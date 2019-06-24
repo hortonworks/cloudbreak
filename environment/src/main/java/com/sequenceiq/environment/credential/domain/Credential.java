@@ -13,12 +13,13 @@ import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 @Table
-public class Credential implements Serializable, AuthResource {
+public class Credential implements Serializable, AuthResource, AccountIdAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "credential_generator")

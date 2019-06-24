@@ -16,12 +16,13 @@ import javax.validation.constraints.NotNull;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "envname"}))
-public class SdxCluster {
+public class SdxCluster implements AccountIdAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sdx_cluster_generator")

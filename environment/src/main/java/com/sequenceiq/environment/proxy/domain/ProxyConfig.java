@@ -16,13 +16,14 @@ import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 @Where(clause = "archived = false")
 @Table
-public class ProxyConfig implements Serializable, AuthResource {
+public class ProxyConfig implements Serializable, AuthResource, AccountIdAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "proxyconfig_generator")

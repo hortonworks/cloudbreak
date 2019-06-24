@@ -9,11 +9,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
-public class FreeIpa {
+public class FreeIpa implements AccountIdAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "freeipa_generator")
@@ -73,5 +74,10 @@ public class FreeIpa {
 
     public void setAdminPassword(String adminPassword) {
         this.adminPassword = new Secret(adminPassword);
+    }
+
+    @Override
+    public String getAccountId() {
+        return stack.getAccountId();
     }
 }

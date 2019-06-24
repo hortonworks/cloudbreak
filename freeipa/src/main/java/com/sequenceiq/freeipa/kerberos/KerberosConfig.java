@@ -15,13 +15,14 @@ import org.hibernate.annotations.Where;
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;
 
 @Entity
 @Where(clause = "archived = false")
-public class KerberosConfig implements ArchivableResource, AuthResource {
+public class KerberosConfig implements ArchivableResource, AuthResource, AccountIdAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "kerberosconfig_generator")
     @SequenceGenerator(name = "kerberosconfig_generator", sequenceName = "kerberosconfig_id_seq", allocationSize = 1)

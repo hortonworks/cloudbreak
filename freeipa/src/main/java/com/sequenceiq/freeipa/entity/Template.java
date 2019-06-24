@@ -13,12 +13,13 @@ import javax.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.freeipa.api.model.ResourceStatus;
 
 @Entity
-public class Template {
+public class Template implements AccountIdAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "template_generator")
@@ -52,6 +53,8 @@ public class Template {
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret secretAttributes = Secret.EMPTY;
+
+    private String accountId;
 
     public Template() {
         deleted = false;
@@ -151,5 +154,14 @@ public class Template {
 
     public void setSecretAttributes(String secretAttributes) {
         this.secretAttributes = new Secret(secretAttributes);
+    }
+
+    @Override
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 }
