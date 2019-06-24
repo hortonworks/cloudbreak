@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.secret.service;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.SecretOperationException;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
@@ -39,7 +41,8 @@ public class SecretAspectService {
                         field.setAccessible(true);
                         Secret value = (Secret) field.get(entity);
                         if (value != null && value.getRaw() != null && value.getSecret() == null) {
-                            String path = String.format("%s/%s/%s-%s",
+                            String accountId = findAccountId(entity);
+                            String path = String.format("%s/%s/%s/%s-%s", accountId,
                                     entity.getClass().getSimpleName().toLowerCase(), field.getName().toLowerCase(),
                                     UUID.randomUUID().toString(), Long.toHexString(System.currentTimeMillis()));
                             String secret = secretService.put(path, value.getRaw());
@@ -113,5 +116,16 @@ public class SecretAspectService {
     public Collection<Object> convertFirstArgToCollection(ProceedingJoinPoint proceedingJoinPoint) {
         Object arg = proceedingJoinPoint.getArgs()[0];
         return arg instanceof Collection ? (Collection<Object>) arg : Collections.singleton(arg);
+    }
+
+    private String findAccountId(Object entity) {
+        return Optional.ofNullable(entity)
+                .filter(e -> e instanceof AccountIdAwareResource)
+                .map(e -> (AccountIdAwareResource) e)
+                .map(AccountIdAwareResource::getAccountId)
+                .orElseGet(() -> {
+                    LOGGER.warn("{} must be a subclass of {}", entity.getClass().getSimpleName(), AccountIdAwareResource.class.getSimpleName());
+                    return "undefined";
+                });
     }
 }

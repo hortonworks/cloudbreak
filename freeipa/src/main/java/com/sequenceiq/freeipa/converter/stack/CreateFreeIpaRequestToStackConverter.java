@@ -73,7 +73,7 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
         updateCloudPlatformAndRelatedFields(source, stack, accountId, cloudPlatform);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
-        stack.setInstanceGroups(convertInstanceGroups(source, stack));
+        stack.setInstanceGroups(convertInstanceGroups(source, stack, accountId));
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
@@ -130,9 +130,9 @@ public class CreateFreeIpaRequestToStackConverter {
         return result;
     }
 
-    private Set<InstanceGroup> convertInstanceGroups(CreateFreeIpaRequest source, Stack stack) {
+    private Set<InstanceGroup> convertInstanceGroups(CreateFreeIpaRequest source, Stack stack, String accountId) {
         if (source.getInstanceGroups() == null) {
-            Set<InstanceGroup> defaultInstanceGroups = defaultInstanceGroupProvider.createDefaultInstanceGroups(stack.getCloudPlatform());
+            Set<InstanceGroup> defaultInstanceGroups = defaultInstanceGroupProvider.createDefaultInstanceGroups(stack.getCloudPlatform(), accountId);
             defaultInstanceGroups.forEach(instanceGroup -> instanceGroup.setStack(stack));
             return defaultInstanceGroups;
         }
