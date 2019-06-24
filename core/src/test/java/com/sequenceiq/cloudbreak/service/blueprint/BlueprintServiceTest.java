@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.dto.BlueprintAccessDto.BlueprintAccessDtoBuilder.aBlueprintAccessDtoBuilder;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
@@ -16,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -38,15 +41,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintServiceTest {
+
+    private static final String MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE = "No name or crn provieded, hence unable to obtain blueprint!";
+
+    private static final String NULL_DTO_EXCEPTION_MESSAGE = "BlueprintAccessDto should not be null";
 
     @Rule
     public final ExpectedException exceptionRule = ExpectedException.none();
@@ -68,6 +75,92 @@ public class BlueprintServiceTest {
     @Before
     public void setup() {
         blueprint = getBlueprint("name", USER_MANAGED);
+    }
+
+    @Test
+    public void testDeleteByWorkspaceWhenDtoNameFilledThenDeleteCalled() {
+        when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(), blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
+
+        Blueprint result = underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder().withName(blueprint.getName()).build(), blueprint.getWorkspace().getId());
+
+        assertEquals(blueprint, result);
+        verify(blueprintRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(1)).findByNameAndWorkspaceId(blueprint.getName(), blueprint.getWorkspace().getId());
+        verify(blueprintRepository, times(1)).delete(any(Blueprint.class));
+        verify(blueprintRepository, times(1)).delete(blueprint);
+    }
+
+    @Test
+    public void testDeleteByWorkspaceWhenDtoCrnFilledThenDeleteCalled() {
+        when(blueprintRepository.findByCrnAndWorkspaceId(blueprint.getCrn(), blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
+
+        Blueprint result = underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder().withCrn(blueprint.getCrn()).build(), blueprint.getWorkspace().getId());
+
+        assertEquals(blueprint, result);
+        verify(blueprintRepository, times(1)).findByCrnAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(1)).findByCrnAndWorkspaceId(blueprint.getCrn(), blueprint.getWorkspace().getId());
+        verify(blueprintRepository, times(1)).delete(any(Blueprint.class));
+        verify(blueprintRepository, times(1)).delete(blueprint);
+    }
+
+    @Test
+    public void testDeleteByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
+        exceptionRule.expect(BadRequestException.class);
+        exceptionRule.expectMessage(MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE);
+
+        underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
+
+        verify(blueprintRepository, times(0)).findByCrnAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(0)).delete(any());
+    }
+
+    @Test
+    public void  testDeleteByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
+        exceptionRule.expect(IllegalArgumentException.class);
+        exceptionRule.expectMessage(NULL_DTO_EXCEPTION_MESSAGE);
+
+        underTest.deleteByWorkspace(null, blueprint.getWorkspace().getId());
+    }
+
+    @Test
+    public void testGetByWorkspaceWhenDtoNameFilledThenProperGetCalled() {
+        when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(), blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
+
+        Blueprint result = underTest.getByWorkspace(aBlueprintAccessDtoBuilder().withName(blueprint.getName()).build(), blueprint.getWorkspace().getId());
+
+        assertEquals(blueprint, result);
+        verify(blueprintRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(1)).findByNameAndWorkspaceId(blueprint.getName(), blueprint.getWorkspace().getId());
+    }
+
+    @Test
+    public void testGetByWorkspaceWhenDtoCrnFilledThenProperGetCalled() {
+        when(blueprintRepository.findByCrnAndWorkspaceId(blueprint.getCrn(), blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
+
+        Blueprint result = underTest.getByWorkspace(aBlueprintAccessDtoBuilder().withCrn(blueprint.getCrn()).build(), blueprint.getWorkspace().getId());
+
+        assertEquals(blueprint, result);
+        verify(blueprintRepository, times(1)).findByCrnAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(1)).findByCrnAndWorkspaceId(blueprint.getCrn(), blueprint.getWorkspace().getId());
+    }
+
+    @Test
+    public void testGetByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
+        exceptionRule.expect(BadRequestException.class);
+        exceptionRule.expectMessage(MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE);
+
+        underTest.getByWorkspace(aBlueprintAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
+
+        verify(blueprintRepository, times(0)).findByCrnAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(0)).save(any());
+    }
+
+    @Test
+    public void  testGetByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
+        exceptionRule.expect(IllegalArgumentException.class);
+        exceptionRule.expectMessage(NULL_DTO_EXCEPTION_MESSAGE);
+
+        underTest.getByWorkspace(null, blueprint.getWorkspace().getId());
     }
 
     @Test
@@ -195,6 +288,8 @@ public class BlueprintServiceTest {
         blueprint.setName(name);
         blueprint.setWorkspace(getWorkspace());
         blueprint.setStatus(status);
+        blueprint.setCreator("someone");
+        blueprint.setCrn("someCrn");
         return blueprint;
     }
 

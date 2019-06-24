@@ -127,6 +127,7 @@ public class Crn {
         DSADMIN("dsadmin", ADMIN_SERVICE),
         SAMPLE("sample", NON_ADMIN_SERVICE),
         WORKSPACES("workspaces", NON_ADMIN_SERVICE),
+        CLOUDBREAK("cloudbreak", ADMIN_SERVICE),
         FREEIPA("freeipa", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
@@ -239,6 +240,7 @@ public class Crn {
         WORKSPACE("workspace"),
         DATABASE("database"),
         DATABASE_SERVER("databaseServer"),
+        BLUEPRINT("blueprint"),
         CREDENTIAL("credential"),
         NETWORK("network"),
         LDAP("ldap"),

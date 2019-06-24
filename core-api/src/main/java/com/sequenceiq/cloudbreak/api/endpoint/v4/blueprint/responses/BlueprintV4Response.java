@@ -25,8 +25,9 @@ public class BlueprintV4Response extends BlueprintV4Base {
     @Pattern(regexp = "^[^;\\/%]*$")
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.ID)
-    private Long id;
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.CRN)
+    private String crn;
 
     @ApiModelProperty(BlueprintModelDescription.HOST_GROUP_COUNT)
     private Integer hostGroupCount;
@@ -50,20 +51,20 @@ public class BlueprintV4Response extends BlueprintV4Base {
         this.hostGroupCount = hostGroupCount;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public ResourceStatus getStatus() {
         return status;
     }
 
     public void setStatus(ResourceStatus status) {
         this.status = status;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
 }

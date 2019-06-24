@@ -582,6 +582,8 @@ public class TestUtil {
         blueprint.setStackName("multi-node-yarn");
         blueprint.setStatus(ResourceStatus.DEFAULT);
         blueprint.setTags(getEmptyJson());
+        blueprint.setCrn("someCrn");
+        blueprint.setCreator("someone");
         return blueprint;
     }
 

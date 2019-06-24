@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.doc.Notes.BLUEPRINT_NOTES;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -40,11 +41,18 @@ public interface BlueprintV4Endpoint {
     BlueprintV4ViewResponses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
-    @Path("{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = BlueprintOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "getBlueprintInWorkspace")
-    BlueprintV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    BlueprintV4Response getByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") @NotNull String name);
+
+    @GET
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = BlueprintOpDescription.GET_BY_CRN_IN_WORKSPACE, produces = JSON, notes = BLUEPRINT_NOTES,
+            nickname = "getBlueprintByCrn")
+    BlueprintV4Response getByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") @NotNull String crn);
 
     @POST
     @Path("")
@@ -54,11 +62,18 @@ public interface BlueprintV4Endpoint {
     BlueprintV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid BlueprintV4Request request);
 
     @DELETE
-    @Path("{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = BlueprintOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "deleteBlueprintInWorkspace")
-    BlueprintV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    BlueprintV4Response deleteByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") @NotNull String name);
+
+    @DELETE
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = BlueprintOpDescription.DELETE_BY_CRN_IN_WORKSPACE, produces = JSON, notes = BLUEPRINT_NOTES,
+            nickname = "deleteBlueprintByCrn")
+    BlueprintV4Response deleteByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") @NotNull String crn);
 
     @DELETE
     @Path("")

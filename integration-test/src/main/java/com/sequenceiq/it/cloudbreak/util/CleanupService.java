@@ -68,7 +68,7 @@ public class CleanupService {
                     .filter(blueprint -> blueprint.getId().equals(blueprintId))
                     .findFirst();
             if (response.isPresent()) {
-                cloudbreakClient.blueprintV4Endpoint().delete(workspaceId, response.get().getName());
+                cloudbreakClient.blueprintV4Endpoint().deleteByName(workspaceId, response.get().getName());
             }
         }
     }

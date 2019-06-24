@@ -5,7 +5,9 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,9 +16,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
@@ -24,8 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.dto.BlueprintAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.AmbariCloudStorageConfigDetails;
@@ -39,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -62,6 +69,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             = Set.of(PRE_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS, DELETE_FAILED, DELETE_COMPLETED);
 
     private static final String SHARED_SERVICES_READY = "shared_services_ready";
+
+    private static final String MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE = "No name or crn provieded, hence unable to obtain blueprint!";
 
     @Inject
     private BlueprintRepository blueprintRepository;
@@ -95,6 +104,41 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
+    }
+
+    public Blueprint createForLoggedInUser(Blueprint blueprint, Long workspaceId, String accountId, String creator) {
+        decorateWithCrn(blueprint, accountId, creator);
+        return super.createForLoggedInUser(blueprint, workspaceId);
+    }
+
+    public Blueprint deleteByWorkspace(BlueprintAccessDto blueprintAccessDto, Long workspaceId) {
+        throwIfNull(blueprintAccessDto, () -> new IllegalArgumentException("BlueprintAccessDto should not be null"));
+        if (isNotEmpty(blueprintAccessDto.getName())) {
+            return super.deleteByNameFromWorkspace(blueprintAccessDto.getName(), workspaceId);
+        } else if (isNotEmpty(blueprintAccessDto.getCrn())) {
+            Blueprint bp = blueprintRepository.findByCrnAndWorkspaceId(blueprintAccessDto.getCrn(), workspaceId)
+                    .orElseThrow(() -> NotFoundException.notFound("blueprint", blueprintAccessDto.getCrn()).get());
+            return delete(bp);
+        }
+        throw new BadRequestException(MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE);
+    }
+
+    public Blueprint getByWorkspace(@NotNull BlueprintAccessDto blueprintAccessDto, Long workspaceId) {
+        throwIfNull(blueprintAccessDto, () -> new IllegalArgumentException("BlueprintAccessDto should not be null"));
+        if (isNotEmpty(blueprintAccessDto.getName())) {
+            return super.getByNameForWorkspaceId(blueprintAccessDto.getName(), workspaceId);
+        } else if (isNotEmpty(blueprintAccessDto.getCrn())) {
+            Blueprint bp = blueprintRepository.findByCrnAndWorkspaceId(blueprintAccessDto.getCrn(), workspaceId)
+                    .orElseThrow(() -> NotFoundException.notFound("blueprint", blueprintAccessDto.getCrn()).get());
+            MDCBuilder.buildMdcContext(bp);
+            return bp;
+        }
+        throw new BadRequestException(MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE);
+    }
+
+    public void decorateWithCrn(Blueprint bp, String accountId, String creator) {
+        bp.setCrn(createCRN(accountId));
+        bp.setCreator(creator);
     }
 
     public Blueprint create(Workspace workspace, Blueprint blueprint, Collection<Map<String, Map<String, String>>> properties,
@@ -323,4 +367,15 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
         return result;
     }
+
+    private String createCRN(String accountId) {
+        return Crn.builder()
+                .setService(Crn.Service.CLOUDBREAK)
+                .setAccountId(accountId)
+                .setResourceType(Crn.ResourceType.BLUEPRINT)
+                .setResource(UUID.randomUUID().toString())
+                .build()
+                .toString();
+    }
+
 }
