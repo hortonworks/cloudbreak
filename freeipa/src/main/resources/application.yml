@@ -37,7 +37,7 @@ freeipa:
     default.os: redhat7
     cache.ttl: 15
   platform.default.instanceType:
-    AWS: m5.xlarge
+    AWS: m5.large
     AZURE: Standard_D3_v2
   security.default:
     ports: 22,443,9443
@@ -52,6 +52,10 @@ freeipa:
 info:
   app:
     capabilities:
+
+altus:
+  ums:
+    host: localhost
 
 spring:
   freemarker:

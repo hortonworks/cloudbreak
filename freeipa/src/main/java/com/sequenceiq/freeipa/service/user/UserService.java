@@ -122,30 +122,33 @@ public class UserService {
                     .filter(stack -> environmentsFilter.contains(stack.getEnvironmentCrn()))
                     .collect(Collectors.toList());
         }
-        for (Stack stack : stacks) {
-            // TODO improve exception handling
-            try {
-                LOGGER.info("Syncing Environment {}", stack.getEnvironmentCrn());
-                // TODO filter by users in request
-                UsersState umsUsersState = umsUsersStateProvider.getUsersState(stack.getEnvironmentCrn());
-                LOGGER.debug("UMS UsersState = {}", umsUsersState);
-                // TODO filter by users in request
-                UsersState ipaUsersState = freeIpaUsersStateProvider.getUsersState(stack);
-                LOGGER.debug("IPA UsersState = {}", ipaUsersState);
-                // TODO calculate group membership changes. this currently only picks up group membership for added users
-                UsersStateDifference stateDifference = UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState);
-                LOGGER.debug("State Difference = {}", stateDifference);
-                FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-                addGroups(freeIpaClient, stateDifference.getGroupsToAdd());
-                addUsers(freeIpaClient, stateDifference.getUsersToAdd());
-                // TODO remove/deactivate groups/users
-            } catch (Exception e) {
-                LOGGER.warn("Failed to synchronize environment {}", stack.getEnvironmentCrn());
-            }
-        }
+
+        stacks.forEach(this::syncAllUserForStack);
 
         return new SynchronizeAllUsersResponse(UUID.randomUUID().toString(), SynchronizationStatus.FAILED,
                 null, null);
+    }
+
+    public void syncAllUserForStack(Stack stack) {
+        // TODO improve exception handling
+        try {
+            LOGGER.info("Syncing Environment {}", stack.getEnvironmentCrn());
+            // TODO filter by users in request
+            UsersState umsUsersState = umsUsersStateProvider.getUsersState(stack.getEnvironmentCrn());
+            LOGGER.debug("UMS UsersState = {}", umsUsersState);
+            // TODO filter by users in request
+            UsersState ipaUsersState = freeIpaUsersStateProvider.getUsersState(stack);
+            LOGGER.debug("IPA UsersState = {}", ipaUsersState);
+            // TODO calculate group membership changes. this currently only picks up group membership for added users
+            UsersStateDifference stateDifference = UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState);
+            LOGGER.debug("State Difference = {}", stateDifference);
+            FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+            addGroups(freeIpaClient, stateDifference.getGroupsToAdd());
+            addUsers(freeIpaClient, stateDifference.getUsersToAdd());
+            // TODO remove/deactivate groups/users
+        } catch (Exception e) {
+            LOGGER.warn("Failed to synchronize environment {}", stack.getEnvironmentCrn());
+        }
     }
 
     public SynchronizeAllUsersResponse getSynchronizeUsersStatus(String syncId) {
