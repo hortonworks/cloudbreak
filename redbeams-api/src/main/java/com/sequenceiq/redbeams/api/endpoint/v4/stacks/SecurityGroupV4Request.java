@@ -5,7 +5,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-// import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SecurityGroupModelDescription;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.SecurityGroupModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,9 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class SecurityGroupV4Request {
 
-    // FIXME define SecurityGroupModelDescription
-
-    @ApiModelProperty(/* SecurityGroupModelDescription.SECURITY_GROUP_IDS */ "IDs for the security groups")
+    @ApiModelProperty(SecurityGroupModelDescription.SECURITY_GROUP_IDS)
     private Set<String> securityGroupIds;
 
     public Set<String> getSecurityGroupIds() {

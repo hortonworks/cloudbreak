@@ -14,7 +14,6 @@ import com.sequenceiq.redbeams.authorization.CheckPermissionsByReturnValue;
 import com.sequenceiq.redbeams.authorization.ResourceAction;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
-// FIXME: Use DisabledBaseRepository when doing permissions
 @EntityType(entityClass = DatabaseServerConfig.class)
 @Transactional(TxType.REQUIRED)
 public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseServerConfig, Long> {

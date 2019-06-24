@@ -39,7 +39,6 @@ public class DBStack {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    // FIXME these two are for making a location for CloudContext, but why?
     private String region;
 
     private String availabilityZone;
@@ -193,5 +192,30 @@ public class DBStack {
 
     public void setOwnerCrn(Crn ownerCrn) {
         this.ownerCrn = ownerCrn;
+    }
+
+    public String getAccountId() {
+        return ownerCrn != null ? ownerCrn.getAccountId() : null;
+    }
+
+    // careful with toString - it may cause database accesses for nested entities
+
+    @Override
+    public String toString() {
+        return "DBStack{"
+            + "id=" + id
+            + ",name='" + name
+            + "',displayName='" + displayName
+            + "',region='" + region
+            + "',availabilityZone='" + availabilityZone
+            + ",network=" + (network != null ? network.toString() : "null")
+            + ",databaseServer=" + (databaseServer != null ? databaseServer.toString() : "null")
+            + ",tags=" + (tags != null ? tags.getValue() : "null")
+            + ",parameters=" + parameters
+            + ",cloudPlatform='" + cloudPlatform
+            + "',platformVariant='" + platformVariant
+            + "',environmentId='" + environmentId
+            + "',ownerCrn='" + (ownerCrn != null ? ownerCrn.toString() : "null")
+            + '}';
     }
 }

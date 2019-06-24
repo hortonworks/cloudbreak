@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+// import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
@@ -38,10 +39,15 @@ public class RedbeamsCreationService {
 
     // FIXME need more than just a config
     public DatabaseServerConfig launchDatabase(DBStack dbStack) {
-        // FIXME log the stack?
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Create called with: {}", dbStack);
+        }
+        // FIXME with CB-1248
+        // if (!dbStackService.findByNameAndEnvironmentId(dbStack.getName(), dbStack.getEnvironmentId()).isEmpty()) {
+        //     throw new BadRequestException("A stack for this database server already exists in the environment");
+        // }
 
         // String accountId = crnService.getCurrentAccountId();
-        // checkIfAlreadyExistsInEnvironment(request, accountId);
         // String userId = crnService.getCurrentUserId();
         // crnService doesn't really use dbStack, for now
         // dbStack.setResourceCrn(crnService.createCrn(dbStack, Crn.ResourceType.DATABASE_SERVER));

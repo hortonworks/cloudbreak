@@ -54,7 +54,9 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverter
         return server;
     }
 
-    // Sorry, MissingResourceNameGenerator seems like overkill
+    // Sorry, MissingResourceNameGenerator seems like overkill. Unlike other
+    // converters, this converter generates names internally in the same format.
+
     private static String generateName() {
         return String.format("dbsvr-%s", UUID.randomUUID().toString());
     }
