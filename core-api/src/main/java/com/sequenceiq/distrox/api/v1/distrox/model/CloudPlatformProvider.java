@@ -10,6 +10,8 @@ public interface CloudPlatformProvider {
             return CloudPlatform.AWS;
         } else if (getAzure() != null) {
             return CloudPlatform.AZURE;
+        } else if (getYarn() != null) {
+            return CloudPlatform.YARN;
         }
         return null;
     }
@@ -17,4 +19,6 @@ public interface CloudPlatformProvider {
     Object getAws();
 
     Object getAzure();
+
+    Object getYarn();
 }

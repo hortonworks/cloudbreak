@@ -36,6 +36,8 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
     @ApiModelProperty(InstanceGroupModelDescription.AWS_PARAMETERS)
     private AwsInstanceGroupV1Parameters aws;
 
+    private YarnInstanceGroupV1Parameters yarn;
+
     @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
 
@@ -79,6 +81,15 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
     @Override
     public AwsInstanceGroupV1Parameters getAws() {
         return aws;
+    }
+
+    @Override
+    public YarnInstanceGroupV1Parameters getYarn() {
+        return yarn;
+    }
+
+    public void setYarn(YarnInstanceGroupV1Parameters yarn) {
+        this.yarn = yarn;
     }
 
     public RecoveryMode getRecoveryMode() {

@@ -22,6 +22,9 @@ public class InstanceTemplateV1Base implements Serializable, CloudPlatformProvid
     @ApiModelProperty(TemplateModelDescription.AZURE_PARAMETERS)
     private AzureInstanceTemplateV1Parameters azure;
 
+    @ApiModelProperty(TemplateModelDescription.YARN_PARAMETERS)
+    private YarnInstanceTemplateV1Parameters yarn;
+
     @ApiModelProperty(TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
 
@@ -49,5 +52,13 @@ public class InstanceTemplateV1Base implements Serializable, CloudPlatformProvid
     @Override
     public AzureInstanceTemplateV1Parameters getAzure() {
         return azure;
+    }
+
+    public YarnInstanceTemplateV1Parameters getYarn() {
+        return yarn;
+    }
+
+    public void setYarn(YarnInstanceTemplateV1Parameters yarn) {
+        this.yarn = yarn;
     }
 }

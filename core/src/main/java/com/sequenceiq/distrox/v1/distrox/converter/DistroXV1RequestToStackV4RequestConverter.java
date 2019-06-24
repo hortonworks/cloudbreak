@@ -74,15 +74,10 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setNetwork(getNetwork(source.getNetwork(), environment));
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
+        request.setYarn(getIfNotNull(source.getYarn(), stackParameterConverter::convert));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSharedService(sdxConverter.getSharedService(source.getSdx(), environment.getCrn()));
-        request.setCustomDomain(null);
-        request.setGatewayPort(null);
-        request.setGcp(null);
-        request.setMock(null);
-        request.setOpenstack(null);
-        request.setYarn(null);
         return request;
     }
 
@@ -109,6 +104,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         }
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
+        request.setYarn(getIfNotNull(source.getYarn(), stackParameterConverter::convert));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSharedService(getIfNotNull(source.getSdx(), sdxConverter::getSharedService));
@@ -164,6 +160,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setNetwork(getIfNotNull(source.getNetwork(), networkConverter::convert));
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
+        request.setYarn(getIfNotNull(source.getYarn(), stackParameterConverter::convert));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSdx(getIfNotNull(source.getSharedService(), sdxConverter::getSdx));

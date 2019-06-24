@@ -7,9 +7,11 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsEncryptionV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AzureInstanceTemplateV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.YarnInstanceTemplateV1Parameters;
 
 @Component
 public class InstanceTemplateParameterConverter {
@@ -36,6 +38,13 @@ public class InstanceTemplateParameterConverter {
         return response;
     }
 
+    public YarnInstanceTemplateV4Parameters convert(YarnInstanceTemplateV1Parameters source) {
+        YarnInstanceTemplateV4Parameters response = new YarnInstanceTemplateV4Parameters();
+        response.setCpus(source.getCpus());
+        response.setMemory(source.getMemory());
+        return response;
+    }
+
     public AwsInstanceTemplateV1Parameters convert(AwsInstanceTemplateV4Parameters source) {
         AwsInstanceTemplateV1Parameters response = new AwsInstanceTemplateV1Parameters();
         response.setEncryption(getIfNotNull(source.getEncryption(), this::convert));
@@ -55,6 +64,13 @@ public class InstanceTemplateParameterConverter {
         response.setEncrypted(source.getEncrypted());
         response.setManagedDisk(source.getManagedDisk());
         response.setPrivateId(source.getPrivateId());
+        return response;
+    }
+
+    public YarnInstanceTemplateV1Parameters convert(YarnInstanceTemplateV4Parameters source) {
+        YarnInstanceTemplateV1Parameters response = new YarnInstanceTemplateV1Parameters();
+        response.setCpus(source.getCpus());
+        response.setMemory(source.getMemory());
         return response;
     }
 }
