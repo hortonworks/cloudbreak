@@ -21,7 +21,7 @@ public class HbaseKnoxServiceConfigProvider implements CmTemplateComponentConfig
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         return List.of(
-                config(RESTSERVER_SECURITY_AUTHENTICATION, "Kerberos"));
+                config(RESTSERVER_SECURITY_AUTHENTICATION, "kerberos"));
     }
 
     @Override
