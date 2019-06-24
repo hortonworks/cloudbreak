@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -163,6 +164,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private KerberosConfigService kerberosConfigService;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster) {
         try {
@@ -566,6 +570,22 @@ public class ClusterHostServiceRunner {
         if (!connectorJarUrlsByVendor.isEmpty()) {
             Map<String, Object> jdbcConnectors = singletonMap("jdbc_connectors", connectorJarUrlsByVendor);
             servicePillar.put("jdbc-connectors", new SaltPillarProperties("/jdbc/connectors.sls", jdbcConnectors));
+        }
+    }
+
+    public void uploadIdentityProviderMetadata(Stack stack) throws CloudbreakException {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String metadataXml = Optional.ofNullable(umsClient.getIdentityProviderMetadataXml(accountId))
+                .orElseThrow(() -> new CloudbreakServiceException("Failed to get identity provider metadata from UMS, through account: " + accountId));
+        HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+        Cluster cluster = stack.getCluster();
+        ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+        try {
+            hostOrchestrator.uploadIdpMetadataXml(gatewayConfigs, exitCriteriaModel, metadataXml);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            LOGGER.debug("Failed to upload metadata file.");
+            throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 }

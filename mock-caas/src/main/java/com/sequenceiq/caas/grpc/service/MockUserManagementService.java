@@ -6,6 +6,7 @@ import static com.cloudera.thunderhead.service.usermanagement.UserManagementProt
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse;
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -35,8 +36,13 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
@@ -44,12 +50,17 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListU
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse.Builder;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
+import com.google.common.io.Resources;
 import com.sequenceiq.caas.grpc.GrpcActorContext;
 import com.sequenceiq.caas.model.AltusToken;
 import com.sequenceiq.caas.util.CrnHelper;
 import com.sequenceiq.caas.util.JsonUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 
 @Service
@@ -345,6 +356,30 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         responseObserver.onNext(UserManagementProto.DeleteMachineUserResponse.newBuilder()
                 .build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getIdPMetadataForWorkloadSSO(
+            UserManagementProto.GetIdPMetadataForWorkloadSSORequest request,
+            StreamObserver<UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> responseObserver) {
+        checkArgument(!Strings.isNullOrEmpty(request.getAccountId()));
+        try {
+            String metadata = Resources.toString(
+                    Resources.getResource("sso/cdp-idp-metadata.xml"),
+                    Charsets.UTF_8).trim();
+            metadata = metadata.replace("accountId_REPLACE_ME", request.getAccountId());
+            metadata = metadata.replace("hostname_REPLACE_ME", "localhost");
+            responseObserver.onNext(
+                    GetIdPMetadataForWorkloadSSOResponse.newBuilder()
+                            .setMetadata(metadata)
+                            .build());
+            responseObserver.onCompleted();
+        } catch (IOException e) {
+            throw Status.INTERNAL
+                    .withDescription("Could not find IdP metadata resource")
+                    .withCause(e)
+                    .asRuntimeException();
+        }
     }
 
     private String getLicense() {

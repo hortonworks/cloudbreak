@@ -897,4 +897,22 @@ public class SaltOrchestrator implements HostOrchestrator {
             throw new RuntimeException("Cannot determine service endpoint for gateway: " + gatewayConfig, e);
         }
     }
+
+    @Override
+    public void uploadIdpMetadataXml(List<GatewayConfig> allGatewayConfigs, ExitCriteriaModel exitModel, String metadataXml)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig gateway = getPrimaryGatewayConfig(allGatewayConfigs);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
+        try (SaltConnector saltConnector = createSaltConnector(gateway)) {
+            if (!gatewayTargets.isEmpty()) {
+                LOGGER.debug("Upload metadata.xml to gateways");
+                byte[] metadataXmlBytes = metadataXml.getBytes();
+                String samlPath = "/var/lib/knox/cloudbreak_resources/";
+                String samlFileName = "metadata.xml";
+                uploadFileToTargets(saltConnector, gatewayTargets, exitModel, samlPath, samlFileName, metadataXmlBytes);
+                Compound gateways = new Compound(allGatewayConfigs.stream().map(GatewayConfig::getHostname).collect(Collectors.toSet()), CompoundType.HOST);
+                SaltStates.runCommandOnHosts(saltConnector, gateways, "chmod 777 " + samlPath + samlFileName);
+            }
+        }
+    }
 }

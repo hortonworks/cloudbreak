@@ -137,4 +137,13 @@ public class ClusterServiceRunner {
         instanceMetaDataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
         return tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), gatewayPublicIp);
     }
+
+    public void uploadIdentityProviderMetadata(Long stackId) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Orchestrator orchestrator = stack.getOrchestrator();
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
+        if (orchestratorType.hostOrchestrator()) {
+            hostRunner.uploadIdentityProviderMetadata(stack);
+        }
+    }
 }

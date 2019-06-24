@@ -368,4 +368,17 @@ public class GrpcUmsClient {
     private UmsClient makeClient(ManagedChannel channel, String accountId) {
         return new UmsClient(channel, accountId, umsClientConfig);
     }
+
+    /**
+     * Queries the metadata file used to configure SSO authentication on clusters.
+     * @param accountId the account ID
+     * @return metadata as string
+     */
+    public String getIdentityProviderMetadataXml(String accountId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), accountId);
+            LOGGER.debug("Getting IdP metadata through account ID: {}", accountId);
+            return client.getIdentityProviderMetadataXml(UUID.randomUUID().toString(), accountId);
+        }
+    }
 }

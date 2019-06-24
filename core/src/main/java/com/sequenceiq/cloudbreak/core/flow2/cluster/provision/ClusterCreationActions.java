@@ -33,6 +33,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.MountDisksReque
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.MountDisksSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UploadIdentityProviderMetadataRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UploadIdentityProviderMetadataSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -121,11 +123,26 @@ public class ClusterCreationActions {
         };
     }
 
-    @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
-    public Action<?, ?> startingAmbariServicesAction() {
+    @Bean(name = "UPLOAD_IDENTITY_PROVIDER_METADATA_STATE")
+    public Action<?, ?> uploadIdentityProviderMetadataAction() {
         return new AbstractClusterAction<>(UploadRecipesSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, UploadRecipesSuccess payload, Map<Object, Object> variables) throws Exception {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new UploadIdentityProviderMetadataRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
+    public Action<?, ?> startingAmbariServicesAction() {
+        return new AbstractClusterAction<>(UploadIdentityProviderMetadataSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, UploadIdentityProviderMetadataSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.startingClusterServices(context.getStack());
                 sendEvent(context);
             }

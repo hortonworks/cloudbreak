@@ -4,11 +4,13 @@ package usermanagement;
 
 option java_package = "com.cloudera.thunderhead.service.usermanagement";
 option java_outer_classname = "UserManagementProto";
+option go_package = "com/cloudera/cdp/protobuf";
 
 import "version.proto";
 import "paging.proto";
 import "options.proto";
 import "resources.proto";
+import "nullable.proto";
 
 // For future compatibility, all rpcs must take a request and return a response
 // even if there is initially no content for these messages.
@@ -62,6 +64,11 @@ service UserManagement {
   // service on which it was used.
   rpc AccessKeyUsage (AccessKeyUsageRequest)
     returns (AccessKeyUsageResponse) {}
+
+  // Create user. Can only be used to create a user associated with a customer
+  // identity provider connector.
+  rpc CreateUser (CreateUserRequest)
+    returns (CreateUserResponse) {}
 
   // Get user.
   rpc GetUser (GetUserRequest)
@@ -240,6 +247,10 @@ service UserManagement {
   rpc ListGroups (ListGroupsRequest)
     returns (ListGroupsResponse) {}
 
+  // Update group
+  rpc UpdateGroup (UpdateGroupRequest)
+    returns (UpdateGroupResponse) {}
+
   // Add member to group
   rpc AddMemberToGroup (AddMemberToGroupRequest)
     returns (AddMemberToGroupResponse) {}
@@ -291,6 +302,23 @@ service UserManagement {
   // Set whether login using Cloudera SSO is enabled.
   rpc SetClouderaSSOLoginEnabled (SetClouderaSSOLoginEnabledRequest)
     returns (SetClouderaSSOLoginEnabledResponse) {}
+
+  // Retrieves the control plane IdP metadata file for a workload
+  // SSO service.
+  rpc GetIdPMetadataForWorkloadSSO (GetIdPMetadataForWorkloadSSORequest)
+    returns (GetIdPMetadataForWorkloadSSOResponse) {}
+
+  // Process a workload SSO AuthNRequest. If the user is already authenticated
+  // an appropriate authn response will be generated to the workload SSO. If not,
+  // an appropriate authn request will be generated to either cloudera-sso or
+  // to one of the customer defined identity providers.
+  rpc ProcessWorkloadSSOAuthnReq(ProcessWorkloadSSOAuthnReqRequest)
+    returns (ProcessWorkloadSSOAuthnReqResponse) {}
+
+  // Set the workload subdomain for an account if no such workload domain has
+  // been set for a different account before.
+  rpc SetWorkloadSubdomain(SetWorkloadSubdomainRequest)
+    returns (SetWorkloadSubdomainResponse) {}
 }
 
 // An User is the Altus identity corresponding to an external SFDC contact. Users
@@ -323,6 +351,12 @@ message User {
   // defined IdP and in this case this field will contain the CRN of the identity
   // provider.
   string identityProviderCrn = 13;
+  // The username to use in all workload clusters for this user. This is
+  // guaranteed to be unique in the account and stable over time, that is, the
+  // same user is guaranteed to have the same workload username. Note though that
+  // if a user is deleted the workload username it used becomes available to new
+  // users in the account.
+  string workloadUsername = 14;
 }
 
 // A MachineUser is an internal Altus identity, used by applications to call
@@ -338,6 +372,12 @@ message MachineUser {
   string crn = 3;
   // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
   uint64 creationDateMs = 4;
+  // The username to use in all workload clusters for this machine user. This is
+  // guaranteed to be unique in the account and stable over time, that is, the
+  // same machine user is guaranteed to have the same workload username. Note
+  // though that if the machine user is deleted the workload username it used
+  // becomes available to new machine users in the account.
+  string workloadUsername = 5;
 }
 
 // A Group is a Altus resource that contains a collection of Actors. Groups
@@ -353,6 +393,10 @@ message Group {
   string crn = 3;
   // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
   uint64 creationDate = 4;
+  // Whether group membership is synced when a user logs in. This is only
+  // relevant for federated users as we don't get group membership through
+  // cloudera-sso.
+  bool syncMembershipOnUserLogin = 5;
 }
 
 message AccessKeyUsage {
@@ -463,17 +507,13 @@ message InsertAzureSubscriptionInformationResponse {
 }
 
 message InteractiveLoginResponse {
-  reserved 4, 5;
+  reserved 4, 5, 6;
   // The user's CRN.
   string crn = 1;
   string accessKeyId = 2;
   // See AccessKeyKeyPairGenerator.AccessKeyPair.
   // Ed25519 private key is 32 bytes encoded in base64
   string privateKey = 3 [(options.sensitive) = true];
-  // A JWT that can be used to authenticate with DP2 CAAS in man-o-war. This is
-  // only set when UMS is configured to generate JWTs and will be removed
-  // shortly.
-  string jwt = 6;
   // A session token that can be used by consoles to authenticate users.
   string sessionToken = 7 [(options.sensitive) = true];
 }
@@ -614,6 +654,29 @@ message AccessKeyUsageRequest {
 }
 
 message AccessKeyUsageResponse {
+}
+
+message CreateUserRequest {
+  // The account ID for which the user is being added to.
+  string accountId = 1;
+  // The identity provider user id for the user. This ID must match the NameId
+  // attribute value that will be passed for the user in the SAML response using
+  // the associated IdP.
+  string idpUserId = 2;
+  // The identity provider name or CRN the user belongs to.
+  string identityProviderNameOrCrn = 3;
+  // The user's email.
+  string email = 4;
+  // The groups the user belongs to. May be empty.
+  repeated string group = 5;
+  // This may be an empty string.
+  string firstName = 6;
+  // This may be an empty string.
+  string lastName = 7;
+}
+
+message CreateUserResponse {
+  User user = 1;
 }
 
 message GetUserRequest {
@@ -840,6 +903,13 @@ message Account {
   AccountType accountType = 12;
   // Whether login using Cloudera SSO is enabled
   bool clouderaSSOLoginEnabled = 13;
+  // The workload subdomain for the account. This is used as part of the domain
+  // name for all workload clusters for the account in a specific environment.
+  // Specifically, the domain for a workload should look something like:
+  // <environment-identifier>.<workload-sub-domain>.cloudera.site
+  // Note that this is ensured to be unique, that is, there will not be two
+  // accounts with the same workload sub domain.
+  string workloadSubdomain = 14;
 }
 
 // Either the accountId or externalAccountId is required to get
@@ -1481,6 +1551,10 @@ message CreateGroupRequest {
   string accountId = 1;
   // The name of the group being created
   string groupName = 2;
+  // Whether group membership is synced when a user logs in. This is only
+  // relevant for federated users as we don't get group membership through
+  // cloudera-sso. The default is to sync group membership.
+  nullable.BoolValue syncMembershipOnUserLogin = 3;
 }
 
 message CreateGroupResponse {
@@ -1511,6 +1585,21 @@ message ListGroupsResponse {
   repeated Group group = 1;
   // See the PageToken comment in paging.proto on paging usage.
   paging.PageToken nextPageToken = 2;
+}
+
+message UpdateGroupRequest {
+  // Account Id for which the request is being made
+  string accountId = 1;
+  // The name or CRN of the group being updated.
+  string groupNameOrCrn = 2;
+  // Whether group membership is synced when a user logs in. This is only
+  // relevant for federated users as we don't get group membership through
+  // cloudera-sso.
+  bool syncMembershipOnUserLogin = 3;
+}
+
+message UpdateGroupResponse {
+  Group group = 1;
 }
 
 message AddMemberToGroupRequest {
@@ -1754,7 +1843,7 @@ message UpdateIdentityProviderConnectorRequest {
   // Whether to sync groups on login or not. This flag is reversed as the default
   // behavior before this flag was introduced was to sync group on login and the
   // default value for protobuf for booleans is 'false'.
-  bool skipGroupSyncOnLogin = 4;
+  nullable.BoolValue skipGroupSyncOnLogin = 4;
 }
 
 message UpdateIdentityProviderConnectorResponse {
@@ -1770,4 +1859,71 @@ message SetClouderaSSOLoginEnabledRequest {
 }
 
 message SetClouderaSSOLoginEnabledResponse {
+}
+
+message GetIdPMetadataForWorkloadSSORequest {
+  // The account ID the workload cluster belongs to and for which SSO is required.
+  string accountId = 1;
+}
+
+message GetIdPMetadataForWorkloadSSOResponse {
+  // The control plane IdP metadata file.
+  string metadata = 1;
+}
+
+message WorkloadSamlAuthnResponse {
+  // Where to send the authn response.
+  string destination = 1;
+  // The HTTP method to use to send the response. This is one
+  // 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST' or
+  // 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
+  string binding = 2;
+  // A SAML 2.0 signed authn response.
+  string authnResponse = 3 [(options.skipLogging) = true];
+  // The relay state, if any, that was passed to us in the original authn
+  // request.
+  string relayState = 4;
+}
+
+message IdpAuthnRequest {
+  // Where to send the authn request. This can be either cloudera sso or a
+  // customer identity provider.
+  string destination = 1;
+  // The HTTP method to use to send the request. This is one
+  // 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST' or
+  // 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
+  string binding = 2;
+  // The authn response - a SAML 2.0 signed authn response.
+  string authnRequest = 3 [(options.skipLogging) = true];
+}
+
+message ProcessWorkloadSSOAuthnReqRequest {
+  // The account ID the workload cluster sent in the URL parameter.
+  string accountId = 1;
+  // The deflated base64 encoded SAML2.0 payload as was received from the
+  // workload cluster.
+  string authnRequest = 2 [(options.skipLogging) = true];
+  // The session-token if one was received.
+  string sessionToken = 3 [(options.sensitive) = true];
+  // The relay state provided by the workload SP. May be empty.
+  string relayState = 4;
+}
+
+message ProcessWorkloadSSOAuthnReqResponse {
+  oneof payload {
+    // a SAML authn response that should be sent to the to the workload cluster.
+    WorkloadSamlAuthnResponse workloadResponse = 1;
+    // Session token auth request.
+    IdpAuthnRequest authnRequest = 2;
+  }
+}
+
+message SetWorkloadSubdomainRequest {
+  // The account ID to set the workload subdomain for.
+  string accountId = 1;
+  // The workload subdomain. This must be a DNS compatible name.
+  string workloadSubdomain = 2;
+}
+
+message SetWorkloadSubdomainResponse {
 }

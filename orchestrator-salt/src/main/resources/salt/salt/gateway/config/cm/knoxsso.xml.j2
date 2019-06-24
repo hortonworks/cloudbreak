@@ -17,45 +17,34 @@
 -->
 <topology>
     <gateway>
-      <provider>
-        <role>webappsec</role>
-        <name>WebAppSec</name>
-        <enabled>true</enabled>
-        <param><name>xframe.options.enabled</name><value>true</value></param>
-      </provider>
-
         <provider>
-            <role>authentication</role>
-            <name>ShiroProvider</name>
+            <role>federation</role>
+            <name>pac4j</name>
             <enabled>true</enabled>
             <param>
+                <name>pac4j.callbackUrl</name>
+                <value>https://{{ salt['pillar.get']('gateway:address') }}:8443/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso</value>
+            </param>
+            <param>
+                <name>clientName</name>
+                <value>SAML2Client</value>
+            </param>
+            <param>
+                <name>saml.identityProviderMetadataPath</name>
+                <value>{{ salt['pillar.get']('gateway:knox_data_root') }}/metadata.xml</value>
+            </param>
+            <param>
                 <!--
-                session timeout in minutes,  this is really idle timeout,
-                defaults to 30mins, if the property value is not defined,,
-                current client authentication would expire if client idles contiuosly for more than this value
+                    Need to include a value for the saml.serviceProviderMetadataPath - the file location here doesn't need to exist.
+                    There is a bug that will throw a NPE if saml.serviceProviderMetadataPath is not included even though the actual metadata
+                    will be served up to the IdP via request.
                 -->
-                <name>sessionTimeout</name>
-                <value>30</value>
+                <name>saml.serviceProviderMetadataPath</name>
+                <value>/tmp/sp-metadata.xml</value>
             </param>
             <param>
-                <name>redirectToUrl</name>
-                <value>/{{ salt['pillar.get']('gateway:path') }}/knoxsso/knoxauth/login.html</value>
-            </param>
-            <param>
-                <name>restrictedCookies</name>
-                <value>rememberme,WWW-Authenticate</value>
-            </param>
-            <param>
-                <name>main.pamRealm</name>
-                <value>org.apache.hadoop.gateway.shirorealm.KnoxPamRealm</value>
-            </param>
-            <param>
-                <name>main.pamRealm.service</name>
-                <value>login</value>
-            </param>
-            <param>
-                <name>urls./**</name>
-                <value>authcBasic</value>
+                <name>saml.serviceProviderEntityId</name>
+                <value>https://{{ salt['pillar.get']('gateway:address') }}:8443/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso?pac4jCallback=true&amp;client_name=SAML2Client</value>
             </param>
         </provider>
 
@@ -68,7 +57,7 @@
     </gateway>
 
     <application>
-      <name>knoxauth</name>
+        <name>knoxauth</name>
     </application>
 
     <service>
@@ -82,8 +71,8 @@
             <value>-1</value>
         </param>
         <param>
-           <name>knoxsso.redirect.whitelist.regex</name>
-           <value>.*</value>
+            <name>knoxsso.redirect.whitelist.regex</name>
+            <value>.*</value>
         </param>
     </service>
 

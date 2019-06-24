@@ -26,4 +26,7 @@ public interface HostRecipeExecutor {
 
     void postInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException;
 
+    void uploadIdpMetadataXml(List<GatewayConfig> allGatewayConfigs, ExitCriteriaModel exitModel, String metadataXml)
+            throws CloudbreakOrchestratorFailedException;
+
 }
