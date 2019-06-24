@@ -20,7 +20,7 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
 
     private static final String ROLE_ASSIGNMENT_RULES = "ranger.usersync.group.based.role.assignment.rules";
 
-    private static final String ROLE_SAFETY_VALVE = "conf/ranger-admin-site.xml_role_safety_valve";
+    private static final String ROLE_SAFETY_VALVE = "conf/ranger-ugsync-site.xml_role_safety_valve";
 
     private static final String RANGER_USERSYNC_UNIX_BACKEND = "ranger.usersync.unix.backend";
 
