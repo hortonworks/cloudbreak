@@ -18,6 +18,11 @@ public class DBStackService {
         return dbStackRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Stack [%s] not found", id)));
     }
 
+    public DBStack getByNameAndEnvironmentId(String name, String environmentId) {
+        return dbStackRepository.findByNameAndEnvironmentId(name, environmentId)
+            .orElseThrow(() -> new NotFoundException(String.format("Stack [%s] not found", name)));
+    }
+
     public DBStack save(DBStack dbStack) {
         return dbStackRepository.save(dbStack);
     }

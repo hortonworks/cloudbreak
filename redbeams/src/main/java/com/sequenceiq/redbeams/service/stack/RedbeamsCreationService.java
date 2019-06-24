@@ -8,9 +8,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
+import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
-import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 // import com.sequenceiq.redbeams.service.crn.CrnService;
 
 import javax.inject.Inject;

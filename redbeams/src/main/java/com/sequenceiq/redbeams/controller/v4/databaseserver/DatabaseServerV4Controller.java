@@ -25,7 +25,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerRequest;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
@@ -77,8 +76,10 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     public DatabaseServerTerminationOutcomeV4Response terminate(TerminateDatabaseServerV4Request request) {
-        // Dummy launch database call
-        return redbeamsTerminationService.terminateDatabaseServer(new TerminateDatabaseServerRequest(0L), "");
+        DatabaseServerConfig server = redbeamsTerminationService.terminateDatabaseServer(request.getName(), request.getEnvironmentId());
+        // FIXME the converter for this doesn't exist yet, and probably needs to convert something
+        // more than just a DatabaseServerConfig
+        return converterUtil.convert(server, DatabaseServerTerminationOutcomeV4Response.class);
     }
 
     @Override

@@ -8,12 +8,12 @@ import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminat
 import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent.REDBEAMS_TERMINATION_FINISHED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent.TERMINATE_DATABASE_SERVER_FAILED_EVENT;
 import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent.TERMINATE_DATABASE_SERVER_FINISHED_EVENT;
-import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState.DEREGISTER_DATABASE_STATE;
+import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState.DEREGISTER_DATABASE_SERVER_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState.FINAL_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState.INIT_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState.REDBEAMS_TERMINATION_FAILED_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState.REDBEAMS_TERMINATION_FINISHED_STATE;
-import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState.TERMINATE_DATABASE_STATE;
+import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState.TERMINATE_DATABASE_SERVER_STATE;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
@@ -31,10 +31,10 @@ public class RedbeamsTerminationFlowConfig extends AbstractFlowConfiguration<Red
 
     private static final List<Transition<RedbeamsTerminationState, RedbeamsTerminationEvent>> TRANSITIONS =
             new Builder<RedbeamsTerminationState, RedbeamsTerminationEvent>().defaultFailureEvent(REDBEAMS_TERMINATION_FAILED_EVENT)
-            .from(INIT_STATE).to(TERMINATE_DATABASE_STATE).event(REDBEAMS_TERMINATION_EVENT).defaultFailureEvent()
-            .from(TERMINATE_DATABASE_STATE).to(DEREGISTER_DATABASE_STATE).event(TERMINATE_DATABASE_SERVER_FINISHED_EVENT)
+            .from(INIT_STATE).to(TERMINATE_DATABASE_SERVER_STATE).event(REDBEAMS_TERMINATION_EVENT).defaultFailureEvent()
+            .from(TERMINATE_DATABASE_SERVER_STATE).to(DEREGISTER_DATABASE_SERVER_STATE).event(TERMINATE_DATABASE_SERVER_FINISHED_EVENT)
                     .failureEvent(TERMINATE_DATABASE_SERVER_FAILED_EVENT)
-            .from(DEREGISTER_DATABASE_STATE).to(REDBEAMS_TERMINATION_FINISHED_STATE).event(DEREGISTER_DATABASE_SERVER_FINISHED_EVENT)
+            .from(DEREGISTER_DATABASE_SERVER_STATE).to(REDBEAMS_TERMINATION_FINISHED_STATE).event(DEREGISTER_DATABASE_SERVER_FINISHED_EVENT)
                     .failureEvent(DEREGISTER_DATABASE_SERVER_FAILED_EVENT)
             .from(REDBEAMS_TERMINATION_FINISHED_STATE).to(FINAL_STATE).event(REDBEAMS_TERMINATION_FINISHED_EVENT).defaultFailureEvent()
             .build();

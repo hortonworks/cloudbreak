@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
+import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.OnFailure;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -56,6 +57,11 @@ public class AwsStackRequestHelper {
                 .withTags(awsTagPreparationService.prepareCloudformationTags(ac, stack.getTags()))
                 .withCapabilities(CAPABILITY_IAM)
                 .withParameters(getStackParameters(ac, stack));
+    }
+
+    public DeleteStackRequest createDeleteStackRequest(String cFStackName) {
+        return new DeleteStackRequest()
+                .withStackName(cFStackName);
     }
 
     private Collection<Parameter> getStackParameters(AuthenticatedContext ac, CloudStack stack, String stackName, String newSubnetCidr) {

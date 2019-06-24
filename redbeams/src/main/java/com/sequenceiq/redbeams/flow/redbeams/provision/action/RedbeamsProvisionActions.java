@@ -1,12 +1,12 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.AbstractRedbeamsProvisionAction;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerSuccess;
 

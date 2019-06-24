@@ -65,6 +65,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     private AwsRdsLaunchService awsRdsLaunchService;
 
     @Inject
+    private AwsRdsTerminateService awsRdsTerminateService;
+
+    @Inject
     private AwsTerminateService awsTerminateService;
 
     @Inject
@@ -103,8 +106,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
-        throw new UnsupportedOperationException("Database server termination is not supported for " + getClass().getName());
+    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack) throws Exception {
+        return awsRdsTerminateService.terminate(ac, stack);
     }
 
     @Override
