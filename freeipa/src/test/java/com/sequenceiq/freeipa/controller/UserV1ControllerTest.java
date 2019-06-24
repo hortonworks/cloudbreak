@@ -45,20 +45,25 @@ public class UserV1ControllerTest {
     @Test
     void synchronizeUser() {
         when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+
         SynchronizeUserRequest request = mock(SynchronizeUserRequest.class);
 
         underTest.synchronizeUser(request);
 
-        verify(userService, times(1)).synchronizeUser(USER_CRN);
+        verify(userService, times(1)).synchronizeUser(ACCOUNT_ID, USER_CRN, USER_CRN);
     }
 
     @Test
     void synchronizeAllUsers() {
+        when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+
         SynchronizeAllUsersRequest request = mock(SynchronizeAllUsersRequest.class);
 
         underTest.synchronizeAllUsers(request);
 
-        verify(userService, times(1)).synchronizeAllUsers(request);
+        verify(userService, times(1)).synchronizeAllUsers(ACCOUNT_ID, USER_CRN, request);
     }
 
     @Test
@@ -73,22 +78,25 @@ public class UserV1ControllerTest {
     @Test
     void setPassword() {
         when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+
         String password = "password";
         SetPasswordRequest request = mock(SetPasswordRequest.class);
         when(request.getPassword()).thenReturn(password);
 
         underTest.setPassword(request);
 
-        verify(passwordService, times(1)).setPassword(USER_CRN, password);
+        verify(passwordService, times(1)).setPassword(ACCOUNT_ID, USER_CRN, password);
     }
 
     @Test
     void createUsers() throws Exception {
         when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+
         CreateUsersRequest request = mock(CreateUsersRequest.class);
 
         underTest.createUsers(request);
 
-        verify(userService, times(1)).createUsers(request, ACCOUNT_ID);
+        verify(userService, times(1)).createUsers(ACCOUNT_ID, request);
     }
 }

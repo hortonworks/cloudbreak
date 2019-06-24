@@ -17,7 +17,11 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Creat
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
@@ -57,6 +61,37 @@ public class UmsClient {
         this.channel = checkNotNull(channel);
         this.actorCrn = checkNotNull(actorCrn);
         this.umsClientConfig = checkNotNull(umsClientConfig);
+    }
+
+    /**
+     * Wraps calls to ListGroups with an Account ID.
+     *
+     * @param requestId             the request ID for the request
+     * @param accountId             the account ID
+     * @param groupNameOrCrnList    the groups to list. if null or empty then all groups will be listed
+     * @return the list of groups
+     */
+    public List<Group> listGroups(String requestId, String accountId, List<String> groupNameOrCrnList) {
+        checkNotNull(requestId);
+        checkNotNull(accountId);
+
+        List<Group> groups = new ArrayList<>();
+
+        ListGroupsRequest.Builder requestBuilder = ListGroupsRequest.newBuilder()
+                .setAccountId(accountId)
+                .setPageSize(umsClientConfig.getListGroupsPageSize());
+
+        if (groupNameOrCrnList != null && !groupNameOrCrnList.isEmpty()) {
+            requestBuilder.addAllGroupNameOrCrn(groupNameOrCrnList);
+        }
+
+        ListGroupsResponse response;
+        do {
+            response = newStub(requestId).listGroups(requestBuilder.build());
+            groups.addAll(response.getGroupList());
+            requestBuilder.setPageToken(response.getNextPageToken());
+        } while (response.hasNextPageToken());
+        return groups;
     }
 
     /**
@@ -101,11 +136,12 @@ public class UmsClient {
     /**
      * Wraps calls to ListUsers with an Account ID.
      *
-     * @param requestId the request ID for the request
-     * @param accountId the account ID
+     * @param requestId         the request ID for the request
+     * @param accountId         the account ID
+     * @param userIdOrCrnList   a list of users to list. If null or empty then all users will be listed
      * @return the list of users
      */
-    public List<User> listUsers(String requestId, String accountId) {
+    public List<User> listUsers(String requestId, String accountId, List<String> userIdOrCrnList) {
         checkNotNull(requestId);
         checkNotNull(accountId);
 
@@ -114,6 +150,10 @@ public class UmsClient {
         ListUsersRequest.Builder requestBuilder = ListUsersRequest.newBuilder()
                 .setAccountId(accountId)
                 .setPageSize(umsClientConfig.getListUsersPageSize());
+
+        if (userIdOrCrnList != null && !userIdOrCrnList.isEmpty()) {
+            requestBuilder.addAllUserIdOrCrn(userIdOrCrnList);
+        }
 
         ListUsersResponse response;
         do {
@@ -145,11 +185,12 @@ public class UmsClient {
     /**
      * Wraps calls to ListMachineUsers with an Account ID.
      *
-     * @param requestId the request ID for the request
-     * @param accountId the account ID
+     * @param requestId                 the request ID for the request
+     * @param accountId                 the account ID
+     * @param machineUserNameOrCrnList  a list of users to list. If null or empty then all users will be listed
      * @return the list of machine users
      */
-    public List<MachineUser> listMachineUsers(String requestId, String accountId) {
+    public List<MachineUser> listMachineUsers(String requestId, String accountId, List<String> machineUserNameOrCrnList) {
         checkNotNull(requestId);
         checkNotNull(accountId);
 
@@ -158,6 +199,10 @@ public class UmsClient {
         ListMachineUsersRequest.Builder requestBuilder = ListMachineUsersRequest.newBuilder()
                 .setAccountId(accountId)
                 .setPageSize(umsClientConfig.getListMachineUsersPageSize());
+
+        if (machineUserNameOrCrnList != null && !machineUserNameOrCrnList.isEmpty()) {
+            requestBuilder.addAllMachineUserNameOrCrn(machineUserNameOrCrnList);
+        }
 
         ListMachineUsersResponse response;
         do {
@@ -362,7 +407,15 @@ public class UmsClient {
         ).getAccount();
     }
 
-    public List<String> getGroupsForUser(String requestId, String actorCrn, String resourceCrn) {
+    /**
+     * Wraps a call to getRights
+     *
+     * @param requestId     the request ID for the request
+     * @param actorCrn      the actor CRN
+     * @param resourceCrn   the user or machine user CRN
+     * @return rights object for the user or machine user
+     */
+    public GetRightsResponse getRightsForUser(String requestId, String actorCrn, String resourceCrn) {
         if (resourceCrn == null) {
             resourceCrn = "*";
         }
@@ -371,7 +424,7 @@ public class UmsClient {
                         .setActorCrn(actorCrn)
                         .setResourceCrn(resourceCrn)
                         .build()
-        ).getGroupCrnList();
+        );
     }
 
     /**

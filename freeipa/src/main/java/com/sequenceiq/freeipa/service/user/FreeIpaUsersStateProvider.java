@@ -3,9 +3,6 @@ package com.sequenceiq.freeipa.service.user;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
@@ -13,8 +10,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.service.user.model.UsersState;
 
 @Service
@@ -29,31 +25,48 @@ public class FreeIpaUsersStateProvider {
     @VisibleForTesting
     static final List<String> IPA_ONLY_GROUPS = List.of("admins", "editors", "ipausers", "trust admins");
 
-    @Inject
-    private FreeIpaClientFactory freeIpaClientFactory;
+    public UsersState getUsersState(FreeIpaClient freeIpaClient) throws FreeIpaClientException {
+        UsersState.Builder builder = new UsersState.Builder();
 
-    public Optional<User> getUser(String username, Stack stack) throws Exception {
-        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-        // TODO is an exception thrown if the user doesn't exist in ipa?
-        Optional<com.sequenceiq.freeipa.client.model.User> freeIpaUser = freeIpaClient.userFind(username);
-        return freeIpaUser.map(this::fromIpaUser);
+        freeIpaClient.userFindAll().stream()
+                .filter(user -> !IPA_ONLY_USERS.contains(user.getUid()))
+                .forEach(user -> {
+                    builder.addUser(fromIpaUser(user));
+                    user.getMemberOfGroup().stream()
+                            .filter(group -> !IPA_ONLY_GROUPS.contains(group))
+                            .forEach(group -> builder.addMemberToGroup(group, user.getUid()));
+                });
+
+        freeIpaClient.groupFindAll().stream()
+                .filter(group -> !IPA_ONLY_GROUPS.contains(group.getCn()))
+                .forEach(group -> builder.addGroup(fromIpaGroup(group)));
+
+        return builder.build();
     }
 
-    // TODO improve out exception handling
-    public UsersState getUsersState(Stack stack) throws Exception {
-        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+    public UsersState getFilteredUsersState(FreeIpaClient freeIpaClient, Set<String> users) throws FreeIpaClientException {
+        UsersState.Builder builder = new UsersState.Builder();
 
-        Set<User> users = freeIpaClient.userFindAll().stream()
-                .filter(user -> !IPA_ONLY_USERS.contains(user.getUid()))
-                .map(this::fromIpaUser)
-                .collect(Collectors.toSet());
+        for (String username : users) {
+            if (IPA_ONLY_USERS.contains(username)) {
+                continue;
+            }
+            Optional<com.sequenceiq.freeipa.client.model.User> ipaUserOptional = freeIpaClient.userFind(username);
+            if (ipaUserOptional.isPresent()) {
+                com.sequenceiq.freeipa.client.model.User ipaUser = ipaUserOptional.get();
+                builder.addUser(fromIpaUser(ipaUser));
+                ipaUser.getMemberOfGroup().stream()
+                        .filter(group -> !IPA_ONLY_GROUPS.contains(group))
+                        .forEach(groupname -> {
+                            Group group = new Group();
+                            group.setName(groupname);
+                            builder.addGroup(group);
+                            builder.addMemberToGroup(groupname, username);
+                        });
+            }
+        }
 
-        Set<Group> groups = freeIpaClient.groupFindAll().stream()
-                .filter(group -> !IPA_ONLY_GROUPS.contains(group.getCn()))
-                .map(this::fromIpaGroup)
-                .collect(Collectors.toSet());
-
-        return new UsersState(groups, users);
+        return builder.build();
     }
 
     @VisibleForTesting
@@ -62,9 +75,6 @@ public class FreeIpaUsersStateProvider {
         user.setName(ipaUser.getUid());
         user.setFirstName(ipaUser.getGivenname());
         user.setLastName(ipaUser.getSn());
-        user.setGroups(ipaUser.getMemberOfGroup().stream()
-                .filter(group -> !IPA_ONLY_GROUPS.contains(group))
-                .collect(Collectors.toSet()));
         return user;
     }
 

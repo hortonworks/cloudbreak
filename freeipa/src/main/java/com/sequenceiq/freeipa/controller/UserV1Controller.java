@@ -42,13 +42,16 @@ public class UserV1Controller implements UserV1Endpoint {
     public SynchronizeUserResponse synchronizeUser(SynchronizeUserRequest request) {
         String userCrn = checkUserCrn();
         LOGGER.debug("synchronizeUser() requested for user {}", userCrn);
+        String accountId = crnService.getCurrentAccountId();
 
-        return userService.synchronizeUser(userCrn);
+        return userService.synchronizeUser(accountId, userCrn, userCrn);
     }
 
     @Override
     public SynchronizeAllUsersResponse synchronizeAllUsers(SynchronizeAllUsersRequest request) {
-        return userService.synchronizeAllUsers(request);
+        String userCrn = checkUserCrn();
+        String accountId = crnService.getCurrentAccountId();
+        return userService.synchronizeAllUsers(accountId, userCrn, request);
     }
 
     @Override
@@ -61,8 +64,9 @@ public class UserV1Controller implements UserV1Endpoint {
         try {
             String userCrn = checkUserCrn();
             LOGGER.debug("setPassword() requested for user {}", userCrn);
+            String accountId = crnService.getCurrentAccountId();
 
-            return passwordService.setPassword(userCrn, request.getPassword());
+            return passwordService.setPassword(accountId, userCrn, request.getPassword());
         } catch (Exception e) {
             LOGGER.error("setPassword caught exception. rethrowing", e);
             throw e;
@@ -73,7 +77,7 @@ public class UserV1Controller implements UserV1Endpoint {
     public CreateUsersResponse createUsers(CreateUsersRequest request) {
         try {
             String accountId = crnService.getCurrentAccountId();
-            userService.createUsers(request, accountId);
+            userService.createUsers(accountId, request);
         } catch (Exception e) {
             LOGGER.error("Failed to create users", e);
             throw new RuntimeException(e);

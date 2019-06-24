@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.user.model;
 
 import java.util.Objects;
-import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -27,9 +26,6 @@ public class User {
     @ApiModelProperty(value = UserModelDescriptions.USER_LASTNAME, required = true)
     private String lastName;
 
-    @ApiModelProperty(value = UserModelDescriptions.USER_GROUPS)
-    private Set<String> groups;
-
     public String getName() {
         return name;
     }
@@ -52,14 +48,6 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public Set<String> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(Set<String> groups) {
-        this.groups = groups;
     }
 
     @Override
@@ -88,7 +76,6 @@ public class User {
                 + "name='" + name + '\''
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''
-                + ", groups=" + groups
                 + '}';
     }
 }

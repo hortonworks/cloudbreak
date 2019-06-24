@@ -4,6 +4,7 @@ import static com.cloudera.thunderhead.service.usermanagement.UserManagementProt
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse;
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse;
+import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
@@ -14,7 +15,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +37,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
@@ -54,6 +59,10 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final Logger LOG = LoggerFactory.getLogger(MockUserManagementService.class);
 
+    private static final int GROUPS_PER_ACCOUNT = 5;
+
+    private static final Random RANDOM = new Random();
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -63,6 +72,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     private String cbLicense;
 
     private final Map<String, Set<String>> accountUsers = new ConcurrentHashMap<>();
+
+    private final Map<String, List<Group>> accountGroups = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void setLicense() {
@@ -76,6 +87,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         String userName = splittedCrn[6];
         String accountId = splittedCrn[4];
         accountUsers.computeIfAbsent(accountId, key -> newSetFromMap(new ConcurrentHashMap<>())).add(userName);
+        accountGroups.computeIfAbsent(accountId, this::createGroups);
         responseObserver.onNext(
                 GetUserResponse.newBuilder()
                         .setUser(createUser(accountId, userName))
@@ -108,14 +120,14 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void getRights(GetRightsRequest request, StreamObserver<GetRightsResponse> responseObserver) {
-        String resourceCrn = request.getResourceCrn();
-        if (StringUtils.isEmpty(resourceCrn)) {
-            responseObserver.onNext(GetRightsResponse.newBuilder().build());
-        } else {
-            responseObserver.onNext(
-                    GetRightsResponse.newBuilder()
-                            .addGroupCrn(resourceCrn).build());
-        }
+        String actorCrn = request.getActorCrn();
+        String[] splittedCrn = actorCrn.split(":");
+        String accountId = splittedCrn[4];
+        List<Group> groups = accountGroups.get(accountId);
+        Group group = groups.get(RANDOM.nextInt(groups.size()));
+        responseObserver.onNext(
+                GetRightsResponse.newBuilder()
+                        .addGroupCrn(group.getCrn()).build());
         responseObserver.onCompleted();
     }
 
@@ -124,6 +136,43 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 .setUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
                 .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
                 .setEmail(userName + "@ums.mock")
+                .build();
+    }
+
+    @Override
+    public void listGroups(ListGroupsRequest request, StreamObserver<ListGroupsResponse> responseObserver) {
+        ListGroupsResponse.Builder groupsBuilder = ListGroupsResponse.newBuilder();
+        if (request.getGroupNameOrCrnCount() == 0) {
+            if (isNotEmpty(request.getAccountId())) {
+                ofNullable(accountGroups.get(request.getAccountId())).orElse(List.of()).stream()
+                        .forEach(groupsBuilder::addGroup);
+            }
+            responseObserver.onNext(groupsBuilder.build());
+        } else {
+            request.getGroupNameOrCrnList().forEach(groupCrn -> {
+                String[] splittedCrn = groupCrn.split(":");
+                groupsBuilder.addGroup(createGroup(splittedCrn[4], splittedCrn[6]));
+            });
+            responseObserver.onNext(groupsBuilder.build());
+        }
+        responseObserver.onCompleted();
+    }
+
+    private List<Group> createGroups(String accountId) {
+        List<Group> groups = new ArrayList(GROUPS_PER_ACCOUNT);
+        for (int i = 0; i < GROUPS_PER_ACCOUNT; ++i) {
+            groups.add(createGroup(accountId, "mockgroup" + i));
+        }
+        return groups;
+    }
+
+    private Group createGroup(String accountId, String groupName) {
+        String groupId = UUID.randomUUID().toString();
+        String groupCrn = createCrn(accountId, Crn.Service.IAM, Crn.ResourceType.GROUP, groupId);
+        return Group.newBuilder()
+                .setGroupId(groupId)
+                .setCrn(groupCrn)
+                .setGroupName(groupName)
                 .build();
     }
 
@@ -329,9 +378,14 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     private String createCrn(String baseCrn, Crn.ResourceType resourceType, String resource) {
+        Crn crn = Crn.fromString(baseCrn);
+        return createCrn(crn.getAccountId(), crn.getService(), resourceType, resource);
+    }
+
+    private String createCrn(String accountId, Crn.Service service, Crn.ResourceType resourceType, String resource) {
         return Crn.builder()
-                .setAccountId(Crn.fromString(baseCrn).getAccountId())
-                .setService(Crn.fromString(baseCrn).getService())
+                .setAccountId(accountId)
+                .setService(service)
                 .setResourceType(resourceType)
                 .setResource(resource)
                 .build()
