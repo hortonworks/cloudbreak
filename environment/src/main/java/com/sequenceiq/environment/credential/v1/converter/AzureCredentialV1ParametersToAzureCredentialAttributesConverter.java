@@ -11,7 +11,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.RoleB
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.RoleBasedResponse;
 import com.sequenceiq.environment.credential.attributes.azure.AppBasedAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.AzureCredentialAttributes;
-import com.sequenceiq.environment.credential.attributes.azure.RoleBasedAttributes;
+import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 
 @Component
 class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
@@ -19,7 +19,7 @@ class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
     public AzureCredentialAttributes convert(AzureCredentialRequestParameters source) {
         AzureCredentialAttributes response = new AzureCredentialAttributes();
         doIfNotNull(source.getAppBased(), param -> response.setAppBased(getAppBased(param)));
-        doIfNotNull(source.getRoleBased(), param -> response.setRoleBased(getRoleBased(param)));
+        doIfNotNull(source.getRoleBased(), param -> response.setCodeGrantFlowBased(getRoleBased(param)));
         response.setSubscriptionId(source.getSubscriptionId());
         response.setTenantId(source.getTenantId());
         return response;
@@ -27,28 +27,28 @@ class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
 
     public AzureCredentialResponseParameters convert(AzureCredentialAttributes source) {
         AzureCredentialResponseParameters response = new AzureCredentialResponseParameters();
-        doIfNotNull(source.getRoleBased(), param -> response.setRoleBased(getRoleBased(param)));
-        //TODO gather accesskey from one of the configured credential types
-//                response.setAccessKey();
+        doIfNotNull(source.getCodeGrantFlowBased(), param -> response.setRoleBased(getRoleBased(param)));
+
+        doIfNotNull(source.getAppBased(), param -> response.setAccessKey(param.getAccessKey()));
+        doIfNotNull(source.getCodeGrantFlowBased(), param -> response.setAccessKey(param.getAccessKey()));
+
         response.setSubscriptionId(source.getSubscriptionId());
         response.setTenantId(source.getTenantId());
         return response;
     }
 
-    private RoleBasedResponse getRoleBased(RoleBasedAttributes roleBased) {
+    private RoleBasedResponse getRoleBased(CodeGrantFlowAttributes roleBased) {
         RoleBasedResponse response = new RoleBasedResponse();
         response.setAppObjectId(roleBased.getAppObjectId());
-        response.setCodeGrantFlow(roleBased.getCodeGrantFlow());
+        response.setCodeGrantFlow(true);
         response.setDeploymentAddress(roleBased.getDeploymentAddress());
-        response.setRoleName(roleBased.getRoleName());
         response.setSpDisplayName(roleBased.getSpDisplayName());
         return response;
     }
 
-    private RoleBasedAttributes getRoleBased(RoleBasedRequest roleBased) {
-        RoleBasedAttributes response = new RoleBasedAttributes();
+    private CodeGrantFlowAttributes getRoleBased(RoleBasedRequest roleBased) {
+        CodeGrantFlowAttributes response = new CodeGrantFlowAttributes();
         response.setDeploymentAddress(roleBased.getDeploymentAddress());
-        response.setRoleName(roleBased.getRoleName());
         return response;
     }
 

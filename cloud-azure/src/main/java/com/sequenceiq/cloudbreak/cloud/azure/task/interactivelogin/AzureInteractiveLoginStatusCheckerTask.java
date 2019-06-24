@@ -4,7 +4,9 @@ import static com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin.MANAGE
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin.XPLAT_CLI_CLIENT_ID;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.ClientBuilder;
@@ -110,10 +112,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                             .toString();
                     sendStatusMessage(extendedCloudCredential, notification);
 
-                    extendedCloudCredential.putParameter("accessKey", application.getAppId());
-                    extendedCloudCredential.putParameter("secretKey", application.getAzureApplicationCreationView().getAppSecret());
-                    extendedCloudCredential.putParameter("spDisplayName", sp.displayName());
-                    extendedCloudCredential.putParameter("appObjectId", application.getObjectId());
+                    saveNewParametersIntoExtendedCloudCred(extendedCloudCredential, application, sp);
 
                     armInteractiveLoginStatusCheckerContext.getCredentialNotifier().createCredential(getAuthenticatedContext().getCloudContext(),
                             extendedCloudCredential);
@@ -185,6 +184,17 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
         graphApiTokenForm.param("resource", resource);
         graphApiTokenForm.param("refresh_token", refreshToken);
         return graphApiTokenForm;
+    }
+
+    private void saveNewParametersIntoExtendedCloudCred(ExtendedCloudCredential cred, AzureApplication app, ServicePrincipalInner sp) {
+        Map<String, Object> azureCredParams = (Map<String, Object>) cred.getParameter(AzureCredentialView.PROVIDER_KEY, Map.class);
+
+        azureCredParams.putIfAbsent(AzureCredentialView.CODE_GRANT_FLOW_BASED, new HashMap<>());
+        Map<String, String> codeGrantFlowParams = (Map<String, String>) azureCredParams.get(AzureCredentialView.CODE_GRANT_FLOW_BASED);
+        codeGrantFlowParams.put("accessKey", app.getAppId());
+        codeGrantFlowParams.put("secretKey", app.getAzureApplicationCreationView().getAppSecret());
+        codeGrantFlowParams.put("spDisplayName", sp.displayName());
+        codeGrantFlowParams.put("appObjectId", app.getObjectId());
     }
 
 }

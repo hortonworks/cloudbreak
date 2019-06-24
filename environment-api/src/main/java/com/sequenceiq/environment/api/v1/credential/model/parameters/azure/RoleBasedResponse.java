@@ -14,9 +14,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class RoleBasedResponse implements Serializable {
 
-    @ApiModelProperty
-    private String roleName;
-
     @ApiModelProperty(hidden = true)
     private String deploymentAddress;
 
@@ -28,14 +25,6 @@ public class RoleBasedResponse implements Serializable {
 
     @ApiModelProperty
     private String appObjectId;
-
-    public String getRoleName() {
-        return roleName;
-    }
-
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
-    }
 
     public String getDeploymentAddress() {
         return deploymentAddress;

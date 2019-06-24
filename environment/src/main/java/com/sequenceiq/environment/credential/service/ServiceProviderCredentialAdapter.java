@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
@@ -131,8 +132,7 @@ public class ServiceProviderCredentialAdapter {
                 throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
             }
             Map<String, String> codeGrantFlowInitParams = res.getCodeGrantFlowInitParams();
-            codeGrantFlowInitParams.forEach(cloudCredential::putParameter);
-            mergeCloudProviderParameters(credential, cloudCredential, Collections.singleton(SMART_SENSE_ID));
+            addCodeGrantFlowInitAttributesToCredential(credential, codeGrantFlowInitParams);
             return credential;
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing initialization of authorization code grant based credential creation:", e);
@@ -160,5 +160,14 @@ public class ServiceProviderCredentialAdapter {
         if (newAttributesAdded) {
             credential.setAttributes(new Json(newAttributes).getValue());
         }
+    }
+
+    private void addCodeGrantFlowInitAttributesToCredential(Credential credential, Map<String, String> codeGrantFlowInitParams) {
+        Json attributes = new Json(credential.getAttributes());
+        Map<String, Object> newAttributes = attributes.getMap();
+        Map<String, Object> azureAttributes = (Map<String, Object>) newAttributes.get(AzureCredentialView.PROVIDER_KEY);
+        Map<String, String> codeGrantFlowAttributes = (Map<String, String>) azureAttributes.get(AzureCredentialView.CODE_GRANT_FLOW_BASED);
+        codeGrantFlowAttributes.putAll(codeGrantFlowInitParams);
+        credential.setAttributes(new Json(newAttributes).getValue());
     }
 }

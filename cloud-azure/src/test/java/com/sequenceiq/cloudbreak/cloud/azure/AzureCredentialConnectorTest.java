@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
@@ -21,13 +22,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.azure.client.CBRefreshTokenClientProvider;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialSender;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 
 public class AzureCredentialConnectorTest {
 
@@ -89,8 +90,8 @@ public class AzureCredentialConnectorTest {
     public void testInteractiveLoginIsEnabled() {
         when(azureInteractiveLogin.login(any(CloudContext.class), any(ExtendedCloudCredential.class),
                 any(CredentialNotifier.class))).thenReturn(Maps.newHashMap());
-        ExtendedCloudCredential extendedCloudCredential = new ExtendedCloudCredential(null, null, null,
-                null, null, USER_ID, WORKSPACE_ID);
+        CloudCredential cloudCredential = new CloudCredential("anId", "aName");
+        ExtendedCloudCredential extendedCloudCredential = new ExtendedCloudCredential(cloudCredential, null, null, USER_ID, "accountId");
         underTest.interactiveLogin(TEST_CLOUD_CONTEXT, extendedCloudCredential, credentialSender);
         verify(azureInteractiveLogin, times(1)).login(any(CloudContext.class), any(ExtendedCloudCredential.class),
                 any(CredentialNotifier.class));
@@ -102,10 +103,18 @@ public class AzureCredentialConnectorTest {
         String tenantId = "1";
         String secretKey = "someExtremelySecretKey";
         String redirectUrl = "some.url.com";
-        when(cloudCredential.getParameter("accessKey", String.class)).thenReturn(accessKey);
-        when(cloudCredential.getParameter("tenantId", String.class)).thenReturn(tenantId);
-        when(cloudCredential.getParameter("secretKey", String.class)).thenReturn(secretKey);
-        when(cloudCredential.getParameter("deploymentAddress", String.class)).thenReturn(DEPLOYMENT_ADDRESS);
+
+        Map<String, Object> parameters = new HashMap<>();
+        Map<String, Object> azureParams = new HashMap<>();
+        Map<String, String> codeGrantFlowParams = new HashMap<>();
+        codeGrantFlowParams.put("accessKey", accessKey);
+        codeGrantFlowParams.put("tenantId", tenantId);
+        codeGrantFlowParams.put("secretKey", secretKey);
+        codeGrantFlowParams.put("deploymentAddress", DEPLOYMENT_ADDRESS);
+        azureParams.put("codeGrantFlowBased", codeGrantFlowParams);
+        parameters.put("azure", azureParams);
+
+        CloudCredential cloudCredential = new CloudCredential("anId", "aName", parameters);
         when(appCreationCommand.getRedirectURL(String.valueOf(WORKSPACE_ID), DEPLOYMENT_ADDRESS)).thenReturn(redirectUrl);
 
         Map<String, String> result = underTest.initCodeGrantFlow(TEST_CLOUD_CONTEXT, cloudCredential);

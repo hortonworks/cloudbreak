@@ -3,32 +3,17 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-
 public class ExtendedCloudCredential extends CloudCredential {
 
     private final String description;
 
     private final String cloudPlatform;
 
-    private final CloudbreakUser cloudbreakUser;
+    private final String userCrn;
 
-    private final String userId;
+    private final String accountId;
 
-    private final Long workspaceId;
-
-    public ExtendedCloudCredential(String credentialCrn, String cloudPlatform, String name, String description,
-            CloudbreakUser cloudbreakUser, String userId, Long workspaceId) {
-        super(credentialCrn, name);
-        this.cloudPlatform = cloudPlatform;
-        this.description = description;
-        this.cloudbreakUser = cloudbreakUser;
-        this.userId = userId;
-        this.workspaceId = workspaceId;
-    }
-
-    public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description,
-            CloudbreakUser cloudbreakUser, String userId, Long workspaceId) {
+    public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description, String userCrn, String accountId) {
         super(cloudCredential.getId(), cloudCredential.getName());
         Map<String, Object> parameters = cloudCredential.getParameters();
         for (Entry<String, Object> parameter : parameters.entrySet()) {
@@ -36,9 +21,8 @@ public class ExtendedCloudCredential extends CloudCredential {
         }
         this.cloudPlatform = cloudPlatform;
         this.description = description;
-        this.cloudbreakUser = cloudbreakUser;
-        this.userId = userId;
-        this.workspaceId = workspaceId;
+        this.userCrn = userCrn;
+        this.accountId = accountId;
     }
 
     public String getDescription() {
@@ -49,15 +33,11 @@ public class ExtendedCloudCredential extends CloudCredential {
         return cloudPlatform;
     }
 
-    public CloudbreakUser getCloudbreakUser() {
-        return cloudbreakUser;
+    public String getUserCrn() {
+        return userCrn;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public Long getWorkspaceId() {
-        return workspaceId;
+    public String getAccountId() {
+        return accountId;
     }
 }

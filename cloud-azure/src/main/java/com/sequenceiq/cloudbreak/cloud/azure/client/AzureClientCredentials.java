@@ -57,7 +57,7 @@ public class AzureClientCredentials {
         String subscriptionId = credentialView.getSubscriptionId();
         AzureEnvironment azureEnvironment = AzureEnvironment.AZURE;
         ApplicationTokenCredentials applicationTokenCredentials = new ApplicationTokenCredentials(clientId, tenantId, secretKey, azureEnvironment);
-        Optional<Boolean> codeGrantFlow = Optional.ofNullable(credentialView.getCodeGrantFlow());
+        Optional<Boolean> codeGrantFlow = Optional.ofNullable(credentialView.codeGrantFlow());
 
         AzureTokenCredentials result = applicationTokenCredentials;
         if (codeGrantFlow.orElse(Boolean.FALSE)) {
@@ -92,7 +92,7 @@ public class AzureClientCredentials {
 
     public Optional<String> getRefreshToken() {
         String refreshToken = null;
-        Optional<Boolean> codeGrantFlow = Optional.ofNullable(credentialView.getCodeGrantFlow());
+        Optional<Boolean> codeGrantFlow = Optional.ofNullable(credentialView.codeGrantFlow());
         if (codeGrantFlow.orElse(Boolean.FALSE)) {
             CbDelegatedTokenCredentials delegatedCredentials = (CbDelegatedTokenCredentials) azureClientCredentials;
             Optional<AuthenticationResult> authenticationResult = delegatedCredentials.getTokens()

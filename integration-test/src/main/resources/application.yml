@@ -160,6 +160,10 @@ integrationtest:
   freeipa:
       server:
 
+  # environment properties
+  environment:
+      server:
+
   # gcp credential details
   gcpcredential:
      name:

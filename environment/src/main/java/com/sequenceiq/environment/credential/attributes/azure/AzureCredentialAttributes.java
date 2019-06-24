@@ -8,7 +8,7 @@ public class AzureCredentialAttributes {
 
     private AppBasedAttributes appBased;
 
-    private RoleBasedAttributes roleBased;
+    private CodeGrantFlowAttributes codeGrantFlowBased;
 
     public String getSubscriptionId() {
         return subscriptionId;
@@ -34,11 +34,11 @@ public class AzureCredentialAttributes {
         this.appBased = appBased;
     }
 
-    public RoleBasedAttributes getRoleBased() {
-        return roleBased;
+    public CodeGrantFlowAttributes getCodeGrantFlowBased() {
+        return codeGrantFlowBased;
     }
 
-    public void setRoleBased(RoleBasedAttributes roleBased) {
-        this.roleBased = roleBased;
+    public void setCodeGrantFlowBased(CodeGrantFlowAttributes codeGrantFlowBased) {
+        this.codeGrantFlowBased = codeGrantFlowBased;
     }
 }

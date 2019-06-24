@@ -2,14 +2,19 @@ package com.sequenceiq.cloudbreak.cloud.azure.view;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class AzureCredentialView {
 
-    private static final String APP_BASED = "appBased";
+    public static final String PROVIDER_KEY = "azure";
 
-    private static final String ROLE_BASED = "roleBased";
+    public static final String APP_BASED = "appBased";
+
+    public static final String CODE_GRANT_FLOW_BASED = "codeGrantFlowBased";
+
+    public static final String CODE_GRANT_FLOW_STATE_KEY = "codeGrantFlowState";
 
     private final CloudCredential cloudCredential;
 
@@ -22,14 +27,14 @@ public class AzureCredentialView {
     public AzureCredentialView(CloudCredential cloudCredential) {
         this.cloudCredential = cloudCredential;
 
-        this.parameters = cloudCredential.getParameters().containsKey("azure")
-                ? (Map<String, Object>) cloudCredential.getParameter("azure", Map.class) : new HashMap<>();
+        this.parameters = cloudCredential.getParameters().get(PROVIDER_KEY) != null
+                ? (Map<String, Object>) cloudCredential.getParameter(PROVIDER_KEY, Map.class) : new HashMap<>();
 
-        this.appBasedParameters = parameters.containsKey(APP_BASED)
+        this.appBasedParameters = parameters.get(APP_BASED) != null
                 ? (Map<String, String>) parameters.get(APP_BASED) : new HashMap<>();
 
-        this.codeGrantFlowParameters = parameters.containsKey(ROLE_BASED)
-                ? (Map<String, String>) parameters.get(ROLE_BASED) : new HashMap<>();
+        this.codeGrantFlowParameters = parameters.get(CODE_GRANT_FLOW_BASED) != null
+                ? (Map<String, String>) parameters.get(CODE_GRANT_FLOW_BASED) : new HashMap<>();
     }
 
     public String getCredentialCrn() {
@@ -49,46 +54,40 @@ public class AzureCredentialView {
     }
 
     public String getAccessKey() {
-        return appBasedParameters.get("accessKey");
+        return Optional.ofNullable(appBasedParameters.get("accessKey"))
+                .orElse(codeGrantFlowParameters.get("accessKey"));
     }
 
     public String getSecretKey() {
-        return appBasedParameters.get("secretKey");
+        return Optional.ofNullable(appBasedParameters.get("secretKey"))
+                .orElse(codeGrantFlowParameters.get("secretKey"));
     }
 
-    public String getRoleName() {
-        return cloudCredential.getParameter("roleName", String.class);
-    }
-
-    public String getRoleType() {
-        return cloudCredential.getParameter("roleType", String.class);
-    }
-
-    public Boolean getCodeGrantFlow() {
-        return cloudCredential.getParameter("codeGrantFlow", Boolean.class);
+    public boolean codeGrantFlow() {
+        return !codeGrantFlowParameters.isEmpty();
     }
 
     public String getAppLoginUrl() {
-        return cloudCredential.getParameter("appLoginUrl", String.class);
+        return codeGrantFlowParameters.get("appLoginUrl");
     }
 
     public String getCodeGrantFlowState() {
-        return cloudCredential.getParameter("codeGrantFlowState", String.class);
+        return codeGrantFlowParameters.get(CODE_GRANT_FLOW_STATE_KEY);
     }
 
     public String getAuthorizationCode() {
-        return cloudCredential.getParameter("authorizationCode", String.class);
+        return codeGrantFlowParameters.get("authorizationCode");
     }
 
     public String getRefreshToken() {
-        return cloudCredential.getParameter("refreshToken", String.class);
+        return codeGrantFlowParameters.get("refreshToken");
     }
 
     public String getAppReplyUrl() {
-        return cloudCredential.getParameter("appReplyUrl", String.class);
+        return codeGrantFlowParameters.get("appReplyUrl");
     }
 
     public String getDeploymentAddress() {
-        return cloudCredential.getParameter("deploymentAddress", String.class);
+        return codeGrantFlowParameters.get("deploymentAddress");
     }
 }

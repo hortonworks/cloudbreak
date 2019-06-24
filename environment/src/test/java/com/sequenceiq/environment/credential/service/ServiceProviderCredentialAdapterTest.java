@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
@@ -115,28 +116,38 @@ public class ServiceProviderCredentialAdapterTest {
     }
 
     @Test
-    public void testInitCodeGrantFlowWhenasd() {
+    public void testInitCodeGrantFlowShouldAddAdditionalAttributesToAzureCodeGrantFlowAttributes() {
         String expectedAdditionalAttributeKey = "someCloudCredentialKey";
         String expectedAdditionalAttributeValue = "someCloudCredentialValue";
-        String initialAttributeKey = "somekey";
-        String initialAttributeValue = "somevalue";
-        String initialCredentialAttriute = String.format("{\"%s\":\"%s\"}", initialAttributeKey, initialAttributeValue);
+        String initialAttributeKey = "aKey";
+        String initialAttributeValue = "aValue";
+
+        Map<String, Object> initialAttributes = new HashMap<>();
+        Map<String, Object> initialAzureAttributes = new HashMap<>();
+        Map<String, String> initialAzureCodeGrantFlowParams = new HashMap<>();
+        initialAzureCodeGrantFlowParams.put(initialAttributeKey, initialAttributeValue);
+        initialAzureAttributes.put("codeGrantFlowBased", initialAzureCodeGrantFlowParams);
+        initialAttributes.put("azure", initialAzureAttributes);
+
         Credential credential = new Credential();
+        String initialCredentialAttriute = new Json(initialAttributes).getValue();
         credential.setAttributes(initialCredentialAttriute);
         credential.setId(CREDENTIAL_ID);
         credential.setCloudPlatform(CLOUD_PLATFORM);
         credential.setName(CREDENTIAL_NAME);
         when(credentialConverter.convert(credential)).thenReturn(convertedCredential);
-        when(convertedCredential.getParameters()).thenReturn(Map.of(expectedAdditionalAttributeKey, expectedAdditionalAttributeValue));
+        when(initCodeGrantFlowResponse.getCodeGrantFlowInitParams()).thenReturn(Map.of(expectedAdditionalAttributeKey, expectedAdditionalAttributeValue));
 
         Credential result = underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID);
 
         assertNotEquals(initialCredentialAttriute, result.getAttributes());
         var attributeMap = new Json(result.getAttributes()).getMap();
-        assertTrue(attributeMap.containsKey(initialAttributeKey));
-        assertTrue(attributeMap.containsKey(expectedAdditionalAttributeKey));
-        assertEquals(expectedAdditionalAttributeValue, attributeMap.get(expectedAdditionalAttributeKey));
-        assertEquals(initialAttributeValue, attributeMap.get(initialAttributeKey));
+        Map<String, Object> azureAttributes = (Map<String, Object>) attributeMap.get("azure");
+        Map<String, String> codeGrattFlowAttributes = (Map<String, String>) azureAttributes.get("codeGrantFlowBased");
+        assertTrue(codeGrattFlowAttributes.containsKey(initialAttributeKey));
+        assertTrue(codeGrattFlowAttributes.containsKey(expectedAdditionalAttributeKey));
+        assertEquals(expectedAdditionalAttributeValue, codeGrattFlowAttributes.get(expectedAdditionalAttributeKey));
+        assertEquals(initialAttributeValue, codeGrattFlowAttributes.get(initialAttributeKey));
         assertEquals(credential, result);
     }
 }

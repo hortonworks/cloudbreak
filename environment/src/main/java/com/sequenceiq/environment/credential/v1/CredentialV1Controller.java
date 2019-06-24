@@ -119,7 +119,8 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @Override
     public InteractiveCredentialResponse interactiveLogin(@Valid CredentialRequest credentialRequest) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        Map<String, String> result = credentialService.interactiveLogin(accountId, credentialConverter.convert(credentialRequest));
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        Map<String, String> result = credentialService.interactiveLogin(accountId, userCrn, credentialConverter.convert(credentialRequest));
         return new InteractiveCredentialResponse(result.get("user_code"), result.get("verification_url"));
     }
 
@@ -131,14 +132,16 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @Override
     public Response initCodeGrantFlow(CredentialRequest credentialRequest) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        String loginURL = credentialService.initCodeGrantFlow(accountId, credentialConverter.convert(credentialRequest));
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String loginURL = credentialService.initCodeGrantFlow(accountId, credentialConverter.convert(credentialRequest), userCrn);
         return Response.status(Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
     }
 
     @Override
     public Response initCodeGrantFlowOnExisting(String name) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        String loginURL = credentialService.initCodeGrantFlow(accountId, name);
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        String loginURL = credentialService.initCodeGrantFlow(accountId, name, userCrn);
         return Response.status(Status.FOUND).header("Referrer-Policy", "origin-when-cross-origin").header("Location", loginURL).build();
     }
 

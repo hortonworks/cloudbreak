@@ -20,7 +20,7 @@ public class CredentialToExtendedCloudCredentialConverter {
 
     public ExtendedCloudCredential convert(Credential credential) {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
-        return new ExtendedCloudCredential(cloudCredential, credential.getCloudPlatform(), "",
-                null, crnService.getCurrentUserId(), 0L);
+        return new ExtendedCloudCredential(cloudCredential, credential.getCloudPlatform(), "", crnService.getCurrentUserId(),
+                crnService.getCurrentAccountId());
     }
 }
