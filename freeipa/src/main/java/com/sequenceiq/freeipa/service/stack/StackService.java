@@ -1,12 +1,14 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
+import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
@@ -49,5 +51,9 @@ public class StackService {
 
     public List<Stack> getAllByAccountId(String accountId) {
         return stackRepository.findByAccountId(accountId);
+    }
+
+    public List<StackIdWithStatus> getStatuses(Set<Long> stackIds) {
+        return stackRepository.findStackStatusesWithoutAuth(stackIds);
     }
 }

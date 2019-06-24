@@ -18,6 +18,7 @@ import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.client.model.DnsZoneList;
 import com.sequenceiq.freeipa.client.model.Group;
+import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.client.model.User;
 
@@ -188,6 +189,13 @@ public class FreeIpaClient {
                 "type", "user"
         );
         invoke("permission_add", flags, params, Object.class);
+    }
+
+    public Set<Permission> findPermission(String permission) throws FreeIpaClientException {
+        Map<String, Object> params = Map.of("cn", permission);
+        ParameterizedType type = TypeUtils
+                .parameterize(Set.class, Permission.class);
+        return (Set<Permission>) invoke("permission_find", List.of(), params, type).getResult();
     }
 
     public int getUsernameLength() throws FreeIpaClientException {

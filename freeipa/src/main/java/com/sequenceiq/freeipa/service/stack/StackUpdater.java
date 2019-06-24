@@ -4,6 +4,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
@@ -40,6 +42,12 @@ public class StackUpdater {
         if (!Status.DELETE_COMPLETED.equals(stack.getStackStatus().getStatus())) {
             stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
             stack = stackService.save(stack);
+            if (status.isRemovableStatus()) {
+                InMemoryStateStore.deleteStack(stackId);
+            } else {
+                PollGroup pollGroup = Status.DELETE_COMPLETED.equals(status) ? PollGroup.CANCELLED : PollGroup.POLLABLE;
+                InMemoryStateStore.putStack(stackId, pollGroup);
+            }
         }
         return stack;
     }

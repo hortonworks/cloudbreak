@@ -19,19 +19,18 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.freeipa.logger.MDCContextFilter;
+import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteria;
 
 @Configuration
 @EnableRetry
 @EnableScheduling
 public class AppConfig {
 
-    @Value("${freeipa.intermediate.threadpool.core.size:}")
+    @Value("${freeipa.intermediate.threadpool.core.size}")
     private int intermediateCorePoolSize;
 
-    @Value("${freeipa.intermediate.threadpool.capacity.size:}")
+    @Value("${freeipa.intermediate.threadpool.capacity.size}")
     private int intermediateQueueCapacity;
 
     @Inject
@@ -56,7 +55,7 @@ public class AppConfig {
     public Map<String, HostOrchestrator> hostOrchestrators() {
         Map<String, HostOrchestrator> map = new HashMap<>();
         for (HostOrchestrator hostOrchestrator : hostOrchestrators) {
-            hostOrchestrator.init(new MyExitCriteria());
+            hostOrchestrator.init(new StackBasedExitCriteria());
             map.put(hostOrchestrator.name(), hostOrchestrator);
         }
         return map;
@@ -69,17 +68,5 @@ public class AppConfig {
         registrationBean.setFilter(filter);
         registrationBean.setOrder(Integer.MAX_VALUE);
         return registrationBean;
-    }
-
-    private static class MyExitCriteria implements ExitCriteria {
-        @Override
-        public boolean isExitNeeded(ExitCriteriaModel exitCriteriaModel) {
-            return false;
-        }
-
-        @Override
-        public String exitMessage() {
-            return null;
-        }
     }
 }

@@ -13,9 +13,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
+import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -32,6 +35,9 @@ public class FreeIpaFlowManager {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
+    @Inject
+    private StackService stackService;
 
     private Random random = new Random();
 
@@ -80,5 +86,20 @@ public class FreeIpaFlowManager {
             decoratedHeader.put(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
         }
         return decoratedHeader;
+    }
+
+    public void cancelRunningFlows(Long stackId) {
+        StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
+        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(createEventParameters(stackId), cancelEvent));
+    }
+
+    private Map<String, Object> createEventParameters(Long stackId) {
+        String userCrn;
+        try {
+            userCrn = threadBasedUserCrnProvider.getUserCrn();
+        } catch (RuntimeException ex) {
+            userCrn = stackService.getStackById(stackId).getOwner();
+        }
+        return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
     }
 }

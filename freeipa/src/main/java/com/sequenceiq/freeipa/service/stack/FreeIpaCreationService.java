@@ -12,6 +12,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
@@ -101,6 +103,7 @@ public class FreeIpaCreationService {
         Image image = imageService.create(stack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest(), credential);
         FreeIpa freeIpa = freeIpaService.create(stack, request.getFreeIpa());
         flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT, new StackEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stack.getId()));
+        InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
         return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa);
     }
 

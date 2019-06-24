@@ -32,7 +32,7 @@ import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.orchestrator.DummyExitCriteriaModel;
+import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.repository.StackRepository;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -82,7 +82,7 @@ public class BootstrapService {
         try {
             byte[] stateConfigZip = getStateConfigZip();
             hostOrchestrator.bootstrapNewNodes(gatewayConfigs, allNodes, allNodes,
-                    stateConfigZip, params, new DummyExitCriteriaModel());
+                    stateConfigZip, params, new StackBasedExitCriteriaModel(stackId));
         } catch (IOException e) {
             LOGGER.error("Couldnt read state config", e);
         } catch (CloudbreakOrchestratorException e) {

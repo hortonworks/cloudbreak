@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.orchestrator.DummyExitCriteriaModel;
+import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -56,7 +56,7 @@ public class FreeIpaInstallService {
                 "password", freeIpa.getAdminPassword());
         servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", Collections.singletonMap("freeipa", freeipaPillar)));
 
-        hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new DummyExitCriteriaModel());
-        hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, new DummyExitCriteriaModel());
+        hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
+        hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
     }
 }
