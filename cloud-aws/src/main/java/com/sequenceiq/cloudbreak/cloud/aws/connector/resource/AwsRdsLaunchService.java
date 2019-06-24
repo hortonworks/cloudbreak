@@ -52,9 +52,6 @@ public class AwsRdsLaunchService {
     @Inject
     private AwsClient awsClient;
 
-    // @Inject
-    // private AwsNetworkService awsNetworkService;
-
     @Inject
     private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
@@ -81,10 +78,8 @@ public class AwsRdsLaunchService {
             cfRetryClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
             LOGGER.debug("Stack already exists: {}", cFStackName);
         } catch (AmazonServiceException ignored) {
-            // boolean existingVPC = awsNetworkView.isExistingVPC();
             // all subnets desired for DB subnet group are in the stack
             boolean existingSubnet = awsNetworkView.isExistingSubnet();
-            // if (!existingVPC || !existingSubnet) {
             if (!existingSubnet) {
                 throw new CloudConnectorException("Can only create RDS instance with existing subnets");
             }
@@ -92,8 +87,6 @@ public class AwsRdsLaunchService {
             resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
 
             RDSModelContext rdsModelContext = new RDSModelContext()
-                    // .withAuthenticatedContext(ac)
-                    // .withStack(stack)
                     .withTemplate(stack.getTemplate());
             String cfTemplate = cloudFormationTemplateBuilder.build(rdsModelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);

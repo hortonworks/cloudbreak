@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.AwsDBStackV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
+import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 
@@ -19,32 +20,30 @@ import javax.validation.constraints.Size;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
-    // FIXME Define ModelDescriptions.DBStackModelDescription
-
-    @Size(max = 40, min = 5, message = "The length of the name has to be in range of 5 to 40")
+    @Size(max = 40, min = 5, message = "The length of the name must be between 5 to 40 inclusive")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and must start with an alphanumeric character")
     @NotNull
-    @ApiModelProperty(value = /* DBStackModelDescription.STACK_NAME */ "name of the stack", required = true)
+    @ApiModelProperty(value = ModelDescriptions.DBStack.STACK_NAME, required = true)
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = /* StackModelDescription.ENVIRONMENT_CRN */ "ID of the environment", required = true)
+    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_ID, required = true)
     private String environmentId;
 
     @NotNull
-    @ApiModelProperty(value = "Region for database stack")
+    @ApiModelProperty(ModelDescriptions.DBStack.REGION)
     private String region;
 
     @Valid
-    @ApiModelProperty(/* DBStackModelDescriptions.NETWORK) */ "Network for database stack")
+    @ApiModelProperty(ModelDescriptions.DBStack.NETWORK)
     private NetworkV4Request network;
 
     @Valid
-    @ApiModelProperty(/* DBStackModelDescriptions.DATABASE_SERVER) */ "Database server for database stack")
+    @ApiModelProperty(ModelDescriptions.DBStack.DATABASE_SERVER)
     private DatabaseServerV4Request databaseServer;
 
-    @ApiModelProperty(/* DBStackModelDescription.AWS_PARAMETERS */ "AWS-specific parameters for database stack")
+    @ApiModelProperty(ModelDescriptions.DBStack.AWS_PARAMETERS)
     private AwsDBStackV4Parameters aws;
 
     public String getName() {

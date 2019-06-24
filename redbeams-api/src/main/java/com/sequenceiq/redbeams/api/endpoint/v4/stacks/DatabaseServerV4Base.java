@@ -3,32 +3,29 @@ package com.sequenceiq.redbeams.api.endpoint.v4.stacks;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.validation.ValidDatabaseVendor;
-// import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescription;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public class DatabaseServerV4Base extends ProviderParametersBase {
 
-    // FIXME define DatabaseServerModelDescription
-
-    @ApiModelProperty("Instance type for database server")
+    @ApiModelProperty(DatabaseServerModelDescription.INSTANCE_TYPE)
     private String instanceType;
 
     @ValidDatabaseVendor
-    @ApiModelProperty("Vendor for database server")
+    @ApiModelProperty(DatabaseServerModelDescription.DATABASE_VENDOR)
     private String databaseVendor;
 
-    @ApiModelProperty("Storage size for database server")
+    @ApiModelProperty(DatabaseServerModelDescription.STORAGE_SIZE)
     private Long storageSize;
 
-    @ApiModelProperty("Root user name for database server")
+    @ApiModelProperty(DatabaseServerModelDescription.ROOT_USER_NAME)
     private String rootUserName;
 
-    @ApiModelProperty("Root user password for database server")
+    @ApiModelProperty(DatabaseServerModelDescription.ROOT_USER_PASSWORD)
     private String rootUserPassword;
 
-    // @ApiModelProperty(DatabaseServerModelDescription.AWS_PARAMETERS)
-    @ApiModelProperty("AWS parameters")
+    @ApiModelProperty(DatabaseServerModelDescription.AWS_PARAMETERS)
     private AwsDatabaseServerV4Parameters aws;
 
     // @ApiModelProperty(DatabaseServerModelDescription.GCP_PARAMETERS)
