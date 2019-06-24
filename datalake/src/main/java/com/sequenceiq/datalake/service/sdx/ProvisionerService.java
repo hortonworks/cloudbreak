@@ -61,9 +61,6 @@ public class ProvisionerService {
     private SdxClusterRepository sdxClusterRepository;
 
     @Inject
-    private EnvironmentService environmentService;
-
-    @Inject
     private Clock clock;
 
     @Value("${sdx.cluster.definition}")

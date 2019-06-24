@@ -8,6 +8,37 @@
   },
   "instanceGroups": [
     {
+      "name": "idbroker",
+      "template": {
+        "instanceType": "m5.2xlarge",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 100,
+            "type": "standard"
+          }
+        ],
+        "rootVolume": {
+          "size": 50
+        }
+      },
+      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [],
+      "securityGroup": {
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "22"
+            ],
+            "protocol": "tcp"
+          }
+        ]
+      }
+    },
+    {
       "name": "master",
       "template": {
         "instanceType": "m5.2xlarge",
