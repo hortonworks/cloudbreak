@@ -30,6 +30,23 @@
       "dependencies": ["ZOOKEEPER","HDFS", "YARN", "HIVE"]
     },
     {
+      "name": "HUE",
+      "displayName": "Hue",
+      "components": [
+        {
+          "name": "HUE_SERVER",
+          "groups": ["master"],
+          "base": true
+        },
+        {
+          "name": "HUE_LOAD_BALANCER",
+          "groups": ["master"],
+          "base": true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER","HDFS", "YARN", "HIVE", "OOZIE"]
+    },
+    {
       "name": "HIVE_ON_TEZ",
       "displayName": "Hive on Tez",
       "components": [
