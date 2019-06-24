@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class V4ExistingResourceEventRestUrlParser extends RestUrlParser {
+public class V4ExistingResourceByCrnOrNameRestUrlParser extends RestUrlParser {
 
     private static final int WORKSPACE_ID_GROUP_NUMBER = 1;
 
@@ -14,17 +15,13 @@ public class V4ExistingResourceEventRestUrlParser extends RestUrlParser {
 
     private static final int RESOURCE_TYPE_GROUP_NUMBER = 2;
 
-    private static final int RESOURCE_EVENT_GROUP_NUMBER = 4;
-
-    // Irregular requests containing event followed by resource name at the end: v4/{workspaceId}/credentials/*
-    // Irregular requests with resource name format followed by resource name at the end: remaining patterns
-    private static final Pattern ANTI_PATTERN = Pattern.compile("v4/\\d+/(credentials/.+|(blueprints)/(name|crn)/([^/]+))");
-
-    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/([^/]+)/([a-z_]+)");
+    // v4/{workspaceId}/blueprints/name/{name}
+    // v4/{workspaceId}/blueprints/crn/{name}
+    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/(blueprints)/(?:name|crn)/([^/]+)");
 
     @Override
-    protected Pattern getAntiPattern() {
-        return ANTI_PATTERN;
+    protected List<String> parsedMethods() {
+        return List.of("DELETE", "GET");
     }
 
     @Override
@@ -54,7 +51,7 @@ public class V4ExistingResourceEventRestUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceEvent(Matcher matcher) {
-        return matcher.group(RESOURCE_EVENT_GROUP_NUMBER);
+        return null;
     }
 
 }

@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.dto.BlueprintAccessDto.BlueprintAccessDtoBuilder.aBlueprintAccessDtoBuilder;
+
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
@@ -16,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
@@ -33,6 +37,9 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     @Inject
     private ConverterUtil converterUtil;
 
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
     @Override
     public BlueprintV4ViewResponses list(Long workspaceId) {
         Set<BlueprintView> allAvailableViewInWorkspace = blueprintService.getAllAvailableViewInWorkspace(workspaceId);
@@ -40,22 +47,37 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     }
 
     @Override
-    public BlueprintV4Response get(Long workspaceId, String name) {
-        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(name, workspaceId);
+    public BlueprintV4Response getByName(Long workspaceId, @NotNull String name) {
+        Blueprint blueprint = blueprintService.getByWorkspace(aBlueprintAccessDtoBuilder().withName(name).build(), workspaceId);
+        return converterUtil.convert(blueprint, BlueprintV4Response.class);
+    }
+
+    @Override
+    public BlueprintV4Response getByCrn(Long workspaceId, @NotNull String crn) {
+        Blueprint blueprint = blueprintService.getByWorkspace(aBlueprintAccessDtoBuilder().withCrn(crn).build(), workspaceId);
         return converterUtil.convert(blueprint, BlueprintV4Response.class);
     }
 
     @Override
     public BlueprintV4Response post(Long workspaceId, BlueprintV4Request request) {
-        Blueprint blueprint = blueprintService.createForLoggedInUser(
-                converterUtil.convert(request, Blueprint.class), workspaceId);
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String creator = threadBasedUserCrnProvider.getUserCrn();
+        Blueprint toSave = converterUtil.convert(request, Blueprint.class);
+        Blueprint blueprint = blueprintService.createForLoggedInUser(toSave, workspaceId, accountId, creator);
         notify(ResourceEvent.BLUEPRINT_CREATED);
         return converterUtil.convert(blueprint, BlueprintV4Response.class);
     }
 
     @Override
-    public BlueprintV4Response delete(Long workspaceId, String name) {
-        Blueprint deleted = blueprintService.deleteByNameFromWorkspace(name, workspaceId);
+    public BlueprintV4Response deleteByName(Long workspaceId, @NotNull String name) {
+        Blueprint deleted = blueprintService.deleteByWorkspace(aBlueprintAccessDtoBuilder().withName(name).build(), workspaceId);
+        notify(ResourceEvent.BLUEPRINT_DELETED);
+        return converterUtil.convert(deleted, BlueprintV4Response.class);
+    }
+
+    @Override
+    public BlueprintV4Response deleteByCrn(Long workspaceId, @NotNull String crn) {
+        Blueprint deleted = blueprintService.deleteByWorkspace(aBlueprintAccessDtoBuilder().withCrn(crn).build(), workspaceId);
         notify(ResourceEvent.BLUEPRINT_DELETED);
         return converterUtil.convert(deleted, BlueprintV4Response.class);
     }

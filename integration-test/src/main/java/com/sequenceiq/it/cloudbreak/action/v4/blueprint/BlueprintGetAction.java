@@ -19,12 +19,12 @@ public class BlueprintGetAction implements Action<BlueprintTestDto, CloudbreakCl
     @Override
     public BlueprintTestDto action(TestContext testContext, BlueprintTestDto testDto, CloudbreakClient client) throws Exception {
         log(LOGGER, format(" Name: %s", testDto.getName()));
-        logJSON(LOGGER, format(" Blueprint get response:%n"), testDto.getName());
+        logJSON(LOGGER, format(" Blueprint getByName response:%n"), testDto.getName());
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .blueprintV4Endpoint()
-                        .get(client.getWorkspaceId(), testDto.getName()));
-        logJSON(LOGGER, format(" Blueprint get successfully:%n"), testDto.getResponse());
+                        .getByName(client.getWorkspaceId(), testDto.getName()));
+        logJSON(LOGGER, format(" Blueprint getByName successfully:%n"), testDto.getResponse());
 
         return testDto;
     }

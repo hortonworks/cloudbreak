@@ -132,7 +132,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
-            when = "the get blueprint endpoint is called",
+            when = "the getByName blueprint endpoint is called",
             then = "the blueprint should be returned")
     public void testGetSpecificBlueprint(TestContext testContext) {
         String blueprintName = resourcePropertyProvider().getName();
@@ -151,7 +151,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
-            when = "the get blueprint endpoint is called with default blueprint",
+            when = "the getByName blueprint endpoint is called with default blueprint",
             then = "the default blueprint should be returned")
     public void testGetDefaultBlueprint(TestContext testContext) {
         testContext.given(BlueprintTestDto.class)
@@ -168,7 +168,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "a specified blueprint",
-            when = "delete blueprint is called for the specified blueprint",
+            when = "deleteByName blueprint is called for the specified blueprint",
             then = "the blueprint list response does not contain it")
     public void testDeleteSpecificBlueprint(TestContext testContext) {
         String blueprintName = resourcePropertyProvider().getName();

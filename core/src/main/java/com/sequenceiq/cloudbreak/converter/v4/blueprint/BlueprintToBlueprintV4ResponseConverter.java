@@ -17,13 +17,13 @@ public class BlueprintToBlueprintV4ResponseConverter
     @Override
     public BlueprintV4Response convert(Blueprint entity) {
         BlueprintV4Response blueprintJson = new BlueprintV4Response();
-        blueprintJson.setId(entity.getId());
         blueprintJson.setName(entity.getName());
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
         blueprintJson.setStatus(entity.getStatus());
         blueprintJson.setTags(entity.getTags().getMap());
         blueprintJson.setBlueprint(entity.getBlueprintText());
+        blueprintJson.setCrn(entity.getCrn());
         return blueprintJson;
     }
 

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.repository;
 
 import static com.sequenceiq.cloudbreak.workspace.resource.ResourceAction.READ;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -37,4 +38,8 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
     @DisableHasPermission
     @CheckPermissionsByTarget(action = READ, targetIndex = 0)
     <S extends Blueprint> Iterable<S> saveAll(Iterable<S> entities);
+
+    @CheckPermissionsByReturnValue
+    Optional<Blueprint> findByCrnAndWorkspaceId(String crn, Long workspaceId);
+
 }

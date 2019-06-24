@@ -19,7 +19,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
@@ -28,6 +30,12 @@ public class BlueprintLoaderService {
 
     @Inject
     private DefaultBlueprintCache defaultBlueprintCache;
+
+    @Inject
+    private BlueprintService blueprintService;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     public boolean isAddingDefaultBlueprintsNecessaryForTheUser(Collection<Blueprint> blueprints) {
         Map<String, Blueprint> defaultBlueprints = defaultBlueprintCache.defaultBlueprints();
@@ -85,7 +93,11 @@ public class BlueprintLoaderService {
         for (Entry<String, Blueprint> diffBlueprint : collectDeviationOfExistingAndDefaultBlueprints(blueprintsInDatabase).entrySet()) {
             LOGGER.debug("Default blueprint '{}' needs to be added for the '{}' workspace because the default validation missing.",
                     diffBlueprint.getKey(), workspace.getId());
-            resultList.add(setupBlueprint(diffBlueprint.getValue(), workspace));
+            Blueprint bp = setupBlueprint(diffBlueprint.getValue(), workspace);
+            String accountId = threadBasedUserCrnProvider.getAccountId();
+            String creator = threadBasedUserCrnProvider.getUserCrn();
+            blueprintService.decorateWithCrn(bp, accountId, creator);
+            resultList.add(bp);
         }
         LOGGER.debug("Finished to add default blueprints which are missing for the user.");
         return resultList;

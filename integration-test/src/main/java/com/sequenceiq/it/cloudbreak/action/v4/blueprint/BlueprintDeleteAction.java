@@ -18,13 +18,13 @@ public class BlueprintDeleteAction implements Action<BlueprintTestDto, Cloudbrea
     @Override
     public BlueprintTestDto action(TestContext testContext, BlueprintTestDto testDto, CloudbreakClient client) throws Exception {
         Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, format(" Blueprint delete request:%n"), testDto.getRequest());
+        Log.logJSON(LOGGER, format(" Blueprint deleteByName request:%n"), testDto.getRequest());
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .blueprintV4Endpoint()
-                        .delete(client.getWorkspaceId(), testDto.getName()));
+                        .deleteByName(client.getWorkspaceId(), testDto.getName()));
         Log.logJSON(LOGGER, format(" Blueprint deleted successfully:%n"), testDto.getResponse());
-        Log.log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+        Log.log(LOGGER, format(" crn: %s", testDto.getResponse().getCrn()));
 
         return testDto;
     }

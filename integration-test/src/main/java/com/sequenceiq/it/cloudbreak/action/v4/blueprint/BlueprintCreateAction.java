@@ -25,7 +25,7 @@ public class BlueprintCreateAction implements Action<BlueprintTestDto, Cloudbrea
                         .blueprintV4Endpoint()
                         .post(client.getWorkspaceId(), testDto.getRequest()));
         logJSON(LOGGER, format(" Blueprint created  successfully:%n"), testDto.getResponse());
-        log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+        log(LOGGER, format(" crn: %s", testDto.getResponse().getCrn()));
 
         return testDto;
     }

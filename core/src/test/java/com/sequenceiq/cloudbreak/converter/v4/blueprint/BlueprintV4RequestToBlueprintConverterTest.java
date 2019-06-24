@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,7 +68,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhereEveryDataFilledButThereIsNoTagsElementInBlueprintJsonThenItShouldBeEmpty() {
         Blueprint result = underTest.convert(getRequest("blueprint.json"));
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, List.of("creator", "crn"));
         assertEquals("{}", result.getTags().getValue());
         assertEquals("HDP", result.getStackType());
         assertEquals("2.3", result.getStackVersion());
@@ -76,7 +77,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhenInputJsonHasTagsFieldButItsEmpty() {
         Blueprint result = underTest.convert(getRequest("blueprint-empty-tags.json"));
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, List.of("creator", "crn"));
         assertEquals("{}", result.getTags().getValue());
         assertEquals("HDP", result.getStackType());
         assertEquals("2.3", result.getStackVersion());
@@ -85,7 +86,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhenInputJsonHasTagsFieldAndItHasMoreThanOneFieldInIt() {
         Blueprint result = underTest.convert(getRequest("blueprint-filled-tags.json"));
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, List.of("creator", "crn"));
         Assert.assertTrue(result.getTags().getMap().size() > 1);
         assertEquals("HDP", result.getStackType());
         assertEquals("2.3", result.getStackVersion());
@@ -204,7 +205,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = getRequest("blueprint.json");
         request.setServices(null);
         Blueprint result = underTest.convert(request);
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, List.of("creator", "crn"));
         assertEquals("{}", result.getTags().getValue());
         assertEquals("HDP", result.getStackType());
         assertEquals("2.3", result.getStackVersion());
@@ -215,7 +216,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = getRequest("blueprint.json");
         request.setServices(new HashSet<>());
         Blueprint result = underTest.convert(request);
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, List.of("creator", "crn"));
         assertEquals("{}", result.getTags().getValue());
         assertEquals("HDP", result.getStackType());
         assertEquals("2.3", result.getStackVersion());
@@ -235,7 +236,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
         Blueprint result = underTest.convert(request);
 
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, List.of("creator", "crn"));
         assertEquals(blueprint, result.getBlueprintText());
     }
 
