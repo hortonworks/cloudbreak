@@ -41,8 +41,6 @@ class FreeIpaUsersStateProviderTest {
 
     @Test
     void testGetUserState() throws Exception {
-        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
-
         List<String> user1GroupNames = List.of("group1", "group2");
         List<String> user2GroupNames = List.of("group2", "group3", FreeIpaUsersStateProvider.IPA_ONLY_GROUPS.get(0));
         List<String> ipaOnlyUserGroupNames = List.of("dont_include");
@@ -65,7 +63,7 @@ class FreeIpaUsersStateProviderTest {
         when(freeIpaClient.userFindAll()).thenReturn(usersFindAll);
         when(freeIpaClient.groupFindAll()).thenReturn(groupsFindAll);
 
-        UsersState ipaState = underTest.getUsersState(stack);
+        UsersState ipaState = underTest.getUsersState(freeIpaClient);
 
         Set<String> expectedUsers = users.keySet().stream()
                 .filter(user -> !FreeIpaUsersStateProvider.IPA_ONLY_USERS.contains(user))
@@ -98,7 +96,6 @@ class FreeIpaUsersStateProviderTest {
         assertEquals(user.getName(), ipaUser.getUid());
         assertEquals(user.getLastName(), ipaUser.getSn());
         assertEquals(user.getFirstName(), ipaUser.getGivenname());
-        assertEquals(user.getGroups(), Set.copyOf(ipaUser.getMemberOfGroup()));
     }
 
     @Test

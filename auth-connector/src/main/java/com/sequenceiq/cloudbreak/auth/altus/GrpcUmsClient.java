@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
@@ -39,6 +41,35 @@ public class GrpcUmsClient {
     private UmsClientConfig umsClientConfig;
 
     /**
+     * Retrieves list of all groups from UMS.
+     *
+     * @param accountId the account Id
+     * @param requestId an optional request Id
+     * @return the list of groups associated with this account
+     */
+    public List<Group> listAllGroups(String actorCrn, String accountId, Optional<String> requestId) {
+        return listGroups(actorCrn, accountId, null, requestId);
+    }
+
+    /**
+     * Retrieves group list from UMS.
+     *
+     * @param accountId the account Id
+     * @param requestId an optional request Id
+     * @param groupCrns the groups to list. if null or empty then all groups will be listed
+     * @return the list of groups associated with this account
+     */
+    public List<Group> listGroups(String actorCrn, String accountId, List<String> groupCrns, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Listing group information for account {} using request ID {}", accountId, requestId);
+            List<Group> groups = client.listGroups(requestId.orElse(UUID.randomUUID().toString()), accountId, groupCrns);
+            LOGGER.debug("{} Groups found for account {}", groups.size(), accountId);
+            return groups;
+        }
+    }
+
+    /**
      * Retrieves user details from UMS.
      *
      * @param actorCrn  the CRN of the actor
@@ -58,17 +89,29 @@ public class GrpcUmsClient {
     }
 
     /**
+     * Retrieves list of all users from UMS.
+     *
+     * @param accountId the account Id
+     * @param requestId an optional request Id
+     * @return the list of users associated with this account
+     */
+    public List<User> listAllUsers(String actorCrn, String accountId, Optional<String> requestId) {
+        return listUsers(actorCrn, accountId, null, requestId);
+    }
+
+    /**
      * Retrieves user list from UMS.
      *
      * @param accountId the account Id
      * @param requestId an optional request Id
-     * @return the user associated with this user CRN
+     * @param userCrns  the users to list. if null or empty then all users will be listed
+     * @return the list of users associated with this account
      */
-    public List<User> listUsers(String actorCrn, String accountId, Optional<String> requestId) {
+    public List<User> listUsers(String actorCrn, String accountId, List<String> userCrns, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Listing user information for account {} using request ID {}", accountId, requestId);
-            List<User> users = client.listUsers(requestId.orElse(UUID.randomUUID().toString()), accountId);
+            List<User> users = client.listUsers(requestId.orElse(UUID.randomUUID().toString()), accountId, userCrns);
             LOGGER.debug("{} Users found for account {}", users.size(), accountId);
             return users;
         }
@@ -94,17 +137,29 @@ public class GrpcUmsClient {
     }
 
     /**
-     * Retrieves machine user list from UMS.
+     * Retrieves list of all machine users from UMS.
      *
      * @param accountId the account Id
      * @param requestId an optional request Id
      * @return the user associated with this user CRN
      */
-    public List<MachineUser> listMachineUsers(String actorCrn, String accountId, Optional<String> requestId) {
+    public List<MachineUser> listAllMachineUsers(String actorCrn, String accountId, Optional<String> requestId) {
+        return listMachineUsers(actorCrn, accountId, null, requestId);
+    }
+
+    /**
+     * Retrieves machine user list from UMS.
+     *
+     * @param accountId the account Id
+     * @param requestId an optional request Id
+     * @param machineUserCrns machine users to list. if null or empty then all machine users will be listed
+     * @return the user associated with this user CRN
+     */
+    public List<MachineUser> listMachineUsers(String actorCrn, String accountId, List<String> machineUserCrns, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Listing machine user information for account {} using request ID {}", accountId, requestId);
-            List<MachineUser> users = client.listMachineUsers(requestId.orElse(UUID.randomUUID().toString()), accountId);
+            List<MachineUser> users = client.listMachineUsers(requestId.orElse(UUID.randomUUID().toString()), accountId, machineUserCrns);
             LOGGER.debug("{} Users found for account {}", users.size(), accountId);
             return users;
         }
@@ -145,13 +200,20 @@ public class GrpcUmsClient {
         }
     }
 
-    public List<String> getGroupsForUser(String actorCrn, String userCrn, String environmentCrn, Optional<String> requestId) {
+    /**
+     * Gets rights for user or machine user
+     *
+     * @param actorCrn          the CRN of the actor
+     * @param userCrn           the CRN of the user or machine user
+     * @param environmentCrn    the CRN of the environment
+     * @param requestId         request id for getting rights
+     * @return                  the rights associated with this user or machine user
+     */
+    public GetRightsResponse getRightsForUser(String actorCrn, String userCrn, String environmentCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
-            LOGGER.debug("Listing groups for user {} in environment {}", userCrn, environmentCrn);
-            List<String> groups = client.getGroupsForUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, environmentCrn);
-            LOGGER.debug("Found groups {}", groups);
-            return groups;
+            LOGGER.debug("Getting rights for user {} in environment {}", userCrn, environmentCrn);
+            return client.getRightsForUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, environmentCrn);
         }
     }
 

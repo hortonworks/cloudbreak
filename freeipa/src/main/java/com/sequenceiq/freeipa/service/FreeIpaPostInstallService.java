@@ -9,11 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.user.UserService;
-import com.sequenceiq.freeipa.client.model.Permission;
 
 @Service
 public class FreeIpaPostInstallService {
@@ -34,6 +35,9 @@ public class FreeIpaPostInstallService {
     @Inject
     private StackService stackService;
 
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
     public void postInstallFreeIpa(Long stackId) throws Exception {
         LOGGER.debug("Performing post-install configuration for stack {}", stackId);
         Stack stack = stackService.getStackById(stackId);
@@ -47,6 +51,7 @@ public class FreeIpaPostInstallService {
             LOGGER.debug("Set maximum username length to {}", MAX_USERNAME_LENGTH);
             freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);
         }
-        userService.syncAllUserForStack(stack);
+
+        userService.syncAllUserForStack(threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), stack);
     }
 }

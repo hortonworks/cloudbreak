@@ -40,8 +40,7 @@ public class PasswordService {
     @Inject
     private GrpcUmsClient umsClient;
 
-    public SetPasswordResponse setPassword(String userCrn, String password) {
-        String accountId = crnService.getCurrentAccountId();
+    public SetPasswordResponse setPassword(String accountId, String userCrn, String password) {
         String userId = getUserIdFromUserCrn(userCrn);
 
         LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
