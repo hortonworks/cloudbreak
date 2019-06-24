@@ -277,6 +277,11 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         }
     }
 
+    @Override
+    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        throw new UnsupportedOperationException("Database server termination is not supported for " + getClass().getName());
+    }
+
     private void deleteKeyPair(AuthenticatedContext authenticatedContext, OSClient<?> client) {
         KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(authenticatedContext);
         String keyPairName = keystoneCredential.getKeyPairName();

@@ -102,6 +102,21 @@ public interface ResourceConnector<R> {
     List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources) throws Exception;
 
     /**
+     * Deletes the infrastructure for a database server from a cloud platform. This method initiates
+     * infrastructure deletion on the cloud platform and returns a list of {@link CloudResourceStatus}
+     * values, one for each terminated resource. The caller does not need to wait/block until
+     * infrastructure deletion is finished, but can return immediately and use
+     * {@link #check(AuthenticatedContext, List)} method to check regularly whether the infrastructure
+     * and all resources have been deleted or not.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     * @return the status of resources terminated on the cloud platform
+     * @throws Exception in case of any error
+     */
+    List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
+
+    /**
      * Update of infrastructure on Cloud platform. (e.g change Security groups). It does not need to wait/block until the infrastructure update is
      * finished, but it can return immediately and the {@link #check(AuthenticatedContext, List)} method is invoked to check regularly whether the
      * infrastructure and all resources have already been updated or not.
