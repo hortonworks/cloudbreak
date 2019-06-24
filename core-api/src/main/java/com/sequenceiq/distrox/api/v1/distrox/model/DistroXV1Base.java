@@ -26,6 +26,9 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
     private AzureDistroXV1Parameters azure;
 
     @ApiModelProperty
+    private YarnDistroXV1Parameters yarn;
+
+    @ApiModelProperty
     private Long timeToLive;
 
     public String getName() {
@@ -60,5 +63,14 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
 
     public void setTimeToLive(Long timeToLive) {
         this.timeToLive = timeToLive;
+    }
+
+    @Override
+    public YarnDistroXV1Parameters getYarn() {
+        return yarn;
+    }
+
+    public void setYarn(YarnDistroXV1Parameters yarn) {
+        this.yarn = yarn;
     }
 }

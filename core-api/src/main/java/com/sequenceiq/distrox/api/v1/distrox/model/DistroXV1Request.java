@@ -1,13 +1,8 @@
 package com.sequenceiq.distrox.api.v1.distrox.model;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,19 +17,11 @@ import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.telemetry.TelemetryV1Request;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class DistroXV1Request implements Serializable {
-
-    @Size(max = 40, min = 5, message = "The length of the name has to be in range of 5 to 40")
-    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
-            message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @NotNull
-    @ApiModelProperty(required = true)
-    private String name;
+public class DistroXV1Request extends DistroXV1Base {
 
     private String environmentName;
 
@@ -50,23 +37,11 @@ public class DistroXV1Request implements Serializable {
 
     private SdxV1Request sdx;
 
-    private AwsDistroXV1Parameters aws;
-
-    private AzureDistroXV1Parameters azure;
-
     private TagsV1Request tags;
 
     private TelemetryV1Request telemetry;
 
     private Map<String, Object> inputs = new HashMap<>();
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getEnvironmentName() {
         return environmentName;
@@ -130,22 +105,6 @@ public class DistroXV1Request implements Serializable {
 
     public void setSdx(SdxV1Request sdx) {
         this.sdx = sdx;
-    }
-
-    public AwsDistroXV1Parameters getAws() {
-        return aws;
-    }
-
-    public void setAws(AwsDistroXV1Parameters aws) {
-        this.aws = aws;
-    }
-
-    public AzureDistroXV1Parameters getAzure() {
-        return azure;
-    }
-
-    public void setAzure(AzureDistroXV1Parameters azure) {
-        this.azure = azure;
     }
 
     public TagsV1Request getTags() {
