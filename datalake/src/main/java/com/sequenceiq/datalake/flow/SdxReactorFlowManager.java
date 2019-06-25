@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.Event;
@@ -41,6 +42,11 @@ public class SdxReactorFlowManager {
     public void triggerSdxDeletion(Long sdxId) {
         String selector = SDX_DELETE_EVENT.event();
         notify(selector, new SdxEvent(selector, sdxId));
+    }
+
+    public void cancelRunningFlows(Long sdxId) {
+        SdxEvent cancelEvent = new SdxEvent(Flow2Handler.FLOW_CANCEL, sdxId);
+        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }
 
     private void notify(String selector, Acceptable acceptable) {
