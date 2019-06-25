@@ -26,6 +26,7 @@ public class AutoscaleStackToAutoscaleStackResponseJsonConverter extends Abstrac
         result.setGatewayPort(source.getGatewayPort());
         result.setCreated(source.getCreated());
         result.setStatus(source.getStackStatus());
+        result.setStackCrn(source.getCrn());
 
         if (source.getClusterStatus() != null) {
             String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(source);

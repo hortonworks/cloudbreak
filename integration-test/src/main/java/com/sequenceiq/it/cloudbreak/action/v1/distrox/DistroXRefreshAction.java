@@ -12,7 +12,7 @@ public class DistroXRefreshAction implements Action<DistroXTestDto, CloudbreakCl
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         testDto.setResponse(
-                client.getCloudbreakClient().distroXV1Endpoint().get(testDto.getName(), Collections.emptySet())
+                client.getCloudbreakClient().distroXV1Endpoint().getByName(testDto.getName(), Collections.emptySet())
         );
         return testDto;
     }

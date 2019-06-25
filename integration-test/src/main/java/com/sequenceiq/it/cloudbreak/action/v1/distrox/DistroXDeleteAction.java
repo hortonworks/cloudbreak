@@ -21,7 +21,7 @@ public class DistroXDeleteAction implements Action<DistroXTestDto, CloudbreakCli
         Log.logJSON(LOGGER, " Stack delete request:\n", testDto.getRequest());
         client.getCloudbreakClient()
                 .distroXV1Endpoint()
-                .delete(testDto.getName(), false);
+                .deleteByName(testDto.getName(), false);
         Log.logJSON(LOGGER, " Stack deletion was successful:\n", testDto.getResponse());
         return testDto;
     }

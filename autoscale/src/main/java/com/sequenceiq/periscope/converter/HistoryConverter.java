@@ -15,7 +15,7 @@ public class HistoryConverter extends AbstractConverter<AutoscaleClusterHistoryR
         json.setAdjustment(source.getAdjustment());
         json.setAdjustmentType(source.getAdjustmentType());
         json.setAlertType(source.getAlertType());
-        json.setCbStackId(source.getCbStackId());
+        json.setStackCrn(source.getStackCrn());
         json.setClusterId(source.getClusterId());
         json.setHostGroup(source.getHostGroup());
         json.setOriginalNodeCount(source.getOriginalNodeCount());

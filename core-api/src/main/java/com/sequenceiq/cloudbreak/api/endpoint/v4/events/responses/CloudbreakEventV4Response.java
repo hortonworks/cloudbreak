@@ -39,8 +39,8 @@ public class CloudbreakEventV4Response extends CloudbreakEventBaseV4 {
     @ApiModelProperty(ClusterModelDescription.CLUSTER_NAME)
     private String clusterName;
 
-    @ApiModelProperty(StackModelDescription.STACK_ID)
-    private Long stackId;
+    @ApiModelProperty(StackModelDescription.CRN)
+    private String stackCrn;
 
     @ApiModelProperty(StackModelDescription.STACK_NAME)
     private String stackName;
@@ -115,12 +115,12 @@ public class CloudbreakEventV4Response extends CloudbreakEventBaseV4 {
         this.stackStatus = stackStatus;
     }
 
-    public Long getStackId() {
-        return stackId;
+    public String getStackCrn() {
+        return stackCrn;
     }
 
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
+    public void setStackCrn(String stackCrn) {
+        this.stackCrn = stackCrn;
     }
 
     public String getStackName() {

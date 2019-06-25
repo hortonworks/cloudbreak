@@ -1,5 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDto.StackAccessDtoBuilder.aStackAccessDtoBuilder;
+
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -63,13 +65,23 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public StackV4Response get(String name, Set<String> entries) {
-        return stackOperation.get(workspaceService.getForCurrentUser().getId(), name, entries, StackType.WORKLOAD);
+    public StackV4Response getByName(String name, Set<String> entries) {
+        return stackOperation.get(aStackAccessDtoBuilder().withName(name).build(), workspaceService.getForCurrentUser().getId(), entries, StackType.WORKLOAD);
     }
 
     @Override
-    public void delete(String name, Boolean forced) {
-        stackOperation.delete(workspaceService.getForCurrentUser().getId(), name, forced, false);
+    public StackV4Response getByCrn(String crn, Set<String> entries) {
+        return stackOperation.get(aStackAccessDtoBuilder().withCrn(crn).build(), workspaceService.getForCurrentUser().getId(), entries, StackType.WORKLOAD);
+    }
+
+    @Override
+    public void deleteByName(String name, Boolean forced) {
+        stackOperation.delete(aStackAccessDtoBuilder().withName(name).build(), workspaceService.getForCurrentUser().getId(), forced, false);
+    }
+
+    @Override
+    public void deleteByCrn(String crn, Boolean forced) {
+        stackOperation.delete(aStackAccessDtoBuilder().withCrn(crn).build(), workspaceService.getForCurrentUser().getId(), forced, false);
     }
 
     @Override

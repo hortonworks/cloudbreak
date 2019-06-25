@@ -25,6 +25,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 // It's only here, because of findbugs does not know the fields will be set by JPA with Reflection
 @SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 public class StackApiView extends CompactView {
+
     @OneToOne(mappedBy = "stack")
     private ClusterApiView cluster;
 
@@ -54,6 +55,16 @@ public class StackApiView extends CompactView {
     private UserView userView;
 
     private String environmentCrn;
+
+    private String resourceCrn;
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
+    }
 
     @Override
     public WorkspaceResource getResource() {

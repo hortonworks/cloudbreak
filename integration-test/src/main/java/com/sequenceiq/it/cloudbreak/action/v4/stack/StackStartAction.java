@@ -19,7 +19,7 @@ public class StackStartAction implements Action<StackTestDto, CloudbreakClient> 
         Log.logJSON(LOGGER, " Stack post request:\n", testDto.getRequest());
         client.getCloudbreakClient().stackV4Endpoint().putStart(client.getWorkspaceId(), testDto.getName());
         Log.logJSON(LOGGER, " Stack was started successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, String.format(" ID: %s", testDto.getResponse().getId()));
+        Log.log(LOGGER, String.format(" CRN: %s", testDto.getResponse().getCrn()));
         return testDto;
     }
 }

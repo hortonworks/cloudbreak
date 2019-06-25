@@ -33,7 +33,7 @@ public class StackTestAction {
                 .stackV4Endpoint()
                 .delete(client.getWorkspaceId(), entity.getName(), false, false);
         Log.logJSON(LOGGER, " Stack deletion was successful:\n", entity.getResponse());
-        Log.log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
+        Log.log(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;
     }
 
@@ -56,7 +56,7 @@ public class StackTestAction {
                         .stackV4Endpoint()
                         .post(client.getWorkspaceId(), entity.getRequest()));
         Log.logJSON(LOGGER, " Stack created was successfully:\n", entity.getResponse());
-        Log.log(LOGGER, " ID: " + entity.getResponse().getId());
+        Log.log(LOGGER, " CRN: " + entity.getResponse().getCrn());
 
         return entity;
     }
@@ -69,7 +69,7 @@ public class StackTestAction {
                         .stackV4Endpoint()
                         .get(client.getWorkspaceId(), entity.getName(), new HashSet<>()));
         Log.logJSON(LOGGER, " Stack get was successfully:\n", entity.getResponse());
-        Log.log(LOGGER, " ID: " + entity.getResponse().getId());
+        Log.log(LOGGER, " CRN: " + entity.getResponse().getCrn());
 
         return entity;
     }
@@ -86,7 +86,7 @@ public class StackTestAction {
         Log.logJSON(LOGGER, " Stack post request:\n", entity.getRequest());
         client.getCloudbreakClient().stackV4Endpoint().putStart(client.getWorkspaceId(), entity.getName());
         Log.logJSON(LOGGER, " Stack was started successfully:\n", entity.getResponse());
-        Log.log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
+        Log.log(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;
     }
 
@@ -95,7 +95,7 @@ public class StackTestAction {
         Log.logJSON(LOGGER, " Stack post request:\n", entity.getRequest());
         client.getCloudbreakClient().stackV4Endpoint().putStop(client.getWorkspaceId(), entity.getName());
         Log.logJSON(LOGGER, " Stack was stopped successfully:\n", entity.getResponse());
-        Log.log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
+        Log.log(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;
     }
 
@@ -109,7 +109,7 @@ public class StackTestAction {
         client.getCloudbreakClient().stackV4Endpoint().putPassword(client.getWorkspaceId(),
                 entity.getName(), userNamePasswordV4Request);
         Log.logJSON(LOGGER, " Stack was modified ambari password successfully:\n", entity.getResponse());
-        Log.log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
+        Log.log(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;
     }
 
@@ -118,7 +118,7 @@ public class StackTestAction {
         Log.logJSON(LOGGER, " Stack post request:\n", entity.getRequest());
         client.getCloudbreakClient().stackV4Endpoint().putSync(client.getWorkspaceId(), entity.getName());
         Log.logJSON(LOGGER, " Stack sync was successful:\n", entity.getResponse());
-        Log.log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
+        Log.log(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;
     }
 
@@ -142,7 +142,7 @@ public class StackTestAction {
                 entity.getName());
         entity.setRequest(request);
         Log.logJSON(LOGGER, " get cli skeleton was successfully:\n", entity.getRequest());
-        Log.log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
+        Log.log(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;
     }
 }

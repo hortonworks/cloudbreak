@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -188,6 +189,9 @@ public class StackServiceTest {
     @Mock
     private FlowLogService flowLogService;
 
+    @Mock
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
     @Before
     public void setup() {
         when(stack.getId()).thenReturn(STACK_ID);
@@ -197,6 +201,7 @@ public class StackServiceTest {
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setDatalakeStackId(STACK_ID);
         datalakeResources.setId(DATALAKE_RESOURCE_ID);
+        when(threadBasedUserCrnProvider.getAccountId()).thenReturn("something");
         when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.of(datalakeResources));
     }
 
@@ -215,7 +220,7 @@ public class StackServiceTest {
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(stackRepository, times(0)).findById(anyLong());
         verify(stackRepository, times(0)).findById(STACK_ID);
@@ -230,7 +235,7 @@ public class StackServiceTest {
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, false, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, true, user);
 
         verify(stackRepository, times(0)).findById(anyLong());
         verify(stackRepository, times(0)).findById(STACK_ID);
@@ -245,7 +250,7 @@ public class StackServiceTest {
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, false, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, false, user);
 
         verify(stackRepository, times(0)).findById(anyLong());
         verify(stackRepository, times(0)).findById(STACK_ID);
@@ -260,7 +265,7 @@ public class StackServiceTest {
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, false, false, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, false, user);
 
         verify(stackRepository, times(0)).findById(anyLong());
         verify(stackRepository, times(0)).findById(STACK_ID);
@@ -275,7 +280,7 @@ public class StackServiceTest {
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(stackRepository, times(1)).findById(anyLong());
         verify(stackRepository, times(1)).findById(STACK_ID);
@@ -290,7 +295,7 @@ public class StackServiceTest {
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
         verify(stackRepository, times(1)).findById(anyLong());
         verify(stackRepository, times(1)).findById(STACK_ID);
         verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -304,7 +309,7 @@ public class StackServiceTest {
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
         verify(stackRepository, times(1)).findById(anyLong());
         verify(stackRepository, times(1)).findById(STACK_ID);
         verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -318,7 +323,7 @@ public class StackServiceTest {
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
         verify(stackRepository, times(1)).findById(anyLong());
         verify(stackRepository, times(1)).findById(STACK_ID);
         verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -333,7 +338,7 @@ public class StackServiceTest {
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stack.isDeleteCompleted()).thenReturn(true);
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -348,7 +353,7 @@ public class StackServiceTest {
         doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         when(stack.isDeleteCompleted()).thenReturn(true);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -367,7 +372,7 @@ public class StackServiceTest {
         expectedException.expect(AccessDeniedException.class);
         expectedException.expectMessage(STACK_DELETE_ACCESS_DENIED);
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -385,7 +390,7 @@ public class StackServiceTest {
         expectedException.expect(AccessDeniedException.class);
         expectedException.expectMessage(STACK_DELETE_ACCESS_DENIED);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -400,7 +405,7 @@ public class StackServiceTest {
         doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(flowManager, times(1)).triggerTermination(STACK_ID, true, true);
@@ -415,7 +420,7 @@ public class StackServiceTest {
         doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(flowManager, times(1)).triggerTermination(STACK_ID, true, true);
@@ -438,7 +443,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -460,7 +465,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, false, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, false, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -482,7 +487,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, false, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -504,7 +509,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, false, false, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, false, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -524,7 +529,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -544,7 +549,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, false, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, false, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -564,7 +569,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, false, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -584,7 +589,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, false, false, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, false, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -607,7 +612,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -630,7 +635,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -653,7 +658,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -676,7 +681,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -697,7 +702,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -718,7 +723,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -739,7 +744,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -760,7 +765,7 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.delete(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
@@ -779,7 +784,7 @@ public class StackServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         when(stack.getWorkspace()).thenReturn(workspace);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, false, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
     }
@@ -797,7 +802,7 @@ public class StackServiceTest {
         flowLog.setCurrentState(StackTerminationState.PRE_TERMINATION_STATE.name());
         when(flowLogService.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(Collections.singletonList(flowLog));
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(1)).triggerTermination(anyLong(), eq(true), anyBoolean());
     }
@@ -815,7 +820,7 @@ public class StackServiceTest {
         flowLog.setCurrentState(StackTerminationState.PRE_TERMINATION_STATE.name());
         when(flowLogService.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(Collections.singletonList(flowLog));
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
     }
@@ -830,7 +835,7 @@ public class StackServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         when(stack.getWorkspace()).thenReturn(workspace);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(flowLogService, times(0)).findAllByStackIdOrderByCreatedDesc(STACK_ID);
@@ -846,7 +851,7 @@ public class StackServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         when(stack.getWorkspace()).thenReturn(workspace);
 
-        underTest.delete(STACK_NAME, WORKSPACE_ID, false, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(flowLogService, times(0)).findAllByStackIdOrderByCreatedDesc(STACK_ID);

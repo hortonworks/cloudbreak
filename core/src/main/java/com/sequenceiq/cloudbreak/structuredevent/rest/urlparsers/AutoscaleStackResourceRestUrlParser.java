@@ -14,7 +14,9 @@ public class AutoscaleStackResourceRestUrlParser extends RestUrlParser {
 
     public static final int RESOURCE_EVENT_GROUP_NUMBER = 3;
 
-    private static final Pattern PATTERN = Pattern.compile("autoscale/([a-z_]+)/(\\d+)(?:/(.+))?");
+    private static final Pattern PATTERN = Pattern.compile("autoscale/([a-z_]+)/([^/]+)(?:/(.+))?");
+
+    private static final Pattern ANTI_PATTERN = Pattern.compile("autoscale/stack/all");
 
     @Override
     public Pattern getPattern() {
@@ -28,12 +30,12 @@ public class AutoscaleStackResourceRestUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceName(Matcher matcher) {
-        return null;
+        return matcher.group(RESOURCE_ID_GROUP_NUMBER);
     }
 
     @Override
     protected String getResourceId(Matcher matcher) {
-        return matcher.group(RESOURCE_ID_GROUP_NUMBER);
+        return null;
     }
 
     @Override
@@ -46,4 +48,8 @@ public class AutoscaleStackResourceRestUrlParser extends RestUrlParser {
         return matcher.group(RESOURCE_EVENT_GROUP_NUMBER);
     }
 
+    @Override
+    protected Pattern getAntiPattern() {
+        return ANTI_PATTERN;
+    }
 }

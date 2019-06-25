@@ -1,16 +1,21 @@
 package com.sequenceiq.distrox.v1.distrox;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
@@ -98,15 +103,26 @@ public class StackOperation {
         return stackV4Response;
     }
 
-    public StackV4Response get(Long workspaceId, String name, Set<String> entries, StackType stackType) {
-        StackV4Response stackResponse = stackCommonService.findStackByNameAndWorkspaceId(name, workspaceId, entries, stackType);
+    public StackV4Response get(@NotNull StackAccessDto stackAccessDto, Long workspaceId, Set<String> entries, StackType stackType) {
+        validateAccessDto(stackAccessDto);
+        StackV4Response stackResponse;
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackResponse = stackCommonService.findStackByNameAndWorkspaceId(stackAccessDto.getName(), workspaceId, entries, stackType);
+        } else {
+            stackResponse = stackCommonService.findStackByCrnAndWorkspaceId(stackAccessDto.getCrn(), workspaceId, entries, stackType);
+        }
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackResponse);
         return stackResponse;
     }
 
-    public void delete(Long workspaceId, String name, Boolean forced, Boolean deleteDependencies) {
+    public void delete(StackAccessDto stackAccessDto, Long workspaceId, Boolean forced, Boolean deleteDependencies) {
+        validateAccessDto(stackAccessDto);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        stackCommonService.deleteInWorkspace(name, workspaceId, forced, deleteDependencies, user);
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.deleteByNameInWorkspace(stackAccessDto.getName(), workspaceId, forced, deleteDependencies, user);
+        } else {
+            stackCommonService.deleteByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, forced, deleteDependencies, user);
+        }
     }
 
     public void putSync(Long workspaceId, String name) {
@@ -162,7 +178,7 @@ public class StackOperation {
         UpdateClusterV4Request updateClusterJson = converterUtil.convert(userNamePasswordJson, UpdateClusterV4Request.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        clusterCommonService.put(stack.getId(), updateClusterJson, user, workspace);
+        clusterCommonService.put(stack.getResourceCrn(), updateClusterJson, user, workspace);
     }
 
     public void setClusterMaintenanceMode(Long workspaceId, String name, @NotNull MaintenanceModeV4Request maintenanceMode) {
@@ -174,7 +190,7 @@ public class StackOperation {
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        clusterCommonService.put(stack.getId(), updateJson, user, workspace);
+        clusterCommonService.put(stack.getResourceCrn(), updateJson, user, workspace);
     }
 
     public Response getClusterHostsInventory(Long workspaceId, String name) {
@@ -188,6 +204,13 @@ public class StackOperation {
 
     public Stack getStackByName(String name) {
         return stackService.getByNameInWorkspace(name, workspaceService.getForCurrentUser().getId());
+    }
+
+    private void validateAccessDto(StackAccessDto dto) {
+        throwIfNull(dto, () -> new IllegalArgumentException("StackAccessDto should not be null"));
+        if (dto.isNotValid()) {
+            throw new BadRequestException("A stack name or crn must be provided. One and only one of them.");
+        }
     }
 
 }

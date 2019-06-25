@@ -81,8 +81,9 @@ public class ClusterCommonService {
     @Inject
     private HostMetadataService hostMetadataService;
 
-    public void put(Long stackId, UpdateClusterV4Request updateJson, User user, Workspace workspace) {
-        Stack stack = stackService.getById(stackId);
+    public void put(String crn, UpdateClusterV4Request updateJson, User user, Workspace workspace) {
+        Stack stack = stackService.getByCrn(crn);
+        Long stackId = stack.getId();
         MDCBuilder.buildMdcContext(stack);
         UserNamePasswordV4Request userNamePasswordJson = updateJson.getUserNamePassword();
         if (userNamePasswordJson != null) {

@@ -59,6 +59,17 @@ public class AutoscaleStackV4Response {
     @ApiModelProperty(ClusterModelDescription.VARIANT)
     private String clusterManagerVariant;
 
+    @ApiModelProperty(StackModelDescription.CRN)
+    private String stackCrn;
+
+    public String getStackCrn() {
+        return stackCrn;
+    }
+
+    public void setStackCrn(String stackCrn) {
+        this.stackCrn = stackCrn;
+    }
+
     public String getTenant() {
         return tenant;
     }

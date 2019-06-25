@@ -88,7 +88,7 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
         notification.setWorkspaceId(stack.getWorkspace().getId());
         notification.setCloud(stack.cloudPlatform());
         notification.setRegion(stack.getRegion());
-        notification.setStackId(stack.getId());
+        notification.setStackCrn(stack.getResourceCrn());
         notification.setStackName(stack.getName());
         notification.setStackStatus(stack.getStatus());
         if (stack.getCluster() != null) {

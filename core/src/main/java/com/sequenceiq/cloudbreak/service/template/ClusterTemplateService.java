@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackTemplateService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -74,6 +75,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
 
+    @Inject
+    private StackService stackService;
+
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
         return clusterTemplateRepository;
@@ -109,6 +113,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             clusterService.saveWithRef(cluster);
         }
 
+        stackService.decorateWithCrn(stackTemplate);
         stackTemplate = stackTemplateService.pureSave(stackTemplate);
 
         componentConfigProviderService.store(new ArrayList<>(stackTemplate.getComponents()));

@@ -17,8 +17,8 @@ public class AutoscaleClusterHistoryResponse implements Json {
     @ApiModelProperty(HistoryJsonProperties.CLUSTERID)
     private long clusterId;
 
-    @ApiModelProperty(HistoryJsonProperties.CBSTACKID)
-    private Long cbStackId;
+    @ApiModelProperty(HistoryJsonProperties.CBSTACKCRN)
+    private String stackCrn;
 
     @ApiModelProperty(HistoryJsonProperties.ORIGINALNODECOUNT)
     private int originalNodeCount;
@@ -63,12 +63,12 @@ public class AutoscaleClusterHistoryResponse implements Json {
         this.clusterId = clusterId;
     }
 
-    public Long getCbStackId() {
-        return cbStackId;
+    public String getStackCrn() {
+        return stackCrn;
     }
 
-    public void setCbStackId(Long cbStackId) {
-        this.cbStackId = cbStackId;
+    public void setStackCrn(String stackCrn) {
+        this.stackCrn = stackCrn;
     }
 
     public int getOriginalNodeCount() {

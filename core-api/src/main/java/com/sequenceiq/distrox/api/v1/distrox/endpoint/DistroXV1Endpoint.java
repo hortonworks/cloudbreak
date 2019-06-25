@@ -3,8 +3,10 @@ package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.WorkspaceOpDescription.DELETE_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CREATE;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_INSTANCE_BY_ID;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STACK_REQUEST;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_NAME;
@@ -64,14 +66,24 @@ public interface DistroXV1Endpoint {
     StackV4Response post(@Valid DistroXV1Request request);
 
     @GET
-    @Path("{name}")
+    @Path("name/{name}")
     @ApiOperation(value = GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getDistroXV1")
-    StackV4Response get(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
+    StackV4Response getByName(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
+
+    @GET
+    @Path("crn/{crn}")
+    @ApiOperation(value = GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getDistroXByCrnV1")
+    StackV4Response getByCrn(@PathParam("crn") String crn, @QueryParam("entries") Set<String> entries);
 
     @DELETE
-    @Path("{name}")
+    @Path("name/{name}")
     @ApiOperation(value = DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "deleteDistroXV1")
-    void delete(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+    void deleteByName(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+
+    @DELETE
+    @Path("crn/{crn}")
+    @ApiOperation(value = DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "deleteDistroXByCrnV1")
+    void deleteByCrn(@PathParam("crn") String crn, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @PUT
     @Path("{name}/sync")

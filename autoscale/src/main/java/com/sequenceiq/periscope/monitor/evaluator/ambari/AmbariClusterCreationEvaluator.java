@@ -128,9 +128,9 @@ public class AmbariClusterCreationEvaluator extends ClusterCreationEvaluator {
     private MonitoredStack createAmbariStack(AutoscaleStackV4Response stack) {
         String host = stack.getAmbariServerIp();
         String gatewayPort = String.valueOf(stack.getGatewayPort());
-        SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(stack.getStackId());
+        SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(stack.getStackCrn());
         ClusterManager clusterManager = new ClusterManager(host, gatewayPort, stack.getUserNamePath(), stack.getPasswordPath(), ClusterManagerVariant.AMBARI);
-        return new MonitoredStack(clusterManager, stack.getStackId(), securityConfig);
+        return new MonitoredStack(clusterManager, stack.getStackCrn(), stack.getStackId(), securityConfig);
     }
 
     private void ambariHealthCheck(MonitoredStack ambariStack) {

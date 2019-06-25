@@ -62,7 +62,7 @@ public class ClusterManagerHostHealthEvaluator extends EvaluatorExecutor {
             CloudbreakInternalCrnClient cbClient = cloudbreakClientConfiguration.cloudbreakInternalCrnClientClient();
             FailureReportV4Request failureReport = new FailureReportV4Request();
             failureReport.setFailedNodes(hostNamesToRecover);
-            cbClient.withInternalCrn().autoscaleEndpoint().failureReport(cluster.getStackId(), failureReport);
+            cbClient.withInternalCrn().autoscaleEndpoint().failureReport(cluster.getStackCrn(), failureReport);
         }
     }
 }

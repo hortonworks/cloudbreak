@@ -31,7 +31,7 @@ public class AmbariClientProvider {
     public AmbariClient createAmbariClient(Cluster cluster) {
         String ambariUser = secretService.get(cluster.getClusterManagerUser());
         String ambariPass = secretService.get(cluster.getClusterManagerPassword());
-        if (cluster.getStackId() != null) {
+        if (cluster.getStackCrn() != null) {
             TlsConfiguration tlsConfig = tlsSecurityService.getConfiguration(cluster);
             if (proxyConfig.isUseProxyForClusterConnection()) {
                 String proxyHost = proxyConfig.getHttpsProxyHost();

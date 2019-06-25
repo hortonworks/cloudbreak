@@ -34,8 +34,8 @@ public class AutoscaleClusterResponse extends ClusterBaseJson {
     public AutoscaleClusterResponse() {
     }
 
-    public AutoscaleClusterResponse(String host, String port, String user, Long stackId, boolean autoscalingEnabled, long id, String state) {
-        super(host, port, user, stackId);
+    public AutoscaleClusterResponse(String host, String port, String user, String stackCrn, boolean autoscalingEnabled, long id, String state) {
+        super(host, port, user, stackCrn);
         this.id = id;
         this.state = state;
         this.autoscalingEnabled = autoscalingEnabled;

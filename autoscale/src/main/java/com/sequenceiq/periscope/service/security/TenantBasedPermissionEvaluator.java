@@ -59,7 +59,7 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
             if (cluster == null || !cloudbreakUser.getTenant().contentEquals(cluster.getClusterPertain().getTenant())) {
                 return false;
             }
-            cloudbreakAuthorizationService.hasAccess(cluster.getStackId(), cloudbreakUser.getUserId(), cloudbreakUser.getTenant(), permission.toString());
+            cloudbreakAuthorizationService.hasAccess(cluster.getStackCrn(), cloudbreakUser.getUserId(), cloudbreakUser.getTenant(), permission.toString());
             return true;
         });
     }

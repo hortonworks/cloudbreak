@@ -27,6 +27,7 @@ public class StackToAutoscaleStackV4ResponseConverter extends AbstractConversion
         result.setGatewayPort(source.getGatewayPort());
         result.setCreated(source.getCreated());
         result.setStatus(source.getStatus());
+        result.setStackCrn(source.getResourceCrn());
 
         if (source.getCluster() != null) {
             Cluster cluster = source.getCluster();

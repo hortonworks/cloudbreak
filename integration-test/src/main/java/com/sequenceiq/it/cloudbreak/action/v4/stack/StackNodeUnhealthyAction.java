@@ -38,9 +38,9 @@ public class StackNodeUnhealthyAction implements Action<StackTestDto, Cloudbreak
         FailureReportV4Request failureReport = new FailureReportV4Request();
         failureReport.setFailedNodes(getNodes(getInstanceGroupResponse(testDto)));
         CloudbreakClient autoscaleClient = testContext.as(Actor::secondUser).getCloudbreakClient(CloudbreakTest.SECONDARY_REFRESH_TOKEN);
-        autoscaleClient.getCloudbreakClient().autoscaleEndpoint().failureReport(Objects.requireNonNull(testDto.getResponse().getId()), failureReport);
+        autoscaleClient.getCloudbreakClient().autoscaleEndpoint().failureReport(Objects.requireNonNull(testDto.getResponse().getCrn()), failureReport);
             Log.logJSON(LOGGER, " Stack unhealthy was successful:\n", testDto.getResponse());
-            Log.log(LOGGER, String.format(" ID: %s", testDto.getResponse().getId()));
+            Log.log(LOGGER, String.format(" crn: %s", testDto.getResponse().getCrn()));
             return testDto;
 
     }

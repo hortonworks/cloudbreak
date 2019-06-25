@@ -33,16 +33,16 @@ import io.swagger.annotations.ApiOperation;
 public interface AutoscaleV4Endpoint {
 
     @PUT
-    @Path("/stack/{id}/{userId}")
+    @Path("/stack/crn/{crn}/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "putStackForAutoscale")
-    void putStack(@PathParam("id") Long id, @PathParam("userId") String userId, @Valid UpdateStackV4Request updateRequest);
+    void putStack(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateStackV4Request updateRequest);
 
     @PUT
-    @Path("/stack/{id}/{userId}/cluster")
+    @Path("/stack/crn/{crn}/{userId}/cluster")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "putClusterForAutoscale")
-    void putCluster(@PathParam("id") Long id, @PathParam("userId") String userId, @Valid UpdateClusterV4Request updateRequest);
+    void putCluster(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateClusterV4Request updateRequest);
 
     @POST
     @Path("ambari")
@@ -58,28 +58,28 @@ public interface AutoscaleV4Endpoint {
     AutoscaleStackV4Responses getAllForAutoscale();
 
     @POST
-    @Path("/stack/{id}/cluster/failurereport")
+    @Path("/stack/crn/{crn}/cluster/failurereport")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterOpDescription.FAILURE_REPORT, produces = ContentType.JSON, notes = Notes.FAILURE_REPORT_NOTES,
             nickname = "failureReportClusterForAutoscale")
-    void failureReport(@PathParam("id") Long stackId, FailureReportV4Request failureReport);
+    void failureReport(@PathParam("crn") String crn, FailureReportV4Request failureReport);
 
     @GET
-    @Path("/stack/{id}")
+    @Path("/stack/crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = StackOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getStackForAutoscale")
-    StackV4Response get(@PathParam("id") Long id);
+    @ApiOperation(value = StackOpDescription.GET_BY_CRN, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getStackForAutoscale")
+    StackV4Response get(@PathParam("crn") String crn);
 
     @GET
-    @Path("/stack/{id}/authorize/{userId}/{tenant}/{permission}")
+    @Path("/stack/crn/{crn}/authorize/{userId}/{tenant}/{permission}")
     @Produces(MediaType.APPLICATION_JSON)
-    AuthorizeForAutoscaleV4Response authorizeForAutoscale(@PathParam("id") Long id, @PathParam("userId") String userId, @PathParam("tenant") String tenant,
+    AuthorizeForAutoscaleV4Response authorizeForAutoscale(@PathParam("crn") String crn, @PathParam("userId") String userId, @PathParam("tenant") String tenant,
             @PathParam("permission") String permission);
 
     @GET
-    @Path("/stack/{id}/certificate")
+    @Path("/stack/crn/{crn}/certificate")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
             nickname = "getCertificateStackForAutoscale")
-    CertificateV4Response getCertificate(@PathParam("id") Long stackId);
+    CertificateV4Response getCertificate(@PathParam("crn") String crn);
 }

@@ -17,9 +17,9 @@ public class CloudbreakAuthorizationService {
     private CloudbreakInternalCrnClient cloudbreakClient;
 
     @Cacheable(cacheNames = "stackAccessByUserIdAndTenantCache")
-    public void hasAccess(Long stackId, String userId, String tenant, String permission) {
-        if (!cloudbreakClient.withInternalCrn().autoscaleEndpoint().authorizeForAutoscale(stackId, userId, tenant, permission).isSuccess()) {
-            throw new AccessDeniedException(String.format("Accessing to stack '%s' is not allowed for '%s' in '%s'", stackId, userId, tenant));
+    public void hasAccess(String stackCrn, String userId, String tenant, String permission) {
+        if (!cloudbreakClient.withInternalCrn().autoscaleEndpoint().authorizeForAutoscale(stackCrn, userId, tenant, permission).isSuccess()) {
+            throw new AccessDeniedException(String.format("Accessing to stack '%s' is not allowed for '%s' in '%s'", stackCrn, userId, tenant));
         }
     }
 }

@@ -26,7 +26,7 @@ public class StackApiViewToStackViewV4ResponseConverter extends AbstractConversi
     @Override
     public StackViewV4Response convert(StackApiView source) {
         StackViewV4Response stackViewResponse = new StackViewV4Response();
-        stackViewResponse.setId(source.getId());
+        stackViewResponse.setCrn(source.getResourceCrn());
         stackViewResponse.setName(source.getName());
         if (source.getCluster() != null) {
             stackViewResponse.setCluster(getConversionService().convert(source.getCluster(), ClusterViewV4Response.class));
