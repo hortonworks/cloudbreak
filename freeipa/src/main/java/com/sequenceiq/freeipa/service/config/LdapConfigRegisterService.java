@@ -18,7 +18,7 @@ import com.sequenceiq.freeipa.ldap.LdapConfigService;
 @Service
 public class LdapConfigRegisterService extends AbstractConfigRegister {
 
-    public static final String ADMIN_GROUP = "ipausers";
+    public static final String ADMIN_GROUP = "admins";
 
     public static final String BIND_DN = "uid=admin,cn=users,cn=accounts";
 
