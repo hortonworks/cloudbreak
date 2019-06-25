@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.api.v1.ldap.model;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -79,7 +80,7 @@ public abstract class LdapConfigBase {
     @JsonDeserialize(using = Base64Deserializer.class)
     private String certificate;
 
-    @NotNull
+    @NotEmpty
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
