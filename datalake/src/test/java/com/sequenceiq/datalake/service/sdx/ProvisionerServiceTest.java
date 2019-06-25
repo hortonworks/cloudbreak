@@ -52,6 +52,7 @@ import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoin
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.client.EnvironmentServiceClient;
@@ -456,6 +457,9 @@ class ProvisionerServiceTest {
         Map<String, CloudSubnet> cloudSubnetMap = Map.of("subnet",  cloudSubnet);
         network.setSubnetMetas(cloudSubnetMap);
         detailedEnvironmentResponse.setNetwork(network);
+        EnvironmentAuthenticationResponse authentication = new EnvironmentAuthenticationResponse();
+        authentication.setPublicKey("ssh-public-key");
+        detailedEnvironmentResponse.setAuthentication(authentication);
         return detailedEnvironmentResponse;
     }
 }
