@@ -96,8 +96,8 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateAnLdapAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(LdapTestDto.class)
-                .when(ldapTestClient.createV4())
-                .when(ldapTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .when(ldapTestClient.createV1())
+                .when(ldapTestClient.describeV1(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }

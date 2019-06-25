@@ -19,11 +19,11 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
+import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
+import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
@@ -98,7 +98,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(RANGER, DatabaseTestDto.class).withRequest(rangerRds).withName(rangerRdsName)
                 .when(databaseTestClient.createV4())
                 .given(LdapTestDto.class).withRequest(ldapRequest(ldapName)).withName(ldapName)
-                .when(ldapTestClient.createV4())
+                .when(ldapTestClient.createV1())
                 .given(BlueprintTestDto.class)
                 .withName(blueprintName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true))
@@ -135,7 +135,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(RANGER, DatabaseTestDto.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
                 .when(databaseTestClient.createV4())
                 .given(LdapTestDto.class).withName(ldapName)
-                .when(ldapTestClient.createV4())
+                .when(ldapTestClient.createV1())
                 .given(BlueprintTestDto.class)
                 .withName(blueprintName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true))
@@ -193,7 +193,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withBlueprint(VALID_DL_BP)
                 .when(blueprintTestClient.createV4())
                 .given(LdapTestDto.class).withName(ldapName)
-                .when(ldapTestClient.createV4())
+                .when(ldapTestClient.createV1())
                 .given(HostGroupType.MASTER.name(), InstanceGroupTestDto.class).valid().withHostGroup(HostGroupType.MASTER).withNodeCount(1)
                 .given(ClusterTestDto.class)
                 .withRdsConfigNames(createSetOfNotNulls(hiveRdsName))
@@ -221,7 +221,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withBlueprint(VALID_DL_BP)
                 .when(blueprintTestClient.createV4())
                 .given(LdapTestDto.class).withName(ldapName)
-                .when(ldapTestClient.createV4())
+                .when(ldapTestClient.createV1())
                 .given(HostGroupType.MASTER.name(), InstanceGroupTestDto.class).valid().withHostGroup(HostGroupType.MASTER).withNodeCount(1)
                 .given(ClusterTestDto.class)
                 .withRdsConfigNames(createSetOfNotNulls(rangerRdsName))
@@ -246,7 +246,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withBlueprint(VALID_DL_BP)
                 .when(blueprintTestClient.createV4())
                 .given(LdapTestDto.class).withName(ldapName)
-                .when(ldapTestClient.createV4())
+                .when(ldapTestClient.createV1())
                 .given(HostGroupType.MASTER.name(), InstanceGroupTestDto.class).valid().withHostGroup(HostGroupType.MASTER).withNodeCount(1)
                 .given(ClusterTestDto.class)
                 .withBlueprintName(blueprintName)
@@ -359,8 +359,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return verifications;
     }
 
-    private LdapV4Request ldapRequest(String name) {
-        LdapV4Request request = new LdapV4Request();
+    private CreateLdapConfigRequest ldapRequest(String environmentCrn) {
+        CreateLdapConfigRequest request = new CreateLdapConfigRequest();
         request.setGroupMemberAttribute("memberAttribute");
         request.setUserNameAttribute("userNameAttribute");
         request.setGroupNameAttribute("nameAttribute");
@@ -378,7 +378,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         request.setDomain("domain");
         request.setProtocol("http");
         request.setPort(1234);
-        request.setName(name);
+        request.setName(environmentCrn);
+        request.setEnvironmentCrn(environmentCrn);
         return request;
     }
 

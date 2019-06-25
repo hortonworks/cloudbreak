@@ -1,0 +1,63 @@
+name: "AWS cluster tests"
+parallel: tests
+threadCount: 10
+parameters:
+  awsRegion: eu-west-1
+  awsAvailabilityZone: eu-west-1a
+  awsCredentialName: autotesting-clusters-aws
+listeners:
+  - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
+  - com.sequenceiq.it.cloudbreak.newway.listener.GatekeeperBehaviour
+  - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
+tests:
+  - name: "aws base image datascience gatekeeper"
+    preserveOrder: true
+    parameters:
+      clusterName: aws-base-datasci
+      provider: aws
+      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      image: base
+      instancegroupName: worker
+      isGatekeeper: true
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        includedMethods:
+          - testCreateNewRegularCluster
+          - testScaleCluster
+          - testStopCluster
+          - testStartCluster
+          - testTerminateCluster
+  - name: "openstack base image datascience gatekeeper"
+    preserveOrder: true
+    parameters:
+      clusterName: os-base-datasci
+      provider: openstack
+      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      image: base
+      instancegroupName: worker
+      isGatekeeper: true
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        includedMethods:
+          - testCreateNewRegularCluster
+          - testScaleCluster
+          - testStopCluster
+          - testStartCluster
+          - testTerminateCluster
+  - name: "openstack cluster with knox gateway"
+    preserveOrder: true
+    parameters:
+      clusterName: os-base-datasci-knox-gw
+      provider: openstack
+      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
+      image: base
+      instancegroupName: worker
+      isGatekeeper: true
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.ClusterTests
+        includedMethods:
+          - testCreateNewClusterWithKnox
+          - testScaleCluster
+          - testStopCluster
+          - testStartCluster
+          - testTerminateCluster

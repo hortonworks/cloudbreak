@@ -1,25 +1,20 @@
 package com.sequenceiq.it.cloudbreak.dto.ldap;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import javax.ws.rs.WebApplicationException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
-import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
+import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
+import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
+import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
+import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIPATestDto;
 
 @Prototype
-public class LdapTestDto extends DeletableTestDto<LdapV4Request, LdapV4Response, LdapTestDto, LdapV4Response> {
+public class LdapTestDto extends AbstractFreeIPATestDto<CreateLdapConfigRequest, DescribeLdapConfigResponse, LdapTestDto> {
 
     public LdapTestDto(TestContext testContext) {
-        super(new LdapV4Request(), testContext);
+        super(new CreateLdapConfigRequest(), testContext);
     }
 
     @Override
@@ -33,7 +28,7 @@ public class LdapTestDto extends DeletableTestDto<LdapV4Request, LdapV4Response,
     }
 
     public String getName() {
-        return getRequest().getName();
+        return getRequest().getEnvironmentCrn();
     }
 
     public LdapTestDto valid() {
@@ -58,7 +53,7 @@ public class LdapTestDto extends DeletableTestDto<LdapV4Request, LdapV4Response,
                 .withUserDnPattern("userDnPattern");
     }
 
-    public LdapTestDto withRequest(LdapV4Request request) {
+    public LdapTestDto withRequest(CreateLdapConfigRequest request) {
         setRequest(request);
         return this;
     }
@@ -152,29 +147,6 @@ public class LdapTestDto extends DeletableTestDto<LdapV4Request, LdapV4Response,
     public LdapTestDto withUserSearchBase(String userSearchBase) {
         getRequest().setUserSearchBase(userSearchBase);
         return this;
-    }
-
-    @Override
-    public List<LdapV4Response> getAll(CloudbreakClient client) {
-        LdapConfigV4Endpoint ldapConfigV4Endpoint = client.getCloudbreakClient().ldapConfigV4Endpoint();
-        return ldapConfigV4Endpoint.list(client.getWorkspaceId(), null, false).getResponses()
-                .stream()
-                .filter(s -> s.getName() != null)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    protected String name(LdapV4Response entity) {
-        return entity.getName();
-    }
-
-    @Override
-    public void delete(TestContext testContext, LdapV4Response entity, CloudbreakClient client) {
-        try {
-            client.getCloudbreakClient().ldapConfigV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
-        } catch (Exception e) {
-            LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
-        }
     }
 
     @Override

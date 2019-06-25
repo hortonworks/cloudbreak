@@ -43,7 +43,7 @@ public class LdapClusterTest extends AbstractIntegrationTest {
                 (request, response) -> new ApiExternalUserMappingList());
 
         testContext.given(LdapTestDto.class)
-                .when(ldapTestClient.createV4())
+                .when(ldapTestClient.createV1())
                 .given(ClusterTestDto.class)
                 .given(StackTestDto.class)
                 .withCluster()
@@ -63,14 +63,14 @@ public class LdapClusterTest extends AbstractIntegrationTest {
         String ldapName = resourcePropertyProvider().getName();
 
         testContext.given(LdapTestDto.class).withName(ldapName)
-                .when(ldapTestClient.createV4())
+                .when(ldapTestClient.createV1())
                 .given(ClusterTestDto.class)
                 .given(StackTestDto.class)
                 .withCluster()
                 .withName(stackName)
                 .when(stackTestClient.createV4())
                 .given(LdapTestDto.class)
-                .when(ldapTestClient.deleteV4(), RunningParameter.key(deleteFail))
+                .when(ldapTestClient.deleteV1(), RunningParameter.key(deleteFail))
                 .expect(BadRequestException.class, RunningParameter.expectedMessage(String.format("LDAP config '%s' cannot be deleted "
                         + "because there are clusters associated with it: \\[%s\\].", ldapName, stackName)).withKey(deleteFail))
                 .validate();

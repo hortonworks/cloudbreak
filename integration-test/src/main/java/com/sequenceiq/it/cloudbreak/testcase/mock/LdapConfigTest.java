@@ -73,7 +73,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .given(LdapTestDto.class)
                 .valid()
                 .withName("")
-                .when(ldapTestClient.createV4(), RunningParameter.key(key))
+                .when(ldapTestClient.createV1(), RunningParameter.key(key))
                 .expect(BadRequestException.class,
                         RunningParameter.expectedMessage("The length of the ldap config's name has to be in range of 1 to 100")
                                 .withKey(key))
@@ -90,7 +90,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .given(LdapTestDto.class)
                 .valid()
                 .withName(INVALID_LDAP_NAME)
-                .when(ldapTestClient.createV4(), RunningParameter.key(INVALID_LDAP_NAME))
+                .when(ldapTestClient.createV1(), RunningParameter.key(INVALID_LDAP_NAME))
                 .expect(UnknownFormatConversionException.class,
                         RunningParameter.expectedMessage("Conversion = '|'")
                                 .withKey(INVALID_LDAP_NAME))
@@ -108,7 +108,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .given(LdapTestDto.class)
                 .valid()
                 .withName(longName)
-                .when(ldapTestClient.createV4(), RunningParameter.key(longName))
+                .when(ldapTestClient.createV1(), RunningParameter.key(longName))
                 .expect(BadRequestException.class,
                         RunningParameter.expectedMessage("The length of the ldap config's name has to be in range of 1 to 100")
                                 .withKey(longName))
@@ -128,7 +128,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .valid()
                 .withName(name)
                 .withDescription(longDesc)
-                .when(ldapTestClient.createV4(), RunningParameter.key(longDesc))
+                .when(ldapTestClient.createV1(), RunningParameter.key(longDesc))
                 .expect(BadRequestException.class,
                         RunningParameter.expectedMessage("The length of the ldap config's description has to be in range of 0 to 1000")
                                 .withKey(longDesc))
@@ -146,9 +146,9 @@ public class LdapConfigTest extends AbstractIntegrationTest {
 //                .given(name, LdapTestDto.class)
 //                .valid()
 //                .withName(name)
-//                .when(ldapTestClient.createV4(), RunningParameter.key(name))
-//                .when(ldapTestClient.deleteV4(), RunningParameter.key(name))
-//                .when(ldapTestClient.createV4(), RunningParameter.key(name))
+//                .when(ldapTestClient.createV1(), RunningParameter.key(name))
+//                .when(ldapTestClient.deleteV1(), RunningParameter.key(name))
+//                .when(ldapTestClient.createV1(), RunningParameter.key(name))
 //                .then((tc, entity, cc) -> {
 //                    assertNotNull(entity);
 //                    assertNotNull(entity.getResponse());
@@ -168,7 +168,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
 //                .given(name, LdapTestDto.class)
 //                .valid()
 //                .withName(name)
-//                .when(ldapTestClient.createV4(), RunningParameter.key(name))
+//                .when(ldapTestClient.createV1(), RunningParameter.key(name))
 //                .then((tc, entity, cc) -> {
 //                    assertNotNull(entity);
 //                    assertNotNull(entity.getResponse());
