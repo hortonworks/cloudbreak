@@ -21,6 +21,9 @@ import com.sequenceiq.freeipa.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.freeipa.kerberos.v1.KerberosConfigV1Controller;
 import com.sequenceiq.freeipa.ldap.v1.LdapConfigV1Controller;
 
+import io.opentracing.Tracer;
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
@@ -44,6 +47,9 @@ public class EndpointConfig extends ResourceConfig {
     @Inject
     private List<ExceptionMapper<?>> exceptionMappers;
 
+    @Inject
+    private Tracer tracer;
+
     @PostConstruct
     private void init() {
         /* TODO Add StructuredEventFilter, preferably as a library
@@ -53,6 +59,8 @@ public class EndpointConfig extends ResourceConfig {
          */
         registerEndpoints();
         registerExceptionMappers();
+        register(new ServerTracingDynamicFeature.Builder(tracer).build());
+        register(new ClientTracingFeature.Builder(tracer).build());
     }
 
     @PostConstruct

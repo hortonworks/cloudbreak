@@ -22,4 +22,6 @@ dependencies {
   implementation group: 'com.sun.xml.bind',              name: 'jaxb-core',                      version: "2.3.0"
   implementation group: 'com.sun.xml.ws',                name: 'rt',                             version: "2.3.0"
   implementation group: 'com.sun.xml.ws',                name: 'jaxws-rt',                       version: "2.3.0"
+  
+  compile group: 'io.opentracing.contrib', name: 'opentracing-jaxrs2', version: '0.5.0'
 }

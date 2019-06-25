@@ -1,5 +1,8 @@
 server.servlet.context-path: "/freeipa"
 
+opentracing.jaeger.udp-sender.host: localhost
+opentracing.jaeger.udp-sender.port: 6831
+
 management:
   endpoints:
     web:
@@ -58,6 +61,8 @@ altus:
     host: localhost
 
 spring:
+  application:
+    name: FreeIpaService
   freemarker:
     template-loader-path: file:/etc/cloudbreak,classpath:/
     prefer-file-system-access: false

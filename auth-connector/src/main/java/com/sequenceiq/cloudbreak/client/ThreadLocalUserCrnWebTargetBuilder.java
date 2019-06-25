@@ -22,6 +22,8 @@ public class ThreadLocalUserCrnWebTargetBuilder {
 
     private ClientRequestFilter clientRequestFilter;
 
+    private Class<?> tracer;
+
     public ThreadLocalUserCrnWebTargetBuilder(String serviceAddress) {
         this.serviceAddress = serviceAddress;
     }
@@ -51,10 +53,18 @@ public class ThreadLocalUserCrnWebTargetBuilder {
         return this;
     }
 
+    public ThreadLocalUserCrnWebTargetBuilder withTracer(Class<?> tracer) {
+        this.tracer = tracer;
+        return this;
+    }
+
     public WebTarget build() {
         ConfigKey configKey = new ConfigKey(secure, debug, ignorePreValidation);
         Client client = RestClientUtil.get(configKey);
         client.register(clientRequestFilter);
+        if (tracer != null) {
+            client.register(tracer);
+        }
         WebTarget webTarget = client.target(serviceAddress).path(apiRoot);
         LOGGER.info("WebTarget has been created with token: service address: {}, configKey: {}", serviceAddress, configKey);
         return webTarget;

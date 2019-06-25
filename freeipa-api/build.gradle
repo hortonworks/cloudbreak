@@ -24,6 +24,8 @@ dependencies {
   implementation project(':common')
   implementation project(':secret-engine')
   implementation project(':structuredevent-model')
+  
+  compile group: 'io.opentracing.contrib', name: 'opentracing-jaxrs2', version: '0.5.0'
 
   constraints {
     implementation group: 'org.glassfish.jersey.ext', name: 'jersey-proxy-client',   version: jerseyCoreVersion

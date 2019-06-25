@@ -42,6 +42,9 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
 
+import io.opentracing.Tracer;
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
@@ -87,6 +90,9 @@ public class EndpointConfig extends ResourceConfig {
     @Inject
     private List<ExceptionMapper<?>> exceptionMappers;
 
+    @Inject
+    private Tracer tracer;
+
     @PostConstruct
     private void init() {
         if (auditEnabled) {
@@ -94,6 +100,8 @@ public class EndpointConfig extends ResourceConfig {
         }
         registerEndpoints();
         registerExceptionMappers();
+        register(new ServerTracingDynamicFeature.Builder(tracer).build());
+        register(new ClientTracingFeature.Builder(tracer).build());
     }
 
     @PostConstruct

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.DispatcherType;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -23,6 +24,8 @@ import com.sequenceiq.environment.environment.validation.network.EnvironmentNetw
 import com.sequenceiq.environment.logger.MDCContextFilter;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
+
+import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
 
 @Configuration
 public class AppConfig {
@@ -108,4 +111,13 @@ public class AppConfig {
                 supportedRedbeamsPlatforms.split(","));
     }
 
+    @Bean
+    public FilterRegistrationBean spanFinishingFilter() {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new SpanFinishingFilter());
+        filterRegistrationBean.setAsyncSupported(true);
+        filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST);
+        filterRegistrationBean.addUrlPatterns("*");
+        return filterRegistrationBean;
+    }
 }

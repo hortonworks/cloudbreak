@@ -15,6 +15,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+
 @Configuration
 public class FreeIpaApiClientConfig {
     @Inject
@@ -29,6 +31,7 @@ public class FreeIpaApiClientConfig {
                 .withDebug(freeIpaApiClientParams.isRestDebug())
                 .withClientRequestFilter(userCrnClientRequestFilter)
                 .withApiRoot(FreeIpaApi.API_ROOT_CONTEXT)
+                .withTracer(ClientTracingFeature.class)
                 .build();
     }
 

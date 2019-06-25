@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -68,6 +69,8 @@ import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiClientParams;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClient;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClientBuilder;
+
+import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
 
 @Configuration
 @EnableRetry
@@ -165,6 +168,16 @@ public class AppConfig implements ResourceLoaderAware {
                 environment.getPropertySources().addFirst(propertySource);
             }
         }
+    }
+
+    @Bean
+    public FilterRegistrationBean spanFinishingFilter() {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new SpanFinishingFilter());
+        filterRegistrationBean.setAsyncSupported(true);
+        filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST);
+        filterRegistrationBean.addUrlPatterns("*");
+        return filterRegistrationBean;
     }
 
     @Bean

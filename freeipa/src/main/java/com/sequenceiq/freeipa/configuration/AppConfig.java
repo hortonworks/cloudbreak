@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.DispatcherType;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -22,6 +23,8 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.freeipa.logger.MDCContextFilter;
+
+import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
 
 @Configuration
 @EnableRetry
@@ -69,6 +72,16 @@ public class AppConfig {
         registrationBean.setFilter(filter);
         registrationBean.setOrder(Integer.MAX_VALUE);
         return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean spanFinishingFilter() {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new SpanFinishingFilter());
+        filterRegistrationBean.setAsyncSupported(true);
+        filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST);
+        filterRegistrationBean.addUrlPatterns("*");
+        return filterRegistrationBean;
     }
 
     private static class MyExitCriteria implements ExitCriteria {

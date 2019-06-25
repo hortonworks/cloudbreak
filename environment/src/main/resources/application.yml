@@ -2,6 +2,9 @@ server.servlet.context-path: "/environmentservice"
 
 server.port: 8088
 
+opentracing.jaeger.udp-sender.host: localhost
+opentracing.jaeger.udp-sender.port: 6831
+
 management:
   endpoints:
     web:
@@ -127,6 +130,8 @@ cb:
     host.name.prefix.length: 255
 
 spring:
+  application:
+    name: EnvironmentService
   freemarker:
     template-loader-path: file:/etc/cloudbreak,classpath:/
     prefer-file-system-access: false

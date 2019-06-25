@@ -15,6 +15,8 @@ import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoin
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+
 @Configuration
 public class EnvironmentApiClientConfig {
 
@@ -33,6 +35,7 @@ public class EnvironmentApiClientConfig {
                 .withDebug(environmentApiClientParams.isRestDebug())
                 .withClientRequestFilter(userCrnClientRequestFilter)
                 .withApiRoot(EnvironmentApi.API_ROOT_CONTEXT)
+                .withTracer(ClientTracingFeature.class)
                 .build();
     }
 
