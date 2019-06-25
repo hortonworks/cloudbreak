@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -41,8 +42,6 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
             + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
             + "centos";
-
-    private static final String FREEIPA_ADMIN_PASSWORD = "Admin123!";
 
     private static final String FREEIPA_DOMAIN = "cdp.site";
 
@@ -113,7 +112,7 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private void setFreeIpaServer(CreateFreeIpaRequest createFreeIpaRequest) {
         FreeIpaServerRequest freeIpaServerRequest = new FreeIpaServerRequest();
-        freeIpaServerRequest.setAdminPassword(FREEIPA_ADMIN_PASSWORD);
+        freeIpaServerRequest.setAdminPassword(PasswordUtil.generatePassword());
         freeIpaServerRequest.setDomain(FREEIPA_DOMAIN);
         freeIpaServerRequest.setHostname(FREEIPA_HOSTNAME);
         createFreeIpaRequest.setFreeIpa(freeIpaServerRequest);
