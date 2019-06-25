@@ -93,14 +93,14 @@ public class ScalingRequest implements Runnable {
         ScalingStatus scalingStatus = null;
         try {
             LOGGER.debug("Sending request to add {} instance(s) into host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
-            Long stackId = internalCrnClient.withInternalCrn().autoscaleEndpoint().getStackForAmbari(ambariAddressJson).getId();
+            String stackCrn = internalCrnClient.withInternalCrn().autoscaleEndpoint().getStackForAmbari(ambariAddressJson).getCrn();
             UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
             updateStackJson.setWithClusterEvent(true);
             InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            internalCrnClient.withInternalCrn().autoscaleEndpoint().putStack(stackId, cluster.getClusterPertain().getUserId(), updateStackJson);
+            internalCrnClient.withInternalCrn().autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Upscale successfully triggered";
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
@@ -124,14 +124,14 @@ public class ScalingRequest implements Runnable {
         ScalingStatus scalingStatus = null;
         try {
             LOGGER.debug("Sending request to remove {} node(s) from host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
-            Long stackId = internalCrnClient.withInternalCrn().autoscaleEndpoint().getStackForAmbari(ambariAddressJson).getId();
+            String stackCrn = internalCrnClient.withInternalCrn().autoscaleEndpoint().getStackForAmbari(ambariAddressJson).getCrn();
             UpdateClusterV4Request updateClusterJson = new UpdateClusterV4Request();
             HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setHostGroup(hostGroup);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            internalCrnClient.withInternalCrn().autoscaleEndpoint().putCluster(stackId, cluster.getClusterPertain().getUserId(), updateClusterJson);
+            internalCrnClient.withInternalCrn().autoscaleEndpoint().putCluster(stackCrn, cluster.getClusterPertain().getUserId(), updateClusterJson);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Downscale successfully triggered";
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);

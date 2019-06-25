@@ -36,7 +36,7 @@ public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse
                 source.getHost(),
                 source.getPort(),
                 secretService.get(source.getClusterManagerUser()),
-                source.getStackId(),
+                source.getStackCrn(),
                 source.isAutoscalingEnabled(),
                 source.getId(),
                 source.getState().name());

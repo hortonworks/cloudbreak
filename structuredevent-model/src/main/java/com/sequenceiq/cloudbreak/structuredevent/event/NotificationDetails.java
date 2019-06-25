@@ -18,6 +18,8 @@ public class NotificationDetails implements Serializable {
 
     private Long stackId;
 
+    private String stackCrn;
+
     private String stackName;
 
     private String stackStatus;
@@ -35,6 +37,14 @@ public class NotificationDetails implements Serializable {
     private String blueprintName;
 
     private Long blueprintId;
+
+    public String getStackCrn() {
+        return stackCrn;
+    }
+
+    public void setStackCrn(String stackCrn) {
+        this.stackCrn = stackCrn;
+    }
 
     public String getNotificationType() {
         return notificationType;

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -36,6 +37,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
@@ -132,6 +135,9 @@ public class StackService {
 
     @Inject
     private StackDownscaleValidatorService downscaleValidatorService;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Inject
     private SaltSecurityConfigService saltSecurityConfigService;
@@ -240,6 +246,19 @@ public class StackService {
         }
     }
 
+    public StackV4Response getJsonByCrn(String crn, Collection<String> entry) {
+        try {
+            return transactionService.required(() -> {
+                Stack stack = getByCrnWithLists(crn);
+                StackV4Response stackResponse = converterUtil.convert(stack, StackV4Response.class);
+                stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entry);
+                return stackResponse;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
     public Stack get(Long id) {
         try {
             return transactionService.required(() -> stackRepository.findById(id).orElseThrow(notFound("Stack", id)));
@@ -248,14 +267,22 @@ public class StackService {
         }
     }
 
-    @PreAuthorize("hasRole('AUTOSCALE')")
-    public Long getWorkspaceId(Long stackId) {
-        return stackRepository.findWorkspaceIdById(stackId);
+    public Stack getByCrn(String crn) {
+        try {
+            return transactionService.required(() -> stackRepository.findByResourceCrn(crn).orElseThrow(notFound("Stack", crn)));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     @PreAuthorize("hasRole('AUTOSCALE')")
-    public Tenant getTenant(Long stackId) {
-        Workspace workspace = stackRepository.findWorkspaceById(stackId).orElseThrow(notFound("workspace", stackId));
+    public Long getWorkspaceId(String crn) {
+        return stackRepository.findWorkspaceIdByCrn(crn);
+    }
+
+    @PreAuthorize("hasRole('AUTOSCALE')")
+    public Tenant getTenant(String crn) {
+        Workspace workspace = stackRepository.findWorkspaceByCrn(crn).orElseThrow(notFound("workspace", crn));
         return workspace.getTenant();
     }
 
@@ -314,6 +341,10 @@ public class StackService {
         return stackRepository.findById(id).orElseThrow(notFound("Stack", id));
     }
 
+    public Stack findByCrn(String crn) {
+        return stackRepository.findByResourceCrn(crn).orElseThrow(notFound("Stack", crn));
+    }
+
     public Optional<Stack> findById(Long id) {
         return stackRepository.findById(id);
     }
@@ -359,6 +390,24 @@ public class StackService {
                 Optional<Stack> stack = findByNameAndWorkspaceIdWithLists(name, workspace.getId(), stackType, showTerminatedClustersAfterConfig);
                 if (stack.isEmpty()) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
+                }
+                StackV4Response stackResponse = converterUtil.convert(stack.get(), StackV4Response.class);
+                stackResponse = stackResponseDecorator.decorate(stackResponse, stack.get(), entries);
+                return stackResponse;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public StackV4Response getByCrnInWorkspaceWithEntries(String crn, Long workspaceId, Set<String> entries, User user, StackType stackType) {
+        try {
+            return transactionService.required(() -> {
+                Workspace workspace = workspaceService.get(workspaceId, user);
+                ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
+                Optional<Stack> stack = findByCrnAndWorkspaceIdWithLists(crn, workspace.getId(), stackType, showTerminatedClustersAfterConfig);
+                if (stack.isEmpty()) {
+                    throw new NotFoundException(String.format("Stack not found by crn '%s'", crn));
                 }
                 StackV4Response stackResponse = converterUtil.convert(stack.get(), StackV4Response.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack.get(), entries);
@@ -419,6 +468,8 @@ public class StackService {
         }
         stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
 
+        stack.setResourceCrn(createCRN(threadBasedUserCrnProvider.getAccountId()));
+
         Stack savedStack = measure(() -> stackRepository.save(stack),
                 LOGGER, "Stackrepository save took {} ms for stack {}", stackName);
 
@@ -466,18 +517,25 @@ public class StackService {
         stack.setPlatformVariant(connector.checkAndGetPlatformVariant(stack).value());
     }
 
-    public void delete(Long id, Boolean forced, Boolean deleteDependencies, User user) {
+    public void deleteByName(Long id, Boolean forced, Boolean deleteDependencies, User user) {
         stackRepository.findById(id).map(stack -> {
-            delete(stack.getName(), stack.getWorkspace().getId(), forced, deleteDependencies, user);
+            deleteByName(stack.getName(), stack.getWorkspace().getId(), forced, deleteDependencies, user);
             return stack;
         }).orElseThrow(notFound("Stack", id));
     }
 
-    public void delete(String name, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
+    public void deleteByName(String name, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
         stackRepository.findByNameAndWorkspaceId(name, workspaceId).map(stack -> {
-            delete(stack, forced, deleteDependencies, user);
+            deleteByName(stack, forced, deleteDependencies, user);
             return stack;
         }).orElseThrow(notFound("Stack", name));
+    }
+
+    public void deleteByCrn(String crn, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
+        stackRepository.findByCrnAndWorkspaceId(crn, workspaceId).map(stack -> {
+            deleteByName(stack, forced, deleteDependencies, user);
+            return stack;
+        }).orElseThrow(notFound("Stack", crn));
     }
 
     public void removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
@@ -646,7 +704,7 @@ public class StackService {
         }
     }
 
-    public void delete(Stack stack, Boolean forced, Boolean deleteDependencies) {
+    public void deleteByName(Stack stack, Boolean forced, Boolean deleteDependencies) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Stack delete requested.");
         if (!stack.isDeleteCompleted()) {
@@ -656,10 +714,20 @@ public class StackService {
         }
     }
 
+    public void decorateWithCrn(Stack stack) {
+        stack.setResourceCrn(createCRN(threadBasedUserCrnProvider.getAccountId()));
+    }
+
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
         return stackType == null
                 ? stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId, config.isActive(), config.showAfterMillisecs())
                 : stackRepository.findByNameAndWorkspaceIdWithLists(name, stackType, workspaceId, config.isActive(), config.showAfterMillisecs());
+    }
+
+    private Optional<Stack> findByCrnAndWorkspaceIdWithLists(String crn, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
+        return stackType == null
+                ? stackRepository.findByCrnAndWorkspaceIdWithLists(crn, workspaceId, config.isActive(), config.showAfterMillisecs())
+                : stackRepository.findByCrnAndWorkspaceIdWithLists(crn, stackType, workspaceId, config.isActive(), config.showAfterMillisecs());
     }
 
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId) {
@@ -677,6 +745,10 @@ public class StackService {
 
     private Stack getByIdWithLists(Long id) {
         return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id)));
+    }
+
+    private Stack getByCrnWithLists(String crn) {
+        return stackRepository.findOneByCrnWithLists(crn).orElseThrow(NotFoundException.notFound("Stack", crn));
     }
 
     private void repairFailedNodes(Stack stack, User user) {
@@ -831,7 +903,7 @@ public class StackService {
         }
     }
 
-    private void delete(Stack stack, Boolean forced, Boolean deleteDependencies, User user) {
+    private void deleteByName(Stack stack, Boolean forced, Boolean deleteDependencies, User user) {
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
         checkStackHasNoAttachedClusters(stack);
         MDCBuilder.buildMdcContext(stack);
@@ -894,6 +966,16 @@ public class StackService {
         } catch (IllegalArgumentException e) {
             LOGGER.info("Could not create Cloudbreak telemetry component.", e);
         }
+    }
+
+    private String createCRN(String accountId) {
+        return Crn.builder()
+                .setService(Crn.Service.CLOUDBREAK)
+                .setAccountId(accountId)
+                .setResourceType(Crn.ResourceType.STACK)
+                .setResource(UUID.randomUUID().toString())
+                .build()
+                .toString();
     }
 
     private enum Msg {

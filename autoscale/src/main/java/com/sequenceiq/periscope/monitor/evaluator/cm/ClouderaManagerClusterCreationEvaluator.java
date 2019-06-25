@@ -89,13 +89,13 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
                 createCluster(stack, resolvedStack);
             }
         } catch (ClusterManagerHealthCheckException ahf) {
-            LOGGER.info("Cloudera Manager health check failed for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getStackId(), stack.getName(),
+            LOGGER.info("Cloudera Manager health check failed for Cloudbreak stack: {} (CRN:{}). Original message: {}", stack.getStackCrn(), stack.getName(),
                     ahf.getMessage());
         } catch (TlsConfigurationException ex) {
-            LOGGER.error("Could not prepare TLS configuration for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getStackId(), stack.getName(),
+            LOGGER.error("Could not prepare TLS configuration for Cloudbreak stack: {} (CRN:{}). Original message: {}", stack.getStackCrn(), stack.getName(),
                     ex.getMessage());
         } catch (Exception ex) {
-            LOGGER.warn(String.format("Could not create cluster for Cloudbreak stack: %s (ID:%s)", stack.getStackId(), stack.getName()), ex);
+            LOGGER.warn(String.format("Could not create cluster for Cloudbreak stack: %s (CRN:%s)", stack.getStackCrn(), stack.getName()), ex);
         } finally {
             LOGGER.debug("Finished clusterCreationEvaluator in {} ms", System.currentTimeMillis() - start);
         }
@@ -134,10 +134,10 @@ public class ClouderaManagerClusterCreationEvaluator extends ClusterCreationEval
     private MonitoredStack createMonitoredStack(AutoscaleStackV4Response stack) {
         String host = stack.getAmbariServerIp();
         String gatewayPort = String.valueOf(stack.getGatewayPort());
-        SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(stack.getStackId());
+        SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(stack.getStackCrn());
         ClusterManager clusterManager =
                 new ClusterManager(host, gatewayPort, stack.getUserNamePath(), stack.getPasswordPath(), ClusterManagerVariant.CLOUDERA_MANAGER);
-        return new MonitoredStack(clusterManager, stack.getStackId(), securityConfig);
+        return new MonitoredStack(clusterManager, stack.getStackCrn(), stack.getStackId(), securityConfig);
     }
 
     private void cmHealthCheck(MonitoredStack monitoredStack) {

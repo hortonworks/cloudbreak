@@ -111,12 +111,20 @@ public class StackCommonService {
         return stackCreatorService.createStack(user, workspace, stackRequest);
     }
 
-    public void deleteInWorkspace(String name, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
-        stackService.delete(name, workspaceId, forced, deleteDependencies, user);
+    public void deleteByNameInWorkspace(String name, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
+        stackService.deleteByName(name, workspaceId, forced, deleteDependencies, user);
+    }
+
+    public void deleteByCrnInWorkspace(String crn, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
+        stackService.deleteByCrn(crn, workspaceId, forced, deleteDependencies, user);
     }
 
     public StackV4Response get(Long id, Set<String> entries) {
         return stackService.getJsonById(id, entries);
+    }
+
+    public StackV4Response getByCrn(String crn, Set<String> entries) {
+        return stackService.getJsonByCrn(crn, entries);
     }
 
     public StackV4Response findStackByNameAndWorkspaceId(String name, Long workspaceId, Set<String> entries, StackType stackType) {
@@ -124,11 +132,16 @@ public class StackCommonService {
         return stackService.getByNameInWorkspaceWithEntries(name, workspaceId, entries, user, stackType);
     }
 
-    public void putInDefaultWorkspace(Long id, UpdateStackV4Request updateRequest) {
+    public StackV4Response findStackByCrnAndWorkspaceId(String crn, Long workspaceId, Set<String> entries, StackType stackType) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        return stackService.getByCrnInWorkspaceWithEntries(crn, workspaceId, entries, user, stackType);
+    }
+
+    public void putInDefaultWorkspace(String crn, UpdateStackV4Request updateRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(restRequestThreadLocalService.getRequestedWorkspaceId(),
                 WorkspaceResource.STACK, ResourceAction.WRITE, user);
-        Stack stack = stackService.getById(id);
+        Stack stack = stackService.getByCrn(crn);
         MDCBuilder.buildMdcContext(stack);
         put(stack, updateRequest);
     }
@@ -191,7 +204,7 @@ public class StackCommonService {
         } else {
             UpdateClusterV4Request updateClusterJson = converterUtil.convert(updateRequest, UpdateClusterV4Request.class);
             Workspace workspace = workspaceService.get(workspaceId, user);
-            clusterCommonService.put(stack.getId(), updateClusterJson, user, workspace);
+            clusterCommonService.put(stack.getResourceCrn(), updateClusterJson, user, workspace);
         }
     }
 
@@ -232,8 +245,9 @@ public class StackCommonService {
     }
 
     @PreAuthorize("hasRole('AUTOSCALE')")
-    public CertificateV4Response getCertificate(Long stackId) {
-        return tlsSecurityService.getCertificates(stackId);
+    public CertificateV4Response getCertificate(String crn) {
+        Stack stack = stackService.findByCrn(crn);
+        return tlsSecurityService.getCertificates(stack.getId());
     }
 
     public StackV4Response getStackForAmbari(AmbariAddressV4Request json) {

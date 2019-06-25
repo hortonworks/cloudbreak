@@ -74,7 +74,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public void delete(TestContext testContext, StackV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().distroXV1Endpoint().delete(entity.getName(), true);
+            client.getCloudbreakClient().distroXV1Endpoint().deleteByName(entity.getName(), true);
             testContext.await(this, STACK_DELETED, key("wait-purge-distrox-" + entity.getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);

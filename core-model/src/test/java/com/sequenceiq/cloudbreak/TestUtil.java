@@ -181,6 +181,7 @@ public class TestUtil {
         stack.setCloudPlatform(credential.cloudPlatform());
         stack.setOrchestrator(orchestrator());
         stack.setEnvironmentCrn("envCrn");
+        stack.setResourceCrn("crn:altus:cloudbreak:us-west:someone:stack:12345");
 
         switch (credential.cloudPlatform()) {
             case AWS:
@@ -831,6 +832,7 @@ public class TestUtil {
         notification.setClusterStatus(AVAILABLE.name());
         notification.setClusterId(1L);
         notification.setClusterName("test");
+        notification.setStackCrn("someCrn");
         return notification;
     }
 

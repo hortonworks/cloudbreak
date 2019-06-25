@@ -512,10 +512,11 @@ public class ClusterService {
         }
     }
 
-    public void failureReport(Long stackId, List<String> failedNodes) {
+    public void failureReport(String crn, List<String> failedNodes) {
         try {
             transactionService.required(() -> {
-                Stack stack = stackService.getById(stackId);
+                Stack stack = stackService.findByCrn(crn);
+                long stackId = stack.getId();
                 Cluster cluster = stack.getCluster();
                 Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
                 Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();

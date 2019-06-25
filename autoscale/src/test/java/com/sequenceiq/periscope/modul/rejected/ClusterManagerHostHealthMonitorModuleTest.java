@@ -115,9 +115,9 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
         AutoscaleV4Endpoint autoscaleEndpoint = mock(AutoscaleV4Endpoint.class);
         Cluster cluster = new Cluster();
         long clusterId = 1L;
-        long stackId = 0L;
+        String stackCrn = "someCrn";
         cluster.setId(clusterId);
-        cluster.setStackId(stackId);
+        cluster.setStackCrn(stackCrn);
         cluster.setClusterManager(new ClusterManager("", "", "", "", ClusterManagerVariant.AMBARI));
 
         when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-heart-beat-critical"));
@@ -136,16 +136,16 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
 
         waitForTasksToFinish();
 
-        verify(autoscaleEndpoint, times(1)).failureReport(eq(stackId), any(FailureReportV4Request.class));
+        verify(autoscaleEndpoint, times(1)).failureReport(eq(stackCrn), any(FailureReportV4Request.class));
     }
 
     @Test
     public void testWhenThreadPoolRejected() {
-        Cluster cluster1 = cluster(1L);
-        Cluster cluster2 = cluster(2L);
-        Cluster cluster3 = cluster(3L);
-        Cluster cluster4 = cluster(4L);
-        Cluster cluster5 = cluster(5L);
+        Cluster cluster1 = cluster(1L, "someCrn1");
+        Cluster cluster2 = cluster(2L, "someCrn2");
+        Cluster cluster3 = cluster(3L, "someCrn3");
+        Cluster cluster4 = cluster(4L, "someCrn4");
+        Cluster cluster5 = cluster(5L, "someCrn5");
 
         when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected-testWhenThreadPoolRejected"));
         when(clusterService.findById(1L)).thenReturn(cluster1);
@@ -172,14 +172,14 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
     @Test
     public void testWhenThreadPoolRejectedAndSubmitAgain() {
         long stackId = 1L;
-        Cluster cluster = cluster(stackId);
+        Cluster cluster = cluster(stackId, "somecrn");
 
         when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected-testWhenThreadPoolRejectedAndSubmitAgain"));
         when(clusterService.findById(stackId)).thenReturn(cluster);
 
         when(ambariClient.getAlert("ambari_server_agent_heartbeat")).thenAnswer(delayed(Collections.emptyList()));
 
-        List<Cluster> clusters = Arrays.asList(cluster, cluster(2L), cluster(3L), cluster(4L), cluster(5L));
+        List<Cluster> clusters = Arrays.asList(cluster, cluster(2L, "someCrn2"), cluster(3L, "someCrn3"), cluster(4L, "someCrn4"), cluster(5L, "someCrn5"));
         when(clusterService.findAllByStateAndNode(ClusterState.RUNNING, null)).thenReturn(clusters);
         underTest.execute(context);
         waitForTasksToFinish();
@@ -204,11 +204,11 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
     @Ignore
     @Test
     public void testWhenThreadPoolRejectedAndCountMoreThanOne() {
-        Cluster cluster1 = cluster(1L);
-        Cluster cluster2 = cluster(2L);
-        Cluster cluster3 = cluster(3L);
-        Cluster cluster4 = cluster(4L);
-        Cluster cluster5 = cluster(5L);
+        Cluster cluster1 = cluster(1L, "someCrn1");
+        Cluster cluster2 = cluster(2L, "someCrn2");
+        Cluster cluster3 = cluster(3L, "someCrn3");
+        Cluster cluster4 = cluster(4L, "someCrn4");
+        Cluster cluster5 = cluster(5L, "someCrn5");
 
         when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-rejected-testWhenThreadPoolRejectedAndCountMoreThanOne"));
         when(clusterService.findById(1L)).thenReturn(cluster1);
@@ -239,9 +239,10 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
 
     }
 
-    private Cluster cluster(long stackId) {
+    private Cluster cluster(long stackId, String stackCrn) {
         Cluster cluster = new Cluster();
         cluster.setId(stackId);
+        cluster.setStackCrn(stackCrn);
         cluster.setStackId(stackId);
         cluster.setClusterManager(new ClusterManager("", "", "", "", ClusterManagerVariant.AMBARI));
         return cluster;

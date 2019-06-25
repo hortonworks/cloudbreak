@@ -17,18 +17,18 @@ public class ClusterBaseJson implements Json {
     @ApiModelProperty(ClusterJsonsProperties.USERNAME)
     private String user;
 
-    @ApiModelProperty(ClusterJsonsProperties.STACK_ID)
     @NotNull
-    private Long stackId;
+    @ApiModelProperty(ClusterJsonsProperties.STACK_CRN)
+    private String stackCrn;
 
     public ClusterBaseJson() {
     }
 
-    public ClusterBaseJson(String host, String port, String user, Long stackId) {
+    public ClusterBaseJson(String host, String port, String user, String stackCrn) {
         this.host = host;
         this.port = port;
         this.user = user;
-        this.stackId = stackId;
+        this.stackCrn = stackCrn;
     }
 
     public String getHost() {
@@ -55,12 +55,12 @@ public class ClusterBaseJson implements Json {
         this.user = user;
     }
 
-    public Long getStackId() {
-        return stackId;
+    public String getStackCrn() {
+        return stackCrn;
     }
 
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
+    public void setStackCrn(String stackCrn) {
+        this.stackCrn = stackCrn;
     }
 
 }

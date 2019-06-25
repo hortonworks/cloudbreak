@@ -66,8 +66,8 @@ public class Cluster implements Monitored, Clustered {
     @Column(name = "cooldown")
     private int coolDown = DEFAULT_COOLDOWN;
 
-    @Column(name = "cb_stack_id")
-    private Long stackId;
+    @Column(name = "cb_stack_crn")
+    private String stackCrn;
 
     @Column(name = "last_scaling_activity")
     private volatile long lastScalingActivity;
@@ -80,11 +80,14 @@ public class Cluster implements Monitored, Clustered {
     @Column(name = "lastevaulated")
     private long lastEvaluated;
 
+    @Column(name = "cb_stack_id")
+    private long stackId;
+
     public Cluster() {
     }
 
     public Cluster(MonitoredStack monitoredStack) {
-        stackId = monitoredStack.getStackId();
+        setStackCrn(monitoredStack.getStackCrn());
         clusterManager = monitoredStack.getClusterManager();
     }
 
@@ -94,6 +97,22 @@ public class Cluster implements Monitored, Clustered {
         this.clusterManager.setPort(clusterManager.getPort());
         this.clusterManager.setUser(clusterManager.getUser());
         this.clusterManager.setPass(clusterManager.getPass());
+    }
+
+    public String getStackCrn() {
+        return stackCrn;
+    }
+
+    public long getStackId() {
+        return stackId;
+    }
+
+    public void setStackId(long stackId) {
+        this.stackId = stackId;
+    }
+
+    public void setStackCrn(String stackCrn) {
+        this.stackCrn = stackCrn;
     }
 
     public long getId() {
@@ -174,14 +193,6 @@ public class Cluster implements Monitored, Clustered {
 
     public void setCoolDown(int coolDown) {
         this.coolDown = coolDown;
-    }
-
-    public Long getStackId() {
-        return stackId;
-    }
-
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
     }
 
     public long getLastScalingActivity() {

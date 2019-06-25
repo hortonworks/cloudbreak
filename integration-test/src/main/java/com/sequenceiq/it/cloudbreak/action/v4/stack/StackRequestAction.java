@@ -25,7 +25,7 @@ public class StackRequestAction implements Action<StackTestDto, CloudbreakClient
                 testDto.getName());
         testDto.setRequest(request);
         Log.logJSON(LOGGER, " get cli skeleton was successfully:\n", testDto.getRequest());
-        Log.log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+        Log.log(LOGGER, format(" CRN: %s", testDto.getResponse().getCrn()));
         return testDto;
     }
 }

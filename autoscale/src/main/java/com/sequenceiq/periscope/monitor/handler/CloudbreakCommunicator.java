@@ -14,11 +14,11 @@ public class CloudbreakCommunicator {
     @Inject
     private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
 
-    public StackV4Response getById(long cloudbreakStackId) {
-        return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().get(cloudbreakStackId);
+    public StackV4Response getByCrn(String stackCrn) {
+        return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().get(stackCrn);
     }
 
-    public void failureReport(long stackId, FailureReportV4Request failureReport) {
-        cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().failureReport(stackId, failureReport);
+    public void failureReport(String stackCrn, FailureReportV4Request failureReport) {
+        cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().failureReport(stackCrn, failureReport);
     }
 }

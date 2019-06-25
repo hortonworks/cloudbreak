@@ -43,8 +43,8 @@ public class AutoscaleClusterRequest extends ClusterBaseJson {
     public AutoscaleClusterRequest() {
     }
 
-    public AutoscaleClusterRequest(String host, String port, String user, String pass, Long stackId, boolean enableAutoscaling) {
-        super(host, port, user, stackId);
+    public AutoscaleClusterRequest(String host, String port, String user, String pass, String stackCrn, boolean enableAutoscaling) {
+        super(host, port, user, stackCrn);
         this.pass = pass;
         this.enableAutoscaling = enableAutoscaling;
     }

@@ -291,6 +291,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Optional<Stack> findByCrnAndWorkspaceId(String crn, Long workspaceId) {
+            return Optional.empty();
+        }
+
+        @Override
         public Set<Stack> findByNameInAndWorkspaceId(Set<String> name, Long workspaceId) {
             return null;
         }
@@ -311,7 +316,22 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Optional<Stack> findByCrnAndWorkspaceIdWithLists(String crn, Long workspaceId, Boolean showTerminated, Long terminatedAfter) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<Stack> findByCrnAndWorkspaceIdWithLists(String crn, StackType type, Long workspaceId, Boolean showTerminated, Long terminatedAfter) {
+            return Optional.empty();
+        }
+
+        @Override
         public Optional<Stack> findOneWithLists(Long id) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<Stack> findOneByCrnWithLists(String crn) {
             return Optional.empty();
         }
 
@@ -406,6 +426,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Long findWorkspaceIdByCrn(String crn) {
+            return null;
+        }
+
+        @Override
         public Set<String> findDatalakeStackNamesByWorkspaceAndEnvironment(Long workspaceId, String environmentCrn) {
             return null;
         }
@@ -421,7 +446,17 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Optional<Workspace> findWorkspaceByCrn(String crn) {
+            return Optional.empty();
+        }
+
+        @Override
         public Optional<Stack> findTemplateWithLists(Long id) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<Stack> findByResourceCrn(String crn) {
             return Optional.empty();
         }
 

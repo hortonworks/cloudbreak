@@ -22,7 +22,7 @@ public class StackCreateAction implements Action<StackTestDto, CloudbreakClient>
                         .stackV4Endpoint()
                         .post(client.getWorkspaceId(), testDto.getRequest()));
         Log.logJSON(LOGGER, " Stack created was successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, " ID: " + testDto.getResponse().getId());
+        Log.log(LOGGER, " crn: " + testDto.getResponse().getCrn());
 
         return testDto;
     }

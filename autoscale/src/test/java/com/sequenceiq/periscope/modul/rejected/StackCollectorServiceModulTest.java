@@ -147,7 +147,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         stack.setAmbariServerIp("199.199.199");
         stack.setClusterManagerVariant(ClusterManagerVariant.AMBARI.name());
 
-        Cluster cluster = cluster(2L);
+        Cluster cluster = cluster(2L, "someCrn");
 
         when(autoscaleEndpoint.getAllForAutoscale()).thenReturn(new AutoscaleStackV4Responses(List.of(stack)));
         when(clusterService.findOneByStackId(1L)).thenReturn(cluster);
@@ -226,10 +226,12 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         Assert.assertTrue(allRejectedCluster.isEmpty());
     }
 
-    private Cluster cluster(long stackId) {
+    private Cluster cluster(long id, String stackCrn) {
         Cluster cluster = new Cluster();
-        cluster.setId(stackId);
-        cluster.setStackId(stackId);
+        cluster.setId(id);
+        cluster.setStackCrn(stackCrn);
+        cluster.setId(id);
+        cluster.setStackId(id);
         cluster.setClusterManager(new ClusterManager("", "", "", "", ClusterManagerVariant.AMBARI));
         return cluster;
     }

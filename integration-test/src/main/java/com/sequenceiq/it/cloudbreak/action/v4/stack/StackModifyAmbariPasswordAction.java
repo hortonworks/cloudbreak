@@ -27,7 +27,7 @@ public class StackModifyAmbariPasswordAction implements Action<StackTestDto, Clo
         client.getCloudbreakClient().stackV4Endpoint().putPassword(client.getWorkspaceId(),
                 testDto.getName(), userNamePasswordV4Request);
         Log.logJSON(LOGGER, " Stack was modified ambari password successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+        Log.log(LOGGER, format(" CRN: %s", testDto.getResponse().getCrn()));
         return testDto;
     }
 }

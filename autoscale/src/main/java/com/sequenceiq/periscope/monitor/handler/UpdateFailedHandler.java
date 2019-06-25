@@ -53,7 +53,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             return;
         }
         MDCBuilder.buildMdcContext(cluster);
-        StackV4Response stackResponse = getStackById(cluster.getStackId());
+        StackV4Response stackResponse = getStackById(cluster.getStackCrn());
         if (stackResponse == null) {
             LOGGER.debug("Suspending cluster {}", autoscaleClusterId);
             suspendCluster(cluster);
@@ -99,9 +99,9 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         return stackResponse.getStatus() != null ? stackResponse.getStatus().name() : "";
     }
 
-    private StackV4Response getStackById(long cloudbreakStackId) {
+    private StackV4Response getStackById(String stackCrn) {
         try {
-            return cloudbreakCommunicator.getById(cloudbreakStackId);
+            return cloudbreakCommunicator.getByCrn(stackCrn);
         } catch (Exception e) {
             LOGGER.warn("Cluster status could not be verified by Cloudbreak. Original message: {}",
                     e.getMessage());
@@ -119,7 +119,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             FailureReportV4Request failureReport = new FailureReportV4Request();
             failureReport.setFailedNodes(Collections.singletonList(pgw.get().getDiscoveryFQDN()));
             try {
-                cloudbreakCommunicator.failureReport(cluster.getStackId(), failureReport);
+                cloudbreakCommunicator.failureReport(cluster.getStackCrn(), failureReport);
             } catch (Exception e) {
                 LOGGER.warn("Exception during failure report. Original message: {}", e.getMessage());
             }

@@ -53,6 +53,11 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Optional<Stack> findByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
+    @Query("SELECT s FROM Stack s WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND s.terminated = null "
+            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    Optional<Stack> findByCrnAndWorkspaceId(@Param("crn") String crn, @Param("workspaceId") Long workspaceId);
+
+    @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s WHERE s.name in :names AND s.workspace.id= :workspaceId AND s.terminated = null "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<Stack> findByNameInAndWorkspaceId(@Param("names") Set<String> name, @Param("workspaceId") Long workspaceId);
@@ -76,9 +81,26 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             @Param("terminatedAfter") Long terminatedAfter);
 
     @CheckPermissionsByReturnValue
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE sresourceCrn= :crn AND s.workspace.id= :workspaceId AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
+    Optional<Stack> findByCrnAndWorkspaceIdWithLists(@Param("crn") String crn, @Param("workspaceId") Long workspaceId,
+            @Param("showTerminated") Boolean showTerminated, @Param("terminatedAfter") Long terminatedAfter);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND s.type = :type AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
+    Optional<Stack> findByCrnAndWorkspaceIdWithLists(@Param("crn") String crn, @Param("type") StackType type, @Param("workspaceId") Long workspaceId,
+            @Param("showTerminated") Boolean showTerminated, @Param("terminatedAfter") Long terminatedAfter);
+
+    @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE sresourceCrn= :crn "
+            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    Optional<Stack> findOneByCrnWithLists(@Param("crn") String crn);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
@@ -154,6 +176,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "w.id as workspaceId, "
             + "t.name as tenantName, "
             + "u.userId as userId, "
+            + "s.resourceCrn as crn, "
             + "c.variant as clusterManagerVariant "
             + "FROM Stack s "
             + "LEFT JOIN s.cluster c "
@@ -197,6 +220,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.workspace.id FROM Stack s where s.id = :id")
     Long findWorkspaceIdById(@Param("id") Long id);
 
+    @DisableCheckPermissions
+    @Query("SELECT s.workspace.id FROM Stack s where s.resourceCrn = :crn")
+    Long findWorkspaceIdByCrn(@Param("crn") String crn);
+
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environmentCrn = :environmentCrn "
             + "AND s.type = 'DATALAKE' AND s.terminated = null")
@@ -211,9 +238,17 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.workspace FROM Stack s where s.id = :id")
     Optional<Workspace> findWorkspaceById(@Param("id") Long id);
 
+    @DisableCheckPermissions
+    @Query("SELECT s.workspace FROM Stack s where s.resourceCrn = :crn")
+    Optional<Workspace> findWorkspaceByCrn(@Param("crn") String crn);
+
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id "
             + "AND s.type is 'TEMPLATE'")
     Optional<Stack> findTemplateWithLists(@Param("id") Long id);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT s FROM Stack s WHERE s.resourceCrn = :crn")
+    Optional<Stack> findByResourceCrn(@Param("crn") String crn);
 
 }

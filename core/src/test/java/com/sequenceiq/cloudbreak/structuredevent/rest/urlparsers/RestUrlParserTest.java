@@ -54,6 +54,8 @@ public class RestUrlParserTest {
 
     private static final String WORKSPACE_NAME = "some-stupid-workspace-name-34";
 
+    private static final String RESOURCE_CRN = "crn:altus:cloudbreak:us-west:default:stack:440ac57e-9f21-4b9a-bcfd-3034a5738b12";
+
     private static final String PATH_AUTOSCALE = "autoscale";
 
     private static final String PATH_V_4 = "v4";
@@ -63,6 +65,8 @@ public class RestUrlParserTest {
     private static final String PATH_CODE_GRANT_FLOW = "code_grant_flow";
 
     private static final String ID_REGEX = "\\d+";
+
+    private static final String CRN_REGEX = "[^/]+";
 
     private static final String SLASH = "/";
 
@@ -75,7 +79,7 @@ public class RestUrlParserTest {
     @Autowired
     private List<RestUrlParser> restUrlParsers;
 
-    private String[] excludes = {"/v1/distrox"};
+    private String[] excludes = {"/v1/distrox", "/autoscale"};
 
     @Test
     public void testEventUrlParser() {
@@ -175,12 +179,12 @@ public class RestUrlParserTest {
             // Skip v4/workspaces/{name}
             // Match v4/users/evict and similars
             resourceEvent = parts[2];
-        } else if ((parts.length == 2 || parts.length == 3 && !parts[2].matches(ID_REGEX)) && PATH_AUTOSCALE.equals(parts[0])) {
-            // Skip autoscale/stack/{id}
+        } else if ((parts.length == 2 || parts.length == 3 && "all".equals(parts[2])) && PATH_AUTOSCALE.equals(parts[0])) {
+            // Skip autoscale/stack/{crn}
             // Match autoscale/ambari and autoscale/stack/all
             resourceEvent = parts.length == 2 ? parts[1] : String.join(SLASH, parts[1], parts[2]);
         } else if (parts.length >= 4 && PATH_AUTOSCALE.equals(parts[0])) {
-            // Match autoscale/stack/{id}/{userId} and similars
+            // Match autoscale/stack/{crn}/{userId} and similars
             String[] eventParts = new String[parts.length - 3];
             System.arraycopy(parts, 3, eventParts, 0, eventParts.length);
             resourceEvent = String.join(SLASH, eventParts);
@@ -198,7 +202,8 @@ public class RestUrlParserTest {
         String resourceType = null;
         if (parts.length > 0) {
             resourceType = parts[0];
-            if (parts.length > 2 && PATH_AUTOSCALE.equals(parts[0]) && parts[2].matches(ID_REGEX)) {
+            if (parts.length > 2 && PATH_AUTOSCALE.equals(parts[0]) && parts[2].matches(CRN_REGEX) && !"all".equals(parts[2])) {
+                // skip autoscale/stack/all - since `all` matches to the crn regex
                 resourceType = parts[1];
             } else if (parts.length > 1 && PATH_V_4.equals(parts[0])) {
                 resourceType = parts.length > 2 && parts[1].matches(ID_REGEX) ? parts[2] : parts[1];
@@ -222,6 +227,9 @@ public class RestUrlParserTest {
             assertEquals("params should contain workspace name",
                     WORKSPACE_NAME, params.get(RestUrlParser.RESOURCE_NAME));
             assertNull("params must not contain resource ID when having a resource name", params.get(RestUrlParser.RESOURCE_ID));
+        } else if (methodPath.contains(RESOURCE_CRN)) {
+            assertEquals("params should contains resource crn", RESOURCE_CRN, params.get(RestUrlParser.RESOURCE_NAME));
+            assertNull("params must not contain resource ID when having a resource crn", params.get(RestUrlParser.RESOURCE_ID));
         } else {
             assertNull("params must not contain resource ID", params.get(RestUrlParser.RESOURCE_ID));
             assertNull("params must not contain resource name", params.get(RestUrlParser.RESOURCE_NAME));
@@ -293,9 +301,13 @@ public class RestUrlParserTest {
                             ? methodPath.replace('{' + pathParamValue + '}', WORKSPACE_ID)
                             : methodPath.replace('{' + pathParamValue + '}', RESOURCE_ID);
                 } else {
-                    methodPath = methodPath.startsWith("/v4/workspaces")
-                            ? methodPath.replace('{' + pathParamValue + '}', WORKSPACE_NAME)
-                            : methodPath.replace('{' + pathParamValue + '}', RESOURCE_NAME);
+                    if (methodPath.startsWith("/v4/workspaces")) {
+                        methodPath = methodPath.replace('{' + pathParamValue + '}', WORKSPACE_NAME);
+                    } else if (methodPath.startsWith("/autoscale/stack")) {
+                        methodPath = methodPath.replace('{' + pathParamValue + '}', RESOURCE_CRN);
+                    } else {
+                        methodPath = methodPath.replace('{' + pathParamValue + '}', RESOURCE_NAME);
+                    }
                 }
             }
         }

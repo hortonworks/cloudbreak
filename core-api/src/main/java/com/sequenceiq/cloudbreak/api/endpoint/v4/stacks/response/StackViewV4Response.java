@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
-import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.STACK_ID;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
@@ -15,8 +13,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class StackViewV4Response implements JsonEntity {
 
-    @ApiModelProperty(STACK_ID)
-    private Long id;
+    @ApiModelProperty(StackModelDescription.CRN)
+    private String crn;
 
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
@@ -52,12 +50,12 @@ public class StackViewV4Response implements JsonEntity {
     @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
-    public Long getId() {
-        return id;
+    public String getCrn() {
+        return crn;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     public ClusterViewV4Response getCluster() {

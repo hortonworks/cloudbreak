@@ -67,23 +67,17 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     private ClusterCommonService clusterCommonService;
 
     @Override
-    public void putStack(Long id, String userId, @Valid UpdateStackV4Request updateRequest) {
-        setupIdentityForAutoscale(id, userId);
-        stackCommonService.putInDefaultWorkspace(id, updateRequest);
-    }
-
-    private void setupIdentityForAutoscale(Long id, String userId) {
-        Tenant tenant = stackService.getTenant(id);
-        restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(userId, tenant.getName());
-        restRequestThreadLocalService.setRequestedWorkspaceId(stackService.getWorkspaceId(id));
+    public void putStack(String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
+        setupIdentityForAutoscale(crn, userId);
+        stackCommonService.putInDefaultWorkspace(crn, updateRequest);
     }
 
     @Override
-    public void putCluster(Long stackId, String userId, @Valid UpdateClusterV4Request updateRequest) {
-        setupIdentityForAutoscale(stackId, userId);
+    public void putCluster(String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
+        setupIdentityForAutoscale(crn, userId);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        clusterCommonService.put(stackId, updateRequest, user, workspace);
+        clusterCommonService.put(crn, updateRequest, user, workspace);
     }
 
     @Override
@@ -98,21 +92,21 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    public void failureReport(Long stackId, FailureReportV4Request failureReport) {
-        clusterService.failureReport(stackId, failureReport.getFailedNodes());
+    public void failureReport(String crn, FailureReportV4Request failureReport) {
+        clusterService.failureReport(crn, failureReport.getFailedNodes());
     }
 
     @Override
-    public StackV4Response get(Long id) {
-        return stackCommonService.get(id, Collections.emptySet());
+    public StackV4Response get(String crn) {
+        return stackCommonService.getByCrn(crn, Collections.emptySet());
     }
 
     @Override
-    public AuthorizeForAutoscaleV4Response authorizeForAutoscale(Long id, String userId, String tenant, String permission) {
+    public AuthorizeForAutoscaleV4Response authorizeForAutoscale(String crn, String userId, String tenant, String permission) {
         AuthorizeForAutoscaleV4Response response = new AuthorizeForAutoscaleV4Response();
         try {
             restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(userId, tenant);
-            Stack stack = stackService.get(id);
+            Stack stack = stackService.getByCrn(crn);
             if (ResourceAction.WRITE.name().equalsIgnoreCase(permission)) {
                 User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
                 permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), STACK, ResourceAction.WRITE, user);
@@ -125,7 +119,14 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    public CertificateV4Response getCertificate(Long stackId) {
-        return stackCommonService.getCertificate(stackId);
+    public CertificateV4Response getCertificate(String crn) {
+        return stackCommonService.getCertificate(crn);
     }
+
+    private void setupIdentityForAutoscale(String crn, String userId) {
+        Tenant tenant = stackService.getTenant(crn);
+        restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(userId, tenant.getName());
+        restRequestThreadLocalService.setRequestedWorkspaceId(stackService.getWorkspaceId(crn));
+    }
+
 }

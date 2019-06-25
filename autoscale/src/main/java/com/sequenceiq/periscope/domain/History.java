@@ -52,8 +52,8 @@ public class History {
     @Column(name = "cluster_id")
     private long clusterId;
 
-    @Column(name = "cb_stack_id")
-    private Long cbStackId;
+    @Column(name = "cb_stack_crn")
+    private String stackCrn;
 
     @Column(name = "original_node_count")
     private int originalNodeCount;
@@ -127,7 +127,7 @@ public class History {
 
     public History withCluster(Cluster cluster) {
         clusterId = cluster.getId();
-        cbStackId = cluster.getStackId();
+        stackCrn = cluster.getStackCrn();
         return this;
     }
 
@@ -139,12 +139,12 @@ public class History {
         this.clusterId = clusterId;
     }
 
-    public Long getCbStackId() {
-        return cbStackId;
+    public String getStackCrn() {
+        return stackCrn;
     }
 
-    public void setCbStackId(Long cbStackId) {
-        this.cbStackId = cbStackId;
+    public void setStackCrn(String stackCrn) {
+        this.stackCrn = stackCrn;
     }
 
     public int getOriginalNodeCount() {

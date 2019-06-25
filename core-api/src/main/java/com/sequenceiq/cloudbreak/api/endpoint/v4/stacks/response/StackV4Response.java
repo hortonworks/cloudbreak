@@ -40,8 +40,9 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class StackV4Response extends StackV4Base {
 
-    @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long id;
+
+    private String crn;
 
     private String environmentCrn;
 
@@ -121,6 +122,14 @@ public class StackV4Response extends StackV4Base {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     public Status getStatus() {

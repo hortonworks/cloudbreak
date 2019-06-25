@@ -24,7 +24,7 @@ public class StackGetAction implements Action<StackTestDto, CloudbreakClient> {
                         .stackV4Endpoint()
                         .get(client.getWorkspaceId(), testDto.getName(), new HashSet<>()));
         Log.logJSON(LOGGER, " Stack get was successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, " ID: " + testDto.getResponse().getId());
+        Log.log(LOGGER, " CRN: " + testDto.getResponse().getCrn());
 
         return testDto;
     }

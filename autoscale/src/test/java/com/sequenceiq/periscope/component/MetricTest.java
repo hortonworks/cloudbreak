@@ -149,6 +149,8 @@ public class MetricTest {
 
     private static final long STACK_ID = 2L;
 
+    private static final String STACK_CRN = "LoremIpsum";
+
     private static final long CLUSTER_ID = 1L;
 
     private static final String PERISCOPE_METRICS_LEADER = "periscope.node.leader";
@@ -304,7 +306,7 @@ public class MetricTest {
         when(clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.SUSPENDED), eq(true), anyString()))
                 .thenReturn(1);
         when(cloudbreakClient.autoscaleEndpoint()).thenReturn(autoscaleEndpoint);
-        when(autoscaleEndpoint.get(eq(STACK_ID))).thenReturn(getStackResponse(AVAILABLE, AVAILABLE));
+        when(autoscaleEndpoint.get(eq(STACK_CRN))).thenReturn(getStackResponse(AVAILABLE, AVAILABLE));
         ReflectionTestUtils.setField(updateFailedHandler, "updateFailures", getUpdateFailures(CLUSTER_ID));
 
         updateFailedHandler.onApplicationEvent(new UpdateFailedEvent(CLUSTER_ID));
@@ -387,7 +389,7 @@ public class MetricTest {
     }
 
     private AutoscaleClusterRequest getCreateAutoscaleClusterRequest() {
-        return new AutoscaleClusterRequest("host", "port", USER_A_ID, "pass", STACK_ID, true);
+        return new AutoscaleClusterRequest("host", "port", USER_A_ID, "pass", STACK_CRN, true);
     }
 
     private ClusterPertain getClusterPertain() {
@@ -397,7 +399,7 @@ public class MetricTest {
     private Cluster getACluster(ClusterState clusterState) {
         Cluster cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
-        cluster.setStackId(STACK_ID);
+        cluster.setStackCrn(STACK_CRN);
         cluster.setClusterPertain(getClusterPertain());
         cluster.setClusterManager(new ClusterManager("host", "port", USER_A_ID, "", ClusterManagerVariant.AMBARI));
         cluster.setState(clusterState);

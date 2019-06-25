@@ -69,7 +69,7 @@ import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
 public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
@@ -96,6 +96,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     private boolean clusterNameAsSubdomain;
 
     private String displayName;
+
+    private String resourceCrn;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
@@ -175,6 +177,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     @Enumerated(EnumType.STRING)
     private StackType type;
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
+    }
 
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;

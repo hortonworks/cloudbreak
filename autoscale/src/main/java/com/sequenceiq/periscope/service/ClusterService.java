@@ -6,6 +6,7 @@ import static com.sequenceiq.periscope.service.NotFoundException.notFound;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
@@ -61,6 +62,7 @@ public class ClusterService {
     public Cluster create(Cluster cluster, ClusterPertain clusterPertain, MonitoredStack stack, ClusterState clusterState) {
         cluster.setClusterPertain(clusterPertain);
         cluster.setClusterManager(stack.getClusterManager());
+        cluster.setStackCrn(stack.getStackCrn());
         cluster.setStackId(stack.getStackId());
         if (clusterState != null) {
             cluster.setState(clusterState);
@@ -178,16 +180,16 @@ public class ClusterService {
         Iterable<Cluster> clusters = clusterRepository.findAll();
         boolean clusterForTheSameStackAndClusterManager = StreamSupport.stream(clusters.spliterator(), false)
                 .anyMatch(cluster -> {
-                    boolean equalityOfStackId = cluster.getStackId() != null && cluster.getStackId().equals(stack.getStackId());
+                    boolean equalityOfStackCrn = cluster.getStackCrn() != null && Objects.equals(cluster.getStackCrn(), stack.getStackCrn());
                     ClusterManager clusterManager = cluster.getClusterManager();
                     ClusterManager newClusterManager = stack.getClusterManager();
                     boolean clrMgrObjectsNotNull = clusterManager != null && newClusterManager != null;
                     boolean clrMgrHostsNotEmpty = clrMgrObjectsNotNull && !isEmpty(clusterManager.getHost()) && !isEmpty(newClusterManager.getHost());
                     boolean equalityOfCMHost = clrMgrObjectsNotNull && clrMgrHostsNotEmpty && clusterManager.getHost().equals(newClusterManager.getHost());
-                    return equalityOfStackId && equalityOfCMHost;
+                    return equalityOfStackCrn && equalityOfCMHost;
                 });
         if (clusterForTheSameStackAndClusterManager) {
-            throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and " + stack.getClusterManager().getVariant().name() + " host.");
+            throw new BadRequestException("Cluster exists for the same Cloudbreak stack crn and " + stack.getClusterManager().getVariant().name() + " host.");
         }
     }
 

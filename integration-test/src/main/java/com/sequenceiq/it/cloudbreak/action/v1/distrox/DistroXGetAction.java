@@ -22,9 +22,9 @@ public class DistroXGetAction implements Action<DistroXTestDto, CloudbreakClient
         testDto.setResponse(
                 client.getCloudbreakClient()
                         .distroXV1Endpoint()
-                        .get(testDto.getName(), new HashSet<>()));
+                        .getByName(testDto.getName(), new HashSet<>()));
         Log.logJSON(LOGGER, " Stack get was successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, " ID: " + testDto.getResponse().getId());
+        Log.log(LOGGER, " crn: " + testDto.getResponse().getCrn());
 
         return testDto;
     }

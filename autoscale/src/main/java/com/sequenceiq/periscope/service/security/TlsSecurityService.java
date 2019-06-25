@@ -27,8 +27,8 @@ public class TlsSecurityService {
     @Inject
     private SecretService secretService;
 
-    public SecurityConfig prepareSecurityConfig(Long stackId) {
-        CertificateV4Response response = internalCrnClient.withInternalCrn().autoscaleEndpoint().getCertificate(stackId);
+    public SecurityConfig prepareSecurityConfig(String stackCrn) {
+        CertificateV4Response response = internalCrnClient.withInternalCrn().autoscaleEndpoint().getCertificate(stackCrn);
         return new SecurityConfig(response.getClientKeyPath(), response.getClientCertPath(), response.getServerCert());
     }
 
@@ -38,7 +38,7 @@ public class TlsSecurityService {
             securityConfig = getSecurityConfigSilently(cluster);
         }
         if (securityConfig == null) {
-            securityConfig = prepareSecurityConfig(cluster.getStackId());
+            securityConfig = prepareSecurityConfig(cluster.getStackCrn());
         }
         String clientKey = new String(Base64.decode(secretService.get(securityConfig.getClientKey())));
         String clientCert = new String(Base64.decode(secretService.get(securityConfig.getClientCert())));
@@ -52,7 +52,7 @@ public class TlsSecurityService {
             securityConfig = getSecurityConfigSilently(cluster);
         }
         if (securityConfig == null) {
-            securityConfig = prepareSecurityConfig(cluster.getStackId());
+            securityConfig = prepareSecurityConfig(cluster.getStackCrn());
         }
         String clientKey = new String(Base64.decode(secretService.get(securityConfig.getClientKey())));
         String clientCert = new String(Base64.decode(secretService.get(securityConfig.getClientCert())));

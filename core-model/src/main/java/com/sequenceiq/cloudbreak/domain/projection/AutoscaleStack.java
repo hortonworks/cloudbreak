@@ -42,4 +42,7 @@ public interface AutoscaleStack {
     String getUserId();
 
     String getClusterManagerVariant();
+
+    String getCrn();
+
 }

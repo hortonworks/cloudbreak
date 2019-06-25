@@ -97,7 +97,7 @@ public class ApiDescription {
         public static final String PORT = "Ambari server port";
         public static final String USERNAME = "Ambari server username";
         public static final String PASSWORD = "Ambari server password";
-        public static final String STACK_ID = "Id of the stack in Cloudbreak";
+        public static final String STACK_CRN = "crn of the stack in Cloudbreak";
         public static final String ENABLE_AUTOSCALING = "Enable or Disable the Autoscaling feature set on the underlying Periscope cluster";
         public static final String AUTOSCALING_ENABLED = "Indicate that the Autoscaling feature set is Enabled or Disabled";
         public static final String ID = "Id of the cluster";
@@ -160,7 +160,7 @@ public class ApiDescription {
     public static class HistoryJsonProperties {
         public static final String ID = "Id of the history object";
         public static final String CLUSTERID = "If of the cluster";
-        public static final String CBSTACKID = "Id of the cloudbreak stack";
+        public static final String CBSTACKCRN = "crn of the cloudbreak stack";
         public static final String ORIGINALNODECOUNT = "The node count before of the scaling";
         public static final String ADJUSTMENT = "Count of scaling";
         public static final String ADJUSTMENTTYPE = "Type of adjustment";

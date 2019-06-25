@@ -1,0 +1,272 @@
+package com.sequenceiq.distrox.v1.distrox;
+
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDto.StackAccessDtoBuilder.aStackAccessDtoBuilder;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.Set;
+
+import javax.ws.rs.BadRequestException;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.ClusterCommonService;
+import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
+import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
+
+public class StackOperationTest {
+
+    private static final String INVALID_DTO_MESSAGE = "A stack name or crn must be provided. One and only one of them.";
+
+    private static final String NULL_DTO_EXCEPTION_MESSAGE = "StackAccessDto should not be null";
+
+    private static final StackType STACK_TYPE = StackType.WORKLOAD;
+
+    private static final Set<String> STACK_ENTRIES = Collections.emptySet();
+
+    @Rule
+    public final ExpectedException exceptionRule = ExpectedException.none();
+
+    @InjectMocks
+    private StackOperation underTest;
+
+    @Mock
+    private StackCommonService stackCommonService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private WorkspaceService workspaceService;
+
+    @Mock
+    private StackService stackService;
+
+    @Mock
+    private ClusterCommonService clusterCommonService;
+
+    @Mock
+    private ConverterUtil converterUtil;
+
+    @Mock
+    private StackApiViewService stackApiViewService;
+
+    @Mock
+    private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
+
+    @Mock
+    private EnvironmentServiceDecorator environmentServiceDecorator;
+
+    @Mock
+    private CloudbreakUser cloudbreakUser;
+
+    private Stack stack;
+
+    private User user;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        user = TestUtil.user(1L, "someUserId");
+        stack = TestUtil.stack();
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
+    }
+
+    @Test
+    public void testDeleteWhenDtoNameFilledAndForcedTrueAndDeleteDependenciesTrueThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), true, true);
+
+        verify(userService, times(1)).getOrCreate(any());
+        verify(userService, times(1)).getOrCreate(cloudbreakUser);
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), true, true, user);
+        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+    }
+
+    @Test
+    public void testDeleteWhenDtoNameFilledAndForcedFalseAndDeleteDependenciesTrueThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), false, true);
+
+        verify(userService, times(1)).getOrCreate(any());
+        verify(userService, times(1)).getOrCreate(cloudbreakUser);
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), false, true, user);
+        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+    }
+
+    @Test
+    public void testDeleteWhenDtoNameFilledAndForcedTrueAndDeleteDependenciesFalseThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), true, false);
+
+        verify(userService, times(1)).getOrCreate(any());
+        verify(userService, times(1)).getOrCreate(cloudbreakUser);
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), true, false, user);
+        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+    }
+
+    @Test
+    public void testDeleteWhenDtoNameFilledAndBothForcedAndDeleteDependenciesAreFalseThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), false, false);
+
+        verify(userService, times(1)).getOrCreate(any());
+        verify(userService, times(1)).getOrCreate(cloudbreakUser);
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), false, false, user);
+        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+    }
+
+    @Test
+    public void testDeleteWhenDtoCrnFilledAndForcedTrueAndDeleteDependenciesTrueThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), true, true);
+
+        verify(userService, times(1)).getOrCreate(any());
+        verify(userService, times(1)).getOrCreate(cloudbreakUser);
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), true, true, user);
+        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+    }
+
+    @Test
+    public void testDeleteWhenDtoCrnFilledAndForcedFalseAndDeleteDependenciesTrueThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), false, true);
+
+        verify(userService, times(1)).getOrCreate(any());
+        verify(userService, times(1)).getOrCreate(cloudbreakUser);
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), false, true, user);
+        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+    }
+
+    @Test
+    public void testDeleteWhenDtoCrnFilledAndForcedTrueAndDeleteDependenciesFalseThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), true, false);
+
+        verify(userService, times(1)).getOrCreate(any());
+        verify(userService, times(1)).getOrCreate(cloudbreakUser);
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), true, false, user);
+        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+    }
+
+    @Test
+    public void testDeleteWhenDtoCrnFilledAndBothForcedAndDeleteDependenciesAreFalseThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), false, false);
+
+        verify(userService, times(1)).getOrCreate(any());
+        verify(userService, times(1)).getOrCreate(cloudbreakUser);
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), false, false, user);
+        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+    }
+
+    @Test
+    public void testDeleteWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
+        exceptionRule.expect(BadRequestException.class);
+        exceptionRule.expectMessage(INVALID_DTO_MESSAGE);
+
+        underTest.delete(aStackAccessDtoBuilder().build(), stack.getWorkspace().getId(), true, true);
+
+        verify(stackCommonService, times(0)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+        verify(stackCommonService, times(0)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+    }
+
+    @Test
+    public void  testDeleteIfDtoIsNullThenIllegalArgumentExceptionComes() {
+        exceptionRule.expect(IllegalArgumentException.class);
+        exceptionRule.expectMessage(NULL_DTO_EXCEPTION_MESSAGE);
+
+        underTest.delete(null, stack.getWorkspace().getId(), true, true);
+
+        verify(stackCommonService, times(0)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+        verify(stackCommonService, times(0)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+    }
+
+    @Test
+    public void testGetWhenDtoNameFilledThenProperGetCalled() {
+        StackV4Response expected = stackResponse();
+        when(stackCommonService.findStackByNameAndWorkspaceId(stack.getName(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE))
+                .thenReturn(expected);
+
+        StackV4Response result = underTest.get(aStackAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(),
+                STACK_ENTRIES, STACK_TYPE);
+
+        assertEquals(expected, result);
+        verify(stackCommonService, times(1)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+        verify(stackCommonService, times(1)).findStackByNameAndWorkspaceId(stack.getName(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
+        verify(stackCommonService, times(0)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+    }
+
+    @Test
+    public void testGetWhenDtoCrnFilledThenProperGetCalled() {
+        StackV4Response expected = stackResponse();
+        when(stackCommonService.findStackByCrnAndWorkspaceId(stack.getResourceCrn(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE))
+                .thenReturn(expected);
+
+        StackV4Response result = underTest.get(aStackAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(),
+                STACK_ENTRIES, STACK_TYPE);
+
+        assertEquals(expected, result);
+        verify(stackCommonService, times(1)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+        verify(stackCommonService, times(1)).findStackByCrnAndWorkspaceId(stack.getResourceCrn(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
+        verify(stackCommonService, times(0)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+    }
+
+    @Test
+    public void testGethenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
+        exceptionRule.expect(BadRequestException.class);
+        exceptionRule.expectMessage(INVALID_DTO_MESSAGE);
+
+        underTest.get(aStackAccessDtoBuilder().build(), stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
+
+        verify(stackCommonService, times(0)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+        verify(stackCommonService, times(0)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+    }
+
+    @Test
+    public void  testGetByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
+        exceptionRule.expect(IllegalArgumentException.class);
+        exceptionRule.expectMessage(NULL_DTO_EXCEPTION_MESSAGE);
+
+        underTest.get(null, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
+
+        verify(stackCommonService, times(0)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+        verify(stackCommonService, times(0)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
+    }
+
+    private StackV4Response stackResponse() {
+        return new StackV4Response();
+    }
+
+}
