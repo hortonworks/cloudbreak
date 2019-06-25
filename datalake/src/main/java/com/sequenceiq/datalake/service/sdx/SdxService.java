@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -47,6 +48,11 @@ public class SdxService {
 
     @Inject
     private CloudbreakUserCrnClient cloudbreakClient;
+
+    public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<SdxClusterStatus> statuses) {
+        List<SdxCluster> sdxClusters = sdxClusterRepository.findByIdInAndStatusIn(resourceIds, statuses);
+        return sdxClusters.stream().map(SdxCluster::getId).collect(Collectors.toSet());
+    }
 
     public SdxCluster getById(Long id) {
         Optional<SdxCluster> sdxClusters = sdxClusterRepository.findById(id);
