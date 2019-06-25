@@ -189,7 +189,10 @@ public class ProvisionerService {
             stackRequest.setTags(tags);
             stackRequest.setEnvironmentCrn(sdxCluster.getEnvCrn());
 
-            if (!CloudPlatform.YARN.name().equals(environment.getCloudPlatform()) && !environment.getNetwork().getSubnetMetas().isEmpty()) {
+            if (!CloudPlatform.YARN.name().equals(environment.getCloudPlatform())
+                    && environment.getNetwork() != null
+                    && environment.getNetwork().getSubnetMetas() != null
+                    && !environment.getNetwork().getSubnetMetas().isEmpty()) {
                 setupPlacement(environment, stackRequest);
                 setupNetwork(environment, stackRequest);
             }
