@@ -49,11 +49,6 @@ public class ProvisionerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionerService.class);
 
-    private String dummySshKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
-            + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
-            + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
-            + "centos";
-
     @Inject
     private CloudbreakUserCrnClient cloudbreakClient;
 
@@ -196,7 +191,7 @@ public class ProvisionerService {
                 setupPlacement(environment, stackRequest);
                 setupNetwork(environment, stackRequest);
             }
-            setupAuthentication(stackRequest);
+            setupAuthentication(environment, stackRequest);
             setupClusterRequest(stackRequest);
             return stackRequest;
         } catch (IOException e) {
@@ -245,12 +240,16 @@ public class ProvisionerService {
         return response;
     }
 
-    private void setupAuthentication(StackV4Request stackRequest) {
+    private void setupAuthentication(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
         if (stackRequest.getAuthentication() == null) {
             StackAuthenticationV4Request stackAuthenticationV4Request = new StackAuthenticationV4Request();
-            stackAuthenticationV4Request.setPublicKey(dummySshKey);
+            stackAuthenticationV4Request.setPublicKey(getSshKey(environment));
             stackRequest.setAuthentication(stackAuthenticationV4Request);
         }
+    }
+
+    private String getSshKey(DetailedEnvironmentResponse environment) {
+        return environment.getAuthentication().getPublicKey();
     }
 
     private void setupClusterRequest(StackV4Request stackRequest) {
