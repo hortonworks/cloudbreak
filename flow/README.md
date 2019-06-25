@@ -63,6 +63,31 @@ You can implement the following interfaces for the flow to be more flexible:
 
 Documentation is under construction...
 
+## Ha application
+
+Flow supports high availability mode of microservice applications:
+- if a microservice has multiple instances, the flows will be distributed among them
+- one flow - one instance is supported currently
+- if an instance of the microservice stops, the flows running on it will be redistributed between the other instances
+- The redistributed flows will continue their running from the last state
+- the steps related to the different states have to be idempotent, because the steps for the last state will be restarted
+- HeartbeatService do the job
+
+If you would like to use your application in high availability mode, you have to do the following steps:
+- For all app instance you have to set the `instance.node.id` parameter, if this parameter is not provided, the application will run in non-ha mode
+- You have to implement HaApplication interface (It has a default empty implementation for non Ha mode: NoHaApplication, example implementation: CloudbreakHaApplication)
+  - getDeletingResources(Set<Long> resourceIds): retrive ids of resources which are in deleting phase
+  - getAllDeletingResources(): retrive all the ids of resources which are in deleting phase
+  - cleanupInMemoryStore(Long resourceId): cleanup resource ids from the inmemory state store which are related to the given resourceid
+  - cancelRunningFlow(Long resourceId): cancel running flows related to the given resourceid
+- You have to implement the ServiceFlowLogComponent interface (default empty implementation: EmptyServiceFlowLogComponent, example implementation: CloudbreakFlowLogComponent)
+  - purgeTerminatedStackLogs(): delete the flowlog entries for the terminated resources
+  - findTerminatingStacksByCloudbreakNodeId(String cloudbreakNodeId): find the resources which has in progress termination / deletion flow on the given nodeid
+- You have to enable scheduling of your application (@EnableScheduling annotation)
+- You have to implement `ApplicationListener<ContextRefreshedEvent>` interface to initialize and cleanup HA related services and broken flows. Example can be found here: CloudbreakCleanupService.onApplicationEvent()
+
+## Cancellable flows
+
 ## Parallel states
 
 Currently not supported, but spring statemachine supports fork and join states
