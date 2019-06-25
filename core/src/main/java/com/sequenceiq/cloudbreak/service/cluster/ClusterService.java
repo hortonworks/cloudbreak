@@ -87,6 +87,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -595,14 +596,14 @@ public class ClusterService {
     }
 
     public void repairCluster(Long stackId, List<String> repairedHostGroups, boolean removeOnly) {
-        repairClusterInternal(true, stackId, repairedHostGroups, null, false, removeOnly);
+        repairClusterInternal(ManualClusterRepairMode.HOST_GROUP, stackId, repairedHostGroups, null, false, removeOnly);
     }
 
     public void repairCluster(Long stackId, List<String> nodeIds, boolean deleteVolumes, boolean removeOnly) {
-        repairClusterInternal(false, stackId, null, nodeIds, deleteVolumes, removeOnly);
+        repairClusterInternal(ManualClusterRepairMode.NODE_ID, stackId, null, nodeIds, deleteVolumes, removeOnly);
     }
 
-    private void repairClusterInternal(boolean hostGroupMode, Long stackId, List<String> repairedHostGroups,
+    private void repairClusterInternal(ManualClusterRepairMode repairMode, Long stackId, List<String> repairedHostGroups,
             List<String> nodeIds, boolean deleteVolumes, boolean removeOnly) {
         Map<String, List<String>> hostGroupToNodesMap = new HashMap<>();
         try {
@@ -611,14 +612,15 @@ public class ClusterService {
                 boolean repairWithReattach = !deleteVolumes;
                 checkReattachSupportedOnProvider(inTransactionStack, repairWithReattach);
                 Cluster cluster = inTransactionStack.getCluster();
-                Set<String> instanceHostNames = getInstanceHostNames(hostGroupMode, inTransactionStack, nodeIds);
+                Set<String> instanceHostNames = getInstanceHostNames(repairMode, inTransactionStack, nodeIds);
                 Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
                 for (HostGroup hg : hostGroups) {
                     List<String> nodesToRepair = new ArrayList<>();
-                    if (hg.getRecoveryMode() == RecoveryMode.MANUAL && (!hostGroupMode || repairedHostGroups.contains(hg.getName()))) {
+                    if (hg.getRecoveryMode() == RecoveryMode.MANUAL
+                            && (repairMode == ManualClusterRepairMode.NODE_ID || repairedHostGroups.contains(hg.getName()))) {
                         for (HostMetadata hmd : hg.getHostMetadata()) {
                             checkReattachSupportForGateways(inTransactionStack, repairWithReattach, cluster, hmd);
-                            if (isRepairNeededForHost(hostGroupMode, instanceHostNames, hmd)) {
+                            if (isRepairNeededForHost(repairMode, instanceHostNames, hmd)) {
                                 checkDiskTypeSupported(inTransactionStack, repairWithReattach, hg);
                                 validateRepair(inTransactionStack, hmd, repairWithReattach);
                                 hostGroupToNodesMap.putIfAbsent(hg.getName(), nodesToRepair);
@@ -627,7 +629,7 @@ public class ClusterService {
                         }
                     }
                 }
-                if (!hostGroupMode) {
+                if (repairMode == ManualClusterRepairMode.NODE_ID) {
                     updateNodeVolumeSetsDeleteVolumesFlag(inTransactionStack, nodeIds, deleteVolumes);
                 }
                 return inTransactionStack;
@@ -666,12 +668,14 @@ public class ClusterService {
         }
     }
 
-    private boolean isRepairNeededForHost(boolean hostGroupMode, Set<String> instanceHostNames, HostMetadata hmd) {
-        return hostGroupMode ? hmd.getHostMetadataState() == HostMetadataState.UNHEALTHY : instanceHostNames.contains(hmd.getHostName());
+    private boolean isRepairNeededForHost(ManualClusterRepairMode repairMode, Set<String> instanceHostNames, HostMetadata hmd) {
+        return repairMode == ManualClusterRepairMode.HOST_GROUP
+                ? hmd.getHostMetadataState() == HostMetadataState.UNHEALTHY
+                : instanceHostNames.contains(hmd.getHostName());
     }
 
-    private Set<String> getInstanceHostNames(boolean hostGroupMode, Stack stack, List<String> nodeIds) {
-        if (hostGroupMode) {
+    private Set<String> getInstanceHostNames(ManualClusterRepairMode repairMode, Stack stack, List<String> nodeIds) {
+        if (repairMode == ManualClusterRepairMode.HOST_GROUP) {
             return Set.of();
         }
         Set<String> instanceHostNames = stack.getInstanceMetaDataAsList()
@@ -679,11 +683,11 @@ public class ClusterService {
                 .filter(md -> nodeIds.contains(md.getInstanceId()))
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(Collectors.toSet());
-        validateRepairNodeIdRequest(nodeIds, instanceHostNames);
+        validateRepairNodeIdUniqueness(nodeIds, instanceHostNames);
         return instanceHostNames;
     }
 
-    private void validateRepairNodeIdRequest(List<String> nodeIds, Set<String> instanceHostNames) {
+    private void validateRepairNodeIdUniqueness(List<String> nodeIds, Set<String> instanceHostNames) {
         long distinctNodeIdCount = nodeIds.stream().distinct().count();
         if (distinctNodeIdCount != instanceHostNames.size()) {
             throw new BadRequestException(String.format("Node ID list is not valid: [%s]", String.join(", ", nodeIds)));
