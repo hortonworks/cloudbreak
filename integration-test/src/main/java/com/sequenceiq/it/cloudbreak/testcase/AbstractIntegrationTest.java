@@ -249,7 +249,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     protected Set<String> createDefaultLdapConfig(TestContext testContext) {
         testContext
                 .given(LdapTestDto.class)
-                .when(ldapTestClient.createIfNotExistV4());
+                .when(ldapTestClient.createIfNotExistV1());
         Set<String> validLdap = new HashSet<>();
         validLdap.add(testContext.get(LdapTestDto.class).getName());
         return validLdap;

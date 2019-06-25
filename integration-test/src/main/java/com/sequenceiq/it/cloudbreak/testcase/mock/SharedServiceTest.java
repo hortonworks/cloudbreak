@@ -22,6 +22,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Req
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
+import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
+import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
@@ -38,6 +40,7 @@ import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -94,8 +97,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .when(databaseTestClient.createV4())
                 .given(RANGER, DatabaseTestDto.class).withRequest(rangerRds).withName(rangerRdsName)
                 .when(databaseTestClient.createV4())
-//                .given(LdapTestDto.class).withRequest(ldapRequest(ldapName)).withName(ldapName)
-//                .when(ldapTestClient.createV4())
+                .given(LdapTestDto.class).withRequest(ldapRequest(ldapName)).withName(ldapName)
+                .when(ldapTestClient.createV1())
                 .given(BlueprintTestDto.class)
                 .withName(blueprintName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true))
@@ -114,7 +117,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .verify(SharedServiceTest::rdsConfigNamesFromResponse, RunningParameter.key(RDS_KEY))
                 .then(SharedServiceTest::checkBlueprintTaggedWithSharedService)
                 .then(cloudStorageParametersHasPassedToAmbariBlueprint())
-//                .then(ldapParametersHasPassedToAmbariBlueprint(ldapName))
+                .then(ldapParametersHasPassedToAmbariBlueprint(ldapName))
                 .then(rdsParametersHasPassedToAmbariBlueprint(hiveRds, rangerRds))
                 .validate();
     }
@@ -131,8 +134,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .when(databaseTestClient.createV4())
                 .given(RANGER, DatabaseTestDto.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
                 .when(databaseTestClient.createV4())
-//                .given(LdapTestDto.class).withName(ldapName)
-//                .when(ldapTestClient.createV4())
+                .given(LdapTestDto.class).withName(ldapName)
+                .when(ldapTestClient.createV1())
                 .given(BlueprintTestDto.class)
                 .withName(blueprintName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true))
@@ -189,8 +192,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(BlueprintTestDto.class).withName(blueprintName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withBlueprint(VALID_DL_BP)
                 .when(blueprintTestClient.createV4())
-//                .given(LdapTestDto.class).withName(ldapName)
-//                .when(ldapTestClient.createV4())
+                .given(LdapTestDto.class).withName(ldapName)
+                .when(ldapTestClient.createV1())
                 .given(HostGroupType.MASTER.name(), InstanceGroupTestDto.class).valid().withHostGroup(HostGroupType.MASTER).withNodeCount(1)
                 .given(ClusterTestDto.class)
                 .withRdsConfigNames(createSetOfNotNulls(hiveRdsName))
@@ -217,8 +220,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(BlueprintTestDto.class).withName(blueprintName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withBlueprint(VALID_DL_BP)
                 .when(blueprintTestClient.createV4())
-//                .given(LdapTestDto.class).withName(ldapName)
-//                .when(ldapTestClient.createV4())
+                .given(LdapTestDto.class).withName(ldapName)
+                .when(ldapTestClient.createV1())
                 .given(HostGroupType.MASTER.name(), InstanceGroupTestDto.class).valid().withHostGroup(HostGroupType.MASTER).withNodeCount(1)
                 .given(ClusterTestDto.class)
                 .withRdsConfigNames(createSetOfNotNulls(rangerRdsName))
@@ -242,8 +245,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(BlueprintTestDto.class).withName(blueprintName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withBlueprint(VALID_DL_BP)
                 .when(blueprintTestClient.createV4())
-//                .given(LdapTestDto.class).withName(ldapName)
-//                .when(ldapTestClient.createV4())
+                .given(LdapTestDto.class).withName(ldapName)
+                .when(ldapTestClient.createV1())
                 .given(HostGroupType.MASTER.name(), InstanceGroupTestDto.class).valid().withHostGroup(HostGroupType.MASTER).withNodeCount(1)
                 .given(ClusterTestDto.class)
                 .withBlueprintName(blueprintName)
@@ -333,18 +336,18 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return verifications;
     }
 
-//    private List<Assertion<StackTestDto>> ldapParametersHasPassedToAmbariBlueprint(String ldapName) {
-//        List<Assertion<StackTestDto>> verifications = new LinkedList<>();
-//        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getUserDnPattern()));
-//        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindPassword()));
-//        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindDn()));
-//        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getHost()));
-//        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getUserSearchBase()));
-//        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getGroupSearchBase()));
-//        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getGroupNameAttribute()));
-//        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getHost()));
-//        return verifications;
-//    }
+    private List<Assertion<StackTestDto, CloudbreakClient>> ldapParametersHasPassedToAmbariBlueprint(String ldapName) {
+        List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
+        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getUserDnPattern()));
+        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindPassword()));
+        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindDn()));
+        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getHost()));
+        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getUserSearchBase()));
+        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getGroupSearchBase()));
+        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getGroupNameAttribute()));
+        verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getHost()));
+        return verifications;
+    }
 
     private List<Assertion<StackTestDto, CloudbreakClient>> rdsParametersHasPassedToAmbariBlueprint(DatabaseV4Request hive, DatabaseV4Request ranger) {
         List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
@@ -356,28 +359,29 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return verifications;
     }
 
-//    private LdapV4Request ldapRequest(String name) {
-//        LdapV4Request request = new LdapV4Request();
-//        request.setGroupMemberAttribute("memberAttribute");
-//        request.setUserNameAttribute("userNameAttribute");
-//        request.setGroupNameAttribute("nameAttribute");
-//        request.setGroupObjectClass("groupObjectClass");
-//        request.setGroupSearchBase("groupSearchBase");
-//        request.setUserObjectClass("userObjectClass");
-//        request.setDirectoryType(DirectoryType.LDAP);
-//        request.setUserSearchBase("userSearchBase");
-//        request.setUserDnPattern("userDnPattern");
-//        request.setBindPassword("bindPassword");
-//        request.setDescription("descrition");
-//        request.setAdminGroup("group");
-//        request.setHost("host");
-//        request.setBindDn("bindDn");
-//        request.setDomain("domain");
-//        request.setProtocol("http");
-//        request.setPort(1234);
-//        request.setName(name);
-//        return request;
-//    }
+    private CreateLdapConfigRequest ldapRequest(String environmentCrn) {
+        CreateLdapConfigRequest request = new CreateLdapConfigRequest();
+        request.setGroupMemberAttribute("memberAttribute");
+        request.setUserNameAttribute("userNameAttribute");
+        request.setGroupNameAttribute("nameAttribute");
+        request.setGroupObjectClass("groupObjectClass");
+        request.setGroupSearchBase("groupSearchBase");
+        request.setUserObjectClass("userObjectClass");
+        request.setDirectoryType(DirectoryType.LDAP);
+        request.setUserSearchBase("userSearchBase");
+        request.setUserDnPattern("userDnPattern");
+        request.setBindPassword("bindPassword");
+        request.setDescription("descrition");
+        request.setAdminGroup("group");
+        request.setHost("host");
+        request.setBindDn("bindDn");
+        request.setDomain("domain");
+        request.setProtocol("http");
+        request.setPort(1234);
+        request.setName(environmentCrn);
+        request.setEnvironmentCrn(environmentCrn);
+        return request;
+    }
 
     private DatabaseV4Request rdsRequest(DatabaseType type, String name) {
         DatabaseV4Request request = new DatabaseV4Request();

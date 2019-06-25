@@ -22,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
@@ -91,15 +92,15 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-//    public void testCreateAnLdapAndGetOtherUser(TestContext testContext) {
-//        testContext
-//                .given(LdapTestDto.class)
-//                .when(ldapTestClient.createV4())
-//                .when(ldapTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-//                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
-//                .validate();
-//    }
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    public void testCreateAnLdapAndGetOtherUser(TestContext testContext) {
+        testContext
+                .given(LdapTestDto.class)
+                .when(ldapTestClient.createV1())
+                .when(ldapTestClient.describeV1(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
+                .validate();
+    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAnImageCatalogWithImagesAndGetOtherUser(TestContext testContext) {
