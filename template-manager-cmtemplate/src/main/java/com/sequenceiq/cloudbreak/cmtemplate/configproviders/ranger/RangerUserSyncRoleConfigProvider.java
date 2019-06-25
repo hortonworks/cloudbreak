@@ -29,7 +29,7 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
         String adminGroup = source.getLdapConfig().map(LdapView::getAdminGroup).orElse("*");
         return List.of(
                 config(ROLE_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty(RANGER_USERSYNC_UNIX_BACKEND, "nss")),
-                config(ROLE_ASSIGNMENT_RULES, "ROLE_SYS_ADMIN:g:" + adminGroup));
+                config(ROLE_ASSIGNMENT_RULES, "&ROLE_SYS_ADMIN:g:" + adminGroup));
     }
 
     @Override
