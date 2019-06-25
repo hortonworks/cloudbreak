@@ -34,6 +34,7 @@ integration-test/test-output/
 owners_log/
 stacks_log/
 suites_log/
+redbeams-log/*.log
 test-output/
 gradle/wrapper/
 */build
