@@ -102,6 +102,22 @@
         ]
       },
       {
+        "refName": "hue",
+        "serviceType": "HUE",
+        "roleConfigGroups": [
+          {
+            "refName": "hue-HUE_SERVER-BASE",
+            "roleType": "HUE_SERVER",
+            "base": true
+          },
+          {
+            "refName": "hue-HUE_LOAD_BALANCER-BASE",
+            "roleType": "HUE_LOAD_BALANCER",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "livy",
         "serviceType": "LIVY",
         "roleConfigGroups": [
@@ -221,6 +237,7 @@
           "hdfs-BALANCER-BASE",
           "hive-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
+          "hue-HUE_LOAD_BALANCER-BASE",
           "livy-LIVY_SERVER-BASE",
           "oozie-OOZIE_SERVER-BASE",
           "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
@@ -239,6 +256,7 @@
           "hive-HIVESERVER2-BASE",
           "hms-GATEWAY-BASE",
           "hms-HIVEMETASTORE-BASE",
+          "hue-HUE_SERVER-BASE",
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
