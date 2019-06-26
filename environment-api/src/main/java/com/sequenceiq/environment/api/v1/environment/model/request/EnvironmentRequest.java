@@ -47,6 +47,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     private String cloudPlatform;
 
     @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
+    @NotNull
     private @Valid EnvironmentAuthenticationRequest authentication;
 
     public String getName() {
