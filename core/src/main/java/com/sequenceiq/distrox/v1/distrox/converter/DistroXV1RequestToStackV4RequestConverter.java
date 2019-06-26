@@ -67,7 +67,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setCloudPlatform(getCloudPlatform(environment));
         request.setEnvironmentCrn(environment.getCrn());
         request.setTelemetry(getIfNotNull(source.getTelemetry(), telemetryConverter::convert));
-        request.setAuthentication(getIfNotNull(source.getAuthentication(), authenticationConverter::convert));
+        request.setAuthentication(getIfNotNull(environment.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
         request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertTo));
@@ -78,6 +78,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSharedService(sdxConverter.getSharedService(source.getSdx(), environment.getCrn()));
+        request.setCustomDomain(null);
         return request;
     }
 
@@ -95,7 +96,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setName(source.getName());
         request.setType(StackType.WORKLOAD);
         request.setTelemetry(getIfNotNull(source.getTelemetry(), telemetryConverter::convert));
-        request.setAuthentication(getIfNotNull(source.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
         request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertTo));
@@ -153,7 +153,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         DistroXV1Request request = new DistroXV1Request();
         request.setName(source.getName());
         request.setEnvironmentName(getIfNotNull(source.getEnvironmentCrn(), crn -> environmentClientService.getByCrn(crn).getName()));
-        request.setAuthentication(getIfNotNull(source.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
         request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertFrom));

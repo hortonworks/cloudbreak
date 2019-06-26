@@ -7,7 +7,6 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.distrox.api.v1.distrox.model.authentication.DistroXAuthenticationV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
@@ -26,8 +25,6 @@ public class DistroXV1Request extends DistroXV1Base {
     private String environmentName;
 
     private Set<InstanceGroupV1Request> instanceGroups;
-
-    private DistroXAuthenticationV1Request authentication;
 
     private DistroXImageV1Request image;
 
@@ -57,14 +54,6 @@ public class DistroXV1Request extends DistroXV1Base {
 
     public void setInstanceGroups(Set<InstanceGroupV1Request> instanceGroups) {
         this.instanceGroups = instanceGroups;
-    }
-
-    public DistroXAuthenticationV1Request getAuthentication() {
-        return authentication;
-    }
-
-    public void setAuthentication(DistroXAuthenticationV1Request authentication) {
-        this.authentication = authentication;
     }
 
     public DistroXImageV1Request getImage() {
