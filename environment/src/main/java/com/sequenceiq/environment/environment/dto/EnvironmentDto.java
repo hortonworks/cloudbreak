@@ -30,6 +30,8 @@ public class EnvironmentDto implements Payload {
 
     private Json regions;
 
+    private Json telemetry;
+
     private boolean archived;
 
     private Long deletionTimestamp = -1L;
@@ -119,6 +121,14 @@ public class EnvironmentDto implements Payload {
 
     public void setRegions(Json regions) {
         this.regions = regions;
+    }
+
+    public Json getTelemetry() {
+        return telemetry;
+    }
+
+    public void setTelemetry(Json telemetry) {
+        this.telemetry = telemetry;
     }
 
     public boolean isArchived() {
@@ -236,6 +246,8 @@ public class EnvironmentDto implements Payload {
 
         private Json regions;
 
+        private Json telemetry;
+
         private boolean archived;
 
         private Long deletionTimestamp = -1L;
@@ -295,6 +307,11 @@ public class EnvironmentDto implements Payload {
 
         public Builder withRegions(Json regions) {
             this.regions = regions;
+            return this;
+        }
+
+        public Builder withTelemetry(Json telemetry) {
+            this.telemetry = telemetry;
             return this;
         }
 
@@ -366,6 +383,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setDescription(description);
             environmentDto.setCredential(credential);
             environmentDto.setCloudPlatform(cloudPlatform);
+            environmentDto.setTelemetry(telemetry);
             environmentDto.setRegions(regions);
             environmentDto.setArchived(archived);
             environmentDto.setDeletionTimestamp(deletionTimestamp);

@@ -55,6 +55,10 @@ public class Environment implements AuthResource {
     @Column(columnDefinition = "TEXT", nullable = false)
     private Json regions;
 
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json telemetry;
+
     @Column(nullable = false)
     private String location;
 
@@ -218,6 +222,14 @@ public class Environment implements AuthResource {
 
     public void setNetwork(BaseNetwork network) {
         this.network = network;
+    }
+
+    public Json getTelemetry() {
+        return telemetry;
+    }
+
+    public void setTelemetry(Json telemetry) {
+        this.telemetry = telemetry;
     }
 
     @Override

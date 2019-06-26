@@ -31,6 +31,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private EnvironmentNetworkResponse network;
 
+        private TelemetryResponse telemetry;
+
         private EnvironmentStatus environmentStatus;
 
         private String statusReason;
@@ -86,6 +88,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withTelemetry(TelemetryResponse telemetry) {
+            this.telemetry = telemetry;
+            return this;
+        }
+
         public Builder withEnvironmentStatus(EnvironmentStatus environmentStatus) {
             this.environmentStatus = environmentStatus;
             return this;
@@ -126,6 +133,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setStatusReason(statusReason);
             detailedEnvironmentResponse.setCreated(created);
             detailedEnvironmentResponse.setAuthentication(authentication);
+            detailedEnvironmentResponse.setTelemetry(telemetry);
             return detailedEnvironmentResponse;
         }
     }

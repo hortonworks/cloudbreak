@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -35,6 +36,7 @@ public class EnvironmentDtoConverter {
                 .withDeletionTimestamp(environment.getDeletionTimestamp())
                 .withLocationDto(environmentToLocationDto(environment))
                 .withRegions(environment.getRegions())
+                .withTelemetry(environment.getTelemetry())
                 .withEnvironmentStatus(environment.getStatus())
                 .withCreator(environment.getCreator())
                 .withCreateFreeIpa(environment.isCreateFreeIpa())
@@ -59,6 +61,9 @@ public class EnvironmentDtoConverter {
         environment.setLatitude(creationDto.getLocation().getLatitude());
         environment.setLongitude(creationDto.getLocation().getLongitude());
         environment.setLocation(creationDto.getLocation().getName());
+        if (creationDto.getTelemetry() != null) {
+            environment.setTelemetry(new Json(creationDto.getTelemetry()));
+        }
         environment.setLocationDisplayName(creationDto.getLocation().getDisplayName());
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
         environment.setCreateFreeIpa(creationDto.isCreateFreeIpa());

@@ -28,6 +28,14 @@ public class EnvironmentModelDescription {
     public static final String LATITUDE = "Location latitude of the environment.";
     public static final String LOCATION_DISPLAY_NAME = "Display name of the location of the environment.";
     public static final String NETWORK = "Network related specifics of the environment.";
+    public static final String TELEMETRY = "Telemetry related specifics of the environment.";
+    public static final String TELEMETRY_LOGGING = "Logging related specifics of the environment.";
+    public static final String TELEMETRY_WORKLOAD_ANALYTICS = "Workload analytics related specifics of the environment.";
+    public static final String TELEMETRY_LOGGING_OUTPUT_TYPE = "Logging output type of the environment";
+    public static final String TELEMETRY_LOGGING_ATTRIBUTES = "Logging component specific attributes of the environment";
+    public static final String TELEMETRY_FEATURE_ENABLED = "Enable telemetry component feature of the environment";
+    public static final String TELEMETRY_WA_DATABUS_ENDPOINT = "Databus endpoint for workload analytics (environment)";
+    public static final String TELEMETRY_WA_ATTRIBUTES = "Workload analytics attributes of the environment";
 
     public static final String CREDENTIAL_RESPONSE = "Credential of the environment.";
     public static final String PROXY_CONFIGS_RESPONSE = "Proxy configurations in the environment.";
