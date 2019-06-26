@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.user.model;
+package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import static java.util.Objects.requireNonNull;
 

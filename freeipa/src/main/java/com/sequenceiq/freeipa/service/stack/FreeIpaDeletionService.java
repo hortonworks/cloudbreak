@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
-import com.sequenceiq.freeipa.service.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 
 @Service
 public class FreeIpaDeletionService {

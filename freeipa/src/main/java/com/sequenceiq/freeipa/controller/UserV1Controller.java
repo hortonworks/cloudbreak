@@ -17,8 +17,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRespo
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserResponse;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
-import com.sequenceiq.freeipa.service.user.PasswordService;
-import com.sequenceiq.freeipa.service.user.UserService;
+import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
+import com.sequenceiq.freeipa.service.freeipa.user.UserService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller

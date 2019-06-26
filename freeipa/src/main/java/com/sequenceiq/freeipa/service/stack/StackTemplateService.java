@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 
 @Service
 public class StackTemplateService {

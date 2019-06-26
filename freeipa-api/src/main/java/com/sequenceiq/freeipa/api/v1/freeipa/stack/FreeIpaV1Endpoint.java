@@ -15,6 +15,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetsResponse;
@@ -105,4 +107,9 @@ public interface FreeIpaV1Endpoint {
     void deleteDnsZoneBySubnetId(@QueryParam("environment") @NotEmpty String environmentCrn,
             @QueryParam("subnetId") @NotEmpty String subnetId) throws Exception;
 
+    @POST
+    @Path("cleanup")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.CLEANUP, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "cleanupV1")
+    CleanupResponse cleanup(@Valid CleanupRequest request) throws Exception;
 }

@@ -24,9 +24,13 @@ public class ListFlatteningDeserializer<T> extends JsonDeserializer<T> implement
         ObjectMapper mapper = (ObjectMapper) p.getCodec();
 
         if (node.iterator().hasNext()) {
-            JsonNode next = node.iterator().next();
-            return mapper.convertValue(next, targetClass);
+            JsonNode actual = node;
+            while (actual.iterator().hasNext()) {
+                actual = actual.iterator().next();
+            }
+            return mapper.convertValue(actual, targetClass);
         }
+
         return null;
     }
 

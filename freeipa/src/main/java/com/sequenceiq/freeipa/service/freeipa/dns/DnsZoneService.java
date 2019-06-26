@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.dns;
+package com.sequenceiq.freeipa.service.freeipa.dns;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +27,7 @@ import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentia
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
-import com.sequenceiq.freeipa.service.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service

@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
-import com.sequenceiq.freeipa.service.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaDeletionServiceTest {

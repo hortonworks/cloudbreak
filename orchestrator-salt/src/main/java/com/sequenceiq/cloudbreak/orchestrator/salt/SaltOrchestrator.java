@@ -102,6 +102,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.new.service.retry:90}")
     private int maxRetry;
 
+    @Value("${cb.max.salt.new.service.leave.retry:5}")
+    private int maxRetryLeave;
+
     @Value("${cb.max.salt.new.service.retry.onerror:20}")
     private int maxRetryOnError;
 
@@ -718,7 +721,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "roles", roleToRemove, CompoundType.IP), exitCriteriaModel);
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetry, true);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryLeave, true);
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for recipes).", e);
             throw new CloudbreakOrchestratorFailedException(e);

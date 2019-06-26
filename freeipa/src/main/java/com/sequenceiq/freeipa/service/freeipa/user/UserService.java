@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.user;
+package com.sequenceiq.freeipa.service.freeipa.user;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,12 +26,12 @@ import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.user.model.SyncStatusDetail;
 import com.sequenceiq.freeipa.service.user.model.UmsState;
-import com.sequenceiq.freeipa.service.user.model.UsersState;
-import com.sequenceiq.freeipa.service.user.model.UsersStateDifference;
 
 @Service
 public class UserService {

@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service;
+package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import java.util.Objects;
 import java.util.Set;
@@ -13,8 +13,9 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.service.user.UserService;
+import com.sequenceiq.freeipa.service.freeipa.user.UserService;
 
 @Service
 public class FreeIpaPostInstallService {

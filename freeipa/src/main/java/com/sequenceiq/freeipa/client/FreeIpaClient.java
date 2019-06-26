@@ -15,11 +15,14 @@ import org.slf4j.LoggerFactory;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.freeipa.client.model.Ca;
 import com.sequenceiq.freeipa.client.model.Config;
+import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.client.model.DnsZoneList;
 import com.sequenceiq.freeipa.client.model.Group;
+import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.freeipa.client.model.Role;
 import com.sequenceiq.freeipa.client.model.User;
 
 public class FreeIpaClient {
@@ -76,6 +79,45 @@ public class FreeIpaClient {
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, User.class);
         return (Set<User>) invoke("user_find", flags, params, type).getResult();
+    }
+
+    public Set<Role> findAllRole() throws FreeIpaClientException {
+        List<String> flags = List.of();
+        Map<String, Object> params = Map.of(
+                "sizelimit", 0,
+                "timelimit", 0
+        );
+        ParameterizedType type = TypeUtils
+                .parameterize(Set.class, Role.class);
+        return (Set<Role>) invoke("role_find", flags, params, type).getResult();
+    }
+
+    public Set<Host> findAllHost() throws FreeIpaClientException {
+        List<String> flags = List.of();
+        Map<String, Object> params = Map.of(
+                "sizelimit", 0,
+                "timelimit", 0
+        );
+        ParameterizedType type = TypeUtils
+                .parameterize(Set.class, Host.class);
+        return (Set<Host>) invoke("host_find", flags, params, type).getResult();
+    }
+
+    public Host deleteHost(String fqdn) throws FreeIpaClientException {
+        Map<String, Object> params = Map.of("updatedns", true);
+        return (Host) invoke("host_del", List.of(fqdn), params, Host.class).getResult();
+    }
+
+    public User deleteUser(String userUid) throws FreeIpaClientException {
+        List<String> flags = List.of(userUid);
+        Map<String, Object> params = Map.of();
+        return (User) invoke("user_del", flags, params, User.class).getResult();
+    }
+
+    public Role deleteRole(String roleName) throws FreeIpaClientException {
+        List<String> flags = List.of(roleName);
+        Map<String, Object> params = Map.of();
+        return (Role) invoke("role_del", flags, params, Role.class).getResult();
     }
 
     public User userAdd(String user, String firstName, String lastName, String password) throws FreeIpaClientException {
@@ -246,6 +288,20 @@ public class FreeIpaClient {
         List<String> flags = List.of(dnsZoneNames);
         Map<String, Object> params = Map.of();
         return invoke("dnszone_del", flags, params, Object.class);
+    }
+
+    public Set<DnsRecord> findAllDnsRecordInZone(String dnsZoneName) throws FreeIpaClientException {
+        List<String> flags = List.of(dnsZoneName);
+        Map<String, Object> params = Map.of();
+        ParameterizedType type = TypeUtils
+                .parameterize(Set.class, DnsRecord.class);
+        return (Set<DnsRecord>) invoke("dnsrecord_find", flags, params, type).getResult();
+    }
+
+    public RPCResponse<Object> deleteDnsRecord(String recordName, String dnsZoneName) throws FreeIpaClientException {
+        List<String> flags = List.of(dnsZoneName, recordName);
+        Map<String, Object> params = Map.of();
+        return invoke("dnsrecord_del", flags, params, Object.class);
     }
 
     public <T> RPCResponse<T> invoke(String method, List<String> flags, Map<String, Object> params, Type resultType) throws FreeIpaClientException {
