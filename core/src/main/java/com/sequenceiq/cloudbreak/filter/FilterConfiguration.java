@@ -6,6 +6,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
@@ -17,6 +18,9 @@ public class FilterConfiguration {
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -58,7 +62,7 @@ public class FilterConfiguration {
     @Bean
     public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
         FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
-        MDCContextFilter filter = new MDCContextFilter(authenticatedUserService,
+        MDCContextFilter filter = new MDCContextFilter(threadBasedUserCrnProvider,
                 () -> MDCBuilder.buildWorkspaceMdcContext(restRequestThreadLocalService.getRequestedWorkspaceId()));
         registrationBean.setFilter(filter);
         registrationBean.setOrder(Integer.MAX_VALUE);

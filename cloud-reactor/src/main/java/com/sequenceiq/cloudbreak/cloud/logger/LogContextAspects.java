@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.logger;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import java.util.Map;
 
 import org.aspectj.lang.JoinPoint;
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MdcContext;
 
 import reactor.bus.Event;
 
@@ -51,13 +54,16 @@ public class LogContextAspects {
     private void buildMdcContext(CloudContext cloudContext, Event<?> event) {
         Map<String, String> eventMdcContext = event.getHeaders().get(MDCBuilder.MDC_CONTEXT_ID);
         if (cloudContext != null) {
-            String flowId = eventMdcContext != null ? eventMdcContext.get(LoggerContextKey.FLOW_ID.toString()) : null;
-            MDCBuilder.addFlowIdToMdcContext(flowId);
-            String requestId = eventMdcContext != null ? eventMdcContext.get(LoggerContextKey.REQUEST_ID.toString()) : null;
-            MDCBuilder.addRequestIdToMdcContext(requestId);
-            MDCBuilder.buildMdcContext(stringValue(cloudContext.getId()), stringValue(cloudContext.getName()), "STACK");
-            MDCBuilder.buildUserAndTenantMdcContext(cloudContext.getUserId(), cloudContext.getAccountId());
-            MDCBuilder.buildEnvironmentMdcContext(eventMdcContext != null ? eventMdcContext.get(LoggerContextKey.ENVIRONMENT_CRN.toString()) : null);
+            MdcContext.builder()
+                    .flowId(getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.FLOW_ID.toString())))
+                    .requestId(getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.REQUEST_ID.toString())))
+                    .resourceCrn(getIfNotNull(cloudContext.getId(), this::stringValue))
+                    .resourceName(getIfNotNull(cloudContext.getName(), this::stringValue))
+                    .resourceType(getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.RESOURCE_TYPE.toString())))
+                    .userCrn(getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.USER_CRN.toString())))
+                    .tenant(getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.TENANT.toString())))
+                    .environmentCrn(getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.ENVIRONMENT_CRN.toString())))
+                    .buildMdc();
         } else {
             MDCBuilder.buildMdcContextFromMap(eventMdcContext);
         }

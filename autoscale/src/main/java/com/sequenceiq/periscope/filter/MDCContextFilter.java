@@ -21,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MdcContext;
 
 public class MDCContextFilter extends OncePerRequestFilter {
 
@@ -47,10 +48,10 @@ public class MDCContextFilter extends OncePerRequestFilter {
         MDCBuilder.cleanupMdc();
         HttpServletRequestWrapper wrapper = new RequestIdHeaderInjectingHttpRequestWrapper(request);
         MDCBuilder.addRequestIdToMdcContext(wrapper.getHeader(REQUEST_ID_HEADER));
+        MdcContext.builder().userCrn(authenticatedUserService.getUserCrn()).buildMdc();
         LOGGER.debug("Request id has been added to MDC context for request, method: {}, path: {}",
                 request.getMethod().toUpperCase(),
                 request.getRequestURI());
-        MDCBuilder.buildUserMdcContext(authenticatedUserService.getCbUser());
         mdcAppender.run();
         filterChain.doFilter(wrapper, response);
     }

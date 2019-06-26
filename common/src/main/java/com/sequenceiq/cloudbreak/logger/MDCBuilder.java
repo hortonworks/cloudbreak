@@ -1,8 +1,14 @@
 package com.sequenceiq.cloudbreak.logger;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -10,7 +16,6 @@ import org.slf4j.MDC;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 public class MDCBuilder {
     public static final String MDC_CONTEXT_ID = "MDC_CONTEXT_ID";
@@ -32,18 +37,20 @@ public class MDCBuilder {
 
     public static void buildMdcContext(Object object) {
         if (object == null) {
-            MDC.put(LoggerContextKey.USER_ID.toString(), "undefined");
-            MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), "undefined");
-            MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
-            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), "undefined");
+            MDC.put(LoggerContextKey.USER_CRN.toString(), null);
+            MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), null);
+            MDC.put(LoggerContextKey.RESOURCE_ID.toString(), null);
+            MDC.put(LoggerContextKey.RESOURCE_CRN.toString(), null);
+            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), null);
         } else {
             MDC.put(LoggerContextKey.WORKSPACE.toString(), getFieldValue(object, "workspace"));
-            MDC.put(LoggerContextKey.RESOURCE_ID.toString(), getFieldValue(object, "id"));
-            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), getFieldValue(object, "name"));
-            MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), object.getClass().getSimpleName().toUpperCase());
-            MDC.put(LoggerContextKey.ENVIRONMENT_CRN.toString(), getFieldValue(object, "environmentCrn"));
-            MDC.put(LoggerContextKey.TENANT.toString(), getFieldValue(object, "accountId"));
-
+            MdcContext.builder()
+                    .resourceCrn(getFieldValues(object, LoggerContextKey.RESOURCE_CRN.toString(), LoggerContextKey.CRN.toString()))
+                    .resourceType(object.getClass().getSimpleName().toUpperCase())
+                    .resourceName(getFieldValue(object, LoggerContextKey.NAME.toString()))
+                    .environmentCrn(getFieldValue(object, LoggerContextKey.ENVIRONMENT_CRN.toString()))
+                    .tenant(getFieldValue(object, LoggerContextKey.ACCOUNT_ID.toString()))
+                    .buildMdc();
         }
     }
 
@@ -52,50 +59,35 @@ public class MDCBuilder {
     }
 
     public static void buildMdcContext(String resourceId, String resourceName, String type) {
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), StringUtils.isEmpty(resourceId) ? "" : resourceId);
-        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), StringUtils.isEmpty(resourceName) ? "" : resourceName);
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), StringUtils.isEmpty(type) ? "" : type);
+        MdcContext.builder()
+                .resourceCrn(resourceId)
+                .resourceType(resourceName)
+                .resourceName(type)
+                .buildMdc();
     }
 
-    public static void buildUserMdcContext(CloudbreakUser user) {
-        if (user != null) {
-            MDC.put(LoggerContextKey.USER_ID.toString(), user.getUserId());
-            MDC.put(LoggerContextKey.USER_NAME.toString(), user.getUsername());
-            MDC.put(LoggerContextKey.TENANT.toString(), user.getTenant());
-        }
+    public static void buildMdc(MdcContext mdcContext) {
+        doIfNotNull(mdcContext.getTenant(), v -> MDC.put(LoggerContextKey.TENANT.toString(), v));
+        doIfNotNull(mdcContext.getUserCrn(), v -> MDC.put(LoggerContextKey.USER_CRN.toString(), v));
+        doIfNotNull(mdcContext.getEnvironmentCrn(), v -> MDC.put(LoggerContextKey.ENVIRONMENT_CRN.toString(), v));
+        doIfNotNull(mdcContext.getFlowId(), v -> MDC.put(LoggerContextKey.FLOW_ID.toString(), v));
+        doIfNotNull(mdcContext.getRequestId(), v -> MDC.put(LoggerContextKey.REQUEST_ID.toString(), v));
+        doIfNotNull(mdcContext.getResourceCrn(), v -> MDC.put(LoggerContextKey.RESOURCE_CRN.toString(), v));
+        doIfNotNull(mdcContext.getResourceName(), v -> MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), v));
+        doIfNotNull(mdcContext.getResourceType(), v -> MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), v));
     }
 
     public static void buildMdcContextFromCrn(Crn crn) {
         if (crn != null) {
-            MDC.put(LoggerContextKey.TENANT.toString(), crn.getAccountId());
-            MDC.put(LoggerContextKey.USER_ID.toString(), crn.getResource());
+            MdcContext.builder()
+                    .tenant(crn.getAccountId())
+                    .userCrn(crn.toString())
+                    .buildMdc();
         }
-    }
-
-    public static void buildUserMdcContext(String userId, String userName) {
-        if (StringUtils.isNotEmpty(userId)) {
-            MDC.put(LoggerContextKey.USER_ID.toString(), userId);
-        }
-        if (StringUtils.isNotEmpty(userName)) {
-            MDC.put(LoggerContextKey.USER_NAME.toString(), userName);
-        }
-    }
-
-    public static void buildUserAndTenantMdcContext(String userId, String tenant) {
-        if (StringUtils.isNotEmpty(userId)) {
-            MDC.put(LoggerContextKey.USER_ID.toString(), userId);
-        }
-        if (StringUtils.isNotEmpty(tenant)) {
-            MDC.put(LoggerContextKey.TENANT.toString(), tenant);
-        }
-    }
-
-    public static void buildEnvironmentMdcContext(String environmentCrn) {
-        MDC.put(LoggerContextKey.ENVIRONMENT_CRN.toString(), environmentCrn == null ? "undefined" : environmentCrn);
     }
 
     public static void buildWorkspaceMdcContext(Long workspaceId) {
-        MDC.put(LoggerContextKey.WORKSPACE_ID.toString(), workspaceId == null ? "undefined" : workspaceId.toString());
+        MDC.put(LoggerContextKey.WORKSPACE_ID.toString(), getIfNotNull(workspaceId, String::valueOf));
     }
 
     public static void buildMdcContextFromMap(Map<String, String> map) {
@@ -133,8 +125,24 @@ public class MDCBuilder {
             privateStringField.setAccessible(true);
             return privateStringField.get(o).toString();
         } catch (Exception ignored) {
-            return "undefined";
+            return null;
         }
+    }
+
+    public static String getFieldValues(Object o, String... fields) {
+        try {
+            Optional<Field> field = Stream.of(fields)
+                    .map(f -> FieldUtils.getField(o.getClass(), f, true))
+                    .filter(Objects::nonNull)
+                    .findFirst();
+            if (field.isPresent()) {
+                field.get().setAccessible(true);
+                return field.get().get(o).toString();
+            }
+        } catch (Exception ignored) {
+
+        }
+        return null;
     }
 
     public static void cleanupMdc() {

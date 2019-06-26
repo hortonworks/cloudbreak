@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.filter;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -19,8 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MdcContext;
 
 public class MDCContextFilter extends OncePerRequestFilter {
 
@@ -28,17 +31,17 @@ public class MDCContextFilter extends OncePerRequestFilter {
 
     private static final String REQUEST_ID_HEADER = "x-cdp-request-id";
 
-    private final AuthenticatedUserService authenticatedUserService;
+    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     private final Runnable mdcAppender;
 
-    public MDCContextFilter(AuthenticatedUserService authenticatedUserService, Runnable mdcAppender) {
-        this.authenticatedUserService = authenticatedUserService;
+    public MDCContextFilter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider, Runnable mdcAppender) {
+        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.mdcAppender = mdcAppender;
     }
 
-    public MDCContextFilter(AuthenticatedUserService authenticatedUserService) {
-        this(authenticatedUserService, () -> {
+    public MDCContextFilter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
+        this(threadBasedUserCrnProvider, () -> {
         });
     }
 
@@ -46,11 +49,15 @@ public class MDCContextFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         MDCBuilder.cleanupMdc();
         HttpServletRequestWrapper wrapper = new RequestIdHeaderInjectingHttpRequestWrapper(request);
-        MDCBuilder.addRequestIdToMdcContext(wrapper.getHeader(REQUEST_ID_HEADER));
+        doIfNotNull(threadBasedUserCrnProvider.getUserCrn(), crn ->
+                MdcContext.builder()
+                        .userCrn(crn)
+                        .tenant(threadBasedUserCrnProvider.getAccountId())
+                        .requestId(wrapper.getHeader(REQUEST_ID_HEADER))
+                        .buildMdc());
         LOGGER.debug("Request id has been added to MDC context for request, method: {}, path: {}",
                 request.getMethod().toUpperCase(),
                 request.getRequestURI());
-        MDCBuilder.buildUserMdcContext(authenticatedUserService.getCbUser());
         mdcAppender.run();
         filterChain.doFilter(wrapper, response);
     }
