@@ -7,6 +7,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -135,15 +136,16 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void awaitFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environment) {
-        PollingResult result = freeIpaPollingService.pollWithTimeoutSingleFailure(
+        Pair<PollingResult, Exception> pollWithTimeout = freeIpaPollingService.pollWithTimeout(
                 new FreeIpaCreationRetrievalTask(),
                 new FreeIpaPollerObject(environment.getResourceCrn(), freeIpaV1Endpoint),
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_INTERVAL,
-                FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT);
-        if (result == SUCCESS) {
+                FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT,
+                FreeIpaCreationRetrievalTask.FREEIPA_FAILURE_COUNT);
+        if (pollWithTimeout.getKey() == SUCCESS) {
             eventSender().sendEvent(getNextStepObject(environment), environmentDtoEvent.getHeaders());
         } else {
-            throw new FreeIpaOperationFailedException("Failed to prepare FreeIpa!");
+            throw new FreeIpaOperationFailedException(pollWithTimeout.getValue().getMessage());
         }
     }
 
