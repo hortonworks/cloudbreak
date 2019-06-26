@@ -31,6 +31,8 @@ public class LdapView {
 
     private String adminGroup;
 
+    private String userGroup;
+
     private String userDnPattern;
 
     private String serverHost;
@@ -127,6 +129,10 @@ public class LdapView {
         return adminGroup;
     }
 
+    public String getUserGroup() {
+        return userGroup;
+    }
+
     public String getUserDnPattern() {
         return userDnPattern;
     }
@@ -161,6 +167,8 @@ public class LdapView {
         private String protocol;
 
         private String adminGroup;
+
+        private String userGroup;
 
         private String userDnPattern;
 
@@ -244,6 +252,11 @@ public class LdapView {
             return this;
         }
 
+        public LdapViewBuilder withUserGroup(String userGroup) {
+            this.userGroup = userGroup;
+            return this;
+        }
+
         public LdapViewBuilder withUserDnPattern(String userDnPattern) {
             this.userDnPattern = userDnPattern;
             return this;
@@ -279,6 +292,7 @@ public class LdapView {
             ldapView.groupObjectClass = this.groupObjectClass;
             ldapView.serverPort = this.serverPort;
             ldapView.adminGroup = this.adminGroup;
+            ldapView.userGroup = this.userGroup;
             ldapView.directoryType = this.directoryType;
             ldapView.domain = this.domain;
             ldapView.groupMemberAttribute = this.groupMemberAttribute;

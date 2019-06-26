@@ -23,6 +23,9 @@ public class DescribeLdapConfigResponse extends LdapConfigBase {
     @ApiModelProperty(LdapConfigModelDescription.BIND_PASSWORD)
     private SecretResponse bindPassword;
 
+    @ApiModelProperty(LdapConfigModelDescription.USER_GROUP)
+    private String userGroup;
+
     public String getCrn() {
         return crn;
     }
@@ -45,5 +48,13 @@ public class DescribeLdapConfigResponse extends LdapConfigBase {
 
     public void setBindPassword(SecretResponse bindPassword) {
         this.bindPassword = bindPassword;
+    }
+
+    public String getUserGroup() {
+        return userGroup;
+    }
+
+    public void setUserGroup(String userGroup) {
+        this.userGroup = userGroup;
     }
 }

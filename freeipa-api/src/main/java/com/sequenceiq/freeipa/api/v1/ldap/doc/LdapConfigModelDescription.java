@@ -23,6 +23,7 @@ public class LdapConfigModelDescription {
     public static final String GROUP_ID_ATTRIBUTE = "Group Id Attribute (defaults to cn)";
     public static final String GROUP_MEMBER_ATTRIBUTE = "Group Member Attribute (defaults to member)";
     public static final String ADMIN_GROUP = "LDAP group for administrators";
+    public static final String USER_GROUP = "LDAP group for regular users";
     public static final String VALIDATION_REQUEST = "Request that contains the minimal set of fields to test LDAP connectivity";
     public static final String CERTIFICATE = "Self-signed certificate of LDAPS server";
 
