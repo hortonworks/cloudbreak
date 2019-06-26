@@ -242,7 +242,7 @@ public class Environment implements AuthResource {
         return status;
     }
 
-    void setStatus(EnvironmentStatus status) {
+    public void setStatus(EnvironmentStatus status) {
         if (ARCHIVED.equals(status)) {
             EnvironmentInMemoryStateStore.put(id, PollGroup.CANCELLED);
         } else {
