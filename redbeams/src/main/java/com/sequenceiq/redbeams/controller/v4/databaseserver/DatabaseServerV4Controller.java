@@ -68,7 +68,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     public DatabaseServerAllocationOutcomeV4Response create(AllocateDatabaseServerV4Request request) {
         DBStack dbStack = dbStackConverter.convert(request, threadBasedUserCrnProvider.getUserCrn());
-        redbeamsCreationService.launchDatabase(dbStack);
+        redbeamsCreationService.launchDatabaseServer(dbStack);
         // FIXME the converter for this doesn't exist yet, and probably needs to convert something
         // more than just a DatabaseServerConfig
         return new DatabaseServerAllocationOutcomeV4Response();

@@ -38,7 +38,7 @@ public class RedbeamsCreationService {
     // private CrnService crnService;
 
     // FIXME need more than just a config
-    public DatabaseServerConfig launchDatabase(DBStack dbStack) {
+    public DatabaseServerConfig launchDatabaseServer(DBStack dbStack) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Create called with: {}", dbStack);
         }
