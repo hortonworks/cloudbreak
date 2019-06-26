@@ -21,10 +21,6 @@ type UserV1 struct {
 	// Required: true
 	FirstName *string `json:"firstName"`
 
-	// the user's groups
-	// Unique: true
-	Groups []string `json:"groups"`
-
 	// last name of the user
 	// Required: true
 	LastName *string `json:"lastName"`
@@ -39,10 +35,6 @@ func (m *UserV1) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateFirstName(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateGroups(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -63,19 +55,6 @@ func (m *UserV1) Validate(formats strfmt.Registry) error {
 func (m *UserV1) validateFirstName(formats strfmt.Registry) error {
 
 	if err := validate.Required("firstName", "body", m.FirstName); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *UserV1) validateGroups(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Groups) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("groups", "body", m.Groups); err != nil {
 		return err
 	}
 

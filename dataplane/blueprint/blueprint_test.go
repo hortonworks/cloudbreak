@@ -32,7 +32,7 @@ func (*mockBlueprintsClient) ListBlueprintsByWorkspace(params *v4bp.ListBlueprin
 }
 
 func (*mockBlueprintsClient) CreateBlueprintInWorkspace(params *v4bp.CreateBlueprintInWorkspaceParams) (*v4bp.CreateBlueprintInWorkspaceOK, error) {
-	return &v4bp.CreateBlueprintInWorkspaceOK{Payload: &model.BlueprintV4Response{ID: int64(1)}}, nil
+	return &v4bp.CreateBlueprintInWorkspaceOK{Payload: &model.BlueprintV4Response{Crn: &(&types.S{S: "crn"}).S}}, nil
 }
 
 func (*mockBlueprintsClient) DeleteBlueprintsInWorkspace(params *v4bp.DeleteBlueprintsInWorkspaceParams) (*v4bp.DeleteBlueprintsInWorkspaceOK, error) {

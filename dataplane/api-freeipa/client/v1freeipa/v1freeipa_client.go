@@ -25,6 +25,66 @@ type Client struct {
 }
 
 /*
+AddDNSZoneForSubnetIdsV1 creates reverse DNS zone entry for subnet ids
+
+FreeIPA is an integrated Identity and Authentication solution that can be used for any of CM, CDP services.
+*/
+func (a *Client) AddDNSZoneForSubnetIdsV1(params *AddDNSZoneForSubnetIdsV1Params) (*AddDNSZoneForSubnetIdsV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAddDNSZoneForSubnetIdsV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "addDnsZoneForSubnetIdsV1",
+		Method:             "POST",
+		PathPattern:        "/v1/freeipa/dns/zone/id",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &AddDNSZoneForSubnetIdsV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*AddDNSZoneForSubnetIdsV1OK), nil
+
+}
+
+/*
+AddDNSZoneForSubnetsV1 creates reverse DNS zone entry for subnets in c ID r format
+
+FreeIPA is an integrated Identity and Authentication solution that can be used for any of CM, CDP services.
+*/
+func (a *Client) AddDNSZoneForSubnetsV1(params *AddDNSZoneForSubnetsV1Params) (*AddDNSZoneForSubnetsV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewAddDNSZoneForSubnetsV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "addDnsZoneForSubnetsV1",
+		Method:             "POST",
+		PathPattern:        "/v1/freeipa/dns/zone/cidr",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &AddDNSZoneForSubnetsV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*AddDNSZoneForSubnetsV1OK), nil
+
+}
+
+/*
 CreateFreeIpaV1 creates free ipa stack
 
 FreeIPA is an integrated Identity and Authentication solution that can be used for any of CM, CDP services.
@@ -51,6 +111,66 @@ func (a *Client) CreateFreeIpaV1(params *CreateFreeIpaV1Params) (*CreateFreeIpaV
 		return nil, err
 	}
 	return result.(*CreateFreeIpaV1OK), nil
+
+}
+
+/*
+DeleteDNSZoneBySubnetIDV1 deletes reverse DNS zone entry by subnet ID
+
+FreeIPA is an integrated Identity and Authentication solution that can be used for any of CM, CDP services.
+*/
+func (a *Client) DeleteDNSZoneBySubnetIDV1(params *DeleteDNSZoneBySubnetIDV1Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteDNSZoneBySubnetIDV1Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteDnsZoneBySubnetIdV1",
+		Method:             "DELETE",
+		PathPattern:        "/v1/freeipa/dns/zone/id",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteDNSZoneBySubnetIDV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+DeleteDNSZoneBySubnetV1 deletes reverse DNS zone entry by subnet c ID r
+
+FreeIPA is an integrated Identity and Authentication solution that can be used for any of CM, CDP services.
+*/
+func (a *Client) DeleteDNSZoneBySubnetV1(params *DeleteDNSZoneBySubnetV1Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteDNSZoneBySubnetV1Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteDnsZoneBySubnetV1",
+		Method:             "DELETE",
+		PathPattern:        "/v1/freeipa/dns/zone/cidr",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteDNSZoneBySubnetV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 
 }
 
@@ -141,6 +261,36 @@ func (a *Client) GetFreeIpaRootCertificateByEnvironmentV1(params *GetFreeIpaRoot
 		return nil, err
 	}
 	return result.(*GetFreeIpaRootCertificateByEnvironmentV1OK), nil
+
+}
+
+/*
+ListDNSZonesV1 lists DNS zones available in free IP a
+
+FreeIPA is an integrated Identity and Authentication solution that can be used for any of CM, CDP services.
+*/
+func (a *Client) ListDNSZonesV1(params *ListDNSZonesV1Params) (*ListDNSZonesV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewListDNSZonesV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "listDnsZonesV1",
+		Method:             "GET",
+		PathPattern:        "/v1/freeipa/dns/zone",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &ListDNSZonesV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*ListDNSZonesV1OK), nil
 
 }
 

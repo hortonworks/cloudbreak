@@ -86,6 +86,9 @@ type DescribeLdapConfigV1Response struct {
 	// Required: true
 	UserDnPattern *string `json:"userDnPattern"`
 
+	// LDAP group for regular users
+	UserGroup string `json:"userGroup,omitempty"`
+
 	// attribute name for simplified search filter (e.g. sAMAccountName in case of AD, UID or cn for LDAP).
 	UserNameAttribute string `json:"userNameAttribute,omitempty"`
 
