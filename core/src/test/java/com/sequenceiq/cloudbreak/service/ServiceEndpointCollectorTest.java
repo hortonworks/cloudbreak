@@ -47,6 +47,8 @@ import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
@@ -75,6 +77,9 @@ public class ServiceEndpointCollectorTest {
 
     @Mock
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
+
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Mock
     private AmbariBlueprintValidator mockBpValidator;
@@ -157,6 +162,7 @@ public class ServiceEndpointCollectorTest {
                 new ExposedService[]{BEACON_SERVER, HIVE_SERVER, WEBHDFS}, GatewayType.INDIVIDUAL);
 
         mockBlueprintTextProcessor(Sets.newHashSet("NAMENODE", "SPARK_JOBHISTORYSERVER", "HIVE_SERVER"), "HDP", "2.6");
+        mockComponentLocator(Lists.newArrayList("10.0.0.1"));
 
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
                 underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
@@ -281,7 +287,7 @@ public class ServiceEndpointCollectorTest {
     public void testGetHdfsUIUrlInHDP30() {
         Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, NAMENODE}, new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
         mockBlueprintTextProcessor(Sets.newHashSet("NAMENODE"), "HDP", "3.0");
-        mockComponentLocator(Lists.newArrayList("10.0.0.1"));
+        mockComponentLocator(Lists.newArrayList("ip-10-0-0-1"));
 
         Map<String, Collection<ClusterExposedServiceV4Response>> exposedServiceResponses = underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
         assertEquals(3L, exposedServiceResponses.get("topology1").size());
@@ -289,15 +295,18 @@ public class ServiceEndpointCollectorTest {
                 .stream()
                 .anyMatch(exposedServiceResponse -> exposedServiceResponse.stream()
                         .anyMatch(clusterExposedService -> StringUtils.equals(clusterExposedService.getKnoxService(), "HDFSUI")
-                                && clusterExposedService.getServiceUrl().contains("?host=http://10.0.0.1:50070"))));
+                                && clusterExposedService.getServiceUrl().contains("?host=http://ip-10-0-0-1:"))));
     }
 
     private void mockBlueprintTextProcessor(Set<String> components, String stackName, String stackVersion) {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{\"Blueprints\":{}}");
         when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
+        when(blueprintService.isAmbariBlueprint(any())).thenReturn(true);
         AmbariBlueprintTextProcessor blueprintTextProcessor = mock(AmbariBlueprintTextProcessor.class);
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(ambariBlueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         when(blueprintTextProcessor.getAllComponents()).thenReturn(components);
         when(blueprintTextProcessor.getStackName()).thenReturn(stackName);
         when(blueprintTextProcessor.getStackVersion()).thenReturn(stackVersion);
@@ -306,7 +315,7 @@ public class ServiceEndpointCollectorTest {
     private void mockComponentLocator(List<String> privateIps) {
         Map<String, List<String>> componentPrivateIps = Maps.newHashMap();
         componentPrivateIps.put("NAMENODE", privateIps);
-        when(componentLocatorService.getComponentPrivateIp(any(), any(), any())).thenReturn(componentPrivateIps);
+        when(componentLocatorService.getComponentLocation(any(), any(), any())).thenReturn(componentPrivateIps);
     }
 
     private GatewayTopology gatewayTopology(String name, ExposedService... services) {

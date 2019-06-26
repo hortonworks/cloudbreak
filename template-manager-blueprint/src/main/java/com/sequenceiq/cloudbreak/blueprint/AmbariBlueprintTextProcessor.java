@@ -704,6 +704,7 @@ public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
         return blueprintsNode.get(STACK_NAME).asText();
     }
 
+    @Override
     public String getStackVersion() {
         ObjectNode blueprintsNode = (ObjectNode) blueprint.path(BLUEPRINTS);
         return blueprintsNode.get(STACK_VERSION).asText();
