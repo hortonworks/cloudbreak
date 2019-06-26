@@ -28,6 +28,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private LocationResponse location;
 
+        private TelemetryResponse telemetry;
+
         private EnvironmentNetworkResponse network;
 
         private EnvironmentStatus environmentStatus;
@@ -66,6 +68,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         public Builder withCredential(CredentialResponse credentialResponse) {
             this.credentialResponse = credentialResponse;
+            return this;
+        }
+
+        public Builder withTelemetry(TelemetryResponse telemetry) {
+            this.telemetry = telemetry;
             return this;
         }
 
@@ -113,6 +120,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setCreateFreeIpa(createFreeIpa);
             simpleEnvironmentResponse.setStatusReason(statusReason);
             simpleEnvironmentResponse.setCreated(created);
+            simpleEnvironmentResponse.setTelemetry(telemetry);
             return simpleEnvironmentResponse;
         }
     }

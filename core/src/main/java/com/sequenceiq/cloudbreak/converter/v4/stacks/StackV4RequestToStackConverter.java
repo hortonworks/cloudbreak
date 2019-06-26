@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.util.TelemetryMergerUtil;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -71,6 +72,7 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.TelemetryResponse;
 
 @Component
 public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
@@ -148,7 +150,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         updateCluster(source, stack, workspace);
-        stack.getComponents().add(getTelemetryComponent(source, stack));
+        stack.getComponents().add(getTelemetryComponent(source, stack, environment));
         setNetworkIfApplicable(source, stack, environment);
 
         stack.setGatewayPort(source.getGatewayPort());
@@ -198,23 +200,24 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(StackV4Request source, Stack stack) {
-        try {
-            TelemetryV4Request telemetryRequest = source.getTelemetry();
-            Logging logging = null;
-            WorkloadAnalytics workloadAnalytics = null;
-            if (telemetryRequest != null) {
-                if (telemetryRequest.getLogging() != null) {
-                    LoggingV4Request loggingRequest = telemetryRequest.getLogging();
-                    logging = new Logging(loggingRequest.isEnabled(), loggingRequest.getOutput(), loggingRequest.getAttributes());
-                }
-                if (telemetryRequest.getWorkloadAnalytics() != null) {
-                    WorkloadAnalyticsV4Request waRequest = telemetryRequest.getWorkloadAnalytics();
-                    workloadAnalytics = new WorkloadAnalytics(waRequest.isEnabled(), waRequest.getDatabusEndpoint(),
-                            waRequest.getAccessKey(), waRequest.getPrivateKey(), waRequest.getAttributes());
-                }
+    private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
+        TelemetryResponse envTelemetryResp = environment != null ? environment.getTelemetry() : null;
+        TelemetryV4Request telemetryRequest = source.getTelemetry();
+        Logging logging = null;
+        WorkloadAnalytics workloadAnalytics = null;
+        if (telemetryRequest != null) {
+            if (telemetryRequest.getLogging() != null) {
+                LoggingV4Request loggingRequest = telemetryRequest.getLogging();
+                logging = new Logging(loggingRequest.isEnabled(), loggingRequest.getOutput(), loggingRequest.getAttributes());
             }
-            Telemetry telemetry = new Telemetry(logging, workloadAnalytics);
+            if (telemetryRequest.getWorkloadAnalytics() != null) {
+                WorkloadAnalyticsV4Request waRequest = telemetryRequest.getWorkloadAnalytics();
+                workloadAnalytics = new WorkloadAnalytics(waRequest.isEnabled(), waRequest.getDatabusEndpoint(),
+                        waRequest.getAccessKey(), waRequest.getPrivateKey(), waRequest.getAttributes());
+            }
+        }
+        Telemetry telemetry = TelemetryMergerUtil.mergeGlobalAndStackLevelTelemetry(envTelemetryResp, new Telemetry(logging, workloadAnalytics));
+        try {
             return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.TELEMETRY, ComponentType.TELEMETRY.name(), Json.silent(telemetry), stack);
         } catch (Exception e) {
             LOGGER.debug("Exception during reading telemetry settings.", e);

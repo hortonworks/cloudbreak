@@ -43,6 +43,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkRequest network;
 
+    @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
+    private TelemetryRequest telemetry;
+
     @ApiModelProperty(EnvironmentModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
@@ -90,6 +93,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setLocation(LocationRequest location) {
         this.location = location;
+    }
+
+    public TelemetryRequest getTelemetry() {
+        return telemetry;
+    }
+
+    public void setTelemetry(TelemetryRequest telemetry) {
+        this.telemetry = telemetry;
     }
 
     public EnvironmentNetworkRequest getNetwork() {

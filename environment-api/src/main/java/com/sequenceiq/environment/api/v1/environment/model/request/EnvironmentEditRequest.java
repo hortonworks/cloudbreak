@@ -31,6 +31,9 @@ public class EnvironmentEditRequest {
     @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
     private @Valid EnvironmentAuthenticationRequest authentication;
 
+    @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
+    private TelemetryRequest telemetry;
+
     public String getDescription() {
         return description;
     }
@@ -69,5 +72,13 @@ public class EnvironmentEditRequest {
 
     public void setAuthentication(EnvironmentAuthenticationRequest authentication) {
         this.authentication = authentication;
+    }
+
+    public TelemetryRequest getTelemetry() {
+        return telemetry;
+    }
+
+    public void setTelemetry(TelemetryRequest telemetry) {
+        this.telemetry = telemetry;
     }
 }

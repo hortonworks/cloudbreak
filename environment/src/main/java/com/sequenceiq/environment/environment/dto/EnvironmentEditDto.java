@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public class EnvironmentEditDto {
@@ -14,6 +15,8 @@ public class EnvironmentEditDto {
     private final Set<String> regions;
 
     private final String accountId;
+
+    private final Telemetry telemetry;
 
     private LocationDto location;
 
@@ -27,7 +30,8 @@ public class EnvironmentEditDto {
             String accountId,
             LocationDto location,
             NetworkDto network,
-            AuthenticationDto authentication) {
+            AuthenticationDto authentication,
+            Telemetry telemetry) {
         this.description = description;
         this.accountId = accountId;
         if (CollectionUtils.isEmpty(regions)) {
@@ -38,6 +42,7 @@ public class EnvironmentEditDto {
         this.network = network;
         this.location = location;
         this.authentication = authentication;
+        this.telemetry = telemetry;
     }
 
     public String getDescription() {
@@ -68,6 +73,10 @@ public class EnvironmentEditDto {
         return authentication;
     }
 
+    public Telemetry getTelemetry() {
+        return telemetry;
+    }
+
     public static final class EnvironmentEditDtoBuilder {
         private String description;
 
@@ -80,6 +89,8 @@ public class EnvironmentEditDto {
         private NetworkDto network;
 
         private AuthenticationDto authentication;
+
+        private Telemetry telemetry;
 
         private EnvironmentEditDtoBuilder() {
         }
@@ -118,8 +129,13 @@ public class EnvironmentEditDto {
             return this;
         }
 
+        public EnvironmentEditDtoBuilder withTelemetry(Telemetry telemetry) {
+            this.telemetry = telemetry;
+            return this;
+        }
+
         public EnvironmentEditDto build() {
-            return new EnvironmentEditDto(description, regions, accountId, location, network, authentication);
+            return new EnvironmentEditDto(description, regions, accountId, location, network, authentication, telemetry);
         }
     }
 }

@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -32,13 +33,15 @@ public class EnvironmentCreationDto {
 
     private final AuthenticationDto authentication;
 
+    private final Telemetry telemetry;
+
     private final Long created;
 
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
-            Long created) {
+            Long created, Telemetry telemetry) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -60,6 +63,7 @@ public class EnvironmentCreationDto {
             this.proxyNames = proxyNames;
         }
         this.authentication = authentication;
+        this.telemetry = telemetry;
     }
 
     public String getName() {
@@ -98,6 +102,10 @@ public class EnvironmentCreationDto {
         return credential;
     }
 
+    public Telemetry getTelemetry() {
+        return telemetry;
+    }
+
     public boolean isCreateFreeIpa() {
         return createFreeIpa;
     }
@@ -128,6 +136,8 @@ public class EnvironmentCreationDto {
         private Set<String> regions;
 
         private Set<String> proxyNames;
+
+        private Telemetry telemetry;
 
         private boolean createFreeIpa = true;
 
@@ -202,9 +212,14 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withTelemetry(Telemetry telemetry) {
+            this.telemetry = telemetry;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId,
-                    location, network, credential, regions, proxyNames, createFreeIpa, authentication, created);
+                    location, network, credential, regions, proxyNames, createFreeIpa, authentication, created, telemetry);
         }
     }
 }

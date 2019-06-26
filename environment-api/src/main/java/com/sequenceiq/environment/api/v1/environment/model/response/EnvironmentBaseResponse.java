@@ -36,6 +36,9 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.LOCATION)
     private LocationResponse location;
 
+    @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
+    private TelemetryResponse telemetry;
+
     @ApiModelProperty(EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkResponse network;
 
@@ -103,6 +106,14 @@ public abstract class EnvironmentBaseResponse {
 
     public void setLocation(LocationResponse location) {
         this.location = location;
+    }
+
+    public TelemetryResponse getTelemetry() {
+        return telemetry;
+    }
+
+    public void setTelemetry(TelemetryResponse telemetry) {
+        this.telemetry = telemetry;
     }
 
     public EnvironmentNetworkResponse getNetwork() {

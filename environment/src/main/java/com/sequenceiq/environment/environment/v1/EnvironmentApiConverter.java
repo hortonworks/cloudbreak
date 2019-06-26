@@ -21,6 +21,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
+import com.sequenceiq.environment.credential.v1.converter.TelemetryApiConverter;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
@@ -41,12 +42,16 @@ public class EnvironmentApiConverter {
 
     private final CredentialToCredentialV1ResponseConverter credentialConverter;
 
+    private final TelemetryApiConverter telemetryApiConverter;
+
     public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
             RegionConverter regionConverter,
-            CredentialToCredentialV1ResponseConverter credentialConverter) {
+            CredentialToCredentialV1ResponseConverter credentialConverter,
+            TelemetryApiConverter telemetryApiConverter) {
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.regionConverter = regionConverter;
         this.credentialConverter = credentialConverter;
+        this.telemetryApiConverter = telemetryApiConverter;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -59,6 +64,7 @@ public class EnvironmentApiConverter {
                 .withCreated(System.currentTimeMillis())
                 .withCreateFreeIpa(request.getCreateFreeIpa() == null ? true : request.getCreateFreeIpa())
                 .withLocation(locationRequestToDto(request.getLocation()))
+                .withTelemetry(telemetryApiConverter.convert(request.getTelemetry()))
                 .withRegions(request.getRegions())
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()));
 
@@ -118,6 +124,7 @@ public class EnvironmentApiConverter {
                 .withAuthentication(authenticationToResponse(environmentDto.getAuthentication()))
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
+                .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
@@ -136,6 +143,7 @@ public class EnvironmentApiConverter {
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
+                .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
@@ -176,6 +184,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
+        NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry())));
         return builder.build();
     }
 
