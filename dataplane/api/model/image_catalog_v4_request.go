@@ -17,6 +17,9 @@ import (
 // swagger:model ImageCatalogV4Request
 type ImageCatalogV4Request struct {
 
+	// the creator of the resource
+	Creator string `json:"creator,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
@@ -28,6 +31,9 @@ type ImageCatalogV4Request struct {
 	// Min Length: 5
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
+
+	// the unique crn of the resource
+	ResourceCrn string `json:"resourceCrn,omitempty"`
 
 	// custom image catalog's URL
 	// Required: true

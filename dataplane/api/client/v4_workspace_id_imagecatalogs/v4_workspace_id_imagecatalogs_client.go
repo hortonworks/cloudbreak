@@ -55,6 +55,36 @@ func (a *Client) CreateImageCatalogInWorkspace(params *CreateImageCatalogInWorks
 }
 
 /*
+DeleteImageCatalogByCrnInWorkspace deletes image catalog by crn in workspace
+
+Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+*/
+func (a *Client) DeleteImageCatalogByCrnInWorkspace(params *DeleteImageCatalogByCrnInWorkspaceParams) (*DeleteImageCatalogByCrnInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteImageCatalogByCrnInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteImageCatalogByCrnInWorkspace",
+		Method:             "DELETE",
+		PathPattern:        "/v4/{workspaceId}/image_catalogs/crn/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteImageCatalogByCrnInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteImageCatalogByCrnInWorkspaceOK), nil
+
+}
+
+/*
 DeleteImageCatalogInWorkspace deletes image catalog by name in workspace
 
 Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
@@ -68,7 +98,7 @@ func (a *Client) DeleteImageCatalogInWorkspace(params *DeleteImageCatalogInWorks
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteImageCatalogInWorkspace",
 		Method:             "DELETE",
-		PathPattern:        "/v4/{workspaceId}/image_catalogs/{name}",
+		PathPattern:        "/v4/{workspaceId}/image_catalogs/name/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -115,6 +145,36 @@ func (a *Client) DeleteImageCatalogsInWorkspace(params *DeleteImageCatalogsInWor
 }
 
 /*
+GetImageCatalogByCrnInWorkspace gets image catalog by crn in workspace
+
+Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+*/
+func (a *Client) GetImageCatalogByCrnInWorkspace(params *GetImageCatalogByCrnInWorkspaceParams) (*GetImageCatalogByCrnInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetImageCatalogByCrnInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getImageCatalogByCrnInWorkspace",
+		Method:             "GET",
+		PathPattern:        "/v4/{workspaceId}/image_catalogs/crn/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetImageCatalogByCrnInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetImageCatalogByCrnInWorkspaceOK), nil
+
+}
+
+/*
 GetImageCatalogInWorkspace gets image catalog by name in workspace
 
 Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
@@ -128,7 +188,7 @@ func (a *Client) GetImageCatalogInWorkspace(params *GetImageCatalogInWorkspacePa
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getImageCatalogInWorkspace",
 		Method:             "GET",
-		PathPattern:        "/v4/{workspaceId}/image_catalogs/{name}",
+		PathPattern:        "/v4/{workspaceId}/image_catalogs/name/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

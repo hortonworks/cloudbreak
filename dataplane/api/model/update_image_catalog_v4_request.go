@@ -17,14 +17,17 @@ import (
 // swagger:model UpdateImageCatalogV4Request
 type UpdateImageCatalogV4Request struct {
 
+	// the creator of the resource
+	Creator string `json:"creator,omitempty"`
+
+	// the unique crn of the resource
+	// Required: true
+	Crn *string `json:"crn"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
-
-	// id of the resource
-	// Required: true
-	ID *int64 `json:"id"`
 
 	// name of the resource
 	// Required: true
@@ -42,11 +45,11 @@ type UpdateImageCatalogV4Request struct {
 func (m *UpdateImageCatalogV4Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateDescription(formats); err != nil {
+	if err := m.validateCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateID(formats); err != nil {
+	if err := m.validateDescription(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -64,6 +67,15 @@ func (m *UpdateImageCatalogV4Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *UpdateImageCatalogV4Request) validateCrn(formats strfmt.Registry) error {
+
+	if err := validate.Required("crn", "body", m.Crn); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *UpdateImageCatalogV4Request) validateDescription(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Description) { // not required
@@ -75,15 +87,6 @@ func (m *UpdateImageCatalogV4Request) validateDescription(formats strfmt.Registr
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *UpdateImageCatalogV4Request) validateID(formats strfmt.Registry) error {
-
-	if err := validate.Required("id", "body", m.ID); err != nil {
 		return err
 	}
 

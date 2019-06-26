@@ -30,8 +30,8 @@ type DistroXClusterV1Request struct {
 	// Unique: true
 	Databases []string `json:"databases"`
 
-	// exposed services
-	ExposedServices []string `json:"exposedServices"`
+	// gateway
+	Gateway *GatewayV1Request `json:"gateway,omitempty"`
 
 	// ambari password
 	// Required: true
@@ -63,6 +63,10 @@ func (m *DistroXClusterV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDatabases(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateGateway(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -124,6 +128,24 @@ func (m *DistroXClusterV1Request) validateDatabases(formats strfmt.Registry) err
 
 	if err := validate.UniqueItems("databases", "body", m.Databases); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *DistroXClusterV1Request) validateGateway(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Gateway) { // not required
+		return nil
+	}
+
+	if m.Gateway != nil {
+		if err := m.Gateway.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("gateway")
+			}
+			return err
+		}
 	}
 
 	return nil

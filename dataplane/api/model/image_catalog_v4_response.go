@@ -17,14 +17,16 @@ import (
 // swagger:model ImageCatalogV4Response
 type ImageCatalogV4Response struct {
 
+	// the creator of the resource
+	Creator string `json:"creator,omitempty"`
+
+	// the unique crn of the resource
+	Crn string `json:"crn,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
-
-	// id of the resource
-	// Required: true
-	ID *int64 `json:"id"`
 
 	// image response in imagecatalog
 	Images *ImagesV4Response `json:"images,omitempty"`
@@ -53,10 +55,6 @@ func (m *ImageCatalogV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -97,15 +95,6 @@ func (m *ImageCatalogV4Response) validateDescription(formats strfmt.Registry) er
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ImageCatalogV4Response) validateID(formats strfmt.Registry) error {
-
-	if err := validate.Required("id", "body", m.ID); err != nil {
 		return err
 	}
 

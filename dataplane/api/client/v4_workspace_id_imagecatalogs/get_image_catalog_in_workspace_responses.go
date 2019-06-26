@@ -51,7 +51,7 @@ type GetImageCatalogInWorkspaceOK struct {
 }
 
 func (o *GetImageCatalogInWorkspaceOK) Error() string {
-	return fmt.Sprintf("[GET /v4/{workspaceId}/image_catalogs/{name}][%d] getImageCatalogInWorkspaceOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /v4/{workspaceId}/image_catalogs/name/{name}][%d] getImageCatalogInWorkspaceOK  %+v", 200, o.Payload)
 }
 
 func (o *GetImageCatalogInWorkspaceOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

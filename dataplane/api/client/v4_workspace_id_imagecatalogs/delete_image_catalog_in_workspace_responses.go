@@ -51,7 +51,7 @@ type DeleteImageCatalogInWorkspaceOK struct {
 }
 
 func (o *DeleteImageCatalogInWorkspaceOK) Error() string {
-	return fmt.Sprintf("[DELETE /v4/{workspaceId}/image_catalogs/{name}][%d] deleteImageCatalogInWorkspaceOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[DELETE /v4/{workspaceId}/image_catalogs/name/{name}][%d] deleteImageCatalogInWorkspaceOK  %+v", 200, o.Payload)
 }
 
 func (o *DeleteImageCatalogInWorkspaceOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

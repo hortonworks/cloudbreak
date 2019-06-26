@@ -27,7 +27,7 @@ type imagecatalogOut struct {
 
 type imagecatalogOutDescribe struct {
 	*imagecatalogOut
-	ID string `json:"ID" yaml:"ID"`
+	CRN string `json:"CRN" yaml:"CRN"`
 }
 
 func (r *imagecatalogOut) DataAsStringArray() []string {
@@ -35,7 +35,7 @@ func (r *imagecatalogOut) DataAsStringArray() []string {
 }
 
 func (b *imagecatalogOutDescribe) DataAsStringArray() []string {
-	return append(b.imagecatalogOut.DataAsStringArray(), b.ID)
+	return append(b.imagecatalogOut.DataAsStringArray(), b.CRN)
 }
 
 var imageHeader = []string{"Date", "Description", "Version", "ImageID"}
@@ -109,7 +109,7 @@ func createImagecatalogImpl(client imageCatalogClient, workspaceID int64, name s
 		utils.LogErrorAndExit(err)
 	}
 	ic := resp.Payload
-	log.Infof("[createImagecatalogImpl] imagecatalog created: %s (id: %d)", *ic.Name, ic.ID)
+	log.Infof("[createImagecatalogImpl] imagecatalog created: %s (crn: %s)", *ic.Name, ic.Crn)
 }
 
 func ListImagecatalogs(c *cli.Context) {
@@ -180,10 +180,10 @@ func DescribeImagecatalog(c *cli.Context) {
 	}
 
 	imgc := resp.Payload
-	if imgc.ID == nil {
+	if len(imgc.Crn) == 0 {
 		output.Write(imagecatalogHeader, &imagecatalogOut{*imgc.Name, utils.SafeStringConvert(imgc.Description), *imgc.UsedAsDefault, *imgc.URL})
 	} else {
-		output.Write(append(imagecatalogHeader, "ID"), &imagecatalogOutDescribe{&imagecatalogOut{*imgc.Name, utils.SafeStringConvert(imgc.Description), *imgc.UsedAsDefault, *imgc.URL}, strconv.FormatInt(*imgc.ID, 10)})
+		output.Write(append(imagecatalogHeader, "CRN"), &imagecatalogOutDescribe{&imagecatalogOut{*imgc.Name, utils.SafeStringConvert(imgc.Description), *imgc.UsedAsDefault, *imgc.URL}, imgc.Crn})
 	}
 }
 
