@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorUtil;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 
 @Service
@@ -105,12 +106,17 @@ public class ServiceEndpointCollector {
         if (cluster.getBlueprint() != null) {
             String blueprintText = cluster.getBlueprint().getBlueprintText();
             if (StringUtils.isNotEmpty(blueprintText)) {
-                AmbariBlueprintTextProcessor blueprintTextProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
-                Collection<ExposedService> knownExposedServices = getExposedServices(blueprintTextProcessor, Collections.emptySet());
+                boolean ambariBlueprint = blueprintService.isAmbariBlueprint(cluster.getBlueprint());
+                BlueprintTextProcessor processor = ambariBlueprint
+                        ? ambariBlueprintProcessorFactory.get(blueprintText)
+                        : cmTemplateProcessorFactory.get(blueprintText);
+                Collection<ExposedService> knownExposedServices = ambariBlueprint
+                        ? getExposedServices(ambariBlueprintProcessorFactory.get(blueprintText), Collections.emptySet())
+                        : getExposedServices(cluster.getBlueprint());
                 Gateway gateway = cluster.getGateway();
                 Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap = new HashMap<>();
-                Map<String, List<String>> privateIps = componentLocatorService.getComponentPrivateIp(cluster.getId(), blueprintTextProcessor,
-                        knownExposedServices.stream().map(ExposedService::getAmbariServiceName).collect(Collectors.toSet()));
+                Map<String, List<String>> privateIps = componentLocatorService.getComponentLocation(cluster.getId(), processor,
+                        knownExposedServices.stream().map(ExposedService::getCmServiceName).collect(Collectors.toSet()));
                 if (gateway != null) {
                     for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
                         List<ClusterExposedServiceV4Response> clusterExposedServiceResponses = new ArrayList<>();
@@ -125,7 +131,7 @@ public class ServiceEndpointCollector {
                             clusterExposedServiceResponse.setKnoxService(exposedService.getKnoxService());
                             clusterExposedServiceResponse.setServiceName(exposedService.getAmbariServiceName());
                             Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, managerIp,
-                                    gateway, gatewayTopology.getTopologyName(), blueprintTextProcessor.getStackVersion(), privateIps);
+                                    gateway, gatewayTopology.getTopologyName(), privateIps);
                             serviceUrlForService.ifPresent(clusterExposedServiceResponse::setServiceUrl);
                             clusterExposedServiceResponse.setOpen(isExposed(exposedService, exposedServicesInTopology));
                             clusterExposedServiceResponses.add(clusterExposedServiceResponse);
@@ -159,6 +165,14 @@ public class ServiceEndpointCollector {
                 ExposedService.LOGSEARCH);
     }
 
+    private Collection<ExposedService> getExposedServices(Blueprint blueprint) {
+        String blueprintText = blueprint.getBlueprintText();
+        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
+        return ExposedService.knoxServicesForCmComponents(
+                processor.getAllComponents().stream().map(
+                        ServiceComponent::getComponent).collect(Collectors.toList()));
+    }
+
     private Collection<ExposedServiceV4Response> getKnoxServices(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintText();
         if (BlueprintTextProcessorUtil.getClusterManagerType(blueprintText) == ClusterManagerType.AMBARI) {
@@ -167,11 +181,8 @@ public class ServiceEndpointCollector {
             haComponents.remove(ExposedService.RANGER.getAmbariServiceName());
             return ExposedServiceV4Response.fromExposedServices(getExposedServices(blueprintTextProcessor, haComponents));
         } else {
-            CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
-            return ExposedServiceV4Response.fromExposedServices(
-                    ExposedService.knoxServicesForCmComponents(
-                            processor.getAllComponents().stream().map(
-                                    ServiceComponent::getComponent).collect(Collectors.toList())));
+            return ExposedServiceV4Response.fromExposedServices(getExposedServices(blueprint));
+
         }
     }
 
@@ -187,13 +198,12 @@ public class ServiceEndpointCollector {
     }
 
     private Optional<String> getServiceUrlForService(ExposedService exposedService, String managerIp, Gateway gateway,
-            String topologyName, String stackVersion, Map<String, List<String>> privateIps) {
+            String topologyName, Map<String, List<String>> privateIps) {
         if (hasKnoxUrl(exposedService) && managerIp != null) {
-            VersionComparator versionComparator = new VersionComparator();
             if (ExposedService.HIVE_SERVER.equals(exposedService) || ExposedService.HIVE_SERVER_INTERACTIVE.equals(exposedService)) {
                 return getHiveJdbcUrl(gateway, managerIp);
-            } else if (ExposedService.NAMENODE.equals(exposedService) && versionComparator.compare(() -> stackVersion, () -> "2.6") > 0) {
-                return getHdfsUIUrl(gateway, managerIp, privateIps.get(ExposedService.NAMENODE.getAmbariServiceName()).iterator().next());
+            } else if (ExposedService.NAMENODE.equals(exposedService)) {
+                return getHdfsUIUrl(gateway, managerIp, privateIps.get(ExposedService.NAMENODE.getCmServiceName()).iterator().next());
             } else {
                 return Optional.of(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService));
             }
@@ -255,7 +265,7 @@ public class ServiceEndpointCollector {
     private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String ambariIp, GatewayTopology gt, String nameNodePrivateIp) {
         Gateway gateway = gt.getGateway();
         String url = String.format("https://%s:%s/%s/%s%s?host=http://%s:%s", ambariIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
-                ExposedService.NAMENODE.getKnoxUrl(), nameNodePrivateIp, ExposedService.NAMENODE.getAmbariPort());
+                ExposedService.NAMENODE.getKnoxUrl(), nameNodePrivateIp, ExposedService.NAMENODE.getCmPort());
         return url;
     }
 }

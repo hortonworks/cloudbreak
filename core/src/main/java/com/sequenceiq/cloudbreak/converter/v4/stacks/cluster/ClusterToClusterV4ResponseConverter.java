@@ -77,12 +77,10 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setStatusReason(source.getStatusReason());
         setUptime(source, clusterResponse);
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
-        if (source.getBlueprint() != null && blueprintService.isAmbariBlueprint(source.getBlueprint())) {
-            String managerIp = stackUtil.extractClusterManagerIp(source.getStack());
-            Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesForTopologies =
+        String managerIp = stackUtil.extractClusterManagerIp(source.getStack());
+        Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesForTopologies =
                     serviceEndpointCollector.prepareClusterExposedServices(source, managerIp);
-            clusterResponse.setExposedServices(clusterExposedServicesForTopologies);
-        }
+        clusterResponse.setExposedServices(clusterExposedServicesForTopologies);
         convertCustomQueue(source, clusterResponse);
         convertNullableProperties(source, clusterResponse);
         convertContainerConfig(source, clusterResponse);
@@ -97,7 +95,6 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4Response.class));
         clusterResponse.setExtendedBlueprintText(getExtendedBlueprintText(source));
         convertDpSecrets(source, clusterResponse);
-        String managerIp = stackUtil.extractClusterManagerIp(source.getStack());
         clusterResponse.setServerIp(managerIp);
         clusterResponse.setServerUrl(serviceEndpointCollector.getManagerServerUrl(source, managerIp));
         return clusterResponse;

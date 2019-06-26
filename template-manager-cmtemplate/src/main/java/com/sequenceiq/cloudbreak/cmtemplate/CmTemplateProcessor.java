@@ -194,6 +194,11 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .orElseGet(() -> new GatewayRecommendation(Set.of()));
     }
 
+    @Override
+    public String getStackVersion() {
+        return cmTemplate.getCdhVersion();
+    }
+
     public Set<ServiceComponent> getAllComponents() {
         return getServiceComponentsByHostGroup().entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())

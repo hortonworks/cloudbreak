@@ -38,4 +38,6 @@ public interface BlueprintTextProcessor {
     Map<String, InstanceCount> getCardinalityByHostGroup();
 
     GatewayRecommendation recommendGateway();
+
+    String getStackVersion();
 }

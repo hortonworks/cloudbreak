@@ -14,7 +14,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -41,7 +40,12 @@ public class ComponentLocatorService {
         return getComponentAttribute(cluster, componentNames, InstanceMetaData::getDiscoveryFQDN);
     }
 
-    public Map<String, List<String>> getComponentPrivateIp(Long clusterId, AmbariBlueprintTextProcessor blueprintTextProcessor,
+    public Map<String, List<String>> getComponentLocation(Long clusterId, BlueprintTextProcessor blueprintTextProcessor,
+            Collection<String> componentNames) {
+        return getComponentAttribute(clusterId, blueprintTextProcessor, componentNames, InstanceMetaData::getDiscoveryFQDN);
+    }
+
+    public Map<String, List<String>> getComponentPrivateIp(Long clusterId, BlueprintTextProcessor blueprintTextProcessor,
             Collection<String> componentNames) {
         return getComponentAttribute(clusterId, blueprintTextProcessor, componentNames, InstanceMetaData::getPrivateIp);
     }
@@ -63,7 +67,7 @@ public class ComponentLocatorService {
         return blueprintService.isAmbariBlueprint(cluster.getBlueprint());
     }
 
-    private Map<String, List<String>> getComponentAttribute(Long clusterId, AmbariBlueprintTextProcessor blueprintTextProcessor,
+    private Map<String, List<String>> getComponentAttribute(Long clusterId, BlueprintTextProcessor blueprintTextProcessor,
             Collection<String> componentNames, Function<InstanceMetaData, String> fqdn) {
         Map<String, List<String>> result = new HashMap<>();
         for (HostGroup hg : hostGroupService.getByCluster(clusterId)) {
