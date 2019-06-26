@@ -5,11 +5,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.authentication.DistroXAuthenticationV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.ClouderaManagerV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.product.ClouderaManagerProductV1Request;
@@ -24,7 +22,6 @@ import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 
 @Prototype
 public class DistroXTestDto extends DeletableTestDto<DistroXV1Request, ClusterTemplateV4Response,
@@ -42,17 +39,7 @@ public class DistroXTestDto extends DeletableTestDto<DistroXV1Request, ClusterTe
         return withName(resourceProperyProvider().getName())
                 .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withCluster(getTestContext().init(ClusterTestDto.class).getRequest())
-                .withInstanceGroups(getTestContext().init(InstanceGroupTestDto.class).getRequest())
-                .withAuthentication(getTestContext().init(StackTestDto.class).getRequest().getAuthentication());
-    }
-
-    private DistroXTestDto withAuthentication(StackAuthenticationV4Request authenticationRequest) {
-        DistroXAuthenticationV1Request authentication = new DistroXAuthenticationV1Request();
-        authentication.setLoginUserName(authenticationRequest.getLoginUserName());
-        authentication.setPublicKey(authenticationRequest.getPublicKey());
-        authentication.setPublicKeyId(authenticationRequest.getPublicKeyId());
-        getRequest().setAuthentication(authentication);
-        return this;
+                .withInstanceGroups(getTestContext().init(InstanceGroupTestDto.class).getRequest());
     }
 
     private DistroXTestDto withInstanceGroups(InstanceGroupV4Request instanceGroupTestDto) {
