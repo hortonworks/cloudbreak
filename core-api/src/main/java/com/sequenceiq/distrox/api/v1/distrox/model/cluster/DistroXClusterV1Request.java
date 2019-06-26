@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.api.v1.distrox.model.cluster;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -15,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.ClouderaManagerV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.cluster.gateway.GatewayV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.storage.CloudStorageV1Request;
 
 import io.swagger.annotations.ApiModel;
@@ -56,7 +56,7 @@ public class DistroXClusterV1Request implements Serializable {
     @ApiModelProperty(ClusterModelDescription.CM_REQUEST)
     private ClouderaManagerV1Request cm;
 
-    private GatewayV1Request gateway;
+    private List<String> exposedServices;
 
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
@@ -101,12 +101,12 @@ public class DistroXClusterV1Request implements Serializable {
         this.cm = cm;
     }
 
-    public GatewayV1Request getGateway() {
-        return gateway;
+    public List<String> getExposedServices() {
+        return exposedServices;
     }
 
-    public void setGateway(GatewayV1Request gateway) {
-        this.gateway = gateway;
+    public void setExposedServices(List<String> exposedServices) {
+        this.exposedServices = exposedServices;
     }
 
     public String getBlueprintName() {

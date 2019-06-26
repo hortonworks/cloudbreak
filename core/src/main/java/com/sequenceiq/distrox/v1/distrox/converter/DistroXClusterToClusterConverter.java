@@ -1,6 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import javax.inject.Inject;
 
@@ -40,7 +41,9 @@ public class DistroXClusterToClusterConverter {
 
     public ClusterV4Request convert(DistroXClusterV1Request source) {
         ClusterV4Request response = new ClusterV4Request();
-        response.setGateway(getIfNotNull(source.getGateway(), gatewayConverter::convert));
+        if (!isEmpty(source.getExposedServices())) {
+            response.setGateway(gatewayConverter.convert(source.getExposedServices()));
+        }
         response.setAmbari(null);
         response.setName(null);
         response.setDatabases(source.getDatabases());
@@ -59,7 +62,7 @@ public class DistroXClusterToClusterConverter {
 
     public DistroXClusterV1Request convert(ClusterV4Request source) {
         DistroXClusterV1Request response = new DistroXClusterV1Request();
-        response.setGateway(getIfNotNull(source.getGateway(), gatewayConverter::convert));
+        response.setExposedServices(getIfNotNull(source.getGateway(), gatewayConverter::exposedService));
         response.setDatabases(source.getDatabases());
         response.setBlueprintName(source.getBlueprintName());
         response.setUserName(source.getUserName());
