@@ -140,7 +140,7 @@ public class DatabaseServerV4ControllerTest {
         String userCrn = "userCrn";
         when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(userCrn);
         when(dbStackConverter.convert(allocateRequest, userCrn)).thenReturn(dbStack);
-        when(creationService.launchDatabase(dbStack)).thenReturn(server);
+        when(creationService.launchDatabaseServer(dbStack)).thenReturn(server);
         when(converterUtil.convert(server, DatabaseServerAllocationOutcomeV4Response.class))
             .thenReturn(allocateResponse);
 
@@ -148,7 +148,7 @@ public class DatabaseServerV4ControllerTest {
 
         // TODO: Restore this check once we introduce provisioning statuses
         // assertEquals(allocateResponse, response);
-        verify(creationService).launchDatabase(dbStack);
+        verify(creationService).launchDatabaseServer(dbStack);
     }
 
     @Test

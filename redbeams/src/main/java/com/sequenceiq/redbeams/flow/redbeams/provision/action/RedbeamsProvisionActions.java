@@ -22,8 +22,8 @@ import org.springframework.statemachine.action.Action;
 @Configuration
 public class RedbeamsProvisionActions {
 
-    @Bean(name = "ALLOCATE_DATABASE_STATE")
-    public Action<?, ?> allocateDatabase() {
+    @Bean(name = "ALLOCATE_DATABASE_SERVER_STATE")
+    public Action<?, ?> allocateDatabaseServer() {
         return new AbstractRedbeamsProvisionAction<>(RedbeamsEvent.class) {
 
             @Override
@@ -34,8 +34,8 @@ public class RedbeamsProvisionActions {
         };
     }
 
-    @Bean(name = "REGISTER_DATABASE_STATE")
-    public Action<?, ?> registerDatabase() {
+    @Bean(name = "REGISTER_DATABASE_SERVER_STATE")
+    public Action<?, ?> registerDatabaseServer() {
         return new AbstractRedbeamsProvisionAction<>(AllocateDatabaseServerSuccess.class) {
 
             private List<CloudResource> dbResources;
