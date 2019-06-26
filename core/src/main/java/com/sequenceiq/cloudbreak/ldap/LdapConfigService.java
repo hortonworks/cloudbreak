@@ -13,6 +13,7 @@ import org.springframework.vault.VaultException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.LdapView.LdapViewBuilder;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -57,7 +58,7 @@ public class LdapConfigService {
         if (describeLdapConfigResponse.getPort() != null) {
             connectionUrl = connectionUrl.toLowerCase() + ':' + describeLdapConfigResponse.getPort();
         }
-        return LdapView.LdapViewBuilder.aLdapView()
+        return LdapViewBuilder.aLdapView()
                 .withProtocol(protocol)
                 .withServerHost(describeLdapConfigResponse.getHost())
                 .withServerPort(describeLdapConfigResponse.getPort())
@@ -73,6 +74,7 @@ public class LdapConfigService {
                 .withDomain(describeLdapConfigResponse.getDomain())
                 .withUserDnPattern(describeLdapConfigResponse.getUserDnPattern())
                 .withAdminGroup(describeLdapConfigResponse.getAdminGroup())
+                .withUserGroup(describeLdapConfigResponse.getUserGroup())
                 .withCertificate(describeLdapConfigResponse.getCertificate())
                 .withBindDn(getSecret(describeLdapConfigResponse.getBindDn()))
                 .withBindPassword(getSecret(describeLdapConfigResponse.getBindPassword()))

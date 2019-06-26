@@ -108,6 +108,7 @@ public class LdapConfigV1Service {
         describeLdapConfigResponse.setGroupNameAttribute(config.getGroupNameAttribute());
         describeLdapConfigResponse.setGroupMemberAttribute(config.getGroupMemberAttribute());
         describeLdapConfigResponse.setAdminGroup(config.getAdminGroup());
+        describeLdapConfigResponse.setUserGroup(config.getUserGroup());
         describeLdapConfigResponse.setCertificate(config.getCertificate());
         describeLdapConfigResponse.setEnvironmentCrn(config.getEnvironmentCrn());
         return describeLdapConfigResponse;

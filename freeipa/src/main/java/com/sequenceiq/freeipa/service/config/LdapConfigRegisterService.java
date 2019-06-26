@@ -20,6 +20,8 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
 
     public static final String ADMIN_GROUP = "admins";
 
+    public static final String USER_GROUP = "ipausers";
+
     public static final String BIND_DN = "uid=admin,cn=users,cn=accounts";
 
     public static final String USER_SEARCH_BASE = "cn=users,cn=accounts";
@@ -55,6 +57,7 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
         ldapConfig.setName(stack.getName());
         ldapConfig.setEnvironmentCrn(stack.getEnvironmentCrn());
         ldapConfig.setAdminGroup(ADMIN_GROUP);
+        ldapConfig.setUserGroup(USER_GROUP);
         String domainComponent = generateDomainComponent(freeIpa);
         ldapConfig.setBindDn(BIND_DN + domainComponent);
         ldapConfig.setUserSearchBase(USER_SEARCH_BASE + domainComponent);

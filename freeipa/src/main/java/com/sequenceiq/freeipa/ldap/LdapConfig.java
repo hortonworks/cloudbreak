@@ -90,6 +90,8 @@ public class LdapConfig implements ArchivableResource, AuthResource, AccountIdAw
 
     private String adminGroup;
 
+    private String userGroup;
+
     private String certificate;
 
     public Long getId() {
@@ -290,6 +292,14 @@ public class LdapConfig implements ArchivableResource, AuthResource, AccountIdAw
 
     public void setAdminGroup(String adminGroup) {
         this.adminGroup = adminGroup;
+    }
+
+    public String getUserGroup() {
+        return userGroup;
+    }
+
+    public void setUserGroup(String userGroup) {
+        this.userGroup = userGroup;
     }
 
     public String getUserDnPattern() {
