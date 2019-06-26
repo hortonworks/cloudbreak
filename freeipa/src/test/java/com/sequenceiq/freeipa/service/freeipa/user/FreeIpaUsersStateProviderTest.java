@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.user;
+package com.sequenceiq.freeipa.service.freeipa.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,8 +21,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.user.model.UsersState;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaUsersStateProviderTest {

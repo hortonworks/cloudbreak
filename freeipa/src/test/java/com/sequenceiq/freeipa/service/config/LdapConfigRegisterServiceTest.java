@@ -34,7 +34,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.ldap.LdapConfig;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
-import com.sequenceiq.freeipa.service.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)

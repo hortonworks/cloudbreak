@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.freeipa.provision.handler;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -11,13 +13,17 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInsta
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaSuccess;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-import com.sequenceiq.freeipa.service.FreeIpaPostInstallService;
+import com.sequenceiq.freeipa.service.freeipa.CleanupService;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaPostInstallService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
 public class PostInstallFreeIpaHandler implements EventHandler<PostInstallFreeIpaRequest> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CleanupService.class);
+
     @Inject
     private EventBus eventBus;
 
@@ -37,6 +43,7 @@ public class PostInstallFreeIpaHandler implements EventHandler<PostInstallFreeIp
             freeIpaPostInstallService.postInstallFreeIpa(request.getResourceId());
             response = new PostInstallFreeIpaSuccess(request.getResourceId());
         } catch (Exception e) {
+            LOGGER.error("Post install tasks have failed", e);
             response = new PostInstallFreeIpaFailed(request.getResourceId(), e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));

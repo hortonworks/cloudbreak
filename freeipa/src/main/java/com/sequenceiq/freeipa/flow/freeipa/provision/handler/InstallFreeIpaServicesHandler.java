@@ -11,7 +11,7 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeI
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-import com.sequenceiq.freeipa.service.FreeIpaInstallService;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaInstallService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;

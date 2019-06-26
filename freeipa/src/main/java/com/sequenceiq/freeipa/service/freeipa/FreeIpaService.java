@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service;
+package com.sequenceiq.freeipa.service.freeipa;
 
 import javax.inject.Inject;
 

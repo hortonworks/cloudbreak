@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 
 @Service
 public class FreeIpaRootCertificateService {

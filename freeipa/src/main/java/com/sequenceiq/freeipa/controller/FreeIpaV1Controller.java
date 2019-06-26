@@ -9,6 +9,8 @@ import javax.validation.constraints.NotEmpty;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetsResponse;
@@ -17,7 +19,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.service.dns.DnsZoneService;
+import com.sequenceiq.freeipa.service.freeipa.CleanupService;
+import com.sequenceiq.freeipa.service.freeipa.dns.DnsZoneService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
@@ -45,6 +48,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaRootCertificateService freeIpaRootCertificateService;
+
+    @Inject
+    private CleanupService cleanupService;
 
     @Inject
     private CrnService crnService;
@@ -108,8 +114,14 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    public void deleteDnsZoneBySubnetId(@NotEmpty String environmentCrn, @NotEmpty String subnetId) throws Exception {
+    public void deleteDnsZoneBySubnetId(@NotEmpty String environmentCrn, @NotEmpty String subnetId) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
         dnsZoneService.deleteDnsZoneBySubnetId(environmentCrn, accountId, subnetId);
+    }
+
+    @Override
+    public CleanupResponse cleanup(@Valid CleanupRequest request) throws FreeIpaClientException {
+        String accountId = crnService.getCurrentAccountId();
+        return cleanupService.cleanup(accountId, request);
     }
 }

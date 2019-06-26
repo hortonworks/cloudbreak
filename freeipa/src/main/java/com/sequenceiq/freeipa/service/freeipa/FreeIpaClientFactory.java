@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service;
+package com.sequenceiq.freeipa.service.freeipa;
 
 import javax.inject.Inject;
 
@@ -13,6 +13,8 @@ import com.sequenceiq.freeipa.client.FreeIpaClientBuilder;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -37,6 +39,11 @@ public class FreeIpaClientFactory {
 
         Stack stack = stackService.getStackById(stackId);
 
+        return getFreeIpaClientForStack(stack);
+    }
+
+    public FreeIpaClient getFreeIpaClientByAccountAndEnvironment(String environmentCrn, String accountId) throws FreeIpaClientException {
+        Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         return getFreeIpaClientForStack(stack);
     }
 

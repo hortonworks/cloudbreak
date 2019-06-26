@@ -22,7 +22,7 @@ import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConvert
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
-import com.sequenceiq.freeipa.service.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 
 @Service
 public class PlatformParameterService {

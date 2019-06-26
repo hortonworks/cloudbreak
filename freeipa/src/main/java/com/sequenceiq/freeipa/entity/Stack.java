@@ -20,14 +20,11 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Where;
-
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environmentcrn", "terminated"}))
-@Where(clause = "terminated = -1")
 public class Stack {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")

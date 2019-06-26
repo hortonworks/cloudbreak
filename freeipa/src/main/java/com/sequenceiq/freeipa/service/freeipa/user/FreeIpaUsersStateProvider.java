@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.user;
+package com.sequenceiq.freeipa.service.freeipa.user;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +11,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.service.user.model.UsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 
 @Service
 public class FreeIpaUsersStateProvider {

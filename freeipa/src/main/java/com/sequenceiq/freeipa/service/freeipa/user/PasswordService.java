@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.user;
+package com.sequenceiq.freeipa.service.freeipa.user;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +19,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordResponse;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordResult;
-import com.sequenceiq.freeipa.service.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service;
+package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import java.util.HashMap;
 import java.util.Map;

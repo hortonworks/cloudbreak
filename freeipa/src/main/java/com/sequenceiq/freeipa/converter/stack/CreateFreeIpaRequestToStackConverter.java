@@ -71,14 +71,14 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setGatewayport(nginxPort);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
-        updateCloudPlatformAndRelatedFields(source, stack, accountId, cloudPlatform);
+        updateCloudPlatformAndRelatedFields(source, stack, Optional.ofNullable(userId).orElse(accountId), cloudPlatform);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
         stack.setInstanceGroups(convertInstanceGroups(source, stack, accountId));
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
-        stack.setOwner(Optional.of(userId).orElse(accountId));
+        stack.setOwner(Optional.ofNullable(userId).orElse(accountId));
         return stack;
     }
 

@@ -12,7 +12,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordResult;
-import com.sequenceiq.freeipa.service.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 
 import reactor.bus.Event;
 

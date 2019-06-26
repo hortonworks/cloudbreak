@@ -16,8 +16,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
-import com.sequenceiq.freeipa.service.user.PasswordService;
-import com.sequenceiq.freeipa.service.user.UserService;
+import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
+import com.sequenceiq.freeipa.service.freeipa.user.UserService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)

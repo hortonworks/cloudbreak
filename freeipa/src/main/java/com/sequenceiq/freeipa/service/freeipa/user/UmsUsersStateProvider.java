@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.user;
+package com.sequenceiq.freeipa.service.freeipa.user;
 
 import java.util.HashSet;
 import java.util.List;

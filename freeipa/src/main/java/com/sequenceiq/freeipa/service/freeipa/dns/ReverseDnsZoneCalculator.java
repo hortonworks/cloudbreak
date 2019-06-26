@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.dns;
+package com.sequenceiq.freeipa.service.freeipa.dns;
 
 import org.springframework.stereotype.Component;
 
