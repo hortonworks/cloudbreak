@@ -1,4 +1,4 @@
-package com.sequenceiq.environment;
+package com.sequenceiq.environment.environment.flow;
 
 import java.util.Collections;
 import java.util.List;

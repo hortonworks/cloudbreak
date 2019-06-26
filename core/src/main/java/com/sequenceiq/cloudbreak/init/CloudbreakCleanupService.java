@@ -84,7 +84,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
             List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
             triggerSyncs(stacksToSync, clustersToSync);
-            restartFlowService.purgeTerminatedStacksFlowLogs();
+            restartFlowService.purgeTerminatedResourceFlowLogs();
             missingVolumeTemplatesMigrator.run();
         } catch (Exception e) {
             LOGGER.error("Clean up or the migration operations failed. Shutting down the node. ", e);

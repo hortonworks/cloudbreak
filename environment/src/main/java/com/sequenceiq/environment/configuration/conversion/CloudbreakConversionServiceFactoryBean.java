@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.configuration;
+package com.sequenceiq.environment.configuration.conversion;
 
 import javax.ws.rs.BadRequestException;
 

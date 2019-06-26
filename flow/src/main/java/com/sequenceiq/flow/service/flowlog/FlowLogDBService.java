@@ -184,7 +184,7 @@ public class FlowLogDBService implements FlowLogService {
     public void purgeTerminatedStacksFlowLogs() throws TransactionService.TransactionExecutionException {
         transactionService.required(() -> {
             LOGGER.debug("Cleaning deleted stack's flowlog");
-            int purgedTerminatedStackLogs = serviceFlowLogComponent.purgeTerminatedStackLogs();
+            int purgedTerminatedStackLogs = serviceFlowLogComponent.purgeTerminatedResourceLogs();
             LOGGER.debug("Deleted flowlog count: {}", purgedTerminatedStackLogs);
             LOGGER.debug("Cleaning orphan flowchainlogs");
             int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFLowChainLogs();
@@ -194,6 +194,6 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     public Set<Long> findTerminatingStacksByCloudbreakNodeId(String id) {
-        return serviceFlowLogComponent.findTerminatingStacksByCloudbreakNodeId(id);
+        return serviceFlowLogComponent.findTerminatingResourcesByNodeId(id);
     }
 }

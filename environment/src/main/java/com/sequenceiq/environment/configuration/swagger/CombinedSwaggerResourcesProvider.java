@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.configuration;
+package com.sequenceiq.environment.configuration.swagger;
 
 import java.util.List;
 import java.util.stream.Collectors;

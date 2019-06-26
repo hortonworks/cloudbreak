@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -157,6 +159,10 @@ public class EnvironmentService {
         return environmentRepository.findById(id);
     }
 
+    public Optional<EnvironmentDto> findById(Long id) {
+        return environmentRepository.findById(id).map(environmentDtoConverter::environmentToDto);
+    }
+
     void setLocation(Environment environment, LocationDto requestedLocation, CloudRegions cloudRegions) {
         if (requestedLocation != null) {
             Coordinate coordinate = cloudRegions.getCoordinates().get(region(requestedLocation.getName()));
@@ -201,4 +207,13 @@ public class EnvironmentService {
         }
     }
 
+    public List<EnvironmentDto> findAllByIdInAndStatusIn(Collection<Long> resourceIds, Collection<EnvironmentStatus> environmentStatuses) {
+        List<Environment> environments = environmentRepository.findAllByIdInAndStatusIn(resourceIds, environmentStatuses);
+        return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
+    }
+
+    public List<EnvironmentDto> findAllByStatusIn(Collection<EnvironmentStatus> environmentStatuses) {
+        List<Environment> environments = environmentRepository.findAllByStatusIn(environmentStatuses);
+        return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
+    }
 }

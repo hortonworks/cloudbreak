@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.configuration;
+package com.sequenceiq.environment.configuration.api;
 
 import javax.inject.Inject;
 import javax.inject.Named;

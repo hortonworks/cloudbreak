@@ -49,7 +49,7 @@ public class ReactorFlowManager {
         eventSender.sendEvent(envDeleteEvent, new Event.Headers(flowTriggerUsercrn));
     }
 
-    private void cancelRunningFlows(Long environmentId, String environmentName) {
+    public void cancelRunningFlows(Long environmentId, String environmentName) {
         BaseNamedFlowEvent cancellationEvent = new BaseNamedFlowEvent(Flow2Handler.FLOW_CANCEL, environmentId, environmentName);
         eventSender.sendEvent(cancellationEvent);
     }
