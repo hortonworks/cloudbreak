@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.datalake.logger.MDCContextFilter;
@@ -41,7 +41,7 @@ public class AppConfig implements AsyncConfigurer {
     private boolean ignorePreValidation;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Bean
     public CloudbreakUserCrnClient cloudbreakClient() {
@@ -64,7 +64,7 @@ public class AppConfig implements AsyncConfigurer {
     @Bean
     public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
         FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
-        MDCContextFilter filter = new MDCContextFilter(authenticatedUserService, null);
+        MDCContextFilter filter = new MDCContextFilter(threadBasedUserCrnProvider, null);
         registrationBean.setFilter(filter);
         registrationBean.setOrder(Integer.MAX_VALUE);
         return registrationBean;

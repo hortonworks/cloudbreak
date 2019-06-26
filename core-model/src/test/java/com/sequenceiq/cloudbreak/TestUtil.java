@@ -132,6 +132,7 @@ public class TestUtil {
                 .aws(AwsCredentialAttributes.builder().build())
                 .description(DUMMY_DESCRIPTION)
                 .name(DUMMY_NAME)
+                .crn("credCrn")
                 .cloudPlatform(CloudPlatform.AWS.name())
                 .build();
     }
@@ -179,6 +180,7 @@ public class TestUtil {
         stack.setCreated(123L);
         stack.setCloudPlatform(credential.cloudPlatform());
         stack.setOrchestrator(orchestrator());
+        stack.setEnvironmentCrn("envCrn");
 
         switch (credential.cloudPlatform()) {
             case AWS:
