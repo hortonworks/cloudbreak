@@ -37,7 +37,7 @@ public enum ExposedService {
     BEACON_SERVER("Beacon", "BEACON_SERVER", "", "BEACON", "/beacon", true, 25968, null),
     LOGSEARCH("Log Search", "LOGSEARCH_SERVER", "", "LOGSEARCH", "/logsearch", true, 61888, null),
     LIVY2_SERVER("Livy Server 2", "LIVY2_SERVER", "", "LIVYSERVER", "/livy/v1/sessions/", true, 8999, null),
-    LIVY_SERVER("Livy Server", "", "LIVY_SERVER", "LIVYSERVER1", "/livy/v1/", true, null, 8998),
+    LIVY_SERVER("Livy Server", "", "LIVY_SERVER", "LIVYSERVER1", "/livy/ui", true, null, 8998),
     OOZIE_UI("Oozie Server", "", "OOZIE_SERVER", "OOZIE", "/oozie/", true, null, 11000),
     SOLR("Solr Server", "", "SOLR_SERVER", "SOLR", "/solr/", true, null, 8983),
     HBASE("HBase", "", "HBASE", "HBASE", "/hbase/webui/", true, null, 16010);
