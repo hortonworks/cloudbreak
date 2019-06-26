@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -33,7 +32,6 @@ class FreeIpaCreationRetrievalTaskTest {
         describeFreeIpaResponse.setCrn("aFreeIpaCRN");
         describeFreeIpaResponse.setStatus(Status.CREATE_IN_PROGRESS);
 
-        when(freeIpaPollerObject.getEnvironmentCrn()).thenReturn("anEnvironmentCRN");
         when(freeIpaPollerObject.getFreeIpaV1Endpoint().describe(anyString()))
                 .thenReturn(describeFreeIpaResponse);
 
@@ -50,13 +48,12 @@ class FreeIpaCreationRetrievalTaskTest {
         describeFreeIpaResponse.setCrn("aFreeIpaCRN");
         describeFreeIpaResponse.setStatus(deletedStatus);
 
-        when(freeIpaPollerObject.getEnvironmentCrn()).thenReturn("anEnvironmentCRN");
         when(freeIpaPollerObject.getFreeIpaV1Endpoint().describe(anyString()))
                 .thenReturn(describeFreeIpaResponse);
 
         boolean result = underTest.exitPolling(freeIpaPollerObject);
 
-        assertTrue(result);
+        assertFalse(result);
     }
 
     @ParameterizedTest
@@ -67,12 +64,11 @@ class FreeIpaCreationRetrievalTaskTest {
         describeFreeIpaResponse.setCrn("aFreeIpaCRN");
         describeFreeIpaResponse.setStatus(failedStatus);
 
-        when(freeIpaPollerObject.getEnvironmentCrn()).thenReturn("anEnvironmentCRN");
         when(freeIpaPollerObject.getFreeIpaV1Endpoint().describe(anyString()))
                 .thenReturn(describeFreeIpaResponse);
 
         boolean result = underTest.exitPolling(freeIpaPollerObject);
 
-        assertTrue(result);
+        assertFalse(result);
     }
 }
