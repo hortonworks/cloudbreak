@@ -42,6 +42,9 @@ type InstanceTemplateV1Request struct {
 
 	// root volume
 	RootVolume *RootVolumeV1Request `json:"rootVolume,omitempty"`
+
+	// yarn specific parameters for template
+	Yarn *YarnInstanceTemplateV1Parameters `json:"yarn,omitempty"`
 }
 
 // Validate validates this instance template v1 request
@@ -69,6 +72,10 @@ func (m *InstanceTemplateV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRootVolume(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateYarn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -229,6 +236,24 @@ func (m *InstanceTemplateV1Request) validateRootVolume(formats strfmt.Registry) 
 		if err := m.RootVolume.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("rootVolume")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *InstanceTemplateV1Request) validateYarn(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Yarn) { // not required
+		return nil
+	}
+
+	if m.Yarn != nil {
+		if err := m.Yarn.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("yarn")
 			}
 			return err
 		}

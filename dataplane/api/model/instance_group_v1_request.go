@@ -54,6 +54,9 @@ type InstanceGroupV1Request struct {
 	// type of the instance group, default value is CORE
 	// Enum: [CORE GATEWAY]
 	Type string `json:"type,omitempty"`
+
+	// yarn
+	Yarn YarnInstanceGroupV1Parameters `json:"yarn,omitempty"`
 }
 
 // Validate validates this instance group v1 request
