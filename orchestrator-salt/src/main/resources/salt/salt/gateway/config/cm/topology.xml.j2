@@ -224,4 +224,15 @@
    {%- endif %}
    {%- endif %}
 
+    {% if 'SOLR_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SOLR' in exposed -%}
+    <service>
+        <role>SOLR</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['SOLR_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['SOLR'] }}/</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
 </topology>
