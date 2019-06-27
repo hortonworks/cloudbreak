@@ -67,6 +67,8 @@ func CreateSdx(c *cli.Context) {
 	envName := c.String(fl.FlEnvironmentName.Name)
 	cidrOptional := c.String(fl.FlCidrOptional.Name)
 	clusterShape := c.String(fl.FlClusterShape.Name)
+	baseLocation := c.String(fl.FlCloudStorageBaseLocationOptional.Name)
+	instanceProfile := c.String(fl.FlCloudStorageInstanceProfileOptional.Name)
 
 	var cidr string
 	if cidr = cidrOptional; cidrOptional == "" {
@@ -78,19 +80,34 @@ func CreateSdx(c *cli.Context) {
 	if inputJson != nil {
 		createInternalSdx(cidr, clusterShape, envName, inputJson, c, name)
 	} else {
-		createSdx(cidr, clusterShape, envName, c, name)
+		createSdx(cidr, clusterShape, envName, c, name, baseLocation, instanceProfile)
 	}
 }
 
-func createSdx(cidr string, clusterShape string, envName string, c *cli.Context, name string) {
-	SdxRequest := &sdxModel.SdxClusterRequest{
+func createSdx(cidr string, clusterShape string, envName string, c *cli.Context, name string, cloudStorageBaseLocation string, instanceProfile string) {
+	s3CloudStorage := &sdxModel.S3CloudStorageV4Parameters{
+		InstanceProfile: &instanceProfile,
+	}
+
+	cloudStorage := &sdxModel.SdxCloudStorageRequest{
+		Adls:           nil,
+		AdlsGen2:       nil,
+		BaseLocation:   cloudStorageBaseLocation,
+		FileSystemType: "S3",
+		Gcs:            nil,
+		S3:             s3CloudStorage,
+		Wasb:           nil,
+	}
+
+	sdxRequest := &sdxModel.SdxClusterRequest{
 		AccessCidr:   &cidr,
 		ClusterShape: &clusterShape,
 		Environment:  &envName,
 		Tags:         nil,
+		CloudStorage: cloudStorage,
 	}
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
-	resp, err := sdxClient.Sdx.CreateSdx(sdx.NewCreateSdxParams().WithName(name).WithBody(SdxRequest))
+	resp, err := sdxClient.Sdx.CreateSdx(sdx.NewCreateSdxParams().WithName(name).WithBody(sdxRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

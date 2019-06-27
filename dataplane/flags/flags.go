@@ -276,6 +276,20 @@ var (
 			Usage: "location of the blueprint file",
 		},
 	}
+	FlCloudStorageBaseLocationOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "cloud-storage-base-location",
+			Usage: "specifies the base location on any kind of cloud storage",
+		},
+	}
+	FlCloudStorageInstanceProfileOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "cloud-storage-aws-instance-profile",
+			Usage: "in case of AWS storage it specifies the instanceProfile",
+		},
+	}
 	FlCloudStorageTypeOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{

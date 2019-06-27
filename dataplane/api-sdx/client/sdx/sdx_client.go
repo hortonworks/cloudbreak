@@ -109,6 +109,34 @@ func (a *Client) GetSdx(params *GetSdxParams) (*GetSdxOK, error) {
 }
 
 /*
+GetSdxDetail gets s d x cluster detail
+*/
+func (a *Client) GetSdxDetail(params *GetSdxDetailParams) (*GetSdxDetailOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSdxDetailParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getSdxDetail",
+		Method:             "GET",
+		PathPattern:        "/sdx/{name}/detail",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetSdxDetailReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetSdxDetailOK), nil
+
+}
+
+/*
 ListSdx lists s d x clusters
 */
 func (a *Client) ListSdx(params *ListSdxParams) (*ListSdxOK, error) {
