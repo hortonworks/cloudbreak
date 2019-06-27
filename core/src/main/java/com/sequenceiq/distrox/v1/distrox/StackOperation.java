@@ -71,10 +71,10 @@ public class StackOperation {
     @Inject
     private EnvironmentServiceDecorator environmentServiceDecorator;
 
-    public StackViewV4Responses list(Long workspaceId, String environmentCrn, StackType stackType) {
+    public StackViewV4Responses list(Long workspaceId, String environmentName, StackType stackType) {
         Set<StackViewV4Response> stackViewResponses;
         stackViewResponses = converterUtil.convertAllAsSet(
-                stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environmentCrn, stackType),
+                stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environmentName, stackType),
                 StackViewV4Response.class);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);
 

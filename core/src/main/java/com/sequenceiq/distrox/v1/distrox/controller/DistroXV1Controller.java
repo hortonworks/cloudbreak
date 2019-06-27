@@ -53,8 +53,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     private DistroXMaintenanceModeV1ToMainenanceModeV4Converter maintenanceModeConverter;
 
     @Override
-    public StackViewV4Responses list(String environment) {
-        return stackOperation.list(workspaceService.getForCurrentUser().getId(), environment, StackType.WORKLOAD);
+    public StackViewV4Responses list(String environmentName) {
+        return stackOperation.list(workspaceService.getForCurrentUser().getId(), environmentName, StackType.WORKLOAD);
     }
 
     @Override
