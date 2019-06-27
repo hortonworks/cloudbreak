@@ -243,13 +243,10 @@ public class ProvisionerService {
     private void setupAuthentication(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
         if (stackRequest.getAuthentication() == null) {
             StackAuthenticationV4Request stackAuthenticationV4Request = new StackAuthenticationV4Request();
-            stackAuthenticationV4Request.setPublicKey(getSshKey(environment));
+            stackAuthenticationV4Request.setPublicKey(environment.getAuthentication().getPublicKey());
+            stackAuthenticationV4Request.setPublicKeyId(environment.getAuthentication().getPublicKeyId());
             stackRequest.setAuthentication(stackAuthenticationV4Request);
         }
-    }
-
-    private String getSshKey(DetailedEnvironmentResponse environment) {
-        return environment.getAuthentication().getPublicKey();
     }
 
     private void setupClusterRequest(StackV4Request stackRequest) {
