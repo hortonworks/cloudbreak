@@ -27,6 +27,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
@@ -82,6 +83,8 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                     CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
                     freeIpaV1Endpoint.create(createFreeIpaRequest);
                     awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
+                    AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(environmentDto);
+                    freeIpaV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
                 }
             }
             eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
@@ -89,6 +92,13 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), ex);
             eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
         }
+    }
+
+    private AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest(EnvironmentDto environmentDto) {
+        AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = new AddDnsZoneForSubnetIdsRequest();
+        addDnsZoneForSubnetIdsRequest.setEnvironmentCrn(environmentDto.getResourceCrn());
+        addDnsZoneForSubnetIdsRequest.setSubnetIds(environmentDto.getNetwork().getSubnetIds());
+        return addDnsZoneForSubnetIdsRequest;
     }
 
     private CreateFreeIpaRequest createFreeIpaRequest(EnvironmentDto environment) {
