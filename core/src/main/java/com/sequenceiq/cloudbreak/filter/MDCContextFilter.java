@@ -24,6 +24,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
+import com.sequenceiq.cloudbreak.logger.MdcContext.Builder;
 
 public class MDCContextFilter extends OncePerRequestFilter {
 
@@ -49,12 +50,9 @@ public class MDCContextFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         MDCBuilder.cleanupMdc();
         HttpServletRequestWrapper wrapper = new RequestIdHeaderInjectingHttpRequestWrapper(request);
-        doIfNotNull(threadBasedUserCrnProvider.getUserCrn(), crn ->
-                MdcContext.builder()
-                        .userCrn(crn)
-                        .tenant(threadBasedUserCrnProvider.getAccountId())
-                        .requestId(wrapper.getHeader(REQUEST_ID_HEADER))
-                        .buildMdc());
+        Builder builder = MdcContext.builder().requestId(wrapper.getHeader(REQUEST_ID_HEADER));
+        doIfNotNull(threadBasedUserCrnProvider.getUserCrn(), crn -> builder.userCrn(crn).tenant(threadBasedUserCrnProvider.getAccountId()));
+        builder.buildMdc();
         LOGGER.debug("Request id has been added to MDC context for request, method: {}, path: {}",
                 request.getMethod().toUpperCase(),
                 request.getRequestURI());
