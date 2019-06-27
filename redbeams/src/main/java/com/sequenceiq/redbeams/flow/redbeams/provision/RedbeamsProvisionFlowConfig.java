@@ -33,10 +33,11 @@ public class RedbeamsProvisionFlowConfig extends AbstractFlowConfiguration<Redbe
             new Builder<RedbeamsProvisionState, RedbeamsProvisionEvent>().defaultFailureEvent(REDBEAMS_PROVISION_FAILED_EVENT)
             .from(INIT_STATE).to(ALLOCATE_DATABASE_SERVER_STATE).event(REDBEAMS_PROVISION_EVENT).defaultFailureEvent()
             .from(ALLOCATE_DATABASE_SERVER_STATE).to(REGISTER_DATABASE_SERVER_STATE).event(ALLOCATE_DATABASE_SERVER_FINISHED_EVENT)
-                    .failureEvent(ALLOCATE_DATABASE_SERVER_FAILED_EVENT)
+                    .failureState(REDBEAMS_PROVISION_FAILED_STATE).failureEvent(ALLOCATE_DATABASE_SERVER_FAILED_EVENT)
             .from(REGISTER_DATABASE_SERVER_STATE).to(REDBEAMS_PROVISION_FINISHED_STATE).event(REGISTER_DATABASE_SERVER_FINISHED_EVENT)
-                    .failureEvent(REGISTER_DATABASE_SERVER_FAILED_EVENT)
-            .from(REDBEAMS_PROVISION_FINISHED_STATE).to(FINAL_STATE).event(REDBEAMS_PROVISION_FINISHED_EVENT).defaultFailureEvent()
+                    .failureState(REDBEAMS_PROVISION_FAILED_STATE).failureEvent(REGISTER_DATABASE_SERVER_FAILED_EVENT)
+            .from(REDBEAMS_PROVISION_FINISHED_STATE).to(FINAL_STATE).event(REDBEAMS_PROVISION_FINISHED_EVENT).noFailureEvent()
+            .from(REDBEAMS_PROVISION_FAILED_STATE).to(FINAL_STATE).event(REDBEAMS_PROVISION_FAILURE_HANDLED_EVENT).noFailureEvent()
             .build();
 
     private static final FlowEdgeConfig<RedbeamsProvisionState, RedbeamsProvisionEvent> EDGE_CONFIG =

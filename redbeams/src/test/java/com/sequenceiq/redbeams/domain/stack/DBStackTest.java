@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.redbeams.api.model.common.Status;
 
 import java.util.Map;
 
@@ -21,10 +22,17 @@ public class DBStackTest {
 
     private static final Map PARAMETERS = ImmutableMap.of("foo", "bar");
 
+    private static final DBStackStatus STATUS = new DBStackStatus();
+
+    static {
+        STATUS.setStatus(Status.AVAILABLE);
+        STATUS.setStatusReason("because");
+    }
+
     private DBStack dbStack;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         dbStack = new DBStack();
     }
 
@@ -75,6 +83,11 @@ public class DBStackTest {
         Crn ownerCrn = Crn.safeFromString("crn:altus:iam:us-west-1:cloudera:user:bob@cloudera.com");
         dbStack.setOwnerCrn(ownerCrn);
         assertEquals(ownerCrn, dbStack.getOwnerCrn());
+
+        dbStack.setDBStackStatus(STATUS);
+        assertEquals(STATUS, dbStack.getDBStackStatus());
+        assertEquals(STATUS.getStatus(), dbStack.getStatus());
+        assertEquals(STATUS.getStatusReason(), dbStack.getStatusReason());
     }
 
 }

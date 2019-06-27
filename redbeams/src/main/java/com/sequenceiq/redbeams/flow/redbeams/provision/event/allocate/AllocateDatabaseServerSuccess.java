@@ -1,13 +1,14 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 import java.util.List;
 
 /**
  * The event that occurs when a database server has been allocated.
  */
-public class AllocateDatabaseServerSuccess extends AllocateDatabaseServerResponse {
+public class AllocateDatabaseServerSuccess extends RedbeamsEvent {
 
     private final List<CloudResourceStatus> results;
 

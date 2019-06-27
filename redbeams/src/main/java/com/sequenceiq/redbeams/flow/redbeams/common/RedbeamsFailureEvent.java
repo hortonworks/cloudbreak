@@ -4,13 +4,13 @@ public class RedbeamsFailureEvent extends RedbeamsEvent {
 
     private final Exception exception;
 
-    public RedbeamsFailureEvent(Long stackId, Exception exception) {
-        super(stackId);
+    public RedbeamsFailureEvent(Long resourceId, Exception exception) {
+        super(resourceId);
         this.exception = exception;
     }
 
-    public RedbeamsFailureEvent(String selector, Long stackId, Exception exception) {
-        super(selector, stackId);
+    public RedbeamsFailureEvent(String selector, Long resourceId, Exception exception) {
+        super(selector, resourceId);
         this.exception = exception;
     }
 

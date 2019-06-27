@@ -26,9 +26,9 @@ public class DatabaseServerAllocationOutcomeV4Response {
     @ApiModelProperty(value = ModelDescriptions.CRN, required = true)
     private String resourceCrn;
 
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.DATABASE_SERVER, required = true)
-    private DatabaseServerV4Response databaseServerConfig;
+    // @NotNull
+    // @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.DATABASE_SERVER, required = true)
+    // private DatabaseServerV4Response databaseServerConfig;
 
     private Status status;
 

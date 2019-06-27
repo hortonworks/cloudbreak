@@ -78,7 +78,7 @@ public class AllocateDatabaseServerHandler implements EventHandler<AllocateDatab
             eventBus.notify(success.selector(), new Event<>(event.getHeaders(), success));
             LOGGER.debug("Launching the database stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            AllocateDatabaseServerFailed failure = new AllocateDatabaseServerFailed(e, request.getResourceId());
+            AllocateDatabaseServerFailed failure = new AllocateDatabaseServerFailed(request.getResourceId(), e);
             LOGGER.warn("Error launching the database stack:", e);
             // request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
