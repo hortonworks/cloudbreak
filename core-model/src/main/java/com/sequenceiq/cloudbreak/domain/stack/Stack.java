@@ -122,7 +122,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private OnFailureAction onFailureActionAction = OnFailureAction.ROLLBACK;
+    private OnFailureAction onFailureActionAction = OnFailureAction.DO_NOTHING;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private FailurePolicy failurePolicy;
