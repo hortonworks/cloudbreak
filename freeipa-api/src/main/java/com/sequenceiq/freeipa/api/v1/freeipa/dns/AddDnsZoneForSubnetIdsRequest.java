@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.dns;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -21,7 +21,7 @@ public class AddDnsZoneForSubnetIdsRequest {
     private String environmentCrn;
 
     @NotEmpty(message = "subnet must be present and have at least one member")
-    private List<String> subnetIds;
+    private Set<String> subnetIds;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -31,11 +31,11 @@ public class AddDnsZoneForSubnetIdsRequest {
         this.environmentCrn = environmentCrn;
     }
 
-    public List<String> getSubnetIds() {
+    public Set<String> getSubnetIds() {
         return subnetIds;
     }
 
-    public void setSubnetIds(List<String> subnetIds) {
+    public void setSubnetIds(Set<String> subnetIds) {
         this.subnetIds = subnetIds;
     }
 }
