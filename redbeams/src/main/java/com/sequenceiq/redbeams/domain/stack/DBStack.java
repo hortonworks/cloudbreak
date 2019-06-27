@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.converter.CrnConverter;
 
 import java.util.Map;
@@ -73,6 +74,9 @@ public class DBStack {
 
     @Convert(converter = CrnConverter.class)
     private Crn ownerCrn;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "dbStack")
+    private DBStackStatus dbStackStatus;
 
     public Long getId() {
         return id;
@@ -196,6 +200,22 @@ public class DBStack {
 
     public String getAccountId() {
         return ownerCrn != null ? ownerCrn.getAccountId() : null;
+    }
+
+    public DBStackStatus getDBStackStatus() {
+        return dbStackStatus;
+    }
+
+    public void setDBStackStatus(DBStackStatus dbStackStatus) {
+        this.dbStackStatus = dbStackStatus;
+    }
+
+    public Status getStatus() {
+        return dbStackStatus != null ? dbStackStatus.getStatus() : null;
+    }
+
+    public String getStatusReason() {
+        return dbStackStatus != null ? dbStackStatus.getStatusReason() : null;
     }
 
     // careful with toString - it may cause database accesses for nested entities

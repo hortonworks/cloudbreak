@@ -21,6 +21,8 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4Request;
+import com.sequenceiq.redbeams.api.model.common.Status;
+import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 
@@ -130,6 +132,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals("bob@cloudera.com", defaultTags.get(OWNER.key()));
         assertEquals(String.valueOf(NOW.getEpochSecond()), defaultTags.get(CB_CREATION_TIMESTAMP.key()));
         assertEquals(VERSION, defaultTags.get(CB_VERSION.key()));
+
+        assertEquals(Status.REQUESTED, dbStack.getStatus());
+        assertEquals(DetailedDBStackStatus.PROVISION_REQUESTED, dbStack.getDBStackStatus().getDetailedDBStackStatus());
+        assertEquals(NOW.toEpochMilli(), dbStack.getDBStackStatus().getCreated().longValue());
 
         assertNotNull(dbStack.getNetwork().getName());
         assertEquals(1, dbStack.getNetwork().getAttributes().getMap().size());

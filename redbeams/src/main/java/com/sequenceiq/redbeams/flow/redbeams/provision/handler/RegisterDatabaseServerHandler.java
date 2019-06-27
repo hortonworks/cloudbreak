@@ -9,6 +9,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerSuccess;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
@@ -49,8 +50,8 @@ public class RegisterDatabaseServerHandler implements EventHandler<RegisterDatab
 
     @Override
     public void accept(Event<RegisterDatabaseServerRequest> event) {
+        LOGGER.debug("Received event: {}", event);
         RegisterDatabaseServerRequest request = event.getData();
-        Selectable response = new RegisterDatabaseServerSuccess(request.getResourceId());
         DBStack dbStack = request.getDBStack();
         List<CloudResource> dbResources = request.getDbResources();
 
@@ -86,8 +87,14 @@ public class RegisterDatabaseServerHandler implements EventHandler<RegisterDatab
         dbServerConfig.setPort(Integer.parseInt(dbPort.get().getName()));
         dbServerConfig.setResourceCrn(crnService.createCrn(dbServerConfig));
 
-        databaseServerConfigRepository.save(dbServerConfig);
-
+        Selectable response;
+        try {
+            databaseServerConfigRepository.save(dbServerConfig);
+            response = new RegisterDatabaseServerSuccess(request.getResourceId());
+        } catch (Exception e) {
+            response = new RegisterDatabaseServerFailed(request.getResourceId(), e);
+            LOGGER.warn("Error registering the database server:", e);
+        }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

@@ -6,7 +6,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedExcep
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
@@ -37,8 +36,7 @@ public class RedbeamsCreationService {
     // @Inject
     // private CrnService crnService;
 
-    // FIXME need more than just a config
-    public DatabaseServerConfig launchDatabaseServer(DBStack dbStack) {
+    public DBStack launchDatabaseServer(DBStack dbStack) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Create called with: {}", dbStack);
         }
@@ -69,10 +67,10 @@ public class RedbeamsCreationService {
             throw new RedbeamsException("Failed to retrieve database stack template for cloud platform", e);
         }
 
-        dbStackService.save(dbStack);
+        DBStack savedStack = dbStackService.save(dbStack);
 
         flowManager.notify(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(),
                 new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(), dbStack.getId()));
-        return new DatabaseServerConfig();
+        return savedStack;
     }
 }

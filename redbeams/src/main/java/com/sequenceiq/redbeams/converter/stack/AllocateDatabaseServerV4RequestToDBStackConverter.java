@@ -20,12 +20,15 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4Request;
+import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -41,6 +44,8 @@ import org.springframework.stereotype.Component;
 public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AllocateDatabaseServerV4RequestToDBStackConverter.class);
+
+    private static final DBStackStatus NEW_STATUS = new DBStackStatus();
 
     @Value("${info.app.version:}")
     private String version;
@@ -78,8 +83,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
             dbStack.setParameters(parameter);
         }
 
+        Instant now = clock.getCurrentInstant();
         dbStack.setOwnerCrn(ownerCrn);
-        dbStack.setTags(getTags(ownerCrn, dbStack.getCloudPlatform()));
+        dbStack.setTags(getTags(ownerCrn, dbStack.getCloudPlatform(), now.getEpochSecond()));
+        dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
 
         return dbStack;
     }
@@ -154,7 +161,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     // compare to freeipa CostTaggingService
 
-    private Json getTags(Crn ownerCrn, String cloudPlatform) {
+    private Json getTags(Crn ownerCrn, String cloudPlatform, long now) {
         // freeipa currently uses account ID for username / owner
         String user = ownerCrn.getResource().toString();
 
@@ -163,7 +170,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         defaultTags.put(safeTagString(CB_VERSION.key(), cloudPlatform), safeTagString(version, cloudPlatform));
         defaultTags.put(safeTagString(OWNER.key(), cloudPlatform), safeTagString(user, cloudPlatform));
         defaultTags.put(safeTagString(CB_CREATION_TIMESTAMP.key(), cloudPlatform),
-            safeTagString(String.valueOf(clock.getCurrentInstant().getEpochSecond()), cloudPlatform));
+            safeTagString(String.valueOf(now), cloudPlatform));
 
         return new Json(new StackTags(new HashMap<>(), new HashMap<>(), defaultTags));
     }

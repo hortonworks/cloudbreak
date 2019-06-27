@@ -1,27 +1,21 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate;
 
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
+
 /**
  * The event that occurs when a database server allocation has failed.
  */
-public class AllocateDatabaseServerFailed extends AllocateDatabaseServerResponse {
+public class AllocateDatabaseServerFailed extends RedbeamsFailureEvent {
 
-    private Exception errorDetails;
-
-    public AllocateDatabaseServerFailed(Exception errorDetails, Long resourceId) {
-        super(resourceId);
-
-        this.errorDetails = errorDetails;
-    }
-
-    public Exception getErrorDetails() {
-        return errorDetails;
+    public AllocateDatabaseServerFailed(Long resourceId, Exception exception) {
+        super(resourceId, exception);
     }
 
     @Override
     public String toString() {
         return "AllocateDatabaseServerFailed{"
-                + "errorDetails=" + errorDetails
-                + ", resourceId=" + getResourceId()
+                + "resourceId=" + getResourceId()
+                + ", exception=" + getException()
                 + '}';
     }
 }
