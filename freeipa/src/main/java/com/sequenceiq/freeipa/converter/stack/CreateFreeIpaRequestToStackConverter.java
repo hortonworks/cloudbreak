@@ -137,12 +137,19 @@ public class CreateFreeIpaRequestToStackConverter {
             return defaultInstanceGroups;
         }
         Set<InstanceGroup> convertedSet = new HashSet<>();
+        validateNullInstanceTemplateCount(source);
         source.getInstanceGroups().stream()
-                .map(ig -> instanceGroupConverter.convert(ig, stack.getCloudPlatform()))
+                .map(ig -> instanceGroupConverter.convert(ig, accountId, stack.getCloudPlatform()))
                 .forEach(ig -> {
                     ig.setStack(stack);
                     convertedSet.add(ig);
                 });
         return convertedSet;
+    }
+
+    private void validateNullInstanceTemplateCount(CreateFreeIpaRequest source) {
+        if (source.getInstanceGroups().stream().filter(ig -> ig.getInstanceTemplate() == null).count() > 1) {
+            throw new BadRequestException("More than one instance group is missing the instance template. Defaults cannot be applied.");
+        }
     }
 }

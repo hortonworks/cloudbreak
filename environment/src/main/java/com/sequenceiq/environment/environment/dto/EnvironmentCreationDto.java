@@ -37,11 +37,13 @@ public class EnvironmentCreationDto {
 
     private final Long created;
 
+    private final SecurityAccessDto securityAccess;
+
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
-            Long created, Telemetry telemetry) {
+            Long created, Telemetry telemetry, SecurityAccessDto securityAccess) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -64,6 +66,7 @@ public class EnvironmentCreationDto {
         }
         this.authentication = authentication;
         this.telemetry = telemetry;
+        this.securityAccess = securityAccess;
     }
 
     public String getName() {
@@ -118,6 +121,10 @@ public class EnvironmentCreationDto {
         return created;
     }
 
+    public SecurityAccessDto getSecurityAccess() {
+        return securityAccess;
+    }
+
     public static final class Builder {
         private String name;
 
@@ -144,6 +151,8 @@ public class EnvironmentCreationDto {
         private AuthenticationDto authentication;
 
         private Long created;
+
+        private SecurityAccessDto securityAccess;
 
         private Builder() {
         }
@@ -217,9 +226,14 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withSecurityAccess(SecurityAccessDto securityAccess) {
+            this.securityAccess = securityAccess;
+            return null;
+        }
+
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId,
-                    location, network, credential, regions, proxyNames, createFreeIpa, authentication, created, telemetry);
+                    location, network, credential, regions, proxyNames, createFreeIpa, authentication, created, telemetry, securityAccess);
         }
     }
 }

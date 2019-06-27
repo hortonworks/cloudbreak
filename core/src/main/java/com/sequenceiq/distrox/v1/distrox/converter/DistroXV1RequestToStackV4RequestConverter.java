@@ -74,7 +74,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAuthentication(getIfNotNull(environment.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
-        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertTo));
+        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), igs -> instanceGroupConverter.convertTo(igs, environment)));
         request.setNetwork(getNetwork(source.getNetwork(), environment));
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
@@ -102,7 +102,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setTelemetry(getIfNotNull(source.getTelemetry(), telemetryConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
-        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertTo));
+        DetailedEnvironmentResponse environmentRef = environment;
+        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroups -> instanceGroupConverter.convertTo(instanceGroups, environmentRef)));
         if (environment != null) {
             request.setNetwork(getNetwork(source.getNetwork(), environment));
         }

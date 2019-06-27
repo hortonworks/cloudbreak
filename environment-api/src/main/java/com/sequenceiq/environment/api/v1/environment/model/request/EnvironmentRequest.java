@@ -52,6 +52,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.FREE_IPA)
     private AttachedFreeIpaRequest freeIpa;
 
+    @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
+    private @Valid SecurityAccessRequest securityAccess;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -134,4 +137,11 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.authentication = authentication;
     }
 
+    public SecurityAccessRequest getSecurityAccess() {
+        return securityAccess;
+    }
+
+    public void setSecurityAccess(SecurityAccessRequest securityAccess) {
+        this.securityAccess = securityAccess;
+    }
 }

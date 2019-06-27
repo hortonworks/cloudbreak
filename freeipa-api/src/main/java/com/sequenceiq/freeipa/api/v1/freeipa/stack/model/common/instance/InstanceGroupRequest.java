@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -15,7 +14,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstanceGroupRequest extends InstanceGroupBase {
-    @NotNull
     @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateRequest instanceTemplate;
 

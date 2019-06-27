@@ -41,6 +41,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private EnvironmentAuthenticationResponse authentication;
 
+        private SecurityAccessResponse securityAccess;
+
         private Builder() {
         }
 
@@ -118,6 +120,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withSecurityAccess(SecurityAccessResponse securityAccess) {
+            this.securityAccess = securityAccess;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -134,6 +141,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setCreated(created);
             detailedEnvironmentResponse.setAuthentication(authentication);
             detailedEnvironmentResponse.setTelemetry(telemetry);
+            detailedEnvironmentResponse.setSecurityAccess(securityAccess);
             return detailedEnvironmentResponse;
         }
     }

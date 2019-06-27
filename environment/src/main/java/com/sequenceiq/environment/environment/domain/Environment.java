@@ -103,6 +103,14 @@ public class Environment implements AuthResource {
 
     private Long created;
 
+    @Column(name = "securitygroup_id_knox")
+    private String securityGroupIdForKnox;
+
+    @Column(name = "securitygroup_id_default")
+    private String defaultSecurityGroupId;
+
+    private String cidr;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
     }
@@ -296,5 +304,29 @@ public class Environment implements AuthResource {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public String getSecurityGroupIdForKnox() {
+        return securityGroupIdForKnox;
+    }
+
+    public void setSecurityGroupIdForKnox(String securityGroupIdForKnox) {
+        this.securityGroupIdForKnox = securityGroupIdForKnox;
+    }
+
+    public String getDefaultSecurityGroupId() {
+        return defaultSecurityGroupId;
+    }
+
+    public void setDefaultSecurityGroupId(String defaultSecurityGroupId) {
+        this.defaultSecurityGroupId = defaultSecurityGroupId;
+    }
+
+    public String getCidr() {
+        return cidr;
+    }
+
+    public void setCidr(String cidr) {
+        this.cidr = cidr;
     }
 }

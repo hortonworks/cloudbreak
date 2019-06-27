@@ -102,7 +102,6 @@ class ProvisionerServiceTest {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         sdxCluster.setEnvCrn("");
@@ -143,7 +142,6 @@ class ProvisionerServiceTest {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
 
@@ -171,7 +169,6 @@ class ProvisionerServiceTest {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
 
@@ -199,7 +196,6 @@ class ProvisionerServiceTest {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
 
@@ -241,7 +237,6 @@ class ProvisionerServiceTest {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         sdxCluster.setClusterName("envir-sdx-cluster");
@@ -273,7 +268,6 @@ class ProvisionerServiceTest {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         sdxCluster.setClusterName("envir-sdx-cluster");
@@ -305,7 +299,6 @@ class ProvisionerServiceTest {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         sdxCluster.setClusterName("envir-sdx-cluster");
@@ -338,7 +331,6 @@ class ProvisionerServiceTest {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         sdxCluster.setClusterName("envir-sdx-cluster");
@@ -370,7 +362,6 @@ class ProvisionerServiceTest {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         sdxCluster.setClusterName("envir-sdx-cluster");
@@ -406,7 +397,6 @@ class ProvisionerServiceTest {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         sdxCluster.setClusterName("envir-sdx-cluster");

@@ -52,6 +52,9 @@ public abstract class EnvironmentBaseResponse {
 
     private Long created;
 
+    @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
+    private SecurityAccessResponse securityAccess;
+
     public String getCrn() {
         return crn;
     }
@@ -170,5 +173,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public SecurityAccessResponse getSecurityAccess() {
+        return securityAccess;
+    }
+
+    public void setSecurityAccess(SecurityAccessResponse securityAccess) {
+        this.securityAccess = securityAccess;
     }
 }

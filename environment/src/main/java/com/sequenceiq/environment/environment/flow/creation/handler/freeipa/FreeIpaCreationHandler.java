@@ -1,10 +1,12 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 import static com.sequenceiq.cloudbreak.polling.PollingResult.SUCCESS;
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -26,6 +28,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
@@ -35,7 +38,11 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -50,6 +57,14 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private static final String FREEIPA_DOMAIN = "cloudera.site";
 
     private static final String FREEIPA_HOSTNAME = "ipaserver";
+
+    private static final String MASTER_GROUP_NAME = "master";
+
+    private static final int MASTER_NODE_COUNT = 1;
+
+    private static final String TCP = "tcp";
+
+    private static final List<String> DEFAULT_SECURITY_GROUP_PORTS = List.of("22", "443", "9443");
 
     private final EnvironmentService environmentService;
 
@@ -150,6 +165,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         setFreeIpaServer(createFreeIpaRequest);
         setPlacementAndNetwork(environment, createFreeIpaRequest);
         setAuthentication(environment.getAuthentication(), createFreeIpaRequest);
+        doIfNotNull(environment.getSecurityAccess(), securityAccess -> setSecurityAccess(securityAccess, createFreeIpaRequest));
         return createFreeIpaRequest;
     }
 
@@ -190,6 +206,36 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         stackAuthenticationRequest.setPublicKey(authentication.getPublicKey());
         stackAuthenticationRequest.setPublicKeyId(authentication.getPublicKeyId());
         createFreeIpaRequest.setAuthentication(stackAuthenticationRequest);
+    }
+
+    private void setSecurityAccess(SecurityAccessDto securityAccess, CreateFreeIpaRequest createFreeIpaRequest) {
+        SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
+        if (securityAccess.getCidr() != null) {
+            SecurityRuleRequest securityRuleRequest = createSecurityRuleRequest(securityAccess.getCidr());
+            securityGroupRequest.setSecurityRules(List.of(securityRuleRequest));
+        } else {
+            securityGroupRequest.setSecurityGroupIds(Set.of(securityAccess.getDefaultSecurityGroupId()));
+        }
+        InstanceGroupRequest instanceGroupRequest = createInstanceGroupRequest(securityGroupRequest);
+        createFreeIpaRequest.setInstanceGroups(List.of(instanceGroupRequest));
+    }
+
+    private InstanceGroupRequest createInstanceGroupRequest(SecurityGroupRequest securityGroupRequest) {
+        InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
+        instanceGroupRequest.setName(MASTER_GROUP_NAME);
+        instanceGroupRequest.setNodeCount(MASTER_NODE_COUNT);
+        instanceGroupRequest.setType(InstanceGroupType.MASTER);
+        instanceGroupRequest.setSecurityGroup(securityGroupRequest);
+        return instanceGroupRequest;
+    }
+
+    private SecurityRuleRequest createSecurityRuleRequest(String cidr) {
+        SecurityRuleRequest securityRuleRequest = new SecurityRuleRequest();
+        securityRuleRequest.setModifiable(false);
+        securityRuleRequest.setPorts(DEFAULT_SECURITY_GROUP_PORTS);
+        securityRuleRequest.setProtocol(TCP);
+        securityRuleRequest.setSubnet(cidr);
+        return securityRuleRequest;
     }
 
     private void awaitFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environment) {

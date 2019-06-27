@@ -47,9 +47,6 @@ public class SdxCluster implements AccountIdAwareResource {
     private String envCrn;
 
     @NotNull
-    private String accessCidr;
-
-    @NotNull
     private String clusterShape;
 
     @NotNull
@@ -145,14 +142,6 @@ public class SdxCluster implements AccountIdAwareResource {
 
     public void setEnvCrn(String envCrn) {
         this.envCrn = envCrn;
-    }
-
-    public String getAccessCidr() {
-        return accessCidr;
-    }
-
-    public void setAccessCidr(String accessCidr) {
-        this.accessCidr = accessCidr;
     }
 
     public String getClusterShape() {

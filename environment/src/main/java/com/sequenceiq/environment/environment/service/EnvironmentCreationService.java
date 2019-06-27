@@ -56,6 +56,7 @@ public class EnvironmentCreationService {
                     creationDto.getName(), creationDto.getAccountId()));
         }
         Environment environment = initializeEnvironment(creationDto, creator);
+        environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
         validateCreation(creationDto, environment, cloudRegions);
         environment = environmentService.save(environment);
@@ -105,5 +106,4 @@ public class EnvironmentCreationService {
                 .build()
                 .toString();
     }
-
 }
