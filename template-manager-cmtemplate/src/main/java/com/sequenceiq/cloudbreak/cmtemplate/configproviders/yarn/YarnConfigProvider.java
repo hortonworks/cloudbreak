@@ -8,10 +8,12 @@ import java.util.Objects;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveRoles;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
@@ -23,12 +25,17 @@ public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
 
     private static final String YARN_CORE_SITE_SAFETY_VALVE = "yarn_core_site_safety_valve";
 
+    private static final String YARN_SITE_SERVICE_SAFETY_VALVE = "yarn_service_config_safety_valve";
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
-        return List.of(
-                config(YARN_CORE_SITE_SAFETY_VALVE,
-                        ConfigUtils.getSafetyValveProperty(HADOOP_PROXYUSER_KNOX_GROUPS, "*")
-                                + ConfigUtils.getSafetyValveProperty(HADOOP_PROXYUSER_KNOX_HOSTS, "*")));
+        List<ApiClusterTemplateConfig> apiClusterTemplateConfigs = Lists.newArrayList();
+        apiClusterTemplateConfigs.add(config(YARN_CORE_SITE_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty(HADOOP_PROXYUSER_KNOX_GROUPS, "*")
+                + ConfigUtils.getSafetyValveProperty(HADOOP_PROXYUSER_KNOX_HOSTS, "*")));
+        if (templateProcessor.getServiceByType(HiveRoles.HIVELLAP).isPresent()) {
+            apiClusterTemplateConfigs.add(config(YARN_SITE_SERVICE_SAFETY_VALVE, getYarnSiteServiceValveValue()));
+        }
+        return apiClusterTemplateConfigs;
     }
 
     @Override
@@ -46,6 +53,12 @@ public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
                 && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.RESOURCEMANAGER_WEB.getKnoxService());
+    }
+
+    private String getYarnSiteServiceValveValue() {
+        return ConfigUtils.getSafetyValveProperty("yarn.resourcemanager.monitor.capacity.preemption.intra-queue-preemption.enabled", "true")
+                + ConfigUtils.getSafetyValveProperty("yarn.scheduler.capacity.ordering-policy.priority-utilization.underutilized-preemption.enabled", "true")
+                + ConfigUtils.getSafetyValveProperty("yarn.resourcemanager.placement-constraints.handler", "scheduler");
     }
 
 }
