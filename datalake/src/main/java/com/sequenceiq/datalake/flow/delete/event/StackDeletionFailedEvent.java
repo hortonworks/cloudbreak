@@ -1,26 +1,19 @@
 package com.sequenceiq.datalake.flow.delete.event;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.datalake.flow.SdxEvent;
 
-public class StackDeletionFailedEvent implements Selectable {
-
-    private Long sdxId;
+public class StackDeletionFailedEvent extends SdxEvent {
 
     private Exception exception;
 
-    public StackDeletionFailedEvent(Long sdxId, Exception exception) {
-        this.sdxId = sdxId;
+    public StackDeletionFailedEvent(Long sdxId, String userId, Exception exception) {
+        super(sdxId, userId);
         this.exception = exception;
     }
 
     @Override
     public String selector() {
         return "StackDeletionFailedEvent";
-    }
-
-    @Override
-    public Long getResourceId() {
-        return sdxId;
     }
 
     public Exception getException() {

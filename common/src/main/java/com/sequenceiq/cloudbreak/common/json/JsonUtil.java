@@ -111,6 +111,10 @@ public class JsonUtil {
         return rootNode;
     }
 
+    public static JsonNode convertToTree(Object object) {
+        return MAPPER.valueToTree(object);
+    }
+
     public static String minify(String content) {
         return minify(content, Collections.emptySet());
     }

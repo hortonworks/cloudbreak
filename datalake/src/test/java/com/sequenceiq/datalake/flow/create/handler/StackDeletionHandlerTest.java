@@ -35,6 +35,8 @@ import reactor.bus.EventBus;
 @DisplayName("StackDeletionHandler tests")
 class StackDeletionHandlerTest {
 
+    private static String userId = "userId";
+
     @Mock
     private ProvisionerService provisionerService;
 
@@ -52,7 +54,7 @@ class StackDeletionHandlerTest {
     @Test
     void acceptTestStackDeletionSuccess() {
         long id = 2L;
-        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id);
+        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
         doNothing().when(provisionerService).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
         stackDeletionHandler.accept(receivedEvent);
@@ -71,7 +73,7 @@ class StackDeletionHandlerTest {
     @Test
     void acceptTestStackDeletionFailed() {
         long id = 2L;
-        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id);
+        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
         doThrow(new UserBreakException("stack deletion failed")).when(provisionerService).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
         stackDeletionHandler.accept(receivedEvent);
@@ -90,7 +92,7 @@ class StackDeletionHandlerTest {
     @Test
     void acceptTestPollerStackTimeout() {
         long id = 2L;
-        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id);
+        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
         doThrow(new PollerStoppedException("stack deletion timeout")).when(provisionerService).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
         stackDeletionHandler.accept(receivedEvent);
@@ -109,7 +111,7 @@ class StackDeletionHandlerTest {
     @Test
     void acceptTestPollerStackOtherError() {
         long id = 2L;
-        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id);
+        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
         doThrow(new PollerException("stack deletion error")).when(provisionerService).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
         stackDeletionHandler.accept(receivedEvent);

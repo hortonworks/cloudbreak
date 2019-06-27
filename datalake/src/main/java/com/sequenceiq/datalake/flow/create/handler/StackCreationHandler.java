@@ -37,31 +37,32 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new SdxCreateFailedEvent(resourceId, e);
+        return new SdxCreateFailedEvent(resourceId, null,  e);
     }
 
     @Override
     protected void doAccept(HandlerEvent handlerEvent) {
         StackCreationWaitRequest stackCreationWaitRequest = handlerEvent.getData();
         Long sdxId = stackCreationWaitRequest.getResourceId();
+        String userId = stackCreationWaitRequest.getUserId();
         Selectable response;
         try {
             LOGGER.debug("start polling stack creation process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig);
-            response = new StackCreationSuccessEvent(sdxId);
+            response = new StackCreationSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxCreateFailedEvent(sdxId, userBreakException);
+            response = new SdxCreateFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Poller stopped for stack: {}", sdxId, pollerStoppedException);
-            response = new SdxCreateFailedEvent(sdxId, pollerStoppedException);
+            response = new SdxCreateFailedEvent(sdxId, userId, pollerStoppedException);
         } catch (PollerException exception) {
             LOGGER.info("Polling failed for stack: {}", sdxId, exception);
-            response = new SdxCreateFailedEvent(sdxId, exception);
+            response = new SdxCreateFailedEvent(sdxId, userId, exception);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in stack creation wait phase", anotherException);
-            response = new SdxCreateFailedEvent(sdxId, anotherException);
+            response = new SdxCreateFailedEvent(sdxId, userId, anotherException);
         }
         sendEvent(response, handlerEvent);
     }

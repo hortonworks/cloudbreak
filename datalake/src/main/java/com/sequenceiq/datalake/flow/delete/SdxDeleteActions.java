@@ -30,6 +30,8 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.notification.ResourceEvent;
 
 @Configuration
 public class SdxDeleteActions {
@@ -42,13 +44,16 @@ public class SdxDeleteActions {
     @Inject
     private ProvisionerService provisionerService;
 
+    @Inject
+    private NotificationService notificationService;
+
     @Bean(name = "SDX_DELETION_START_STATE")
     public Action<?, ?> sdxDeletion() {
         return new AbstractSdxAction<>(SdxEvent.class) {
 
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId());
+                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId());
             }
 
             @Override
@@ -60,7 +65,7 @@ public class SdxDeleteActions {
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return new StackDeletionFailedEvent(payload.getResourceId(), ex);
+                return new StackDeletionFailedEvent(payload.getResourceId(), payload.getUserId(), ex);
             }
         };
     }
@@ -71,23 +76,24 @@ public class SdxDeleteActions {
 
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId());
+                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId());
             }
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("SDX stack deletion in progress: {}", payload.getResourceId());
+                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_STARTED, context.getUserId());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(SdxContext context) {
-                return new StackDeletionWaitRequest(context.getSdxId());
+                return new StackDeletionWaitRequest(context.getSdxId(), context.getUserId());
             }
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return new StackDeletionFailedEvent(payload.getResourceId(), ex);
+                return new StackDeletionFailedEvent(payload.getResourceId(), payload.getUserId(), ex);
             }
         };
     }
@@ -98,12 +104,13 @@ public class SdxDeleteActions {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     StackDeletionSuccessEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId());
+                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId());
             }
 
             @Override
             protected void doExecute(SdxContext context, StackDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("SDX delete finalized: {}", payload.getResourceId());
+                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_FINISHED, payload, context.getUserId());
                 sendEvent(context, SDX_DELETE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -120,7 +127,7 @@ public class SdxDeleteActions {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     StackDeletionFailedEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId());
+                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId());
             }
 
             @Override
@@ -130,6 +137,7 @@ public class SdxDeleteActions {
                 LOGGER.info("Update SDX status to {} for resource: {}", deleteFailedStatus, payload.getResourceId(), exception);
                 String statusReason = ExceptionUtils.getMessage(exception);
                 sdxService.updateSdxStatus(payload.getResourceId(), deleteFailedStatus, statusReason);
+                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_FAILED, payload, context.getUserId());
                 sendEvent(context, SDX_DELETE_FAILED_HANDLED_EVENT.event(), payload);
             }
 

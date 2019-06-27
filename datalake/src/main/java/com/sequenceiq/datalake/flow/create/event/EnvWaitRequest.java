@@ -1,22 +1,11 @@
 package com.sequenceiq.datalake.flow.create.event;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.datalake.flow.SdxEvent;
 
-public class EnvWaitRequest implements Selectable {
+public class EnvWaitRequest extends SdxEvent {
 
-    private Long sdxId;
-
-    public EnvWaitRequest(Long sdxId) {
-        this.sdxId = sdxId;
-    }
-
-    @Override
-    public Long getResourceId() {
-        return sdxId;
-    }
-
-    public void setResourceId(Long sdxId) {
-        this.sdxId = sdxId;
+    public EnvWaitRequest(Long sdxId, String userId) {
+        super(sdxId, userId);
     }
 
     @Override

@@ -1,6 +1,16 @@
 package com.sequenceiq.notification;
 
 public enum ResourceEvent {
+    SDX_CLUSTER_CREATED("resource.sdx.created"),
+    SDX_CLUSTER_PROVISION_STARTED("resource.sdx.provisionstarted"),
+    SDX_CLUSTER_PROVISION_FINISHED("resource.sdx.provisionfinished"),
+    SDX_CLUSTER_DELETED("resource.sdx.deleted"),
+    SDX_CLUSTER_DELETION_STARTED("resource.sdx.deletionstarted"),
+    SDX_CLUSTER_DELETION_FINISHED("resource.sdx.deletionfinished"),
+    SDX_CLUSTER_DELETION_FAILED("resource.sdx.deletionfailed"),
+    SDX_CLUSTER_CREATION_FAILED("resource.sdx.failed"),
+    SDX_WAITING_FOR_ENVIRONMENT("resource.sdx.envwait"),
+    SDX_ENVIRONMENT_FINISHED("resource.sdx.envfinished"),
     WORKSPACE_CREATED("resource.workspace.created"),
     WORKSPACE_DELETED("resource.workspace.deleted"),
     BLUEPRINT_CREATED("resource.blueprint.created"),
