@@ -34,6 +34,8 @@ import reactor.bus.EventBus;
 @DisplayName("StackCreationHandler tests")
 class StackCreationHandlerTest {
 
+    private static String userId = "userId";
+
     @Mock
     private ProvisionerService provisionerService;
 
@@ -51,7 +53,7 @@ class StackCreationHandlerTest {
     @Test
     void acceptTest() {
         long stackId = 2L;
-        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId);
+        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
         doNothing().when(provisionerService).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         stackCreationHandler.accept(receivedEvent);
@@ -69,7 +71,7 @@ class StackCreationHandlerTest {
     @Test
     void acceptTestPollerStackFailed() {
         long stackId = 2L;
-        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId);
+        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
         doThrow(new UserBreakException("stack failed")).when(provisionerService).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         stackCreationHandler.accept(receivedEvent);
@@ -88,7 +90,7 @@ class StackCreationHandlerTest {
     @Test
     void acceptTestPollerStackTimeout() {
         long stackId = 2L;
-        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId);
+        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
         doThrow(new PollerStoppedException("stack timeout")).when(provisionerService).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         stackCreationHandler.accept(receivedEvent);
@@ -107,7 +109,7 @@ class StackCreationHandlerTest {
     @Test
     void acceptTestPollerStackOtherError() {
         long stackId = 2L;
-        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId);
+        StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
         doThrow(new PollerException("stack error")).when(provisionerService).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         stackCreationHandler.accept(receivedEvent);

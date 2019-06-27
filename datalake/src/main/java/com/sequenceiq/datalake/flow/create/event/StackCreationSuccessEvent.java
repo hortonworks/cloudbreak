@@ -1,13 +1,11 @@
 package com.sequenceiq.datalake.flow.create.event;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.datalake.flow.SdxEvent;
 
-public class StackCreationSuccessEvent implements Selectable {
+public class StackCreationSuccessEvent extends SdxEvent {
 
-    private Long sdxId;
-
-    public StackCreationSuccessEvent(Long sdxId) {
-        this.sdxId = sdxId;
+    public StackCreationSuccessEvent(Long sdxId, String userId) {
+        super(sdxId, userId);
     }
 
     @Override
@@ -15,8 +13,4 @@ public class StackCreationSuccessEvent implements Selectable {
         return "StackCreationSuccessEvent";
     }
 
-    @Override
-    public Long getResourceId() {
-        return sdxId;
-    }
 }

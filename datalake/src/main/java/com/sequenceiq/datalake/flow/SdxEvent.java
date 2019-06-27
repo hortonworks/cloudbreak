@@ -13,27 +13,35 @@ public class SdxEvent implements Selectable, Acceptable {
 
     private final Long sdxId;
 
+    private final String userId;
+
     private final Promise<Boolean> accepted;
 
-    public SdxEvent(Long sdxId) {
-        this(null, sdxId);
+    public SdxEvent(Long sdxId, String userId) {
+        this(null, sdxId, userId);
     }
 
-    public SdxEvent(String selector, Long sdxId) {
+    public SdxEvent(String selector, Long sdxId, String userId) {
         this.selector = selector;
         this.sdxId = sdxId;
+        this.userId = userId;
         accepted = new Promise<>();
     }
 
-    public SdxEvent(String selector, Long sdxId, Promise<Boolean> accepted) {
+    public SdxEvent(String selector, Long sdxId, String userId, Promise<Boolean> accepted) {
         this.selector = selector;
         this.sdxId = sdxId;
+        this.userId = userId;
         this.accepted = accepted;
     }
 
     @Override
     public Long getResourceId() {
         return sdxId;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     @Override

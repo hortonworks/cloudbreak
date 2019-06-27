@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
@@ -34,18 +35,24 @@ public class SdxReactorFlowManager {
     @Inject
     private SdxService sdxService;
 
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
     public void triggerSdxCreation(Long sdxId) {
         String selector = ENV_WAIT_EVENT.event();
-        notify(selector, new SdxEvent(selector, sdxId));
+        String userId = threadBasedUserCrnProvider.getUserCrn();
+        notify(selector, new SdxEvent(selector, sdxId, userId));
     }
 
     public void triggerSdxDeletion(Long sdxId) {
         String selector = SDX_DELETE_EVENT.event();
-        notify(selector, new SdxEvent(selector, sdxId));
+        String userId = threadBasedUserCrnProvider.getUserCrn();
+        notify(selector, new SdxEvent(selector, sdxId, userId));
     }
 
     public void cancelRunningFlows(Long sdxId) {
-        SdxEvent cancelEvent = new SdxEvent(Flow2Handler.FLOW_CANCEL, sdxId);
+        String userId = threadBasedUserCrnProvider.getUserCrn();
+        SdxEvent cancelEvent = new SdxEvent(Flow2Handler.FLOW_CANCEL, sdxId, userId);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }
 

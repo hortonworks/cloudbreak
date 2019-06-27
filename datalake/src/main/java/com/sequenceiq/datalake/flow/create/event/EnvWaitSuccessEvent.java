@@ -7,8 +7,8 @@ public class EnvWaitSuccessEvent extends SdxEvent {
 
     private DetailedEnvironmentResponse detailedEnvironmentResponse;
 
-    public EnvWaitSuccessEvent(Long sdxId, DetailedEnvironmentResponse detailedEnvironmentResponse) {
-        super(sdxId);
+    public EnvWaitSuccessEvent(Long sdxId, String userId, DetailedEnvironmentResponse detailedEnvironmentResponse) {
+        super(sdxId, userId);
         this.detailedEnvironmentResponse = detailedEnvironmentResponse;
     }
 

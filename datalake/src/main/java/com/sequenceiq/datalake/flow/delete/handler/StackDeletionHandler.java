@@ -46,21 +46,22 @@ public class StackDeletionHandler implements EventHandler<StackDeletionWaitReque
     public void accept(Event<StackDeletionWaitRequest> event) {
         StackDeletionWaitRequest stackDeletionWaitRequest = event.getData();
         Long sdxId = stackDeletionWaitRequest.getResourceId();
+        String userId = stackDeletionWaitRequest.getUserId();
         Selectable response;
         try {
             LOGGER.debug("Start polling stack deletion process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             provisionerService.waitCloudbreakClusterDeletion(sdxId, pollingConfig);
-            response = new StackDeletionSuccessEvent(sdxId);
+            response = new StackDeletionSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Deletion polling exited before timeout. Cause: ", userBreakException);
-            response = new StackDeletionFailedEvent(sdxId, userBreakException);
+            response = new StackDeletionFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Deletion poller stopped for stack: {}", sdxId);
-            response = new StackDeletionFailedEvent(sdxId, pollerStoppedException);
+            response = new StackDeletionFailedEvent(sdxId, userId, pollerStoppedException);
         } catch (PollerException exception) {
             LOGGER.info("Deletion polling failed for stack: {}", sdxId);
-            response = new StackDeletionFailedEvent(sdxId, exception);
+            response = new StackDeletionFailedEvent(sdxId, userId, exception);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @JsonInclude(Include.NON_NULL)
 public class CloudbreakNotification extends CloudbreakNotificationBase {
@@ -36,9 +38,30 @@ public class CloudbreakNotification extends CloudbreakNotificationBase {
 
     private String tenantName;
 
-    private LdapDetails ldapDetails;
+    private JsonNode payload;
 
-    private RdsDetails rdsDetails;
+    private String payloadType;
+
+    public JsonNode getPayload() {
+        return payload;
+    }
+
+    public void setPayload(JsonNode payload) {
+        this.payload = payload;
+    }
+
+    @JsonIgnore
+    public String getPayloadAsText() {
+        return payload != null ? payload.asText() : "";
+    }
+
+    public String getPayloadType() {
+        return payloadType;
+    }
+
+    public void setPayloadType(String payloadType) {
+        this.payloadType = payloadType;
+    }
 
     public Integer getNodeCount() {
         return nodeCount;
@@ -150,22 +173,6 @@ public class CloudbreakNotification extends CloudbreakNotificationBase {
 
     public void setWorkspaceId(Long workspaceId) {
         this.workspaceId = workspaceId;
-    }
-
-    public LdapDetails getLdapDetails() {
-        return ldapDetails;
-    }
-
-    public void setLdapDetails(LdapDetails ldapDetails) {
-        this.ldapDetails = ldapDetails;
-    }
-
-    public RdsDetails getRdsDetails() {
-        return rdsDetails;
-    }
-
-    public void setRdsDetails(RdsDetails rdsDetails) {
-        this.rdsDetails = rdsDetails;
     }
 
     public String getTenantName() {

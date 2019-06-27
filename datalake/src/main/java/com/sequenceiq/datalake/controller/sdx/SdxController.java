@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.ResourceEvent;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.RedeploySdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -20,7 +22,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Controller
-public class SdxController implements SdxEndpoint {
+public class SdxController extends NotificationController implements SdxEndpoint {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
@@ -37,6 +39,7 @@ public class SdxController implements SdxEndpoint {
         SdxCluster sdxCluster = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         sdxClusterResponse.setName(sdxCluster.getClusterName());
+        notify(ResourceEvent.SDX_CLUSTER_CREATED, sdxClusterResponse);
         return sdxClusterResponse;
     }
 
@@ -44,6 +47,7 @@ public class SdxController implements SdxEndpoint {
     public void delete(String name) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         sdxService.deleteSdx(userCrn, name);
+        notify(ResourceEvent.SDX_CLUSTER_DELETED);
     }
 
     @Override

@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.notification.NotificationService;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -41,6 +42,9 @@ class SdxControllerTest {
 
     @Mock
     private SdxService sdxService;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private SdxController sdxController;

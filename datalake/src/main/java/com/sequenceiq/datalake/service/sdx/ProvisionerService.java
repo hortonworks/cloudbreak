@@ -114,6 +114,7 @@ public class ProvisionerService {
     }
 
     public void waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig) {
+
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(false)

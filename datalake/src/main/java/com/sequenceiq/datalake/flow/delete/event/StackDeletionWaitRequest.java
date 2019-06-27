@@ -1,22 +1,11 @@
 package com.sequenceiq.datalake.flow.delete.event;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.datalake.flow.SdxEvent;
 
-public class StackDeletionWaitRequest implements Selectable {
+public class StackDeletionWaitRequest extends SdxEvent {
 
-    private Long sdxId;
-
-    public StackDeletionWaitRequest(Long sdxId) {
-        this.sdxId = sdxId;
-    }
-
-    @Override
-    public Long getResourceId() {
-        return sdxId;
-    }
-
-    public void setResourceId(Long sdxId) {
-        this.sdxId = sdxId;
+    public StackDeletionWaitRequest(Long sdxId, String userId) {
+        super(sdxId, userId);
     }
 
     @Override

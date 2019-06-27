@@ -1,26 +1,19 @@
 package com.sequenceiq.datalake.flow.create.event;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.datalake.flow.SdxEvent;
 
-public class SdxCreateFailedEvent implements Selectable {
-
-    private Long sdxId;
+public class SdxCreateFailedEvent extends SdxEvent {
 
     private Exception exception;
 
-    public SdxCreateFailedEvent(Long sdxId, Exception exception) {
-        this.sdxId = sdxId;
+    public SdxCreateFailedEvent(Long sdxId, String userId, Exception exception) {
+        super(sdxId, userId);
         this.exception = exception;
     }
 
     @Override
     public String selector() {
         return "SdxCreateFailedEvent";
-    }
-
-    @Override
-    public Long getResourceId() {
-        return sdxId;
     }
 
     public Exception getException() {
