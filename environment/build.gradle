@@ -54,6 +54,7 @@ dependencies {
   compile project (":cloud-gcp")
   compile project (":cloud-openstack")
   compile project (":cloud-cumulus-yarn")
+  compile project(":core-api")
   implementation (project (":redbeams-api")) {
 //    exclude module: 'core-api'
   }
