@@ -45,11 +45,14 @@ public class NetworkDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
-                environmentService.save(environment);
-                if (environment.getNetwork().getRegistrationType().equals(RegistrationType.CREATE_NEW)) {
-                    environmentNetworkManagementService.deleteNetwork(environmentDtoConverter.environmentToDto(environment));
+                if (environment.getNetwork() != null) {
+                    RegistrationType registrationType = environment.getNetwork().getRegistrationType();
+                    if (registrationType != null && registrationType.equals(RegistrationType.CREATE_NEW)) {
+                        environmentNetworkManagementService.deleteNetwork(environmentDtoConverter.environmentToDto(environment));
+                    }
+                    environment.setNetwork(null);
+                    environmentService.save(environment);
                 }
-                environment.setNetwork(null);
             });
 
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> deleteNetworkIfExists(environment.getId()));
