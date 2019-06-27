@@ -13,6 +13,8 @@ public class ConfigUtils {
 
     private static final String CM_SAFETY_VALVE_PROPERTY_FORMAT = "<property><name>%s</name><value>%s</value></property>";
 
+    private static final String CM_SAFETY_VALVE_CONFIGURATION_FORMAT = "<configuration>%s</configuration>";
+
     private ConfigUtils() { }
 
     /**
@@ -60,6 +62,10 @@ public class ConfigUtils {
 
     public static String getSafetyValveProperty(String key, String value) {
         return String.format(CM_SAFETY_VALVE_PROPERTY_FORMAT, key, value);
+    }
+
+    public static String getSafetyValveConfiguration(String value) {
+        return String.format(CM_SAFETY_VALVE_CONFIGURATION_FORMAT, value);
     }
 
 }
