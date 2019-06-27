@@ -16,17 +16,17 @@ import (
 	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
-// DeleteRecipeInWorkspaceReader is a Reader for the DeleteRecipeInWorkspace structure.
-type DeleteRecipeInWorkspaceReader struct {
+// GetRecipeByCrnInWorkspaceReader is a Reader for the GetRecipeByCrnInWorkspace structure.
+type GetRecipeByCrnInWorkspaceReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *DeleteRecipeInWorkspaceReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetRecipeByCrnInWorkspaceReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewDeleteRecipeInWorkspaceOK()
+		result := NewGetRecipeByCrnInWorkspaceOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *DeleteRecipeInWorkspaceReader) ReadResponse(response runtime.ClientResp
 	}
 }
 
-// NewDeleteRecipeInWorkspaceOK creates a DeleteRecipeInWorkspaceOK with default headers values
-func NewDeleteRecipeInWorkspaceOK() *DeleteRecipeInWorkspaceOK {
-	return &DeleteRecipeInWorkspaceOK{}
+// NewGetRecipeByCrnInWorkspaceOK creates a GetRecipeByCrnInWorkspaceOK with default headers values
+func NewGetRecipeByCrnInWorkspaceOK() *GetRecipeByCrnInWorkspaceOK {
+	return &GetRecipeByCrnInWorkspaceOK{}
 }
 
-/*DeleteRecipeInWorkspaceOK handles this case with default header values.
+/*GetRecipeByCrnInWorkspaceOK handles this case with default header values.
 
 successful operation
 */
-type DeleteRecipeInWorkspaceOK struct {
+type GetRecipeByCrnInWorkspaceOK struct {
 	Payload *model.RecipeV4Response
 }
 
-func (o *DeleteRecipeInWorkspaceOK) Error() string {
-	return fmt.Sprintf("[DELETE /v4/{workspaceId}/recipes/name/{name}][%d] deleteRecipeInWorkspaceOK  %+v", 200, o.Payload)
+func (o *GetRecipeByCrnInWorkspaceOK) Error() string {
+	return fmt.Sprintf("[GET /v4/{workspaceId}/recipes/crn/{crn}][%d] getRecipeByCrnInWorkspaceOK  %+v", 200, o.Payload)
 }
 
-func (o *DeleteRecipeInWorkspaceOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetRecipeByCrnInWorkspaceOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.RecipeV4Response)
 

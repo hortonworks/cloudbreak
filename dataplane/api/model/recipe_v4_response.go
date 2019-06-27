@@ -22,13 +22,16 @@ type RecipeV4Response struct {
 	// content of recipe
 	Content string `json:"content,omitempty"`
 
+	// the creator of the resource
+	Creator string `json:"creator,omitempty"`
+
+	// the unique crn of the resource
+	Crn string `json:"crn,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
-
-	// id of the resource
-	ID int64 `json:"id,omitempty"`
 
 	// name of the resource
 	// Max Length: 100

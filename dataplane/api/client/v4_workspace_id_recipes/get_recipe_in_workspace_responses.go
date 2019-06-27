@@ -51,7 +51,7 @@ type GetRecipeInWorkspaceOK struct {
 }
 
 func (o *GetRecipeInWorkspaceOK) Error() string {
-	return fmt.Sprintf("[GET /v4/{workspaceId}/recipes/{name}][%d] getRecipeInWorkspaceOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /v4/{workspaceId}/recipes/name/{name}][%d] getRecipeInWorkspaceOK  %+v", 200, o.Payload)
 }
 
 func (o *GetRecipeInWorkspaceOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

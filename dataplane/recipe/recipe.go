@@ -1,10 +1,10 @@
 package recipe
 
 import (
-	"github.com/hortonworks/cb-cli/dataplane/oauth"
-	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
 	"encoding/base64"
 
@@ -27,12 +27,12 @@ type recipeOut struct {
 type recipeOutJsonDescribe struct {
 	*recipeOut
 	Content string `json:"RecipeTextAsBase64" yaml:"RecipeTextAsBase64"`
-	ID      string `json:"ID" yaml:"ID"`
+	Crn     string `json:"CRN" yaml:"CRN"`
 }
 
 type recipeOutTableDescribe struct {
 	*recipeOut
-	ID string `json:"ID" yaml:"ID"`
+	Crn string `json:"CRN" yaml:"CRN"`
 }
 
 func (r *recipeOut) DataAsStringArray() []string {
@@ -40,11 +40,11 @@ func (r *recipeOut) DataAsStringArray() []string {
 }
 
 func (r *recipeOutJsonDescribe) DataAsStringArray() []string {
-	return append(r.recipeOut.DataAsStringArray(), r.ID)
+	return append(r.recipeOut.DataAsStringArray(), r.Crn)
 }
 
 func (r *recipeOutTableDescribe) DataAsStringArray() []string {
-	return append(r.recipeOut.DataAsStringArray(), r.ID)
+	return append(r.recipeOut.DataAsStringArray(), r.Crn)
 }
 
 func CreateRecipeFromFile(c *cli.Context) {
@@ -97,7 +97,7 @@ func createRecipeImpl(client recipeClient, workspaceID int64, name string, descr
 	}
 	recipe = resp.Payload
 
-	log.Infof("[createRecipeImpl] recipe created: %s (id: %d)", recipe.Name, recipe.ID)
+	log.Infof("[createRecipeImpl] recipe created: %s (crn: %s)", recipe.Name, recipe.Crn)
 	return recipe
 }
 
@@ -113,9 +113,9 @@ func DescribeRecipe(c *cli.Context) {
 	}
 	recipe := resp.Payload
 	if output.Format != "table" {
-		output.Write(append(recipeHeader, "ContentAsBase64", "ID"), &recipeOutJsonDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.Type}, recipe.Content, strconv.FormatInt(recipe.ID, 10)})
+		output.Write(append(recipeHeader, "ContentAsBase64", "CRN"), &recipeOutJsonDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.Type}, recipe.Content, recipe.Crn})
 	} else {
-		output.Write(append(recipeHeader, "ID"), &recipeOutTableDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.Type}, strconv.FormatInt(recipe.ID, 10)})
+		output.Write(append(recipeHeader, "CRN"), &recipeOutTableDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.Type}, recipe.Crn})
 	}
 }
 
