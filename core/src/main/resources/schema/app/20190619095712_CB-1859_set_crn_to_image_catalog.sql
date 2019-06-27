@@ -7,8 +7,7 @@ UPDATE imagecatalog
 SET crn = CONCAT('crn:altus:cloudbreak:us-west-1:', (SELECT name from workspace WHERE id = SQ.workspace_id), ':imageCatalog:', imagecatalog.id)
 FROM (SELECT *
 	  FROM imagecatalog imgc
-	  WHERE archived = false
-	  AND crn IS NULL) AS SQ
+	  WHERE crn IS NULL) AS SQ
 WHERE imagecatalog.workspace_id = SQ.workspace_id;
 
 ALTER TABLE imagecatalog ALTER COLUMN crn SET NOT NULL;
