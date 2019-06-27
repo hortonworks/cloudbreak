@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @Service
@@ -57,11 +58,17 @@ public class StackApiViewService {
         return stackApiViewRepository.save(stackApiView);
     }
 
-    public Set<StackApiView> retrieveStackViewsByWorkspaceId(Long workspaceId, String environmentCrn, @Nullable StackType stackType) {
+    public Set<StackApiView> retrieveStackViewsByWorkspaceId(Long workspaceId, String environmentName, @Nullable StackType stackType) {
         ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
-        Set<StackApiView> stackViewResponses = StringUtils.isEmpty(environmentCrn)
-                ? getAllByWorkspace(workspaceId, showTerminatedClustersAfterConfig)
-                : getAllByWorkspaceAndEnvironment(workspaceId, environmentCrn, showTerminatedClustersAfterConfig);
+
+        Set<StackApiView> stackViewResponses;
+        if (StringUtils.isEmpty(environmentName)) {
+            stackViewResponses = getAllByWorkspace(workspaceId, showTerminatedClustersAfterConfig);
+        } else {
+            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(environmentName);
+            stackViewResponses = getAllByWorkspaceAndEnvironment(workspaceId, environmentResponse.getCrn(), showTerminatedClustersAfterConfig);
+        }
+
         if (stackType != null) {
             stackViewResponses = filterByStackType(stackType, stackViewResponses);
         }

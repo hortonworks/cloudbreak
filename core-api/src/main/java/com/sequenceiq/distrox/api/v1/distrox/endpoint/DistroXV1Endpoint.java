@@ -56,7 +56,7 @@ public interface DistroXV1Endpoint {
     @Path("")
     @ApiOperation(value = LIST, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "listDistroXV1")
-    StackViewV4Responses list(@QueryParam("environment") String environment);
+    StackViewV4Responses list(@QueryParam("environment") String environmentName);
 
     @POST
     @Path("")
