@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive;
 
 public class HiveRoles {
 
+    public static final String HIVELLAP = "HIVE_LLAP";
+
     public static final String HIVEMETASTORE = "HIVEMETASTORE";
 
     public static final String HIVE = "HIVE";
