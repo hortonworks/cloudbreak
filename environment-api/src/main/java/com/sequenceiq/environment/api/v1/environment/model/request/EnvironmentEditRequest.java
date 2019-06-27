@@ -34,6 +34,9 @@ public class EnvironmentEditRequest {
     @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
     private TelemetryRequest telemetry;
 
+    @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
+    private @Valid SecurityAccessRequest securityAccess;
+
     public String getDescription() {
         return description;
     }
@@ -80,5 +83,13 @@ public class EnvironmentEditRequest {
 
     public void setTelemetry(TelemetryRequest telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public SecurityAccessRequest getSecurityAccess() {
+        return securityAccess;
+    }
+
+    public void setSecurityAccess(SecurityAccessRequest securityAccess) {
+        this.securityAccess = securityAccess;
     }
 }

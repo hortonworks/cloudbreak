@@ -102,7 +102,6 @@ public class SdxServiceTest {
     @Test
     void createSdxIfExists() {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setAccessCidr("0.0.0.0/0");
         sdxClusterRequest.setClusterShape("big");
         sdxClusterRequest.setEnvironment("envir");
         Map<String, String> tags = new HashMap<>();
@@ -116,7 +115,6 @@ public class SdxServiceTest {
     @Test
     void createSdx() {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setAccessCidr("0.0.0.0/0");
         sdxClusterRequest.setClusterShape("big");
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
@@ -136,7 +134,6 @@ public class SdxServiceTest {
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
-        Assertions.assertEquals("0.0.0.0/0", capturedSdx.getAccessCidr());
         Assertions.assertEquals("tagecske", capturedSdx.getTags().getValue("mytag"));
         Assertions.assertEquals(sdxName, capturedSdx.getClusterName());
         Assertions.assertEquals("big", capturedSdx.getClusterShape());

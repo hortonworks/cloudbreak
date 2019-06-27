@@ -9,9 +9,6 @@ public class SdxClusterRequest {
     @NotNull
     private String environment;
 
-    @NotNull
-    private String accessCidr;
-
     // what does it contain?
     @NotNull
     private String clusterShape;
@@ -26,14 +23,6 @@ public class SdxClusterRequest {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
-    }
-
-    public String getAccessCidr() {
-        return accessCidr;
-    }
-
-    public void setAccessCidr(String accessCidr) {
-        this.accessCidr = accessCidr;
     }
 
     public String getClusterShape() {

@@ -29,6 +29,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
+import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -91,6 +92,7 @@ public class EnvironmentModificationService {
         editLocationAndRegionsIfChanged(env, editDto);
         editNetworkIfChanged(env, editDto);
         editAuthenticationIfChanged(editDto, env);
+        editSecurityAccessIfChanged(editDto, env);
         Environment saved = environmentRepository.save(env);
         return environmentDtoConverter.environmentToDto(saved);
     }
@@ -191,6 +193,13 @@ public class EnvironmentModificationService {
         AuthenticationDto authenticationDto = editDto.getAuthentication();
         if (authenticationDto != null) {
             environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(authenticationDto));
+        }
+    }
+
+    private void editSecurityAccessIfChanged(EnvironmentEditDto editDto, Environment environment) {
+        SecurityAccessDto securityAccessDto = editDto.getSecurityAccess();
+        if (securityAccessDto != null) {
+            environmentService.setSecurityAccess(environment, securityAccessDto);
         }
     }
 }

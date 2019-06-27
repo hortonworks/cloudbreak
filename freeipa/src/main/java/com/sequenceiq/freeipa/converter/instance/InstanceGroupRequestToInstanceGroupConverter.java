@@ -13,6 +13,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.converter.instance.template.InstanceTemplateRequestToTemplateConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider;
 
 @Component
 public class InstanceGroupRequestToInstanceGroupConverter {
@@ -26,10 +27,15 @@ public class InstanceGroupRequestToInstanceGroupConverter {
     @Inject
     private SecurityGroupRequestToSecurityGroupConverter securityGroupConverter;
 
-    public InstanceGroup convert(InstanceGroupRequest source, String cloudPlatformString) {
+    @Inject
+    private DefaultInstanceGroupProvider defaultInstanceGroupProvider;
+
+    public InstanceGroup convert(InstanceGroupRequest source, String accountId, String cloudPlatformString) {
         InstanceGroup instanceGroup = new InstanceGroup();
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(cloudPlatformString);
-        instanceGroup.setTemplate(templateConverter.convert(source.getInstanceTemplate(), cloudPlatform));
+        instanceGroup.setTemplate(source.getInstanceTemplate() == null
+                ? defaultInstanceGroupProvider.createDefaultTemplate(cloudPlatform, accountId)
+                : templateConverter.convert(source.getInstanceTemplate(), cloudPlatform));
         instanceGroup.setSecurityGroup(securityGroupConverter.convert(source.getSecurityGroup()));
         instanceGroup.setGroupName(source.getName());
         instanceGroup.setInstanceGroupType(source.getType());

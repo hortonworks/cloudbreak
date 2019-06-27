@@ -28,6 +28,7 @@ import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.LocationDto;
+import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
@@ -228,5 +229,13 @@ public class EnvironmentService {
     public List<EnvironmentDto> findAllByStatusIn(Collection<EnvironmentStatus> environmentStatuses) {
         List<Environment> environments = environmentRepository.findAllByStatusIn(environmentStatuses);
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
+    }
+
+    void setSecurityAccess(Environment environment, SecurityAccessDto securityAccess) {
+        if (securityAccess != null) {
+            environment.setCidr(securityAccess.getCidr());
+            environment.setSecurityGroupIdForKnox(securityAccess.getSecurityGroupIdForKnox());
+            environment.setDefaultSecurityGroupId(securityAccess.getDefaultSecurityGroupId());
+        }
     }
 }

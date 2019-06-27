@@ -11,6 +11,8 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull.MutuallyExclusiveNotNullValidator;
 
 @Target(ElementType.TYPE)
@@ -18,18 +20,18 @@ import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull.MutuallyExc
 @Constraint(validatedBy = MutuallyExclusiveNotNullValidator.class)
 public @interface MutuallyExclusiveNotNull {
 
-    String[] fieldNames();
+    String[] fieldGroups();
 
     String message() default "Only one field should be not null.";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 
     class MutuallyExclusiveNotNullValidator implements ConstraintValidator<MutuallyExclusiveNotNull, Object> {
-        private String[] fieldNames;
+        private String[] fieldGroups;
 
         @Override
         public void initialize(MutuallyExclusiveNotNull constraintAnnotation) {
-            fieldNames = constraintAnnotation.fieldNames();
+            fieldGroups = constraintAnnotation.fieldGroups();
         }
 
         @Override
@@ -37,26 +39,41 @@ public @interface MutuallyExclusiveNotNull {
             if (value == null) {
                 return false;
             }
-            boolean hasNotNull = false;
+            boolean hasNotNullGroup = false;
             try {
-                for (String fieldName : fieldNames) {
-                    Field field = value.getClass().getDeclaredField(fieldName);
-                    field.setAccessible(true);
-                    Object fieldValue = field.get(value);
-                    if (fieldValue != null) {
-                        if (!hasNotNull) {
-                            hasNotNull = true;
+                for (String fieldGroup : fieldGroups) {
+                    String[] fieldNames = fieldGroup.split(",");
+
+                    Boolean groupNullity = null;
+                    for (String fieldName : fieldNames) {
+                        Object fieldValue = getFieldValue(value, fieldName);
+                        if (groupNullity == null) {
+                            groupNullity = fieldValue == null;
+                        } else {
+                            if (groupNullity != (fieldValue == null)) {
+                                return false;
+                            }
+                        }
+                    }
+                    if (!ObjectUtils.defaultIfNull(groupNullity, true)) {
+                        if (!hasNotNullGroup) {
+                            hasNotNullGroup = true;
                         } else {
                             return false;
                         }
                     }
-
                 }
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
 
-            return hasNotNull;
+            return hasNotNullGroup;
+        }
+
+        private Object getFieldValue(Object value, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+            Field field = value.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(value);
         }
     }
 }

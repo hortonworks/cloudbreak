@@ -106,7 +106,6 @@ public class SdxService {
         sdxCluster.setClusterName(name);
         sdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
-        sdxCluster.setAccessCidr(sdxClusterRequest.getAccessCidr());
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
 
         DetailedEnvironmentResponse environment = getEnvironment(userCrn, sdxClusterRequest);

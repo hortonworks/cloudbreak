@@ -54,7 +54,6 @@ class SdxControllerTest {
     void createTest() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("test-sdx-cluster");
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setClusterShape("big");
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");
@@ -62,7 +61,6 @@ class SdxControllerTest {
         when(sdxService.createSdx(anyString(), anyString(), any(SdxClusterRequest.class), nullable(StackV4Request.class))).thenReturn(sdxCluster);
 
         SdxClusterRequest createSdxClusterRequest = new SdxClusterRequest();
-        createSdxClusterRequest.setAccessCidr("0.0.0.0/0");
         createSdxClusterRequest.setClusterShape("big");
         createSdxClusterRequest.setEnvironment("test-env");
         Map<String, String> tags = new HashMap<>();
@@ -80,7 +78,6 @@ class SdxControllerTest {
     void getTest() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("test-sdx-cluster");
-        sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setClusterShape("big");
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");
