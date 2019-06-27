@@ -15,7 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteEvent;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
@@ -32,12 +34,16 @@ public class EnvironmentResourceDeletionService {
 
     private final SdxEndpoint sdxEndpoint;
 
+    private final CloudbreakUserCrnClient cloudbreakClient;
+
     private final ThreadBasedUserCrnProvider userCrnProvider;
 
     private final EventSender eventSender;
 
-    public EnvironmentResourceDeletionService(SdxEndpoint sdxEndpoint, ThreadBasedUserCrnProvider userCrnProvider, EventSender eventSender) {
+    public EnvironmentResourceDeletionService(SdxEndpoint sdxEndpoint, CloudbreakUserCrnClient cloudbreakClient,
+            ThreadBasedUserCrnProvider userCrnProvider, EventSender eventSender) {
         this.sdxEndpoint = sdxEndpoint;
+        this.cloudbreakClient = cloudbreakClient;
         this.userCrnProvider = userCrnProvider;
         this.eventSender = eventSender;
     }
@@ -54,6 +60,27 @@ public class EnvironmentResourceDeletionService {
             clusterNames.addAll(sdxClusterNames);
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to get SDX clusters from SDX service due to: '%s' ", e.getMessage());
+            LOGGER.error(message, e);
+            throw new EnvironmentServiceException(message, e);
+        }
+        return clusterNames;
+    }
+
+    Set<String> getAttachedDistroXClusterNames(Environment environment) {
+        Set<String> clusterNames = new HashSet<>();
+        LOGGER.debug("Get DistroX clusters of the environment: '{}'", environment.getName());
+        try {
+            Set<String> distroXClusterNames = cloudbreakClient
+                    .withCrn(environment.getCreator())
+                    .distroXV1Endpoint()
+                    .list(environment.getName())
+                    .getResponses()
+                    .stream()
+                    .map(StackViewV4Response::getName)
+                    .collect(Collectors.toSet());
+            clusterNames.addAll(distroXClusterNames);
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to get DistroX clusters from Cloudbreak service due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);
             throw new EnvironmentServiceException(message, e);
         }

@@ -193,11 +193,18 @@ public class EnvironmentService {
     }
 
     private void checkForDeletePermit(Environment env) {
-        LOGGER.debug("Checking if environment [name: {}] is deletable", env.getName());
+        LOGGER.info("Checking if environment [name: {}] is deletable", env.getName());
+
         Set<String> sdxNames = environmentResourceDeletionService.getAttachedSdxClusterNames(env);
         if (!sdxNames.isEmpty()) {
-            throw new BadRequestException(String.format("The following cluster(s) must be terminated before Environment deletion [%s]",
+            throw new BadRequestException(String.format("The following Data Lake cluster(s) must be terminated before Environment deletion [%s]",
                     String.join(", ", sdxNames)));
+        }
+
+        Set<String> distroXClusterNames = environmentResourceDeletionService.getAttachedDistroXClusterNames(env);
+        if (!distroXClusterNames.isEmpty()) {
+            throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before Environment deletion [%s]",
+                    String.join(", ", distroXClusterNames)));
         }
     }
 
