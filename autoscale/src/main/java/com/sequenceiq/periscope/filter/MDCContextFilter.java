@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.filter;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -48,7 +50,7 @@ public class MDCContextFilter extends OncePerRequestFilter {
         MDCBuilder.cleanupMdc();
         HttpServletRequestWrapper wrapper = new RequestIdHeaderInjectingHttpRequestWrapper(request);
         MDCBuilder.addRequestIdToMdcContext(wrapper.getHeader(REQUEST_ID_HEADER));
-        MdcContext.builder().userCrn(authenticatedUserService.getUserCrn()).buildMdc();
+        doIfNotNull(authenticatedUserService.getCbUser(), cbUser -> MdcContext.builder().userCrn(cbUser.getUserCrn()).buildMdc());
         LOGGER.debug("Request id has been added to MDC context for request, method: {}, path: {}",
                 request.getMethod().toUpperCase(),
                 request.getRequestURI());
