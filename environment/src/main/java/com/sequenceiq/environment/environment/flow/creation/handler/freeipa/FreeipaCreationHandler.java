@@ -85,7 +85,9 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                     freeIpaV1Endpoint.create(createFreeIpaRequest);
                     awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
                     AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(createFreeIpaRequest, environmentDto);
-                    freeIpaV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
+                    if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
+                        freeIpaV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
+                    }
                 }
             }
             eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
@@ -93,6 +95,10 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), ex);
             eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
         }
+    }
+
+    private boolean shouldSendSubnetIdsToFreeIpa(AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest) {
+        return !addDnsZoneForSubnetIdsRequest.getSubnetIds().isEmpty();
     }
 
     private AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest(CreateFreeIpaRequest createFreeIpaRequest, EnvironmentDto environmentDto) {
