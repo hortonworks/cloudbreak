@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor entityID="https://hostname_REPLACE_ME/consoleauth/sso/saml?accountId=accountId_REPLACE_ME" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+    <md:IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+        <md:KeyDescriptor use="signing">
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:X509Data>
+                    <ds:X509Certificate>
+                        MIIEFDCCAvygAwIBAgIJAKcAPfZmlxHuMA0GCSqGSIb3DQEBCwUAMIGeMQswCQYDVQQGEwJVUzEL
+                        MAkGA1UECAwCQ0ExFjAUBgNVBAcMDVNhbiBGcmFuY2lzY28xFjAUBgNVBAoMDUNsb3VkZXJhIElu
+                        Yy4xDDAKBgNVBAsMA0NEUDEhMB8GA1UEAwwYY29uc29sZS5jZHAuY2xvdWRlcmEuY29tMSEwHwYJ
+                        KoZIhvcNAQkBFhJnaWxhZEBjbG91ZGVyYS5jb20wHhcNMTkwNTE1MTkxNzAzWhcNMjkwNTEyMTkx
+                        NzAzWjCBnjELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMRYwFAYDVQQHDA1TYW4gRnJhbmNpc2Nv
+                        MRYwFAYDVQQKDA1DbG91ZGVyYSBJbmMuMQwwCgYDVQQLDANDRFAxITAfBgNVBAMMGGNvbnNvbGUu
+                        Y2RwLmNsb3VkZXJhLmNvbTEhMB8GCSqGSIb3DQEJARYSZ2lsYWRAY2xvdWRlcmEuY29tMIIBIjAN
+                        BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxtSeG1PgA2F+XZaptmisgVkSo85vHqsRL7kw8t+N
+                        Q247vPG/CO913thYrRQiVy4IgbX6EWMt/PLmQVS/7my2bHZYo3o4al8otQzM8D1dDLl6IDj2JgUx
+                        NJpP3h/+Bh/arlgCnaiF/Xyidne/JSZk1mxyTcc3TvKz9AzZ1ryLcyRyw/BIC+LbMRLdfN8SMbKv
+                        Vyb7pFBy5RtUleJ82ZCKE1pO9XosspfJWXp7JOI7S9qavnKhfE/RRn51Nmx2BR7ghFlZkkIdRjWX
+                        xSPOhsJSwXNewrfBl1OQ9jvFh4B9nYD2YkSufJgRap+Zg+abynxLZoZRzllIpNrMwbexJxacKwID
+                        AQABo1MwUTAdBgNVHQ4EFgQUxb+Gekt1mbGZF2jZKQhDF6jlMscwHwYDVR0jBBgwFoAUxb+Gekt1
+                        mbGZF2jZKQhDF6jlMscwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAHFroVYTa
+                        QhEKz8bV92wRlQGTfy5PYuEzR96Ol4jETuE7y84pMmqQwqRFpuDuj7KI1K2EjRXC92WvQJlgLT8p
+                        z29Asz1nV2ADfYdkkN+4UjEhb5kOFpwROo+gjsFHBC+0YfgvKsVRHf8ioajcJFZXDzU60bNpjuT7
+                        egArA2Pq3G5KuG+DblX7PRfg5jEAps9R3zh4dYMJlCny5ueoiVSxBgwRfksaPfMoqSJLP+mFzuAv
+                        4M0DNcJXnpYIGc2OHBMisi7260MGvYdVtR6tGFLVt/Vfp51lyQ/2+bICKc4U0G54kTF/ZwDtwG8E
+                        iCznu+8A2/Dd1jKk7zRAphKsE79dCg==
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </md:KeyDescriptor>
+        <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://hostname_REPLACE_ME/consoleauth/logout"/>
+        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://hostname_REPLACE_ME/consoleauth/sso/saml?accountId=accountId_REPLACE_ME"/>
+        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://hostname_REPLACE_ME/consoleauth/sso/saml?accountId=accountId_REPLACE_ME"/>
+    </md:IDPSSODescriptor>
+</md:EntityDescriptor>

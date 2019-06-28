@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -163,6 +164,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private KerberosConfigService kerberosConfigService;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster) {
         try {
@@ -457,6 +461,16 @@ public class ClusterHostServiceRunner {
             if (cluster.getBlueprint() != null) {
                 Map<String, Integer> servicePorts = connector.getServicePorts(cluster.getBlueprint());
                 gateway.put("ports", servicePorts);
+            }
+            if (SSOType.SSO_PROVIDER_FROM_UMS.equals(clusterGateway.getSsoType())) {
+                String accountId = threadBasedUserCrnProvider.getAccountId();
+                try {
+                    String metadataXml = umsClient.getIdentityProviderMetadataXml(accountId);
+                    gateway.put("saml", metadataXml);
+                } catch (Exception e) {
+                    LOGGER.debug("Could not get SAML metadata file to set up IdP in KNOXSSO.", e);
+                    throw new NotFoundException("Could not get SAML metadata file to set up IdP in KNOXSSO: " + e.getMessage());
+                }
             }
         }
         gateway.put("kerberos", kerberosConfig != null);
