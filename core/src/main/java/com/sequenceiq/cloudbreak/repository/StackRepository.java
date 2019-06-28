@@ -65,7 +65,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             @Param("terminatedAfter") Long terminatedAfter);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s WHERE s.environmentCrn= :environmentCrn AND s.type = :type")
+    @Query("SELECT s FROM Stack s WHERE s.environmentCrn= :environmentCrn AND s.type = :type AND s.terminated=null")
     List<Stack> findByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn, @Param("type") StackType type);
 
     @CheckPermissionsByReturnValue
