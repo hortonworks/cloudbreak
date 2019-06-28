@@ -42,7 +42,7 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaCreationHandler.class);
 
-    private static final String FREEIPA_DOMAIN = "cdp.site";
+    private static final String FREEIPA_DOMAIN = "cloudera.site";
 
     private static final String FREEIPA_HOSTNAME = "ipaserver";
 

@@ -13,6 +13,7 @@ ipa-server-install \
           -p $FPW \
           --setup-dns \
           --auto-reverse \
+          --allow-zone-overlap \
           --ssh-trust-dns \
           --mkhomedir \
           --ip-address $IPADDR \
