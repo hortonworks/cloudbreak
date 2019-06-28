@@ -6,6 +6,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -83,7 +84,7 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                     CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
                     freeIpaV1Endpoint.create(createFreeIpaRequest);
                     awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
-                    AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(environmentDto);
+                    AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(createFreeIpaRequest, environmentDto);
                     freeIpaV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
                 }
             }
@@ -94,10 +95,21 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         }
     }
 
-    private AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest(EnvironmentDto environmentDto) {
+    private AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest(CreateFreeIpaRequest createFreeIpaRequest, EnvironmentDto environmentDto) {
         AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = new AddDnsZoneForSubnetIdsRequest();
         addDnsZoneForSubnetIdsRequest.setEnvironmentCrn(environmentDto.getResourceCrn());
-        addDnsZoneForSubnetIdsRequest.setSubnetIds(environmentDto.getNetwork().getSubnetIds());
+
+        FreeIpaNetworkProvider freeIpaNetworkProvider = freeIpaNetworkProviderMapByCloudPlatform
+                .get(CloudPlatform.valueOf(environmentDto.getCloudPlatform()));
+
+        if (freeIpaNetworkProvider != null) {
+            Set<String> subnetsForIpa = freeIpaNetworkProvider.getSubnets(createFreeIpaRequest.getNetwork());
+            Set<String> allSubnets = environmentDto.getNetwork().getSubnetIds();
+
+            allSubnets.removeAll(subnetsForIpa);
+
+            addDnsZoneForSubnetIdsRequest.setSubnetIds(allSubnets);
+        }
         return addDnsZoneForSubnetIdsRequest;
     }
 
@@ -126,15 +138,19 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void setPlacementAndNetwork(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
-        FreeIpaNetworkProvider freeIpaNetworkProvider = freeIpaNetworkProviderMapByCloudPlatform
-                .get(CloudPlatform.valueOf(environment.getCloudPlatform()));
         PlacementRequest placementRequest = new PlacementRequest();
         placementRequest.setRegion(environment.getRegionSet().iterator().next().getName());
         createFreeIpaRequest.setPlacement(placementRequest);
-        createFreeIpaRequest.setNetwork(
-                freeIpaNetworkProvider.provider(environment));
-        placementRequest.setAvailabilityZone(
-                freeIpaNetworkProvider.availabilityZone(createFreeIpaRequest.getNetwork(), environment));
+
+        FreeIpaNetworkProvider freeIpaNetworkProvider = freeIpaNetworkProviderMapByCloudPlatform
+                .get(CloudPlatform.valueOf(environment.getCloudPlatform()));
+
+        if (freeIpaNetworkProvider != null) {
+            createFreeIpaRequest.setNetwork(
+                    freeIpaNetworkProvider.provider(environment));
+            placementRequest.setAvailabilityZone(
+                    freeIpaNetworkProvider.availabilityZone(createFreeIpaRequest.getNetwork(), environment));
+        }
     }
 
     private void setAuthentication(AuthenticationDto authentication, CreateFreeIpaRequest createFreeIpaRequest) {

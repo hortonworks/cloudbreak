@@ -1,7 +1,10 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
+import java.util.Set;
+
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -28,6 +31,11 @@ public class FreeIpaAzureNetworkProvider implements FreeIpaNetworkProvider {
     public String availabilityZone(NetworkRequest networkRequest, EnvironmentDto environment) {
         AzureNetworkParameters azureNetwork = networkRequest.getAzure();
         return environment.getNetwork().getSubnetMetas().get(azureNetwork.getSubnetId()).getAvailabilityZone();
+    }
+
+    @Override
+    public Set<String> getSubnets(NetworkRequest networkRequest) {
+        return Sets.newHashSet(networkRequest.getAzure().getSubnetId());
     }
 
     @Override
