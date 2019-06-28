@@ -134,12 +134,24 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
     public void testBuildTelemetryCMConfigList() {
         // GIVEN
         // WHEN
-        ApiConfigList result = underTest.buildTelemetryCMConfigList();
+        WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics(true, null, null, null, null);
+        ApiConfigList result = underTest.buildTelemetryCMConfigList(workloadAnalytics);
         // THEN
         assertEquals(4, result.getItems().size());
         assertTrue(containsConfigWithValue(result, "telemetry_wa", "true"));
         assertTrue(containsConfigWithValue(result, "telemetry_master", "true"));
         assertTrue(containsConfigWithValue(result, "telemetry_altus_account", "cb-altus-access"));
+    }
+
+    @Test
+    public void testBuildTelemetryCMConfigListWithCustomEndpoint() {
+        // GIVEN
+        // WHEN
+        WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics(true, "customEndpoint", null, null, null);
+        ApiConfigList result = underTest.buildTelemetryCMConfigList(workloadAnalytics);
+        // THEN
+        assertEquals(5, result.getItems().size());
+        assertTrue(containsConfigWithValue(result, "telemetry_altus_url", "customEndpoint"));
     }
 
     @Test
@@ -155,22 +167,6 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         ApiConfigList result = underTest.buildTelemetryConfigList(stack, wa, null);
         // THEN
         assertEquals(1, result.getItems().size());
-    }
-
-    @Test
-    public void testBuildTelemetryConfigListWithCustomEndpoint() {
-        // GIVEN
-        Stack stack = new Stack();
-        Cluster cluster = new Cluster();
-        cluster.setId(1L);
-        cluster.setName("cl1");
-        stack.setCluster(cluster);
-        WorkloadAnalytics wa = new WorkloadAnalytics(true, "customEndpoint", null, null, null);
-        // WHEN
-        ApiConfigList result = underTest.buildTelemetryConfigList(stack, wa, null);
-        // THEN
-        assertEquals(2, result.getItems().size());
-        assertTrue(containsConfigWithValue(result, "telemetry_altus_url", "customEndpoint"));
     }
 
     @Test

@@ -56,9 +56,9 @@ public class ClouderaManagerMgmtTelemetryService {
 
     private static final String TELEMETRY_ALTUS_ACCOUNT = "telemetry_altus_account";
 
-    private static final String TELEMETRY_SAFETY_VALVE = "telemetrypublisher_safety_valve";
-
     private static final String TELEMETRY_ALTUS_URL = "telemetry_altus_url";
+
+    private static final String TELEMETRY_SAFETY_VALVE = "telemetrypublisher_safety_valve";
 
     // Telemetry publisher - Safety valve settings
     private static final String DATABUS_HEADER_SDX_ID = "databus.header.sdx.id";
@@ -83,12 +83,12 @@ public class ClouderaManagerMgmtTelemetryService {
     public void setupTelemetryRole(final Stack stack, final ApiClient client, final ApiHostRef cmHostRef,
             final ApiRoleList mgmtRoles, final Telemetry telemetry) throws ApiException {
         if (isWorkflowAnalyticsEnabled(stack, telemetry)) {
-            WorkloadAnalytics wa = telemetry.getWorkloadAnalytics();
+            WorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
             ClouderaManagerResourceApi cmResourceApi = new ClouderaManagerResourceApi(client);
-            ApiConfigList apiConfigList = buildTelemetryCMConfigList();
+            ApiConfigList apiConfigList = buildTelemetryCMConfigList(workloadAnalytics);
             cmResourceApi.updateConfig("Adding telemetry settings.", apiConfigList);
 
-            AltusCredential credentials = getAltusCredential(stack, wa);
+            AltusCredential credentials = getAltusCredential(stack, workloadAnalytics);
             Map<String, String> accountConfigs = new HashMap<>();
             accountConfigs.put(ALTUS_CREDENTIAL_ACCESS_KEY_NAME, credentials.getAccessKey());
             accountConfigs.put(ALTUS_CREDENTIAL_PRIVATE_KEY_NAME, new String(credentials.getPrivateKey()));
@@ -125,21 +125,21 @@ public class ClouderaManagerMgmtTelemetryService {
         enrichWithSdxData(sdxContext, stack, wa, telemetrySafetyValveMap);
         telemetrySafetyValveMap.put(TELEMETRY_UPLOAD_LOGS, "true");
         configsToUpdate.put(TELEMETRY_SAFETY_VALVE, createStringFromSafetyValveMap(telemetrySafetyValveMap));
-        if (StringUtils.isNotEmpty(wa.getDatabusEndpoint())) {
-            configsToUpdate.put(TELEMETRY_ALTUS_URL, wa.getDatabusEndpoint());
-        } else if (StringUtils.isNotEmpty(databusEndpoint)) {
-            configsToUpdate.put(TELEMETRY_ALTUS_URL, databusEndpoint);
-        }
         return makeApiConfigList(configsToUpdate);
     }
 
     @VisibleForTesting
-    ApiConfigList buildTelemetryCMConfigList() {
+    ApiConfigList buildTelemetryCMConfigList(WorkloadAnalytics wa) {
         final Map<String, String> configsToUpdate = new HashMap<>();
         configsToUpdate.put(TELEMETRY_MASTER, "true");
         configsToUpdate.put(TELEMETRY_WA, "true");
         configsToUpdate.put(TELEMETRY_COLLECT_JOB_LOGS, "true");
         configsToUpdate.put(TELEMETRY_ALTUS_ACCOUNT, ALTUS_CREDENTIAL_NAME);
+        if (StringUtils.isNotEmpty(wa.getDatabusEndpoint())) {
+            configsToUpdate.put(TELEMETRY_ALTUS_URL, wa.getDatabusEndpoint());
+        } else if (StringUtils.isNotEmpty(databusEndpoint)) {
+            configsToUpdate.put(TELEMETRY_ALTUS_URL, databusEndpoint);
+        }
         return makeApiConfigList(configsToUpdate);
     }
 
