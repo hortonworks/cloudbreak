@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -39,7 +38,7 @@ public class SetPasswordHandler implements EventHandler<SetPasswordRequest> {
             SetPasswordResult result = new SetPasswordResult(request);
             request.getResult().onNext(result);
         } catch (Exception e) {
-            request.getResult().onError(new OperationException(e));
+            request.getResult().onError(e);
         }
     }
 }

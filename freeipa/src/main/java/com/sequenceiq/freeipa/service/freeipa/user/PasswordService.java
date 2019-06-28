@@ -63,12 +63,12 @@ public class PasswordService {
             try {
                 waitSetPassword(request);
                 success.add(request.getEnvironment());
-            } catch (OperationException e) {
-                LOGGER.debug("Failed to set password for user {} in environment {}", userCrn, request.getEnvironment());
-                failure.put(request.getEnvironment(), e.getCause().getLocalizedMessage());
             } catch (InterruptedException e) {
                 LOGGER.error("Interrupted while setting passwords for user {} in account {}", userCrn, accountId);
                 throw new OperationException(e);
+            } catch (Exception e) {
+                LOGGER.debug("Failed to set password for user {} in environment {}", userCrn, request.getEnvironment(), e);
+                failure.put(request.getEnvironment(), e.getLocalizedMessage());
             }
         }
 
