@@ -13,7 +13,6 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInsta
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaSuccess;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-import com.sequenceiq.freeipa.service.freeipa.CleanupService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaPostInstallService;
 
 import reactor.bus.Event;
@@ -22,7 +21,7 @@ import reactor.bus.EventBus;
 @Component
 public class PostInstallFreeIpaHandler implements EventHandler<PostInstallFreeIpaRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CleanupService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostInstallFreeIpaHandler.class);
 
     @Inject
     private EventBus eventBus;

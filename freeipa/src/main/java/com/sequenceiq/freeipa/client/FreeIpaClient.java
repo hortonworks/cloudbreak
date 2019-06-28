@@ -23,6 +23,7 @@ import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.client.model.Role;
+import com.sequenceiq.freeipa.client.model.Service;
 import com.sequenceiq.freeipa.client.model.User;
 
 public class FreeIpaClient {
@@ -268,6 +269,23 @@ public class FreeIpaClient {
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, DnsZoneList.class);
         return (Set<DnsZoneList>) invoke("dnszone_find", flags, params, type).getResult();
+    }
+
+    public Set<Service> findAllService() throws FreeIpaClientException {
+        List<String> flags = List.of();
+        Map<String, Object> params = Map.of(
+                "sizelimit", 0,
+                "timelimit", 0
+        );
+        ParameterizedType type = TypeUtils
+                .parameterize(Set.class, Service.class);
+        return (Set<Service>) invoke("service_find", flags, params, type).getResult();
+    }
+
+    public Service deleteService(String canonicalPrincipal) throws FreeIpaClientException {
+        List<String> flags = List.of(canonicalPrincipal);
+        Map<String, Object> params = Map.of();
+        return (Service) invoke("service_del", flags, params, Service.class).getResult();
     }
 
     /**
