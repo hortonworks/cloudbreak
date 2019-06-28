@@ -177,7 +177,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public void changeOriginalCredentialsAndCreateCloudbreakUser() throws CloudbreakException {
+    public void changeOriginalCredentialsAndCreateCloudbreakUser(boolean ldapConfigured) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
         LOGGER.debug("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), cluster.getAmbariIp());
         AmbariClient client = ambariClientFactory.getDefaultAmbariClient(stack, clientConfig);

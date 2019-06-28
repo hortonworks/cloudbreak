@@ -99,12 +99,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     private String ambariIp;
 
-    @Column(nullable = false)
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret userName = Secret.EMPTY;
 
-    @Column(nullable = false)
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret password = Secret.EMPTY;
@@ -317,7 +315,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public void setUserName(String userName) {
-        this.userName = new Secret(userName);
+        if (userName != null) {
+            this.userName = new Secret(userName);
+        }
     }
 
     public String getPassword() {
@@ -325,7 +325,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public void setPassword(String password) {
-        this.password = new Secret(password);
+        if (password != null) {
+            this.password = new Secret(password);
+        }
     }
 
     public String getAmbariIp() {

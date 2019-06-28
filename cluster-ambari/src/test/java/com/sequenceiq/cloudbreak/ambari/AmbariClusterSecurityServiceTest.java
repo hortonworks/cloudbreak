@@ -43,6 +43,8 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterSecurityServiceTest {
 
+    private static final boolean LDAP_CONFIGURED = true;
+
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
@@ -142,7 +144,7 @@ public class AmbariClusterSecurityServiceTest {
         when(ambariUserHandler.createAmbariUser(cluster.getUserName(), cluster.getPassword(), stack, ambariClient, clientConfig)).thenReturn(ambariClient);
         when(ambariClient.deleteUser("admin")).thenReturn(ambariClient);
 
-        underTest.changeOriginalCredentialsAndCreateCloudbreakUser();
+        underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_CONFIGURED);
 
         verify(ambariSecurityConfigProvider, times(1)).getCloudbreakClusterUserName(stack.getCluster());
         verify(ambariSecurityConfigProvider, times(1)).getCloudbreakClusterPassword(stack.getCluster());
@@ -170,7 +172,7 @@ public class AmbariClusterSecurityServiceTest {
         when(ambariUserHandler
                 .createAmbariUser("cloudbreak", "cloudbreak123", stack, ambariClient, clientConfig)).thenReturn(ambariClient);
 
-        underTest.changeOriginalCredentialsAndCreateCloudbreakUser();
+        underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_CONFIGURED);
 
         verify(ambariSecurityConfigProvider, times(1)).getCloudbreakClusterUserName(stack.getCluster());
         verify(ambariSecurityConfigProvider, times(1)).getCloudbreakClusterPassword(stack.getCluster());
@@ -195,7 +197,7 @@ public class AmbariClusterSecurityServiceTest {
         when(ambariSecurityConfigProvider.getCloudbreakClusterPassword(cluster)).thenReturn("cloudbreak123");
         when(ambariUserHandler.createAmbariUser("cloudbreak", "cloudbreak123", stack, ambariClient, clientConfig)).thenReturn(ambariClient);
 
-        underTest.changeOriginalCredentialsAndCreateCloudbreakUser();
+        underTest.changeOriginalCredentialsAndCreateCloudbreakUser(LDAP_CONFIGURED);
 
         verify(ambariSecurityConfigProvider, times(1)).getCloudbreakClusterUserName(stack.getCluster());
         verify(ambariSecurityConfigProvider, times(1)).getCloudbreakClusterPassword(stack.getCluster());
