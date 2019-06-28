@@ -59,8 +59,7 @@ public class FreeIpaClientFactory {
             return new FreeIpaClientBuilder("admin", freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
                     httpClientConfig, stack.getGatewayport().toString()).build();
         } catch (Exception e) {
-            LOGGER.error("Couldn't build FreeIPA client", e);
-            throw new FreeIpaClientException("Couldn't build FreeIPA client", e);
+            throw new FreeIpaClientException("Couldn't build FreeIPA client: " + e.getLocalizedMessage(), e);
         }
     }
 }

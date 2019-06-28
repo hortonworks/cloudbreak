@@ -103,7 +103,7 @@ public class FreeIpaClientBuilder {
             throws IOException, URISyntaxException, FreeIpaClientException {
 
         URI target = getIpaUrl(apiAddress, port, basePath, "/session/login_password").toURI();
-        LOGGER.debug("Connecting for user: $user at target: $target");
+        LOGGER.debug("Connecting for user: {} at target: {}", user, target);
 
         HttpPost post = getPost(target);
         post.setEntity(new UrlEncodedFormEntity(List.of(new BasicNameValuePair("user", user), new BasicNameValuePair("password", pass))));
