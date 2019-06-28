@@ -102,6 +102,11 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         }
     }
 
+    public void archive(DatabaseConfig databaseConfig) {
+        databaseConfig.setArchived(true);
+        repository.save(databaseConfig);
+    }
+
     public DatabaseConfig get(String name, String environmentId) {
         Optional<DatabaseConfig> resourceOpt =
                 repository.findByEnvironmentIdAndName(environmentId, name);

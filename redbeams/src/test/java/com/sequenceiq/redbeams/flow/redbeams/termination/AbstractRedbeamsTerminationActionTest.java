@@ -22,6 +22,8 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -81,7 +83,7 @@ public class AbstractRedbeamsTerminationActionTest {
 
     @Test
     public void testCreateFlowContext() {
-        when(dbStackService.getById(Long.valueOf(1L))).thenReturn(dbStack);
+        when(dbStackService.findById(Long.valueOf(1L))).thenReturn(Optional.of(dbStack));
         when(credentialService.getCredentialByEnvCrn("myenv")).thenReturn(credential);
         when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);

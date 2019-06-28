@@ -37,7 +37,8 @@ public class RedbeamsTerminationActions {
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
-                return new DeregisterDatabaseServerRequest(0L);
+                return new DeregisterDatabaseServerRequest(context.getCloudContext(), context.getDatabaseStack(),
+                        context.getDBStack());
             }
         };
     }

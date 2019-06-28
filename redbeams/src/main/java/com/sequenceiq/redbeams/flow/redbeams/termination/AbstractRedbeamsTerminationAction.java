@@ -60,18 +60,27 @@ public abstract class AbstractRedbeamsTerminationAction<P extends Payload>
     @Override
     protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
                                                 StateContext<RedbeamsTerminationState, RedbeamsTerminationEvent> stateContext, P payload) {
-        DBStack dbStack = dbStackService.getById(payload.getResourceId());
-        // FIXME add MDCBuilder stuff
-        // MDCBuilder.buildMdcContext(dbStack);
-        Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
-        String userName = dbStack.getOwnerCrn().getResource();
-        String accountId = dbStack.getOwnerCrn().getAccountId();
-        CloudContext cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getCloudPlatform(), dbStack.getPlatformVariant(),
-                location, userName, accountId);
-        // FIXME must use CRN
-        Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
-        CloudCredential cloudCredential = credentialConverter.convert(credential);
-        DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
+        Optional<DBStack> optionalDBStack = dbStackService.findById(payload.getResourceId());
+
+        CloudContext cloudContext = null;
+        CloudCredential cloudCredential = null;
+        DatabaseStack databaseStack = null;
+        DBStack dbStack = null;
+
+        if (optionalDBStack.isPresent()) {
+            dbStack = optionalDBStack.get();
+            // FIXME add MDCBuilder stuff
+            // MDCBuilder.buildMdcContext(dbStack);
+            Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
+            String userName = dbStack.getOwnerCrn().getResource();
+            String accountId = dbStack.getOwnerCrn().getAccountId();
+            cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getCloudPlatform(), dbStack.getPlatformVariant(),
+                    location, userName, accountId);
+            // FIXME must use CRN
+            Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
+            cloudCredential = credentialConverter.convert(credential);
+            databaseStack = databaseStackConverter.convert(dbStack);
+        }
         return new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack, dbStack);
     }
 

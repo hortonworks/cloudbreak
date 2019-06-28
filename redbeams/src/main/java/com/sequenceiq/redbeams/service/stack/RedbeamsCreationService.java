@@ -5,7 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
-// import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
@@ -42,10 +42,10 @@ public class RedbeamsCreationService {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Create called with: {}", dbStack);
         }
-        // FIXME with CB-1248
-        // if (!dbStackService.findByNameAndEnvironmentId(dbStack.getName(), dbStack.getEnvironmentId()).isEmpty()) {
-        //     throw new BadRequestException("A stack for this database server already exists in the environment");
-        // }
+
+        if (dbStackService.findByNameAndEnvironmentId(dbStack.getName(), dbStack.getEnvironmentId()).isPresent()) {
+            throw new BadRequestException("A stack for this database server already exists in the environment");
+        }
 
         // String accountId = crnService.getCurrentAccountId();
         // String userId = crnService.getCurrentUserId();
