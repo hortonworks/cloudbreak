@@ -16,6 +16,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Accou
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
@@ -215,8 +217,9 @@ public class UmsClient {
 
     /**
      * Create new machine user - only if it does not exist
-     * @param requestId id of the request
-     * @param userCrn actor useridentifier
+     *
+     * @param requestId       id of the request
+     * @param userCrn         actor useridentifier
      * @param machineUserName machine user name that will be created
      */
     public void createMachineUser(String requestId, String userCrn, String machineUserName) {
@@ -242,8 +245,9 @@ public class UmsClient {
 
     /**
      * Remove machine user
-     * @param requestId id of the request
-     * @param userCrn actor identifier
+     *
+     * @param requestId       id of the request
+     * @param userCrn         actor identifier
      * @param machineUserName machine user to remove
      */
     public void deleteMachineUser(String requestId, String userCrn, String machineUserName) {
@@ -334,10 +338,11 @@ public class UmsClient {
 
     /**
      * Remove a role (from machine user) - if role exists
-     * @param requestId id of the request
-     * @param userCrn actor user (account & assignee)
+     *
+     * @param requestId      id of the request
+     * @param userCrn        actor user (account & assignee)
      * @param machineUserCrn machine user identifier
-     * @param roleCrn role identifier
+     * @param roleCrn        role identifier
      */
     public void unassignMachineUserRole(String requestId, String userCrn, String machineUserCrn, String roleCrn) {
         checkNotNull(requestId);
@@ -429,8 +434,9 @@ public class UmsClient {
 
     /**
      * Wraps a call to create an access private key pair
-     * @param requestId the request ID for the request
-     * @param userCrn the user CRN
+     *
+     * @param requestId       the request ID for the request
+     * @param userCrn         the user CRN
      * @param machineUserName the machine user name
      * @return key creation response
      */
@@ -447,8 +453,9 @@ public class UmsClient {
 
     /**
      * Get a list of access key CRN (keys owned by a machine user)
-     * @param requestId id of the request
-     * @param userCrn actor that query the keys for the machine user
+     *
+     * @param requestId       id of the request
+     * @param userCrn         actor that query the keys for the machine user
      * @param machineUserName machine user that owns the access keys
      * @return access key CRNs
      */
@@ -493,9 +500,10 @@ public class UmsClient {
 
     /**
      * Delete access keys identified by CRNs
-     * @param requestId id of the request
+     *
+     * @param requestId     id of the request
      * @param accessKeyCrns list of access key CRNs
-     * @param actorCrn user that executes the deletion
+     * @param actorCrn      user that executes the deletion
      */
     void deleteAccessKeys(String requestId, List<String> accessKeyCrns, String actorCrn) {
         checkNotNull(requestId);
@@ -529,5 +537,22 @@ public class UmsClient {
         checkNotNull(requestId);
         return UserManagementGrpc.newBlockingStub(channel)
                 .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+    }
+
+    /**
+     * Queries the metadata file used to configure SSO authentication on clusters.
+     * @param requestId the Request ID
+     * @param userCrn the user CRN
+     * @return metadata as string
+     */
+    public String getIdentityProviderMetadataXml(String requestId, String accountId) {
+        checkNotNull(accountId);
+
+        GetIdPMetadataForWorkloadSSORequest request =
+                GetIdPMetadataForWorkloadSSORequest.newBuilder()
+                        .setAccountId(accountId)
+                        .build();
+        GetIdPMetadataForWorkloadSSOResponse response = newStub(requestId).getIdPMetadataForWorkloadSSO(request);
+        return response.getMetadata();
     }
 }

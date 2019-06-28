@@ -402,6 +402,43 @@ public final class UserManagementGrpc {
      return getAccessKeyUsageMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getCreateUserMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> METHOD_CREATE_USER = getCreateUserMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> getCreateUserMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> getCreateUserMethod() {
+    return getCreateUserMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> getCreateUserMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> getCreateUserMethod;
+    if ((getCreateUserMethod = UserManagementGrpc.getCreateUserMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getCreateUserMethod = UserManagementGrpc.getCreateUserMethod) == null) {
+          UserManagementGrpc.getCreateUserMethod = getCreateUserMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "CreateUser"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateUser"))
+                  .build();
+          }
+        }
+     }
+     return getCreateUserMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getGetUserMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse> METHOD_GET_USER = getGetUserMethodHelper();
@@ -2030,6 +2067,43 @@ public final class UserManagementGrpc {
      return getListGroupsMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getUpdateGroupMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> METHOD_UPDATE_GROUP = getUpdateGroupMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> getUpdateGroupMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> getUpdateGroupMethod() {
+    return getUpdateGroupMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> getUpdateGroupMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> getUpdateGroupMethod;
+    if ((getUpdateGroupMethod = UserManagementGrpc.getUpdateGroupMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getUpdateGroupMethod = UserManagementGrpc.getUpdateGroupMethod) == null) {
+          UserManagementGrpc.getUpdateGroupMethod = getUpdateGroupMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "UpdateGroup"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateGroup"))
+                  .build();
+          }
+        }
+     }
+     return getUpdateGroupMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getAddMemberToGroupMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse> METHOD_ADD_MEMBER_TO_GROUP = getAddMemberToGroupMethodHelper();
@@ -2510,6 +2584,117 @@ public final class UserManagementGrpc {
      }
      return getSetClouderaSSOLoginEnabledMethod;
   }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGetIdPMetadataForWorkloadSSOMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> METHOD_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = getGetIdPMetadataForWorkloadSSOMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> getGetIdPMetadataForWorkloadSSOMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> getGetIdPMetadataForWorkloadSSOMethod() {
+    return getGetIdPMetadataForWorkloadSSOMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> getGetIdPMetadataForWorkloadSSOMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> getGetIdPMetadataForWorkloadSSOMethod;
+    if ((getGetIdPMetadataForWorkloadSSOMethod = UserManagementGrpc.getGetIdPMetadataForWorkloadSSOMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getGetIdPMetadataForWorkloadSSOMethod = UserManagementGrpc.getGetIdPMetadataForWorkloadSSOMethod) == null) {
+          UserManagementGrpc.getGetIdPMetadataForWorkloadSSOMethod = getGetIdPMetadataForWorkloadSSOMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "GetIdPMetadataForWorkloadSSO"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetIdPMetadataForWorkloadSSO"))
+                  .build();
+          }
+        }
+     }
+     return getGetIdPMetadataForWorkloadSSOMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getProcessWorkloadSSOAuthnReqMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> METHOD_PROCESS_WORKLOAD_SSOAUTHN_REQ = getProcessWorkloadSSOAuthnReqMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> getProcessWorkloadSSOAuthnReqMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> getProcessWorkloadSSOAuthnReqMethod() {
+    return getProcessWorkloadSSOAuthnReqMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> getProcessWorkloadSSOAuthnReqMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> getProcessWorkloadSSOAuthnReqMethod;
+    if ((getProcessWorkloadSSOAuthnReqMethod = UserManagementGrpc.getProcessWorkloadSSOAuthnReqMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getProcessWorkloadSSOAuthnReqMethod = UserManagementGrpc.getProcessWorkloadSSOAuthnReqMethod) == null) {
+          UserManagementGrpc.getProcessWorkloadSSOAuthnReqMethod = getProcessWorkloadSSOAuthnReqMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "ProcessWorkloadSSOAuthnReq"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ProcessWorkloadSSOAuthnReq"))
+                  .build();
+          }
+        }
+     }
+     return getProcessWorkloadSSOAuthnReqMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getSetWorkloadSubdomainMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> METHOD_SET_WORKLOAD_SUBDOMAIN = getSetWorkloadSubdomainMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> getSetWorkloadSubdomainMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> getSetWorkloadSubdomainMethod() {
+    return getSetWorkloadSubdomainMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> getSetWorkloadSubdomainMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> getSetWorkloadSubdomainMethod;
+    if ((getSetWorkloadSubdomainMethod = UserManagementGrpc.getSetWorkloadSubdomainMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getSetWorkloadSubdomainMethod = UserManagementGrpc.getSetWorkloadSubdomainMethod) == null) {
+          UserManagementGrpc.getSetWorkloadSubdomainMethod = getSetWorkloadSubdomainMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "SetWorkloadSubdomain"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetWorkloadSubdomain"))
+                  .build();
+          }
+        }
+     }
+     return getSetWorkloadSubdomainMethod;
+  }
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -2650,6 +2835,17 @@ public final class UserManagementGrpc {
     public void accessKeyUsage(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getAccessKeyUsageMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Create user. Can only be used to create a user associated with a customer
+     * identity provider connector.
+     * </pre>
+     */
+    public void createUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getCreateUserMethodHelper(), responseObserver);
     }
 
     /**
@@ -3093,6 +3289,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Update group
+     * </pre>
+     */
+    public void updateGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getUpdateGroupMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Add member to group
      * </pre>
      */
@@ -3221,6 +3427,41 @@ public final class UserManagementGrpc {
       asyncUnimplementedUnaryCall(getSetClouderaSSOLoginEnabledMethodHelper(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * Retrieves the control plane IdP metadata file for a workload
+     * SSO service.
+     * </pre>
+     */
+    public void getIdPMetadataForWorkloadSSO(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetIdPMetadataForWorkloadSSOMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Process a workload SSO AuthNRequest. If the user is already authenticated
+     * an appropriate authn response will be generated to the workload SSO. If not,
+     * an appropriate authn request will be generated to either cloudera-sso or
+     * to one of the customer defined identity providers.
+     * </pre>
+     */
+    public void processWorkloadSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getProcessWorkloadSSOAuthnReqMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Set the workload subdomain for an account if no such workload domain has
+     * been set for a different account before.
+     * </pre>
+     */
+    public void setWorkloadSubdomain(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetWorkloadSubdomainMethodHelper(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -3293,6 +3534,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse>(
                   this, METHODID_ACCESS_KEY_USAGE)))
+          .addMethod(
+            getCreateUserMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse>(
+                  this, METHODID_CREATE_USER)))
           .addMethod(
             getGetUserMethodHelper(),
             asyncUnaryCall(
@@ -3602,6 +3850,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse>(
                   this, METHODID_LIST_GROUPS)))
           .addMethod(
+            getUpdateGroupMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse>(
+                  this, METHODID_UPDATE_GROUP)))
+          .addMethod(
             getAddMemberToGroupMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
@@ -3692,6 +3947,27 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse>(
                   this, METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED)))
+          .addMethod(
+            getGetIdPMetadataForWorkloadSSOMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse>(
+                  this, METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO)))
+          .addMethod(
+            getProcessWorkloadSSOAuthnReqMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse>(
+                  this, METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ)))
+          .addMethod(
+            getSetWorkloadSubdomainMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse>(
+                  this, METHODID_SET_WORKLOAD_SUBDOMAIN)))
           .build();
     }
   }
@@ -3836,6 +4112,18 @@ public final class UserManagementGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getAccessKeyUsageMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Create user. Can only be used to create a user associated with a customer
+     * identity provider connector.
+     * </pre>
+     */
+    public void createUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getCreateUserMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -4323,6 +4611,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Update group
+     * </pre>
+     */
+    public void updateGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getUpdateGroupMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Add member to group
      * </pre>
      */
@@ -4463,6 +4762,44 @@ public final class UserManagementGrpc {
       asyncUnaryCall(
           getChannel().newCall(getSetClouderaSSOLoginEnabledMethodHelper(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Retrieves the control plane IdP metadata file for a workload
+     * SSO service.
+     * </pre>
+     */
+    public void getIdPMetadataForWorkloadSSO(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetIdPMetadataForWorkloadSSOMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Process a workload SSO AuthNRequest. If the user is already authenticated
+     * an appropriate authn response will be generated to the workload SSO. If not,
+     * an appropriate authn request will be generated to either cloudera-sso or
+     * to one of the customer defined identity providers.
+     * </pre>
+     */
+    public void processWorkloadSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getProcessWorkloadSSOAuthnReqMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Set the workload subdomain for an account if no such workload domain has
+     * been set for a different account before.
+     * </pre>
+     */
+    public void setWorkloadSubdomain(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetWorkloadSubdomainMethodHelper(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -4595,6 +4932,17 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse accessKeyUsage(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest request) {
       return blockingUnaryCall(
           getChannel(), getAccessKeyUsageMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create user. Can only be used to create a user associated with a customer
+     * identity provider connector.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse createUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getCreateUserMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -5038,6 +5386,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Update group
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse updateGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getUpdateGroupMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Add member to group
      * </pre>
      */
@@ -5164,6 +5522,41 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse setClouderaSSOLoginEnabled(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest request) {
       return blockingUnaryCall(
           getChannel(), getSetClouderaSSOLoginEnabledMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Retrieves the control plane IdP metadata file for a workload
+     * SSO service.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse getIdPMetadataForWorkloadSSO(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetIdPMetadataForWorkloadSSOMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Process a workload SSO AuthNRequest. If the user is already authenticated
+     * an appropriate authn response will be generated to the workload SSO. If not,
+     * an appropriate authn request will be generated to either cloudera-sso or
+     * to one of the customer defined identity providers.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse processWorkloadSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getProcessWorkloadSSOAuthnReqMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Set the workload subdomain for an account if no such workload domain has
+     * been set for a different account before.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse setWorkloadSubdomain(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetWorkloadSubdomainMethodHelper(), getCallOptions(), request);
     }
   }
 
@@ -5307,6 +5700,18 @@ public final class UserManagementGrpc {
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getAccessKeyUsageMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Create user. Can only be used to create a user associated with a customer
+     * identity provider connector.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> createUser(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getCreateUserMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -5794,6 +6199,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Update group
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> updateGroup(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getUpdateGroupMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Add member to group
      * </pre>
      */
@@ -5934,6 +6350,44 @@ public final class UserManagementGrpc {
       return futureUnaryCall(
           getChannel().newCall(getSetClouderaSSOLoginEnabledMethodHelper(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Retrieves the control plane IdP metadata file for a workload
+     * SSO service.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> getIdPMetadataForWorkloadSSO(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetIdPMetadataForWorkloadSSOMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Process a workload SSO AuthNRequest. If the user is already authenticated
+     * an appropriate authn response will be generated to the workload SSO. If not,
+     * an appropriate authn request will be generated to either cloudera-sso or
+     * to one of the customer defined identity providers.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> processWorkloadSSOAuthnReq(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getProcessWorkloadSSOAuthnReqMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Set the workload subdomain for an account if no such workload domain has
+     * been set for a different account before.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> setWorkloadSubdomain(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetWorkloadSubdomainMethodHelper(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_INTERACTIVE_LOGIN = 0;
@@ -5946,63 +6400,68 @@ public final class UserManagementGrpc {
   private static final int METHODID_VERIFY_INTERACTIVE_USER_SESSION_TOKEN = 7;
   private static final int METHODID_AUTHENTICATE = 8;
   private static final int METHODID_ACCESS_KEY_USAGE = 9;
-  private static final int METHODID_GET_USER = 10;
-  private static final int METHODID_LIST_USERS = 11;
-  private static final int METHODID_FIND_USERS_BY_EMAIL = 12;
-  private static final int METHODID_CREATE_ACCESS_KEY = 13;
-  private static final int METHODID_UPDATE_ACCESS_KEY = 14;
-  private static final int METHODID_DELETE_ACCESS_KEY = 15;
-  private static final int METHODID_GET_ACCESS_KEY = 16;
-  private static final int METHODID_LIST_ACCESS_KEYS = 17;
-  private static final int METHODID_GET_VERSION = 18;
-  private static final int METHODID_GET_ACCOUNT = 19;
-  private static final int METHODID_LIST_ACCOUNTS = 20;
-  private static final int METHODID_GET_RIGHTS = 21;
-  private static final int METHODID_CHECK_RIGHTS = 22;
-  private static final int METHODID_CREATE_ACCOUNT = 23;
-  private static final int METHODID_GRANT_ENTITLEMENT = 24;
-  private static final int METHODID_REVOKE_ENTITLEMENT = 25;
-  private static final int METHODID_ASSIGN_ROLE = 26;
-  private static final int METHODID_UNASSIGN_ROLE = 27;
-  private static final int METHODID_LIST_ASSIGNED_ROLES = 28;
-  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 29;
-  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 30;
-  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 31;
-  private static final int METHODID_LIST_ROLES = 32;
-  private static final int METHODID_LIST_RESOURCE_ROLES = 33;
-  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 34;
-  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 35;
-  private static final int METHODID_INITIATE_SUPPORT_CASE = 36;
-  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 37;
-  private static final int METHODID_CREATE_MACHINE_USER = 38;
-  private static final int METHODID_LIST_MACHINE_USERS = 39;
-  private static final int METHODID_DELETE_MACHINE_USER = 40;
-  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 41;
-  private static final int METHODID_SET_ACCOUNT_MESSAGES = 42;
-  private static final int METHODID_ACCEPT_TERMS = 43;
-  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 44;
-  private static final int METHODID_DESCRIBE_TERMS = 45;
-  private static final int METHODID_LIST_TERMS = 46;
-  private static final int METHODID_LIST_ENTITLEMENTS = 47;
-  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 48;
-  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 49;
-  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 50;
-  private static final int METHODID_CREATE_GROUP = 51;
-  private static final int METHODID_DELETE_GROUP = 52;
-  private static final int METHODID_LIST_GROUPS = 53;
-  private static final int METHODID_ADD_MEMBER_TO_GROUP = 54;
-  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 55;
-  private static final int METHODID_LIST_GROUP_MEMBERS = 56;
-  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 57;
-  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 58;
-  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 59;
-  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 60;
-  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 61;
-  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 62;
-  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 63;
-  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 64;
-  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 65;
-  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 66;
+  private static final int METHODID_CREATE_USER = 10;
+  private static final int METHODID_GET_USER = 11;
+  private static final int METHODID_LIST_USERS = 12;
+  private static final int METHODID_FIND_USERS_BY_EMAIL = 13;
+  private static final int METHODID_CREATE_ACCESS_KEY = 14;
+  private static final int METHODID_UPDATE_ACCESS_KEY = 15;
+  private static final int METHODID_DELETE_ACCESS_KEY = 16;
+  private static final int METHODID_GET_ACCESS_KEY = 17;
+  private static final int METHODID_LIST_ACCESS_KEYS = 18;
+  private static final int METHODID_GET_VERSION = 19;
+  private static final int METHODID_GET_ACCOUNT = 20;
+  private static final int METHODID_LIST_ACCOUNTS = 21;
+  private static final int METHODID_GET_RIGHTS = 22;
+  private static final int METHODID_CHECK_RIGHTS = 23;
+  private static final int METHODID_CREATE_ACCOUNT = 24;
+  private static final int METHODID_GRANT_ENTITLEMENT = 25;
+  private static final int METHODID_REVOKE_ENTITLEMENT = 26;
+  private static final int METHODID_ASSIGN_ROLE = 27;
+  private static final int METHODID_UNASSIGN_ROLE = 28;
+  private static final int METHODID_LIST_ASSIGNED_ROLES = 29;
+  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 30;
+  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 31;
+  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 32;
+  private static final int METHODID_LIST_ROLES = 33;
+  private static final int METHODID_LIST_RESOURCE_ROLES = 34;
+  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 35;
+  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 36;
+  private static final int METHODID_INITIATE_SUPPORT_CASE = 37;
+  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 38;
+  private static final int METHODID_CREATE_MACHINE_USER = 39;
+  private static final int METHODID_LIST_MACHINE_USERS = 40;
+  private static final int METHODID_DELETE_MACHINE_USER = 41;
+  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 42;
+  private static final int METHODID_SET_ACCOUNT_MESSAGES = 43;
+  private static final int METHODID_ACCEPT_TERMS = 44;
+  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 45;
+  private static final int METHODID_DESCRIBE_TERMS = 46;
+  private static final int METHODID_LIST_TERMS = 47;
+  private static final int METHODID_LIST_ENTITLEMENTS = 48;
+  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 49;
+  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 50;
+  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 51;
+  private static final int METHODID_CREATE_GROUP = 52;
+  private static final int METHODID_DELETE_GROUP = 53;
+  private static final int METHODID_LIST_GROUPS = 54;
+  private static final int METHODID_UPDATE_GROUP = 55;
+  private static final int METHODID_ADD_MEMBER_TO_GROUP = 56;
+  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 57;
+  private static final int METHODID_LIST_GROUP_MEMBERS = 58;
+  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 59;
+  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 60;
+  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 61;
+  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 62;
+  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 63;
+  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 64;
+  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 65;
+  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 66;
+  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 67;
+  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 68;
+  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 69;
+  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 70;
+  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 71;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -6060,6 +6519,10 @@ public final class UserManagementGrpc {
         case METHODID_ACCESS_KEY_USAGE:
           serviceImpl.accessKeyUsage((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse>) responseObserver);
+          break;
+        case METHODID_CREATE_USER:
+          serviceImpl.createUser((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse>) responseObserver);
           break;
         case METHODID_GET_USER:
           serviceImpl.getUser((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest) request,
@@ -6237,6 +6700,10 @@ public final class UserManagementGrpc {
           serviceImpl.listGroups((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse>) responseObserver);
           break;
+        case METHODID_UPDATE_GROUP:
+          serviceImpl.updateGroup((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse>) responseObserver);
+          break;
         case METHODID_ADD_MEMBER_TO_GROUP:
           serviceImpl.addMemberToGroup((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse>) responseObserver);
@@ -6288,6 +6755,18 @@ public final class UserManagementGrpc {
         case METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED:
           serviceImpl.setClouderaSSOLoginEnabled((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse>) responseObserver);
+          break;
+        case METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO:
+          serviceImpl.getIdPMetadataForWorkloadSSO((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse>) responseObserver);
+          break;
+        case METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ:
+          serviceImpl.processWorkloadSSOAuthnReq((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse>) responseObserver);
+          break;
+        case METHODID_SET_WORKLOAD_SUBDOMAIN:
+          serviceImpl.setWorkloadSubdomain((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -6360,6 +6839,7 @@ public final class UserManagementGrpc {
               .addMethod(getVerifyInteractiveUserSessionTokenMethodHelper())
               .addMethod(getAuthenticateMethodHelper())
               .addMethod(getAccessKeyUsageMethodHelper())
+              .addMethod(getCreateUserMethodHelper())
               .addMethod(getGetUserMethodHelper())
               .addMethod(getListUsersMethodHelper())
               .addMethod(getFindUsersByEmailMethodHelper())
@@ -6404,6 +6884,7 @@ public final class UserManagementGrpc {
               .addMethod(getCreateGroupMethodHelper())
               .addMethod(getDeleteGroupMethodHelper())
               .addMethod(getListGroupsMethodHelper())
+              .addMethod(getUpdateGroupMethodHelper())
               .addMethod(getAddMemberToGroupMethodHelper())
               .addMethod(getRemoveMemberFromGroupMethodHelper())
               .addMethod(getListGroupMembersMethodHelper())
@@ -6417,6 +6898,9 @@ public final class UserManagementGrpc {
               .addMethod(getDescribeIdentityProviderConnectorMethodHelper())
               .addMethod(getUpdateIdentityProviderConnectorMethodHelper())
               .addMethod(getSetClouderaSSOLoginEnabledMethodHelper())
+              .addMethod(getGetIdPMetadataForWorkloadSSOMethodHelper())
+              .addMethod(getProcessWorkloadSSOAuthnReqMethodHelper())
+              .addMethod(getSetWorkloadSubdomainMethodHelper())
               .build();
         }
       }

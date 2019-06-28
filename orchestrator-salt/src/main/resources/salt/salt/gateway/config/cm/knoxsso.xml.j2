@@ -17,6 +17,38 @@
 -->
 <topology>
     <gateway>
+      {% if 'SSO_PROVIDER_FROM_UMS' == salt['pillar.get']('gateway:ssotype') -%}
+        <provider>
+            <role>federation</role>
+            <name>pac4j</name>
+            <enabled>true</enabled>
+            <param>
+                <name>pac4j.callbackUrl</name>
+                <value>https://{{ salt['pillar.get']('gateway:address') }}:8443/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso</value>
+            </param>
+            <param>
+                <name>clientName</name>
+                <value>SAML2Client</value>
+            </param>
+            <param>
+                <name>saml.identityProviderMetadataPath</name>
+                <value>{{ salt['pillar.get']('gateway:knoxDataRoot') }}/cdp-idp-metadata.xml</value>
+            </param>
+            <param>
+                <!--
+                    Need to include a value for the saml.serviceProviderMetadataPath - the file location here doesn't need to exist.
+                    There is a bug that will throw a NPE if saml.serviceProviderMetadataPath is not included even though the actual metadata
+                    will be served up to the IdP via request.
+                -->
+                <name>saml.serviceProviderMetadataPath</name>
+                <value>/tmp/sp-metadata.xml</value>
+            </param>
+            <param>
+                <name>saml.serviceProviderEntityId</name>
+                <value>https://{{ salt['pillar.get']('gateway:address') }}:8443/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso?pac4jCallback=true&amp;client_name=SAML2Client</value>
+            </param>
+        </provider>
+      {% else %}
       <provider>
         <role>webappsec</role>
         <name>WebAppSec</name>
@@ -58,6 +90,7 @@
                 <value>authcBasic</value>
             </param>
         </provider>
+        {% endif %}
 
         <provider>
             <role>identity-assertion</role>

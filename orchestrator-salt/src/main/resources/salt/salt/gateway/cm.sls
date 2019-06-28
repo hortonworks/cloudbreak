@@ -118,3 +118,13 @@ knox-create-sign-jks:
   file.managed:
     - mode: 777
     - replace: False
+
+{% if salt['pillar.get']('gateway:saml') %}
+
+{{ gateway.knox_data_root }}/cdp-idp-metadata.xml:
+  file.managed:
+    - contents_pillar: gateway:saml
+    - mode: 777
+    - replace: False
+
+{% endif %}
