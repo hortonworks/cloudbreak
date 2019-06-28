@@ -23,12 +23,6 @@ public class ServiceEndpointConfig {
     @Value("${cb.db.serviceid:}")
     private String databaseId;
 
-    @Value("${cb.identity.server.url:}")
-    private String identityServiceUrl;
-
-    @Value("${cb.identity.serviceid:}")
-    private String identityServiceId;
-
     @Value("${cb.environment.url}")
     private String environmentServiceUrl;
 
@@ -55,11 +49,6 @@ public class ServiceEndpointConfig {
     @Bean
     public String databaseAddress() throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveHostPort(dbHost, dbPort, databaseId);
-    }
-
-    @Bean
-    public String identityServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(identityServiceUrl, "http", identityServiceId);
     }
 
     @Bean
