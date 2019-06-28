@@ -61,8 +61,8 @@ public interface ClusterApi {
         clusterSecurityService().disableSecurity();
     }
 
-    default void changeOriginalCredentialsAndCreateCloudbreakUser() throws CloudbreakException {
-        clusterSecurityService().changeOriginalCredentialsAndCreateCloudbreakUser();
+    default void changeOriginalCredentialsAndCreateCloudbreakUser(boolean ldapConfigured) throws CloudbreakException {
+        clusterSecurityService().changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
     }
 
     default void upscaleCluster(HostGroup hostGroup, Collection<HostMetadata> hostMetadata, List<InstanceMetaData> metas) throws CloudbreakException {

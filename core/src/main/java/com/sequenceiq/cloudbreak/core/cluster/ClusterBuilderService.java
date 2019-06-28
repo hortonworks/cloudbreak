@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -99,11 +100,15 @@ public class ClusterBuilderService {
     @Inject
     private KerberosConfigService kerberosConfigService;
 
+    @Inject
+    private LdapConfigService ldapConfigService;
+
     public void startCluster(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         connector.waitForServer(stack);
-        connector.changeOriginalCredentialsAndCreateCloudbreakUser();
+        boolean ldapConfigured = ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn());
+        connector.changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
     }
 
     public void buildCluster(Long stackId) throws CloudbreakException {
