@@ -71,13 +71,21 @@ public class StackOperation {
     @Inject
     private EnvironmentServiceDecorator environmentServiceDecorator;
 
-    public StackViewV4Responses list(Long workspaceId, String environmentName, StackType stackType) {
+    public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, StackType stackType) {
         Set<StackViewV4Response> stackViewResponses;
         stackViewResponses = converterUtil.convertAllAsSet(
-                stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environmentName, stackType),
+                stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentName(workspaceId, environmentName, stackType),
                 StackViewV4Response.class);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);
+        return new StackViewV4Responses(stackViewResponses);
+    }
 
+    public StackViewV4Responses listByEnvironmentCrn(Long workspaceId, String environmentCrn, StackType stackType) {
+        Set<StackViewV4Response> stackViewResponses;
+        stackViewResponses = converterUtil.convertAllAsSet(
+                stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackType),
+                StackViewV4Response.class);
+        environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);
         return new StackViewV4Responses(stackViewResponses);
     }
 

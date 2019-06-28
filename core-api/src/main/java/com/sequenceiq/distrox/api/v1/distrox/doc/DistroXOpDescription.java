@@ -8,7 +8,7 @@ public class DistroXOpDescription {
     public static final String GET_BY_AMBARI_ADDRESS = "retrieve stack by ambari address";
     public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
     public static final String GET_ALL = "retrieve all stacks";
-    public static final String LIST = "list stacks";
+    public static final String LIST = "list stacks by environment crn";
     public static final String GET_BY_NAME = "get stack by name";
     public static final String CREATE = "create stack";
     public static final String DELETE_BY_NAME = "delete stack by name";

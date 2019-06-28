@@ -34,12 +34,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     private StackOperation stackOperation;
 
     @Override
-    public StackViewV4Responses list(Long workspaceId, String environment, Boolean onlyDatalakes) {
+    public StackViewV4Responses list(Long workspaceId, String environmentCrn, Boolean onlyDatalakes) {
         StackType type = null;
         if (onlyDatalakes) {
             type = StackType.DATALAKE;
         }
-        return stackOperation.list(workspaceId, environment, type);
+        return stackOperation.listByEnvironmentCrn(workspaceId, environmentCrn, type);
     }
 
     @Override
