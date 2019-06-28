@@ -34,7 +34,7 @@ public class OperationDescriptions {
         public static final String GET_BY_AMBARI_ADDRESS = "retrieve stack by ambari address";
         public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
         public static final String GET_ALL = "retrieve all stacks";
-        public static final String LIST_BY_WORKSPACE = "list stacks for the given workspace";
+        public static final String LIST_BY_WORKSPACE = "list stacks for the given workspace and environment name";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get stack by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create stack in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete stack by name in workspace";

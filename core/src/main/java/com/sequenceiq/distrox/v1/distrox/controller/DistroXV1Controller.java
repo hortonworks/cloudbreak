@@ -54,7 +54,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public StackViewV4Responses list(String environmentName) {
-        return stackOperation.list(workspaceService.getForCurrentUser().getId(), environmentName, StackType.WORKLOAD);
+        return stackOperation.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), environmentName, StackType.WORKLOAD);
     }
 
     @Override

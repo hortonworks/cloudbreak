@@ -58,7 +58,7 @@ public class StackApiViewService {
         return stackApiViewRepository.save(stackApiView);
     }
 
-    public Set<StackApiView> retrieveStackViewsByWorkspaceId(Long workspaceId, String environmentName, @Nullable StackType stackType) {
+    public Set<StackApiView> retrieveStackViewsByWorkspaceIdAndEnvironmentName(Long workspaceId, String environmentName, @Nullable StackType stackType) {
         ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
 
         Set<StackApiView> stackViewResponses;
@@ -66,6 +66,23 @@ public class StackApiViewService {
             stackViewResponses = getAllByWorkspace(workspaceId, showTerminatedClustersAfterConfig);
         } else {
             DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(environmentName);
+            stackViewResponses = getAllByWorkspaceAndEnvironment(workspaceId, environmentResponse.getCrn(), showTerminatedClustersAfterConfig);
+        }
+
+        if (stackType != null) {
+            stackViewResponses = filterByStackType(stackType, stackViewResponses);
+        }
+        return stackViewResponses;
+    }
+
+    public Set<StackApiView> retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(Long workspaceId, String environmentCrn, @Nullable StackType stackType) {
+        ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
+
+        Set<StackApiView> stackViewResponses;
+        if (StringUtils.isEmpty(environmentCrn)) {
+            stackViewResponses = getAllByWorkspace(workspaceId, showTerminatedClustersAfterConfig);
+        } else {
+            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(environmentCrn);
             stackViewResponses = getAllByWorkspaceAndEnvironment(workspaceId, environmentResponse.getCrn(), showTerminatedClustersAfterConfig);
         }
 
