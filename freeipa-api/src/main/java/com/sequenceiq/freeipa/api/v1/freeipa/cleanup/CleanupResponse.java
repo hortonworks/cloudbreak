@@ -73,4 +73,16 @@ public class CleanupResponse {
     public void setRoleCleanupFailed(Map<String, String> roleCleanupFailed) {
         this.roleCleanupFailed = roleCleanupFailed;
     }
+
+    @Override
+    public String toString() {
+        return "CleanupResponse{"
+                + "userCleanupSuccess=" + userCleanupSuccess
+                + ", hostCleanupSuccess=" + hostCleanupSuccess
+                + ", roleCleanupSuccess=" + roleCleanupSuccess
+                + ", userCleanupFailed=" + userCleanupFailed
+                + ", hostCleanupFailed=" + hostCleanupFailed
+                + ", roleCleanupFailed=" + roleCleanupFailed
+                + '}';
+    }
 }

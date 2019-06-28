@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,19 +40,22 @@ public class CleanupService {
     private FreeIpaService freeIpaService;
 
     public CleanupResponse cleanup(String accountId, CleanupRequest request) throws FreeIpaClientException {
-        Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
-        FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+        Optional<Stack> optionalStack = stackService.findByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
         CleanupResponse cleanupResponse = new CleanupResponse();
-        if (!CollectionUtils.isEmpty(request.getHosts())) {
-            removeHosts(client, request, cleanupResponse);
-            removeDnsEntries(client, request, cleanupResponse, freeIpa.getDomain());
-        }
-        if (!CollectionUtils.isEmpty(request.getUsers())) {
-            removeUsers(client, request, cleanupResponse);
-        }
-        if (!CollectionUtils.isEmpty(request.getRoles())) {
-            removeRoles(client, request, cleanupResponse);
+        if (optionalStack.isPresent()) {
+            Stack stack = optionalStack.get();
+            FreeIpa freeIpa = freeIpaService.findByStack(stack);
+            FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+            if (!CollectionUtils.isEmpty(request.getHosts())) {
+                removeHosts(client, request, cleanupResponse);
+                removeDnsEntries(client, request, cleanupResponse, freeIpa.getDomain());
+            }
+            if (!CollectionUtils.isEmpty(request.getUsers())) {
+                removeUsers(client, request, cleanupResponse);
+            }
+            if (!CollectionUtils.isEmpty(request.getRoles())) {
+                removeRoles(client, request, cleanupResponse);
+            }
         }
         return cleanupResponse;
     }
@@ -83,9 +88,17 @@ public class CleanupService {
                 .filter(existingHostFqdn::contains)
                 .filter(h -> !response.getHostCleanupFailed().keySet().contains(h))
                 .collect(Collectors.toSet());
+        Map<String, String> principalCanonicalMap = client.findAllService().stream()
+                .collect(Collectors.toMap(com.sequenceiq.freeipa.client.model.Service::getKrbprincipalname,
+                        com.sequenceiq.freeipa.client.model.Service::getKrbcanonicalname));
         for (String host : hostsToRemove) {
             try {
                 client.deleteHost(host);
+                Set<String> services = principalCanonicalMap.entrySet().stream().filter(e -> e.getKey().contains(host))
+                        .map(Map.Entry::getValue).collect(Collectors.toSet());
+                for (String service : services) {
+                    client.deleteService(service);
+                }
                 response.getHostCleanupSuccess().add(host);
             } catch (FreeIpaClientException e) {
                 LOGGER.info("Host delete failed for host: {}", host, e);

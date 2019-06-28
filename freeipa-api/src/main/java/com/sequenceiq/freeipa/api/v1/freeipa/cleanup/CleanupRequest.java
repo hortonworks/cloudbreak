@@ -56,4 +56,14 @@ public class CleanupRequest {
     public void setRoles(Set<String> roles) {
         this.roles = roles;
     }
+
+    @Override
+    public String toString() {
+        return "CleanupRequest{"
+                + "environmentCrn='" + environmentCrn + '\''
+                + ", users=" + users
+                + ", hosts=" + hosts
+                + ", roles=" + roles
+                + '}';
+    }
 }

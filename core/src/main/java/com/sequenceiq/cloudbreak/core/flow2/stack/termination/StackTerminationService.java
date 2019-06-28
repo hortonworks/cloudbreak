@@ -2,14 +2,18 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 
+import java.util.concurrent.ExecutorService;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -23,6 +27,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 
 @Service
 public class StackTerminationService {
@@ -49,6 +54,16 @@ public class StackTerminationService {
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
 
+    @Inject
+    @Qualifier("cloudbreakListeningScheduledExecutorService")
+    private ExecutorService executorService;
+
+    @Inject
+    private FreeIpaV1Endpoint freeIpaV1Endpoint;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
     public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean deleteDependencies) {
         LOGGER.debug("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
@@ -63,6 +78,7 @@ public class StackTerminationService {
             datalakeResourcesService.findByDatalakeStackId(stack.getId()).ifPresent(datalakeResources ->
                     datalakeResourcesService.deleteWithMdcContextRestore(datalakeResources));
         }
+        executorService.execute(new CleanupFreeIpaTask(stack, freeIpaV1Endpoint, threadBasedUserCrnProvider, threadBasedUserCrnProvider.getUserCrn()));
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }
 

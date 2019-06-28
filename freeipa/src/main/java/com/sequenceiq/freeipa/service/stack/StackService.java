@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -38,6 +39,10 @@ public class StackService {
     public Stack getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
         return stackRepository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
+    }
+
+    public Optional<Stack> findByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
+        return stackRepository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId);
     }
 
     public List<Stack> findAllByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
