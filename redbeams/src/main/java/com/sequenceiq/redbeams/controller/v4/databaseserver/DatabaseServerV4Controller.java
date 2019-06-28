@@ -76,10 +76,10 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     public DatabaseServerTerminationOutcomeV4Response terminate(TerminateDatabaseServerV4Request request) {
-        DatabaseServerConfig server = redbeamsTerminationService.terminateDatabaseServer(request.getName(), request.getEnvironmentId());
+        redbeamsTerminationService.terminateDatabaseServer(request.getName(), request.getEnvironmentId());
         // FIXME the converter for this doesn't exist yet, and probably needs to convert something
         // more than just a DatabaseServerConfig
-        return converterUtil.convert(server, DatabaseServerTerminationOutcomeV4Response.class);
+        return new DatabaseServerTerminationOutcomeV4Response();
     }
 
     @Override

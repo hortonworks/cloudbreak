@@ -8,6 +8,7 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -98,7 +99,7 @@ public class DatabaseServerConfig implements ArchivableResource, CrnResource, Ac
     @Column(nullable = false)
     private String environmentId;
 
-    @OneToMany(mappedBy = "server")
+    @OneToMany(mappedBy = "server", fetch = FetchType.EAGER)
     private Set<DatabaseConfig> databases;
 
     public Long getId() {

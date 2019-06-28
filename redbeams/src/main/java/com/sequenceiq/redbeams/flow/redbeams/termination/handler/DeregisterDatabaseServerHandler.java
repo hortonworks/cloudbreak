@@ -3,9 +3,14 @@ package com.sequenceiq.redbeams.flow.redbeams.termination.handler;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerSuccess;
+import com.sequenceiq.redbeams.repository.DatabaseConfigRepository;
+import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 import javax.inject.Inject;
 
@@ -21,8 +26,19 @@ public class DeregisterDatabaseServerHandler implements EventHandler<DeregisterD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeregisterDatabaseServerHandler.class);
 
+    private static final long DEFAULT_WORKSPACE = 0L;
+
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private DatabaseConfigRepository databaseConfigRepository;
+
+    @Inject
+    private DatabaseServerConfigService databaseServerConfigService;
+
+    @Inject
+    private DBStackService dbStackService;
 
     @Override
     public String selector() {
@@ -31,12 +47,22 @@ public class DeregisterDatabaseServerHandler implements EventHandler<DeregisterD
 
     @Override
     public void accept(Event<DeregisterDatabaseServerRequest> event) {
-        RedbeamsEvent request = event.getData();
+        DeregisterDatabaseServerRequest request = event.getData();
         Selectable response = new DeregisterDatabaseServerSuccess(request.getResourceId());
 
-        // TODO: Actually deregister database server
-        LOGGER.info("A database server would be deregistered here.");
+        DBStack dbStack = request.getDbStack();
 
-        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+        try {
+            DatabaseServerConfig dbServerConfig =
+                    databaseServerConfigService.getByName(DEFAULT_WORKSPACE, dbStack.getEnvironmentId(), dbStack.getName());
+
+            databaseServerConfigService.archive(dbServerConfig);
+            dbStackService.delete(dbStack);
+            eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+        } catch (Exception e) {
+            DeregisterDatabaseServerFailed failure = new DeregisterDatabaseServerFailed(request.getResourceId(), e);
+            LOGGER.warn("Error deregistering database:", e);
+            eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
+        }
     }
 }
