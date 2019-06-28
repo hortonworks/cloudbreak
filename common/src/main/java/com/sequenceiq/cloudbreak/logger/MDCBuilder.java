@@ -61,8 +61,8 @@ public class MDCBuilder {
     public static void buildMdcContext(String resourceId, String resourceName, String type) {
         MdcContext.builder()
                 .resourceCrn(resourceId)
-                .resourceType(resourceName)
-                .resourceName(type)
+                .resourceName(resourceName)
+                .resourceType(type)
                 .buildMdc();
     }
 
