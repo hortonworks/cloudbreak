@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 docker login --username=$DOCKERHUB_USERNAME --password=$DOCKERHUB_PASSWORD
 rm -rf ./integcb/docker-containers
 mkdir -p ./integcb/docker-containers

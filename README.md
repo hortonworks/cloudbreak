@@ -141,11 +141,8 @@ Restart IDEA, and Rebuild.
 
 To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.CloudbreakApplication` class (set 'Use classpath of module' to `core_main`) with the following VM options:
 ```
--Dcb.client.id=cloudbreak
--Dcb.client.secret=<UAA_DEFAULT_SECRET>
 -Dcb.db.port.5432.tcp.addr=localhost
 -Dcb.db.port.5432.tcp.port=5432
--Dcb.identity.server.url=http://localhost:8089
 -Dspring.cloud.consul.host=YOUR_IP
 -Dserver.port=9091
 -Daltus.ums.host=localhost
@@ -153,7 +150,7 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 ```
 
-Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
+Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
 The database migration scripts are run automatically by Cloudbreak, but this migration can be turned off with the `-Dcb.schema.migration.auto=false` JVM option.
 
@@ -174,9 +171,6 @@ In order to be able to determine the local Cloudbreak version automatically, a `
 After importing the cloudbreak repo root, launch the Periscope application by executing the com.sequenceiq.periscope.PeriscopeApplication class with the following JVM options:
 
 ````
--Dperiscope.client.id=periscope
--Dperiscope.client.secret=<UAA_DEFAULT_SECRET>
--Dperiscope.identity.server.url=http://localhost:8089
 -Dperiscope.db.port.5432.tcp.addr=localhost
 -Dperiscope.db.port.5432.tcp.port=5432
 -Dperiscope.cloudbreak.url=http://localhost:8080
@@ -186,7 +180,7 @@ After importing the cloudbreak repo root, launch the Periscope application by ex
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 ````
 
-Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
+Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
 ### Running Datalake in IDEA
 
@@ -202,9 +196,6 @@ After importing the cloudbreak repo root, launch the Datalake application by exe
 After importing the cloudbreak repo root, launch the Redbeams application by executing the com.sequenceiq.redbeams.RedbeamsApplication class with the following JVM options:
 
 ```
--Dredbeams.client.id=redbeams
--Dredbeams.client.secret=<UAA_DEFAULT_SECRET>
--Dredbeams.identity.server.url=http://localhost:8089
 -Dredbeams.db.port.5432.tcp.addr=localhost
 -Dredbeams.db.port.5432.tcp.port=5432
 -Dredbeams.cloudbreak.url=http://localhost:8080
@@ -214,7 +205,7 @@ After importing the cloudbreak repo root, launch the Redbeams application by exe
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 ```
 
-Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
+Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
 ### Running the Environment service in IDEA
 
@@ -232,11 +223,8 @@ Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-loc
 To run Cloudbreak from the command line, run the following Gradle command:
 
 ```
-./gradlew :core:buildInfo :core:bootRun -PjvmArgs="-Dcb.client.id=cloudbreak \
--Dcb.client.secret=<UAA_DEFAULT_SECRET> \
--Dcb.db.port.5432.tcp.addr=localhost \
+./gradlew :core:buildInfo :core:bootRun -PjvmArgs="-Dcb.db.port.5432.tcp.addr=localhost \
 -Dcb.db.port.5432.tcp.port=5432 \
--Dcb.identity.server.url=http://localhost:8089 \
 -Dcb.schema.scripts.location=$(pwd)/core/src/main/resources/schema
 -Dserver.port=9091 \
 -Daltus.ums.host=localhost
@@ -245,7 +233,7 @@ To run Cloudbreak from the command line, run the following Gradle command:
 -Dspring.config.location=$(pwd)/cloud-common/src/main/resources/application.yml,$(pwd)/core/build/resources/main/application.properties"
 ```
 
-Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
+Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
 The database migration scripts are run automatically by Cloudbreak, this migration can be turned off with the `-Dcb.schema.migration.auto=false` VM option.
 
@@ -253,10 +241,7 @@ The database migration scripts are run automatically by Cloudbreak, this migrati
 To run Periscope from the command line, run the following Gradle command:
 
 ````
-./gradlew :autoscale:bootRun -PjvmArgs="-Dperiscope.client.id=periscope \
--Dperiscope.client.secret=<UAA_DEFAULT_SECRET> \
--Dperiscope.identity.server.url=http://localhost:8089 \
--Dperiscope.db.port.5432.tcp.addr=localhost \
+./gradlew :autoscale:bootRun -PjvmArgs="-Dperiscope.db.port.5432.tcp.addr=localhost \
 -Dperiscope.db.port.5432.tcp.port=5432 \
 -Dperiscope.cloudbreak.url=http://localhost:8080 \
 -Dperiscope.schema.scripts.location=$(pwd)/autoscale/src/main/resources/schema
@@ -267,7 +252,7 @@ To run Periscope from the command line, run the following Gradle command:
 -Dspring.config.location=$(pwd)/autoscale/src/main/resources/application.yml,$(pwd)/autoscale/build/resources/main/application.properties"
 ````
 
-Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
+Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
 ### Datalake
 To run Datalake from the command line, run the following Gradle command:
@@ -295,10 +280,7 @@ Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-loc
 To run Redbeams from the command line, run the following Gradle command:
 
 ```
-./gradlew :redbeams:bootRun -PjvmArgs="-Dredbeams.client.id=redbeams \
--Dredbeams.client.secret=<UAA_DEFAULT_SECRET> \
--Dredbeams.identity.server.url=http://localhost:8089 \
--Dredbeams.db.port.5432.tcp.addr=localhost \
+./gradlew :redbeams:bootRun -PjvmArgs="-Dredbeams.db.port.5432.tcp.addr=localhost \
 -Dredbeams.db.port.5432.tcp.port=5432 \
 -Dredbeams.cloudbreak.url=http://localhost:8080 \
 -Dredbeams.schema.scripts.location=$(pwd)/redbeams/src/main/resources/schema \
@@ -309,7 +291,7 @@ To run Redbeams from the command line, run the following Gradle command:
 -Dspring.config.location=$(pwd)/redbeams/src/main/resources/application.yml,$(pwd)/redbeams/build/resources/main/application.properties"
 ```
 
-Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
+Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
 ### Environment
 To run the Environment service from the command line, run the following Gradle command:

@@ -24,12 +24,6 @@ public class ServiceEndpointConfig {
     @Value("${redbeams.db.serviceid:}")
     private String databaseId;
 
-    @Value("${redbeams.identity.server.url:}")
-    private String identityServiceUrl;
-
-    @Value("${redbeams.identity.serviceid:}")
-    private String identityServiceId;
-
     @Value("${redbeams.cloudbreak.url:}")
     private String cloudbreakUrl;
 

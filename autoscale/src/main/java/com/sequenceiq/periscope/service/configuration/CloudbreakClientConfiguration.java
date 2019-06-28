@@ -22,10 +22,6 @@ public class CloudbreakClientConfiguration {
     @Value("${cb.server.contextPath:/cb}")
     private String cbRootContextPath;
 
-    @Autowired
-    @Qualifier("identityServerUrl")
-    private String identityServerUrl;
-
     @Value("${periscope.client.id}")
     private String clientId;
 
