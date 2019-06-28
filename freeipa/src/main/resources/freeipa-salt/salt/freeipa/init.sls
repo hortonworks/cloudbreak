@@ -27,3 +27,17 @@ install-freeipa:
     - unless: test -f /var/log/freeipa_install-executed
     - require:
         - file: /opt/salt/scripts/freeipa_install.sh
+
+/usr/lib/python2.7/site-packages/ipaserver/plugins/getkeytab.py:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 644
+    - source: salt://freeipa/scripts/getkeytab.py
+
+restart_freeipa_after_plugin_change:
+  service.running:
+    - name: ipa
+    - watch:
+      - file: /usr/lib/python2.7/site-packages/ipaserver/plugins/getkeytab.py
