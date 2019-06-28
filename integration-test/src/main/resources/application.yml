@@ -16,6 +16,9 @@ integrationtest:
   imageCatalogName: cloudbreak-default
   gatewayPort: null
   defaultCredentialDescription: "autotesting credential default description."
+  tags:
+    auto: tesztelek
+  clusterShape: autoteszt
 
   testsuite:
     pollingInterval: 1000
