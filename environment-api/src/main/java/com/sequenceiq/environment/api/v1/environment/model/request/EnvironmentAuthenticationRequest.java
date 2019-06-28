@@ -5,17 +5,15 @@ import javax.validation.constraints.Size;
 
 import org.apache.commons.lang3.ObjectUtils;
 
-import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("EnvironmentAuthenticationV1Request")
-@MutuallyExclusiveNotNull(fieldNames = {"publicKey", "publicKeyId"}, message = "Either publicKey or publicKeyId should be provided but not both.")
 public class EnvironmentAuthenticationRequest {
 
-    private static final String DEFAULT_USER_NAME = "cloudbreak";
+    public static final String DEFAULT_USER_NAME = "cloudbreak";
 
     @ApiModelProperty(EnvironmentModelDescription.PUBLIC_KEY)
     private String publicKey;

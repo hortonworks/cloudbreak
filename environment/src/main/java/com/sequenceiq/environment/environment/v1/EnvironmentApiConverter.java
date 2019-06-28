@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.v1;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest.DEFAULT_USER_NAME;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
 
 import org.springframework.stereotype.Component;
@@ -35,6 +36,11 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
 public class EnvironmentApiConverter {
+
+    private static final String DUMMY_SSH_KEY = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
+            + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
+            + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+            + "centos";
 
     private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
@@ -103,11 +109,17 @@ public class EnvironmentApiConverter {
     }
 
     private AuthenticationDto authenticationRequestToDto(EnvironmentAuthenticationRequest authentication) {
-        return AuthenticationDto.builder()
-                .withLoginUserName(authentication.getLoginUserName())
-                .withPublicKey(authentication.getPublicKey())
-                .withPublicKeyId(authentication.getPublicKeyId())
-                .build();
+        AuthenticationDto.Builder builder = AuthenticationDto.builder();
+        if (authentication != null) {
+            builder.withLoginUserName(authentication.getLoginUserName())
+                    .withPublicKey(authentication.getPublicKey())
+                    .withPublicKeyId(authentication.getPublicKeyId());
+        } else {
+            builder.withLoginUserName(DEFAULT_USER_NAME)
+                    .withPublicKey(DUMMY_SSH_KEY)
+                    .withPublicKeyId(null);
+        }
+        return builder.build();
     }
 
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
