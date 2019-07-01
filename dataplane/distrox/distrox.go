@@ -3,11 +3,12 @@ package distrox
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hortonworks/cb-cli/dataplane/api-environment/client/v1env"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hortonworks/cb-cli/dataplane/api-environment/client/v1env"
 
 	envmodel "github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v1distrox"
@@ -32,8 +33,8 @@ type dxOut struct {
 }
 
 type stackOutDescribe struct {
-	stack       *model.StackV4Response
-	environment *envmodel.DetailedEnvironmentV1Response
+	Stack       model.StackV4Response
+	Environment envmodel.DetailedEnvironmentV1Response
 }
 
 func (s *dxOut) DataAsStringArray() []string {
@@ -46,19 +47,19 @@ func (s *dxOut) DataAsStringArray() []string {
 
 func (s *stackOutDescribe) DataAsStringArray() []string {
 	stack := convertResponseToDx(s)
-	return append(stack.DataAsStringArray(), s.stack.StatusReason)
+	return append(stack.DataAsStringArray(), s.Stack.StatusReason)
 }
 
 func convertResponseToDx(s *stackOutDescribe) *dxOut {
 	return &dxOut{
 		CloudResourceOut: common.CloudResourceOut{
-			Name:          *s.stack.Name,
-			Description:   utils.SafeClusterDescriptionConvert(s.stack),
-			CloudPlatform: s.environment.CloudPlatform,
+			Name:          *s.Stack.Name,
+			Description:   utils.SafeClusterDescriptionConvert(&s.Stack),
+			CloudPlatform: s.Environment.CloudPlatform,
 		},
-		Environment:   s.environment.Name,
-		DistroXStatus: s.stack.Status,
-		ClusterStatus: utils.SafeClusterStatusConvert(s.stack),
+		Environment:   s.Environment.Name,
+		DistroXStatus: s.Stack.Status,
+		ClusterStatus: utils.SafeClusterStatusConvert(&s.Stack),
 	}
 }
 
@@ -239,8 +240,8 @@ func DescribeDistroX(c *cli.Context) {
 	}
 
 	output.Write(append(stackHeader, "STATUSREASON"), &stackOutDescribe{
-		stack:       s,
-		environment: envResp.Payload,
+		Stack:       *s,
+		Environment: *envResp.Payload,
 	})
 }
 
