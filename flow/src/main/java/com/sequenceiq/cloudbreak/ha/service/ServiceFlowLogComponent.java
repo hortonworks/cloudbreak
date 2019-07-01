@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.ha.service;
 import java.util.Set;
 
 public interface ServiceFlowLogComponent {
-    int purgeTerminatedStackLogs();
+    int purgeTerminatedResourceLogs();
 
-    Set<Long> findTerminatingStacksByCloudbreakNodeId(String cloudbreakNodeId);
+    Set<Long> findTerminatingResourcesByNodeId(String nodeId);
 }

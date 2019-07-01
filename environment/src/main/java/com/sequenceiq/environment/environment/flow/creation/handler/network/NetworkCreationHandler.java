@@ -26,7 +26,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFai
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
-import com.sequenceiq.environment.network.EnvironmentNetworkManagementService;
+import com.sequenceiq.environment.network.EnvironmentNetworkService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.AwsParams;
@@ -49,7 +49,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    private final EnvironmentNetworkManagementService environmentNetworkManagementService;
+    private final EnvironmentNetworkService environmentNetworkService;
 
     private final Set<String> enabledPlatforms;
 
@@ -58,14 +58,14 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
             PlatformParameterService platformParameterService,
             NetworkService networkService,
             EnvironmentDtoConverter environmentDtoConverter,
-            EnvironmentNetworkManagementService environmentNetworkManagementService,
+            EnvironmentNetworkService environmentNetworkService,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
         super(eventSender);
         this.environmentService = environmentService;
         this.platformParameterService = platformParameterService;
         this.networkService = networkService;
         this.environmentDtoConverter = environmentDtoConverter;
-        this.environmentNetworkManagementService = environmentNetworkManagementService;
+        this.environmentNetworkService = environmentNetworkService;
         this.enabledPlatforms = enabledPlatforms;
     }
 
@@ -73,26 +73,39 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            Optional<Environment> environment = getEnvironment(environmentDtoEvent);
-            environment.ifPresent(env -> {
-                EnvironmentDto envDto = populateEnvironmentDto(env);
-                env.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
-                BaseNetwork baseNetwork = networkService.save(hasExistingNetwork(env)
-                        ? decorateWithSubnetMeta(env.getNetwork().getId(), envDto)
-                        : environmentNetworkManagementService.createNetwork(envDto, env.getNetwork()));
-                env.setNetwork(baseNetwork);
-                environmentService.save(env);
-            });
-
-            EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
-                    .withResourceId(environmentDto.getResourceId())
-                    .withSelector(START_FREEIPA_CREATION_EVENT.selector())
-                    .build();
-            eventSender().sendEvent(envCreationEvent, environmentDtoEvent.getHeaders());
+            createNetwork(environmentDto);
+            stepToFreeIpaCreation(environmentDtoEvent, environmentDto);
         } catch (Exception e) {
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), e);
             eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
         }
+    }
+
+    private void createNetwork(EnvironmentDto environmentDto) {
+        environmentService.findEnvironmentById(environmentDto.getId())
+                .ifPresent(environment -> {
+                    environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
+                    setNetworkIfNeeded(environmentDto, environment);
+                    environmentService.save(environment);
+                });
+    }
+
+    private void setNetworkIfNeeded(EnvironmentDto environmentDto, Environment environment) {
+        if (hasNetwork(environment)) {
+            BaseNetwork baseNetwork = hasExistingNetwork(environment)
+                    ? decorateWithSubnetMeta(environment.getNetwork().getId(), environmentDto)
+                    : environmentNetworkService.createNetwork(environmentDto, environment.getNetwork());
+            baseNetwork = networkService.save(baseNetwork);
+            environment.setNetwork(baseNetwork);
+        }
+    }
+
+    private boolean hasNetwork(Environment environment) {
+        return Objects.nonNull(environment.getNetwork()) && enabledPlatforms.contains(environment.getCloudPlatform());
+    }
+
+    private boolean hasExistingNetwork(Environment environment) {
+        return networkService.hasExistingNetwork(environment.getNetwork(), CloudPlatform.valueOf(environment.getCloudPlatform()));
     }
 
     private BaseNetwork decorateWithSubnetMeta(Long networkId, EnvironmentDto envDto) {
@@ -102,21 +115,6 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
                     String.join(",", envDto.getNetwork().getSubnetIds()), getVpcId(envDto).orElse("")));
         }
         return networkService.decorateNetworkWithSubnetMeta(networkId, subnetMetadata);
-    }
-
-    private EnvironmentDto populateEnvironmentDto(Environment environment) {
-        return environmentDtoConverter.environmentToDto(environment);
-    }
-
-    private boolean hasExistingNetwork(Environment environment) {
-        return networkService.hasExistingNetwork(environment.getNetwork(), CloudPlatform.valueOf(environment.getCloudPlatform()));
-    }
-
-    private Optional<Environment> getEnvironment(Event<EnvironmentDto> environmentDtoEvent) {
-        EnvironmentDto environmentDto = environmentDtoEvent.getData();
-        return environmentService.findEnvironmentById(environmentDto.getId())
-                .filter(environment -> Objects.nonNull(environment.getNetwork())
-                        && enabledPlatforms.contains(environment.getCloudPlatform()));
     }
 
     private Map<String, CloudSubnet> getSubnetMetadata(EnvironmentDto environmentDto) {
@@ -144,6 +142,14 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
         return Optional.ofNullable(environmentDto.getNetwork())
                 .map(NetworkDto::getAws)
                 .map(AwsParams::getVpcId);
+    }
+
+    private void stepToFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) {
+        EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
+                .withResourceId(environmentDto.getResourceId())
+                .withSelector(START_FREEIPA_CREATION_EVENT.selector())
+                .build();
+        eventSender().sendEvent(envCreationEvent, environmentDtoEvent.getHeaders());
     }
 
     @Override

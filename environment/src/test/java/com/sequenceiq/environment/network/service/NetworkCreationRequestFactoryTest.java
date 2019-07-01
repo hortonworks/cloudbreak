@@ -11,8 +11,7 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -41,14 +40,11 @@ public class NetworkCreationRequestFactoryTest {
 
     private static final Set<String> SUBNET_CIDRS = Collections.singleton("10.10.1.1/24");
 
-    @InjectMocks
-    private NetworkCreationRequestFactory underTest;
+    private final SubnetCidrProvider subnetCidrProvider = Mockito.mock(SubnetCidrProvider.class);
 
-    @Mock
-    private SubnetCidrProvider subnetCidrProvider;
+    private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = Mockito.mock(CredentialToCloudCredentialConverter.class);
 
-    @Mock
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+    private final NetworkCreationRequestFactory underTest = new NetworkCreationRequestFactory(subnetCidrProvider, credentialToCloudCredentialConverter);
 
     @Test
     public void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsAreNotPresent() {

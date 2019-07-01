@@ -3,8 +3,6 @@ package com.sequenceiq.environment.network.service;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -18,11 +16,14 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 @Service
 public class NetworkCreationRequestFactory {
 
-    @Inject
-    private SubnetCidrProvider subnetCidrProvider;
+    private final SubnetCidrProvider subnetCidrProvider;
 
-    @Inject
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+    private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+
+    public NetworkCreationRequestFactory(SubnetCidrProvider subnetCidrProvider, CredentialToCloudCredentialConverter credentialToCloudCredentialConverter) {
+        this.subnetCidrProvider = subnetCidrProvider;
+        this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
+    }
 
     public NetworkCreationRequest create(EnvironmentDto environment) {
         NetworkDto networkDto = environment.getNetwork();
