@@ -176,11 +176,15 @@ public class StackDecorator {
     }
 
     private String getAvailabilityZoneFromEnv(DetailedEnvironmentResponse environment) {
-        return environment.getNetwork().getSubnetMetas().entrySet().stream()
-                .findFirst()
-                .map(Map.Entry::getValue)
-                .map(CloudSubnet::getAvailabilityZone)
-                .orElse(null);
+        if (environment.getNetwork() != null && environment.getNetwork().getSubnetMetas() != null) {
+            return environment.getNetwork().getSubnetMetas().entrySet().stream()
+                    .findFirst()
+                    .map(Map.Entry::getValue)
+                    .map(CloudSubnet::getAvailabilityZone)
+                    .orElse(null);
+        } else {
+            return null;
+        }
     }
 
     private Credential prepareCredential(DetailedEnvironmentResponse environment) {

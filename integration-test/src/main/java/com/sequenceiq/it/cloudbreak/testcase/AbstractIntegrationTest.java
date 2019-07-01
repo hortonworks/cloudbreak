@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashSet;
@@ -283,6 +285,13 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe());
+    }
+
+    protected void createImageCatalog(TestContext testContext, String name) {
+        testContext
+                .given(ImageCatalogTestDto.class)
+                .withName(name)
+                .when(imageCatalogTestClient.createV4(), key(name));
     }
 
     protected void createDefaultUser(TestContext testContext) {

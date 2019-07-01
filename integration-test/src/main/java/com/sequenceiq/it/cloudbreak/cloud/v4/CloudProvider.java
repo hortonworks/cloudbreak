@@ -21,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestD
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
@@ -59,6 +60,8 @@ public interface CloudProvider {
     DistroXClusterTestDto cluster(DistroXClusterTestDto cluster);
 
     SdxTestDto sdx(SdxTestDto sdx);
+
+    SdxInternalTestDto sdxInternal(SdxInternalTestDto sdxInternal);
 
     String getSubnetCIDR();
 
