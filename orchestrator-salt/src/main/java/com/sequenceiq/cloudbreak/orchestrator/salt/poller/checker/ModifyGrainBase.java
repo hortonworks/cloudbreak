@@ -19,9 +19,9 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public abstract class ModifyGrainBase extends BaseSaltJobRunner {
 
-    private static final int RETRY_LIMIT = 10;
+    private static final int RETRY_LIMIT = 5;
 
-    private static final int RETRY_BACKOFF_MILLIS = 10_000;
+    private static final int RETRY_BACKOFF_MILLIS = 5_000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyGrainBase.class);
 
@@ -63,6 +63,7 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
         for (retryCounter = 0; retryCounter < RETRY_LIMIT && modificationFailed; retryCounter++) {
             backoff();
             LOGGER.info("Retry #{} for salt modify grain process. {}", retryCounter, this);
+            SaltStates.syncAll(saltConnector);
             response = modifyGrain(saltConnector, target);
             grains = SaltStates.getGrains(saltConnector, target, key);
             modificationFailed = isModificationFailed(grains);

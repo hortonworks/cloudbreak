@@ -102,7 +102,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.new.service.retry:90}")
     private int maxRetry;
 
-    @Value("${cb.max.salt.new.service.leave.retry:5}")
+    @Value("${cb.max.salt.new.service.leave.retry:10}")
     private int maxRetryLeave;
 
     @Value("${cb.max.salt.new.service.retry.onerror:20}")
@@ -717,10 +717,10 @@ public class SaltOrchestrator implements HostOrchestrator {
             throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
             Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "roles", roleToAdd, CompoundType.IP), exitCriteriaModel);
-            runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "roles", roleToRemove, CompoundType.IP), exitCriteriaModel);
+            runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "roles", roleToAdd, CompoundType.IP), exitCriteriaModel, maxRetryLeave);
+            runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "roles", roleToRemove, CompoundType.IP), exitCriteriaModel, maxRetryLeave);
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitCriteriaModel);
+            runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitCriteriaModel, maxRetryLeave);
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryLeave, true);
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for recipes).", e);
@@ -790,6 +790,12 @@ public class SaltOrchestrator implements HostOrchestrator {
     private void runSaltCommand(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws Exception {
         OrchestratorBootstrap saltCommandTracker = new SaltCommandTracker(sc, baseSaltJobRunner);
         Callable<Boolean> saltCommandRunBootstrapRunner = runner(saltCommandTracker, exitCriteria, exitCriteriaModel);
+        saltCommandRunBootstrapRunner.call();
+    }
+
+    private void runSaltCommand(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel, int retry) throws Exception {
+        OrchestratorBootstrap saltCommandTracker = new SaltCommandTracker(sc, baseSaltJobRunner);
+        Callable<Boolean> saltCommandRunBootstrapRunner = runner(saltCommandTracker, exitCriteria, exitCriteriaModel, retry, false);
         saltCommandRunBootstrapRunner.call();
     }
 

@@ -26,6 +26,22 @@ join_ipa:
     - env:
         - PW: {{salt['pillar.get']('sssd-ipa:password')}}
 
+{% if salt['file.directory_exists']('/yarn-private') %}
+dns_remove_script:
+  file.managed:
+    - source: salt://sssd/ycloud/dns_hack.sh
+    - name: /opt/salt//scripts/dns_hack.sh
+    - user: root
+    - group: root
+    - mode: 755
+    - template: jinja
+
+removing_dns_entries:
+  cmd.run:
+    - name: runuser -l root -c '/opt/salt/scripts/dns_hack.sh 2>&1 | tee -a /var/log/dns_hack.log'
+    - unless: test -f /var/log/dns_hack.log
+{% endif%}
+
 add_dns_record:
   cmd.run:
     - name: echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa dnsrecord-add {{salt['pillar.get']('sssd-ipa:domain')}}. $(hostname) --a-rec=$(hostname -i) --a-create-reverse
