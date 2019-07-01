@@ -1,5 +1,7 @@
 server.servlet.context-path: "/freeipa"
 
+server.port: 8090
+
 management:
   endpoints:
     web:
@@ -24,6 +26,7 @@ freeipa:
     rest:
       enabled: false
   db:
+    addr: localhost
     port: 5432
     env:
       user: postgres
