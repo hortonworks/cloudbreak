@@ -21,6 +21,8 @@ import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserService;
 import com.sequenceiq.freeipa.util.CrnService;
 
+import java.util.Set;
+
 @Controller
 public class UserV1Controller implements UserV1Endpoint {
 
@@ -65,8 +67,8 @@ public class UserV1Controller implements UserV1Endpoint {
             String userCrn = checkUserCrn();
             LOGGER.debug("setPassword() requested for user {}", userCrn);
             String accountId = crnService.getCurrentAccountId();
-
-            return passwordService.setPassword(accountId, userCrn, request.getPassword());
+            Set<String> envs = request.getEnvironments();
+            return passwordService.setPassword(accountId, userCrn, request.getPassword(), envs);
         } catch (Exception e) {
             LOGGER.error("setPassword caught exception. rethrowing", e);
             throw e;
