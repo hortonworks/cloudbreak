@@ -11,6 +11,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServicePrincipalRequest;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -22,19 +23,23 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     @Inject
     private CrnService crnService;
 
-    public ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request) {
-        return kerberosMgmtV1Service.generateServiceKeytab(request);
+    public ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request) throws FreeIpaClientException {
+        String accountId = crnService.getCurrentAccountId();
+        return kerberosMgmtV1Service.generateServiceKeytab(request, accountId);
     }
 
-    public ServiceKeytabResponse getServiceKeytab(@Valid ServiceKeytabRequest request) {
-        return kerberosMgmtV1Service.getServiceKeytab(request);
+    public ServiceKeytabResponse getServiceKeytab(@Valid ServiceKeytabRequest request) throws FreeIpaClientException {
+        String accountId = crnService.getCurrentAccountId();
+        return kerberosMgmtV1Service.getExistingServiceKeytab(request, accountId);
     }
 
     public void deleteServicePrincipal(@Valid ServicePrincipalRequest request) {
-        kerberosMgmtV1Service.deleteServicePrincipal(request);
+        String accountId = crnService.getCurrentAccountId();
+        kerberosMgmtV1Service.deleteServicePrincipal(request, accountId);
     }
 
     public void deleteHost(@Valid HostRequest request) {
-        kerberosMgmtV1Service.deleteHost(request);
+        String accountId = crnService.getCurrentAccountId();
+        kerberosMgmtV1Service.deleteHost(request, accountId);
     }
 }

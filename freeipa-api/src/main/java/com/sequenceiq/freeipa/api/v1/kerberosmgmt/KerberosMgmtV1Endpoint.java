@@ -31,14 +31,14 @@ public interface KerberosMgmtV1Endpoint {
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_GENERATE_SERVICE_KEYTAB, produces = ContentType.JSON,
             notes = KeytabModelNotes.GENERATE_KEYTAB_NOTES,
             nickname = "generateServiceKeytabV1")
-    ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request);
+    ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request) throws Exception;
 
     @GET
     @Path("servicekeytab")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_SERVICE_KEYTAB, produces = ContentType.JSON, notes = KeytabModelNotes.GET_KEYTAB_NOTES,
             nickname = "getServiceKeytabV1")
-    ServiceKeytabResponse getServiceKeytab(@Valid ServiceKeytabRequest request);
+    ServiceKeytabResponse getServiceKeytab(@Valid ServiceKeytabRequest request) throws Exception;
 
     @DELETE
     @Path("serviceprincipal")

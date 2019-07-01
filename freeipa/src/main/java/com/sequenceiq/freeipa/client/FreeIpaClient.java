@@ -20,6 +20,7 @@ import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.client.model.DnsZoneList;
 import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.Host;
+import com.sequenceiq.freeipa.client.model.Keytab;
 import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.client.model.Role;
@@ -107,6 +108,12 @@ public class FreeIpaClient {
     public Host deleteHost(String fqdn) throws FreeIpaClientException {
         Map<String, Object> params = Map.of("updatedns", true);
         return (Host) invoke("host_del", List.of(fqdn), params, Host.class).getResult();
+    }
+
+    public RPCResponse<Host> addHost(String fqdn) throws FreeIpaClientException {
+        RPCResponse<Host> response = null;
+        //TODO Implement as part of CDPSDX-584
+        return response;
     }
 
     public User deleteUser(String userUid) throws FreeIpaClientException {
@@ -288,6 +295,12 @@ public class FreeIpaClient {
         return (Service) invoke("service_del", flags, params, Service.class).getResult();
     }
 
+    public RPCResponse<Service> addService(String canonicalPrincipal) throws FreeIpaClientException {
+        RPCResponse<Service> response = null;
+        //TODO Implement as part of CDPSDX-584
+        return response;
+    }
+
     /**
      * Adds new reverse DNS zone for CIDR
      *
@@ -320,6 +333,24 @@ public class FreeIpaClient {
         List<String> flags = List.of(dnsZoneName, recordName);
         Map<String, Object> params = Map.of();
         return invoke("dnsrecord_del", flags, params, Object.class);
+    }
+
+    public RPCResponse<Service> serviceAllowRetrieveKeytab(String canonicalPrincipal, String user) throws FreeIpaClientException {
+        RPCResponse<Service> response = null;
+        //TODO Implement as part of CDPSDX-584
+        return response;
+    }
+
+    public RPCResponse<Keytab> getExistingKeytab(String canonicalPrincipal) throws FreeIpaClientException {
+        RPCResponse<Keytab> response = null;
+        //TODO Implement as part of CDPSDX-584
+        return response;
+    }
+
+    public RPCResponse<Keytab> getKeytab(String canonicalPrincipal) throws FreeIpaClientException {
+        RPCResponse<Keytab> response = null;
+        //TODO Implement as part of CDPSDX-584
+        return response;
     }
 
     public <T> RPCResponse<T> invoke(String method, List<String> flags, Map<String, Object> params, Type resultType) throws FreeIpaClientException {
