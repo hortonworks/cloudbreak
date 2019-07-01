@@ -18,6 +18,7 @@
 {% set s3_log_bucket = salt['pillar.get']('fluent:s3LogArchiveBucketName') %}
 {% set s3_log_folder = salt['pillar.get']('fluent:s3LogFolderName') %}
 {% set partition_interval = salt['pillar.get']('fluent:partitionIntervalMin') %}
+{% set cloudera_public_gem_repo = 'https://repository.cloudera.com/cloudera/api/gems/cloudera-gems/' %}
 
 {% do fluent.update({
     "is_systemd" : is_systemd,
@@ -30,5 +31,6 @@
     "providerPrefix": provider_prefix,
     "partitionIntervalMin": partition_interval,
     "s3LogArchiveBucketName" : s3_log_bucket,
-    "s3LogFolderName": s3_log_folder
+    "s3LogFolderName": s3_log_folder,
+    "clouderaPublicGemRepo": cloudera_public_gem_repo
 }) %}
