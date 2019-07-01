@@ -210,11 +210,11 @@
     {%- endif %}
     {%- endif %}
 
-    {% if 'CM-UI' in salt['pillar.get']('gateway:location') -%}
+    {% if 'CM-API' in salt['pillar.get']('gateway:location') -%}
     {% if 'CM-UI' in exposed -%}
     <service>
         <role>CM-UI</role>
-        {% for hostloc in salt['pillar.get']('gateway:location')['CM-UI'] -%}
+        {% for hostloc in salt['pillar.get']('gateway:location')['CM-API'] -%}
         <url>http://{{ hostloc }}:{{ ports['CM-UI'] }}</url>
         {%- endfor %}
     </service>
