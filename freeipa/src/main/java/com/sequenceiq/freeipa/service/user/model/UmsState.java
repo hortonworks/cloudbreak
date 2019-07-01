@@ -71,14 +71,13 @@ public class UmsState {
 
     public Set<String> getUsernamesFromCrns(Set<String> userCrns) {
         return userCrns.stream()
-                .map(crn -> getUsernameFromEmail(userMap.get(crn)))
+                .map(crn -> getWorkloadUsername(userMap.get(crn)))
                 .collect(Collectors.toSet());
     }
 
     private com.sequenceiq.freeipa.api.v1.freeipa.user.model.User umsUserToUser(User umsUser) {
         com.sequenceiq.freeipa.api.v1.freeipa.user.model.User user = new com.sequenceiq.freeipa.api.v1.freeipa.user.model.User();
-        // TODO Use workloadUsername once the UMS proto is updated in DISTX-184
-        user.setName(getUsernameFromEmail(umsUser));
+        user.setName(getWorkloadUsername(umsUser));
         user.setFirstName(getOrDefault(umsUser.getFirstName(), "None"));
         user.setLastName(getOrDefault(umsUser.getLastName(), "None"));
         return user;
@@ -88,15 +87,13 @@ public class UmsState {
         return (value == null || value.isBlank()) ? other : value;
     }
 
-    private String getUsernameFromEmail(User umsUser) {
-        // TODO replace this code with workloadUsername in DISTX-184
-        return umsUser.getEmail().split("@")[0];
+    private String getWorkloadUsername(User umsUser) {
+        return umsUser.getWorkloadUsername();
     }
 
     private com.sequenceiq.freeipa.api.v1.freeipa.user.model.User umsMachineUserToUser(MachineUser umsMachineUser) {
         com.sequenceiq.freeipa.api.v1.freeipa.user.model.User user = new com.sequenceiq.freeipa.api.v1.freeipa.user.model.User();
-        // TODO Use workloadUsername once the UMS proto is updated in DISTX-184
-        user.setName(umsMachineUser.getMachineUserName());
+        user.setName(umsMachineUser.getWorkloadUsername());
         // TODO what should the appropriate first and last name be for machine users?
         user.setFirstName("Machine");
         user.setLastName("User");
