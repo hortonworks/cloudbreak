@@ -68,7 +68,7 @@ public class EnvironmentApiConverter {
                 .withCloudPlatform(request.getCloudPlatform())
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
-                .withCreateFreeIpa(request.getCreateFreeIpa() == null ? true : request.getCreateFreeIpa())
+                .withCreateFreeIpa(request.getFreeIpa() == null ? true : request.getFreeIpa().getCreate())
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry()))
                 .withRegions(request.getRegions())
