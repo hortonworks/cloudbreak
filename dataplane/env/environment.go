@@ -41,11 +41,13 @@ type environmentOutJsonDescribe struct {
 	*environment
 	ProxyConfigs []string                           `json:"ProxyConfigs" yaml:"ProxyConfigs"`
 	Network      model.EnvironmentNetworkV1Response `json:"Network" yaml:"Network"`
+	Telemetry    model.TelemetryV1Response          `json:"Telemetry" yaml:"Telemetry"`
 }
 
 type environmentListJsonDescribe struct {
 	*environment
-	Network model.EnvironmentNetworkV1Response `json:"Network" yaml:"Network"`
+	Network   model.EnvironmentNetworkV1Response `json:"Network" yaml:"Network"`
+	Telemetry model.TelemetryV1Response          `json:"Telemetry" yaml:"Telemetry"`
 }
 
 type environmentClient interface {
@@ -240,18 +242,24 @@ func listEnvironmentsImpl(envClient environmentClient, output utils.Output) erro
 			Crn:           e.Crn,
 		}
 
-		if output.Format != "table" && output.Format != "yaml" && e.Network != nil {
-			tableRows = append(tableRows, &environmentListJsonDescribe{
+		if output.Format != "table" && output.Format != "yaml" {
+			envListJSON := environmentListJsonDescribe{
 				environment: row,
-				Network:     *e.Network,
-			})
+			}
+			if e.Network != nil {
+				envListJSON.Network = *e.Network
+			}
+			if e.Telemetry != nil {
+				envListJSON.Telemetry = *e.Telemetry
+			}
+			tableRows = append(tableRows, &envListJSON)
 		} else {
 			tableRows = append(tableRows, row)
 		}
 	}
 
 	if output.Format != "table" && output.Format != "yaml" {
-		output.WriteList(append(EnvironmentHeader, "Network"), tableRows)
+		output.WriteList(append(EnvironmentHeader, "Network", "Telemetry"), tableRows)
 	} else {
 		output.WriteList(EnvironmentHeader, tableRows)
 	}
@@ -272,7 +280,7 @@ func DescribeEnvironment(c *cli.Context) {
 	}
 	env := resp.Payload
 	if output.Format != "table" && output.Format != "yaml" {
-		output.Write(append(EnvironmentHeader, "Network"), convertResponseToJsonOutput(env))
+		output.Write(append(EnvironmentHeader, "Network", "Telemetry"), convertResponseToJsonOutput(env))
 	} else {
 		output.Write(append(EnvironmentHeader), convertResponseToTableOutput(env))
 	}
@@ -370,6 +378,9 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentV1Response) *envi
 	}
 	if env.Network != nil {
 		result.Network = *env.Network
+	}
+	if env.Telemetry != nil {
+		result.Telemetry = *env.Telemetry
 	}
 	return result
 }
