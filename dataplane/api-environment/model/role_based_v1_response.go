@@ -21,9 +21,6 @@ type RoleBasedV1Response struct {
 	// code grant flow
 	CodeGrantFlow bool `json:"codeGrantFlow,omitempty"`
 
-	// role name
-	RoleName string `json:"roleName,omitempty"`
-
 	// sp display name
 	SpDisplayName string `json:"spDisplayName,omitempty"`
 }

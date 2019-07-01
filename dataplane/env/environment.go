@@ -3,9 +3,10 @@ package env
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hortonworks/cb-cli/dataplane/cloud"
 	"strings"
 	"time"
+
+	"github.com/hortonworks/cb-cli/dataplane/cloud"
 
 	"github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"

@@ -34,6 +34,9 @@ type EnvironmentEditV1Request struct {
 	// Regions of the environment.
 	// Unique: true
 	Regions []string `json:"regions"`
+
+	// Telemetry related specifics of the environment.
+	Telemetry *TelemetryV1Request `json:"telemetry,omitempty"`
 }
 
 // Validate validates this environment edit v1 request
@@ -57,6 +60,10 @@ func (m *EnvironmentEditV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRegions(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateTelemetry(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -145,6 +152,24 @@ func (m *EnvironmentEditV1Request) validateRegions(formats strfmt.Registry) erro
 
 	if err := validate.UniqueItems("regions", "body", m.Regions); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentEditV1Request) validateTelemetry(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Telemetry) { // not required
+		return nil
+	}
+
+	if m.Telemetry != nil {
+		if err := m.Telemetry.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("telemetry")
+			}
+			return err
+		}
 	}
 
 	return nil

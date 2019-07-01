@@ -26,6 +26,9 @@ type CloudSubnet struct {
 
 	// name
 	Name string `json:"name,omitempty"`
+
+	// private subnet
+	PrivateSubnet bool `json:"privateSubnet,omitempty"`
 }
 
 // Validate validates this cloud subnet

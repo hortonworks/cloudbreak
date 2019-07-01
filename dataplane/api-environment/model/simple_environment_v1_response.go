@@ -61,6 +61,9 @@ type SimpleEnvironmentV1Response struct {
 
 	// status reason
 	StatusReason string `json:"statusReason,omitempty"`
+
+	// Telemetry related specifics of the environment.
+	Telemetry *TelemetryV1Response `json:"telemetry,omitempty"`
 }
 
 // Validate validates this simple environment v1 response
@@ -88,6 +91,10 @@ func (m *SimpleEnvironmentV1Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRegions(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateTelemetry(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -255,6 +262,24 @@ func (m *SimpleEnvironmentV1Response) validateRegions(formats strfmt.Registry) e
 		if err := m.Regions.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("regions")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *SimpleEnvironmentV1Response) validateTelemetry(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Telemetry) { // not required
+		return nil
+	}
+
+	if m.Telemetry != nil {
+		if err := m.Telemetry.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("telemetry")
 			}
 			return err
 		}
