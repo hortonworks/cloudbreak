@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -40,7 +41,7 @@ public class PasswordService {
     @Inject
     private GrpcUmsClient umsClient;
 
-    public SetPasswordResponse setPassword(String accountId, String userCrn, String password) {
+    public SetPasswordResponse setPassword(String accountId, String userCrn, String password, Set<String> envs) {
         String userId = getUserIdFromUserCrn(userCrn);
 
         LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
@@ -51,9 +52,23 @@ public class PasswordService {
             throw new IllegalArgumentException("No stacks found for accountId " + accountId);
         }
 
+        // Filter based on provided envs
+        boolean filterForEnvs = false;
+        if (envs != null && envs.size() > 0) {
+            filterForEnvs = true;
+        }
+
         List<SetPasswordRequest> requests = new ArrayList<>();
         for (Stack stack : stacks) {
-            requests.add(triggerSetPassword(stack, stack.getEnvironmentCrn(), userId, password));
+
+            if (filterForEnvs) {
+                if (envs.contains(stack.getEnvironmentCrn())) {
+                    LOGGER.debug("Env list provided, setting password for env :{}", stack.getEnvironmentCrn());
+                    requests.add(triggerSetPassword(stack, stack.getEnvironmentCrn(), userId, password));
+                }
+            } else {
+                requests.add(triggerSetPassword(stack, stack.getEnvironmentCrn(), userId, password));
+            }
         }
 
         List<String> success = new ArrayList<>();

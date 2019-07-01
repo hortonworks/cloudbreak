@@ -20,6 +20,8 @@ import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserService;
 import com.sequenceiq.freeipa.util.CrnService;
 
+import java.util.HashSet;
+
 @ExtendWith(MockitoExtension.class)
 public class UserV1ControllerTest {
 
@@ -86,7 +88,7 @@ public class UserV1ControllerTest {
 
         underTest.setPassword(request);
 
-        verify(passwordService, times(1)).setPassword(ACCOUNT_ID, USER_CRN, password);
+        verify(passwordService, times(1)).setPassword(ACCOUNT_ID, USER_CRN, password, new HashSet<>());
     }
 
     @Test
