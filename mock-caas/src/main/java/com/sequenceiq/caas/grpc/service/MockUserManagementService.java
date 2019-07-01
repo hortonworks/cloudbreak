@@ -138,9 +138,16 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     private User createUser(String accountId, String userName) {
+        Crn actorCrn = Crn.safeFromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn());
+        String userCrn = Crn.builder()
+                .setService(actorCrn.getService())
+                .setAccountId(actorCrn.getAccountId())
+                .setResourceType(actorCrn.getResourceType())
+                .setResource(userName)
+                .build().toString();
         return User.newBuilder()
                 .setUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
-                .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
+                .setCrn(userCrn)
                 .setEmail(userName + "@ums.mock")
                 .build();
     }
