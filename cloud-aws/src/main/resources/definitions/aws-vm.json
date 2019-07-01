@@ -353,6 +353,47 @@
             "maximumNumber": 24
           }, 
           {
+            "minimumSize": 7500, 
+            "minimumNumber": 8, 
+            "volumeParameterType": "EPHEMERAL", 
+            "maximumSize": 7500, 
+            "maximumNumber": 8
+          }
+        ], 
+        "properties": {
+          "Price": "12.0000000000", 
+          "encryption_supported": false, 
+          "Cpu": "96", 
+          "Memory": 768.0
+        }
+      }, 
+      "value": "i3en.24xlarge"
+    }, 
+    {
+      "meta": {
+        "configs": [
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "MAGNETIC", 
+            "maximumSize": 1024, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "SSD", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 500, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "ST1", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
             "minimumSize": 420, 
             "minimumNumber": 1, 
             "volumeParameterType": "EPHEMERAL", 
@@ -655,6 +696,47 @@
         }
       }, 
       "value": "m5a.large"
+    }, 
+    {
+      "meta": {
+        "configs": [
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "MAGNETIC", 
+            "maximumSize": 1024, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "SSD", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 500, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "ST1", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 1250, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "EPHEMERAL", 
+            "maximumSize": 1250, 
+            "maximumNumber": 1
+          }
+        ], 
+        "properties": {
+          "Price": "0.2500000000", 
+          "encryption_supported": false, 
+          "Cpu": "2", 
+          "Memory": 16.0
+        }
+      }, 
+      "value": "i3en.large"
     }, 
     {
       "meta": {
@@ -1018,7 +1100,7 @@
         ], 
         "properties": {
           "Price": "0.2260000000", 
-          "encryption_supported": true, 
+          "encryption_supported": false, 
           "Cpu": "2", 
           "Memory": 16.0
         }
@@ -1106,6 +1188,47 @@
         }
       }, 
       "value": "m4.10xlarge"
+    }, 
+    {
+      "meta": {
+        "configs": [
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "MAGNETIC", 
+            "maximumSize": 1024, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "SSD", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 500, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "ST1", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 7500, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "EPHEMERAL", 
+            "maximumSize": 7500, 
+            "maximumNumber": 1
+          }
+        ], 
+        "properties": {
+          "Price": "1.5000000000", 
+          "encryption_supported": false, 
+          "Cpu": "12", 
+          "Memory": 96.0
+        }
+      }, 
+      "value": "i3en.3xlarge"
     }, 
     {
       "meta": {
@@ -2289,7 +2412,7 @@
         ], 
         "properties": {
           "Price": "5.4240000000", 
-          "encryption_supported": true, 
+          "encryption_supported": false, 
           "Cpu": "48", 
           "Memory": 384.0
         }
@@ -4371,6 +4494,47 @@
             "maximumNumber": 24
           }, 
           {
+            "minimumSize": 2500, 
+            "minimumNumber": 2, 
+            "volumeParameterType": "EPHEMERAL", 
+            "maximumSize": 2500, 
+            "maximumNumber": 2
+          }
+        ], 
+        "properties": {
+          "Price": "1.0000000000", 
+          "encryption_supported": false, 
+          "Cpu": "8", 
+          "Memory": 64.0
+        }
+      }, 
+      "value": "i3en.2xlarge"
+    }, 
+    {
+      "meta": {
+        "configs": [
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "MAGNETIC", 
+            "maximumSize": 1024, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "SSD", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 500, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "ST1", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
             "minimumSize": 300, 
             "minimumNumber": 2, 
             "volumeParameterType": "EPHEMERAL", 
@@ -5806,6 +5970,47 @@
             "maximumNumber": 24
           }, 
           {
+            "minimumSize": 7500, 
+            "minimumNumber": 2, 
+            "volumeParameterType": "EPHEMERAL", 
+            "maximumSize": 7500, 
+            "maximumNumber": 2
+          }
+        ], 
+        "properties": {
+          "Price": "3.0000000000", 
+          "encryption_supported": false, 
+          "Cpu": "24", 
+          "Memory": 192.0
+        }
+      }, 
+      "value": "i3en.6xlarge"
+    }, 
+    {
+      "meta": {
+        "configs": [
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "MAGNETIC", 
+            "maximumSize": 1024, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "SSD", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 500, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "ST1", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
             "minimumSize": 0, 
             "minimumNumber": 0, 
             "volumeParameterType": "EPHEMERAL", 
@@ -6430,7 +6635,7 @@
         ], 
         "properties": {
           "Price": "10.8480000000", 
-          "encryption_supported": true, 
+          "encryption_supported": false, 
           "Cpu": "96", 
           "Memory": 768.0
         }
@@ -9660,6 +9865,47 @@
             "maximumNumber": 24
           }, 
           {
+            "minimumSize": 7500, 
+            "minimumNumber": 4, 
+            "volumeParameterType": "EPHEMERAL", 
+            "maximumSize": 7500, 
+            "maximumNumber": 4
+          }
+        ], 
+        "properties": {
+          "Price": "6.0000000000", 
+          "encryption_supported": false, 
+          "Cpu": "48", 
+          "Memory": 384.0
+        }
+      }, 
+      "value": "i3en.12xlarge"
+    },
+    {
+      "meta": {
+        "configs": [
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "MAGNETIC", 
+            "maximumSize": 1024, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "SSD", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 500, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "ST1", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
             "minimumSize": 410, 
             "minimumNumber": 1, 
             "volumeParameterType": "EPHEMERAL", 
@@ -9710,7 +9956,7 @@
         ], 
         "properties": {
           "Price": "0.9040000000", 
-          "encryption_supported": true, 
+          "encryption_supported": false, 
           "Cpu": "8", 
           "Memory": 64.0
         }
@@ -11341,6 +11587,47 @@
             "maximumNumber": 24
           }, 
           {
+            "minimumSize": 2500, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "EPHEMERAL", 
+            "maximumSize": 2500, 
+            "maximumNumber": 1
+          }
+        ], 
+        "properties": {
+          "Price": "0.5000000000", 
+          "encryption_supported": false, 
+          "Cpu": "4", 
+          "Memory": 32.0
+        }
+      }, 
+      "value": "i3en.xlarge"
+    }, 
+    {
+      "meta": {
+        "configs": [
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "MAGNETIC", 
+            "maximumSize": 1024, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "SSD", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 500, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "ST1", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
             "minimumSize": 0, 
             "minimumNumber": 0, 
             "volumeParameterType": "EPHEMERAL", 
@@ -12121,6 +12408,47 @@
           }, 
           {
             "minimumSize": 7500, 
+            "minimumNumber": 8, 
+            "volumeParameterType": "EPHEMERAL", 
+            "maximumSize": 7500, 
+            "maximumNumber": 8
+          }
+        ], 
+        "properties": {
+          "Price": "10.8480000000", 
+          "encryption_supported": false, 
+          "Cpu": "96", 
+          "Memory": 768.0
+        }
+      }, 
+      "value": "i3en.metal"
+    }, 
+    {
+      "meta": {
+        "configs": [
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "MAGNETIC", 
+            "maximumSize": 1024, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "SSD", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 500, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "ST1", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 7500, 
             "minimumNumber": 1, 
             "volumeParameterType": "EPHEMERAL", 
             "maximumSize": 7500, 
@@ -12129,7 +12457,7 @@
         ], 
         "properties": {
           "Price": "1.3560000000", 
-          "encryption_supported": true, 
+          "encryption_supported": false, 
           "Cpu": "12", 
           "Memory": 96.0
         }
@@ -12407,6 +12735,47 @@
             "maximumNumber": 24
           }, 
           {
+            "minimumSize": 7500, 
+            "minimumNumber": 8, 
+            "volumeParameterType": "EPHEMERAL", 
+            "maximumSize": 7500, 
+            "maximumNumber": 8
+          }
+        ], 
+        "properties": {
+          "Price": "12.0000000000", 
+          "encryption_supported": false, 
+          "Cpu": "96", 
+          "Memory": 768.0
+        }
+      }, 
+      "value": "i3en.metal"
+    }, 
+    {
+      "meta": {
+        "configs": [
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "MAGNETIC", 
+            "maximumSize": 1024, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 1, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "SSD", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
+            "minimumSize": 500, 
+            "minimumNumber": 1, 
+            "volumeParameterType": "ST1", 
+            "maximumSize": 17592, 
+            "maximumNumber": 24
+          }, 
+          {
             "minimumSize": 32, 
             "minimumNumber": 1, 
             "volumeParameterType": "EPHEMERAL", 
@@ -12539,7 +12908,7 @@
         ], 
         "properties": {
           "Price": "0.4520000000", 
-          "encryption_supported": true, 
+          "encryption_supported": false, 
           "Cpu": "4", 
           "Memory": 32.0
         }
@@ -12703,7 +13072,7 @@
         ], 
         "properties": {
           "Price": "2.7120000000", 
-          "encryption_supported": true, 
+          "encryption_supported": false, 
           "Cpu": "24", 
           "Memory": 192.0
         }
