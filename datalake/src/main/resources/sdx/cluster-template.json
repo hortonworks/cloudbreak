@@ -1,6 +1,17 @@
 {
   "cluster": {
-    "validateBlueprint": false
+    "validateBlueprint": false,
+    "gateway": {
+      "topologies": [
+        {
+          "topologyName": "dp-proxy",
+          "exposedServices": [
+            "ALL"
+          ]
+        }
+      ],
+      "ssoType": "SSO_PROVIDER"
+    }
   },
   "customDomain": {
     "domainName": "sdx",
@@ -63,6 +74,13 @@
             "subnet": "0.0.0.0/0",
             "ports": [
               "9443"
+            ],
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "8443"
             ],
             "protocol": "tcp"
           },
