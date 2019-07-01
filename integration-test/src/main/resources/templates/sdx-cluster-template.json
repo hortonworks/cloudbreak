@@ -1,0 +1,94 @@
+{
+  "cluster": {
+    "userName": "admin",
+    "password": "Admin123",
+    "databases": [],
+    "cm": {},
+    "executorType": "DEFAULT",
+    "blueprintName": "CDP 1.0 - SDX: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+    "validateBlueprint": false
+  },
+  "network": {
+    "subnetCIDR": "10.0.0.0/16",
+    "mock": {
+      "vpcId": "vpc-e623b28d",
+      "internetGatewayId": "igw-b55b26dd",
+      "subnetId": "subnet-83901cfe"
+    }
+  },
+  "authentication": {
+    "publicKeyId": "publicKeyId"
+  },
+  "customDomain": {
+    "domainName": "sdx",
+    "hostgroupNameAsHostname": true
+  },
+  "instanceGroups": [
+    {
+      "name": "idbroker",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 100,
+            "type": "magnetic"
+          }
+        ],
+        "rootVolume": {
+          "size": 50
+        }
+      },
+      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [],
+      "securityGroup": {
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "22"
+            ],
+            "protocol": "tcp"
+          }
+        ]
+      }
+    },
+    {
+      "name": "master",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 100,
+            "type": "magnetic"
+          }
+        ],
+        "rootVolume": {
+          "size": 50
+        }
+      },
+      "nodeCount": 1,
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [],
+      "securityGroup": {
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "22",
+              "443",
+              "8443",
+              "9443",
+              "8080"
+            ],
+            "protocol": "tcp"
+          }
+        ]
+      }
+    }
+  ]
+}

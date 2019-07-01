@@ -32,6 +32,7 @@ services:
       - INTEGRATIONTEST_CLOUDBREAK_SERVER=http://cloudbreak:8080
       - INTEGRATIONTEST_FREEIPA_SERVER=http://freeipa:8080
       - INTEGRATIONTEST_ENVIRONMENT_SERVER=http://environment:8088
+      - INTEGRATIONTEST_SDX_SERVER=http://datalake:8080
       - CLOUDBREAK_URL=cloudbreak:8080
       - SPRING_CONFIG_LOCATION=classpath:/application.yml,/it/it-application.yml
       - INTEGRATIONTEST_SUITEFILES

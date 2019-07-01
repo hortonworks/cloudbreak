@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.mock;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -203,7 +204,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
-        return network.withSubnetCIDR(getSubnetCIDR());
+        return network.withSubnetCIDR(getSubnetCIDR())
+                .withMock(networkParameters());
     }
 
     @Override
@@ -237,7 +239,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
-        return environmentNetwork.withNetworkCIDR(getSubnetCIDR());
+        return environmentNetwork.withNetworkCIDR(getSubnetCIDR())
+                .withSubnetIDs(getSubnetIDs());
     }
 
     @Override
@@ -249,5 +252,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public String getBlueprintName() {
         return DEFAULT_CLUSTER_DEFINTION_NAME;
+    }
+
+    public Set<String> getSubnetIDs() {
+        Set<String> subnetIDAsSet = new HashSet<String>();
+        subnetIDAsSet.add(getSubnetId());
+        return subnetIDAsSet;
     }
 }
