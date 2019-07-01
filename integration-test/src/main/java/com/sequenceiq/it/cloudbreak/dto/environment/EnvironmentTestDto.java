@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
@@ -76,7 +77,9 @@ public class EnvironmentTestDto
     }
 
     private EnvironmentTestDto withCreateFreeIpa(Boolean create) {
-        getRequest().setCreateFreeIpa(create);
+        AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
+        attachedFreeIpaRequest.setCreate(create);
+        getRequest().setFreeIpa(attachedFreeIpaRequest);
         return this;
     }
 
