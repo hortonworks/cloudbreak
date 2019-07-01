@@ -214,6 +214,17 @@
             "base": true
           }
         ]
+      },
+      {
+        "serviceType": "KNOX",
+        "refName": "knox",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY"
+          }
+        ]
       }
     ],
     "hostTemplates": [
@@ -237,7 +248,8 @@
           "oozie-OOZIE_SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
-          "zookeeper-SERVER-BASE"
+          "zookeeper-SERVER-BASE",
+          "knox-KNOX_GATEWAY-BASE"
         ]
       },
       {

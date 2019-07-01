@@ -227,6 +227,17 @@
             "base": true
           }
         ]
+      },
+      {
+        "serviceType": "KNOX",
+        "refName": "knox",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY"
+          }
+        ]
       }
     ],
     "hostTemplates": [
@@ -243,7 +254,8 @@
           "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "tez-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
-          "zeppelin-ZEPPELIN_SERVER-BASE"
+          "zeppelin-ZEPPELIN_SERVER-BASE",
+          "knox-KNOX_GATEWAY-BASE"
         ]
       },
       {
