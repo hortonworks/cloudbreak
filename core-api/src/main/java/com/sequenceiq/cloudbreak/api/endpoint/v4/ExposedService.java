@@ -96,7 +96,8 @@ public enum ExposedService {
         Collection<ExposedService> supportedKnoxServices = filterSupportedKnoxServices();
         return supportedKnoxServices.stream()
                 .filter(exposedService ->
-                        components.contains(exposedService.cmServiceName))
+                        components.contains(exposedService.cmServiceName)
+                                || "CM-UI".equals(exposedService.cmServiceName))
                 .collect(Collectors.toList());
     }
 
