@@ -17,12 +17,12 @@ public class CloudbreakFlowLogComponent implements ServiceFlowLogComponent {
     private CloudbreakFlowLogRepository cloudbreakFlowLogRepository;
 
     @Override
-    public int purgeTerminatedStackLogs() {
+    public int purgeTerminatedResourceLogs() {
         return cloudbreakFlowLogRepository.purgeTerminatedStackLogs();
     }
 
     @Override
-    public Set<Long> findTerminatingStacksByCloudbreakNodeId(String cloudbreakNodeId) {
-        return cloudbreakFlowLogRepository.findTerminatingStacksByCloudbreakNodeId(cloudbreakNodeId);
+    public Set<Long> findTerminatingResourcesByNodeId(String nodeId) {
+        return cloudbreakFlowLogRepository.findTerminatingStacksByCloudbreakNodeId(nodeId);
     }
 }

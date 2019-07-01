@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -10,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 
 @Transactional(TxType.REQUIRED)
@@ -29,4 +32,8 @@ public interface EnvironmentRepository extends JpaRepository<Environment, Long> 
 
     @Query("SELECT COUNT(e)>0 FROM Environment e WHERE e.name = :name AND e.accountId = :accountId")
     boolean existsWithNameInAccount(@Param("name") String name, @Param("accountId") String accountId);
+
+    List<Environment> findAllByIdInAndStatusIn(Collection<Long> ids, Collection<EnvironmentStatus> statuses);
+
+    List<Environment> findAllByStatusIn(Collection<EnvironmentStatus> environmentStatuses);
 }

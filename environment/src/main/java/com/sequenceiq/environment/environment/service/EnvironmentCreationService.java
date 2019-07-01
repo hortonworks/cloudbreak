@@ -16,7 +16,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
-import com.sequenceiq.environment.environment.flow.ReactorFlowManager;
+import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 
@@ -31,7 +31,7 @@ public class EnvironmentCreationService {
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    private final ReactorFlowManager reactorFlowManager;
+    private final EnvironmentReactorFlowManager reactorFlowManager;
 
     private final AuthenticationDtoConverter authenticationDtoConverter;
 
@@ -40,7 +40,7 @@ public class EnvironmentCreationService {
             EnvironmentValidatorService validatorService,
             EnvironmentResourceService environmentResourceService,
             EnvironmentDtoConverter environmentDtoConverter,
-            ReactorFlowManager reactorFlowManager,
+            EnvironmentReactorFlowManager reactorFlowManager,
             AuthenticationDtoConverter authenticationDtoConverter) {
         this.environmentService = environmentService;
         this.validatorService = validatorService;
@@ -63,7 +63,7 @@ public class EnvironmentCreationService {
             environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), accountId);
             environmentService.save(environment);
         }
-        reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), accountId, creator);
+        reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creator);
         return environmentDtoConverter.environmentToDto(environment);
     }
 

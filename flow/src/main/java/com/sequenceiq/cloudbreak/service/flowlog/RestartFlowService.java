@@ -51,10 +51,10 @@ public class RestartFlowService {
         return stackIdsUnderOperation;
     }
 
-    public void purgeTerminatedStacksFlowLogs() throws TransactionService.TransactionExecutionException {
+    public void purgeTerminatedResourceFlowLogs() throws TransactionService.TransactionExecutionException {
         transactionService.required(() -> {
             LOGGER.debug("Cleaning deleted stack's flowlog");
-            int purgedTerminatedStackLogs = serviceFlowLogComponent.purgeTerminatedStackLogs();
+            int purgedTerminatedStackLogs = serviceFlowLogComponent.purgeTerminatedResourceLogs();
             LOGGER.debug("Deleted flowlog count: {}", purgedTerminatedStackLogs);
             LOGGER.debug("Cleaning orphan flowchainlogs");
             int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFLowChainLogs();
@@ -64,7 +64,7 @@ public class RestartFlowService {
     }
 
     public Set<Long> findTerminatingStacksByCloudbreakNodeId(String id) {
-        return serviceFlowLogComponent.findTerminatingStacksByCloudbreakNodeId(id);
+        return serviceFlowLogComponent.findTerminatingResourcesByNodeId(id);
     }
 
     /**
