@@ -49,6 +49,8 @@ public class UmsState {
                 .forEach(e -> {
                     com.sequenceiq.freeipa.api.v1.freeipa.user.model.User user = umsUserToUser(e.getValue());
                     builder.addUser(user);
+                    // TODO remove `admins` membership once the group mapping is figured out (CB-2003, DISTX-95)
+                    builder.addMemberToGroup("admins", user.getName());
                     userRightsMap.get(e.getKey()).getGroupCrnList()
                             .forEach(crn -> builder.addMemberToGroup(crnToGroup.get(crn).getName(), user.getName()));
                 });
