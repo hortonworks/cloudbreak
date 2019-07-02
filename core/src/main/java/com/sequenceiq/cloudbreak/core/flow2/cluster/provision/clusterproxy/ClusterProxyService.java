@@ -39,6 +39,9 @@ public class ClusterProxyService {
     @Value("${clusterProxy.registerConfigPath:}")
     private String registerConfigPath;
 
+    @Value("${clusterProxy.updateConfigPath:}")
+    private String updateConfigPath;
+
     @Autowired
     ClusterProxyService(StackService stackService, RestTemplate restTemplate) {
         this.stackService = stackService;
@@ -56,7 +59,29 @@ public class ClusterProxyService {
         return response.getBody();
     }
 
+    public void registerGatewayConfiguration(Long stackId) throws JsonProcessingException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        if (!stack.getCluster().hasGateway()) {
+            LOGGER.info("Cluster {} in environment {} not configured with Gateway (Knox). Not updating Cluster Proxy with Gateway url.",
+                    stack.getCluster().getName(), stack.getEnvironmentCrn());
+            return;
+        }
+        ConfigUpdateRequest request = createProxyConfigUpdateRequest(stack);
+        LOGGER.debug("Cluster Proxy config update request: {}", request);
+        ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(clusterProxyUrl + updateConfigPath,
+                requestEntity(request), ConfigRegistrationResponse.class);
+
+        LOGGER.debug("Cluster Proxy config update response: {}", response);
+
+    }
+
     private HttpEntity<String> requestEntity(ConfigRegistrationRequest proxyConfigRequest) throws JsonProcessingException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(JsonUtil.writeValueAsString(proxyConfigRequest), headers);
+    }
+
+    private HttpEntity<String> requestEntity(ConfigUpdateRequest proxyConfigRequest) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(JsonUtil.writeValueAsString(proxyConfigRequest), headers);
@@ -74,7 +99,18 @@ public class ClusterProxyService {
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
                 new ClusterServiceCredential(dpUser, dpPasswordVaultPath));
         ClusterServiceConfig serviceConfig = new ClusterServiceConfig("cloudera-manager", singletonList(clusterManagerUrl(stack)), credentials);
-        return new ConfigRegistrationRequest(stack.getCluster().getId().toString(), singletonList(serviceConfig));
+        return new ConfigRegistrationRequest(clusterCrn(stack.getCluster()), singletonList(serviceConfig));
+    }
+
+    private ConfigUpdateRequest createProxyConfigUpdateRequest(Stack stack) {
+        String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
+        Cluster cluster = stack.getCluster();
+        String knoxUrl = String.format("https://%s:8443/%s", gatewayIp, cluster.getGateway().getPath());
+        return new ConfigUpdateRequest(clusterCrn(cluster), knoxUrl);
+    }
+
+    private String clusterCrn(Cluster cluster) {
+        return cluster.getId().toString();
     }
 
     private String clusterManagerUrl(Stack stack) {

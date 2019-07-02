@@ -25,6 +25,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationRequ
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyGatewayRegistrationRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyGatewayRegistrationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
@@ -186,9 +188,9 @@ public class ClusterCreationActions {
 
     @Bean(name = "CLUSTER_CREATION_FINISHED_STATE")
     public Action<?, ?> clusterCreationFinishedAction() {
-        return new AbstractClusterAction<>(InstallClusterSuccess.class) {
+        return new AbstractClusterAction<>(ClusterProxyGatewayRegistrationSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, InstallClusterSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterViewContext context, ClusterProxyGatewayRegistrationSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.clusterInstallationFinished(context.getStack());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
@@ -214,6 +216,22 @@ public class ClusterCreationActions {
             @Override
             protected Selectable createRequest(StackFailureContext context) {
                 return new StackEvent(ClusterCreationEvent.CLUSTER_CREATION_FAILURE_HANDLED_EVENT.event(), context.getStackView().getId());
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE")
+    public Action<?, ?> clusterProxyGatewayRegistrationAction() {
+        return new AbstractStackCreationAction<>(InstallClusterSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, InstallClusterSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.registeringGatewayToClusterProxy(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new ClusterProxyGatewayRegistrationRequest(context.getStack().getId());
             }
         };
     }

@@ -59,6 +59,11 @@ public class ClusterCreationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CLUSTER_PROXY, UPDATE_IN_PROGRESS.name());
     }
 
+    public void registeringGatewayToClusterProxy(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REGISTERING_GATEWAY_TO_CLUSTER_PROXY);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CLUSTER_PROXY_GATEWAY_REGISTRATION, UPDATE_IN_PROGRESS.name());
+    }
+
     public void collectingHostMetadata(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.COLLECTING_HOST_METADATA);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());

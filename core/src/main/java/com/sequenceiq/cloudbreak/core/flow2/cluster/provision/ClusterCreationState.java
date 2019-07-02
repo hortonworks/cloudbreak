@@ -17,6 +17,7 @@ public enum ClusterCreationState implements FlowState {
     CONFIGURE_LDAP_SSO_STATE,
     INSTALLING_CLUSTER_STATE,
     CLUSTER_CREATION_FINISHED_STATE,
+    CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE,
     FINAL_STATE;
 
     private final Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;

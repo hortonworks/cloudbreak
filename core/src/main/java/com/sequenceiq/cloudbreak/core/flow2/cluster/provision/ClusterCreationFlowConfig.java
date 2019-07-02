@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_INSTALL_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_PROXY_GATEWAY_REGISTRATION_SUCCEEDED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_PROXY_REGISTRATION_SUCCEEDED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.HOST_METADATASETUP_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.HOST_METADATASETUP_FINISHED_EVENT;
@@ -25,6 +26,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_MACHINES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CLUSTER_CREATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CLUSTER_CREATION_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CLUSTER_PROXY_REGISTRATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.COLLECTING_HOST_METADATA_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CONFIGURE_LDAP_SSO_STATE;
@@ -66,8 +68,10 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
                     .failureEvent(START_AMBARI_FAILED_EVENT)
             .from(CONFIGURE_LDAP_SSO_STATE).to(INSTALLING_CLUSTER_STATE).event(LDAP_SSO_CONFIGURATION_FINISHED_EVENT)
                     .failureEvent(LDAP_SSO_CONFIGURATION_FAILED_EVENT)
-            .from(INSTALLING_CLUSTER_STATE).to(CLUSTER_CREATION_FINISHED_STATE).event(INSTALL_CLUSTER_FINISHED_EVENT)
+            .from(INSTALLING_CLUSTER_STATE).to(CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE).event(INSTALL_CLUSTER_FINISHED_EVENT)
                     .failureEvent(INSTALL_CLUSTER_FAILED_EVENT)
+            .from(CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE).to(CLUSTER_CREATION_FINISHED_STATE).event(CLUSTER_PROXY_GATEWAY_REGISTRATION_SUCCEEDED_EVENT)
+                    .defaultFailureEvent()
             .from(CLUSTER_CREATION_FINISHED_STATE).to(FINAL_STATE).event(CLUSTER_CREATION_FINISHED_EVENT).defaultFailureEvent()
             .build();
 
