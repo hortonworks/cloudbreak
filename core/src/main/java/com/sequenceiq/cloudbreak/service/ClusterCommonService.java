@@ -219,12 +219,14 @@ public class ClusterCommonService {
     /**
      * Get cluster host details (ips + cluster name) - ini format
      * @param cluster cluster object that is used to fill the cluster details ini
+     * @param loginUser ssh username that will be used as a default user in the inventory
      * @return Ini file content in string
      */
-    public String getHostNamesAsIniString(Cluster cluster) {
+    public String getHostNamesAsIniString(Cluster cluster, String loginUser) {
         Long clusterId = cluster.getId();
         String clusterName = cluster.getName();
         String serverHost = cluster.getAmbariIp();
+
         Set<HostMetadata> agentHostsSet = hostMetadataService.findHostsInCluster(clusterId);
         if (agentHostsSet.isEmpty()) {
             throw new NotFoundException(String.format("Not found any agent hosts (yet) for cluster '%s'", cluster.getId()));
@@ -246,7 +248,8 @@ public class ClusterCommonService {
                 addSectionWithBody("cluster", "name=" + clusterName),
                 addSectionWithBody("server", serverHost),
                 String.join("\n", hostGroupHostsStrings),
-                addSectionWithBody("agent", agentHosts)
+                addSectionWithBody("agent", agentHosts),
+                addSectionWithBody("all:vars", String.format("ansible_ssh_user=%s", loginUser))
         );
     }
 

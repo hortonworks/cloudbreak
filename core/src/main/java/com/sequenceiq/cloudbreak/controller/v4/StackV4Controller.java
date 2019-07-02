@@ -7,7 +7,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Controller;
 
@@ -135,7 +134,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
-    public Response getClusterHostsInventory(Long workspaceId, String name) {
+    public String getClusterHostsInventory(Long workspaceId, String name) {
         return stackOperation.getClusterHostsInventory(workspaceId, name);
     }
 }

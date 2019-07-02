@@ -9,8 +9,6 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,13 +225,10 @@ public class StackOperation {
         clusterCommonService.put(stack.getResourceCrn(), updateJson, user, workspace);
     }
 
-    public Response getClusterHostsInventory(Long workspaceId, String name) {
+    public String getClusterHostsInventory(Long workspaceId, String name) {
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
-        String iniStr = clusterCommonService.getHostNamesAsIniString(stack.getCluster());
-        return Response
-                .ok(iniStr, MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", String.format("attachment; filename = %s-hosts.ini", stack.getName()))
-                .build();
+        String loginUser = stack.getStackAuthentication().getLoginUserName();
+        return clusterCommonService.getHostNamesAsIniString(stack.getCluster(), loginUser);
     }
 
     public Stack getStackByName(String name) {
