@@ -1,12 +1,5 @@
 package com.sequenceiq.redbeams.flow;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.core.FlowConstants;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -17,6 +10,13 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -38,7 +38,7 @@ public class RedbeamsFlowManager {
 
     public void triggerHelloworld() {
         String selector = "HELLOWORLD_CHAIN_EVENT";
-        notify(selector, new BaseFlowEvent(selector, random.nextLong()));
+        notify(selector, new BaseFlowEvent(selector, random.nextLong(), "resourceCrn"));
     }
 
     public void notify(String selector, Acceptable acceptable) {

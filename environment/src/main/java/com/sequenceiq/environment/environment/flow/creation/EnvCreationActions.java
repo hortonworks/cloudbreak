@@ -16,6 +16,8 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
+import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
@@ -45,7 +47,11 @@ public class EnvCreationActions {
                     LOGGER.info("NETWORK_CREATION_STARTED_STATE");
                     sendEvent(context, CREATE_NETWORK_EVENT.selector(), environmentService.getEnvironmentDto(environment));
                 }, () -> {
-                    EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(payload.getResourceId(), null, null);
+                    EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
+                            payload.getResourceId(),
+                            payload.getResourceName(),
+                            null,
+                            payload.getResourceCrn());
                     LOGGER.warn("Failed to create network for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
@@ -62,7 +68,11 @@ public class EnvCreationActions {
                     LOGGER.info("FREEIPA_CREATION_STARTED_STATE");
                     sendEvent(context, CREATE_FREEIPA_EVENT.selector(), environmentService.getEnvironmentDto(environment));
                 }, () -> {
-                    EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(payload.getResourceId(), null, null);
+                    EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
+                            payload.getResourceId(),
+                            payload.getResourceName(),
+                            null,
+                            payload.getResourceCrn());
                     LOGGER.warn("Failed to create freeipa for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
@@ -72,9 +82,9 @@ public class EnvCreationActions {
 
     @Bean(name = "ENV_CREATION_FINISHED_STATE")
     public Action<?, ?> finishedAction() {
-        return new AbstractVpcCreateAction<>(Payload.class) {
+        return new AbstractVpcCreateAction<>(ResourceCrnPayload.class) {
             @Override
-            protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
+            protected void doExecute(CommonContext context, ResourceCrnPayload payload, Map<Object, Object> variables) {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresent(environment -> {
@@ -107,7 +117,8 @@ public class EnvCreationActions {
         };
     }
 
-    private abstract class AbstractVpcCreateAction<P extends Payload> extends AbstractAction<EnvCreationState, EnvCreationStateSelectors, CommonContext, P> {
+    private abstract class AbstractVpcCreateAction<P extends ResourceCrnPayload>
+            extends AbstractAction<EnvCreationState, EnvCreationStateSelectors, CommonContext, P> {
 
         protected AbstractVpcCreateAction(Class<P> payloadClass) {
             super(payloadClass);
@@ -122,6 +133,11 @@ public class EnvCreationActions {
         @Override
         protected Object getFailurePayload(P payload, Optional<CommonContext> flowContext, Exception ex) {
             return (Payload) () -> null;
+        }
+
+        @Override
+        protected void prepareExecution(P payload, Map<Object, Object> variables) {
+            MdcContext.builder().resourceCrn(payload.getResourceCrn()).buildMdc();
         }
     }
 }

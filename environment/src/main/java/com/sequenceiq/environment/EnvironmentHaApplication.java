@@ -60,7 +60,7 @@ public class EnvironmentHaApplication implements HaApplication {
     public void cancelRunningFlow(Long resourceId) {
         environmentService.findById(resourceId).ifPresent(environmentDto -> {
             EnvironmentInMemoryStateStore.put(resourceId, PollGroup.CANCELLED);
-            reactorFlowManager.cancelRunningFlows(resourceId, environmentDto.getName());
+            reactorFlowManager.cancelRunningFlows(resourceId, environmentDto.getName(), environmentDto.getResourceCrn());
         });
     }
 }

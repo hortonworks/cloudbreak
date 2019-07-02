@@ -9,8 +9,8 @@ public class EnvDeleteFailedEvent extends BaseNamedFlowEvent implements Selectab
 
     private final Exception exception;
 
-    public EnvDeleteFailedEvent(Long environmentId, String resourceName, Exception exception) {
-        super(FAILED_ENV_DELETE_EVENT.name(), environmentId, resourceName);
+    public EnvDeleteFailedEvent(Long environmentId, String resourceName, Exception exception, String resourceCrn) {
+        super(FAILED_ENV_DELETE_EVENT.name(), environmentId, resourceName, resourceCrn);
         this.exception = exception;
     }
 

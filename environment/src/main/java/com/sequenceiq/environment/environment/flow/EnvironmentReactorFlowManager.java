@@ -34,11 +34,12 @@ public class EnvironmentReactorFlowManager {
         this.eventFactory = eventFactory;
     }
 
-    public void triggerCreationFlow(long envId, String envName, String userCrn) {
+    public void triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
         EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
                 .withSelector(START_NETWORK_CREATION_EVENT.selector())
                 .withResourceId(envId)
                 .withResourceName(envName)
+                .withResourceCrn(envCrn)
                 .build();
 
         Map<String, Object> flowTriggerUsercrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
@@ -52,13 +53,13 @@ public class EnvironmentReactorFlowManager {
                 .withResourceName(environment.getName())
                 .build();
 
-        cancelRunningFlows(environment.getId(), environment.getName());
+        cancelRunningFlows(environment.getId(), environment.getName(), environment.getResourceCrn());
         Map<String, Object> flowTriggerUsercrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
         eventSender.sendEvent(envDeleteEvent, new Event.Headers(flowTriggerUsercrn));
     }
 
-    public void cancelRunningFlows(Long environmentId, String environmentName) {
-        BaseNamedFlowEvent cancellationEvent = new BaseNamedFlowEvent(Flow2Handler.FLOW_CANCEL, environmentId, environmentName);
+    public void cancelRunningFlows(Long environmentId, String environmentName, String environmentCrn) {
+        BaseNamedFlowEvent cancellationEvent = new BaseNamedFlowEvent(Flow2Handler.FLOW_CANCEL, environmentId, environmentName, environmentCrn);
         eventBus.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancellationEvent));
     }
 }

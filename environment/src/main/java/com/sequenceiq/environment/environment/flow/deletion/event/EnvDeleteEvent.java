@@ -6,16 +6,18 @@ import reactor.rx.Promise;
 
 public class EnvDeleteEvent extends BaseNamedFlowEvent {
 
-    public EnvDeleteEvent(String selector, Long resourceId, String resourceName) {
-        super(selector, resourceId, resourceName);
+    public EnvDeleteEvent(String selector, Long resourceId, String resourceName, String resourceCrn) {
+        super(selector, resourceId, resourceName, resourceCrn);
     }
 
-    public EnvDeleteEvent(String selector, Long resourceId, Promise<Boolean> accepted, String resourceName) {
-        super(selector, resourceId, accepted, resourceName);
+    public EnvDeleteEvent(String selector, Long resourceId, Promise<Boolean> accepted, String resourceName, String resourceCrn) {
+        super(selector, resourceId, accepted, resourceName, resourceCrn);
     }
 
     public static final class EnvDeleteEventBuilder {
         private String resourceName;
+
+        private String resourceCrn;
 
         private String selector;
 
@@ -50,8 +52,13 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
             return this;
         }
 
+        public EnvDeleteEventBuilder withResourceCrn(String resourceCrn) {
+            this.resourceCrn = resourceCrn;
+            return this;
+        }
+
         public EnvDeleteEvent build() {
-            return new EnvDeleteEvent(selector, resourceId, accepted, resourceName);
+            return new EnvDeleteEvent(selector, resourceId, accepted, resourceName, resourceCrn);
         }
     }
 }

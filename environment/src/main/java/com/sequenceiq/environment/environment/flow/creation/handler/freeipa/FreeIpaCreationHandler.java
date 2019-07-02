@@ -91,7 +91,10 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             }
             eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
         } catch (Exception ex) {
-            EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), ex);
+            EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(),
+                    environmentDto.getName(),
+                    ex,
+                    environmentDto.getResourceCrn());
             eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
         }
     }
@@ -206,6 +209,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private EnvCreationEvent getNextStepObject(EnvironmentDto environmentDto) {
         return EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
                 .withResourceId(environmentDto.getResourceId())
+                .withResourceName(environmentDto.getName())
+                .withResourceCrn(environmentDto.getResourceCrn())
                 .withSelector(FINISH_ENV_CREATION_EVENT.selector())
                 .build();
     }

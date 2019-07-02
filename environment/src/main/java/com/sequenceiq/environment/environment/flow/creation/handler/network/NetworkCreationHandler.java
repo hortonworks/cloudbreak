@@ -76,7 +76,11 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
             createNetwork(environmentDto);
             stepToFreeIpaCreation(environmentDtoEvent, environmentDto);
         } catch (Exception e) {
-            EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), e);
+            EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
+                    environmentDto.getId(),
+                    environmentDto.getName(),
+                    e,
+                    environmentDto.getResourceCrn());
             eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
         }
     }
@@ -148,6 +152,8 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
         EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
                 .withResourceId(environmentDto.getResourceId())
                 .withSelector(START_FREEIPA_CREATION_EVENT.selector())
+                .withResourceCrn(environmentDto.getResourceCrn())
+                .withResourceName(environmentDto.getName())
                 .build();
         eventSender().sendEvent(envCreationEvent, environmentDtoEvent.getHeaders());
     }

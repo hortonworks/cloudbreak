@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.core.helloworld.config;
 
+import static com.sequenceiq.flow.core.helloworld.config.HelloWorldEvent.HELLOWORLD_TRIGGER_EVENT;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -19,7 +21,7 @@ public class HelloWorldFlowChainFactory implements FlowEventChainFactory<BaseFlo
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(BaseFlowEvent event) {
         Queue<Selectable> flowChainTriggers = new ConcurrentLinkedDeque<>();
-        flowChainTriggers.add(new BaseFlowEvent(HelloWorldEvent.HELLOWORLD_TRIGGER_EVENT.event(), event.getResourceId(), event.accepted()));
+        flowChainTriggers.add(new BaseFlowEvent(HELLOWORLD_TRIGGER_EVENT.event(), event.getResourceId(), event.getResourceCrn(), event.accepted()));
         return flowChainTriggers;
     }
 }
