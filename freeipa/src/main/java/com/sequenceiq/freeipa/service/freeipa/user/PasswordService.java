@@ -52,16 +52,11 @@ public class PasswordService {
             throw new IllegalArgumentException("No stacks found for accountId " + accountId);
         }
 
-        // Filter based on provided envs
-        boolean filterForEnvs = false;
-        if (envs != null && envs.size() > 0) {
-            filterForEnvs = true;
-        }
-
         List<SetPasswordRequest> requests = new ArrayList<>();
         for (Stack stack : stacks) {
 
-            if (filterForEnvs) {
+            // Filter based on provided envs
+            if (envs != null && envs.size() > 0) {
                 if (envs.contains(stack.getEnvironmentCrn())) {
                     LOGGER.debug("Env list provided, setting password for env :{}", stack.getEnvironmentCrn());
                     requests.add(triggerSetPassword(stack, stack.getEnvironmentCrn(), userId, password));
