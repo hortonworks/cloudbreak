@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
@@ -52,6 +54,8 @@ public class ClusterProxyServiceTest {
 
     private static final String REGISTER_CONFIG_PATH = "/rpc/registerConfig";
 
+    private static final String UPDATE_CONFIG_PATH = "/rpc/updateConfig";
+
     @Mock
     private StackService stackService;
 
@@ -66,6 +70,7 @@ public class ClusterProxyServiceTest {
         service = new ClusterProxyService(stackService, restTemplate);
         ReflectionTestUtils.setField(service, "clusterProxyUrl", CLUSTER_PROXY_URL);
         ReflectionTestUtils.setField(service, "registerConfigPath", REGISTER_CONFIG_PATH);
+        ReflectionTestUtils.setField(service, "updateConfigPath", UPDATE_CONFIG_PATH);
     }
 
     @Test
@@ -86,20 +91,47 @@ public class ClusterProxyServiceTest {
         assertEquals("X509PublicKey", registrationResponse.getKey());
     }
 
-    private String configRegistrationRequest() {
-        ClusterServiceCredential credential1 = new ClusterServiceCredential("cbuser", "/cb/test-data/secret/cbpassword");
-        ClusterServiceCredential credential2 = new ClusterServiceCredential("dpuser", "/cb/test-data/secret/dppassword");
-        ClusterServiceConfig service = new ClusterServiceConfig("cloudera-manager",
-                List.of("https://10.10.10.10:8443"), asList(credential1, credential2));
-        return JsonUtil.writeValueAsStringSilent(new ConfigRegistrationRequest("1000", List.of(service)));
-    }
-
     @Test
     public void shouldFailIfVaultSecretIsInvalid() throws URISyntaxException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithInvalidSecret());
         mockServer.expect(never(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REGISTER_CONFIG_PATH)));
 
         assertThrows(VaultConfigException.class, () -> service.registerProxyConfiguration(STACK_ID));
+    }
+
+    @Test
+    public void shouldUpdateKnoxUrlWithClusterProxy() throws URISyntaxException, JsonProcessingException {
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithKnox());
+        mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + UPDATE_CONFIG_PATH)))
+                .andExpect(content().json(configUpdateRequest()))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.OK));
+
+        service.registerGatewayConfiguration(STACK_ID);
+    }
+
+    @Test
+    public void shouldNotUpdateProxyConfigIfClusterIsNotConfiguredWithGateway() throws URISyntaxException, JsonProcessingException {
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStack());
+        mockServer.expect(never(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + UPDATE_CONFIG_PATH)))
+                .andExpect(content().json(configUpdateRequest()))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.OK));
+
+        service.registerGatewayConfiguration(STACK_ID);
+    }
+
+    private String configRegistrationRequest() {
+        ClusterServiceCredential credential1 = new ClusterServiceCredential("cbuser", "/cb/test-data/secret/cbpassword");
+        ClusterServiceCredential credential2 = new ClusterServiceCredential("dpuser", "/cb/test-data/secret/dppassword");
+        ClusterServiceConfig service = new ClusterServiceConfig("cloudera-manager",
+                List.of("https://10.10.10.10:9443"), asList(credential1, credential2));
+        return JsonUtil.writeValueAsStringSilent(new ConfigRegistrationRequest("1000", List.of(service)));
+    }
+
+    private String configUpdateRequest() {
+        return JsonUtil.writeValueAsStringSilent(of("clusterCrn", String.valueOf(CLUSTER_ID),
+                "uriOfKnox", "https://10.10.10.10:8443/test-cluster"));
     }
 
     @After
@@ -111,7 +143,7 @@ public class ClusterProxyServiceTest {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setCluster(testCluster());
-        stack.setGatewayPort(8443);
+        stack.setGatewayPort(9443);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         InstanceMetaData primaryInstanceMetaData = new InstanceMetaData();
@@ -127,6 +159,14 @@ public class ClusterProxyServiceTest {
     private Stack testStackWithInvalidSecret() {
         Stack stack = testStack();
         ReflectionTestUtils.setField(stack.getCluster(), "cloudbreakAmbariPassword", new Secret("cbpassword", "invalid-vault-string"));
+        return stack;
+    }
+
+    private Stack testStackWithKnox() {
+        Stack stack = testStack();
+        Gateway gateway = new Gateway();
+        gateway.setPath("test-cluster");
+        stack.getCluster().setGateway(gateway);
         return stack;
     }
 

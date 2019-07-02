@@ -20,7 +20,7 @@ import reactor.bus.EventBus;
 
 @Component
 public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProxyRegistrationRequest> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyRegistrationHandler.class);
 
     @Value("${clusterProxy.enabled:false}")
     private boolean clusterProxyIntegrationEnabled;
