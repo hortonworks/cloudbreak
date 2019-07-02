@@ -147,17 +147,17 @@ func (a *Client) DeleteWithKerberos(params *DeleteWithKerberosParams) error {
 /*
 GetClusterHostsInventory generates hosts inventory
 */
-func (a *Client) GetClusterHostsInventory(params *GetClusterHostsInventoryParams) error {
+func (a *Client) GetClusterHostsInventory(params *GetClusterHostsInventoryParams) (*GetClusterHostsInventoryOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetClusterHostsInventoryParams()
 	}
 
-	_, err := a.transport.Submit(&runtime.ClientOperation{
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getClusterHostsInventory",
 		Method:             "GET",
 		PathPattern:        "/v4/{workspaceId}/stacks/{name}/inventory",
-		ProducesMediaTypes: []string{"application/octet-stream"},
+		ProducesMediaTypes: []string{"text/plain"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
@@ -166,9 +166,9 @@ func (a *Client) GetClusterHostsInventory(params *GetClusterHostsInventoryParams
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*GetClusterHostsInventoryOK), nil
 
 }
 

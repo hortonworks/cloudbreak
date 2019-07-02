@@ -92,6 +92,18 @@ func init() {
 				},
 			},
 			{
+				Name:   "generate-inventory",
+				Usage:  "creates an ansible compatible ini file from the cluster details",
+				Before: cf.CheckConfigAndCommandFlags,
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlOutputFile).AddAuthenticationFlags().AddOutputFlag().Build(),
+				Action: stack.GenerateInventoryFile,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlOutputFile).AddAuthenticationFlags().AddOutputFlag().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
+			{
 				Name:        "generate-template",
 				Usage:       "creates a cluster JSON template",
 				Description: stackTemplateDescription,

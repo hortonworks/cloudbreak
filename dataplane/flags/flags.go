@@ -248,6 +248,13 @@ var (
 			Usage: "location of the input JSON file",
 		},
 	}
+	FlOutputFile = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "file",
+			Usage: "location of the generated output file",
+		},
+	}
 	FlURL = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

@@ -3,6 +3,7 @@ package stack
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -374,4 +375,16 @@ func listStacksImpl(client listStacksByWorkspaceClient, writer func([]string, []
 	}
 
 	writer(stackHeader, tableRows)
+}
+
+func GenerateInventoryFile(c *cli.Context) {
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	clusterName := c.String(fl.FlName.Name)
+	outputFileName := c.String(fl.FlOutputFile.Name)
+	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
+	response, err := cbClient.Cloudbreak.V4WorkspaceIDStacks.GetClusterHostsInventory(v4stack.NewGetClusterHostsInventoryParams().WithWorkspaceID(workspaceID).WithName(clusterName))
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	ioutil.WriteFile(outputFileName, []byte(response.Payload), 0644)
 }
