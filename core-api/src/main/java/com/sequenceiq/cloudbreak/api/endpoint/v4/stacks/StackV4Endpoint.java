@@ -36,7 +36,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
@@ -190,8 +189,8 @@ public interface StackV4Endpoint {
 
     @GET
     @Path("{name}/inventory")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ApiOperation(value = GENERATE_HOSTS_INVENTORY, produces = ContentType.FILE_STREAM, nickname = "getClusterHostsInventory")
-    Response getClusterHostsInventory(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(value = GENERATE_HOSTS_INVENTORY, produces = MediaType.TEXT_PLAIN, nickname = "getClusterHostsInventory")
+    String getClusterHostsInventory(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
 }
