@@ -87,12 +87,13 @@ public class EnvCreationActions {
             protected void doExecute(CommonContext context, ResourceCrnPayload payload, Map<Object, Object> variables) {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
-                        .ifPresent(environment -> {
+                        .ifPresentOrElse(environment -> {
                             environment.setStatusReason(null);
                             environment.setStatus(EnvironmentStatus.AVAILABLE);
                             environmentService.save(environment);
-                        });
-                LOGGER.info("ENV_CREATION_FINISHED_STATE");
+                        }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
+                                + "But the flow will continue, how can this happen?", payload.getResourceId()));
+                LOGGER.info("Flow entered into ENV_CREATION_FINISHED_STATE");
                 sendEvent(context, FINALIZE_ENV_CREATION_EVENT.event(), payload);
             }
         };
@@ -106,12 +107,13 @@ public class EnvCreationActions {
                 LOGGER.warn("Failed to create environment", payload.getException());
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
-                        .ifPresent(environment -> {
+                        .ifPresentOrElse(environment -> {
                             environment.setStatusReason(payload.getException().getMessage());
                             environment.setStatus(EnvironmentStatus.CREATE_FAILED);
                             environmentService.save(environment);
-                        });
-                LOGGER.info("ENV_CREATION_FAILED_STATE");
+                        }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
+                                + "But the flow will continue, how can this happen?", payload.getResourceId()));
+                LOGGER.info("Flow entered into ENV_CREATION_FAILED_STATE");
                 sendEvent(context, HANDLED_FAILED_ENV_CREATION_EVENT.event(), payload);
             }
         };

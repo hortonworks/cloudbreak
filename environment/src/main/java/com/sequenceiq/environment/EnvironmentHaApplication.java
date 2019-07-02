@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,8 @@ public class EnvironmentHaApplication implements HaApplication {
 
     public static final List<EnvironmentStatus> DELETION_STATUSES
             = List.of(DELETE_INITIATED, NETWORK_DELETE_IN_PROGRESS, FREEIPA_DELETE_IN_PROGRESS, RDBMS_DELETE_IN_PROGRESS, DELETE_FAILED, ARCHIVED);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentHaApplication.class);
 
     private final EnvironmentService environmentService;
 
@@ -58,9 +62,9 @@ public class EnvironmentHaApplication implements HaApplication {
 
     @Override
     public void cancelRunningFlow(Long resourceId) {
-        environmentService.findById(resourceId).ifPresent(environmentDto -> {
+        environmentService.findById(resourceId).ifPresentOrElse(environmentDto -> {
             EnvironmentInMemoryStateStore.put(resourceId, PollGroup.CANCELLED);
             reactorFlowManager.cancelRunningFlows(resourceId, environmentDto.getName(), environmentDto.getResourceCrn());
-        });
+        }, () -> LOGGER.error("Cannot cancel the flow, because the environment does not exist: {}", resourceId));
     }
 }
