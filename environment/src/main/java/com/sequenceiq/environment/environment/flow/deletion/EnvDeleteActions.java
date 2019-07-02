@@ -19,6 +19,8 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
+import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
@@ -53,6 +55,8 @@ public class EnvDeleteActions {
                         });
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
+                envDto.setResourceCrn(payload.getResourceCrn());
+                envDto.setResourceCrn(payload.getResourceName());
                 LOGGER.info("NETWORK_DELETE_STARTED_STATE");
                 sendEvent(context, DELETE_NETWORK_EVENT.selector(), envDto);
             }
@@ -72,6 +76,8 @@ public class EnvDeleteActions {
                         });
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
+                envDto.setResourceCrn(payload.getResourceCrn());
+                envDto.setName(payload.getResourceName());
                 LOGGER.info("RDBMS_DELETE_STARTED_STATE");
                 sendEvent(context, DELETE_RDBMS_EVENT.selector(), envDto);
             }
@@ -91,6 +97,8 @@ public class EnvDeleteActions {
                         });
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
+                envDto.setResourceCrn(payload.getResourceCrn());
+                envDto.setResourceCrn(payload.getResourceName());
                 LOGGER.info("FREEIPA_DELETE_STARTED_STATE");
                 sendEvent(context, DELETE_FREEIPA_EVENT.selector(), envDto);
             }
@@ -99,9 +107,9 @@ public class EnvDeleteActions {
 
     @Bean(name = "ENV_DELETE_FINISHED_STATE")
     public Action<?, ?> finishedAction() {
-        return new AbstractVpcDeleteAction<>(Payload.class) {
+        return new AbstractVpcDeleteAction<>(ResourceCrnPayload.class) {
             @Override
-            protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
+            protected void doExecute(CommonContext context, ResourceCrnPayload payload, Map<Object, Object> variables) {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresent(env -> {
@@ -137,7 +145,8 @@ public class EnvDeleteActions {
         };
     }
 
-    private abstract class AbstractVpcDeleteAction<P extends Payload> extends AbstractAction<EnvDeleteState, EnvDeleteStateSelectors, CommonContext, P> {
+    private abstract class AbstractVpcDeleteAction<P extends ResourceCrnPayload>
+            extends AbstractAction<EnvDeleteState, EnvDeleteStateSelectors, CommonContext, P> {
 
         protected AbstractVpcDeleteAction(Class<P> payloadClass) {
             super(payloadClass);
@@ -152,6 +161,11 @@ public class EnvDeleteActions {
         @Override
         protected Object getFailurePayload(P payload, Optional<CommonContext> flowContext, Exception ex) {
             return (Payload) () -> null;
+        }
+
+        @Override
+        protected void prepareExecution(P payload, Map<Object, Object> variables) {
+            MdcContext.builder().resourceCrn(payload.getResourceCrn()).buildMdc();
         }
     }
 

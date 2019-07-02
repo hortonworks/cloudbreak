@@ -63,7 +63,7 @@ public class EnvironmentCreationService {
             environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), accountId);
             environmentService.save(environment);
         }
-        reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creator);
+        reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creator, environment.getResourceCrn());
         return environmentDtoConverter.environmentToDto(environment);
     }
 

@@ -43,7 +43,7 @@ public class FreeIpaFlowManager {
 
     public void triggerHelloworld() {
         String selector = "HELLOWORLD_CHAIN_EVENT";
-        notify(selector, new BaseFlowEvent(selector, random.nextLong()));
+        notify(selector, new BaseFlowEvent(selector, random.nextLong(), "resourceCrn"));
     }
 
     public void notify(String selector, Acceptable acceptable) {

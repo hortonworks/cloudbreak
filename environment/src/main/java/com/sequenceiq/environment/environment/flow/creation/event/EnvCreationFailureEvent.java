@@ -9,8 +9,8 @@ public class EnvCreationFailureEvent extends BaseNamedFlowEvent implements Selec
 
     private final Exception exception;
 
-    public EnvCreationFailureEvent(Long environmentId, String resourceName, Exception exception) {
-        super(FAILED_ENV_CREATION_EVENT.name(), environmentId, resourceName);
+    public EnvCreationFailureEvent(Long environmentId, String resourceName, Exception exception, String resourceCrn) {
+        super(FAILED_ENV_CREATION_EVENT.name(), environmentId, resourceName, resourceCrn);
         this.exception = exception;
     }
 

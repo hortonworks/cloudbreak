@@ -69,7 +69,7 @@ public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
                 eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
             }
         } catch (Exception ex) {
-            EnvDeleteFailedEvent failedEvent = new EnvDeleteFailedEvent(environmentDto.getId(), environmentDto.getName(), ex);
+            EnvDeleteFailedEvent failedEvent = new EnvDeleteFailedEvent(environmentDto.getId(), environmentDto.getName(), ex, environmentDto.getResourceCrn());
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }
@@ -82,6 +82,8 @@ public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
     private EnvDeleteEvent getNextStepObject(EnvironmentDto environmentDto) {
         return EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
                 .withResourceId(environmentDto.getResourceId())
+                .withResourceName(environmentDto.getName())
+                .withResourceCrn(environmentDto.getResourceCrn())
                 .withSelector(START_RDBMS_DELETE_EVENT.selector())
                 .build();
     }

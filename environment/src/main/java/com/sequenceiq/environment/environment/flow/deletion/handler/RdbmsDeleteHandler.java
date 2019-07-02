@@ -30,11 +30,13 @@ public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> 
         try {
             EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
                     .withResourceId(environmentDto.getResourceId())
+                    .withResourceCrn(environmentDto.getResourceCrn())
+                    .withResourceName(environmentDto.getName())
                     .withSelector(START_NETWORK_DELETE_EVENT.selector())
                     .build();
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            EnvDeleteFailedEvent failedEvent = new EnvDeleteFailedEvent(environmentDto.getId(), environmentDto.getName(), e);
+            EnvDeleteFailedEvent failedEvent = new EnvDeleteFailedEvent(environmentDto.getId(), environmentDto.getName(), e, environmentDto.getResourceCrn());
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }

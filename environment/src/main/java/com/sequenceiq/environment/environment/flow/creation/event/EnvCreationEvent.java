@@ -6,16 +6,18 @@ import reactor.rx.Promise;
 
 public class EnvCreationEvent extends BaseNamedFlowEvent {
 
-    public EnvCreationEvent(String selector, Long resourceId, String resourceName) {
-        super(selector, resourceId, resourceName);
+    public EnvCreationEvent(String selector, Long resourceId, String resourceName, String resourceCrn) {
+        super(selector, resourceId, resourceName, resourceCrn);
     }
 
-    public EnvCreationEvent(String selector, Long resourceId, Promise<Boolean> accepted, String resourceName) {
-        super(selector, resourceId, accepted, resourceName);
+    public EnvCreationEvent(String selector, Long resourceId, Promise<Boolean> accepted, String resourceName, String resourceCrn) {
+        super(selector, resourceId, accepted, resourceName, resourceCrn);
     }
 
     public static final class EnvCreationEventBuilder {
         private String resourceName;
+
+        private String resourceCrn;
 
         private String selector;
 
@@ -45,13 +47,18 @@ public class EnvCreationEvent extends BaseNamedFlowEvent {
             return this;
         }
 
+        public EnvCreationEventBuilder withResourceCrn(String resourceCrn) {
+            this.resourceCrn = resourceCrn;
+            return this;
+        }
+
         public EnvCreationEventBuilder withAccepted(Promise<Boolean> accepted) {
             this.accepted = accepted;
             return this;
         }
 
         public EnvCreationEvent build() {
-            return new EnvCreationEvent(selector, resourceId, accepted, resourceName);
+            return new EnvCreationEvent(selector, resourceId, accepted, resourceName, resourceCrn);
         }
     }
 }
