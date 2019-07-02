@@ -5,6 +5,8 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -22,6 +24,8 @@ import reactor.bus.EventBus;
 @Service
 public class EnvironmentReactorFlowManager {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentReactorFlowManager.class);
+
     private final EventBus eventBus;
 
     private final EventSender eventSender;
@@ -35,6 +39,7 @@ public class EnvironmentReactorFlowManager {
     }
 
     public void triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
+        LOGGER.info("Trigger flow creation");
         EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
                 .withSelector(START_NETWORK_CREATION_EVENT.selector())
                 .withResourceId(envId)
@@ -47,6 +52,7 @@ public class EnvironmentReactorFlowManager {
     }
 
     public void triggerDeleteFlow(Environment environment, String userCrn) {
+        LOGGER.info("Trigger flow deletion");
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
                 .withSelector(START_FREEIPA_DELETE_EVENT.selector())
                 .withResourceId(environment.getId())
@@ -59,6 +65,7 @@ public class EnvironmentReactorFlowManager {
     }
 
     public void cancelRunningFlows(Long environmentId, String environmentName, String environmentCrn) {
+        LOGGER.info("Cancel the running flow");
         BaseNamedFlowEvent cancellationEvent = new BaseNamedFlowEvent(Flow2Handler.FLOW_CANCEL, environmentId, environmentName, environmentCrn);
         eventBus.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancellationEvent));
     }

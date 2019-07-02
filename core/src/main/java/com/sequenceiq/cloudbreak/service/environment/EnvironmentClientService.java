@@ -30,7 +30,7 @@ public class EnvironmentClientService {
         try {
             return environmentEndpoint.getByName(name);
         } catch (WebApplicationException | ProcessingException e) {
-            String message = String.format("Failed to GET Environment due to: '%s' ", e.getMessage());
+            String message = String.format("Failed to GET Environment by name: %s, due to: '%s' ", name, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
@@ -40,7 +40,7 @@ public class EnvironmentClientService {
         try {
             return environmentEndpoint.getByCrn(crn);
         } catch (WebApplicationException | ProcessingException e) {
-            String message = String.format("Failed to GET Environment due to: '%s' ", e.getMessage());
+            String message = String.format("Failed to GET Environment by crn: %s, due to: '%s' ", crn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
@@ -60,7 +60,7 @@ public class EnvironmentClientService {
         try {
             return environmentEndpoint.post(request);
         } catch (WebApplicationException | ProcessingException e) {
-            String message = String.format("Failed to CREATE Environment due to: '%s' ", e.getMessage());
+            String message = String.format("Failed to CREATE Environment by name: %s, due to: '%s' ", request.getName(), e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
@@ -70,7 +70,7 @@ public class EnvironmentClientService {
         try {
             return environmentEndpoint.editByCrn(environmentCrn, request);
         } catch (WebApplicationException | ProcessingException e) {
-            String message = String.format("Failed to EDIT Environment due to: '%s' ", e.getMessage());
+            String message = String.format("Failed to EDIT Environment by crn: %s, due to: '%s' ", environmentCrn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
@@ -80,7 +80,7 @@ public class EnvironmentClientService {
         try {
             return environmentEndpoint.deleteByName(name);
         } catch (WebApplicationException | ProcessingException e) {
-            String message = String.format("Failed to DELETE Environment due to: '%s' ", e.getMessage());
+            String message = String.format("Failed to DELETE Environment by name: %s, due to: '%s' ", name, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
