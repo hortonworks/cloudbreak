@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildVolumePathStringZeroVolumeHandled;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -24,9 +25,10 @@ public class YarnVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
         switch (roleType) {
             case YarnRoles.NODEMANAGER:
+                Integer volumeCount = Objects.nonNull(hostGroupView) ? hostGroupView.getVolumeCount() : 0;
                 return List.of(
-                        config(NODE_LOCAL_DIRS, buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "nodemanager")),
-                        config(NODE_LOG_DIRS, buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "nodemanager/log"))
+                        config(NODE_LOCAL_DIRS, buildVolumePathStringZeroVolumeHandled(volumeCount, "nodemanager")),
+                        config(NODE_LOG_DIRS, buildVolumePathStringZeroVolumeHandled(volumeCount, "nodemanager/log"))
                 );
             default:
                 return List.of();
