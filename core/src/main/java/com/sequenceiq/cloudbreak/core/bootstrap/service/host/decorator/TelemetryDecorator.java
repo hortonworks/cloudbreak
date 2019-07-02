@@ -55,6 +55,8 @@ public class TelemetryDecorator {
 
     private static final String CLUSTER_LOG_PREFIX = "cluster-logs";
 
+    private static final String FLUENT_CLOUD_PLATFORM = "platform";
+
     private static final String FLUENT_ENABLED_PROPERTY = "enabled";
 
     private static final String FLUENT_USER_PROPERTY = "user";
@@ -83,20 +85,20 @@ public class TelemetryDecorator {
         this.servicePillar = servicePillar;
     }
 
-    public void decoratePillar(Telemetry telemetry, String clusterName, StackType stackType) {
+    public void decoratePillar(Telemetry telemetry, String clusterName, StackType stackType, String cloudPlatform) {
         if (telemetry != null) {
             Logging logging = telemetry.getLogging();
             if (logging != null && logging.isEnabled() && logging.getOutputType() != null) {
                 if (logging.getAttributes() != null) {
                     Map<String, Object> fluentConfig = new HashMap<>();
-                    fillFluentConfigs(logging, fluentConfig, clusterName, stackType);
+                    fillFluentConfigs(logging, fluentConfig, clusterName, stackType, cloudPlatform);
                 }
             }
         }
     }
 
     private void fillFluentConfigs(Logging logging, Map<String, Object> fluentConfig,
-            String clusterName, StackType stackType) {
+            String clusterName, StackType stackType, String cloudPlatform) {
         LoggingAttributesHolder attributes = logging.getAttributes();
         if (attributes != null) {
             String user = TD_AGENT_USER_DEFAULT;
@@ -117,6 +119,7 @@ public class TelemetryDecorator {
             fluentConfig.put(FLUENT_AGENT_LOG_PREFIX_PROPERTY, LOGS_FOLDER_PREFIX_DEFAULT);
             fluentConfig.put(FLUENT_SERVICE_LOG_PREFIX_PROPERTY, LOGS_FOLDER_PREFIX_DEFAULT);
             fluentConfig.put(FLUENT_ENABLED_PROPERTY, true);
+            fluentConfig.put(FLUENT_CLOUD_PLATFORM, cloudPlatform);
 
             if (LoggingOutputType.S3.equals(logging.getOutputType()) && attributes.getS3Attributes() != null) {
                 S3LoggingAttributes s3Attributes = attributes.getS3Attributes();

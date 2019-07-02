@@ -247,7 +247,7 @@ public class ClusterHostServiceRunner {
 
         if (blueprintService.isClouderaManagerTemplate(cluster.getBlueprint())) {
             Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
-            new TelemetryDecorator(servicePillar).decoratePillar(telemetry, cluster.getName(), stack.getType());
+            new TelemetryDecorator(servicePillar).decoratePillar(telemetry, cluster.getName(), stack.getType(), stack.getCloudPlatform());
             decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
             decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
             decoratePillarWithClouderaManagerRepo(stack.getId(), cluster.getId(), servicePillar);

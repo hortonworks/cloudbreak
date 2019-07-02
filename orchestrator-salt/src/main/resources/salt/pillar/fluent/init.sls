@@ -5,6 +5,7 @@ fluent:
   serverLogFolderPrefix: /var/log
   agentLogFolderPrefix: /var/log
   serviceLogFolderPrefix: /var/log
+  platform:
   providerPrefix: "stdout"
   partitionIntervalMin: 5
   s3LogArchiveBucketName:
