@@ -122,7 +122,7 @@ dependencyManagement {
     dependency group: 'com.google.code.findbugs',           name: 'annotations',                 version: '3.0.1'
     dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '1.22.0'
     dependency group: 'com.icegreen',                       name: 'greenmail',                   version: '1.4.1'
-    dependency group: 'com.thoughtworks.xstream',           name: 'xstream',                     version: '1.4.7'
+    dependency group: 'com.thoughtworks.xstream',           name: 'xstream',                     version: '1.4.11.1'
     dependency group: 'com.github.fommil',                  name: 'openssh',                     version: '1.0'
 
     dependency (group: 'io.swagger',                         name: 'swagger-jersey2-jaxrs',       version: swaggerVersion) {
