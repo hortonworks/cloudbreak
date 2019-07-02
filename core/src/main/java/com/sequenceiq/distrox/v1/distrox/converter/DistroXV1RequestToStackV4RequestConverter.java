@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Reque
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.network.DefaultNetworkRequiredService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
@@ -52,6 +53,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
 
     @Inject
     private WorkspaceService workspaceService;
+
+    @Inject
+    private DefaultNetworkRequiredService defaultNetworkRequiredService;
 
     @Inject
     private SdxConverter sdxConverter;
@@ -113,7 +117,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
 
     private NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment) {
         NetworkV4Request network = getIfNotNull(networkRequest, networkConverter::convert);
-        if (network == null) {
+        if (defaultNetworkRequiredService.shouldAddNetwork(environment.getCloudPlatform(), network)) {
             network = getIfNotNull(environment.getNetwork(), networkConverter::convert);
         }
         validateSubnetIds(network, environment);
