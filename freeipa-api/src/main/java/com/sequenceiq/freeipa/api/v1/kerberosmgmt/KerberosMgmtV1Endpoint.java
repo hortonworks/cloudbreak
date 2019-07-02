@@ -30,7 +30,7 @@ public interface KerberosMgmtV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_GENERATE_SERVICE_KEYTAB, produces = ContentType.JSON,
             notes = KeytabModelNotes.GENERATE_KEYTAB_NOTES,
-            nickname = "getServiceKeytabV1")
+            nickname = "generateServiceKeytabV1")
     ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request);
 
     @GET
