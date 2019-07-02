@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildSingleVolumePa
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildVolumePathStringZeroVolumeHandled;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -19,26 +20,27 @@ public class HdfsVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+        Integer volumeCount = Objects.nonNull(hostGroupView) ? hostGroupView.getVolumeCount() : 0;
         switch (roleType) {
             case HdfsRoles.DATANODE:
                 return List.of(
                         config("dfs_data_dir_list",
-                                buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "datanode"))
+                                buildVolumePathStringZeroVolumeHandled(volumeCount, "datanode"))
                 );
             case HdfsRoles.NAMENODE:
                 return List.of(
                         config("dfs_name_dir_list",
-                                buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "namenode"))
+                                buildVolumePathStringZeroVolumeHandled(volumeCount, "namenode"))
                 );
             case HdfsRoles.SECONDARYNAMENODE:
                 return List.of(
                         config("fs_checkpoint_dir_list",
-                                buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "namesecondary"))
+                                buildVolumePathStringZeroVolumeHandled(volumeCount, "namesecondary"))
                 );
             case HdfsRoles.JOURNALNODE:
                 return List.of(
                         config("dfs_journalnode_edits_dir",
-                                buildSingleVolumePath(hostGroupView.getVolumeCount(), "journalnode"))
+                                buildSingleVolumePath(volumeCount, "journalnode"))
                 );
             default:
                 return List.of();
