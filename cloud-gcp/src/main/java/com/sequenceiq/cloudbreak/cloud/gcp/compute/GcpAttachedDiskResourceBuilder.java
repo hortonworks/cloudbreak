@@ -91,7 +91,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Location location = context.getLocation();
 
         List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE);
+        DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, 0);
         for (int i = 0; i < template.getVolumes().size(); i++) {
             String volumeName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
             Volume volume = template.getVolumes().get(i);

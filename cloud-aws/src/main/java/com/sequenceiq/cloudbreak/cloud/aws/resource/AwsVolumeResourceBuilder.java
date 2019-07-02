@@ -175,11 +175,14 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         List<CloudResource> requestedResources = buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
+        Long ephemeralCount = group.getReferenceInstanceConfiguration().getTemplate().getVolumes().stream()
+                .filter(vol -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType())).collect(Collectors.counting());
+
         for (CloudResource resource : requestedResources) {
             volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
 
             VolumeSetAttributes volumeSet = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
-            DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE);
+            DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, ephemeralCount.intValue());
             futures.addAll(volumeSet.getVolumes().stream()
                     .map(createVolumeRequest(snapshotId, tagSpecification, volumeSet))
                     .map(request -> intermediateBuilderExecutor.submit(() -> {

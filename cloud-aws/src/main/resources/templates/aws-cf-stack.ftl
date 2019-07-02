@@ -338,7 +338,18 @@
               "VolumeType" : "gp2"
             }
           }
-      	],
+          <#assign ephemeralCount = group.getVolumeCount("ephemeral")>
+          <#if ephemeralCount != 0>
+            <#assign seq = ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]>
+            <#list seq as x>
+              <#if x_index = ephemeralCount><#break></#if>
+              ,{
+                "DeviceName" : "/dev/xvd${x}",
+                "VirtualName" : "ephemeral${x_index}"
+              }
+			</#list>
+          </#if>
+        ],
       	<#if group.ebsEncrypted == true>
       	"ImageId"        : "${group.encryptedAMI}",
         <#else>
