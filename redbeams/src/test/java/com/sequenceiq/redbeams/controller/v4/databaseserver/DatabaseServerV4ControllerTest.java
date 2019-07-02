@@ -155,13 +155,13 @@ public class DatabaseServerV4ControllerTest {
     public void testTerminate() {
         terminateRequest.setName(server.getName());
         terminateRequest.setEnvironmentId(server.getEnvironmentId());
-        when(terminationService.terminateDatabaseServer(server.getName(), server.getEnvironmentId())).thenReturn(server);
-        when(converterUtil.convert(server, DatabaseServerTerminationOutcomeV4Response.class))
+        when(terminationService.terminateDatabaseServer(server.getName(), server.getEnvironmentId())).thenReturn(dbStack);
+        when(converterUtil.convert(dbStack, DatabaseServerTerminationOutcomeV4Response.class))
             .thenReturn(terminateResponse);
 
-        underTest.terminate(terminateRequest);
+        DatabaseServerTerminationOutcomeV4Response response = underTest.terminate(terminateRequest);
 
-        //assertEquals(terminateResponse, response);
+        assertEquals(terminateResponse, response);
         verify(terminationService).terminateDatabaseServer(server.getName(), server.getEnvironmentId());
     }
 
