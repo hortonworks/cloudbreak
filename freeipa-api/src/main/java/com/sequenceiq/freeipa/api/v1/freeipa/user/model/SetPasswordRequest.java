@@ -19,7 +19,6 @@ public class SetPasswordRequest {
     @ApiModelProperty(value = UserModelDescriptions.USER_PASSWORD)
     private String password;
 
-
     public Set<String> getEnvironments() {
         return environments;
     }
