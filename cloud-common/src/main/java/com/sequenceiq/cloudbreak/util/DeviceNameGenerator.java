@@ -12,9 +12,9 @@ public class DeviceNameGenerator {
 
     private final Iterator<Character> letterIterator;
 
-    public DeviceNameGenerator(String deviceNameTemplate) {
+    public DeviceNameGenerator(String deviceNameTemplate, int offset) {
         this.deviceNameTemplate = deviceNameTemplate;
-        letterIterator = DEVICE_NAME_POSTFIX_LETTER.iterator();
+        letterIterator = DEVICE_NAME_POSTFIX_LETTER.listIterator(offset);
     }
 
     public String next() {

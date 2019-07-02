@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import java.util.List;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters.AwsDiskType;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
@@ -25,7 +26,7 @@ public class AwsGroupView {
 
     private final String kmsKey;
 
-    private final List<String> volumeTypes;
+    private final Map<String, Long> volumeCounts;
 
     private final Double spotPrice;
 
@@ -39,9 +40,9 @@ public class AwsGroupView {
 
     private final String autoScalingGroupName;
 
-    public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Boolean ebsEncrypted,
-            Integer rootVolumeSize, List<String> volumeTypes, Double spotPrice, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId,
-            Boolean kmsKeyDefined, String kmsKey, String encryptedAMI) {
+    public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Boolean ebsEncrypted, Integer rootVolumeSize,
+            Map<String, Long> volumeCounts, Double spotPrice, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, Boolean kmsKeyDefined,
+            String kmsKey, String encryptedAMI) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -55,7 +56,7 @@ public class AwsGroupView {
         this.kmsKeyDefined = kmsKeyDefined;
         this.kmsKey = kmsKey;
         this.encryptedAMI = encryptedAMI;
-        this.volumeTypes = volumeTypes;
+        this.volumeCounts = volumeCounts;
         autoScalingGroupName = getAutoScalingGroupName(groupName);
     }
 
@@ -83,8 +84,16 @@ public class AwsGroupView {
         return ebsEncrypted;
     }
 
+    public Long getVolumeCount(String volumeType) {
+        return volumeCounts.getOrDefault(volumeType, 0L);
+    }
+
     public Double getSpotPrice() {
         return spotPrice;
+    }
+
+    public Map<String, Long> getVolumeCounts() {
+        return volumeCounts;
     }
 
     public List<SecurityRule> getRules() {
@@ -92,7 +101,7 @@ public class AwsGroupView {
     }
 
     public Boolean getEbsOptimized() {
-        return volumeTypes.contains(AwsDiskType.St1.value());
+        return volumeCounts.keySet().contains(AwsDiskType.St1.value());
     }
 
     public List<String> getCloudSecurityIds() {
