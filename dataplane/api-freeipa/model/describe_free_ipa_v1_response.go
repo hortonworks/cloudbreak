@@ -28,7 +28,7 @@ type DescribeFreeIpaV1Response struct {
 	// Required: true
 	Crn *string `json:"crn"`
 
-	// The crn of the environment
+	// CRN of the environment
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
 

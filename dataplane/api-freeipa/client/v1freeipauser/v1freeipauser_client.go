@@ -55,32 +55,32 @@ func (a *Client) CreateUsersV1(params *CreateUsersV1Params) (*CreateUsersV1OK, e
 }
 
 /*
-GetSynchronizationStatusV1 gets the status of synchronization operation
+GetSynchronizeAllUsersStatusV1 gets the status of synchronization operation
 
 User synchronization and management operations
 */
-func (a *Client) GetSynchronizationStatusV1(params *GetSynchronizationStatusV1Params) (*GetSynchronizationStatusV1OK, error) {
+func (a *Client) GetSynchronizeAllUsersStatusV1(params *GetSynchronizeAllUsersStatusV1Params) (*GetSynchronizeAllUsersStatusV1OK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetSynchronizationStatusV1Params()
+		params = NewGetSynchronizeAllUsersStatusV1Params()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getSynchronizationStatusV1",
+		ID:                 "getSynchronizeAllUsersStatusV1",
 		Method:             "GET",
-		PathPattern:        "/v1/freeipa/user/sync",
+		PathPattern:        "/v1/freeipa/user/syncAll",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetSynchronizationStatusV1Reader{formats: a.formats},
+		Reader:             &GetSynchronizeAllUsersStatusV1Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetSynchronizationStatusV1OK), nil
+	return result.(*GetSynchronizeAllUsersStatusV1OK), nil
 
 }
 

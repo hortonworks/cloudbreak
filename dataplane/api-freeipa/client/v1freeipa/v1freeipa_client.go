@@ -85,6 +85,36 @@ func (a *Client) AddDNSZoneForSubnetsV1(params *AddDNSZoneForSubnetsV1Params) (*
 }
 
 /*
+CleanupV1 cleans out users hosts and related DNS entries
+
+FreeIPA is an integrated Identity and Authentication solution that can be used for any of CM, CDP services.
+*/
+func (a *Client) CleanupV1(params *CleanupV1Params) (*CleanupV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCleanupV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "cleanupV1",
+		Method:             "POST",
+		PathPattern:        "/v1/freeipa/cleanup",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &CleanupV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*CleanupV1OK), nil
+
+}
+
+/*
 CreateFreeIpaV1 creates free ipa stack
 
 FreeIPA is an integrated Identity and Authentication solution that can be used for any of CM, CDP services.

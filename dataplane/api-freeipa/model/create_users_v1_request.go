@@ -19,7 +19,7 @@ import (
 // swagger:model CreateUsersV1Request
 type CreateUsersV1Request struct {
 
-	// The crn of the environment
+	// CRN of the environment
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
 

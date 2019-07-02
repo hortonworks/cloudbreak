@@ -45,7 +45,7 @@ type CreateLdapConfigV1Request struct {
 	// domain in LDAP server (e.g. ad.seq.com).
 	Domain string `json:"domain,omitempty"`
 
-	// The crn of the environment
+	// CRN of the environment
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
 

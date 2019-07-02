@@ -39,7 +39,7 @@ type DescribeKerberosConfigV1Response struct {
 	// cluster instances will set this as the domain part of their hostname
 	Domain string `json:"domain,omitempty"`
 
-	// The crn of the environment
+	// CRN of the environment
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
 

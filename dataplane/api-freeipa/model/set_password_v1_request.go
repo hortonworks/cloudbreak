@@ -8,12 +8,18 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // SetPasswordV1Request set password v1 request
 // swagger:model SetPasswordV1Request
 type SetPasswordV1Request struct {
+
+	// Optional environments to sync
+	// Unique: true
+	Environments []string `json:"environments"`
 
 	// the user's password
 	Password string `json:"password,omitempty"`
@@ -21,6 +27,28 @@ type SetPasswordV1Request struct {
 
 // Validate validates this set password v1 request
 func (m *SetPasswordV1Request) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateEnvironments(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SetPasswordV1Request) validateEnvironments(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Environments) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
+		return err
+	}
+
 	return nil
 }
 

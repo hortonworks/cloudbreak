@@ -16,7 +16,7 @@ import (
 // swagger:model TestLdapConfigV1Request
 type TestLdapConfigV1Request struct {
 
-	// The crn of the environment
+	// CRN of the environment
 	EnvironmentCrn string `json:"environmentCrn,omitempty"`
 
 	// Request that contains the minimal set of fields to test LDAP connectivity

@@ -13,28 +13,28 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// AddDNSZoneForSubnetIdsV1Request add Dns zone for subnet ids v1 request
-// swagger:model AddDnsZoneForSubnetIdsV1Request
-type AddDNSZoneForSubnetIdsV1Request struct {
+// HostV1Request host v1 request
+// swagger:model HostV1Request
+type HostV1Request struct {
 
 	// CRN of the environment
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
 
-	// subnet ids
-	// Unique: true
-	SubnetIds []string `json:"subnetIds"`
+	// Hostname where the service is running
+	// Required: true
+	ServerHostName *string `json:"serverHostName"`
 }
 
-// Validate validates this add Dns zone for subnet ids v1 request
-func (m *AddDNSZoneForSubnetIdsV1Request) Validate(formats strfmt.Registry) error {
+// Validate validates this host v1 request
+func (m *HostV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateSubnetIds(formats); err != nil {
+	if err := m.validateServerHostName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -44,7 +44,7 @@ func (m *AddDNSZoneForSubnetIdsV1Request) Validate(formats strfmt.Registry) erro
 	return nil
 }
 
-func (m *AddDNSZoneForSubnetIdsV1Request) validateEnvironmentCrn(formats strfmt.Registry) error {
+func (m *HostV1Request) validateEnvironmentCrn(formats strfmt.Registry) error {
 
 	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
@@ -53,13 +53,9 @@ func (m *AddDNSZoneForSubnetIdsV1Request) validateEnvironmentCrn(formats strfmt.
 	return nil
 }
 
-func (m *AddDNSZoneForSubnetIdsV1Request) validateSubnetIds(formats strfmt.Registry) error {
+func (m *HostV1Request) validateServerHostName(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.SubnetIds) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("subnetIds", "body", m.SubnetIds); err != nil {
+	if err := validate.Required("serverHostName", "body", m.ServerHostName); err != nil {
 		return err
 	}
 
@@ -67,7 +63,7 @@ func (m *AddDNSZoneForSubnetIdsV1Request) validateSubnetIds(formats strfmt.Regis
 }
 
 // MarshalBinary interface implementation
-func (m *AddDNSZoneForSubnetIdsV1Request) MarshalBinary() ([]byte, error) {
+func (m *HostV1Request) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -75,8 +71,8 @@ func (m *AddDNSZoneForSubnetIdsV1Request) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *AddDNSZoneForSubnetIdsV1Request) UnmarshalBinary(b []byte) error {
-	var res AddDNSZoneForSubnetIdsV1Request
+func (m *HostV1Request) UnmarshalBinary(b []byte) error {
+	var res HostV1Request
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

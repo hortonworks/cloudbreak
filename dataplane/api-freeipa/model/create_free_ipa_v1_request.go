@@ -23,7 +23,7 @@ type CreateFreeIpaV1Request struct {
 	// Required: true
 	Authentication *StackAuthenticationV1Request `json:"authentication"`
 
-	// The crn of the environment
+	// CRN of the environment
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
 
