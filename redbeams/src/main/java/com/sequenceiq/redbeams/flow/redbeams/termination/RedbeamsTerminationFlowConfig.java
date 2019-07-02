@@ -31,11 +31,11 @@ public class RedbeamsTerminationFlowConfig extends AbstractFlowConfiguration<Red
 
     private static final List<Transition<RedbeamsTerminationState, RedbeamsTerminationEvent>> TRANSITIONS =
             new Builder<RedbeamsTerminationState, RedbeamsTerminationEvent>().defaultFailureEvent(REDBEAMS_TERMINATION_FAILED_EVENT)
-            .from(INIT_STATE).to(TERMINATE_DATABASE_SERVER_STATE).event(REDBEAMS_TERMINATION_EVENT).defaultFailureEvent()
-            .from(TERMINATE_DATABASE_SERVER_STATE).to(DEREGISTER_DATABASE_SERVER_STATE).event(TERMINATE_DATABASE_SERVER_FINISHED_EVENT)
-                    .failureEvent(TERMINATE_DATABASE_SERVER_FAILED_EVENT)
-            .from(DEREGISTER_DATABASE_SERVER_STATE).to(REDBEAMS_TERMINATION_FINISHED_STATE).event(DEREGISTER_DATABASE_SERVER_FINISHED_EVENT)
+            .from(INIT_STATE).to(DEREGISTER_DATABASE_SERVER_STATE).event(REDBEAMS_TERMINATION_EVENT).defaultFailureEvent()
+            .from(DEREGISTER_DATABASE_SERVER_STATE).to(TERMINATE_DATABASE_SERVER_STATE).event(DEREGISTER_DATABASE_SERVER_FINISHED_EVENT)
                     .failureEvent(DEREGISTER_DATABASE_SERVER_FAILED_EVENT)
+            .from(TERMINATE_DATABASE_SERVER_STATE).to(REDBEAMS_TERMINATION_FINISHED_STATE).event(TERMINATE_DATABASE_SERVER_FINISHED_EVENT)
+                    .failureEvent(TERMINATE_DATABASE_SERVER_FAILED_EVENT)
             .from(REDBEAMS_TERMINATION_FINISHED_STATE).to(FINAL_STATE).event(REDBEAMS_TERMINATION_FINISHED_EVENT).defaultFailureEvent()
             .build();
 

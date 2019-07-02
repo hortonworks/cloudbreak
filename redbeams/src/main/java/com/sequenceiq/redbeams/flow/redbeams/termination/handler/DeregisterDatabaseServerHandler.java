@@ -10,7 +10,6 @@ import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.Deregi
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerSuccess;
 import com.sequenceiq.redbeams.repository.DatabaseConfigRepository;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
-import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 import javax.inject.Inject;
 
@@ -37,9 +36,6 @@ public class DeregisterDatabaseServerHandler implements EventHandler<DeregisterD
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
 
-    @Inject
-    private DBStackService dbStackService;
-
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DeregisterDatabaseServerRequest.class);
@@ -57,7 +53,6 @@ public class DeregisterDatabaseServerHandler implements EventHandler<DeregisterD
                     databaseServerConfigService.getByName(DEFAULT_WORKSPACE, dbStack.getEnvironmentId(), dbStack.getName());
 
             databaseServerConfigService.archive(dbServerConfig);
-            dbStackService.delete(dbStack);
             eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
         } catch (Exception e) {
             DeregisterDatabaseServerFailed failure = new DeregisterDatabaseServerFailed(request.getResourceId(), e);

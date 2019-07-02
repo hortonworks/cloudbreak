@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.service.stack;
 
-import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
@@ -25,6 +25,9 @@ public class RedbeamsTerminationService {
     private DBStackService dbStackService;
 
     @Inject
+    private DBStackStatusUpdater dbStackStatusUpdater;
+
+    @Inject
     private RedbeamsFlowManager flowManager;
 
     // @Inject
@@ -32,14 +35,16 @@ public class RedbeamsTerminationService {
 
     private final Random random = new SecureRandom();
 
-    public DatabaseServerConfig terminateDatabaseServer(String dbStackName, String environmentId) {
+    public DBStack terminateDatabaseServer(String dbStackName, String environmentId) {
         // FIXME log the stack?
 
         DBStack dbStack = dbStackService.getByNameAndEnvironmentId(dbStackName, environmentId);
+        dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.DELETE_REQUESTED);
+        // Get the updated entity with the updated status
+        dbStack = dbStackService.getById(dbStack.getId());
 
-        // Replace resourceId with something non-random
         flowManager.notify(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(),
                 new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(), dbStack.getId()));
-        return new DatabaseServerConfig();
+        return dbStack;
     }
 }
