@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.LoggingAttributesHolder;
 import com.sequenceiq.cloudbreak.cloud.model.LoggingOutputType;
 import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.logging.S3LoggingAttributes;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
@@ -40,7 +41,7 @@ public class TelemetryDecoratorTest {
         Logging logging = new Logging(true, LoggingOutputType.S3, attributes);
         Telemetry telemetry = new Telemetry(logging, null);
         // WHEN
-        underTest.decoratePillar(telemetry, clusterName, StackType.WORKLOAD);
+        underTest.decoratePillar(telemetry, clusterName, StackType.WORKLOAD, CloudPlatform.AWS.name());
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(servicePillar);
         assertEquals(results.get("providerPrefix"), "s3");
@@ -60,7 +61,7 @@ public class TelemetryDecoratorTest {
         Logging logging = new Logging(true, LoggingOutputType.S3, attributes);
         Telemetry telemetry = new Telemetry(logging, null);
         // WHEN
-        underTest.decoratePillar(telemetry, clusterName, StackType.DATALAKE);
+        underTest.decoratePillar(telemetry, clusterName, StackType.DATALAKE, CloudPlatform.AWS.name());
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(servicePillar);
         assertEquals(results.get("providerPrefix"), "s3");
@@ -80,13 +81,14 @@ public class TelemetryDecoratorTest {
         Logging logging = new Logging(true, LoggingOutputType.S3, attributes);
         Telemetry telemetry = new Telemetry(logging, null);
         // WHEN
-        underTest.decoratePillar(telemetry, clusterName, StackType.WORKLOAD);
+        underTest.decoratePillar(telemetry, clusterName, StackType.WORKLOAD, CloudPlatform.AZURE.name());
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(servicePillar);
         assertEquals(results.get("providerPrefix"), "s3");
         assertEquals(results.get("s3LogArchiveBucketName"), "mybucket");
         assertEquals(results.get("s3LogFolderName"), "cluster-logs/distrox/cl1");
         assertEquals(results.get("enabled"), true);
+        assertEquals(results.get("platform"), CloudPlatform.AZURE.name());
     }
 
     @Test
@@ -97,7 +99,7 @@ public class TelemetryDecoratorTest {
         Logging logging = new Logging(true, LoggingOutputType.S3, attributes);
         Telemetry telemetry = new Telemetry(logging, null);
         // WHEN
-        underTest.decoratePillar(telemetry, clusterName, StackType.WORKLOAD);
+        underTest.decoratePillar(telemetry, clusterName, StackType.WORKLOAD, CloudPlatform.AWS.name());
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(servicePillar);
         assertEquals(results.get("enabled"), false);
