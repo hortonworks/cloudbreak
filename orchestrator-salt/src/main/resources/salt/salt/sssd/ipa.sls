@@ -29,8 +29,8 @@ join_ipa:
 {% if salt['file.directory_exists']('/yarn-private') %}
 dns_remove_script:
   file.managed:
-    - source: salt://sssd/ycloud/dns_hack.sh
-    - name: /opt/salt//scripts/dns_hack.sh
+    - source: salt://sssd/ycloud/dns_cleanup.sh
+    - name: /opt/salt/scripts/dns_cleanup.sh
     - user: root
     - group: root
     - mode: 755
@@ -38,8 +38,8 @@ dns_remove_script:
 
 removing_dns_entries:
   cmd.run:
-    - name: runuser -l root -c '/opt/salt/scripts/dns_hack.sh 2>&1 | tee -a /var/log/dns_hack.log'
-    - unless: test -f /var/log/dns_hack.log
+    - name: runuser -l root -c '/opt/salt/scripts/dns_cleanup.sh 2>&1 | tee -a /var/log/dns_cleanup.log'
+    - unless: test -f /var/log/dns_cleanup.log
 {% endif%}
 
 add_dns_record:
