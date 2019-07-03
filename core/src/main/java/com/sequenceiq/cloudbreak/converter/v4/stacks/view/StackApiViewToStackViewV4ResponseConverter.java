@@ -39,9 +39,13 @@ public class StackApiViewToStackViewV4ResponseConverter extends AbstractConversi
         stackViewResponse.setCloudPlatform(source.getCloudPlatform());
         stackViewResponse.setEnvironmentCrn(source.getEnvironmentCrn());
         if (source.getEnvironmentCrn() != null) {
-            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(source.getEnvironmentCrn());
-            stackViewResponse.setEnvironmentName(environmentResponse.getName());
-            stackViewResponse.setCredentialName(environmentResponse.getCredential().getName());
+            try {
+                DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(source.getEnvironmentCrn());
+                stackViewResponse.setEnvironmentName(environmentResponse.getName());
+                stackViewResponse.setCredentialName(environmentResponse.getCredential().getName());
+            } catch (Exception ex) {
+                LOGGER.warn("Environment deleted which had crn: {}.", source.getEnvironmentCrn());
+            }
         }
         return stackViewResponse;
     }
