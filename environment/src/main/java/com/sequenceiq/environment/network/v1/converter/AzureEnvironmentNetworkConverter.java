@@ -63,6 +63,19 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     }
 
     @Override
+    void setRegistrationType(BaseNetwork result, NetworkDto networkDto) {
+        if (isExistingNetworkSpecified(networkDto)) {
+            result.setRegistrationType(RegistrationType.EXISTING);
+        } else {
+            result.setRegistrationType(RegistrationType.CREATE_NEW);
+        }
+    }
+
+    private boolean isExistingNetworkSpecified(NetworkDto networkDto) {
+        return networkDto.getAzure() != null && networkDto.getAzure().getNetworkId() != null;
+    }
+
+    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }

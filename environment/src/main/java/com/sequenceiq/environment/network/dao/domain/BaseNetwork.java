@@ -106,10 +106,6 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
         deletionTimestamp = timestampMillisecs;
     }
 
-    public void setArchived(boolean archived) {
-        this.archived = archived;
-    }
-
     public Long getId() {
         return id;
     }
@@ -132,6 +128,10 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     public RegistrationType getRegistrationType() {
         return registrationType;
+    }
+
+    public void setRegistrationType(RegistrationType registrationType) {
+        this.registrationType = registrationType;
     }
 
     public Json getSubnetMetas() {
@@ -160,12 +160,12 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
         });
     }
 
-    public void setRegistrationType(RegistrationType registrationType) {
-        this.registrationType = registrationType;
-    }
-
     public boolean isArchived() {
         return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 
     public Long getDeletionTimestamp() {

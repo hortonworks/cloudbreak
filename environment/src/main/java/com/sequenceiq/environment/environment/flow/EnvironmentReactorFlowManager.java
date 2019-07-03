@@ -47,21 +47,21 @@ public class EnvironmentReactorFlowManager {
                 .withResourceCrn(envCrn)
                 .build();
 
-        Map<String, Object> flowTriggerUsercrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
-        eventSender.sendEvent(envCreationEvent, new Event.Headers(flowTriggerUsercrn));
+        Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
+        eventSender.sendEvent(envCreationEvent, new Event.Headers(flowTriggerUserCrn));
     }
 
     public void triggerDeleteFlow(Environment environment, String userCrn) {
         LOGGER.info("Trigger flow deletion");
+        cancelRunningFlows(environment.getId(), environment.getName(), environment.getResourceCrn());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
                 .withSelector(START_FREEIPA_DELETE_EVENT.selector())
                 .withResourceId(environment.getId())
                 .withResourceName(environment.getName())
                 .build();
 
-        cancelRunningFlows(environment.getId(), environment.getName(), environment.getResourceCrn());
-        Map<String, Object> flowTriggerUsercrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
-        eventSender.sendEvent(envDeleteEvent, new Event.Headers(flowTriggerUsercrn));
+        Map<String, Object> flowTriggerUserCrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
+        eventSender.sendEvent(envDeleteEvent, new Event.Headers(flowTriggerUserCrn));
     }
 
     public void cancelRunningFlows(Long environmentId, String environmentName, String environmentCrn) {

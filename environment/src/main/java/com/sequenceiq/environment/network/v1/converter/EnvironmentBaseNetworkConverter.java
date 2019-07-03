@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
-import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetworkConverter {
@@ -20,7 +19,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         result.setName(creationDto.getNetworkName() != null ? creationDto.getNetworkName() : environment.getName());
         result.setNetworkCidr(creationDto.getNetworkCidr());
         result.setEnvironments(convertEnvToView(environment));
-        result.setRegistrationType(RegistrationType.EXISTING);
+        setRegistrationType(result, creationDto);
         result.setSubnetIds(creationDto.getSubnetIds());
         result.setSubnetMetas(creationDto.getSubnetIds().stream().collect(Collectors.toMap(Function.identity(), id -> new CloudSubnet(id, null))));
         return result;
@@ -59,4 +58,6 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
     abstract BaseNetwork createProviderSpecificNetwork(NetworkDto network);
 
     abstract NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork source);
+
+    abstract void setRegistrationType(BaseNetwork result, NetworkDto networkDto);
 }

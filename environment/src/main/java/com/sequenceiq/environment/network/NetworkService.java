@@ -37,13 +37,13 @@ public class NetworkService {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
     }
 
-    public BaseNetwork saveNetwork(Environment environment, NetworkDto creationDto, String accountId) {
+    public BaseNetwork saveNetwork(Environment environment, NetworkDto networkDto, String accountId) {
         BaseNetwork network = null;
-        if (creationDto != null) {
+        if (networkDto != null) {
             EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(getCloudPlatform(environment));
             if (environmentNetworkConverter != null) {
-                BaseNetwork baseNetwork = environmentNetworkConverter.convert(environment, creationDto);
-                baseNetwork.setId(getIfNotNull(creationDto, NetworkDto::getId));
+                BaseNetwork baseNetwork = environmentNetworkConverter.convert(environment, networkDto);
+                baseNetwork.setId(getIfNotNull(networkDto, NetworkDto::getId));
                 baseNetwork.setResourceCrn(createCRN(accountId));
                 baseNetwork.setAccountId(accountId);
                 network = save(baseNetwork);

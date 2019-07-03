@@ -44,13 +44,14 @@ public class ReactorFlowManager {
                 .withResourceName(environment.getName())
                 .build();
 
-        cancelRunningFlows(environment.getId(), environment.getName());
+        cancelRunningFlows(environment);
         Map<String, Object> flowTriggerUsercrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
         eventSender.sendEvent(envDeleteEvent, new Event.Headers(flowTriggerUsercrn));
     }
 
-    public void cancelRunningFlows(Long environmentId, String environmentName) {
-        BaseNamedFlowEvent cancellationEvent = new BaseNamedFlowEvent(Flow2Handler.FLOW_CANCEL, environmentId, environmentName);
+    public void cancelRunningFlows(Environment environment) {
+        BaseNamedFlowEvent cancellationEvent = new BaseNamedFlowEvent(Flow2Handler.FLOW_CANCEL,
+                environment.getId(), environment.getName(), environment.getResourceCrn());
         eventSender.sendEvent(cancellationEvent);
     }
 }

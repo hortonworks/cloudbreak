@@ -108,7 +108,7 @@ public class AzureEnvironmentNetworkConverterTest {
         assertNull(actual.getNoPublicIp());
         assertNull(actual.getNoFirewallRules());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
-        assertEquals(RegistrationType.EXISTING, actual.getRegistrationType());
+        assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
         assertEquals(SUBNET_IDS, actual.getSubnetIdsSet());
         assertEquals(SUBNET_1, actual.getSubnetMetasMap().get(SUBNET_1).getId());
         assertEquals(SUBNET_2, actual.getSubnetMetasMap().get(SUBNET_2).getId());

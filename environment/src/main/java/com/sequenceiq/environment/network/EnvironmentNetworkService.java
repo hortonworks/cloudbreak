@@ -55,13 +55,14 @@ public class EnvironmentNetworkService {
 
     public void deleteNetwork(EnvironmentDto environment) {
         NetworkConnector networkConnector = getNetworkConnector(environment.getCloudPlatform());
-        networkConnector.deleteNetworkWithSubnets(createNetworkDeletionRequest(environment));
+        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(environment);
+        networkConnector.deleteNetworkWithSubnets(networkDeletionRequest);
     }
 
     private NetworkDeletionRequest createNetworkDeletionRequest(EnvironmentDto environment) {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
         NetworkDeletionRequest.Builder builder = new NetworkDeletionRequest.Builder()
-                .withStackName(environment.getNetwork().getNetworkName())
+                .withStackName(networkCreationRequestFactory.getStackName(environment))
                 .withCloudCredential(cloudCredential)
                 .withRegion(environment.getLocation().getName());
         getNoPublicIp(environment.getNetwork()).ifPresent(builder::withResourceGroup);

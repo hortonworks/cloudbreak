@@ -41,28 +41,31 @@ import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConvert
 @RunWith(MockitoJUnitRunner.class)
 public class EnvironmentNetworkServiceTest {
 
-    private static final String CLOUD_PLATFORM = "AWS";
+    private static final String CLOUD_PLATFORM = "AZURE";
 
-    @InjectMocks
-    private EnvironmentNetworkService underTest;
-
-    @Mock
-    private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Mock
-    private NetworkCreationRequestFactory networkCreationRequestFactory;
-
-    @Mock
-    private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
-
-    @Mock
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+    private static final String STACK_NAME = "stackName";
 
     @Mock
     private CloudConnector<Object> cloudConnector;
 
     @Mock
     private NetworkConnector networkConnector;
+
+    private final CloudPlatformConnectors cloudPlatformConnectors = Mockito.mock(CloudPlatformConnectors.class);
+
+    private final NetworkCreationRequestFactory networkCreationRequestFactory = Mockito.mock(NetworkCreationRequestFactory.class);
+
+    private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap = Mockito.mock(Map.class);
+
+    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = Mockito.mock(CredentialToCloudCredentialConverter.class);
+
+    @InjectMocks
+    private EnvironmentNetworkService underTest = new EnvironmentNetworkService(
+            cloudPlatformConnectors,
+            networkCreationRequestFactory,
+            environmentNetworkConverterMap,
+            credentialToCloudCredentialConverter
+    );
 
     @Before
     public void before() {
@@ -100,6 +103,7 @@ public class EnvironmentNetworkServiceTest {
         EnvironmentDto environmentDto = createEnvironmentDto(null);
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
+        when(networkCreationRequestFactory.getStackName(any())).thenReturn(STACK_NAME);
 
         underTest.deleteNetwork(environmentDto);
 
@@ -107,7 +111,7 @@ public class EnvironmentNetworkServiceTest {
 
         verify(networkConnector).deleteNetworkWithSubnets(argumentCaptor.capture());
 
-        assertEquals(environmentDto.getNetwork().getNetworkName(), argumentCaptor.getValue().getStackName());
+        assertEquals(STACK_NAME, argumentCaptor.getValue().getStackName());
         assertEquals(cloudCredential, argumentCaptor.getValue().getCloudCredential());
         assertEquals(environmentDto.getLocation().getName(), argumentCaptor.getValue().getRegion());
         assertNull(argumentCaptor.getValue().getResourceGroup());
@@ -115,10 +119,11 @@ public class EnvironmentNetworkServiceTest {
 
     @Test
     public void testDeleteNetworkShouldDeleteTheNetworkWithResourceGroup() {
-        CloudCredential cloudCredential = new CloudCredential("1", "asd");
+        CloudCredential cloudCredential = new CloudCredential("1", "credName");
         EnvironmentDto environmentDto = createEnvironmentDto("resourceGroup");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
+        when(networkCreationRequestFactory.getStackName(any())).thenReturn(STACK_NAME);
 
         underTest.deleteNetwork(environmentDto);
 
@@ -126,7 +131,7 @@ public class EnvironmentNetworkServiceTest {
 
         verify(networkConnector).deleteNetworkWithSubnets(argumentCaptor.capture());
 
-        assertEquals(environmentDto.getNetwork().getNetworkName(), argumentCaptor.getValue().getStackName());
+        assertEquals(STACK_NAME, argumentCaptor.getValue().getStackName());
         assertEquals(cloudCredential, argumentCaptor.getValue().getCloudCredential());
         assertEquals(environmentDto.getLocation().getName(), argumentCaptor.getValue().getRegion());
         assertEquals(environmentDto.getNetwork().getAzure().getResourceGroupName(), argumentCaptor.getValue().getResourceGroup());
@@ -136,7 +141,7 @@ public class EnvironmentNetworkServiceTest {
         return EnvironmentDto.builder()
                 .withCloudPlatform(CLOUD_PLATFORM)
                 .withCredential(new Credential())
-                .withLocationDto(LocationDto.LocationDtoBuilder.aLocationDto().withName("us-west").build())
+                .withLocationDto(LocationDto.LocationDtoBuilder.aLocationDto().withName("us-west-1").build())
                 .withNetwork(NetworkDto.Builder.aNetworkDto()
                         .withName("net-1")
                         .withAzure(AzureParams.AzureParamsBuilder.anAzureParams()

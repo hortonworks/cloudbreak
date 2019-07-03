@@ -38,14 +38,12 @@ dependencies {
     exclude module: 'workspace-authorization'
   }
   compile (project(':cloud-reactor')) {
-    exclude module: 'cloud-reactor-api'
   }
   compile (project(':cloud-reactor-api')) {
-    exclude module: 'core-api'
   }
   compile (project(':datalake-api')) {
-    exclude module: 'core-api'
   }
+  compile (project(':core-api'))
 
   compile project (":cloud-aws")
   compile project (":cloud-azure")
@@ -55,9 +53,7 @@ dependencies {
   compile project (":cloud-openstack")
   compile project (":cloud-cumulus-yarn")
   compile project(":core-api")
-  implementation (project (":redbeams-api")) {
-//    exclude module: 'core-api'
-  }
+  implementation (project (":redbeams-api"))
   implementation (project (":freeipa-api"))
 
   compile     group: 'org.yaml',                  name: 'snakeyaml'
