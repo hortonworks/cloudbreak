@@ -53,6 +53,6 @@ public class FreeIpaPostInstallService {
             freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);
         }
 
-        userService.syncAllUserForStack(threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), stack);
+        userService.syncAllUsersForStack(threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), stack);
     }
 }

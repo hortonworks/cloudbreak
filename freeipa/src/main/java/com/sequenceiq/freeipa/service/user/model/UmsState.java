@@ -52,7 +52,9 @@ public class UmsState {
                     // TODO remove `admins` membership once the group mapping is figured out (CB-2003, DISTX-95)
                     builder.addMemberToGroup("admins", user.getName());
                     userRightsMap.get(e.getKey()).getGroupCrnList()
-                            .forEach(crn -> builder.addMemberToGroup(crnToGroup.get(crn).getName(), user.getName()));
+                            .forEach(crn -> {
+                                builder.addMemberToGroup(crnToGroup.get(crn).getName(), user.getName());
+                            });
                 });
 
         // TODO filter machine users by environment rights

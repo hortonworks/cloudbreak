@@ -18,11 +18,22 @@ public class SynchronizeAllUsersRequest {
     @ApiModelProperty(value = UserModelDescriptions.USERSYNC_USERS)
     private Set<String> users = new HashSet<>();
 
+    public SynchronizeAllUsersRequest() {
+    }
+
     public Set<String> getEnvironments() {
         return environments;
     }
 
+    public void setEnvironments(Set<String> environments) {
+        this.environments = environments;
+    }
+
     public Set<String> getUsers() {
         return users;
+    }
+
+    public void setUsers(Set<String> users) {
+        this.users = users;
     }
 }
