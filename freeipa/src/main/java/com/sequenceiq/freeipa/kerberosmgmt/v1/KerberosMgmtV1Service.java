@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
+import java.util.Optional;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
@@ -14,7 +16,6 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServicePrincipalRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Keytab;
-import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -22,7 +23,6 @@ import com.sequenceiq.freeipa.kerberosmgmt.exception.KeytabCreationException;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
 public class KerberosMgmtV1Service {
@@ -43,8 +43,7 @@ public class KerberosMgmtV1Service {
 
     private static final String IPA_STACK_NOT_FOUND = "Stack for IPA server not found.";
 
-    @Inject
-    private CrnService crnService;
+    private static final int DUPLICATE_ENTRY_ERROR_CODE = 4002;
 
     @Inject
     private StackService stackService;
@@ -63,18 +62,11 @@ public class KerberosMgmtV1Service {
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
         ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
-        if (!hostAdd(request.getServerHostName(), ipaClient)) {
-            throw new KeytabCreationException(HOST_CREATION_FAILED);
-        }
-        String servicePrincipal = serviceAdd(request.getServiceName(), request.getServerHostName(), realm, ipaClient);
-        if (Strings.isNullOrEmpty(servicePrincipal)) {
-            throw new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED);
-        }
-        String serviceKaytab = getServiceKeytab(servicePrincipal, ipaClient);
-        if (Strings.isNullOrEmpty(serviceKaytab)) {
-            throw new KeytabCreationException(KEYTAB_GENERATION_FAILED);
-        }
-        response.setKeytab(serviceKaytab);
+        String adminUser = freeIpaClientFactory.getAdminUser();
+        hostAdd(request.getServerHostName(), ipaClient);
+        String servicePrincipal = serviceAdd(request.getServiceName(), request.getServerHostName(), realm, adminUser, ipaClient);
+        String serviceKeytab = getServiceKeytab(servicePrincipal, ipaClient);
+        response.setKeytab(serviceKeytab);
         response.setServicePrincial(servicePrincipal);
         return response;
     }
@@ -87,11 +79,8 @@ public class KerberosMgmtV1Service {
         ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
 
         String servicePrincipal = request.getServiceName() + "/" + request.getServerHostName() + "@" + realm;
-        String serviceKaytab = getExistingServiceKeytab(servicePrincipal, ipaClient);
-        if (Strings.isNullOrEmpty(serviceKaytab)) {
-            throw new KeytabCreationException(KEYTAB_FETCH_FAILED);
-        }
-        response.setKeytab(serviceKaytab);
+        String serviceKeytab = getExistingServiceKeytab(servicePrincipal, ipaClient);
+        response.setKeytab(serviceKeytab);
         response.setServicePrincial(servicePrincipal);
         return response;
     }
@@ -124,84 +113,72 @@ public class KerberosMgmtV1Service {
         throw new KeytabCreationException(EMPTY_REALM);
     }
 
-    private boolean hostAdd(String hostname, FreeIpaClient ipaClient) {
+    private void hostAdd(String hostname, FreeIpaClient ipaClient) throws KeytabCreationException {
         try {
-            RPCResponse<com.sequenceiq.freeipa.client.model.Host> response;
-            response = ipaClient.addHost(hostname);
-            if (response == null || response.getResult() == null) {
-                return false;
-            }
-            // TODO Handle Failure cases.
+            ipaClient.addHost(hostname);
         } catch (FreeIpaClientException e) {
-            LOGGER.error(HOST_CREATION_FAILED + e.getMessage());
-            return false;
+            if (!isDuplicateEntryException(e)) {
+                LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
+                throw new KeytabCreationException(HOST_CREATION_FAILED);
+            }
         }
-        return true;
     }
 
-    private String serviceAdd(String serviceName, String hostname, String realm, FreeIpaClient ipaClient) {
-        RPCResponse<com.sequenceiq.freeipa.client.model.Service> response;
+    private String serviceAdd(String serviceName, String hostname, String realm, String adminUser, FreeIpaClient ipaClient) throws KeytabCreationException {
+        String canonicalPrincipal = serviceName + "/" + hostname + "@" + realm;
         com.sequenceiq.freeipa.client.model.Service service;
         try {
-            response = ipaClient.addService(serviceName + "/" + hostname + "@" + realm);
-            if (response == null || response.getResult() == null) {
-                return null;
+            try {
+                service = ipaClient.addService(canonicalPrincipal);
+            } catch (FreeIpaClientException e) {
+                if (!isDuplicateEntryException(e)) {
+                    throw e;
+                }
+                service = ipaClient.showService(canonicalPrincipal);
             }
-            service = (com.sequenceiq.freeipa.client.model.Service) response.getResult();
-            serviceAllowRetrieveKeytab(service.getKrbprincipalname(), ipaClient);
-            // TODO Handle Failure cases.
+            allowServiceKeytabRetrieval(service.getKrbprincipalname(), adminUser, ipaClient);
         } catch (FreeIpaClientException e) {
-            LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + e.getMessage());
-            return null;
+            LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
+            throw new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED);
         }
         return service.getKrbprincipalname();
     }
 
-    private String serviceAllowRetrieveKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) {
-        RPCResponse<com.sequenceiq.freeipa.client.model.Service> response;
-        com.sequenceiq.freeipa.client.model.Service service;
+    private void allowServiceKeytabRetrieval(String canonicalPrincipal, String adminUser, FreeIpaClient ipaClient) throws FreeIpaClientException {
         try {
-            response = ipaClient.serviceAllowRetrieveKeytab(canonicalPrincipal, crnService.getCurrentUserId());
-            // TODO Handle Failure cases.
+            ipaClient.allowServiceKeytabRetrieval(canonicalPrincipal, adminUser);
         } catch (FreeIpaClientException e) {
-            LOGGER.error(SERVICE_ALLOW_FAILURE + e.getMessage());
-            return null;
+            LOGGER.error(SERVICE_ALLOW_FAILURE + " " + e.getLocalizedMessage(), e);
+            throw e;
         }
-        service = (com.sequenceiq.freeipa.client.model.Service) response.getResult();
-        return service.getKrbprincipalname();
     }
 
-    private String getServiceKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) {
-        RPCResponse<Keytab> response;
-        Keytab keytab;
+    private String getServiceKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) throws KeytabCreationException {
         try {
-            response = ipaClient.getKeytab(canonicalPrincipal);
-            if (response == null || response.getResult() == null) {
-                return null;
-            }
-            // TODO Handle Failure cases.
+            Keytab keytab = ipaClient.getKeytab(canonicalPrincipal);
+            return keytab.getKeytab();
         } catch (FreeIpaClientException e) {
-            LOGGER.error(KEYTAB_GENERATION_FAILED + e.getMessage());
-            return null;
+            LOGGER.error(KEYTAB_GENERATION_FAILED + " " + e.getLocalizedMessage(), e);
+            throw new KeytabCreationException(KEYTAB_GENERATION_FAILED);
         }
-        keytab = (Keytab) response.getResult();
-        return keytab.getKeytab();
     }
 
-    private String getExistingServiceKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) {
-        RPCResponse<Keytab> response;
-        Keytab keytab;
+    private String getExistingServiceKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) throws KeytabCreationException {
         try {
-            response = ipaClient.getExistingKeytab(canonicalPrincipal);
-            if (response == null || response.getResult() == null) {
-                return null;
-            }
-            // TODO Handle Failure cases.
+            Keytab keytab = ipaClient.getExistingKeytab(canonicalPrincipal);
+            return keytab.getKeytab();
         } catch (FreeIpaClientException e) {
-            LOGGER.error(KEYTAB_FETCH_FAILED + e.getMessage());
-            return null;
+            LOGGER.error(KEYTAB_FETCH_FAILED + " " + e.getLocalizedMessage(), e);
+            throw new KeytabCreationException(KEYTAB_FETCH_FAILED);
         }
-        keytab = (Keytab) response.getResult();
-        return keytab.getKeytab();
+    }
+
+    private boolean isDuplicateEntryException(FreeIpaClientException e) {
+        return Optional.ofNullable(e.getCause())
+                .filter(JsonRpcClientException.class::isInstance)
+                .map(JsonRpcClientException.class::cast)
+                .map(JsonRpcClientException::getCode)
+                .filter(c -> c == DUPLICATE_ENTRY_ERROR_CODE)
+                .isPresent();
     }
 }
