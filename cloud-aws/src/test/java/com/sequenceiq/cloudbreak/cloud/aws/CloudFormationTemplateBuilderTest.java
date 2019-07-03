@@ -10,6 +10,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -389,6 +390,43 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
         assertThat(templateString, containsString("AvailabilitySet"));
         assertThat(templateString, not(containsString("EIP")));
+    }
+
+    @Test
+    public void buildTestWithVPCAndIGWAndVpcSubnets() {
+        assumeFalse(templatePath.contains("1.16"));
+        String vpcSubnet = "10.0.0.0/24";
+        List<String> vpcSubnets = List.of(vpcSubnet);
+        Security security = new Security(getDefaultSecurityRules(), List.of(), true);
+        List<Group> groups = List.of(createDefaultGroup("master", InstanceGroupType.CORE, ROOT_VOLUME_SIZE, security));
+        cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(vpcSubnets)
+                .mapPublicIpOnLaunch(false)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, containsString("InstanceProfile"));
+        assertThat(templateString, containsString("VPCId"));
+        assertThat(templateString, not(containsString("SubnetCIDR")));
+        assertThat(templateString, containsString("SubnetId"));
+        assertThat(templateString, not(containsString("SubnetConfig")));
+        assertThat(templateString, not(containsString("\"AttachGateway\"")));
+        assertThat(templateString, not(containsString("\"InternetGateway\"")));
+        assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, not(containsString("EIP")));
+        assertThat(templateString, containsString("{ \"IpProtocol\" : \"icmp\", \"FromPort\" : \"-1\", \"ToPort\" : \"-1\", \"CidrIp\" : "
+                + "\"10.0.0.0/24\"} ,{ \"IpProtocol\" : \"tcp\", \"FromPort\" : \"0\", \"ToPort\" : \"65535\", \"CidrIp\" : \"10.0.0.0/24\"} ,{ \"IpProtocol\" "
+                + ": \"udp\", \"FromPort\" : \"0\", \"ToPort\" : \"65535\", \"CidrIp\" : \"10.0.0.0/24\"}"));
     }
 
     @Test
