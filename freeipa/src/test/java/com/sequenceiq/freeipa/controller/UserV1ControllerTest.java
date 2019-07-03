@@ -5,6 +5,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,22 +16,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
+import com.sequenceiq.freeipa.service.freeipa.user.SyncOperationStatusService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserService;
-import com.sequenceiq.freeipa.util.CrnService;
-
-import java.util.HashSet;
 
 @ExtendWith(MockitoExtension.class)
 public class UserV1ControllerTest {
 
-    private static final String ACCOUNT_ID = "accountId";
+    private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
-    private static final String USER_CRN = ":crn:altus:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:59cbfafb-999b-4df9-81e2-aa00a88382e9";
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
+
+    private static final String ENV_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
 
     @InjectMocks
     private UserV1Controller underTest;
@@ -39,7 +42,7 @@ public class UserV1ControllerTest {
     private PasswordService passwordService;
 
     @Mock
-    private CrnService crnService;
+    private SyncOperationStatusService syncOperationStatusService;
 
     @Mock
     private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
@@ -47,7 +50,7 @@ public class UserV1ControllerTest {
     @Test
     void synchronizeUser() {
         when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
 
         SynchronizeUserRequest request = mock(SynchronizeUserRequest.class);
 
@@ -59,28 +62,32 @@ public class UserV1ControllerTest {
     @Test
     void synchronizeAllUsers() {
         when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
 
-        SynchronizeAllUsersRequest request = mock(SynchronizeAllUsersRequest.class);
+        Set<String> environments = Set.of(ENV_CRN);
+        Set<String> users = Set.of(USER_CRN);
+        SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest();
+        request.setEnvironments(environments);
+        request.setUsers(users);
 
         underTest.synchronizeAllUsers(request);
 
-        verify(userService, times(1)).synchronizeAllUsers(ACCOUNT_ID, USER_CRN, request);
+        verify(userService, times(1)).synchronizeAllUsers(ACCOUNT_ID, USER_CRN, environments, users);
     }
 
     @Test
     void getStatus() {
-        String syncId = "testId";
+        String operationId = "testId";
 
-        underTest.getSynchronizationStatus(syncId);
+        underTest.getSyncOperationStatus(operationId);
 
-        verify(userService, times(1)).getSynchronizeUsersStatus(syncId);
+        verify(syncOperationStatusService, times(1)).getStatus(operationId);
     }
 
     @Test
     void setPassword() {
         when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
 
         String password = "password";
         SetPasswordRequest request = mock(SetPasswordRequest.class);
@@ -89,16 +96,5 @@ public class UserV1ControllerTest {
         underTest.setPassword(request);
 
         verify(passwordService, times(1)).setPassword(ACCOUNT_ID, USER_CRN, password, new HashSet<>());
-    }
-
-    @Test
-    void createUsers() throws Exception {
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-
-        CreateUsersRequest request = mock(CreateUsersRequest.class);
-
-        underTest.createUsers(request);
-
-        verify(userService, times(1)).createUsers(ACCOUNT_ID, request);
     }
 }

@@ -31,7 +31,7 @@ public class FreeIpaApiUserCrnEndpoint extends AbstractUserCrnServiceEndpoint im
     }
 
     @Override
-    public UserV1Endpoint getUsersyncV1Endpoint() {
+    public UserV1Endpoint getUserV1Endpoint() {
         return getEndpoint(UserV1Endpoint.class);
     }
 

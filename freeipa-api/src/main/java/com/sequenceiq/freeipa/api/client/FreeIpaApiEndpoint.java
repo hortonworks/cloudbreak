@@ -14,7 +14,7 @@ public interface FreeIpaApiEndpoint {
 
     KerberosConfigV1Endpoint getKerberosConfigV1Endpoint();
 
-    UserV1Endpoint getUsersyncV1Endpoint();
+    UserV1Endpoint getUserV1Endpoint();
 
     ClientTestV1Endpoint getClientTestV1Endpoint();
 

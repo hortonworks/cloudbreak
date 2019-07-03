@@ -11,7 +11,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -79,7 +80,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private final Map<String, Set<String>> accountUsers = new ConcurrentHashMap<>();
 
-    private final Map<String, List<Group>> accountGroups = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, Group>> accountGroups = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void setLicense() {
@@ -93,7 +94,6 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         String userName = splittedCrn[6];
         String accountId = splittedCrn[4];
         accountUsers.computeIfAbsent(accountId, key -> newSetFromMap(new ConcurrentHashMap<>())).add(userName);
-        accountGroups.computeIfAbsent(accountId, this::createGroups);
         responseObserver.onNext(
                 GetUserResponse.newBuilder()
                         .setUser(createUser(accountId, userName))
@@ -129,7 +129,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         String actorCrn = request.getActorCrn();
         String[] splittedCrn = actorCrn.split(":");
         String accountId = splittedCrn[4];
-        List<Group> groups = accountGroups.get(accountId);
+        List<Group> groups = List.copyOf(getOrCreateGroups(accountId));
         Group group = groups.get(RANDOM.nextInt(groups.size()));
         responseObserver.onNext(
                 GetRightsResponse.newBuilder()
@@ -154,27 +154,44 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void listGroups(ListGroupsRequest request, StreamObserver<ListGroupsResponse> responseObserver) {
+
         ListGroupsResponse.Builder groupsBuilder = ListGroupsResponse.newBuilder();
         if (request.getGroupNameOrCrnCount() == 0) {
             if (isNotEmpty(request.getAccountId())) {
-                ofNullable(accountGroups.get(request.getAccountId())).orElse(List.of()).stream()
+                getOrCreateGroups(request.getAccountId()).stream()
                         .forEach(groupsBuilder::addGroup);
             }
             responseObserver.onNext(groupsBuilder.build());
         } else {
-            request.getGroupNameOrCrnList().forEach(groupCrn -> {
-                String[] splittedCrn = groupCrn.split(":");
-                groupsBuilder.addGroup(createGroup(splittedCrn[4], splittedCrn[6]));
-            });
+            request.getGroupNameOrCrnList().stream()
+                    .map(this::getOrCreateGroup)
+                    .forEach(groupsBuilder::addGroup);
             responseObserver.onNext(groupsBuilder.build());
         }
         responseObserver.onCompleted();
     }
 
-    private List<Group> createGroups(String accountId) {
-        List<Group> groups = new ArrayList(GROUPS_PER_ACCOUNT);
+    private Collection<Group> getOrCreateGroups(String accountId) {
+        accountGroups.computeIfAbsent(accountId, this::createGroups);
+        return accountGroups.get(accountId).values();
+    }
+
+    private Group getOrCreateGroup(String groupCrn) {
+        String[] splittedCrn = groupCrn.split(":");
+        String accountId = splittedCrn[4];
+
+        accountGroups.computeIfAbsent(accountId, this::createGroups);
+        Map<String, Group> groups = accountGroups.get(accountId);
+
+        groups.computeIfAbsent(groupCrn, this::createGroupFromCrn);
+        return groups.get(groupCrn);
+    }
+
+    private Map<String, Group> createGroups(String accountId) {
+        Map<String, Group> groups = new HashMap(GROUPS_PER_ACCOUNT);
         for (int i = 0; i < GROUPS_PER_ACCOUNT; ++i) {
-            groups.add(createGroup(accountId, "mockgroup" + i));
+            Group group = createGroup(accountId, "mockgroup" + i);
+            groups.put(group.getCrn(), group);
         }
         return groups;
     }
@@ -186,6 +203,16 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 .setGroupId(groupId)
                 .setCrn(groupCrn)
                 .setGroupName(groupName)
+                .build();
+    }
+
+    private Group createGroupFromCrn(String groupCrn) {
+        String[] splittedCrn = groupCrn.split(":");
+        String groupId = splittedCrn[6];
+        return Group.newBuilder()
+                .setGroupId(groupId)
+                .setCrn(groupCrn)
+                .setGroupName(groupId)
                 .build();
     }
 

@@ -1,26 +1,27 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Multimap;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -50,85 +51,80 @@ public class UserService {
     @Inject
     private FreeIpaUsersStateProvider freeIpaUsersStateProvider;
 
-    public SynchronizeUserResponse synchronizeUser(String accountId, String actorCrn, String userCrn) {
-        LOGGER.debug("Syncing user {} in account {}", userCrn, accountId);
-        List<SyncStatusDetail> statuses = synchronizeUsers(accountId, actorCrn, null, Set.of(userCrn));
+    @Inject
+    private AsyncTaskExecutor asyncTaskExecutor;
 
-        List<String> success = new ArrayList<>();
-        Map<String, String> failure = new HashMap<>();
-        statuses.forEach(status -> {
-            switch (status.getStatus()) {
-                case COMPLETED:
-                    success.add(status.getEnvironmentCrn());
-                    break;
-                case FAILED:
-                    failure.put(status.getEnvironmentCrn(), status.getDetails());
-                    break;
-                default:
-                    failure.put(status.getEnvironmentCrn(), "Unknown status");
-                    break;
-            }
-        });
-        return new SynchronizeUserResponse(success, failure);
+    @Inject
+    private SyncOperationStatusService syncOperationStatusService;
+
+    public SyncOperationStatus synchronizeUser(String accountId, String actorCrn, String userCrn) {
+        return synchronizeAllUsers(accountId, actorCrn, null, Set.of(userCrn));
     }
 
-    public SynchronizeAllUsersResponse synchronizeAllUsers(String accountId, String actorCrn, SynchronizeAllUsersRequest request) {
-        synchronizeUsers(accountId, actorCrn, request.getEnvironments(), request.getUsers());
+    public SyncOperationStatus synchronizeAllUsers(String accountId, String actorCrn, Set<String> environmentFilter, Set<String> userCrnFilter) {
+        SyncOperationStatus response = syncOperationStatusService.startOperation(SyncOperationType.USER_SYNC);
 
-        // TODO properly return values
-        return new SynchronizeAllUsersResponse(UUID.randomUUID().toString(), SynchronizationStatus.RUNNING,
-                null, null);
+        asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(response.getOperationId(), accountId, actorCrn, environmentFilter, userCrnFilter));
+
+        return response;
     }
 
-    private List<SyncStatusDetail> synchronizeUsers(String accountId, String actorCrn, Set<String> environmentsFilter, Set<String> userCrnFilter) {
-        boolean filterUsers = userCrnFilter != null && !userCrnFilter.isEmpty();
-
-        // TODO allow filtering on machine users as well
-
-        List<Stack> stacks = stackService.getAllByAccountId(accountId);
-        LOGGER.debug("Found {} stacks for account {}", stacks.size(), accountId);
-        if (environmentsFilter != null && !environmentsFilter.isEmpty()) {
-            stacks = stacks.stream()
-                    .filter(stack -> environmentsFilter.contains(stack.getEnvironmentCrn()))
-                    .collect(Collectors.toList());
-        }
-        UmsState umsState = filterUsers ? umsUsersStateProvider.getUserFilteredUmsState(accountId, actorCrn, userCrnFilter)
-                : umsUsersStateProvider.getUmsState(accountId, actorCrn);
-
-        Set<String> userIdFilter = filterUsers ? umsState.getUsernamesFromCrns(userCrnFilter)
-                : Set.of();
-
-        List<SyncStatusDetail> statuses = stacks.stream()
-                .map(stack -> synchronizeStack(stack, umsState, userIdFilter))
-                .collect(Collectors.toList());
-
-        return statuses;
-    }
-
-    public SynchronizeAllUsersResponse getSynchronizeUsersStatus(String syncId) {
-        return new SynchronizeAllUsersResponse(syncId, SynchronizationStatus.RUNNING,
-                null, null);
-    }
-
-    public void createUsers(String accountId, CreateUsersRequest request) throws Exception {
-        // TODO remove this method and API when we are happy w/ user sync
-        LOGGER.info("UserService.createUsers() called");
-
-        Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
-
-        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-
-        addGroups(freeIpaClient, request.getGroups());
-
-        Set<User> users = request.getUsers();
-        addUsers(freeIpaClient, users);
-
-        LOGGER.info("Done!");
-    }
-
-    public SyncStatusDetail syncAllUserForStack(String accountId, String actorCrn, Stack stack) {
+    public SyncStatusDetail syncAllUsersForStack(String accountId, String actorCrn, Stack stack) {
         UmsState umsState = umsUsersStateProvider.getUmsState(accountId, actorCrn);
         return synchronizeStack(stack, umsState, Set.of());
+    }
+
+    private void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, Set<String> environmentsFilter, Set<String> userCrnFilter) {
+        try {
+            boolean filterUsers = userCrnFilter != null && !userCrnFilter.isEmpty();
+
+            // TODO allow filtering on machine users as well
+
+            List<Stack> stacks = stackService.getAllByAccountId(accountId);
+            LOGGER.debug("Found {} stacks for account {}", stacks.size(), accountId);
+            if (environmentsFilter != null && !environmentsFilter.isEmpty()) {
+                stacks = stacks.stream()
+                        .filter(stack -> environmentsFilter.contains(stack.getEnvironmentCrn()))
+                        .collect(Collectors.toList());
+            }
+            UmsState umsState = filterUsers ? umsUsersStateProvider.getUserFilteredUmsState(accountId, actorCrn, userCrnFilter)
+                    : umsUsersStateProvider.getUmsState(accountId, actorCrn);
+
+            Set<String> userIdFilter = filterUsers ? umsState.getUsernamesFromCrns(userCrnFilter)
+                    : Set.of();
+
+            Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
+                    .collect(Collectors.toMap(Stack::getEnvironmentCrn,
+                            stack -> asyncTaskExecutor.submit(() -> synchronizeStack(stack, umsState, userIdFilter))));
+
+
+            List<SuccessDetails> success = new ArrayList<>();
+            List<FailureDetails> failure = new ArrayList<>();
+
+            statusFutures.forEach((envCrn, statusFuture) -> {
+                SyncStatusDetail status;
+                try {
+                    status = statusFuture.get();
+                    switch (status.getStatus()) {
+                        case COMPLETED:
+                            success.add(new SuccessDetails(envCrn));
+                            break;
+                        case FAILED:
+                            failure.add(new FailureDetails(envCrn, status.getDetails()));
+                            break;
+                        default:
+                            failure.add(new FailureDetails(envCrn, "Unknown status"));
+                            break;
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    failure.add(new FailureDetails(envCrn, e.getLocalizedMessage()));
+                }
+            });
+            syncOperationStatusService.completeOperation(operationId, success, failure);
+        } catch (RuntimeException e) {
+            syncOperationStatusService.failOperation(operationId, e.getLocalizedMessage());
+            throw e;
+        }
     }
 
     private SyncStatusDetail synchronizeStack(Stack stack, UmsState umsState, Set<String> userIdFilter) {
@@ -155,7 +151,7 @@ public class UserService {
 
             return SyncStatusDetail.succeed(environmentCrn, "TODO- collect detail info");
         } catch (Exception e) {
-            LOGGER.warn("Failed to synchronize environment {}", stack.getEnvironmentCrn());
+            LOGGER.warn("Failed to synchronize environment {}", stack.getEnvironmentCrn(), e);
             return SyncStatusDetail.fail(environmentCrn, e.getLocalizedMessage());
         }
     }
