@@ -13,9 +13,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Keytab;
 import com.sequenceiq.freeipa.client.model.Service;
@@ -44,6 +48,8 @@ public class KerberosMgmtV1ServiceTest {
 
     private static final String SERVICE_PRINCIPAL = "principal";
 
+    private static final String SECRET = "secret";
+
     private static FreeIpa freeIpa;
 
     private static Stack stack;
@@ -53,6 +59,8 @@ public class KerberosMgmtV1ServiceTest {
     private static Service service;
 
     private static Keytab keytab;
+
+    private static FreeIpaClientException ipaClientException;
 
     @Mock
     private StackService stackService;
@@ -65,6 +73,12 @@ public class KerberosMgmtV1ServiceTest {
 
     @Mock
     private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
+
+    @Mock
+    private StringToSecretResponseConverter stringToSecretResponseConverter;
+
+    @Mock
+    private SecretService secretService;
 
     @InjectMocks
     private KerberosMgmtV1Service underTest;
@@ -81,6 +95,7 @@ public class KerberosMgmtV1ServiceTest {
         service.setKrbprincipalname(SERVICE_PRINCIPAL);
         keytab = new Keytab();
         keytab.setKeytab(KEYTAB);
+        ipaClientException = new FreeIpaClientException("failure");
     }
 
     @Test
@@ -107,6 +122,7 @@ public class KerberosMgmtV1ServiceTest {
         Mockito.reset(freeIpaService);
         Mockito.when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.getExistingKeytab(anyString())).thenReturn(new Keytab());
         try {
             underTest.getExistingServiceKeytab(request, ACCOUNT_ID);
         } catch (RuntimeException exp) {
@@ -138,18 +154,24 @@ public class KerberosMgmtV1ServiceTest {
         Mockito.reset(freeIpaService);
         Mockito.when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.addHost(anyString())).thenThrow(ipaClientException);
         try {
+
             underTest.generateServiceKeytab(request, ACCOUNT_ID);
         } catch (RuntimeException exp) {
             Assert.assertEquals("Failed to create host.", exp.getMessage());
         }
+        Mockito.reset(mockIpaClient);
         Mockito.when(mockIpaClient.addHost(anyString())).thenReturn(host);
+        Mockito.when(mockIpaClient.addService(anyString())).thenThrow(ipaClientException);
         try {
             underTest.generateServiceKeytab(request, ACCOUNT_ID);
         } catch (RuntimeException exp) {
             Assert.assertEquals("Failed to create service principal.", exp.getMessage());
         }
+        Mockito.reset(mockIpaClient);
         Mockito.when(mockIpaClient.addService(anyString())).thenReturn(service);
+        Mockito.when(mockIpaClient.getKeytab(anyString())).thenThrow(ipaClientException);
         try {
             underTest.generateServiceKeytab(request, ACCOUNT_ID);
         } catch (RuntimeException exp) {
@@ -166,13 +188,15 @@ public class KerberosMgmtV1ServiceTest {
         Mockito.when(mockIpaClient.addHost(anyString())).thenReturn(host);
         Mockito.when(mockIpaClient.addService(anyString())).thenReturn(service);
         Mockito.when(mockIpaClient.getKeytab(anyString())).thenReturn(keytab);
+        Mockito.when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
+        Mockito.when(stringToSecretResponseConverter.convert(SECRET)).thenReturn(new SecretResponse());
         ServiceKeytabRequest request = new ServiceKeytabRequest();
         request.setServiceName(USERCRN);
         request.setEnvironmentCrn(ENVIRONMENT_ID);
         request.setServerHostName(HOST);
         ServiceKeytabResponse resp = underTest.generateServiceKeytab(request, ACCOUNT_ID);
-        Assert.assertEquals(resp.getKeytab(), "keytab");
-        Assert.assertEquals(resp.getServicePrincial(), SERVICE_PRINCIPAL);
+        Assert.assertNotNull(resp.getKeytab());
+        Assert.assertNotNull(resp.getServicePrincial());
     }
 
     @Test
@@ -182,11 +206,13 @@ public class KerberosMgmtV1ServiceTest {
         Mockito.when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(mockIpaClient);
         Mockito.when(mockIpaClient.getExistingKeytab(anyString())).thenReturn(keytab);
+        Mockito.when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
+        Mockito.when(stringToSecretResponseConverter.convert(SECRET)).thenReturn(new SecretResponse());
         ServiceKeytabRequest request = new ServiceKeytabRequest();
         request.setServiceName(USERCRN);
         request.setEnvironmentCrn(ENVIRONMENT_ID);
         request.setServerHostName(HOST);
         ServiceKeytabResponse resp = underTest.getExistingServiceKeytab(request, ACCOUNT_ID);
-        Assert.assertEquals(resp.getKeytab(), KEYTAB);
+        Assert.assertNotNull(resp.getKeytab());
     }
 }
