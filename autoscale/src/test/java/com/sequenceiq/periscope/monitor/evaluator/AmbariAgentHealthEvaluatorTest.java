@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,7 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
+import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.monitor.evaluator.ambari.AmbariAgentHealthEvaluator;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
@@ -47,12 +47,12 @@ public class AmbariAgentHealthEvaluatorTest {
 
     @Test
     public void testRunCallsFinished() {
-        underTest.setContext(new ClusterIdEvaluatorContext(CLUSTER_ID));
-        when(clusterService.findById(anyLong())).thenThrow(new RuntimeException("exception from the test"));
+        Cluster cluster = new Cluster();
+        cluster.setId(CLUSTER_ID);
 
-        underTest.run();
+        when(ambariClientProvider.createAmbariClient(cluster)).thenThrow(new RuntimeException("exception from the test"));
+        underTest.determineHostnamesToRecover(cluster);
 
-        verify(executorServiceWithRegistry).finished(underTest, CLUSTER_ID);
         verify(eventPublisher).publishEvent(any(UpdateFailedEvent.class));
     }
 }

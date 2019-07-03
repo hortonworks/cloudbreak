@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.ambari;
 
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 public class AmbariOperationFailedException extends CloudbreakServiceException {
 

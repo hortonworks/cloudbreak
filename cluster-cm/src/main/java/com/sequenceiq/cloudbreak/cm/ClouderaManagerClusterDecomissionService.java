@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -44,7 +45,10 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
 
     @PostConstruct
     public void initApiClient() {
-        client = clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig);
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
     }
 
     @Override

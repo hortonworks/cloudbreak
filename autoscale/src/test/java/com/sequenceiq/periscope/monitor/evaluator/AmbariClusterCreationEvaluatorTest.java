@@ -11,6 +11,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.periscope.monitor.context.ClusterCreationEvaluatorContext;
+import com.sequenceiq.periscope.monitor.evaluator.ambari.AmbariClusterCreationEvaluator;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
@@ -18,7 +19,7 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
 
-public class ClusterCreationEvaluatorTest {
+public class AmbariClusterCreationEvaluatorTest {
 
     public static final long STACK_ID = 1L;
 
@@ -41,7 +42,7 @@ public class ClusterCreationEvaluatorTest {
     private ExecutorServiceWithRegistry executorServiceWithRegistry;
 
     @InjectMocks
-    private ClusterCreationEvaluator underTest;
+    private AmbariClusterCreationEvaluator underTest;
 
     @Before
     public void setup() {

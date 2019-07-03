@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.polling.StatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Component
 public class NginxCertListenerTask implements StatusCheckerTask<NginxPollerObject> {

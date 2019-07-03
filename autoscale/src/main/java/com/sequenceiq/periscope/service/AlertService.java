@@ -21,7 +21,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.services.CommonService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
-import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
+import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.MetricAlert;
@@ -72,7 +72,7 @@ public class AlertService {
     private ScalingService scalingPolicyService;
 
     @Inject
-    private AmbariRequestLogging ambariRequestLogging;
+    private RequestLogging ambariRequestLogging;
 
     public MetricAlert createMetricAlert(Long clusterId, MetricAlert alert) {
         Cluster cluster = clusterService.findById(clusterId);

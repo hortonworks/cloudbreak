@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.common.exception;
 
 public class CloudbreakServiceException extends RuntimeException {
     public CloudbreakServiceException(String message) {

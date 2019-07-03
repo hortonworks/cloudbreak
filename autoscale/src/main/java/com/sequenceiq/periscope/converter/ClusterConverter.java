@@ -35,7 +35,7 @@ public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse
         AutoscaleClusterResponse json = new AutoscaleClusterResponse(
                 source.getHost(),
                 source.getPort(),
-                secretService.get(source.getAmbariUser()),
+                secretService.get(source.getClusterManagerUser()),
                 source.getStackId(),
                 source.isAutoscalingEnabled(),
                 source.getId(),

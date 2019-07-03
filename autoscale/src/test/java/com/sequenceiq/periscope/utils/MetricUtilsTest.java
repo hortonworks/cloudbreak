@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerScheduledExecutor;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
 
@@ -31,7 +32,7 @@ public class MetricUtilsTest {
 
     @Test
     public void testSubmitThreadPoolExecutorParameters() {
-        ThreadPoolExecutor threadPoolExecutor = mock(ThreadPoolExecutor.class);
+        ThreadPoolExecutor threadPoolExecutor = mock(MDCCleanerScheduledExecutor.class);
         when(threadPoolExecutor.getCorePoolSize()).thenReturn(5);
         var blockingQueue = mock(BlockingQueue.class);
         when(blockingQueue.size()).thenReturn(6);

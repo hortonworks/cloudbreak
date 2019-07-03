@@ -1,7 +1,10 @@
 package com.sequenceiq.periscope.modul.rejected;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,17 +16,21 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.test.context.TestPropertySource;
 
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.periscope.aspects.RequestLogging;
+import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
+import com.sequenceiq.periscope.monitor.evaluator.ambari.AmbariClusterCreationEvaluator;
 import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
-import com.sequenceiq.periscope.monitor.executor.LoggedExecutorService;
 import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHandler;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
@@ -34,7 +41,6 @@ import com.sequenceiq.periscope.service.StackCollectorService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
-import com.sequenceiq.periscope.utils.LoggerUtils;
 import com.sequenceiq.periscope.utils.MetricUtils;
 
 @TestPropertySource(properties = "profile=dev")
@@ -47,23 +53,25 @@ public class StackCollectorContext {
                     value = {
                             PersistRejectedThreadExecutionHandler.class,
                             RejectedThreadService.class,
-                            AmbariRequestLogging.class,
+                            RequestLogging.class,
                             PeriscopeNodeConfig.class,
-                            ClusterCreationEvaluator.class,
+                            AmbariClusterCreationEvaluator.class,
                             StackCollectorService.class,
                             ExecutorServiceWithRegistry.class,
                             EvaluatorExecutorRegistry.class,
-                            LoggedExecutorService.class,
                             Clock.class
                     })
     )
     @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, TlsSecurityService.class, HistoryService.class,
-            HttpNotificationSender.class, MetricUtils.class, LoggerUtils.class, Clock.class})
+            HttpNotificationSender.class, MetricUtils.class, Clock.class, ClouderaManagerClientFactory.class, SecretService.class})
     @EnableAsync
     public static class StackCollectorSpringConfig implements AsyncConfigurer {
 
         @Inject
         private PersistRejectedThreadExecutionHandler persistRejectedThreadExecutionHandler;
+
+        @Inject
+        private List<ClusterCreationEvaluator> clusterCreationEvaluators;
 
         @Bean("periscopeListeningScheduledExecutorService")
         ExecutorService listeningScheduledExecutorService() {
@@ -78,6 +86,20 @@ public class StackCollectorContext {
             executorFactoryBean.setQueueCapacity(2);
             executorFactoryBean.setRejectedExecutionHandler(persistRejectedThreadExecutionHandler);
             return executorFactoryBean;
+        }
+
+        @Bean
+        public Map<ClusterManagerVariant, Class<? extends ClusterCreationEvaluator>> clusterCreationEvaluatorMap() {
+            return clusterCreationEvaluators.stream()
+                    .collect(Collectors.toMap(
+                            ClusterCreationEvaluator::getSupportedClusterManagerVariant,
+                            ClusterCreationEvaluator::getClass
+                    ));
+        }
+
+        @Bean
+        public static PropertySourcesPlaceholderConfigurer propertiesResolver() {
+            return new PropertySourcesPlaceholderConfigurer();
         }
 
         @Override

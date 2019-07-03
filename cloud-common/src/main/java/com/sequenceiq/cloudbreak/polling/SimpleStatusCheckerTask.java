@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.polling;
 
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 public abstract class SimpleStatusCheckerTask<T> implements StatusCheckerTask<T> {
 

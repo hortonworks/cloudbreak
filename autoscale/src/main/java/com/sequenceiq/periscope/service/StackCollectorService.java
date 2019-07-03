@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.service;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -12,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.monitor.context.ClusterCreationEvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
@@ -39,16 +40,21 @@ public class StackCollectorService {
     @Inject
     private RejectedThreadService rejectedThreadService;
 
+    @Inject
+    private Map<ClusterManagerVariant, Class<? extends ClusterCreationEvaluator>> clusterCreationEvaluatorMap;
+
     public void collectStackDetails() {
         if (LOCK.tryLock()) {
             try {
                 CloudbreakInternalCrnClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakInternalCrnClientClient();
                 Collection<AutoscaleStackV4Response> allStacks = cloudbreakClient.withInternalCrn().autoscaleEndpoint().getAllForAutoscale().getResponses();
                 for (AutoscaleStackV4Response stack : allStacks) {
-                    Status clusterStatus = stack.getClusterStatus();
                     try {
                         LOGGER.debug("Evaluate cluster management for stack: {} (ID:{})", stack.getName(), stack.getStackId());
-                        ClusterCreationEvaluator clusterCreationEvaluator = applicationContext.getBean(ClusterCreationEvaluator.class);
+
+                        ClusterManagerVariant variant = ClusterManagerVariant.valueOf(stack.getClusterManagerVariant());
+                        Class<? extends ClusterCreationEvaluator> clusterCreationEvaluatorClass = clusterCreationEvaluatorMap.get(variant);
+                        ClusterCreationEvaluator clusterCreationEvaluator = applicationContext.getBean(clusterCreationEvaluatorClass);
                         clusterCreationEvaluator.setContext(new ClusterCreationEvaluatorContext(stack));
                         executorServiceWithRegistry.submitIfAbsent(clusterCreationEvaluator, stack.getStackId());
                         LOGGER.debug("Succesfully submitted, the stack id: {}.", stack.getStackId());

@@ -34,7 +34,9 @@ public class ClouderaManagerLdapService {
 
     public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig, LdapView ldapView) throws ApiException {
         if (ldapView != null) {
-            ApiClient client = clouderaManagerClientFactory.getClient(stack, cluster, clientConfig);
+            String user = cluster.getCloudbreakAmbariUser();
+            String password = cluster.getCloudbreakAmbariPassword();
+            ApiClient client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
 
             LOGGER.debug("Setup LDAP on ClouderaManager API for stack: {}", stack.getId());
             ExternalUserMappingsResourceApi externalUserMappingsResourceApi =

@@ -56,6 +56,9 @@ public class AutoscaleStackV4Response {
     @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
 
+    @ApiModelProperty(ClusterModelDescription.VARIANT)
+    private String clusterManagerVariant;
+
     public String getTenant() {
         return tenant;
     }
@@ -150,5 +153,13 @@ public class AutoscaleStackV4Response {
 
     public void setClusterStatus(Status clusterStatus) {
         this.clusterStatus = clusterStatus;
+    }
+
+    public String getClusterManagerVariant() {
+        return clusterManagerVariant;
+    }
+
+    public void setClusterManagerVariant(String clusterManagerVariant) {
+        this.clusterManagerVariant = clusterManagerVariant;
     }
 }

@@ -3,13 +3,13 @@ package com.sequenceiq.periscope.monitor.executor;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
 import org.junit.Before;
@@ -28,7 +28,7 @@ public class ExecutorServiceWithRegistryTest {
     private EvaluatorExecutorRegistry evaluatorExecutorRegistry;
 
     @Mock
-    private LoggedExecutorService loggedExecutorService;
+    private ExecutorService executorService;
 
     @InjectMocks
     private ExecutorServiceWithRegistry executorServiceWithRegistry;
@@ -44,7 +44,7 @@ public class ExecutorServiceWithRegistryTest {
 
         executorServiceWithRegistry.submitIfAbsent(getEvaluatorExecutor(), CLUSTER_ID);
 
-        verify(loggedExecutorService).submit(anyString(), (Runnable) any());
+        verify(executorService).submit((Runnable) any());
         verify(evaluatorExecutorRegistry, never()).remove(any(), anyLong());
     }
 
@@ -55,13 +55,13 @@ public class ExecutorServiceWithRegistryTest {
         executorServiceWithRegistry.submitIfAbsent(getEvaluatorExecutor(), CLUSTER_ID);
 
         verify(evaluatorExecutorRegistry, never()).remove(any(), anyLong());
-        verify(loggedExecutorService, never()).submit(anyString(), (Runnable) any());
+        verify(executorService, never()).submit((Runnable) any());
     }
 
     @Test
     public void testSubmitIfAbsentWhenExecutorServiceThrows() {
         when(evaluatorExecutorRegistry.putIfAbsent(any(), eq(CLUSTER_ID))).thenReturn(true);
-        when(loggedExecutorService.submit(anyString(), (Runnable) any())).thenThrow(new RejectedExecutionException(""));
+        when(executorService.submit((Runnable) any())).thenThrow(new RejectedExecutionException(""));
 
         try {
             executorServiceWithRegistry.submitIfAbsent(getEvaluatorExecutor(), CLUSTER_ID);
@@ -70,7 +70,7 @@ public class ExecutorServiceWithRegistryTest {
 
         }
 
-        verify(loggedExecutorService).submit(anyString(), (Runnable) any());
+        verify(executorService).submit((Runnable) any());
         verify(evaluatorExecutorRegistry).remove(any(), eq(CLUSTER_ID));
     }
 

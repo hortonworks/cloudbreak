@@ -135,7 +135,7 @@ cloud-init[1001]: + '[' -e /dev/vdy ']'
 cloud-init[1001]: + (( i++  ))
 cloud-init[1001]: + (( i<=24 ))
 cloud-init[1001]: + cd /hadoopfs/fs1
-cloud-init[1001]: + mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch
+cloud-init[1001]: + mkdir logs logs/clusterManager-server logs/clusterManager-agent logs/consul-watch
 cloud-init[1001]: + fix_hostname
 cloud-init[1001]: ++ get_ip
 cloud-init[1001]: ++ ifconfig eth0

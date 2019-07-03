@@ -18,8 +18,6 @@ import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Service
 public class ClouderaManagerClientFactory {
@@ -27,29 +25,25 @@ public class ClouderaManagerClientFactory {
     @Inject
     private ClouderaManagerClientProvider clouderaManagerClientProvider;
 
-    public ApiClient getDefaultClient(Stack stack, HttpClientConfig clientConfig) {
-        return clouderaManagerClientProvider.getClouderaManagerClient(clientConfig, stack.getGatewayPort(), "admin", "admin");
+    public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig) {
+        return clouderaManagerClientProvider.getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin");
     }
 
-    public ApiClient getClient(Stack stack, Cluster cluster, HttpClientConfig clientConfig) {
-        if (StringUtils.isNoneBlank(cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword())) {
+    public ApiClient getClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) {
+        if (StringUtils.isNoneBlank(user, password)) {
             return clouderaManagerClientProvider.getClouderaManagerClient(clientConfig,
-                    stack.getGatewayPort(), cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword());
+                    gatewayPort, user, password);
         } else {
-            return getDefaultClient(stack, clientConfig);
+            return getDefaultClient(gatewayPort, clientConfig);
         }
     }
 
-    public ApiClient getClient(Stack stack, String username, String password, HttpClientConfig clientConfig) {
-        return clouderaManagerClientProvider.getClouderaManagerClient(clientConfig, stack.getGatewayPort(), username, password);
-    }
-
-    public ApiClient getRootClient(Stack stack, Cluster cluster, HttpClientConfig clientConfig) {
-        if (StringUtils.isNoneBlank(cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword())) {
+    public ApiClient getRootClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) {
+        if (StringUtils.isNoneBlank(user, password)) {
             return clouderaManagerClientProvider.getClouderaManagerRootClient(clientConfig,
-                    stack.getGatewayPort(), cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword());
+                    gatewayPort, user, password);
         } else {
-            return clouderaManagerClientProvider.getClouderaManagerRootClient(clientConfig, stack.getGatewayPort(), "admin", "admin");
+            return clouderaManagerClientProvider.getClouderaManagerRootClient(clientConfig, gatewayPort, "admin", "admin");
         }
     }
 

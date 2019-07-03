@@ -2,22 +2,24 @@ package com.sequenceiq.periscope.monitor.handler;
 
 import static java.lang.Math.ceil;
 
+import java.util.concurrent.ExecutorService;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
+import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
-import com.sequenceiq.periscope.monitor.executor.LoggedExecutorService;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
@@ -30,7 +32,8 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingHandler.class);
 
     @Inject
-    private LoggedExecutorService loggedExecutorService;
+    @Qualifier("periscopeListeningScheduledExecutorService")
+    private ExecutorService executorService;
 
     @Inject
     private ClusterService clusterService;
@@ -45,7 +48,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     private RejectedThreadService rejectedThreadService;
 
     @Inject
-    private AmbariRequestLogging ambariRequestLogging;
+    private RequestLogging ambariRequestLogging;
 
     @Override
     public void onApplicationEvent(ScalingEvent event) {
@@ -63,7 +66,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
             int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
             if (totalNodes != desiredNodeCount) {
                 Runnable scalingRequest = (Runnable) applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
-                loggedExecutorService.submit("ScalingHandler", scalingRequest);
+                executorService.submit(scalingRequest);
                 rejectedThreadService.remove(cluster.getId());
                 cluster.setLastScalingActivityCurrent();
                 clusterService.save(cluster);

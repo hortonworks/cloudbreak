@@ -7,7 +7,7 @@ import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.rest.LogLevel;
 import com.microsoft.rest.interceptors.LoggingInterceptor;
 import com.microsoft.rest.serializer.JacksonAdapter;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 import okhttp3.JavaNetAuthenticator;
 import okhttp3.OkHttpClient;

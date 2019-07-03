@@ -46,9 +46,11 @@ import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient.CloudbreakEndpoi
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterManager;
+import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.modul.rejected.RejectedThreadContext.SpringConfig;
-import com.sequenceiq.periscope.monitor.AmbariAgentHealthMonitor;
+import com.sequenceiq.periscope.monitor.ClusterManagerHostHealthMonitor;
 import com.sequenceiq.periscope.monitor.MonitorContext;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
@@ -58,10 +60,10 @@ import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfigurat
 
 @RunWith(Silent.class)
 @SpringBootTest(classes = SpringConfig.class)
-public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
+public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadContext {
 
     @Inject
-    private AmbariAgentHealthMonitor underTest;
+    private ClusterManagerHostHealthMonitor underTest;
 
     @Inject
     private ApplicationContext applicationContext;
@@ -116,6 +118,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         long stackId = 0L;
         cluster.setId(clusterId);
         cluster.setStackId(stackId);
+        cluster.setClusterManager(new ClusterManager("", "", "", "", ClusterManagerVariant.AMBARI));
 
         when(jobDetail.getKey()).thenReturn(JobKey.jobKey("test-heart-beat-critical"));
         when(clusterService.findById(clusterId)).thenReturn(cluster);
@@ -240,6 +243,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         Cluster cluster = new Cluster();
         cluster.setId(stackId);
         cluster.setStackId(stackId);
+        cluster.setClusterManager(new ClusterManager("", "", "", "", ClusterManagerVariant.AMBARI));
         return cluster;
     }
 
