@@ -6,6 +6,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -16,6 +18,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 
 @Service
 public class EnvironmentServiceDecorator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentServiceDecorator.class);
 
     @Inject
     private EnvironmentClientService environmentClientService;
@@ -34,9 +38,13 @@ public class EnvironmentServiceDecorator {
     }
 
     public void prepareEnvironmentAndCredentialName(StackV4Response stackResponse) {
-        DetailedEnvironmentResponse byCrn = environmentClientService.getByCrn(stackResponse.getEnvironmentCrn());
-        stackResponse.setEnvironmentName(byCrn.getName());
-        stackResponse.setCredentialName(byCrn.getCredential().getName());
+        try {
+            DetailedEnvironmentResponse byCrn = environmentClientService.getByCrn(stackResponse.getEnvironmentCrn());
+            stackResponse.setEnvironmentName(byCrn.getName());
+            stackResponse.setCredentialName(byCrn.getCredential().getName());
+        } catch (Exception e) {
+            LOGGER.warn("Environment deleted which had crn: {}.", stackResponse.getEnvironmentCrn());
+        }
     }
 
 }
