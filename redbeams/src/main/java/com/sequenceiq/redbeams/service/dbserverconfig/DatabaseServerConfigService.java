@@ -95,6 +95,12 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     public DatabaseServerConfig create(DatabaseServerConfig resource, Long workspaceId) {
         // FIXME? Currently no checks if logged-in user has access to workspace
         // Compare with AbstractWorkspaceAwareResourceService
+        String testResults = testConnection(resource);
+
+        if (!testResults.equals(DATABASE_TEST_RESULT_SUCCESS)) {
+            throw new IllegalArgumentException(testResults);
+        }
+
         try {
             MDCBuilder.buildMdcContext(resource);
             // prepareCreation(resource);

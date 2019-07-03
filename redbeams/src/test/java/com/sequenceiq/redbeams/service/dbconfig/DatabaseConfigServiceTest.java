@@ -133,6 +133,20 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
+    public void testRegisterConnectionFailure() {
+        thrown.expect(IllegalArgumentException.class);
+        DatabaseConfig configToRegister = new DatabaseConfig();
+        doAnswer((Answer) invocation -> {
+            MapBindingResult errors = invocation.getArgument(1, MapBindingResult.class);
+            errors.addError(new ObjectError("failed", ERROR_MESSAGE));
+            return null;
+        }).when(connectionValidator).validate(any(), any());
+
+        underTest.register(configToRegister);
+
+    }
+
+    @Test
     public void testDeleteRegisteredDatabase() throws TransactionService.TransactionExecutionException {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME);
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));

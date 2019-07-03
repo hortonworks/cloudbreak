@@ -78,6 +78,12 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     public DatabaseConfig register(DatabaseConfig configToSave) {
+        String testResults = testConnection(configToSave);
+
+        if (!testResults.equals(DATABASE_TEST_RESULT_SUCCESS)) {
+            throw new IllegalArgumentException(testResults);
+        }
+
         try {
             MDCBuilder.buildMdcContext(configToSave);
             // prepareCreation(configToSave);
