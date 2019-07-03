@@ -49,7 +49,7 @@ import io.swagger.annotations.ApiOperation;
 @Path("/v1/distrox")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/V1/distrox", protocols = "http,https")
+@Api(value = "/v1/distrox", protocols = "http,https")
 public interface DistroXV1Endpoint {
 
     @GET

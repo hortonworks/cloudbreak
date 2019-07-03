@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoi
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.ManagementPackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.user.UserV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
@@ -117,5 +118,10 @@ public class CloudbreakUserCrnClient extends AbstractUserCrnServiceClient<Cloudb
         public DistroXV1Endpoint distroXV1Endpoint() {
             return getEndpoint(DistroXV1Endpoint.class);
         }
+
+        public DatalakeV4Endpoint datalakeV4Endpoint() {
+            return getEndpoint(DatalakeV4Endpoint.class);
+        }
+
     }
 }
