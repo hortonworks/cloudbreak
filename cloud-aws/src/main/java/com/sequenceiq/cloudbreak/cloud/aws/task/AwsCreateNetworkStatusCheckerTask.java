@@ -17,12 +17,13 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryResourceStateStore;
 
-@Component(AwsCreateNetworkStatusCheckerTask.NAME)
 @Scope("prototype")
+@Component(AwsCreateNetworkStatusCheckerTask.NAME)
 public class AwsCreateNetworkStatusCheckerTask extends AbstractAwsStackStatusCheckerTask {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCreateNetworkStatusCheckerTask.class);
 
     public static final String NAME = "awsCreateNetworkStatusCheckerTask";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCreateNetworkStatusCheckerTask.class);
 
     private final NetworkCreationRequest networkCreationRequest;
 

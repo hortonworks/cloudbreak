@@ -20,10 +20,8 @@ import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
-import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.network.EnvironmentNetworkService;
@@ -47,24 +45,20 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final NetworkService networkService;
 
-    private final EnvironmentDtoConverter environmentDtoConverter;
-
     private final EnvironmentNetworkService environmentNetworkService;
 
     private final Set<String> enabledPlatforms;
 
     protected NetworkCreationHandler(EventSender eventSender,
-            EnvironmentService environmentService, EnvironmentRepository environmentRepository,
+            EnvironmentService environmentService,
             PlatformParameterService platformParameterService,
             NetworkService networkService,
-            EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentNetworkService environmentNetworkService,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
         super(eventSender);
         this.environmentService = environmentService;
         this.platformParameterService = platformParameterService;
         this.networkService = networkService;
-        this.environmentDtoConverter = environmentDtoConverter;
         this.environmentNetworkService = environmentNetworkService;
         this.enabledPlatforms = enabledPlatforms;
     }

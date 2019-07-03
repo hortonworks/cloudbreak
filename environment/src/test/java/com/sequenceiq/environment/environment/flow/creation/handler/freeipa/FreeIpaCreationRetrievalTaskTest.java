@@ -1,9 +1,10 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,11 +14,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaCreationRetrievalTaskTest {
+
+    private static final String ENV_CRN = "envCrn";
+
+    private static final long ENV_ID = 1L;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private FreeIpaPollerObject freeIpaPollerObject;
@@ -25,11 +32,18 @@ class FreeIpaCreationRetrievalTaskTest {
     @InjectMocks
     private FreeIpaCreationRetrievalTask underTest;
 
+    @Before
+    void setup() {
+        when(freeIpaPollerObject.getEnvironmentId()).thenReturn(ENV_ID);
+    }
+
     @Test
     void testExitPollingWhenFreeIpaClusterIsInCreateInProgressState() {
+        EnvironmentInMemoryStateStore.put(ENV_ID, PollGroup.CANCELLED);
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
         describeFreeIpaResponse.setName("aFreeIpaName");
         describeFreeIpaResponse.setCrn("aFreeIpaCRN");
+        describeFreeIpaResponse.setEnvironmentCrn(ENV_CRN);
         describeFreeIpaResponse.setStatus(Status.CREATE_IN_PROGRESS);
 
         when(freeIpaPollerObject.getFreeIpaV1Endpoint().describe(anyString()))
@@ -37,7 +51,7 @@ class FreeIpaCreationRetrievalTaskTest {
 
         boolean result = underTest.exitPolling(freeIpaPollerObject);
 
-        assertFalse(result);
+        assertTrue(result);
     }
 
     @ParameterizedTest
@@ -53,7 +67,7 @@ class FreeIpaCreationRetrievalTaskTest {
 
         boolean result = underTest.exitPolling(freeIpaPollerObject);
 
-        assertFalse(result);
+        assertTrue(result);
     }
 
     @ParameterizedTest
@@ -69,6 +83,6 @@ class FreeIpaCreationRetrievalTaskTest {
 
         boolean result = underTest.exitPolling(freeIpaPollerObject);
 
-        assertFalse(result);
+        assertTrue(result);
     }
 }

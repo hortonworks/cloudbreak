@@ -111,7 +111,7 @@ public class EnvironmentService {
     }
 
     public Environment delete(Environment environment, String userCrn) {
-        checkForDeletePermit(environment);
+        checkIsEnvironmentDeletable(environment);
         MDCBuilder.buildMdcContext(environment);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
         reactorFlowManager.triggerDeleteFlow(environment, userCrn);
@@ -198,7 +198,7 @@ public class EnvironmentService {
         return platformParameterService.getRegionsByCredential(platformResourceRequest);
     }
 
-    private void checkForDeletePermit(Environment env) {
+    private void checkIsEnvironmentDeletable(Environment env) {
         LOGGER.info("Checking if environment [name: {}] is deletable", env.getName());
 
         Set<String> sdxNames = environmentResourceDeletionService.getAttachedSdxClusterNames(env);

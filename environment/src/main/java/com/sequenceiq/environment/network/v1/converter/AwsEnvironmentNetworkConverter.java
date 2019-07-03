@@ -57,6 +57,19 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     }
 
     @Override
+    void setRegistrationType(BaseNetwork result, NetworkDto networkDto) {
+        if (isExistingNetworkSpecified(networkDto)) {
+            result.setRegistrationType(RegistrationType.EXISTING);
+        } else {
+            result.setRegistrationType(RegistrationType.CREATE_NEW);
+        }
+    }
+
+    private boolean isExistingNetworkSpecified(NetworkDto networkDto) {
+        return networkDto.getAws() != null && networkDto.getAws().getVpcId() != null;
+    }
+
+    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AWS;
     }

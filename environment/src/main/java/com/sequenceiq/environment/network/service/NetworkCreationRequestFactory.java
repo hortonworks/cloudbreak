@@ -45,7 +45,7 @@ public class NetworkCreationRequestFactory {
         return credentialToCloudCredentialConverter.convert(environment.getCredential());
     }
 
-    private String getStackName(EnvironmentDto environment) {
+    public String getStackName(EnvironmentDto environment) {
         return String.join("-", environment.getName(), String.valueOf(environment.getNetwork().getId()));
     }
 
