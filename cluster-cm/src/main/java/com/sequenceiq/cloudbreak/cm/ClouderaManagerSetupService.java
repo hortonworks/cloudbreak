@@ -43,10 +43,10 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
-import com.sequenceiq.cloudbreak.cm.client.DataView;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -56,7 +56,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Service
@@ -102,12 +101,15 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @PostConstruct
     public void initApiClient() {
-        client = clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig);
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
     }
 
     @Override
     public void waitForServer() throws CloudbreakException {
-        ApiClient client = clouderaManagerClientFactory.getDefaultClient(stack, clientConfig);
+        ApiClient client = clouderaManagerClientFactory.getDefaultClient(stack.getGatewayPort(), clientConfig);
         PollingResult pollingResult = clouderaManagerPollingServiceProvider.clouderaManagerStartupPollerObjectPollingService(stack, client);
         if (isSuccess(pollingResult)) {
             LOGGER.debug("Cloudera Manager server has successfully started! Polling result: {}", pollingResult);
@@ -176,7 +178,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     private String createDataContext(String sdxContext) {
-        ApiClient rootClient = clouderaManagerClientFactory.getRootClient(stack, stack.getCluster(), clientConfig);
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        ApiClient rootClient = clouderaManagerClientFactory.getRootClient(stack.getGatewayPort(), user, password, clientConfig);
         CdpResourceApi cdpResourceApi = new CdpResourceApi(rootClient);
         try {
             ApiRemoteDataContext apiRemoteDataContext = JsonUtil.readValue(sdxContext, ApiRemoteDataContext.class);
@@ -271,7 +276,11 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public void waitForHosts(Set<HostMetadata> hostsInCluster) {
-        clouderaManagerPollingServiceProvider.hostsPollingService(stack, clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig));
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        ApiClient client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
+        clouderaManagerPollingServiceProvider.hostsPollingService(stack, client);
     }
 
     @Override
@@ -281,7 +290,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public String getSdxContext() {
-        ApiClient rootClient = clouderaManagerClientFactory.getRootClient(stack, stack.getCluster(), clientConfig);
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        ApiClient rootClient = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
         CdpResourceApi cdpResourceApi = new CdpResourceApi(rootClient);
         try {
             LOGGER.debug("Get remote context from SDX cluster: {}", stack.getName());

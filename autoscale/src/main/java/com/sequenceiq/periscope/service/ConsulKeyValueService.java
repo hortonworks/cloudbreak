@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
-import com.sequenceiq.periscope.domain.Ambari;
+import com.sequenceiq.periscope.domain.ClusterManager;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.model.TlsConfiguration;
@@ -25,7 +25,7 @@ public class ConsulKeyValueService {
     private TlsSecurityService tlsSecurityService;
 
     public PrometheusAlert addAlert(Cluster cluster, PrometheusAlert alert) {
-        Ambari ambari = cluster.getAmbari();
+        ClusterManager ambari = cluster.getClusterManager();
         try {
             if (RUNNING.equals(cluster.getState())) {
                 TlsConfiguration tlsConfig = tlsSecurityService.getConfiguration(cluster);
@@ -41,7 +41,7 @@ public class ConsulKeyValueService {
     }
 
     public void deleteAlert(Cluster cluster, PrometheusAlert alert) {
-        Ambari ambari = cluster.getAmbari();
+        ClusterManager ambari = cluster.getClusterManager();
         try {
             TlsConfiguration tlsConfig = tlsSecurityService.getConfiguration(cluster);
             ConsulClient consulClient = ConsulUtils.createClient(ambari.getHost(), cluster.getPort(), tlsConfig);

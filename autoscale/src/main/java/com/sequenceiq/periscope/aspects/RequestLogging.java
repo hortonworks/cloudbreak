@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AmbariRequestLogging {
+public class RequestLogging {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRequestLogging.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestLogging.class);
 
     public <T> T logging(Supplier<T> callback, String requestName) {
         long start = System.currentTimeMillis();

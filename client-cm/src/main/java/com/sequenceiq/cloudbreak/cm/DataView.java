@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm.client;
+package com.sequenceiq.cloudbreak.cm;
 
 import com.google.common.base.Joiner;
 

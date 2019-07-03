@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.termination;
 
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 public class TerminationFailedException extends CloudbreakServiceException {
 

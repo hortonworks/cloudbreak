@@ -11,7 +11,7 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Service
 public class ClouderaManagerClientProvider {
@@ -56,7 +56,7 @@ public class ClouderaManagerClientProvider {
             cmClient.getHttpClient().setHostnameVerifier(CertificateTrustManager.hostnameVerifier());
             return cmClient;
         } catch (Exception e) {
-            LOGGER.info("Can not create SSL context for cloudera manager", e);
+            LOGGER.info("Can not create SSL context for Cloudera Manager", e);
             throw new CloudbreakServiceException(e);
         }
     }

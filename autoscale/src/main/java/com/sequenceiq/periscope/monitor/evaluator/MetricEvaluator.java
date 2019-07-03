@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
+import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.MetricAlert;
@@ -49,7 +49,7 @@ public class MetricEvaluator extends EvaluatorExecutor {
     private AmbariClientProvider ambariClientProvider;
 
     @Inject
-    private AmbariRequestLogging ambariRequestLogging;
+    private RequestLogging requestLogging;
 
     @Inject
     private EventPublisher eventPublisher;
@@ -82,7 +82,7 @@ public class MetricEvaluator extends EvaluatorExecutor {
             for (MetricAlert alert : alertRepository.findAllByCluster(clusterId)) {
                 String alertName = alert.getName();
                 LOGGER.debug("Checking metric based alert: '{}'", alertName);
-                List<Map<String, Object>> alertHistory = ambariRequestLogging.logging(() ->
+                List<Map<String, Object>> alertHistory = requestLogging.logging(() ->
                         ambariClient.getAlertHistory(alert.getDefinitionName(), 1), "alertHistory");
                 int historySize = alertHistory.size();
                 if (historySize > 1) {

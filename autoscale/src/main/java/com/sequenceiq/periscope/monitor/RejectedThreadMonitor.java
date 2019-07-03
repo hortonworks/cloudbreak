@@ -44,7 +44,7 @@ public class RejectedThreadMonitor extends AbstractMonitor<RejectedThread> {
     @Override
     public EvaluatorContext getContext(RejectedThread rejectedThread) {
         try {
-            if (getEvaluatorType(rejectedThread).equals(ClusterCreationEvaluator.class)) {
+            if (getEvaluatorType(rejectedThread).isAssignableFrom(ClusterCreationEvaluator.class)) {
                 AutoscaleStackV4Response response = JsonUtil.readValue(rejectedThread.getJson(), AutoscaleStackV4Response.class);
                 return new ClusterCreationEvaluatorContext(response);
             } else {

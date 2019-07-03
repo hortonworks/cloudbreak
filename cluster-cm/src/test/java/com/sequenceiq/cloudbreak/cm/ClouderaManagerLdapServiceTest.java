@@ -74,7 +74,9 @@ public class ClouderaManagerLdapServiceTest {
         stack.setCluster(cluster);
         httpClientConfig = new HttpClientConfig("apiAddress");
         MockitoAnnotations.initMocks(this);
-        when(clouderaManagerClientFactory.getClient(stack, cluster, httpClientConfig)).thenReturn(apiClient);
+        String cmUser = cluster.getCloudbreakAmbariUser();
+        String cmPassword = cluster.getCloudbreakAmbariPassword();
+        when(clouderaManagerClientFactory.getClient(stack.getGatewayPort(), cmUser, cmPassword, httpClientConfig)).thenReturn(apiClient);
         when(clouderaManagerClientFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerClientFactory.getExternalUserMappingsResourceApi(apiClient)).thenReturn(externalUserMappingsResourceApi);
         when(clouderaManagerClientFactory.getAuthRolesResourceApi(apiClient)).thenReturn(authRolesResourceApi);

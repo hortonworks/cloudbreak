@@ -84,7 +84,7 @@ public class ClouderaManagerClusterStatusServiceTest {
 
         MockitoAnnotations.initMocks(this);
 
-        when(clientFactory.getClient(stack, cluster, clientConfig)).thenReturn(client);
+        when(clientFactory.getClient(stack.getGatewayPort(), cluster.getCloudbreakAmbariUser(), cluster.getPassword(), clientConfig)).thenReturn(client);
         when(clientFactory.getClouderaManagerResourceApi(client)).thenReturn(cmApi);
         when(clientFactory.getServicesResourceApi(client)).thenReturn(servicesApi);
         when(clientFactory.getRolesResourceApi(client)).thenReturn(rolesApi);

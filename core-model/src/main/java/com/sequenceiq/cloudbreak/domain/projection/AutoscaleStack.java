@@ -40,4 +40,6 @@ public interface AutoscaleStack {
     Long getWorkspaceId();
 
     String getUserId();
+
+    String getClusterManagerVariant();
 }

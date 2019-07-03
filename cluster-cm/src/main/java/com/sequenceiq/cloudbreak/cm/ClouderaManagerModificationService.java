@@ -81,7 +81,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @PostConstruct
     public void initApiClient() {
-        client = clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig);
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
     }
 
     @Override

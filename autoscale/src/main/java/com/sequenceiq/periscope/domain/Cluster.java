@@ -12,12 +12,13 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.periscope.api.model.ClusterState;
-import com.sequenceiq.periscope.model.AmbariStack;
+import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.monitor.Monitored;
 
 @Entity
@@ -37,8 +38,9 @@ public class Cluster implements Monitored, Clustered {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private ClusterPertain clusterPertain;
 
+    @JoinColumn(name = "cluster_manager_id")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Ambari ambari;
+    private ClusterManager clusterManager;
 
     @OneToOne(mappedBy = "cluster", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private SecurityConfig securityConfig;
@@ -81,17 +83,17 @@ public class Cluster implements Monitored, Clustered {
     public Cluster() {
     }
 
-    public Cluster(AmbariStack ambariStack) {
-        stackId = ambariStack.getStackId();
-        ambari = ambariStack.getAmbari();
+    public Cluster(MonitoredStack monitoredStack) {
+        stackId = monitoredStack.getStackId();
+        clusterManager = monitoredStack.getClusterManager();
     }
 
-    public void update(AmbariStack ambariStack) {
-        Ambari ambari = ambariStack.getAmbari();
-        this.ambari.setHost(ambari.getHost());
-        this.ambari.setPort(ambari.getPort());
-        this.ambari.setUser(ambari.getUser());
-        this.ambari.setPass(ambari.getPass());
+    public void update(MonitoredStack monitoredStack) {
+        ClusterManager clusterManager = monitoredStack.getClusterManager();
+        this.clusterManager.setHost(clusterManager.getHost());
+        this.clusterManager.setPort(clusterManager.getPort());
+        this.clusterManager.setUser(clusterManager.getUser());
+        this.clusterManager.setPass(clusterManager.getPass());
     }
 
     public long getId() {
@@ -110,12 +112,12 @@ public class Cluster implements Monitored, Clustered {
         this.clusterPertain = clusterPertain;
     }
 
-    public Ambari getAmbari() {
-        return ambari;
+    public ClusterManager getClusterManager() {
+        return clusterManager;
     }
 
-    public void setAmbari(Ambari ambari) {
-        this.ambari = ambari;
+    public void setClusterManager(ClusterManager clusterManager) {
+        this.clusterManager = clusterManager;
     }
 
     public SecurityConfig getSecurityConfig() {
@@ -191,19 +193,19 @@ public class Cluster implements Monitored, Clustered {
     }
 
     public String getHost() {
-        return ambari.getHost();
+        return clusterManager.getHost();
     }
 
     public String getPort() {
-        return ambari.getPort();
+        return clusterManager.getPort();
     }
 
-    public String getAmbariUser() {
-        return ambari.getUser();
+    public String getClusterManagerUser() {
+        return clusterManager.getUser();
     }
 
-    public String getAmbariPass() {
-        return ambari.getPass();
+    public String getClusterManagerPassword() {
+        return clusterManager.getPass();
     }
 
     public synchronized void setLastScalingActivityCurrent() {

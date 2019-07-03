@@ -33,6 +33,7 @@ public class AutoscaleStackToAutoscaleStackResponseJsonConverter extends Abstrac
             result.setUserNamePath(source.getCloudbreakAmbariUser().getSecret());
             result.setPasswordPath(source.getCloudbreakAmbariPassword().getSecret());
             result.setClusterStatus(source.getClusterStatus());
+            result.setClusterManagerVariant(source.getClusterManagerVariant());
         }
         return result;
     }

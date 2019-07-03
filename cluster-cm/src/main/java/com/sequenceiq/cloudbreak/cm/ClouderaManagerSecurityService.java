@@ -54,7 +54,10 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
 
     @Override
     public void replaceUserNamePassword(String newUserName, String newPassword) throws CloudbreakException {
-        ApiClient client = clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig);
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        ApiClient client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
         UsersResourceApi usersResourceApi = new UsersResourceApi(client);
         try {
             ApiUser2List oldUserList = usersResourceApi.readUsers2("SUMMARY");
@@ -75,7 +78,10 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
 
     @Override
     public void updateUserNamePassword(String newPassword) throws CloudbreakException {
-        ApiClient client = clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig);
+        Cluster cluster = stack.getCluster();
+        String cmUser = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        ApiClient client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), cmUser, password, clientConfig);
         UsersResourceApi usersResourceApi = new UsersResourceApi(client);
         try {
             ApiUser2List oldUserList = usersResourceApi.readUsers2("SUMMARY");
@@ -102,13 +108,17 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
 
     @Override
     public void disableSecurity() {
-        kerberosService.deleteCredentials(clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig), clientConfig, stack);
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        ApiClient client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
+        kerberosService.deleteCredentials(client, clientConfig, stack);
     }
 
     @Override
     public void changeOriginalCredentialsAndCreateCloudbreakUser() throws CloudbreakException {
         LOGGER.debug("change original admin user and create cloudbreak user");
-        ApiClient defaultClient = clouderaManagerClientFactory.getDefaultClient(stack, clientConfig);
+        ApiClient defaultClient = clouderaManagerClientFactory.getDefaultClient(stack.getGatewayPort(), clientConfig);
         UsersResourceApi usersResourceApi = new UsersResourceApi(defaultClient);
         try {
             ApiUser2List oldUserList = usersResourceApi.readUsers2("SUMMARY");
@@ -124,7 +134,9 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
                     oldAdmin.setPassword(cluster.getPassword());
                     usersResourceApi.updateUser2(oldAdminUser.get().getName(), oldAdmin);
                 } else {
-                    ApiClient newClient = clouderaManagerClientFactory.getClient(stack, cluster, clientConfig);
+                    String user = cluster.getCloudbreakAmbariUser();
+                    String password = cluster.getCloudbreakAmbariPassword();
+                    ApiClient newClient = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
                     UsersResourceApi newUsersResourceApi = new UsersResourceApi(newClient);
                     createNewUser(newUsersResourceApi, oldAdminUser.get().getAuthRoles(), cluster.getUserName(), cluster.getPassword());
                     newUsersResourceApi.deleteUser2(oldAdminUser.get().getName());

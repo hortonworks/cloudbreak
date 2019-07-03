@@ -1,6 +1,9 @@
 package com.sequenceiq.periscope.config;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -22,6 +25,9 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.periscope.domain.ClusterManagerVariant;
+import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
+import com.sequenceiq.periscope.monitor.evaluator.ClusterManagerSpecificHostHealthEvaluator;
 import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHandler;
 
 @Configuration
@@ -67,6 +73,12 @@ public class AppConfig implements AsyncConfigurer {
     @Inject
     private PersistRejectedThreadExecutionHandler persistRejectedThreadExecutionHandler;
 
+    @Inject
+    private List<ClusterManagerSpecificHostHealthEvaluator> hostHealthEvaluators;
+
+    @Inject
+    private List<ClusterCreationEvaluator> clusterCreationEvaluators;
+
     @Bean
     public ThreadPoolExecutorFactoryBean getThreadPoolExecutorFactoryBean() {
         ThreadPoolExecutorFactoryBean executorFactoryBean = new ThreadPoolExecutorFactoryBean();
@@ -94,6 +106,24 @@ public class AppConfig implements AsyncConfigurer {
     @Bean
     public Client restClient() {
         return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
+    }
+
+    @Bean
+    public Map<ClusterManagerVariant, ClusterManagerSpecificHostHealthEvaluator> hostHealthEvaluatorMap() {
+        return hostHealthEvaluators.stream()
+                .collect(Collectors.toMap(
+                        ClusterManagerSpecificHostHealthEvaluator::getSupportedClusterManagerVariant,
+                        hostHealthEvaluator -> hostHealthEvaluator
+                ));
+    }
+
+    @Bean
+    public Map<ClusterManagerVariant, Class<? extends ClusterCreationEvaluator>> clusterCreationEvaluatorMap() {
+        return clusterCreationEvaluators.stream()
+                .collect(Collectors.toMap(
+                        ClusterCreationEvaluator::getSupportedClusterManagerVariant,
+                        ClusterCreationEvaluator::getClass
+                ));
     }
 
     @Override

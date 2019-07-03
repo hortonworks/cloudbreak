@@ -22,9 +22,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner.Silent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -38,6 +41,8 @@ import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient.CloudbreakEndpoi
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterManager;
+import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.modul.rejected.StackCollectorContext.StackCollectorSpringConfig;
@@ -51,7 +56,12 @@ import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfigurat
 
 @RunWith(Silent.class)
 @SpringBootTest(classes = StackCollectorSpringConfig.class)
+@TestPropertySource(properties = {
+        "periscope.monitor.exeutor.registry.timeout=500",
+})
 public class StackCollectorServiceModulTest extends StackCollectorContext {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackCollectorServiceModulTest.class);
 
     @Inject
     private StackCollectorService underTest;
@@ -112,6 +122,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         stack.setStackId(1L);
         stack.setClusterStatus(Status.AVAILABLE);
         stack.setAmbariServerIp("199.199.199");
+        stack.setClusterManagerVariant(ClusterManagerVariant.AMBARI.name());
 
         Cluster cluster = new Cluster();
         cluster.setState(ClusterState.RUNNING);
@@ -134,6 +145,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         stack.setStackId(1L);
         stack.setClusterStatus(Status.AVAILABLE);
         stack.setAmbariServerIp("199.199.199");
+        stack.setClusterManagerVariant(ClusterManagerVariant.AMBARI.name());
 
         Cluster cluster = cluster(2L);
 
@@ -218,6 +230,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         Cluster cluster = new Cluster();
         cluster.setId(stackId);
         cluster.setStackId(stackId);
+        cluster.setClusterManager(new ClusterManager("", "", "", "", ClusterManagerVariant.AMBARI));
         return cluster;
     }
 
@@ -226,6 +239,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
         stack.setStackId(stackId);
         stack.setClusterStatus(Status.AVAILABLE);
         stack.setAmbariServerIp(String.format("199.199.%03d", stackId));
+        stack.setClusterManagerVariant(ClusterManagerVariant.AMBARI.name());
         return stack;
     }
 

@@ -26,7 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.api.services.compute.model.Disk;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 public class GcpDiskEncryptionServiceTest extends LocalServerTestBase {
 

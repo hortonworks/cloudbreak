@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.Resource;
 
 public class BuildStackFailureException extends CloudbreakServiceException {

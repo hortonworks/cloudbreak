@@ -2,39 +2,46 @@ package com.sequenceiq.periscope.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
-@Entity
-public class Ambari {
+@Entity(name = "cluster_manager")
+public class ClusterManager {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "ambari_generator")
-    @SequenceGenerator(name = "ambari_generator", sequenceName = "ambari_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "cluster_manager_generator")
+    @SequenceGenerator(name = "cluster_manager_generator", sequenceName = "cluster_manager_id_seq", allocationSize = 1)
     private long id;
 
-    @Column(name = "ambari_host")
+    @Column(name = "host")
     private String host;
 
-    @Column(name = "ambari_port")
+    @Column(name = "port")
     private String port;
 
-    @Column(name = "ambari_user")
+    @Column(name = "lgn_user")
     private String user;
 
-    @Column(name = "ambari_pass")
+    @Column(name = "lgn_pass")
     private String pass;
 
-    public Ambari() {
+    @Column(name = "variant")
+    @Enumerated(EnumType.STRING)
+    private ClusterManagerVariant variant;
+
+    public ClusterManager() {
     }
 
-    public Ambari(String host, String port, String user, String pass) {
+    public ClusterManager(String host, String port, String user, String pass, ClusterManagerVariant variant) {
         this.host = host;
         this.port = port;
         this.user = user;
         this.pass = pass;
+        this.variant = variant;
     }
 
     public long getId() {
@@ -75,5 +82,13 @@ public class Ambari {
 
     public void setPass(String pass) {
         this.pass = pass;
+    }
+
+    public ClusterManagerVariant getVariant() {
+        return variant;
+    }
+
+    public void setVariant(ClusterManagerVariant variant) {
+        this.variant = variant;
     }
 }

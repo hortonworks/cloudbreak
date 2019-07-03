@@ -19,12 +19,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
-import com.sequenceiq.periscope.domain.Ambari;
+import com.sequenceiq.periscope.domain.ClusterManager;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.SecurityConfig;
-import com.sequenceiq.periscope.model.AmbariStack;
+import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
@@ -49,7 +49,7 @@ public class ClusterService {
     @Inject
     private PeriscopeMetricService metricService;
 
-    public Cluster create(AmbariStack stack, ClusterState clusterState, ClusterPertain clusterPertain) {
+    public Cluster create(MonitoredStack stack, ClusterState clusterState, ClusterPertain clusterPertain) {
         return create(new Cluster(), clusterPertain, stack, clusterState);
     }
 
@@ -58,9 +58,9 @@ public class ClusterService {
         calculateClusterStateMetrics();
     }
 
-    public Cluster create(Cluster cluster, ClusterPertain clusterPertain, AmbariStack stack, ClusterState clusterState) {
+    public Cluster create(Cluster cluster, ClusterPertain clusterPertain, MonitoredStack stack, ClusterState clusterState) {
         cluster.setClusterPertain(clusterPertain);
-        cluster.setAmbari(stack.getAmbari());
+        cluster.setClusterManager(stack.getClusterManager());
         cluster.setStackId(stack.getStackId());
         if (clusterState != null) {
             cluster.setState(clusterState);
@@ -75,11 +75,11 @@ public class ClusterService {
         return cluster;
     }
 
-    public Cluster update(Long clusterId, AmbariStack stack, boolean enableAutoscaling) {
+    public Cluster update(Long clusterId, MonitoredStack stack, boolean enableAutoscaling) {
         return update(clusterId, stack, null, enableAutoscaling);
     }
 
-    public Cluster update(Long clusterId, AmbariStack stack, ClusterState clusterState, boolean enableAutoscaling) {
+    public Cluster update(Long clusterId, MonitoredStack stack, ClusterState clusterState, boolean enableAutoscaling) {
         Cluster cluster = findById(clusterId);
         ClusterState newState = clusterState != null ? clusterState : cluster.getState();
         cluster.setState(newState);
@@ -174,20 +174,20 @@ public class ClusterService {
         return clusterRepository.findByStateAndAutoscalingEnabledAndPeriscopeNodeId(state, autoscalingEnabled, nodeId);
     }
 
-    public void validateClusterUniqueness(AmbariStack stack) {
+    public void validateClusterUniqueness(MonitoredStack stack) {
         Iterable<Cluster> clusters = clusterRepository.findAll();
-        boolean clusterForTheSameStackAndAmbari = StreamSupport.stream(clusters.spliterator(), false)
+        boolean clusterForTheSameStackAndClusterManager = StreamSupport.stream(clusters.spliterator(), false)
                 .anyMatch(cluster -> {
                     boolean equalityOfStackId = cluster.getStackId() != null && cluster.getStackId().equals(stack.getStackId());
-                    Ambari ambari = cluster.getAmbari();
-                    Ambari newAmbari = stack.getAmbari();
-                    boolean ambariObjectsNotNull = ambari != null && newAmbari != null;
-                    boolean ambariHostsNotEmpty = ambariObjectsNotNull && !isEmpty(ambari.getHost()) && !isEmpty(newAmbari.getHost());
-                    boolean equalityOfAmbariHost = ambariObjectsNotNull && ambariHostsNotEmpty && ambari.getHost().equals(newAmbari.getHost());
-                    return equalityOfStackId && equalityOfAmbariHost;
+                    ClusterManager clusterManager = cluster.getClusterManager();
+                    ClusterManager newClusterManager = stack.getClusterManager();
+                    boolean clrMgrObjectsNotNull = clusterManager != null && newClusterManager != null;
+                    boolean clrMgrHostsNotEmpty = clrMgrObjectsNotNull && !isEmpty(clusterManager.getHost()) && !isEmpty(newClusterManager.getHost());
+                    boolean equalityOfCMHost = clrMgrObjectsNotNull && clrMgrHostsNotEmpty && clusterManager.getHost().equals(newClusterManager.getHost());
+                    return equalityOfStackId && equalityOfCMHost;
                 });
-        if (clusterForTheSameStackAndAmbari) {
-            throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and Ambari host.");
+        if (clusterForTheSameStackAndClusterManager) {
+            throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and " + stack.getClusterManager().getVariant().name() + " host.");
         }
     }
 

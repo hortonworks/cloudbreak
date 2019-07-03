@@ -1,11 +1,13 @@
 package com.sequenceiq.periscope.monitor.executor;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
@@ -19,12 +21,13 @@ public class ExecutorServiceWithRegistry {
     private EvaluatorExecutorRegistry evaluatorExecutorRegistry;
 
     @Inject
-    private LoggedExecutorService loggedExecutorService;
+    @Qualifier("periscopeListeningScheduledExecutorService")
+    private ExecutorService executorService;
 
     public void submitIfAbsent(EvaluatorExecutor evaluatorExecutor, long clusterId) {
         if (evaluatorExecutorRegistry.putIfAbsent(evaluatorExecutor, clusterId)) {
             try {
-                loggedExecutorService.submit(evaluatorExecutor.getName(), evaluatorExecutor);
+                executorService.submit(evaluatorExecutor);
             } catch (RejectedExecutionException e) {
                 evaluatorExecutorRegistry.remove(evaluatorExecutor, clusterId);
                 throw e;

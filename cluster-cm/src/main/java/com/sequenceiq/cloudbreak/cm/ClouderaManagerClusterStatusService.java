@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Service
 @Scope("prototype")
@@ -90,7 +91,10 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     @PostConstruct
     public void initApiClient() {
-        client = clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig);
+        Cluster cluster = stack.getCluster();
+        String cloudbreakAmbariUser = cluster.getCloudbreakAmbariUser();
+        String cloudbreakAmbariPassword = cluster.getCloudbreakAmbariPassword();
+        client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
     }
 
     @Override

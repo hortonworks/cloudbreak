@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -76,13 +77,13 @@ import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.config.DatabaseConfig;
 import com.sequenceiq.periscope.controller.AutoScaleClusterV1Controller;
 import com.sequenceiq.periscope.controller.AutoScaleClusterV2Controller;
-import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterManager;
+import com.sequenceiq.periscope.domain.ClusterManagerVariant;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
-import com.sequenceiq.periscope.monitor.executor.LoggedExecutorService;
 import com.sequenceiq.periscope.monitor.handler.UpdateFailedHandler;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.HistoryRepository;
@@ -226,7 +227,7 @@ public class MetricTest {
     private UpdateFailedHandler updateFailedHandler;
 
     @Inject
-    private LoggedExecutorService loggedExecutorService;
+    private ExecutorService executorService;
 
     @Test
     public void testCounterMetricsPresent() {
@@ -361,12 +362,12 @@ public class MetricTest {
     @Test
     public void testThreadpoolMetricsWhenTaskIsSubmitted() {
         BlockingTaskManager blockingTaskManager = new BlockingTaskManager();
-        loggedExecutorService.submit("fakeTaskDone", () -> {
+        executorService.submit(() -> {
         });
         for (int t = 0; t < THREADPOOL_MAX_SIZE; t++) {
-            loggedExecutorService.submit("fakeTaskActive" + t, blockingTaskManager.getNewTask());
+            executorService.submit(blockingTaskManager.getNewTask());
         }
-        loggedExecutorService.submit("fakeTaskInQueue", blockingTaskManager.getNewTask());
+        executorService.submit(blockingTaskManager.getNewTask());
 
         MultiValueMap<String, String> metrics = responseToMap(readMetricsEndpoint());
 
@@ -398,7 +399,7 @@ public class MetricTest {
         cluster.setId(CLUSTER_ID);
         cluster.setStackId(STACK_ID);
         cluster.setClusterPertain(getClusterPertain());
-        cluster.setAmbari(new Ambari("host", "port", USER_A_ID, ""));
+        cluster.setClusterManager(new ClusterManager("host", "port", USER_A_ID, "", ClusterManagerVariant.AMBARI));
         cluster.setState(clusterState);
         return cluster;
     }

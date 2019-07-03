@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
@@ -43,6 +44,20 @@ public class TlsSecurityService {
         String clientCert = new String(Base64.decode(secretService.get(securityConfig.getClientCert())));
         String serverCert = new String(Base64.decode(securityConfig.getServerCert()));
         return new TlsConfiguration(clientKey, clientCert, serverCert);
+    }
+
+    public HttpClientConfig buildTLSClientConfig(Cluster cluster) {
+        SecurityConfig securityConfig = cluster.getSecurityConfig();
+        if (securityConfig == null) {
+            securityConfig = getSecurityConfigSilently(cluster);
+        }
+        if (securityConfig == null) {
+            securityConfig = prepareSecurityConfig(cluster.getStackId());
+        }
+        String clientKey = new String(Base64.decode(secretService.get(securityConfig.getClientKey())));
+        String clientCert = new String(Base64.decode(secretService.get(securityConfig.getClientCert())));
+        String serverCert = new String(Base64.decode(securityConfig.getServerCert()));
+        return new HttpClientConfig(cluster.getClusterManager().getHost(), serverCert, clientCert, clientKey);
     }
 
     private SecurityConfig getSecurityConfigSilently(Cluster cluster) {
