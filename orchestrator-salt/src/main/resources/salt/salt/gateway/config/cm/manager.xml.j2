@@ -71,7 +71,11 @@
          </param>
          <param>
             <name>knox.acl</name>
+{%- if ldap.adminGroup is defined and ldap.adminGroup is not none %}
             <value>KNOX_ADMIN_USERS;{{ ldap.adminGroup }};*</value>
+{%- else %}
+            <value>KNOX_ADMIN_USERS;admin;*</value>
+{%- endif %}
          </param>
       </provider>
    </gateway>
