@@ -82,6 +82,9 @@ class ProvisionerServiceTest {
     @Mock
     private EnvironmentEndpoint environmentEndpoint;
 
+    @Mock
+    private StackRequestManifester stackRequestManifester;
+
     @InjectMocks
     private ProvisionerService provisionerService;
 
@@ -455,7 +458,7 @@ class ProvisionerServiceTest {
         cloudSubnet.setId("subnet");
         cloudSubnet.setName("subnet");
         cloudSubnet.setAvailabilityZone("eu-west-1a");
-        Map<String, CloudSubnet> cloudSubnetMap = Map.of("subnet",  cloudSubnet);
+        Map<String, CloudSubnet> cloudSubnetMap = Map.of("subnet", cloudSubnet);
         network.setSubnetMetas(cloudSubnetMap);
         detailedEnvironmentResponse.setNetwork(network);
         EnvironmentAuthenticationResponse authentication = new EnvironmentAuthenticationResponse();

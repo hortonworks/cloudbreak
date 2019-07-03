@@ -4,63 +4,41 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
-import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
-import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
 @Service
 public class StackRequestManifester {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackRequestManifester.class);
 
-    @Inject
-    private CloudbreakUserCrnClient cloudbreakClient;
-
     @Value("${sdx.cluster.definition}")
     private String clusterDefinition;
 
-    public void configureStackForSdxCluster(StackV4Request internalRequest, SdxClusterRequest sdxClusterRequest,
-            SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        if (internalRequest != null) {
-            addStackV4RequestAsString(sdxCluster, internalRequest);
-        } else {
-            //TODO: get detailed env service
-            StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, sdxClusterRequest, environment);
-            addStackV4RequestAsString(sdxCluster, generatedStackV4Request);
-        }
+    public void configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+        StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
+        addStackV4RequestAsString(sdxCluster, generatedStackV4Request);
     }
 
     public void addStackV4RequestAsString(SdxCluster sdxCluster, StackV4Request internalRequest) {
@@ -73,16 +51,9 @@ public class StackRequestManifester {
         }
     }
 
-    public StackV4Request setupStackRequestForCloudbreak(SdxCluster sdxCluster, SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment) {
-
-        String clusterTemplateJson;
-        if (sdxCluster.getStackRequest() == null) {
-            clusterTemplateJson = FileReaderUtils.readFileFromClasspathQuietly("sdx/" + "cluster-template.json");
-        } else {
-            clusterTemplateJson = sdxCluster.getStackRequest();
-        }
+    public StackV4Request setupStackRequestForCloudbreak(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         try {
-            StackV4Request stackRequest = JsonUtil.readValue(clusterTemplateJson, StackV4Request.class);
+            StackV4Request stackRequest = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);
             stackRequest.setName(sdxCluster.getClusterName());
             TagsV4Request tags = new TagsV4Request();
             try {
@@ -100,9 +71,6 @@ public class StackRequestManifester {
                 setupPlacement(environment, stackRequest);
                 setupNetwork(environment, stackRequest);
             }
-            if (isCloudStorageConfigured(clusterRequest)) {
-                configureCloudStorage(environment.getCloudPlatform(), sdxCluster, clusterRequest, stackRequest);
-            }
             setupAuthentication(environment, stackRequest);
             setupClusterRequest(stackRequest);
             return stackRequest;
@@ -110,11 +78,6 @@ public class StackRequestManifester {
             LOGGER.error("Can not parse json to stack request");
             throw new IllegalStateException("Can not parse json to stack request", e);
         }
-    }
-
-    private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
-        return clusterRequest.getCloudStorage() != null
-                && StringUtils.isNotEmpty(clusterRequest.getCloudStorage().getBaseLocation());
     }
 
     private void setupPlacement(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
@@ -177,49 +140,5 @@ public class StackRequestManifester {
         if (cluster != null && cluster.getPassword() == null) {
             cluster.setPassword(PasswordUtil.generatePassword());
         }
-    }
-
-    private void configureCloudStorage(String cloudPlatform, SdxCluster sdxCluster, SdxClusterRequest clusterRequest, StackV4Request stackRequest) {
-        SdxCloudStorageRequest cloudStorage = clusterRequest.getCloudStorage();
-        validateCloudStorage(cloudPlatform, cloudStorage);
-
-        FileSystemParameterV4Responses fileSystemRecommendations = getFileSystemRecommendations(sdxCluster.getInitiatorUserCrn(),
-                sdxCluster.getClusterName(),
-                cloudStorage);
-
-        LOGGER.info("File recommendations {}", fileSystemRecommendations);
-
-        CloudStorageV4Request cloudStorageV4Request = new CloudStorageV4Request();
-        Set<StorageLocationV4Request> locations = new HashSet<>();
-        for (FileSystemParameterV4Response response : fileSystemRecommendations.getResponses()) {
-            StorageLocationV4Request sl = new StorageLocationV4Request();
-            sl.setPropertyName(response.getPropertyName());
-            sl.setPropertyFile(response.getPropertyFile());
-            sl.setValue(response.getDefaultPath());
-            locations.add(sl);
-        }
-        cloudStorageV4Request.setLocations(locations);
-        cloudStorageV4Request.setS3(cloudStorage.getS3());
-        stackRequest.getCluster().setCloudStorage(cloudStorageV4Request);
-    }
-
-    private void validateCloudStorage(String cloudPlatform, SdxCloudStorageRequest cloudStorage) {
-        if (CloudPlatform.AWS.name().equalsIgnoreCase(cloudPlatform)) {
-            if (cloudStorage.getS3() == null || StringUtils.isEmpty(cloudStorage.getS3().getInstanceProfile())) {
-                throw new BadRequestException("instance profile must be defined for S3");
-            }
-        }
-    }
-
-    private FileSystemParameterV4Responses getFileSystemRecommendations(String userCrn, String clusterName, SdxCloudStorageRequest cloudStorageRequest) {
-        return cloudbreakClient.withCrn(userCrn).filesystemV4Endpoint()
-                .getFileSystemParameters(0L,
-                        clusterDefinition,
-                        clusterName,
-                        "",
-                        cloudStorageRequest.getBaseLocation(),
-                        cloudStorageRequest.getFileSystemType().toString(),
-                        false,
-                        false);
     }
 }

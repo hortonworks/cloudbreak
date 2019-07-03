@@ -38,6 +38,9 @@ public class ProvisionerService {
     private SdxClusterRepository sdxClusterRepository;
 
     @Inject
+    private StackRequestManifester stackRequestManifester;
+
+    @Inject
     private Clock clock;
 
     public void startStackDeletion(Long id) {
@@ -88,6 +91,7 @@ public class ProvisionerService {
 
     public void startStackProvisioning(Long id, DetailedEnvironmentResponse environment) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
+            stackRequestManifester.configureStackForSdxCluster(sdxCluster,  environment);
             LOGGER.info("Call cloudbreak with stackrequest");
             try {
                 StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
