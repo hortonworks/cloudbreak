@@ -1,0 +1,5 @@
+name: "yarn-e2e-tests"
+tests:
+  - name: "yarn e2e tests"
+    packages:
+      - com.sequenceiq.it.cloudbreak.testcase.e2e.yarn.*
