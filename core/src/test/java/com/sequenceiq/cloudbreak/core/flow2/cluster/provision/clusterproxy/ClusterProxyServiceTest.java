@@ -56,6 +56,8 @@ public class ClusterProxyServiceTest {
 
     private static final String UPDATE_CONFIG_PATH = "/rpc/updateConfig";
 
+    private static final String REMOVE_CONFIG_PATH = "/rpc/removeConfig";
+
     @Mock
     private StackService stackService;
 
@@ -71,6 +73,7 @@ public class ClusterProxyServiceTest {
         ReflectionTestUtils.setField(service, "clusterProxyUrl", CLUSTER_PROXY_URL);
         ReflectionTestUtils.setField(service, "registerConfigPath", REGISTER_CONFIG_PATH);
         ReflectionTestUtils.setField(service, "updateConfigPath", UPDATE_CONFIG_PATH);
+        ReflectionTestUtils.setField(service, "removeConfigPath", REMOVE_CONFIG_PATH);
     }
 
     @Test
@@ -86,7 +89,7 @@ public class ClusterProxyServiceTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(JsonUtil.writeValueAsStringSilent(response)));
 
-        ConfigRegistrationResponse registrationResponse = service.registerProxyConfiguration(STACK_ID);
+        ConfigRegistrationResponse registrationResponse = service.registerCluster(STACK_ID);
         assertEquals("123", registrationResponse.getId());
         assertEquals("X509PublicKey", registrationResponse.getKey());
     }
@@ -96,7 +99,7 @@ public class ClusterProxyServiceTest {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithInvalidSecret());
         mockServer.expect(never(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REGISTER_CONFIG_PATH)));
 
-        assertThrows(VaultConfigException.class, () -> service.registerProxyConfiguration(STACK_ID));
+        assertThrows(VaultConfigException.class, () -> service.registerCluster(STACK_ID));
     }
 
     @Test
@@ -119,6 +122,16 @@ public class ClusterProxyServiceTest {
                 .andRespond(withStatus(HttpStatus.OK));
 
         service.registerGatewayConfiguration(STACK_ID);
+    }
+
+    @Test
+    public void shouldDeregisterClsuter() throws URISyntaxException, JsonProcessingException {
+        mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REMOVE_CONFIG_PATH)))
+                .andExpect(content().json(JsonUtil.writeValueAsStringSilent(of("clusterCrn", String.valueOf(CLUSTER_ID)))))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.OK));
+
+        service.deregisterCluster(testCluster());
     }
 
     private String configRegistrationRequest() {
