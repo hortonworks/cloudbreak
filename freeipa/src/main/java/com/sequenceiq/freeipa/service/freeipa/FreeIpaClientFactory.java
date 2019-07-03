@@ -22,6 +22,8 @@ public class FreeIpaClientFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaClientFactory.class);
 
+    private static final String ADMIN_USER = "admin";
+
     @Inject
     private GatewayConfigService gatewayConfigService;
 
@@ -56,10 +58,14 @@ public class FreeIpaClientFactory {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
 
         try {
-            return new FreeIpaClientBuilder("admin", freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
+            return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
                     httpClientConfig, stack.getGatewayport().toString()).build();
         } catch (Exception e) {
             throw new FreeIpaClientException("Couldn't build FreeIPA client: " + e.getLocalizedMessage(), e);
         }
+    }
+
+    public String getAdminUser() {
+        return ADMIN_USER;
     }
 }
