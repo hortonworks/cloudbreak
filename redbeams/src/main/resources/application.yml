@@ -68,7 +68,7 @@ cert:
   ignorePreValidation: false
 
 secret:
-  application: cb/shared
+  application: redbeams/shared
   engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
 
 vault:
