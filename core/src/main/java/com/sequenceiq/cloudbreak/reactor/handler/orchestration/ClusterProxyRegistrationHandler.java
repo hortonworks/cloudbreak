@@ -42,7 +42,7 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
         Selectable response;
         try {
             if (clusterProxyIntegrationEnabled) {
-                clusterProxyService.registerProxyConfiguration(request.getResourceId());
+                clusterProxyService.registerCluster(request.getResourceId());
                 response = new ClusterProxyRegistrationSuccess(request.getResourceId());
             } else {
                 response = new ClusterProxyRegistrationSuccess(request.getResourceId());
