@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
 import java.util.Optional;
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -9,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
@@ -39,6 +44,8 @@ public class KerberosMgmtV1Service {
 
     private static final String KEYTAB_FETCH_FAILED = "Failed to fetch keytab.";
 
+    private static final String VAULT_UPDATE_FAILED = "Failed to update Vault.";
+
     private static final String EMPTY_REALM = "Failed to create service as realm was empty.";
 
     private static final String IPA_STACK_NOT_FOUND = "Stack for IPA server not found.";
@@ -54,6 +61,12 @@ public class KerberosMgmtV1Service {
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
 
+    @Inject
+    private SecretService secretService;
+
+    @Inject
+    private StringToSecretResponseConverter stringToSecretResponseConverter;
+
     public ServiceKeytabResponse generateServiceKeytab(ServiceKeytabRequest request, String accountId) throws FreeIpaClientException {
         LOGGER.debug("Request to generate keytab for Service:{} Host:{} in Environment:{}", request.getServiceName(), request.getServerHostName(),
                 request.getEnvironmentCrn());
@@ -66,8 +79,8 @@ public class KerberosMgmtV1Service {
         hostAdd(request.getServerHostName(), ipaClient);
         String servicePrincipal = serviceAdd(request.getServiceName(), request.getServerHostName(), realm, adminUser, ipaClient);
         String serviceKeytab = getServiceKeytab(servicePrincipal, ipaClient);
-        response.setKeytab(serviceKeytab);
-        response.setServicePrincial(servicePrincipal);
+        response.setKeytab(getSecretResponseForKeytab(accountId, serviceKeytab));
+        response.setServicePrincial(getSecretResponseForPrincipal(accountId, servicePrincipal));
         return response;
     }
 
@@ -80,8 +93,8 @@ public class KerberosMgmtV1Service {
 
         String servicePrincipal = request.getServiceName() + "/" + request.getServerHostName() + "@" + realm;
         String serviceKeytab = getExistingServiceKeytab(servicePrincipal, ipaClient);
-        response.setKeytab(serviceKeytab);
-        response.setServicePrincial(servicePrincipal);
+        response.setKeytab(getSecretResponseForKeytab(accountId, serviceKeytab));
+        response.setServicePrincial(getSecretResponseForPrincipal(accountId, servicePrincipal));
         return response;
     }
 
@@ -180,5 +193,32 @@ public class KerberosMgmtV1Service {
                 .map(JsonRpcClientException::getCode)
                 .filter(c -> c == DUPLICATE_ENTRY_ERROR_CODE)
                 .isPresent();
+    }
+
+    private SecretResponse getSecretResponseForPrincipal(String accountId, String principal) {
+        try {
+            String path = constructVaultPath(accountId, "ServiceKeytab", "serviceprincipal");
+            String secret = secretService.put(path, principal);
+            return stringToSecretResponseConverter.convert(secret);
+        } catch (Exception exception) {
+            LOGGER.warn("Failure while updating vault.", exception);
+            throw new KeytabCreationException(VAULT_UPDATE_FAILED);
+        }
+    }
+
+    private SecretResponse getSecretResponseForKeytab(String accountId, String keytab) {
+        try {
+            String path = constructVaultPath(accountId, "ServiceKeytab", "keytab");
+            String secret = secretService.put(path, keytab);
+            return stringToSecretResponseConverter.convert(secret);
+        } catch (Exception exception) {
+            LOGGER.warn("Failure while updating vault.", exception);
+            throw new KeytabCreationException(VAULT_UPDATE_FAILED);
+        }
+    }
+
+    private String constructVaultPath(String accountId, String type, String subtype) {
+        return String.format("%s/%s/%s/%s-%s", accountId, type, subtype,
+                UUID.randomUUID().toString(), Long.toHexString(System.currentTimeMillis()));
     }
 }
