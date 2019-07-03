@@ -42,13 +42,16 @@ public class ClusterProxyService {
     @Value("${clusterProxy.updateConfigPath:}")
     private String updateConfigPath;
 
+    @Value("${clusterProxy.removeConfigPath:}")
+    private String removeConfigPath;
+
     @Autowired
     ClusterProxyService(StackService stackService, RestTemplate restTemplate) {
         this.stackService = stackService;
         this.restTemplate = restTemplate;
     }
 
-    public ConfigRegistrationResponse registerProxyConfiguration(Long stackId) throws JsonProcessingException {
+    public ConfigRegistrationResponse registerCluster(Long stackId) throws JsonProcessingException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
         LOGGER.debug("Cluster Proxy config request: {}", proxyConfigRequest);
@@ -61,7 +64,7 @@ public class ClusterProxyService {
 
     public void registerGatewayConfiguration(Long stackId) throws JsonProcessingException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        if (!stack.getCluster().hasGateway()) {
+        if  (!stack.getCluster().hasGateway()) {
             LOGGER.info("Cluster {} in environment {} not configured with Gateway (Knox). Not updating Cluster Proxy with Gateway url.",
                     stack.getCluster().getName(), stack.getEnvironmentCrn());
             return;
@@ -75,6 +78,13 @@ public class ClusterProxyService {
 
     }
 
+    public void deregisterCluster(Cluster cluster) throws JsonProcessingException {
+        LOGGER.debug("Removing cluster proxy configuration for cluster with crn: {}", clusterCrn(cluster));
+        restTemplate.postForEntity(clusterProxyUrl + removeConfigPath,
+                requestEntity(new ConfigDeleteRequest(clusterCrn(cluster))), ConfigRegistrationResponse.class);
+        LOGGER.debug("Removed cluster proxy configuration for cluster with crn: {}", clusterCrn(cluster));
+    }
+
     private HttpEntity<String> requestEntity(ConfigRegistrationRequest proxyConfigRequest) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -82,6 +92,12 @@ public class ClusterProxyService {
     }
 
     private HttpEntity<String> requestEntity(ConfigUpdateRequest proxyConfigRequest) throws JsonProcessingException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(JsonUtil.writeValueAsString(proxyConfigRequest), headers);
+    }
+
+    private HttpEntity<String> requestEntity(ConfigDeleteRequest proxyConfigRequest) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(JsonUtil.writeValueAsString(proxyConfigRequest), headers);
