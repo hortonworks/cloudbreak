@@ -84,7 +84,11 @@ class GetKeytab(Command):
 
     has_output = (
         output.summary,
-        output.Output('keytab', unicode, _('The keytab encoded as base64')),
+        output.Output(
+            'result',
+            dict,
+            _('The keytab response which has a base64 encoded keytab element.')
+        ),
     )
 
     # See https://web.mit.edu/kerberos/krb5-devel/doc/formats/keytab_file_format.html
@@ -122,7 +126,7 @@ class GetKeytab(Command):
 
         return dict(
             summary=summary,
-            keytab=base64_keytab
+            result=dict(keytab=base64_keytab)
         )
 
     def get_keytab(self, principal, retrieve):
