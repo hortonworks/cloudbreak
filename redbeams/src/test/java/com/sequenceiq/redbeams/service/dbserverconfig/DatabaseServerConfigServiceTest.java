@@ -159,6 +159,22 @@ public class DatabaseServerConfigServiceTest {
     }
 
     @Test
+    public void testCreateConnectionFailure() {
+        thrown.expect(IllegalArgumentException.class);
+
+        doAnswer(new Answer() {
+            public Object answer(InvocationOnMock invocation) {
+                Errors errors = invocation.getArgument(1);
+                errors.rejectValue("connectorJarUrl", "", "bad jar");
+                errors.reject("", "epic fail");
+                return null;
+            }
+        }).when(connectionValidator).validate(eq(server), any(Errors.class));
+
+        underTest.create(server, 0L);
+    }
+
+    @Test
     public void testGetByNameFound() {
         when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv")).thenReturn(Optional.of(server));
 
