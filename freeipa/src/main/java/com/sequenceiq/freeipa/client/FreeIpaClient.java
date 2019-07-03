@@ -110,10 +110,10 @@ public class FreeIpaClient {
         return (Host) invoke("host_del", List.of(fqdn), params, Host.class).getResult();
     }
 
-    public RPCResponse<Host> addHost(String fqdn) throws FreeIpaClientException {
+    public Host addHost(String fqdn) throws FreeIpaClientException {
         RPCResponse<Host> response = null;
-        //TODO Implement as part of CDPSDX-584
-        return response;
+        Map<String, Object> params = Map.of("force", true);
+        return (Host) invoke("host_add", List.of(fqdn), params, Host.class).getResult();
     }
 
     public User deleteUser(String userUid) throws FreeIpaClientException {
@@ -295,10 +295,16 @@ public class FreeIpaClient {
         return (Service) invoke("service_del", flags, params, Service.class).getResult();
     }
 
-    public RPCResponse<Service> addService(String canonicalPrincipal) throws FreeIpaClientException {
-        RPCResponse<Service> response = null;
-        //TODO Implement as part of CDPSDX-584
-        return response;
+    public Service addService(String canonicalPrincipal) throws FreeIpaClientException {
+        List<String> flags = List.of(canonicalPrincipal);
+        Map<String, Object> params = Map.of("force", true);
+        return (Service) invoke("service_add", flags, params, Service.class).getResult();
+    }
+
+    public Service showService(String canonicalPrincipal) throws FreeIpaClientException {
+        List<String> flags = List.of(canonicalPrincipal);
+        Map<String, Object> params = Map.of();
+        return (Service) invoke("service_show", flags, params, Service.class).getResult();
     }
 
     /**
@@ -335,22 +341,22 @@ public class FreeIpaClient {
         return invoke("dnsrecord_del", flags, params, Object.class);
     }
 
-    public RPCResponse<Service> serviceAllowRetrieveKeytab(String canonicalPrincipal, String user) throws FreeIpaClientException {
-        RPCResponse<Service> response = null;
-        //TODO Implement as part of CDPSDX-584
-        return response;
+    public void allowServiceKeytabRetrieval(String canonicalPrincipal, String user) throws FreeIpaClientException {
+        List<String> flags = List.of(canonicalPrincipal);
+        Map<String, Object> params = Map.of("user", user);
+        invoke("service_allow_retrieve_keytab", flags, params, Service.class);
     }
 
-    public RPCResponse<Keytab> getExistingKeytab(String canonicalPrincipal) throws FreeIpaClientException {
-        RPCResponse<Keytab> response = null;
-        //TODO Implement as part of CDPSDX-584
-        return response;
+    public Keytab getExistingKeytab(String canonicalPrincipal) throws FreeIpaClientException {
+        List<String> flags = List.of(canonicalPrincipal);
+        Map<String, Object> params = Map.of("retrieve", true);
+        return (Keytab) invoke("get_keytab", flags, params, Keytab.class).getResult();
     }
 
-    public RPCResponse<Keytab> getKeytab(String canonicalPrincipal) throws FreeIpaClientException {
-        RPCResponse<Keytab> response = null;
-        //TODO Implement as part of CDPSDX-584
-        return response;
+    public Keytab getKeytab(String canonicalPrincipal) throws FreeIpaClientException {
+        List<String> flags = List.of(canonicalPrincipal);
+        Map<String, Object> params = Map.of();
+        return (Keytab) invoke("get_keytab", flags, params, Keytab.class).getResult();
     }
 
     public <T> RPCResponse<T> invoke(String method, List<String> flags, Map<String, Object> params, Type resultType) throws FreeIpaClientException {
