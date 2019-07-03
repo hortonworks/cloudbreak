@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -24,14 +26,17 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
+import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Vpc;
+import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTagPreparationService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -718,6 +723,39 @@ public class AwsNetworkServiceTest {
         String cidr = underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
 
         Assert.assertEquals("172.14.255.0/24", cidr);
+    }
+
+    @Test
+    public void testGetVpcCidrs() {
+        String cidr1 = "1.2.3.0/24";
+        String cidr2 = "10.0.0.0/8";
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        CloudStack cloudStack = mock(CloudStack.class);
+        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudStack.getNetwork()).thenReturn(new Network(new Subnet(null), Map.of("vpcId", "vpc-123")));
+        when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("eu-west1")));
+        when(awsClient.createAccess(any(AwsCredentialView.class), anyString())).thenReturn(ec2Client);
+        when(ec2Client.describeVpcs(any(DescribeVpcsRequest.class)))
+                .thenReturn(new DescribeVpcsResult().withVpcs(new Vpc()
+                        .withCidrBlockAssociationSet(new VpcCidrBlockAssociation().withCidrBlock(cidr1), new VpcCidrBlockAssociation().withCidrBlock(cidr2))));
+
+        List<String> vpcCidrs = underTest.getVpcCidrs(authenticatedContext, cloudStack);
+
+        assertTrue(vpcCidrs.contains(cidr1));
+        assertTrue(vpcCidrs.contains(cidr2));
+    }
+
+    @Test
+    public void testGetVpcCidrsEmpty() {
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudStack cloudStack = mock(CloudStack.class);
+        when(cloudStack.getNetwork()).thenReturn(new Network(new Subnet(null)));
+
+        List<String> vpcCidrs = underTest.getVpcCidrs(authenticatedContext, cloudStack);
+
+        assertTrue(vpcCidrs.isEmpty());
     }
 
     private String incrementIp(String ip) {

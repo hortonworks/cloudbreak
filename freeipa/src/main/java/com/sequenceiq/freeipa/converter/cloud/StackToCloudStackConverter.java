@@ -219,7 +219,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     private Security buildSecurity(InstanceGroup ig) {
         List<SecurityRule> rules = new ArrayList<>();
         if (ig.getSecurityGroup() == null) {
-            return new Security(rules, Collections.emptyList());
+            return new Security(rules, Collections.emptyList(), true);
         }
         List<com.sequenceiq.freeipa.entity.SecurityRule> securityRules = securityRuleService.findAllBySecurityGroup(ig.getSecurityGroup());
         for (com.sequenceiq.freeipa.entity.SecurityRule securityRule : securityRules) {
@@ -236,7 +236,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
             rules.add(new SecurityRule(securityRule.getCidr(), portDefinitions.toArray(new PortDefinition[portDefinitions.size()]),
                     securityRule.getProtocol()));
         }
-        return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds());
+        return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds(), true);
     }
 
     private Network buildNetwork(Stack stack) {

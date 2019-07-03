@@ -4,6 +4,7 @@ import static java.util.Collections.singletonList;
 
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Vpc;
+import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
@@ -97,6 +99,24 @@ public class AwsNetworkService {
         LOGGER.debug("The selected VPCs: {}, has the following subnets: {}", vpc.getVpcId(), String.join(",", subnetCidrs));
 
         return calculateSubnet(ac.getCloudContext().getName(), vpc, subnetCidrs);
+    }
+
+    public List<String> getVpcCidrs(AuthenticatedContext ac, CloudStack stack) {
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        if (awsNetworkView.isExistingVPC()) {
+            String region = ac.getCloudContext().getLocation().getRegion().value();
+            AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
+
+            DescribeVpcsRequest vpcRequest = new DescribeVpcsRequest().withVpcIds(awsNetworkView.getExistingVPC());
+            Vpc vpc = ec2Client.describeVpcs(vpcRequest).getVpcs().get(0);
+            List<String> cidrBlockAssociationSet = vpc.getCidrBlockAssociationSet().stream()
+                    .map(VpcCidrBlockAssociation::getCidrBlock)
+                    .collect(Collectors.toList());
+            LOGGER.info("VPC associated CIDR blocks: [{}]", cidrBlockAssociationSet);
+            return cidrBlockAssociationSet;
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private String calculateSubnet(String stackName, Vpc vpc, Iterable<String> subnetCidrs) {

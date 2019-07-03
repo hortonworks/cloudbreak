@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,8 @@ public class CloudFormationTemplateBuilder {
                     getSubnetIds(context.existingSubnetIds, i, group, multigw),
                     awsInstanceView.isKmsEnabled(),
                     awsInstanceView.getKmsKey(),
-                    encryptedAMI);
+                    encryptedAMI,
+                    group.getSecurity().isUseNetworkCidrAsSourceForDefaultRules());
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);
@@ -78,6 +80,7 @@ public class CloudFormationTemplateBuilder {
         model.put("existingRole", context.instanceProfileAvailable);
         model.put("cbSubnet", (isNullOrEmptyList(context.existingSubnetCidr)) ? Lists.newArrayList(context.defaultSubnet)
                 : context.existingSubnetCidr);
+        model.put("vpcSubnet", context.existingVpcCidr == null ? Collections.emptyList() : context.existingVpcCidr);
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
@@ -138,6 +141,8 @@ public class CloudFormationTemplateBuilder {
 
         private List<String> existingSubnetCidr = new ArrayList<>();
 
+        private List<String> existingVpcCidr = new ArrayList<>();
+
         private boolean mapPublicIpOnLaunch;
 
         private String template;
@@ -172,6 +177,11 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withExistingSubnetCidr(List<String> cidr) {
             existingSubnetCidr = cidr;
+            return this;
+        }
+
+        public ModelContext withExistinVpcCidr(List<String> cidr) {
+            existingVpcCidr = cidr;
             return this;
         }
 
