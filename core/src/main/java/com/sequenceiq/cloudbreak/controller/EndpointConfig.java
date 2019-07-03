@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.controller.v4.BlueprintV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CloudbreakInfoV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ClusterTemplateV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.DatalakeV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.EventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.FileSystemV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ImageCatalogV4Controller;
@@ -71,7 +72,8 @@ public class EndpointConfig extends ResourceConfig {
             ManagementPackV4Controller.class,
             StackV4Controller.class,
             CloudbreakInfoV4Controller.class,
-            DistroXV1Controller.class
+            DistroXV1Controller.class,
+            DatalakeV4Controller.class
     );
 
     private static final String VERSION_UNAVAILABLE = "unspecified";

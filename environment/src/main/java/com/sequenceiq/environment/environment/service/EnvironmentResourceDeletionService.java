@@ -66,6 +66,27 @@ public class EnvironmentResourceDeletionService {
         return clusterNames;
     }
 
+    Set<String> getDatalakeClusterNames(Environment environment) {
+        Set<String> clusterNames = new HashSet<>();
+        LOGGER.debug("Get Datalake clusters of the environment: '{}'", environment.getName());
+        try {
+            Set<String> datalakeClusterNames = cloudbreakClient
+                    .withCrn(environment.getResourceCrn())
+                    .datalakeV4Endpoint()
+                    .list(environment.getName())
+                    .getResponses()
+                    .stream()
+                    .map(StackViewV4Response::getName)
+                    .collect(Collectors.toSet());
+            clusterNames.addAll(datalakeClusterNames);
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to get Datalake clusters from Cloudbreak service due to: '%s' ", e.getMessage());
+            LOGGER.error(message, e);
+            throw new EnvironmentServiceException(message, e);
+        }
+        return clusterNames;
+    }
+
     Set<String> getAttachedDistroXClusterNames(Environment environment) {
         Set<String> clusterNames = new HashSet<>();
         LOGGER.debug("Get DistroX clusters of the environment: '{}'", environment.getName());

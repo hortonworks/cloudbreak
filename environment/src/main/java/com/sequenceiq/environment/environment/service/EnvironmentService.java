@@ -207,6 +207,12 @@ public class EnvironmentService {
                     String.join(", ", sdxNames)));
         }
 
+        Set<String> datalakes = environmentResourceDeletionService.getDatalakeClusterNames(env);
+        if (!datalakes.isEmpty()) {
+            throw new BadRequestException(String.format("The following Data Lake cluster(s) must be terminated before Environment deletion [%s]",
+                    String.join(", ", datalakes)));
+        }
+
         Set<String> distroXClusterNames = environmentResourceDeletionService.getAttachedDistroXClusterNames(env);
         if (!distroXClusterNames.isEmpty()) {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before Environment deletion [%s]",
