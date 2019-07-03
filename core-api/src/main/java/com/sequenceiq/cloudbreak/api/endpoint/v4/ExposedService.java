@@ -19,7 +19,7 @@ public enum ExposedService {
     CLOUDERA_MANAGER("CM", "CM-API", "CM-API", "CM-API", "/cm-api/", true, null, 7180),
     CLOUDERA_MANAGER_UI("CM-UI", "CM-UI", "CM-UI", "CM-UI", "/cmf/home", true, null, 7180),
     AMBARI("Ambari", "AMBARI_SERVER", "", "AMBARI", "/ambari/", true, 8080, null),
-    WEBHDFS("WebHDFS", "NAMENODE", "NAMENODE", "WEBHDFS", "/webhdfs/v1", false, 50070),
+    WEBHDFS("WebHDFS", "NAMENODE", "NAMENODE", "WEBHDFS", "/webhdfs/v1", false, 50070, 9870),
     NAMENODE("Name Node", "NAMENODE", "NAMENODE", "HDFSUI", "/hdfs/", true, 50070, 9870),
     RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "RESOURCEMANAGER", "YARNUI", "/yarn/", true, 8088),
     RESOURCEMANAGER_WEB_V2("Resource Manager V2", "RESOURCEMANAGER", "RESOURCEMANAGER", "YARNUIV2", "/yarnuiv2/", true, 8088),
