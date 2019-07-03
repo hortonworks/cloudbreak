@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -9,19 +10,24 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -49,10 +55,7 @@ public class SdxService {
     private CloudbreakUserCrnClient cloudbreakClient;
 
     @Inject
-    private StackRequestManifester stackRequestManifester;
-
-    @Value("${sdx.cluster.definition}")
-    private String clusterDefinition;
+    private CloudStorageManifester cloudStorageManifester;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<SdxClusterStatus> statuses) {
         List<SdxCluster> sdxClusters = sdxClusterRepository.findByIdInAndStatusIn(resourceIds, statuses);
@@ -73,7 +76,7 @@ public class SdxService {
             return cloudbreakClient.withCrn(userCrn).stackV4Endpoint().get(0L, name, entries);
         } catch (javax.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);
-            throw notFound("SDX cluster", name).get();
+            return null;
         }
     }
 
@@ -102,7 +105,6 @@ public class SdxService {
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         sdxCluster.setClusterName(name);
         sdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
-        sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setAccessCidr(sdxClusterRequest.getAccessCidr());
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
@@ -112,8 +114,14 @@ public class SdxService {
         sdxCluster.setEnvCrn(environment.getCrn());
 
         setTagsSafe(sdxClusterRequest, sdxCluster);
+        stackV4Request = prepareStackRequest(sdxClusterRequest, stackV4Request, sdxCluster, environment);
 
-        stackRequestManifester.configureStackForSdxCluster(stackV4Request, sdxClusterRequest, sdxCluster,  environment);
+        try {
+            sdxCluster.setStackRequest(JsonUtil.writeValueAsString(stackV4Request));
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Can not parse internal stackrequest", e);
+            throw new BadRequestException("Can not parse internal stackrequest", e);
+        }
 
         sdxCluster = sdxClusterRepository.save(sdxCluster);
 
@@ -121,6 +129,40 @@ public class SdxService {
         sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
 
         return sdxCluster;
+    }
+
+    private StackV4Request prepareStackRequest(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request,
+            SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+        stackV4Request = getStackRequest(stackV4Request, environment.getCloudPlatform());
+        if (isCloudStorageConfigured(sdxClusterRequest)) {
+            CloudStorageV4Request cloudStorageConfig =
+                    cloudStorageManifester.getCloudStorageConfig(environment.getCloudPlatform(), sdxCluster, sdxClusterRequest);
+            stackV4Request.getCluster().setCloudStorage(cloudStorageConfig);
+        }
+        return stackV4Request;
+    }
+
+    private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
+        return clusterRequest.getCloudStorage() != null
+                && StringUtils.isNotEmpty(clusterRequest.getCloudStorage().getBaseLocation());
+    }
+
+    private StackV4Request getStackRequest(@Nullable StackV4Request internalStackRequest, String cloudPlatform) {
+        if (internalStackRequest == null) {
+            return getStackRequestFromFile(cloudPlatform);
+        } else {
+            return internalStackRequest;
+        }
+    }
+
+    private StackV4Request getStackRequestFromFile(String cloudPlatform) {
+        try {
+            String clusterTemplateJson = FileReaderUtils.readFileFromClasspath("sdx/cluster-template.json");
+            return JsonUtil.readValue(clusterTemplateJson, StackV4Request.class);
+        } catch (IOException e) {
+            LOGGER.info("Can not read SDX template for platform {}", cloudPlatform, e);
+            throw new BadRequestException("Can not read template for platform " + cloudPlatform);
+        }
     }
 
     private void validateSdxRequest(String name, String envName, String accountId) {
