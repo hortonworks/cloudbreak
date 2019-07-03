@@ -43,7 +43,7 @@ dependencies {
   compile group: 'org.springframework',                   name: 'spring-beans',                   version: springFrameworkVersion
   compile group: 'org.springframework',                   name: 'spring-context',                 version: springFrameworkVersion
   compile group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
-  compile group: 'org.springframework.data',              name: 'spring-data-jpa',                version: '2.1.6.RELEASE'
+  compile group: 'org.springframework.data',              name: 'spring-data-jpa',                version: '2.1.5.RELEASE'
   compile group: 'org.springframework',                   name: 'spring-jdbc',                    version: springFrameworkVersion
   compile group: 'org.springframework',                   name: 'spring-web',                     version: springFrameworkVersion
   compile group: 'org.springframework.retry',             name: 'spring-retry',                   version: '1.2.0.RELEASE'
