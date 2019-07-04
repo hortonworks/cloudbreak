@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.api.v1.environment.model.base;
+package com.sequenceiq.environment.api.v1.environment.model.common;
 
 import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalyticsAttributesHolder;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;

@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.common.AwsParams;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -52,8 +53,7 @@ public abstract class EnvironmentBaseResponse {
 
     private Long created;
 
-    @ApiModelProperty(EnvironmentModelDescription.S3_GUARD_DYNAMO_TABLE)
-    private String s3GuardDynamoTable;
+    private AwsParams awsParams;
 
     public String getCrn() {
         return crn;
@@ -175,11 +175,11 @@ public abstract class EnvironmentBaseResponse {
         this.created = created;
     }
 
-    public String getS3GuardDynamoTable() {
-        return s3GuardDynamoTable;
+    public AwsParams getAwsParams() {
+        return awsParams;
     }
 
-    public void setS3GuardDynamoTable(String s3GuardDynamoTable) {
-        this.s3GuardDynamoTable = s3GuardDynamoTable;
+    public void setAwsParams(AwsParams awsParams) {
+        this.awsParams = awsParams;
     }
 }

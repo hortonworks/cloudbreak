@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.api.v1.environment.model.base;
+package com.sequenceiq.environment.api.v1.environment.model.common;
 
 import java.util.Set;
 

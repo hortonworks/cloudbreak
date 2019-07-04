@@ -1,7 +1,8 @@
-package com.sequenceiq.environment.api.v1.environment.model.request;
+package com.sequenceiq.environment.api.v1.environment.model.request.operations;
 
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

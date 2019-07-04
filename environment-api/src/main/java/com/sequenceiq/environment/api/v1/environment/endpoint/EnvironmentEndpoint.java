@@ -18,8 +18,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.environment.api.WelcomeResponse;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.operations.EnvironmentChangeCredentialRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.operations.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.common.AwsParams;
 
 import io.swagger.annotations.ApiModel;
 
@@ -45,7 +46,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private EnvironmentAuthenticationResponse authentication;
 
-        private String s3GuardDynamoTable;
+        private AwsParams awsParams;
 
         private Builder() {
         }
@@ -120,8 +121,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withS3GuardDynamoTable(String s3GuardDynamoTable) {
-            this.s3GuardDynamoTable = s3GuardDynamoTable;
+        public Builder withAwsParams(AwsParams awsParams) {
+            this.awsParams = awsParams;
             return this;
         }
 
@@ -141,7 +142,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setCreated(created);
             detailedEnvironmentResponse.setAuthentication(authentication);
             detailedEnvironmentResponse.setTelemetry(telemetry);
-            detailedEnvironmentResponse.setS3GuardDynamoTable(s3GuardDynamoTable);
+            detailedEnvironmentResponse.setAwsParams(awsParams);
             return detailedEnvironmentResponse;
         }
     }

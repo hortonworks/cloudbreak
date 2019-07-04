@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.common.AwsParams;
 
 import io.swagger.annotations.ApiModel;
 
@@ -38,7 +39,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private Long created;
 
-        private String s3GuardDynamoTable;
+        private AwsParams awsParams;
 
         private Builder() {
         }
@@ -108,8 +109,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withS3GuardDynamoTable(String s3GuardDynamoTable) {
-            this.s3GuardDynamoTable = s3GuardDynamoTable;
+        public Builder withAwsParams(AwsParams awsParams) {
+            this.awsParams = awsParams;
             return this;
         }
 
@@ -128,7 +129,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setStatusReason(statusReason);
             simpleEnvironmentResponse.setCreated(created);
             simpleEnvironmentResponse.setTelemetry(telemetry);
-            simpleEnvironmentResponse.setS3GuardDynamoTable(s3GuardDynamoTable);
+            simpleEnvironmentResponse.setAwsParams(awsParams);
             return simpleEnvironmentResponse;
         }
     }

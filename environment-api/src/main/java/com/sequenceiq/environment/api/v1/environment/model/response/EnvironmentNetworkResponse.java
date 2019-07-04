@@ -8,7 +8,7 @@ import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
-import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
+import com.sequenceiq.environment.api.v1.environment.model.common.EnvironmentNetworkBase;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

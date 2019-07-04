@@ -93,8 +93,9 @@ public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
             LOGGER.debug("About to call freeipa describe with ");
             freeIpaV1Endpoint.describe(env.getResourceCrn());
             return true;
-        } catch (NotFoundException probablyResourseDoesNotExists) {
-            LOGGER.debug("Exception occured during freeipa describe. Probably the resource does not exists, but worth to check", probablyResourseDoesNotExists);
+        } catch (NotFoundException e) {
+            LOGGER.debug("Exception occurred during freeipa describe. "
+                    + "Probably the resource does not exists, but worth a check. Message was: {}", e.getMessage());
             return false;
         }
     }

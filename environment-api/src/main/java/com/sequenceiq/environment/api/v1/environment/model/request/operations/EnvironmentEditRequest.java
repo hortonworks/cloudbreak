@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.api.v1.environment.model.request;
+package com.sequenceiq.environment.api.v1.environment.model.request.operations;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -8,6 +8,10 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.TelemetryRequest;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

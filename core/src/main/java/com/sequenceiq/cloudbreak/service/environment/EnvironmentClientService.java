@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.operations.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;

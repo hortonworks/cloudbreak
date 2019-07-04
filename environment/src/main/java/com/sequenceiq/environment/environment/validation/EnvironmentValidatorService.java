@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAttachRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.operations.EnvironmentAttachRequest;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;

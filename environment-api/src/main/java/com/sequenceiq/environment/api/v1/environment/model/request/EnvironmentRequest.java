@@ -10,6 +10,7 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.environment.model.common.AwsParams;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -52,8 +53,12 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.FREE_IPA)
     private AttachedFreeIpaRequest freeIpa;
 
-    @ApiModelProperty(EnvironmentModelDescription.S3_GUARD_DYNAMO_TABLE)
-    private String s3GuardDynamoTable;
+    @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMS)
+    private AwsParams awsParams;
+
+    public EnvironmentRequest() {
+        awsParams = new AwsParams();
+    }
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
@@ -137,11 +142,11 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.authentication = authentication;
     }
 
-    public String getS3GuardDynamoTable() {
-        return s3GuardDynamoTable;
+    public AwsParams getAwsParams() {
+        return awsParams;
     }
 
-    public void setS3GuardDynamoTable(String s3GuardDynamoTable) {
-        this.s3GuardDynamoTable = s3GuardDynamoTable;
+    public void setAwsParams(AwsParams awsParams) {
+        this.awsParams = awsParams;
     }
 }

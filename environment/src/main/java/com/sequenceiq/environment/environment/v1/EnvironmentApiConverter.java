@@ -11,8 +11,8 @@ import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.operations.EnvironmentChangeCredentialRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.operations.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
@@ -138,7 +138,7 @@ public class EnvironmentApiConverter {
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
                 .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
-                .withS3GuardDynamoTable(environmentDto.getS3GuardDynamoTable())
+                .withAwsParams(environmentDto.getS3GuardDynamoTable())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
@@ -157,7 +157,7 @@ public class EnvironmentApiConverter {
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
-                .withS3GuardDynamoTable(environmentDto.getS3GuardDynamoTable())
+                .withAwsParams(environmentDto.getS3GuardDynamoTable())
                 .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 

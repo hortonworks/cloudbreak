@@ -2,7 +2,7 @@ package com.sequenceiq.environment.api.v1.environment.model.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
+import com.sequenceiq.environment.api.v1.environment.model.common.EnvironmentNetworkBase;
 
 import io.swagger.annotations.ApiModel;
 

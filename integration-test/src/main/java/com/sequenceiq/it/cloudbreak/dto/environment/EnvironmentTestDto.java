@@ -13,7 +13,7 @@ import javax.inject.Inject;
 
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.operations.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
