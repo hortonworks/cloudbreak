@@ -147,6 +147,7 @@ public class SdxServiceTest {
     private void mockEnvironmentCall(SdxClusterRequest sdxClusterRequest) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
+        detailedEnvironmentResponse.setCloudPlatform("AWS");
         detailedEnvironmentResponse.setCrn(Crn.builder()
                 .setService(Crn.Service.ENVIRONMENTS)
                 .setResourceType(Crn.ResourceType.ENVIRONMENT)

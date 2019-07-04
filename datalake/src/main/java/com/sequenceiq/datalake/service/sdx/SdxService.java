@@ -161,7 +161,7 @@ public class SdxService {
 
     private StackV4Request getStackRequestFromFile(String cloudPlatform) {
         try {
-            String clusterTemplateJson = FileReaderUtils.readFileFromClasspath("sdx/cluster-template.json");
+            String clusterTemplateJson = FileReaderUtils.readFileFromClasspath("sdx/" + cloudPlatform.toLowerCase() + "/cluster-template.json");
             return JsonUtil.readValue(clusterTemplateJson, StackV4Request.class);
         } catch (IOException e) {
             LOGGER.info("Can not read SDX template for platform {}", cloudPlatform, e);
