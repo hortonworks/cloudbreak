@@ -87,14 +87,11 @@ public class ServiceEndpointCollector {
                 if (gateway != null) {
                     String variant = cluster.getVariant();
                     ExposedService exposedService = isNotEmpty(variant) && variant.equals(ClusterApi.CLOUDERA_MANAGER)
-                            ? ExposedService.CLOUDERA_MANAGER : ExposedService.AMBARI;
-                    // Knox cannot proxy Cloudera Manager yet
-                    if (!ExposedService.CLOUDERA_MANAGER.equals(exposedService)) {
-                        Optional<GatewayTopology> gatewayTopology = getGatewayTopologyForService(gateway, exposedService);
-                        Optional<String> managerUrl = gatewayTopology.map(t -> getExposedServiceUrl(managerIp, gateway, t.getTopologyName(), exposedService));
-                        // when knox gateway is enabled, but ambari/cm is not exposed, use the default url
-                        return managerUrl.orElse(String.format("https://%s/", managerIp));
-                    }
+                            ? ExposedService.CLOUDERA_MANAGER_UI : ExposedService.AMBARI;
+                    Optional<GatewayTopology> gatewayTopology = getGatewayTopologyForService(gateway, exposedService);
+                    Optional<String> managerUrl = gatewayTopology.map(t -> getExposedServiceUrl(managerIp, gateway, t.getTopologyName(), exposedService));
+                    // when knox gateway is enabled, but ambari/cm is not exposed, use the default url
+                    return managerUrl.orElse(String.format("https://%s/", managerIp));
                 }
                 return String.format("https://%s/", managerIp);
             }
