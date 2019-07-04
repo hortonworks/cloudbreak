@@ -72,7 +72,6 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     public void setUp() {
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceV4Response.class)))
                 .willReturn(new WorkspaceResourceV4Response());
-        given(blueprintService.isAmbariBlueprint(any())).willReturn(true);
     }
 
     @Test
