@@ -18,12 +18,15 @@ public class YarnResourceManagerRoleConfigProvider extends AbstractRoleConfigPro
 
     private static final String CAPACITY_SCHEDULER_SAFETY_VALVE = "resourcemanager_capacity_scheduler_configuration";
 
+    private static final String CAPACITY_SCHEDULER_CLASS = "yarn_resourcemanager_scheduler_class";
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case YarnRoles.RESOURCEMANAGER:
-                return List.of(config(CAPACITY_SCHEDULER_SAFETY_VALVE,
-                        ConfigUtils.getSafetyValveConfiguration(getCapacitySchedulerValveValue())));
+                return List.of(
+                        config(CAPACITY_SCHEDULER_SAFETY_VALVE, ConfigUtils.getSafetyValveConfiguration(getCapacitySchedulerValveValue())),
+                        config(CAPACITY_SCHEDULER_CLASS, "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"));
             default:
                 return List.of();
         }
