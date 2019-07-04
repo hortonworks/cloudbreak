@@ -9,6 +9,9 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
@@ -32,6 +35,8 @@ import com.sequenceiq.flow.core.FlowState;
 
 @Configuration
 public class SdxCreateActions {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxCreateActions.class);
 
     @Inject
     private ProvisionerService provisionerService;
@@ -145,7 +150,11 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxCreateFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                sdxService.updateSdxStatus(payload.getResourceId(), SdxClusterStatus.PROVISIONING_FAILED);
+                Exception exception = payload.getException();
+                SdxClusterStatus provisioningFailedStatus = SdxClusterStatus.PROVISIONING_FAILED;
+                LOGGER.info("Update SDX status to {} for resource: {}", provisioningFailedStatus.name(), payload.getResourceId(), exception);
+                String statusReason = ExceptionUtils.getMessage(exception);
+                sdxService.updateSdxStatus(payload.getResourceId(), provisioningFailedStatus, statusReason);
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }
 

@@ -91,9 +91,14 @@ public class SdxService {
     }
 
     public void updateSdxStatus(Long id, SdxClusterStatus sdxClusterStatus) {
+        updateSdxStatus(id, sdxClusterStatus, null);
+    }
+
+    public void updateSdxStatus(Long id, SdxClusterStatus sdxClusterStatus, String statusReason) {
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findById(id);
         sdxCluster.ifPresentOrElse(sdx -> {
             sdx.setStatus(sdxClusterStatus);
+            sdx.setStatusReason(statusReason);
             sdxClusterRepository.save(sdx);
         }, () -> LOGGER.info("Can not update sdx {} to {} status", id, sdxClusterStatus));
     }

@@ -53,7 +53,7 @@ public class ProvisionerService {
                 LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
             } catch (ClientErrorException e) {
                 LOGGER.info("Can not delete stack from cloudbreak: {}", sdxCluster.getClusterName());
-                throw new RuntimeException("Can not delete stack, client error happened", e);
+                throw new RuntimeException("Can not delete stack, client error happened on Cloudbreak side", e);
             }
         }, () -> {
             throw notFound("SDX cluster", id).get();
@@ -103,7 +103,7 @@ public class ProvisionerService {
                 LOGGER.info("Sdx cluster updated");
             } catch (ClientErrorException e) {
                 LOGGER.info("Can not start provisioning", e);
-                throw new RuntimeException("Can not start provisioning, client error happened", e);
+                throw new RuntimeException("Can not start provisioning, client error happened on Cloudbreak side: " + e.getMessage(), e);
             } catch (IOException e) {
                 LOGGER.info("Can not parse stackrequest to json");
                 throw new RuntimeException("Can not write stackrequest to json", e);

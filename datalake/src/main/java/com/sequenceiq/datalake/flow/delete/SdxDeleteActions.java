@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -124,8 +125,11 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, StackDeletionFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Update SDX status to delete failed: {}", payload.getResourceId());
-                sdxService.updateSdxStatus(payload.getResourceId(), SdxClusterStatus.DELETE_FAILED);
+                Exception exception = payload.getException();
+                SdxClusterStatus deleteFailedStatus = SdxClusterStatus.DELETE_FAILED;
+                LOGGER.info("Update SDX status to {} for resource: {}", deleteFailedStatus, payload.getResourceId(), exception);
+                String statusReason = ExceptionUtils.getMessage(exception);
+                sdxService.updateSdxStatus(payload.getResourceId(), deleteFailedStatus, statusReason);
                 sendEvent(context, SDX_DELETE_FAILED_HANDLED_EVENT.event(), payload);
             }
 
