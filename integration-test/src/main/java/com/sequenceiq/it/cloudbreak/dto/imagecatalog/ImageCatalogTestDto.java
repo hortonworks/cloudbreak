@@ -14,7 +14,7 @@ import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
 public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV4Request, ImageCatalogV4Response, ImageCatalogTestDto>
-        implements Purgable<ImageCatalogV4Response> {
+        implements Purgable<ImageCatalogV4Response, CloudbreakClient> {
 
     public static final String IMAGE_CATALOG = "IMAGE_CATALOG";
 
@@ -80,6 +80,11 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }
+    }
+
+    @Override
+    public Class<CloudbreakClient> client() {
+        return CloudbreakClient.class;
     }
 
     @Override

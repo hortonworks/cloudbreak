@@ -19,6 +19,12 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -73,7 +79,17 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
+        return delegate.imageSettings(imageSettings);
+    }
+
+    @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
+        return delegate.template(template);
+    }
+
+    @Override
+    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template) {
         return delegate.template(template);
     }
 
@@ -88,6 +104,16 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public DistroXTestDtoBase distrox(DistroXTestDtoBase distrox) {
+        return delegate.distrox(distrox);
+    }
+
+    @Override
+    public DistroXClusterTestDto cluster(DistroXClusterTestDto cluster) {
+        return delegate.cluster(cluster);
+    }
+
+    @Override
     public SdxTestDto sdx(SdxTestDto sdx) {
         return delegate.sdx(sdx);
     }
@@ -98,7 +124,17 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume) {
+        return delegate.attachedVolume(volume);
+    }
+
+    @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
+        return delegate.network(network);
+    }
+
+    @Override
+    public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
         return delegate.network(network);
     }
 

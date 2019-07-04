@@ -27,7 +27,7 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
 
     public ClusterTemplateTestDto valid() {
         return withName(resourceProperyProvider().getName())
-                .withDistroXTemplate(getTestContext().init(DistroXTestDto.class).getRequest());
+                .withDistroXTemplate(getTestContext().init(DistroXTemplateTestDto.class).getRequest());
     }
 
     private ClusterTemplateTestDto withDistroXTemplate(DistroXV1Request distroXV1Request) {

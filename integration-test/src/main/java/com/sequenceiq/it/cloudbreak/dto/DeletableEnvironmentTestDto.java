@@ -1,9 +1,11 @@
 package com.sequenceiq.it.cloudbreak.dto;
 
+import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
-public abstract class DeletableEnvironmentTestDto<R, S, T extends CloudbreakTestDto, Z> extends AbstractEnvironmentTestDto<R, S, T> implements Purgable<Z> {
+public abstract class DeletableEnvironmentTestDto<R, S, T extends CloudbreakTestDto, Z> extends AbstractEnvironmentTestDto<R, S, T>
+        implements Purgable<Z, EnvironmentClient> {
 
     protected DeletableEnvironmentTestDto(String newId) {
         super(newId);
@@ -19,4 +21,9 @@ public abstract class DeletableEnvironmentTestDto<R, S, T extends CloudbreakTest
     }
 
     protected abstract String name(Z entity);
+
+    @Override
+    public Class<EnvironmentClient> client() {
+        return EnvironmentClient.class;
+    }
 }

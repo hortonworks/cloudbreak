@@ -1,9 +1,11 @@
 package com.sequenceiq.it.cloudbreak.dto.credential;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.cumulus.CumulusYarnParameters;
@@ -14,6 +16,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnPa
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -100,13 +103,15 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
     }
 
     @Override
-    public Collection<CredentialResponse> getAll(CloudbreakClient client) {
-        return when(credentialTestClient.list()).getResponses();
+    public Collection<CredentialResponse> getAll(EnvironmentClient client) {
+        CredentialEndpoint credentialEndpoint = client.getEnvironmentClient().credentialV1Endpoint();
+        return new ArrayList<>(credentialEndpoint.list().getResponses());
     }
 
     @Override
-    public void delete(TestContext testContext, CredentialResponse entity, CloudbreakClient client) {
-        when(credentialTestClient.delete());
+    public void delete(TestContext testContext, CredentialResponse entity, EnvironmentClient client) {
+        CredentialEndpoint credentialEndpoint = client.getEnvironmentClient().credentialV1Endpoint();
+        credentialEndpoint.deleteByName(entity.getName());
     }
 
     @Override

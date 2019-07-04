@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
@@ -21,6 +23,11 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
@@ -38,8 +45,18 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template) {
+        return template.withInstanceType(awsProperties.getInstance().getType());
+    }
+
+    @Override
     public StackTestDtoBase stack(StackTestDtoBase stack) {
         return stack.withAws(stackParameters());
+    }
+
+    @Override
+    public DistroXTestDtoBase distrox(DistroXTestDtoBase distrox) {
+        return distrox.withAws(distroXParameters());
     }
 
     @Override
@@ -50,12 +67,31 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    protected DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster) {
+        return cluster.withBlueprintName(getBlueprintName());
+    }
+
+    @Override
     public AwsStackV4Parameters stackParameters() {
         return new AwsStackV4Parameters();
     }
 
+    public AwsDistroXV1Parameters distroXParameters() {
+        return new AwsDistroXV1Parameters();
+    }
+
     @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
+        int attachedVolumeSize = awsProperties.getInstance().getVolumeSize();
+        int attachedVolumeCount = awsProperties.getInstance().getVolumeCount();
+        String attachedVolumeType = awsProperties.getInstance().getVolumeType();
+        return volume.withSize(attachedVolumeSize)
+                .withCount(attachedVolumeCount)
+                .withType(attachedVolumeType);
+    }
+
+    @Override
+    public DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume) {
         int attachedVolumeSize = awsProperties.getInstance().getVolumeSize();
         int attachedVolumeCount = awsProperties.getInstance().getVolumeCount();
         String attachedVolumeType = awsProperties.getInstance().getVolumeType();
@@ -70,8 +106,20 @@ public class AwsCloudProvider extends AbstractCloudProvider {
                 .withAws(networkParameters());
     }
 
+    @Override
+    public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
+        return network.withAws(distroXNetworkParameters());
+    }
+
     private AwsNetworkV4Parameters networkParameters() {
         AwsNetworkV4Parameters awsNetworkV4Parameters = new AwsNetworkV4Parameters();
+        awsNetworkV4Parameters.setVpcId(getVpcId());
+        awsNetworkV4Parameters.setSubnetId(getSubnetId());
+        return awsNetworkV4Parameters;
+    }
+
+    private AwsNetworkV1Parameters distroXNetworkParameters() {
+        AwsNetworkV1Parameters awsNetworkV4Parameters = new AwsNetworkV1Parameters();
         awsNetworkV4Parameters.setVpcId(getVpcId());
         awsNetworkV4Parameters.setSubnetId(getSubnetId());
         return awsNetworkV4Parameters;
@@ -135,7 +183,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     public Set<String> getSubnetIDs() {
-        Set<String> subnetIDAsSet = new HashSet<String>();
+        Set<String> subnetIDAsSet = new HashSet<>();
         subnetIDAsSet.add(getSubnetId());
         return subnetIDAsSet;
     }

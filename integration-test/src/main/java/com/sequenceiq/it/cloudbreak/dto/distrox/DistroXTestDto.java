@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.dto.stack;
+package com.sequenceiq.it.cloudbreak.dto.distrox;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.withoutLogError;
@@ -14,66 +14,50 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
-import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.v4.StackActionV4;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
-public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purgable<StackV4Response, CloudbreakClient> {
+public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implements Purgable<StackV4Response, CloudbreakClient> {
 
-    public static final String STACK = "STACK";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackTestDto.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXTestDto.class);
 
     private GeneratedBlueprintV4Response generatedBlueprint;
 
     @Inject
-    private StackTestClient stackTestClient;
+    private DistroXTestClient distroXTestClient;
 
-    StackTestDto(String newId) {
-        super(newId);
-    }
-
-    public StackTestDto() {
-        this(STACK);
-    }
-
-    public StackTestDto(StackV4Request request) {
-        this();
-        setRequest(request);
-    }
-
-    public StackTestDto(TestContext testContext) {
-        super(testContext);
+    public DistroXTestDto(TestContext testContext) {
+        super(new DistroXV1Request(), testContext);
     }
 
     @Override
-    public StackTestDtoBase<StackTestDto> valid() {
+    public DistroXTestDtoBase<DistroXTestDto> valid() {
         return super.valid().withEnvironment(EnvironmentTestDto.class);
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(StackActionV4::delete, withoutLogError());
+        when(distroXTestClient.delete(), withoutLogError());
         await(STACK_DELETED);
     }
 
     @Override
     public List<StackV4Response> getAll(CloudbreakClient client) {
-        StackV4Endpoint stackEndpoint = client.getCloudbreakClient().stackV4Endpoint();
-        return stackEndpoint.list(client.getWorkspaceId(), null, false).getResponses().stream()
+        DistroXV1Endpoint distroXV1Endpoint = client.getCloudbreakClient().distroXV1Endpoint();
+        return distroXV1Endpoint.list(null).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
                     StackV4Response stackResponse = new StackV4Response();
@@ -90,8 +74,8 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     @Override
     public void delete(TestContext testContext, StackV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true, false);
-            testContext.await(this, STACK_DELETED, key("wait-purge-stack-" + entity.getName()));
+            client.getCloudbreakClient().distroXV1Endpoint().delete(entity.getName(), true);
+            testContext.await(this, STACK_DELETED, key("wait-purge-distrox-" + entity.getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }
@@ -104,7 +88,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     @Override
     public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
-        return when(stackTestClient.refreshV4(), key("refresh-stack-" + getName()));
+        return when(distroXTestClient.refresh(), key("refresh-distrox-" + getName()));
     }
 
     @Override
@@ -112,7 +96,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
         return await(desiredStatuses, runningParameter);
     }
 
-    public StackTestDto withGeneratedBlueprint(GeneratedBlueprintV4Response generatedBlueprint) {
+    public DistroXTestDto withGeneratedBlueprint(GeneratedBlueprintV4Response generatedBlueprint) {
         this.generatedBlueprint = generatedBlueprint;
         return this;
     }
