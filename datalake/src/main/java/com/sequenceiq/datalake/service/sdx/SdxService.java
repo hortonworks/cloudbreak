@@ -80,6 +80,16 @@ public class SdxService {
         }
     }
 
+    public SdxCluster getByCrn(String userCrn, String clusterCrn) {
+        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
+        Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
+        if (sdxCluster.isPresent()) {
+            return sdxCluster.get();
+        } else {
+            throw notFound("SDX cluster", clusterCrn).get();
+        }
+    }
+
     public SdxCluster getByAccountIdAndSdxName(String userCrn, String name) {
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name);
@@ -187,6 +197,11 @@ public class SdxService {
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Can not convert tags", e);
         }
+    }
+
+    public List<SdxCluster> listSdxByEnvCrn(String userCrn, String envCrn) {
+        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
+        return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(accountIdFromCrn, envCrn);
     }
 
     public List<SdxCluster> listSdx(String userCrn, String envName) {

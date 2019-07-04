@@ -14,6 +14,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.springframework.validation.annotation.Validated;
+
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.sdx.api.model.RedeploySdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
@@ -25,6 +28,7 @@ import io.swagger.annotations.ApiOperation;
 @Path("/sdx")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/sdx", protocols = "http,https")
+@Validated
 public interface SdxEndpoint {
 
     @POST
@@ -50,6 +54,18 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "get SDX cluster", produces = "application/json", nickname = "getSdx")
     SdxClusterResponse get(@PathParam("name") String name);
+
+    @GET
+    @Path("/crn/{clusterCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get SDX cluster by crn", produces = MediaType.APPLICATION_JSON, nickname = "getSdxByCrn")
+    SdxClusterResponse getByCrn(@PathParam("clusterCrn") @ValidCrn String clusterCrn);
+
+    @GET
+    @Path("/envcrn/{envCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get SDX cluster by crn", produces = MediaType.APPLICATION_JSON, nickname = "getSdxByCrn")
+    List<SdxClusterResponse> getByEnvCrn(@PathParam("envCrn") @ValidCrn String envCrn);
 
     @GET
     @Path("{name}/detail")
