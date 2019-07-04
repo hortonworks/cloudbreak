@@ -9,6 +9,7 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.request.ManagementPackV4Request;
+import com.sequenceiq.cloudbreak.util.ValidatorUtil;
 
 public class ManagementPackResourceValidator implements ConstraintValidator<ValidManagementPack, ManagementPackV4Request> {
     private Set<String> validPurgeListElements;

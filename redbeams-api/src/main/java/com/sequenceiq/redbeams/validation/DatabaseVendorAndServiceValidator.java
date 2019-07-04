@@ -8,7 +8,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.validation.ValidatorUtil;
+import com.sequenceiq.cloudbreak.util.ValidatorUtil;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseEntry;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedExternalDatabaseServiceEntry;

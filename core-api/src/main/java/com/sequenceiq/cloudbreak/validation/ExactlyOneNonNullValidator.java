@@ -6,6 +6,8 @@ import java.util.Arrays;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import com.sequenceiq.cloudbreak.util.ValidatorUtil;
+
 public class ExactlyOneNonNullValidator implements ConstraintValidator<ValidIfExactlyOneNonNull, Object> {
 
     private String[] fields;

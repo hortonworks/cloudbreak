@@ -13,7 +13,7 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsGen2CloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.cloud.model.storage.AdlsGen2CloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureProperties;
@@ -98,7 +98,7 @@ public class AzureAdlsGen2Tests extends AbstractE2ETest {
 
     private CloudStorageV4Request adlsGen2CloudStorageV4RequestWithoutStorageLocations() {
         CloudStorageV4Request request = new CloudStorageV4Request();
-        AdlsGen2CloudStorageV4Parameters adlsGen2 = new AdlsGen2CloudStorageV4Parameters();
+        AdlsGen2CloudStorageParameters adlsGen2 = new AdlsGen2CloudStorageParameters();
         String accountName = azureProperties.getCloudstorage().getAccountName();
         String accountKey = azureProperties.getCloudstorage().getAccountKey();
         adlsGen2.setAccountKey(accountKey);

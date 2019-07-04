@@ -5,6 +5,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
+import com.sequenceiq.cloudbreak.util.ValidatorUtil;
 
 public class UpdateStackRequestValidator implements ConstraintValidator<ValidUpdateStackRequest, UpdateStackV4Request> {
 

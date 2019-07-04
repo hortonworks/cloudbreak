@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -21,6 +22,9 @@ import org.springframework.context.annotation.ComponentScans;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -95,6 +99,9 @@ public class TestApplicationContext {
     private PersistenceNotifier persistenceNotifier;
 
     @Mock
+    private DefaultConversionService conversionService;
+
+    @Mock
     private Persister<?> persister;
 
     @Inject
@@ -123,6 +130,12 @@ public class TestApplicationContext {
     @Bean
     public ListeningScheduledExecutorService listeningScheduledExecutorService() {
         return MoreExecutors.listeningDecorator(new ScheduledThreadPoolExecutor(1));
+    }
+
+    @Bean
+    public ConversionService conversionService() {
+        doNothing().when(conversionService).addConverter(any(Converter.class));
+        return conversionService;
     }
 
     @Bean

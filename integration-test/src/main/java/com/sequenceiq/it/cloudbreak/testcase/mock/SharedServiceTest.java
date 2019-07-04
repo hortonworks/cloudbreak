@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
+import com.sequenceiq.cloudbreak.cloud.model.storage.AdlsCloudStorageParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
@@ -289,7 +289,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     }
 
     private CloudStorageV4Request cloudStorage() {
-        AdlsCloudStorageV4Parameters adls = new AdlsCloudStorageV4Parameters();
+        AdlsCloudStorageParameters adls = new AdlsCloudStorageParameters();
         CloudStorageV4Request csr = new CloudStorageV4Request();
         csr.setLocations(Set.of(storageLocation()));
         adls.setCredential("value");

@@ -5,7 +5,7 @@ import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.validation.ValidAdlsGen2CloudStorageParameters;
+import com.sequenceiq.cloudbreak.cloud.validation.ValidAdlsGen2CloudStorageParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
