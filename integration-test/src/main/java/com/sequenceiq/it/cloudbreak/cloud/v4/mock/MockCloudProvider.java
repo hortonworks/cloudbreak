@@ -23,6 +23,11 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -78,6 +83,16 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public StackTestDtoBase stack(StackTestDtoBase stack) {
         return stack.withMock(stackParameters());
+    }
+
+    @Override
+    public DistroXTestDtoBase distrox(DistroXTestDtoBase distrox) {
+        return distrox;
+    }
+
+    @Override
+    public DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster) {
+        return cluster.withBlueprintName(getBlueprintName());
     }
 
     @Override
@@ -166,7 +181,20 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template) {
+        return template.withInstanceType("large");
+    }
+
+    @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
+        return volume
+                .withCount(1)
+                .withSize(100)
+                .withType("magnetic");
+    }
+
+    @Override
+    public DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume) {
         return volume
                 .withCount(1)
                 .withSize(100)
@@ -176,6 +204,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
         return network.withSubnetCIDR(getSubnetCIDR());
+    }
+
+    @Override
+    public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
+        return network;
     }
 
     @Override

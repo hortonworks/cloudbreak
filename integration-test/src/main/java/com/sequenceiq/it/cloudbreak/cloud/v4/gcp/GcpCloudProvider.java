@@ -17,6 +17,11 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
@@ -49,7 +54,22 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template) {
+        return template.withInstanceType(gcpProperties.getInstance().getType());
+    }
+
+    @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
+        int attachedVolumeSize = gcpProperties.getInstance().getVolumeSize();
+        int attachedVolumeCount = gcpProperties.getInstance().getVolumeCount();
+        String attachedVolumeType = gcpProperties.getInstance().getVolumeType();
+        return volume.withSize(attachedVolumeSize)
+                .withCount(attachedVolumeCount)
+                .withType(attachedVolumeType);
+    }
+
+    @Override
+    public DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume) {
         int attachedVolumeSize = gcpProperties.getInstance().getVolumeSize();
         int attachedVolumeCount = gcpProperties.getInstance().getVolumeCount();
         String attachedVolumeType = gcpProperties.getInstance().getVolumeType();
@@ -68,8 +88,18 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
+        return network;
+    }
+
+    @Override
     public StackTestDtoBase stack(StackTestDtoBase stack) {
         return stack.withGcp(stackParameters());
+    }
+
+    @Override
+    public DistroXTestDtoBase distrox(DistroXTestDtoBase distrox) {
+        return distrox;
     }
 
     @Override
@@ -77,6 +107,11 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         return cluster
                 .withValidateBlueprint(Boolean.TRUE)
                 .withBlueprintName(getBlueprintName());
+    }
+
+    @Override
+    protected DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster) {
+        return cluster.withBlueprintName(getBlueprintName());
     }
 
     @Override

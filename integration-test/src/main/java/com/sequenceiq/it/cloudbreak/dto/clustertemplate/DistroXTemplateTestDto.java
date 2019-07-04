@@ -24,25 +24,25 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Prototype
-public class DistroXTestDto extends DeletableTestDto<DistroXV1Request, ClusterTemplateV4Response,
-        DistroXTestDto, ClusterTemplateV4Response> {
+public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, ClusterTemplateV4Response,
+        DistroXTemplateTestDto, ClusterTemplateV4Response> {
 
-    public DistroXTestDto(TestContext testContext) {
+    public DistroXTemplateTestDto(TestContext testContext) {
         super(new DistroXV1Request(), testContext);
     }
 
-    public DistroXTestDto() {
-        super(DistroXTestDto.class.getSimpleName().toUpperCase());
+    public DistroXTemplateTestDto() {
+        super(DistroXTemplateTestDto.class.getSimpleName().toUpperCase());
     }
 
-    public DistroXTestDto valid() {
+    public DistroXTemplateTestDto valid() {
         return withName(resourceProperyProvider().getName())
                 .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withCluster(getTestContext().init(ClusterTestDto.class).getRequest())
                 .withInstanceGroups(getTestContext().init(InstanceGroupTestDto.class).getRequest());
     }
 
-    private DistroXTestDto withInstanceGroups(InstanceGroupV4Request instanceGroupTestDto) {
+    private DistroXTemplateTestDto withInstanceGroups(InstanceGroupV4Request instanceGroupTestDto) {
         InstanceGroupV1Request instanceGroup = new InstanceGroupV1Request();
         InstanceTemplateV1Request template = new InstanceTemplateV1Request();
         RootVolumeV1Request rootVolume = new RootVolumeV1Request();
@@ -54,7 +54,7 @@ public class DistroXTestDto extends DeletableTestDto<DistroXV1Request, ClusterTe
         return this;
     }
 
-    private DistroXTestDto withCluster(ClusterV4Request clusterV4Request) {
+    private DistroXTemplateTestDto withCluster(ClusterV4Request clusterV4Request) {
         DistroXClusterV1Request cluster = new DistroXClusterV1Request();
         cluster.setBlueprintName(clusterV4Request.getBlueprintName());
         ClouderaManagerV1Request cm = new ClouderaManagerV1Request();
@@ -67,12 +67,12 @@ public class DistroXTestDto extends DeletableTestDto<DistroXV1Request, ClusterTe
         return this;
     }
 
-    private DistroXTestDto withEnvironmentName(String name) {
+    private DistroXTemplateTestDto withEnvironmentName(String name) {
         getRequest().setEnvironmentName(name);
         return this;
     }
 
-    public DistroXTestDto withName(String name) {
+    public DistroXTemplateTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
         return this;

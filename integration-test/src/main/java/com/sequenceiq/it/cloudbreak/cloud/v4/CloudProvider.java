@@ -12,6 +12,12 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -30,15 +36,27 @@ public interface CloudProvider {
 
     ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings);
 
+    DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings);
+
     InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template);
+
+    DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template);
 
     VolumeV4TestDto attachedVolume(VolumeV4TestDto volume);
 
+    DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume);
+
     NetworkV4TestDto network(NetworkV4TestDto network);
+
+    DistroXNetworkTestDto network(DistroXNetworkTestDto network);
 
     StackTestDtoBase stack(StackTestDtoBase stack);
 
     ClusterTestDto cluster(ClusterTestDto cluster);
+
+    DistroXTestDtoBase distrox(DistroXTestDtoBase distrox);
+
+    DistroXClusterTestDto cluster(DistroXClusterTestDto cluster);
 
     SdxTestDto sdx(SdxTestDto sdx);
 

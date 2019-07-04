@@ -9,6 +9,8 @@ import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -43,6 +45,12 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
+        imageSettings.withImageCatalog(CLOUDBREAK_DEFAULT);
+        return imageSettings;
+    }
+
+    @Override
+    public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
         imageSettings.withImageCatalog(CLOUDBREAK_DEFAULT);
         return imageSettings;
     }
@@ -94,10 +102,19 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
+    public final DistroXClusterTestDto cluster(DistroXClusterTestDto clusterTestDto) {
+        clusterTestDto.withUserName(commonCloudProperties.getAmbari().getDefaultUser())
+                .withPassword(commonCloudProperties.getAmbari().getDefaultPassword());
+        return withCluster(clusterTestDto);
+    }
+
+    @Override
     public final SdxTestDto sdx(SdxTestDto sdx) {
         sdx.withAccessCidr(commonCloudProperties.getAccessCidr()).withTags(commonCloudProperties.getTags());
         return sdx;
     }
 
     protected abstract ClusterTestDto withCluster(ClusterTestDto cluster);
+
+    protected abstract DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster);
 }

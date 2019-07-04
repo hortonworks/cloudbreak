@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -21,6 +23,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -148,8 +151,15 @@ public class EnvironmentTestDto
     }
 
     @Override
-    public List<SimpleEnvironmentResponse> getAll(CloudbreakClient client) {
-        return new ArrayList<>(when(environmentTestClient.list()).getResponseSimpleEnvSet());
+    public List<SimpleEnvironmentResponse> getAll(EnvironmentClient client) {
+        EnvironmentEndpoint environmentEndpoint = client.getEnvironmentClient().environmentV1Endpoint();
+        return new ArrayList<>(environmentEndpoint.list().getResponses()).stream()
+                .filter(s -> s.getName() != null)
+                .map(s -> {
+                    SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
+                    simpleEnvironmentResponse.setName(s.getName());
+                    return simpleEnvironmentResponse;
+                }).collect(Collectors.toList());
     }
 
     @Override
@@ -171,15 +181,12 @@ public class EnvironmentTestDto
     }
 
     @Override
-    public boolean deletable(SimpleEnvironmentResponse entity) {
-        return getName().startsWith(resourceProperyProvider().prefix());
-    }
-
-    @Override
-    public void delete(TestContext testContext, SimpleEnvironmentResponse entity, CloudbreakClient client) {
-        LOGGER.info("Delete resource with name: {}", getName());
-        when(environmentTestClient.delete());
-        await(ARCHIVED);
+    public void delete(TestContext testContext, SimpleEnvironmentResponse entity, EnvironmentClient client) {
+        LOGGER.info("Delete resource with name: {}", entity.getName());
+        EnvironmentEndpoint credentialEndpoint = client.getEnvironmentClient().environmentV1Endpoint();
+        credentialEndpoint.deleteByName(entity.getName());
+        setName(entity.getName());
+        testContext.await(this, ARCHIVED, emptyRunningParameter());
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status) {

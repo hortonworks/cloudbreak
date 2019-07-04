@@ -12,7 +12,7 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 
 @Prototype
@@ -49,8 +49,8 @@ public class PurgeGarbageService {
     }
 
     private <T> void purge(TestContext testContext) {
-        CloudbreakClient cloudbreakClient = testContext.getCloudbreakClient();
         orderedPurgables().forEach(purgable -> {
+            MicroserviceClient cloudbreakClient = testContext.getMicroserviceClient(purgable.client(), testContext.getDefaultUser());
             Collection<Object> all = purgable.getAll(cloudbreakClient);
             all = all.stream()
                     .filter(purgable::deletable)

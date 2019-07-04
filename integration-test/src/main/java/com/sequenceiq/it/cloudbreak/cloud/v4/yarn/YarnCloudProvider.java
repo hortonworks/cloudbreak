@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.Y
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.YarnInstanceTemplateV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnParameters;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -18,6 +19,11 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -68,8 +74,18 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template) {
+        return template.withYarn(distroxInstanceParameters());
+    }
+
+    @Override
     public StackTestDtoBase stack(StackTestDtoBase stack) {
         return stack.withYarn(stackParameters());
+    }
+
+    @Override
+    public DistroXTestDtoBase distrox(DistroXTestDtoBase distrox) {
+        return distrox;
     }
 
     @Override
@@ -77,6 +93,11 @@ public class YarnCloudProvider extends AbstractCloudProvider {
         return cluster
                 .withValidateBlueprint(Boolean.FALSE)
                 .withBlueprintName(getBlueprintName());
+    }
+
+    @Override
+    protected DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster) {
+        return cluster.withBlueprintName(getBlueprintName());
     }
 
     @Override
@@ -93,8 +114,19 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume) {
+        return volume.withSize(yarnProperties.getInstance().getVolumeSize())
+                .withCount(yarnProperties.getInstance().getVolumeCount());
+    }
+
+    @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
         return network.withYarn(networkParameters()).withSubnetCIDR(getSubnetCIDR());
+    }
+
+    @Override
+    public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
+        return network;
     }
 
     @Override
@@ -159,5 +191,12 @@ public class YarnCloudProvider extends AbstractCloudProvider {
         YarnNetworkV4Parameters yarnNetworkV4Parameters = new YarnNetworkV4Parameters();
         yarnNetworkV4Parameters.getCloudPlatform();
         return yarnNetworkV4Parameters;
+    }
+
+    private YarnInstanceTemplateV1Parameters distroxInstanceParameters() {
+        YarnInstanceTemplateV1Parameters yarnInstanceTemplateV4Parameters = new YarnInstanceTemplateV1Parameters();
+        yarnInstanceTemplateV4Parameters.setCpus(getCPUCount());
+        yarnInstanceTemplateV4Parameters.setMemory(getMemorySize());
+        return yarnInstanceTemplateV4Parameters;
     }
 }

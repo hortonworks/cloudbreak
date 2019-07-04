@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AppBasedRequest;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
@@ -19,6 +21,11 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
@@ -48,6 +55,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public DistroXTestDtoBase distrox(DistroXTestDtoBase distrox) {
+        return distrox.withAzure(distroXParameters());
+    }
+
+    @Override
     protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
                 .withValidateBlueprint(Boolean.TRUE)
@@ -55,8 +67,17 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    protected DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster) {
+        return cluster.withBlueprintName(getBlueprintName());
+    }
+
+    @Override
     public AzureStackV4Parameters stackParameters() {
         return new AzureStackV4Parameters();
+    }
+
+    public AzureDistroXV1Parameters distroXParameters() {
+        return new AzureDistroXV1Parameters();
     }
 
     @Override
@@ -75,7 +96,22 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template) {
+        return template.withInstanceType(azureProperties.getInstance().getType());
+    }
+
+    @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
+        int attachedVolumeSize = azureProperties.getInstance().getVolumeSize();
+        int attachedVolumeCount = azureProperties.getInstance().getVolumeCount();
+        String attachedVolumeType = azureProperties.getInstance().getVolumeType();
+        return volume.withSize(attachedVolumeSize)
+                .withCount(attachedVolumeCount)
+                .withType(attachedVolumeType);
+    }
+
+    @Override
+    public DistroXVolumeTestDto attachedVolume(DistroXVolumeTestDto volume) {
         int attachedVolumeSize = azureProperties.getInstance().getVolumeSize();
         int attachedVolumeCount = azureProperties.getInstance().getVolumeCount();
         String attachedVolumeType = azureProperties.getInstance().getVolumeType();
@@ -91,6 +127,14 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         parameters.setNoFirewallRules(false);
         return network.withAzure(parameters)
                 .withSubnetCIDR(getSubnetCIDR());
+    }
+
+    @Override
+    public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
+        AzureNetworkV1Parameters parameters = new AzureNetworkV1Parameters();
+        parameters.setNoPublicIp(false);
+        parameters.setNoFirewallRules(false);
+        return network.withAzure(parameters);
     }
 
     @Override
