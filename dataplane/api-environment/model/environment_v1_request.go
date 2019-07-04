@@ -23,9 +23,6 @@ type EnvironmentV1Request struct {
 	// Cloud platform of the environment.
 	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
-	// Create freeipa in environment
-	CreateFreeIpa bool `json:"createFreeIpa,omitempty"`
-
 	// Name of the credential of the environment. If the name is given, the detailed credential is ignored in the request.
 	CredentialName string `json:"credentialName,omitempty"`
 
@@ -33,6 +30,9 @@ type EnvironmentV1Request struct {
 	// Max Length: 1000
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
+
+	// Properties for FreeIpa which can be attached to the given environment
+	FreeIpa *AttachedFreeIpaRequest `json:"freeIpa,omitempty"`
 
 	// Location of the environment.
 	// Required: true
@@ -68,6 +68,10 @@ func (m *EnvironmentV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDescription(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateFreeIpa(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -131,6 +135,24 @@ func (m *EnvironmentV1Request) validateDescription(formats strfmt.Registry) erro
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentV1Request) validateFreeIpa(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.FreeIpa) { // not required
+		return nil
+	}
+
+	if m.FreeIpa != nil {
+		if err := m.FreeIpa.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("freeIpa")
+			}
+			return err
+		}
 	}
 
 	return nil

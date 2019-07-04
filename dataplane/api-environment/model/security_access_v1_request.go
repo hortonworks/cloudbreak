@@ -21,15 +21,15 @@ type SecurityAccessV1Request struct {
 	// Pattern: (^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$)|(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(/([0-9]|[1-2][0-9]|3[0-2]))$)
 	Cidr string `json:"cidr,omitempty"`
 
-	// Security group where Knox-enabled hosts are placed.
-	// Max Length: 255
-	// Min Length: 0
-	SecurityGroupKnox *string `json:"securityGroupKnox,omitempty"`
-
 	// Security group where all other hosts are placed.
 	// Max Length: 255
 	// Min Length: 0
-	SecurityGroupOther *string `json:"securityGroupOther,omitempty"`
+	DefaultSecurityGroupID *string `json:"defaultSecurityGroupId,omitempty"`
+
+	// Security group where Knox-enabled hosts are placed.
+	// Max Length: 255
+	// Min Length: 0
+	SecurityGroupIDForKnox *string `json:"securityGroupIdForKnox,omitempty"`
 }
 
 // Validate validates this security access v1 request
@@ -40,11 +40,11 @@ func (m *SecurityAccessV1Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateSecurityGroupKnox(formats); err != nil {
+	if err := m.validateDefaultSecurityGroupID(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateSecurityGroupOther(formats); err != nil {
+	if err := m.validateSecurityGroupIDForKnox(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -67,34 +67,34 @@ func (m *SecurityAccessV1Request) validateCidr(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SecurityAccessV1Request) validateSecurityGroupKnox(formats strfmt.Registry) error {
+func (m *SecurityAccessV1Request) validateDefaultSecurityGroupID(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.SecurityGroupKnox) { // not required
+	if swag.IsZero(m.DefaultSecurityGroupID) { // not required
 		return nil
 	}
 
-	if err := validate.MinLength("securityGroupKnox", "body", string(*m.SecurityGroupKnox), 0); err != nil {
+	if err := validate.MinLength("defaultSecurityGroupId", "body", string(*m.DefaultSecurityGroupID), 0); err != nil {
 		return err
 	}
 
-	if err := validate.MaxLength("securityGroupKnox", "body", string(*m.SecurityGroupKnox), 255); err != nil {
+	if err := validate.MaxLength("defaultSecurityGroupId", "body", string(*m.DefaultSecurityGroupID), 255); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *SecurityAccessV1Request) validateSecurityGroupOther(formats strfmt.Registry) error {
+func (m *SecurityAccessV1Request) validateSecurityGroupIDForKnox(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.SecurityGroupOther) { // not required
+	if swag.IsZero(m.SecurityGroupIDForKnox) { // not required
 		return nil
 	}
 
-	if err := validate.MinLength("securityGroupOther", "body", string(*m.SecurityGroupOther), 0); err != nil {
+	if err := validate.MinLength("securityGroupIdForKnox", "body", string(*m.SecurityGroupIDForKnox), 0); err != nil {
 		return err
 	}
 
-	if err := validate.MaxLength("securityGroupOther", "body", string(*m.SecurityGroupOther), 255); err != nil {
+	if err := validate.MaxLength("securityGroupIdForKnox", "body", string(*m.SecurityGroupIDForKnox), 255); err != nil {
 		return err
 	}
 
