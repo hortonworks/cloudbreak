@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.notification.NotificationController;
@@ -60,6 +61,22 @@ public class SdxController extends NotificationController implements SdxEndpoint
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByAccountIdAndSdxName(userCrn, name);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
+    }
+
+    @Override
+    public SdxClusterResponse getByCrn(String clusterCrn) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
+        return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
+    }
+
+    @Override
+    public List<SdxClusterResponse> getByEnvCrn(@ValidCrn String envCrn) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        List<SdxCluster> sdxClusters = sdxService.listSdxByEnvCrn(userCrn, envCrn);
+        return sdxClusters.stream()
+                .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
+                .collect(Collectors.toList());
     }
 
     @Override
