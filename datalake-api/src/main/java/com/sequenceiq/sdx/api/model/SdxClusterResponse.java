@@ -8,6 +8,8 @@ public class SdxClusterResponse {
 
     private SdxClusterStatusResponse status;
 
+    private String statusReason;
+
     private String environmentName;
 
     private String environmentCrn;
@@ -15,10 +17,11 @@ public class SdxClusterResponse {
     public SdxClusterResponse() {
     }
 
-    public SdxClusterResponse(String crn, String name, SdxClusterStatusResponse status, String environmentName, String environmentCrn) {
+    public SdxClusterResponse(String crn, String name, SdxClusterStatusResponse status, String statusReason, String environmentName, String environmentCrn) {
         this.crn = crn;
         this.name = name;
         this.status = status;
+        this.statusReason = statusReason;
         this.environmentName = environmentName;
         this.environmentCrn = environmentCrn;
     }
@@ -61,5 +64,13 @@ public class SdxClusterResponse {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 }

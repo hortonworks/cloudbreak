@@ -63,6 +63,8 @@ public class SdxCluster implements AccountIdAwareResource {
     @Enumerated(EnumType.STRING)
     private SdxClusterStatus status;
 
+    private String statusReason;
+
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret stackRequest = Secret.EMPTY;
@@ -191,5 +193,13 @@ public class SdxCluster implements AccountIdAwareResource {
 
     public void setStackRequestToCloudbreak(String stackRequestToCloudbreak) {
         this.stackRequestToCloudbreak = new Secret(stackRequestToCloudbreak);
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 }
