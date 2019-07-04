@@ -52,6 +52,9 @@ public abstract class EnvironmentBaseResponse {
 
     private Long created;
 
+    @ApiModelProperty(EnvironmentModelDescription.S3_GUARD_DYNAMO_TABLE)
+    private String s3GuardDynamoTable;
+
     public String getCrn() {
         return crn;
     }
@@ -170,5 +173,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public String getS3GuardDynamoTable() {
+        return s3GuardDynamoTable;
+    }
+
+    public void setS3GuardDynamoTable(String s3GuardDynamoTable) {
+        this.s3GuardDynamoTable = s3GuardDynamoTable;
     }
 }

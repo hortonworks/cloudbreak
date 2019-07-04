@@ -9,6 +9,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.io.IOException;
+import java.time.Instant;
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Answers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
@@ -21,22 +33,10 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4Request;
-import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.EnvironmentService;
-
-import java.io.IOException;
-import java.time.Instant;
-import java.util.Map;
-import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Answers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.test.util.ReflectionTestUtils;
 
 public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
@@ -110,7 +110,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         securityGroupRequest.setSecurityGroupIds(Set.of("sg-1234"));
 
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.aDetailedEnvironmentResponse()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
             .withCloudPlatform(CloudPlatform.AWS.name()).build();
         when(environmentService.getByCrn("myenv")).thenReturn(environment);
 

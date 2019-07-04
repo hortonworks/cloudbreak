@@ -72,6 +72,7 @@ public class EnvironmentApiConverter {
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry()))
                 .withRegions(request.getRegions())
+                .withS3GuardDynamoTable(request.getS3GuardDynamoTable())
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()));
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
@@ -123,7 +124,7 @@ public class EnvironmentApiConverter {
     }
 
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
-        DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.Builder.aDetailedEnvironmentResponse()
+        DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.builder()
                 .withCrn(environmentDto.getResourceCrn())
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())
@@ -137,6 +138,7 @@ public class EnvironmentApiConverter {
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
                 .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
+                .withS3GuardDynamoTable(environmentDto.getS3GuardDynamoTable())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
@@ -155,6 +157,7 @@ public class EnvironmentApiConverter {
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
+                .withS3GuardDynamoTable(environmentDto.getS3GuardDynamoTable())
                 .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 

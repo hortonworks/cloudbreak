@@ -37,11 +37,13 @@ public class EnvironmentCreationDto {
 
     private final Long created;
 
+    private String s3GuardDynamoTable;
+
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
-            Long created, Telemetry telemetry) {
+            Long created, Telemetry telemetry, String s3GuardDynamoTable) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -64,6 +66,7 @@ public class EnvironmentCreationDto {
         }
         this.authentication = authentication;
         this.telemetry = telemetry;
+        this.s3GuardDynamoTable = s3GuardDynamoTable;
     }
 
     public String getName() {
@@ -118,6 +121,10 @@ public class EnvironmentCreationDto {
         return created;
     }
 
+    public String getS3GuardDynamoTable() {
+        return s3GuardDynamoTable;
+    }
+
     public static final class Builder {
         private String name;
 
@@ -144,6 +151,8 @@ public class EnvironmentCreationDto {
         private AuthenticationDto authentication;
 
         private Long created;
+
+        private String s3GuardDynamoTable;
 
         private Builder() {
         }
@@ -217,9 +226,14 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withS3GuardDynamoTable(String s3GuardDynamoTable) {
+            this.s3GuardDynamoTable = s3GuardDynamoTable;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
-            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId,
-                    location, network, credential, regions, proxyNames, createFreeIpa, authentication, created, telemetry);
+            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, location, network, credential,
+                    regions, proxyNames, createFreeIpa, authentication, created, telemetry, s3GuardDynamoTable);
         }
     }
 }

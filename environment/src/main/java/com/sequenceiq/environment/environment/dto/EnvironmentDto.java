@@ -57,6 +57,8 @@ public class EnvironmentDto implements Payload {
 
     private Long created;
 
+    private String s3GuardDynamoTable;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -227,6 +229,14 @@ public class EnvironmentDto implements Payload {
         this.created = created;
     }
 
+    public String getS3GuardDynamoTable() {
+        return s3GuardDynamoTable;
+    }
+
+    public void setS3GuardDynamoTable(String s3GuardDynamoTable) {
+        this.s3GuardDynamoTable = s3GuardDynamoTable;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -271,6 +281,8 @@ public class EnvironmentDto implements Payload {
         private AuthenticationDto authentication;
 
         private Long created;
+
+        private String s3GuardDynamoTable;
 
         private Builder() {
         }
@@ -375,6 +387,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withS3GuardDynamoTable(String s3GuardDynamoTable) {
+            this.s3GuardDynamoTable = s3GuardDynamoTable;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -397,6 +414,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setAuthentication(authentication);
             environmentDto.setStatusReason(statusReason);
             environmentDto.setCreated(created);
+            environmentDto.setS3GuardDynamoTable(s3GuardDynamoTable);
             return environmentDto;
         }
     }

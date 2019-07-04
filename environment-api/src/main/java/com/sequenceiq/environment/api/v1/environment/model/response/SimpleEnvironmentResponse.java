@@ -38,6 +38,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private Long created;
 
+        private String s3GuardDynamoTable;
+
         private Builder() {
         }
 
@@ -106,6 +108,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withS3GuardDynamoTable(String s3GuardDynamoTable) {
+            this.s3GuardDynamoTable = s3GuardDynamoTable;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -121,6 +128,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setStatusReason(statusReason);
             simpleEnvironmentResponse.setCreated(created);
             simpleEnvironmentResponse.setTelemetry(telemetry);
+            simpleEnvironmentResponse.setS3GuardDynamoTable(s3GuardDynamoTable);
             return simpleEnvironmentResponse;
         }
     }

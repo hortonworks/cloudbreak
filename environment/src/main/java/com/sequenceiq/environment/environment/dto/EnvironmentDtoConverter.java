@@ -43,6 +43,7 @@ public class EnvironmentDtoConverter {
                 .withAuthentication(authenticationDtoConverter.authenticationToDto(environment.getAuthentication()))
                 .withCreateFreeIpa(environment.isCreateFreeIpa())
                 .withCreated(environment.getCreated())
+                .withS3GuardDynamoTable(environment.getS3GuardDynamoTable())
                 .withStatusReason(environment.getStatusReason());
         if (environment.getNetwork() != null) {
             builder.withNetwork(environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()))
@@ -67,6 +68,7 @@ public class EnvironmentDtoConverter {
         environment.setLocationDisplayName(creationDto.getLocation().getDisplayName());
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
         environment.setCreateFreeIpa(creationDto.isCreateFreeIpa());
+        environment.setS3GuardDynamoTable(creationDto.getS3GuardDynamoTable());
         return environment;
     }
 

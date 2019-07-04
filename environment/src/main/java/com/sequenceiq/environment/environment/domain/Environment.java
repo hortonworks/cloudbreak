@@ -103,6 +103,9 @@ public class Environment implements AuthResource {
 
     private Long created;
 
+    @Column
+    private String s3GuardDynamoTable;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
     }
@@ -296,5 +299,13 @@ public class Environment implements AuthResource {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public String getS3GuardDynamoTable() {
+        return s3GuardDynamoTable;
+    }
+
+    public void setS3GuardDynamoTable(String s3GuardDynamoTable) {
+        this.s3GuardDynamoTable = s3GuardDynamoTable;
     }
 }

@@ -52,6 +52,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.FREE_IPA)
     private AttachedFreeIpaRequest freeIpa;
 
+    @ApiModelProperty(EnvironmentModelDescription.S3_GUARD_DYNAMO_TABLE)
+    private String s3GuardDynamoTable;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -134,4 +137,11 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.authentication = authentication;
     }
 
+    public String getS3GuardDynamoTable() {
+        return s3GuardDynamoTable;
+    }
+
+    public void setS3GuardDynamoTable(String s3GuardDynamoTable) {
+        this.s3GuardDynamoTable = s3GuardDynamoTable;
+    }
 }

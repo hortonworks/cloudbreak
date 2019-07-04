@@ -12,6 +12,10 @@ import io.swagger.annotations.ApiModel;
 @JsonInclude(Include.NON_NULL)
 public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static final class Builder {
         private String crn;
 
@@ -41,11 +45,9 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private EnvironmentAuthenticationResponse authentication;
 
-        private Builder() {
-        }
+        private String s3GuardDynamoTable;
 
-        public static Builder aDetailedEnvironmentResponse() {
-            return new Builder();
+        private Builder() {
         }
 
         public Builder withCrn(String id) {
@@ -118,6 +120,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withS3GuardDynamoTable(String s3GuardDynamoTable) {
+            this.s3GuardDynamoTable = s3GuardDynamoTable;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -134,6 +141,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setCreated(created);
             detailedEnvironmentResponse.setAuthentication(authentication);
             detailedEnvironmentResponse.setTelemetry(telemetry);
+            detailedEnvironmentResponse.setS3GuardDynamoTable(s3GuardDynamoTable);
             return detailedEnvironmentResponse;
         }
     }

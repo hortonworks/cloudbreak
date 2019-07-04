@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
-import static com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse.Builder.aDetailedEnvironmentResponse;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -66,6 +65,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public class StackToStackV4ResponseConverterTest extends AbstractEntityConverterTest<Stack> {
 
@@ -155,7 +155,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
         given(conversionService.convert(any(), eq(TelemetryV4Response.class))).willReturn(new TelemetryV4Response());
-        given(environmentClientService.getByCrn(anyString())).willReturn(aDetailedEnvironmentResponse()
+        given(environmentClientService.getByCrn(anyString())).willReturn(DetailedEnvironmentResponse.builder()
                 .withCredential(credentialResponse)
                 .withName("env-name")
                 .build());
@@ -183,7 +183,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
         given(conversionService.convert(any(), eq(TelemetryV4Response.class))).willReturn(new TelemetryV4Response());
-        given(environmentClientService.getByCrn(anyString())).willReturn(aDetailedEnvironmentResponse()
+        given(environmentClientService.getByCrn(anyString())).willReturn(DetailedEnvironmentResponse.builder()
                 .withCredential(credentialResponse)
                 .withName("env-name")
                 .build());
