@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.network;
 
+import static com.sequenceiq.environment.CloudPlatform.AWS;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
 
@@ -91,11 +92,21 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private void setNetworkIfNeeded(EnvironmentDto environmentDto, Environment environment) {
         if (hasNetwork(environment)) {
             BaseNetwork baseNetwork = hasExistingNetwork(environment)
-                    ? decorateWithSubnetMeta(environment.getNetwork().getId(), environmentDto)
+                    ? decorateWithSubnetMetaIfNeeded(environment.getNetwork().getId(), environmentDto)
                     : environmentNetworkService.createNetwork(environmentDto, environment.getNetwork());
             baseNetwork = networkService.save(baseNetwork);
             environment.setNetwork(baseNetwork);
         }
+    }
+
+    private BaseNetwork decorateWithSubnetMetaIfNeeded(Long networkId, EnvironmentDto envDto) {
+        Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(envDto);
+        CloudPlatform envCloudPlatform = CloudPlatform.valueOf(envDto.getCloudPlatform().toUpperCase());
+        if (subnetMetadata.isEmpty() && AWS.equals(envCloudPlatform)) {
+            throw new EnvironmentServiceException(String.format("Subnets of the environment (%s) are not found in vpc (%s). ",
+                    String.join(",", envDto.getNetwork().getSubnetIds()), getVpcId(envDto).orElse("")));
+        }
+        return networkService.decorateNetworkWithSubnetMeta(networkId, subnetMetadata);
     }
 
     private boolean hasNetwork(Environment environment) {
@@ -104,15 +115,6 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private boolean hasExistingNetwork(Environment environment) {
         return networkService.hasExistingNetwork(environment.getNetwork(), CloudPlatform.valueOf(environment.getCloudPlatform()));
-    }
-
-    private BaseNetwork decorateWithSubnetMeta(Long networkId, EnvironmentDto envDto) {
-        Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(envDto);
-        if (subnetMetadata.isEmpty()) {
-            throw new EnvironmentServiceException(String.format("Subnets of the environment (%s) are not found in vpc (%s). ",
-                    String.join(",", envDto.getNetwork().getSubnetIds()), getVpcId(envDto).orElse("")));
-        }
-        return networkService.decorateNetworkWithSubnetMeta(networkId, subnetMetadata);
     }
 
     private Map<String, CloudSubnet> getSubnetMetadata(EnvironmentDto environmentDto) {
