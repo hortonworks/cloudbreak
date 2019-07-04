@@ -13,9 +13,16 @@ public class Security {
 
     private final List<String> cloudSecurityIds;
 
+    private final boolean useNetworkCidrAsSourceForDefaultRules;
+
     public Security(@Nonnull Collection<SecurityRule> rules, @Nonnull Collection<String> cloudSecurityIds) {
+        this(rules, cloudSecurityIds, false);
+    }
+
+    public Security(@Nonnull Collection<SecurityRule> rules, @Nonnull Collection<String> cloudSecurityIds, boolean useNetworkCidrAsSourceForDefaultRules) {
         this.rules = ImmutableList.copyOf(rules);
         this.cloudSecurityIds = ImmutableList.copyOf(cloudSecurityIds);
+        this.useNetworkCidrAsSourceForDefaultRules = useNetworkCidrAsSourceForDefaultRules;
     }
 
     public List<SecurityRule> getRules() {
@@ -28,6 +35,10 @@ public class Security {
 
     public List<String> getCloudSecurityIds() {
         return cloudSecurityIds;
+    }
+
+    public boolean isUseNetworkCidrAsSourceForDefaultRules() {
+        return useNetworkCidrAsSourceForDefaultRules;
     }
 
     @Override

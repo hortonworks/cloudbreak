@@ -121,6 +121,7 @@ public class AwsLaunchService {
                     .withExistingVpc(existingVPC)
                     .withExistingIGW(awsNetworkView.isExistingIGW())
                     .withExistingSubnetCidr(existingSubnet ? awsNetworkService.getExistingSubnetCidr(ac, stack) : null)
+                    .withExistinVpcCidr(awsNetworkService.getVpcCidrs(ac, stack))
                     .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
                     .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                     .withEnableInstanceProfile(awsInstanceProfileView.isInstanceProfileAvailable())
