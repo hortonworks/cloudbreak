@@ -51,8 +51,7 @@ public class ClusterProxyService {
         this.restTemplate = restTemplate;
     }
 
-    public ConfigRegistrationResponse registerCluster(Long stackId) throws JsonProcessingException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+    public ConfigRegistrationResponse registerCluster(Stack stack) throws JsonProcessingException {
         ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
         LOGGER.debug("Cluster Proxy config request: {}", proxyConfigRequest);
         ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(clusterProxyUrl + registerConfigPath,
@@ -115,7 +114,7 @@ public class ClusterProxyService {
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
                 new ClusterServiceCredential(dpUser, dpPasswordVaultPath));
         ClusterServiceConfig serviceConfig = new ClusterServiceConfig("cloudera-manager", singletonList(clusterManagerUrl(stack)), credentials);
-        return new ConfigRegistrationRequest(clusterCrn(stack.getCluster()), singletonList(serviceConfig));
+        return new ConfigRegistrationRequest(clusterCrn(cluster), singletonList(serviceConfig));
     }
 
     private ConfigUpdateRequest createProxyConfigUpdateRequest(Stack stack) {
