@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,8 @@ public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaDeleteHandler.class);
 
+    private static final int SINGLE_FAILURE = 1;
+
     private final EnvironmentService environmentService;
 
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
@@ -54,16 +57,16 @@ public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
         try {
             if (env.isPresent() && isFreeIpaExistsForEnvironment(env.get())) {
                 freeIpaV1Endpoint.delete(env.get().getResourceCrn());
-
-                PollingResult result = freeIpaPollingService.pollWithTimeoutSingleFailure(
+                Pair<PollingResult, Exception> result = freeIpaPollingService.pollWithTimeout(
                         new FreeIpaDeleteRetrievalTask(),
                         new FreeIpaPollerObject(env.get().getId(), env.get().getResourceCrn(), freeIpaV1Endpoint),
                         FreeIpaDeleteRetrievalTask.FREEIPA_RETRYING_INTERVAL,
-                        FreeIpaDeleteRetrievalTask.FREEIPA_RETRYING_COUNT);
-                if (isSuccess(result)) {
+                        FreeIpaDeleteRetrievalTask.FREEIPA_RETRYING_COUNT,
+                        SINGLE_FAILURE);
+                if (isSuccess(result.getLeft())) {
                     eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
                 } else {
-                    throw new FreeIpaOperationFailedException("Failed to delete FreeIpa! Result was " + getIfNotNull(result, Enum::name));
+                    throw new FreeIpaOperationFailedException("Failed to delete FreeIpa! " + getIfNotNull(result.getRight(), Throwable::getMessage));
                 }
             } else {
                 eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
