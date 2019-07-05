@@ -22,8 +22,7 @@ type SdxInternalClusterRequest struct {
 	AccessCidr *string `json:"accessCidr"`
 
 	// cloud storage
-	// Required: true
-	CloudStorage *SdxCloudStorageRequest `json:"cloudStorage"`
+	CloudStorage *SdxCloudStorageRequest `json:"cloudStorage,omitempty"`
 
 	// cluster shape
 	// Required: true
@@ -81,8 +80,8 @@ func (m *SdxInternalClusterRequest) validateAccessCidr(formats strfmt.Registry) 
 
 func (m *SdxInternalClusterRequest) validateCloudStorage(formats strfmt.Registry) error {
 
-	if err := validate.Required("cloudStorage", "body", m.CloudStorage); err != nil {
-		return err
+	if swag.IsZero(m.CloudStorage) { // not required
+		return nil
 	}
 
 	if m.CloudStorage != nil {

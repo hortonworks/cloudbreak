@@ -37,6 +37,9 @@ type SdxClusterDetailResponse struct {
 	// status
 	// Enum: [REQUESTED REQUESTED_FROM_CLOUDBREAK RUNNING PROVISIONING_FAILED DELETE_REQUESTED DELETED DELETE_FAILED]
 	Status string `json:"status,omitempty"`
+
+	// status reason
+	StatusReason string `json:"statusReason,omitempty"`
 }
 
 // Validate validates this sdx cluster detail response
