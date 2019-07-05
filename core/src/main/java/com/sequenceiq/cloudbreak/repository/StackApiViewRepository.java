@@ -30,17 +30,15 @@ public interface StackApiViewRepository extends WorkspaceResourceRepository<Stac
     @Query("SELECT s FROM StackApiView s LEFT JOIN FETCH s.cluster c LEFT JOIN FETCH c.blueprint "
             + "LEFT JOIN FETCH c.hostGroups hg LEFT JOIN FETCH hg.hostMetadata "
             + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH c.kerberosConfig "
-            + "LEFT JOIN FETCH s.workspace w LEFT JOIN FETCH w.tenant WHERE s.id= :id")
+            + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH s.workspace w LEFT JOIN FETCH w.tenant WHERE s.id= :id")
     Optional<StackApiView> findById(@Param("id") Long id);
 
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s FROM StackApiView s LEFT JOIN FETCH s.cluster c LEFT JOIN FETCH c.blueprint "
             + "LEFT JOIN FETCH c.hostGroups hg LEFT JOIN FETCH hg.hostMetadata "
             + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH c.kerberosConfig "
-            + "LEFT JOIN FETCH s.workspace w LEFT JOIN FETCH w.tenant WHERE s.workspace.id= :id AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED
-            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH s.workspace w LEFT JOIN FETCH w.tenant WHERE s.workspace.id= :id AND "
+            + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<StackApiView> findAllByWorkspaceId(
             @Param("id") Long id,
             @Param("showTerminated") Boolean showTerminated,
@@ -51,9 +49,8 @@ public interface StackApiViewRepository extends WorkspaceResourceRepository<Stac
     @Query("SELECT s FROM StackApiView s LEFT JOIN FETCH s.cluster c LEFT JOIN FETCH c.blueprint "
             + "LEFT JOIN FETCH c.hostGroups hg LEFT JOIN FETCH hg.hostMetadata "
             + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH c.kerberosConfig "
-            + "LEFT JOIN FETCH s.workspace w LEFT JOIN FETCH w.tenant WHERE s.workspace.id = :id AND s.environmentCrn = :environmentCrn AND "
-            + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            + "LEFT JOIN FETCH s.userView LEFT JOIN FETCH s.workspace w LEFT JOIN FETCH w.tenant WHERE s.workspace.id = :id AND "
+            + "s.environmentCrn = :environmentCrn AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<StackApiView> findAllByWorkspaceIdAndEnvironments(
             @Param("id") Long id,
             @Param("environmentCrn") String environmentCrn,

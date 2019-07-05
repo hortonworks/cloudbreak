@@ -11,6 +11,7 @@ import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Prototype
 public class LdapTestDto extends AbstractFreeIPATestDto<CreateLdapConfigRequest, DescribeLdapConfigResponse, LdapTestDto> {
@@ -37,9 +38,8 @@ public class LdapTestDto extends AbstractFreeIPATestDto<CreateLdapConfigRequest,
     }
 
     public LdapTestDto valid() {
-        String environmentCrn = resourceProperyProvider().getName();
-        return withName(environmentCrn)
-                .withEnvironmentCrn(environmentCrn)
+        return withName(resourceProperyProvider().getName())
+                .withEnvironment(EnvironmentTestDto.class)
                 .withDescription(resourceProperyProvider().getDescription("LDAP"))
                 .withBindPassword("bindPassword")
                 .withAdminGroup("group")
@@ -75,6 +75,18 @@ public class LdapTestDto extends AbstractFreeIPATestDto<CreateLdapConfigRequest,
         getRequest().setEnvironmentCrn(environmentCrn);
         return this;
 
+    }
+
+    public LdapTestDto withEnvironment(Class<EnvironmentTestDto> environmentKey) {
+        return withEnvironmentKey(environmentKey.getSimpleName());
+    }
+
+    public LdapTestDto withEnvironmentKey(String environmentKey) {
+        EnvironmentTestDto env = getTestContext().get(environmentKey);
+        if (env == null) {
+            throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
+        }
+        return withEnvironmentCrn(env.getResponse().getCrn());
     }
 
     public LdapTestDto withUserDnPattern(String userDnPattern) {

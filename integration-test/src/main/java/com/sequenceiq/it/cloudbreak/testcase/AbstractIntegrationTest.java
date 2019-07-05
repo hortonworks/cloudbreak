@@ -262,7 +262,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
                 .withRealm("realm.addomain.com")
                 .given(KerberosTestDto.class)
                 .withActiveDirectoryDescriptor()
-                .when(kerberosTestClient.createV4());
+                .when(kerberosTestClient.createV1());
         Set<String> validKerberos = new HashSet<>();
         validKerberos.add(testContext.get(KerberosTestDto.class).getName());
         return validKerberos;

@@ -1,25 +1,24 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.OK;
 
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.HttpMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
+import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiConfigList;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerberosDescriptor;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIPAKerberosDescriptor;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.MITKerberosDescriptor;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
@@ -31,10 +30,12 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
+import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 import spark.Route;
@@ -51,34 +52,34 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    // TODO: Update to new kerberos endpoints
-//    @Test(dataProvider = "dataProviderForTest", enabled = false)
-//    public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String blueprintName, KerberosTestData testData,
-//            @Description TestCaseDescription testCaseDescription) {
-//        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
-//        dynamicRouteStack.put(ClouderaManagerMock.API_ROOT + "/cm/config", (request, response) -> new ApiConfigList());
-//        dynamicRouteStack
-//                .post(ClouderaManagerMock.API_ROOT
-//                        + "/cm/commands/importAdminCredentials", (request, response) -> new ApiCommand().id(new BigDecimal(1)));
-//
-//        KerberosV4Request request = testData.getRequest();
-//        request.setName(extendNameWithGeneratedPart(request.getName()));
-//        testContext
-//                .given(KerberosTestDto.class)
-//                .withRequest(request)
-//                .withName(request.getName())
-//                .when(kerberosTestClient.createV4())
-//                .given("master", InstanceGroupTestDto.class)
-//                .withHostGroup(HostGroupType.MASTER)
-//                .withNodeCount(1)
-//                .given(ClusterTestDto.class)
-//                .given(StackTestDto.class)
-//                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
-//                .when(stackTestClient.createV4())
-//                .await(STACK_AVAILABLE)
-//                .then(testData.getAssertions())
-//                .validate();
-//    }
+    @Test(dataProvider = "dataProviderForTest")
+    public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String blueprintName, KerberosTestData testData,
+            @Description TestCaseDescription testCaseDescription) {
+        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
+        dynamicRouteStack.put(ClouderaManagerMock.API_ROOT + "/cm/config", (request, response) -> new ApiConfigList());
+        dynamicRouteStack
+                .post(ClouderaManagerMock.API_ROOT
+                        + "/cm/commands/importAdminCredentials", (request, response) -> new ApiCommand().id(new BigDecimal(1)));
+
+        CreateKerberosConfigRequest request = testData.getRequest();
+        request.setName(extendNameWithGeneratedPart(request.getName()));
+        testContext
+                .given(KerberosTestDto.class)
+                .withRequest(request)
+                .withEnvironment(EnvironmentTestDto.class)
+                .withName(request.getName())
+                .when(kerberosTestClient.createV1())
+                .given("master", InstanceGroupTestDto.class)
+                .withHostGroup(HostGroupType.MASTER)
+                .withNodeCount(1)
+                .given(ClusterTestDto.class)
+                .given(StackTestDto.class)
+                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
+                .when(stackTestClient.createV4())
+                .await(STACK_AVAILABLE)
+                .then(testData.getAssertions())
+                .validate();
+    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -99,74 +100,6 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    // TODO: Update to new kerberos endpoint
-//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-//    @Description(
-//            given = "a cluster setup with '' kerberosname",
-//            when = "calling cluster creation",
-//            then = "getting BadRequestException because kerberosname should not be empty")
-//    public void testClusterCreationAttemptWithKerberosConfigWithEmptyName(MockedTestContext testContext) {
-//        mockAmbariBlueprintPassLdapSync(testContext);
-//        KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
-//        request.setName(extendNameWithGeneratedPart(request.getName()));
-//        testContext
-//                .given(KerberosTestDto.class)
-//                .withRequest(request)
-//                .withName(request.getName())
-//                .when(kerberosTestClient.createV4())
-//                .given("master", InstanceGroupTestDto.class)
-//                .withHostGroup(HostGroupType.MASTER)
-//                .withNodeCount(1)
-//                .given(ClusterTestDto.class)
-//                .withAmbari(testContext.given(AmbariTestDto.class))
-//                .given(StackTestDto.class)
-//                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
-//                .when(stackTestClient.createV4(), key("badRequest"))
-//                .expect(BadRequestException.class, key("badRequest"))
-//                .validate();
-//    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "a valid kerberos descriptor JSON which does not contain all the required fields",
-            when = "calling kerberos creation",
-            then = "getting BadRequestException because descriptor need all the required fields")
-    public void testKerberosCreationAttemptWhenDescriptorDoesNotContainsAllTheRequiredFields(MockedTestContext testContext) {
-        mockAmbariBlueprintPassLdapSync(testContext);
-        String badRequest = resourcePropertyProvider().getName();
-        KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
-        request.getAmbariDescriptor().setDescriptor(
-                Base64.encodeBase64String("{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\"}}}".getBytes()));
-        request.setName(extendNameWithGeneratedPart(request.getName()));
-        testContext
-                .given(KerberosTestDto.class)
-                .withRequest(request)
-                .withName(request.getName())
-                .when(kerberosTestClient.createV4(), key(badRequest))
-                .expect(BadRequestException.class, key(badRequest))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "a kerberos configuration where the krb5conf is not a valid JSON",
-            when = "calling kerberos creation",
-            then = "getting BadRequestException because krb5conf should be a valid JSON")
-    public void testKerberosCreationAttemptWhenKrb5ConfIsNotAValidJson(MockedTestContext testContext) {
-        mockAmbariBlueprintPassLdapSync(testContext);
-        String badRequest = resourcePropertyProvider().getName();
-        KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
-        request.getAmbariDescriptor().setKrb5Conf(Base64.encodeBase64String("{".getBytes()));
-        request.setName(extendNameWithGeneratedPart(request.getName()));
-        testContext
-                .given(KerberosTestDto.class)
-                .withRequest(request)
-                .withName(request.getName())
-                .when(kerberosTestClient.createV4(), key(badRequest))
-                .expect(BadRequestException.class, key(badRequest))
-                .validate();
-    }
-
     @DataProvider(name = "dataProviderForTest")
     public Object[][] provide() {
         return new Object[][]{
@@ -176,7 +109,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                         KerberosTestData.FREEIPA,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("a valid stack request and a FreeIPA based kerberos configuration")
-                                .when("calling calling create kerberos configuration and a cluster creation with that kerberos configuration")
+                                .when("calling create kerberos configuration and a cluster creation with that kerberos configuration")
                                 .then("the cluster should be available")
                 },
                 {
@@ -185,7 +118,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                         KerberosTestData.ACTIVE_DIRECTORY,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("a valid stack request and a Active Directory based kerberos configuration")
-                                .when("calling calling create kerberos configuration and a cluster creation with that kerberos configuration")
+                                .when("calling create kerberos configuration and a cluster creation with that kerberos configuration")
                                 .then("the cluster should be available")
                 },
                 {
@@ -194,16 +127,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                         KerberosTestData.MIT,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("a valid stack request and a MIT based kerberos configuration")
-                                .when("calling calling create kerberos configuration and a cluster creation with that kerberos configuration")
-                                .then("the cluster should be available")
-                },
-                {
-                        getBean(MockedTestContext.class),
-                        resourcePropertyProvider().getName(),
-                        KerberosTestData.AMBARI_DESCRIPTOR,
-                        new TestCaseDescription.TestCaseDescriptionBuilder()
-                                .given("a valid stack request and a Ambari Descriptor based kerberos configuration")
-                                .when("calling calling create kerberos configuration and a cluster creation with that kerberos configuration")
+                                .when("calling create kerberos configuration and a cluster creation with that kerberos configuration")
                                 .then("the cluster should be available")
                 }
         };
@@ -237,8 +161,8 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             }
 
             @Override
-            public KerberosV4Request getRequest() {
-                KerberosV4Request request = new KerberosV4Request();
+            public CreateKerberosConfigRequest getRequest() {
+                CreateKerberosConfigRequest request = new CreateKerberosConfigRequest();
                 request.setName("adKerberos");
                 ActiveDirectoryKerberosDescriptor activeDirectory = new ActiveDirectoryKerberosDescriptor();
                 activeDirectory.setTcpAllowed(true);
@@ -264,8 +188,8 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             }
 
             @Override
-            public KerberosV4Request getRequest() {
-                KerberosV4Request request = new KerberosV4Request();
+            public CreateKerberosConfigRequest getRequest() {
+                CreateKerberosConfigRequest request = new CreateKerberosConfigRequest();
                 request.setName("mitKerberos");
                 MITKerberosDescriptor mit = new MITKerberosDescriptor();
                 mit.setTcpAllowed(true);
@@ -279,32 +203,6 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             }
         },
 
-        AMBARI_DESCRIPTOR {
-            @Override
-            public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
-                List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
-                verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
-                return verifications;
-            }
-
-            @Override
-            public KerberosV4Request getRequest() {
-                KerberosV4Request request = new KerberosV4Request();
-                request.setName("customKerberos");
-                AmbariKerberosDescriptor ambariKerberosDescriptor = new AmbariKerberosDescriptor();
-                ambariKerberosDescriptor.setTcpAllowed(true);
-                ambariKerberosDescriptor.setPrincipal("kerberosPrincipal");
-                ambariKerberosDescriptor.setPassword("kerberosPassword");
-                String descriptor = "{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\",\"admin_server_host\""
-                        + ":\"admin-server-host-value\",\"realm\":\"realm-value\"}}}";
-                ambariKerberosDescriptor.setDescriptor(Base64.encodeBase64String(descriptor.getBytes()));
-                ambariKerberosDescriptor.setKrb5Conf(Base64.encodeBase64String("{}".getBytes()));
-                request.setAmbariDescriptor(ambariKerberosDescriptor);
-                return request;
-            }
-        },
-
         FREEIPA {
             @Override
             public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
@@ -314,8 +212,8 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             }
 
             @Override
-            public KerberosV4Request getRequest() {
-                KerberosV4Request request = new KerberosV4Request();
+            public CreateKerberosConfigRequest getRequest() {
+                CreateKerberosConfigRequest request = new CreateKerberosConfigRequest();
                 FreeIPAKerberosDescriptor freeIpaRequest = new FreeIPAKerberosDescriptor();
                 freeIpaRequest.setAdminUrl("http://someurl.com");
                 freeIpaRequest.setRealm("someRealm");
@@ -332,12 +230,11 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
 
         public abstract List<Assertion<StackTestDto, CloudbreakClient>> getAssertions();
 
-        public abstract KerberosV4Request getRequest();
+        public abstract CreateKerberosConfigRequest getRequest();
 
         private static MockVerification clusterTemplatePostToCMContains(String content) {
             return MockVerification.verify(HttpMethod.POST, ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE).bodyContains(content);
         }
 
     }
-
 }

@@ -49,9 +49,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -76,13 +74,13 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsNotificationDetails;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -435,26 +433,6 @@ public class TestUtil {
         workspace.setId(1L);
         cluster.setWorkspace(workspace);
         return cluster;
-    }
-
-    public static KerberosConfig kerberosConfigFreeipa() {
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setType(KerberosType.FREEIPA);
-        kerberosConfig.setAdmin("admin");
-        kerberosConfig.setPassword("passwd");
-        kerberosConfig.setVerifyKdcTrust(true);
-        kerberosConfig.setTcpAllowed(true);
-        return kerberosConfig;
-    }
-
-    public static KerberosConfig kerberosConfigMit() {
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setType(KerberosType.MIT);
-        kerberosConfig.setAdmin("admin");
-        kerberosConfig.setPassword("passwd");
-        kerberosConfig.setVerifyKdcTrust(true);
-        kerberosConfig.setTcpAllowed(true);
-        return kerberosConfig;
     }
 
     public static HostGroup hostGroup(String name) {
