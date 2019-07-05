@@ -16,10 +16,12 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEd
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.TelemetryApiConverter;
@@ -29,6 +31,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
+import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.v1.converter.RegionConverter;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -75,6 +78,15 @@ public class EnvironmentApiConverter {
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()));
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
+        NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
+
+        // TODO temporary until CCM not really integrated
+        if (request.getSecurityAccess() == null) {
+            SecurityAccessDto securityAccess = SecurityAccessDto.builder()
+                    .withCidr("0.0.0.0/0")
+                    .build();
+            builder.withSecurityAccess(securityAccess);
+        }
         return builder.build();
     }
 
@@ -122,6 +134,14 @@ public class EnvironmentApiConverter {
         return builder.build();
     }
 
+    private SecurityAccessDto securityAccessRequestToDto(SecurityAccessRequest securityAccess) {
+        return SecurityAccessDto.builder()
+                .withCidr(securityAccess.getCidr())
+                .withSecurityGroupIdForKnox(securityAccess.getSecurityGroupIdForKnox())
+                .withDefaultSecurityGroupId(securityAccess.getDefaultSecurityGroupId())
+                .build();
+    }
+
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
         DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.Builder.aDetailedEnvironmentResponse()
                 .withCrn(environmentDto.getResourceCrn())
@@ -133,13 +153,14 @@ public class EnvironmentApiConverter {
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
-                .withAuthentication(authenticationToResponse(environmentDto.getAuthentication()))
+                .withAuthentication(authenticationDtoToResponse(environmentDto.getAuthentication()))
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
                 .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
+        NullUtil.doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));
         return builder.build();
     }
 
@@ -197,6 +218,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry())));
+        NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
         return builder.build();
     }
 
@@ -206,11 +228,19 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
-    public EnvironmentAuthenticationResponse authenticationToResponse(AuthenticationDto authenticationDto) {
+    public EnvironmentAuthenticationResponse authenticationDtoToResponse(AuthenticationDto authenticationDto) {
         return EnvironmentAuthenticationResponse.builder()
                 .withLoginUserName(authenticationDto.getLoginUserName())
                 .withPublicKey(authenticationDto.getPublicKey())
                 .withPublicKeyId(authenticationDto.getPublicKeyId())
+                .build();
+    }
+
+    private SecurityAccessResponse securityAccessDtoToResponse(SecurityAccessDto securityAccess) {
+        return SecurityAccessResponse.builder()
+                .withCidr(securityAccess.getCidr())
+                .withSecurityGroupIdForKnox(securityAccess.getSecurityGroupIdForKnox())
+                .withDefaultSecurityGroupId(securityAccess.getDefaultSecurityGroupId())
                 .build();
     }
 }

@@ -55,6 +55,18 @@ public class DefaultInstanceGroupProvider {
         return Set.of(instanceGroup);
     }
 
+    public Template createDefaultTemplate(CloudPlatform cloudPlatform, String accountId) {
+        Template template = new Template();
+        template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
+        template.setStatus(ResourceStatus.DEFAULT);
+        template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform.name()));
+        template.setVolumeCount(0);
+        template.setVolumeSize(0);
+        template.setInstanceType(defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name()));
+        template.setAccountId(accountId);
+        return template;
+    }
+
     private SecurityGroup createDefaultSecurityGroup() {
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setName(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
@@ -80,17 +92,5 @@ public class DefaultInstanceGroupProvider {
             instanceMetaDataSet.add(instanceMetaData);
         }
         return instanceMetaDataSet;
-    }
-
-    private Template createDefaultTemplate(CloudPlatform cloudPlatform, String accountId) {
-        Template template = new Template();
-        template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
-        template.setStatus(ResourceStatus.DEFAULT);
-        template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform.name()));
-        template.setVolumeCount(0);
-        template.setVolumeSize(0);
-        template.setInstanceType(defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name()));
-        template.setAccountId(accountId);
-        return template;
     }
 }

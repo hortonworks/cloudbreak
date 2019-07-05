@@ -42,7 +42,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     public SdxTestDto valid() {
         withName(resourceProperyProvider().getName())
                 .withEnvironment(getTestContext().get(EnvironmentTestDto.class).getName())
-                .withAccessCidr(getCloudProvider().getAccessCIDR())
                 .withClusterShape(getCloudProvider().getClusterShape())
                 .withTags(getCloudProvider().getTags());
         return getCloudProvider().sdx(this);
@@ -55,11 +54,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto withClusterShape(String shape) {
         getRequest().setClusterShape(shape);
-        return this;
-    }
-
-    public SdxTestDto withAccessCidr(String cidr) {
-        getRequest().setAccessCidr(cidr);
         return this;
     }
 

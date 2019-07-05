@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
-
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,6 +27,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
+import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -91,6 +90,7 @@ public class EnvironmentModificationService {
         editLocationAndRegionsIfChanged(env, editDto);
         editNetworkIfChanged(env, editDto);
         editAuthenticationIfChanged(editDto, env);
+        editSecurityAccessIfChanged(editDto, env);
         Environment saved = environmentRepository.save(env);
         return environmentDtoConverter.environmentToDto(saved);
     }
@@ -99,15 +99,11 @@ public class EnvironmentModificationService {
         //CHECKSTYLE:OFF
         // TODO: 2019. 06. 03. also we have to check for SDXs and DistroXs what uses the given credential. If there is at least one, we have to update the crn reference through the other services
         //CHECKSTYLE:ON
-        if (environment.getStatus() == AVAILABLE) {
-            Credential credential = credentialService.getByNameForAccountId(dto.getCredentialName(), accountId);
-            environment.setCredential(credential);
-            LOGGER.debug("About to change credential on environment \"{}\"", environmentName);
-            Environment saved = environmentRepository.save(environment);
-            return environmentDtoConverter.environmentToDto(saved);
-        } else {
-            throw new BadRequestException(String.format("Credential cannot be changed since the given environment status is not %s", AVAILABLE.name()));
-        }
+        Credential credential = credentialService.getByNameForAccountId(dto.getCredentialName(), accountId);
+        environment.setCredential(credential);
+        LOGGER.debug("About to change credential on environment \"{}\"", environmentName);
+        Environment saved = environmentRepository.save(environment);
+        return environmentDtoConverter.environmentToDto(saved);
     }
 
     private boolean locationAndRegionChanged(EnvironmentEditDto editDto) {
@@ -191,6 +187,13 @@ public class EnvironmentModificationService {
         AuthenticationDto authenticationDto = editDto.getAuthentication();
         if (authenticationDto != null) {
             environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(authenticationDto));
+        }
+    }
+
+    private void editSecurityAccessIfChanged(EnvironmentEditDto editDto, Environment environment) {
+        SecurityAccessDto securityAccessDto = editDto.getSecurityAccess();
+        if (securityAccessDto != null) {
+            environmentService.setSecurityAccess(environment, securityAccessDto);
         }
     }
 }

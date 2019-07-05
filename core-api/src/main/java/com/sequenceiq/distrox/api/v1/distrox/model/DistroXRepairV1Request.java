@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-@MutuallyExclusiveNotNull(fieldNames = {"hostGroups", "nodes"}, message = "Either hostGroups or nodes should be provided but not both.")
+@MutuallyExclusiveNotNull(fieldGroups = {"hostGroups", "nodes"}, message = "Either hostGroups or nodes should be provided but not both.")
 public class DistroXRepairV1Request {
 
     @ApiModelProperty(value = RepairClusterRequest.HOSTGROUPS, required = true)

@@ -3,19 +3,25 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 
 @Component
 public class InstanceGroupV1ToInstanceGroupV4Converter {
@@ -26,11 +32,15 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
     @Inject
     private InstanceGroupParameterConverter instanceGroupParameterConverter;
 
-    public List<InstanceGroupV4Request> convertTo(Set<InstanceGroupV1Request> instanceGroups) {
-        return instanceGroups.stream().map(this::convert).collect(Collectors.toList());
+    public List<InstanceGroupV4Request> convertTo(Set<InstanceGroupV1Request> instanceGroups, DetailedEnvironmentResponse environment) {
+        return instanceGroups.stream().map(ig -> convert(ig, environment)).collect(Collectors.toList());
     }
 
-    public InstanceGroupV4Request convert(InstanceGroupV1Request source) {
+    public Set<InstanceGroupV1Request> convertFrom(List<InstanceGroupV4Request> instanceGroups) {
+        return instanceGroups.stream().map(this::convert).collect(Collectors.toSet());
+    }
+
+    private InstanceGroupV4Request convert(InstanceGroupV1Request source, DetailedEnvironmentResponse environment) {
         InstanceGroupV4Request response = new InstanceGroupV4Request();
         response.setNodeCount(source.getNodeCount());
         response.setType(source.getType());
@@ -38,18 +48,14 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setName(source.getName());
         response.setTemplate(getIfNotNull(source.getTemplate(), instanceTemplateConverter::convert));
         response.setRecoveryMode(source.getRecoveryMode());
-        response.setSecurityGroup(getSecurityGroup(source.getType()));
+        response.setSecurityGroup(createSecurityGroupFromEnvironment(source.getType(), environment));
         response.setRecipeNames(source.getRecipeNames());
         response.setAws(getIfNotNull(source.getAws(), instanceGroupParameterConverter::convert));
         response.setAzure(getIfNotNull(source.getAzure(), instanceGroupParameterConverter::convert));
         return response;
     }
 
-    public Set<InstanceGroupV1Request> convertFrom(List<InstanceGroupV4Request> instanceGroups) {
-        return instanceGroups.stream().map(this::convert).collect(Collectors.toSet());
-    }
-
-    public InstanceGroupV1Request convert(InstanceGroupV4Request source) {
+    private InstanceGroupV1Request convert(InstanceGroupV4Request source) {
         InstanceGroupV1Request response = new InstanceGroupV1Request();
         response.setNodeCount(source.getNodeCount());
         response.setType(source.getType());
@@ -62,14 +68,22 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         return response;
     }
 
-    private SecurityGroupV4Request getSecurityGroup(InstanceGroupType type) {
-        SecurityGroupV4Request response = new SecurityGroupV4Request();
-        SecurityRuleV4Request securityRule = new SecurityRuleV4Request();
-        securityRule.setProtocol("tcp");
-        securityRule.setSubnet("0.0.0.0/0");
-        securityRule.setPorts(getPorts(type));
-        response.setSecurityRules(List.of(securityRule));
-        return response;
+    private SecurityGroupV4Request createSecurityGroupFromEnvironment(InstanceGroupType type, DetailedEnvironmentResponse environment) {
+        return getIfNotNull(Optional.ofNullable(environment).map(DetailedEnvironmentResponse::getSecurityAccess).orElse(null), securityAccess -> {
+            if (ObjectUtils.anyNotNull(securityAccess.getSecurityGroupIdForKnox(),
+                    securityAccess.getDefaultSecurityGroupId(),
+                    securityAccess.getCidr())) {
+
+                SecurityGroupV4Request securityGroup = new SecurityGroupV4Request();
+                SecurityRuleV4Request securityRule = new SecurityRuleV4Request();
+                securityRule.setProtocol("tcp");
+                securityRule.setPorts(getPorts(type));
+                securityGroup.setSecurityRules(List.of(securityRule));
+                setupSecurityAccess(type, securityAccess, securityGroup);
+                return securityGroup;
+            }
+            return null;
+        });
     }
 
     private List<String> getPorts(InstanceGroupType type) {
@@ -79,5 +93,31 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
             ret.addAll(List.of("9443", "8443", "443"));
         }
         return ret;
+    }
+
+    private void setupSecurityAccess(InstanceGroupType type, SecurityAccessResponse securityAccess, SecurityGroupV4Request securityGroup) {
+        String securityGroupIdForKnox = securityAccess.getSecurityGroupIdForKnox();
+        String defaultSecurityGroupId = securityAccess.getDefaultSecurityGroupId();
+        String cidr = securityAccess.getCidr();
+        if (type == InstanceGroupType.GATEWAY) {
+            setSecurityAccess(securityGroup, securityGroupIdForKnox, cidr);
+        } else {
+            setSecurityAccess(securityGroup, defaultSecurityGroupId, cidr);
+        }
+    }
+
+    private void setSecurityAccess(SecurityGroupV4Request securityGroup, String securityGroupId, String cidr) {
+        if (!Strings.isNullOrEmpty(securityGroupId)) {
+            securityGroup.setSecurityGroupIds(Set.of(securityGroupId));
+            securityGroup.setSecurityRules(new ArrayList<>());
+        } else if (!Strings.isNullOrEmpty(cidr)) {
+            for (SecurityRuleV4Request securityRule : securityGroup.getSecurityRules()) {
+                securityRule.setSubnet(cidr);
+            }
+            securityGroup.setSecurityGroupIds(new HashSet<>());
+        } else {
+            securityGroup.setSecurityRules(new ArrayList<>());
+            securityGroup.setSecurityGroupIds(new HashSet<>());
+        }
     }
 }

@@ -110,7 +110,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public final SdxTestDto sdx(SdxTestDto sdx) {
-        sdx.withAccessCidr(commonCloudProperties.getAccessCidr()).withTags(commonCloudProperties.getTags());
+        sdx.withTags(commonCloudProperties.getTags());
         return sdx;
     }
 

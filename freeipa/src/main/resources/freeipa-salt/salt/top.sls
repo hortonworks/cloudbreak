@@ -2,3 +2,4 @@ base:
   '*':
     - nginx
     - freeipa
+    - dns

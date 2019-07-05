@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.freeipa;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
-
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -12,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaPollerObject;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaPollerObject> {
 
@@ -26,11 +26,19 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
         String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
         try {
             LOGGER.info("Checking the state of FreeIpa termination progress for environment: '{}'", environmentCrn);
-            if (getIfNotNull(freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn), response -> !response.getStatus().isSuccessfullyDeleted())) {
-                return false;
+            DescribeFreeIpaResponse freeIpaResponse = freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn);
+            if (freeIpaResponse != null) {
+                if (freeIpaResponse.getStatus().equals(Status.DELETE_FAILED)) {
+                    throw new FreeIpaOperationFailedException("FreeIpa delete operation failed: " + freeIpaResponse.getStatusReason());
+                }
+                if (!freeIpaResponse.getStatus().isSuccessfullyDeleted()) {
+                    return false;
+                }
             }
         } catch (NotFoundException nfe) {
             return true;
+        } catch (FreeIpaOperationFailedException fiofe) {
+            throw fiofe;
         } catch (Exception e) {
             throw new FreeIpaOperationFailedException("FreeIpa delete operation failed", e);
         }
@@ -52,7 +60,11 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
     public boolean exitPolling(FreeIpaPollerObject freeIpaPollerObject) {
         try {
             String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
-            return freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn).getStatus().isFailed();
+            Status status = freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn).getStatus();
+            if (status.equals(Status.DELETE_FAILED)) {
+                return false;
+            }
+            return status.isFailed();
         } catch (WebApplicationException | ProcessingException clientException) {
             LOGGER.info("Failed to describe FreeIpa cluster due to API client exception: {}", clientException.getMessage());
         } catch (Exception e) {

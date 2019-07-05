@@ -20,6 +20,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRe
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
+import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
@@ -142,8 +143,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     public DetailedEnvironmentResponse changeCredentialByEnvironmentName(String environmentName, @Valid EnvironmentChangeCredentialRequest request) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentName(accountId, environmentName,
-                environmentApiConverter.convertEnvironmentChangeCredentialDto(request));
+        EnvironmentChangeCredentialDto dto = environmentApiConverter.convertEnvironmentChangeCredentialDto(request);
+        EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentName(accountId, environmentName, dto);
         return environmentApiConverter.dtoToDetailedResponse(result);
     }
 

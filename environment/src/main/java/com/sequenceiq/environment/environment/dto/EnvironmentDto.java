@@ -57,6 +57,8 @@ public class EnvironmentDto implements Payload {
 
     private Long created;
 
+    private SecurityAccessDto securityAccess;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -227,6 +229,14 @@ public class EnvironmentDto implements Payload {
         this.created = created;
     }
 
+    public SecurityAccessDto getSecurityAccess() {
+        return securityAccess;
+    }
+
+    public void setSecurityAccess(SecurityAccessDto securityAccess) {
+        this.securityAccess = securityAccess;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -271,6 +281,8 @@ public class EnvironmentDto implements Payload {
         private AuthenticationDto authentication;
 
         private Long created;
+
+        private SecurityAccessDto securityAccess;
 
         private Builder() {
         }
@@ -375,6 +387,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withSecurityAccess(SecurityAccessDto securityAccess) {
+            this.securityAccess = securityAccess;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -397,6 +414,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setAuthentication(authentication);
             environmentDto.setStatusReason(statusReason);
             environmentDto.setCreated(created);
+            environmentDto.setSecurityAccess(securityAccess);
             return environmentDto;
         }
     }

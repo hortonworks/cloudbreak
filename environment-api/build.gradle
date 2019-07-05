@@ -32,9 +32,10 @@ dependencies {
   implementation     group: 'com.sun.xml.ws',                name: 'jaxws-rt',                       version: "2.3.0"
 
   testImplementation group: 'org.junit.jupiter',             name: 'junit-jupiter-api',              version: junitJupiterVersion
+  testImplementation group: 'org.junit.jupiter',             name: 'junit-jupiter-params',           version: junitJupiterVersion
   testImplementation group: 'com.openpojo',                  name: 'openpojo',                       version: openPojoVersion
   testImplementation group: 'org.ow2.asm',                   name: 'asm',                            version: asmVersion
-
+  testImplementation group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
   testRuntimeOnly    group: 'org.junit.jupiter',             name: 'junit-jupiter-engine',           version: junitJupiterVersion
 }
 

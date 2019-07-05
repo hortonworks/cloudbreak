@@ -43,7 +43,8 @@ public class EnvironmentDtoConverter {
                 .withAuthentication(authenticationDtoConverter.authenticationToDto(environment.getAuthentication()))
                 .withCreateFreeIpa(environment.isCreateFreeIpa())
                 .withCreated(environment.getCreated())
-                .withStatusReason(environment.getStatusReason());
+                .withStatusReason(environment.getStatusReason())
+                .withSecurityAccess(environmentToSecurityAccessDto(environment));
         if (environment.getNetwork() != null) {
             builder.withNetwork(environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()))
                     .convertToDto(environment.getNetwork()));
@@ -76,6 +77,14 @@ public class EnvironmentDtoConverter {
                 .withDisplayName(environment.getLocationDisplayName())
                 .withLongitude(environment.getLongitude())
                 .withLatitude(environment.getLatitude())
+                .build();
+    }
+
+    private SecurityAccessDto environmentToSecurityAccessDto(Environment environment) {
+        return SecurityAccessDto.builder()
+                .withCidr(environment.getCidr())
+                .withSecurityGroupIdForKnox(environment.getSecurityGroupIdForKnox())
+                .withDefaultSecurityGroupId(environment.getDefaultSecurityGroupId())
                 .build();
     }
 }

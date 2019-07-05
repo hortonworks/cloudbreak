@@ -24,6 +24,8 @@ public class EnvironmentEditDto {
 
     private final AuthenticationDto authentication;
 
+    private final SecurityAccessDto securityAccess;
+
     public EnvironmentEditDto(
             String description,
             Set<String> regions,
@@ -31,7 +33,8 @@ public class EnvironmentEditDto {
             LocationDto location,
             NetworkDto network,
             AuthenticationDto authentication,
-            Telemetry telemetry) {
+            Telemetry telemetry,
+            SecurityAccessDto securityAccess) {
         this.description = description;
         this.accountId = accountId;
         if (CollectionUtils.isEmpty(regions)) {
@@ -43,6 +46,7 @@ public class EnvironmentEditDto {
         this.location = location;
         this.authentication = authentication;
         this.telemetry = telemetry;
+        this.securityAccess = securityAccess;
     }
 
     public String getDescription() {
@@ -77,6 +81,10 @@ public class EnvironmentEditDto {
         return telemetry;
     }
 
+    public SecurityAccessDto getSecurityAccess() {
+        return securityAccess;
+    }
+
     public static final class EnvironmentEditDtoBuilder {
         private String description;
 
@@ -91,6 +99,8 @@ public class EnvironmentEditDto {
         private AuthenticationDto authentication;
 
         private Telemetry telemetry;
+
+        private SecurityAccessDto securityAccess;
 
         private EnvironmentEditDtoBuilder() {
         }
@@ -134,8 +144,13 @@ public class EnvironmentEditDto {
             return this;
         }
 
+        public EnvironmentEditDtoBuilder withSecurityAccess(SecurityAccessDto securityAccess) {
+            this.securityAccess = securityAccess;
+            return this;
+        }
+
         public EnvironmentEditDto build() {
-            return new EnvironmentEditDto(description, regions, accountId, location, network, authentication, telemetry);
+            return new EnvironmentEditDto(description, regions, accountId, location, network, authentication, telemetry, securityAccess);
         }
     }
 }

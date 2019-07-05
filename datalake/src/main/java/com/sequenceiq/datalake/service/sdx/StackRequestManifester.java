@@ -3,7 +3,11 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,22 +15,28 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 
 @Service
 public class StackRequestManifester {
@@ -72,6 +82,7 @@ public class StackRequestManifester {
                 setupNetwork(environment, stackRequest);
             }
             setupAuthentication(environment, stackRequest);
+            setupSecurityAccess(environment, stackRequest);
             setupClusterRequest(stackRequest);
             return stackRequest;
         } catch (IOException e) {
@@ -127,6 +138,42 @@ public class StackRequestManifester {
             stackAuthenticationV4Request.setPublicKeyId(environment.getAuthentication().getPublicKeyId());
             stackRequest.setAuthentication(stackAuthenticationV4Request);
         }
+    }
+
+    private void setupSecurityAccess(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
+        List<InstanceGroupV4Request> instanceGroups = stackRequest.getInstanceGroups();
+        SecurityAccessResponse securityAccess = environment.getSecurityAccess();
+        if (instanceGroups != null && securityAccess != null) {
+            String securityGroupIdForKnox = securityAccess.getSecurityGroupIdForKnox();
+            String defaultSecurityGroupId = securityAccess.getDefaultSecurityGroupId();
+            String cidr = securityAccess.getCidr();
+            overrideSecurityAccess(InstanceGroupType.GATEWAY, instanceGroups, securityGroupIdForKnox, cidr);
+            overrideSecurityAccess(InstanceGroupType.CORE, instanceGroups, defaultSecurityGroupId, cidr);
+        }
+    }
+
+    private void overrideSecurityAccess(InstanceGroupType instanceGroupType, List<InstanceGroupV4Request> instanceGroups, String securityGroupId, String cidr) {
+        instanceGroups.stream()
+                .filter(ig -> ig.getType() == instanceGroupType)
+                .findFirst()
+                .ifPresent(ig -> {
+                    SecurityGroupV4Request securityGroup = ig.getSecurityGroup();
+                    if (securityGroup != null) {
+                        if (!Strings.isNullOrEmpty(securityGroupId)) {
+                            securityGroup.setSecurityGroupIds(Set.of(securityGroupId));
+                            securityGroup.setSecurityRules(new ArrayList<>());
+                        } else if (!Strings.isNullOrEmpty(cidr)) {
+                            List<SecurityRuleV4Request> securityRules = securityGroup.getSecurityRules();
+                            if (securityRules != null) {
+                                securityRules.forEach(sr -> sr.setSubnet(cidr));
+                            }
+                            securityGroup.setSecurityGroupIds(new HashSet<>());
+                        } else {
+                            securityGroup.setSecurityGroupIds(new HashSet<>());
+                            securityGroup.setSecurityRules(new ArrayList<>());
+                        }
+                    }
+                });
     }
 
     private void setupClusterRequest(StackV4Request stackRequest) {

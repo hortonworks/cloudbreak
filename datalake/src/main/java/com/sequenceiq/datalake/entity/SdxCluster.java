@@ -47,9 +47,6 @@ public class SdxCluster implements AccountIdAwareResource {
     private String envCrn;
 
     @NotNull
-    private String accessCidr;
-
-    @NotNull
     private String clusterShape;
 
     @NotNull
@@ -62,6 +59,8 @@ public class SdxCluster implements AccountIdAwareResource {
     @NotNull
     @Enumerated(EnumType.STRING)
     private SdxClusterStatus status;
+
+    private String statusReason;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -145,14 +144,6 @@ public class SdxCluster implements AccountIdAwareResource {
         this.envCrn = envCrn;
     }
 
-    public String getAccessCidr() {
-        return accessCidr;
-    }
-
-    public void setAccessCidr(String accessCidr) {
-        this.accessCidr = accessCidr;
-    }
-
     public String getClusterShape() {
         return clusterShape;
     }
@@ -191,5 +182,13 @@ public class SdxCluster implements AccountIdAwareResource {
 
     public void setStackRequestToCloudbreak(String stackRequestToCloudbreak) {
         this.stackRequestToCloudbreak = new Secret(stackRequestToCloudbreak);
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 }
