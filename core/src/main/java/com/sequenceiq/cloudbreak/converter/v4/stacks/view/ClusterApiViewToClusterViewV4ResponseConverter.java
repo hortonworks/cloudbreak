@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.view;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -14,6 +15,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostGroupViewV4Res
 import com.sequenceiq.cloudbreak.converter.CompactViewToCompactViewResponseConverter;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -22,16 +25,21 @@ public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewT
     @Inject
     private StackService stackService;
 
+    @Inject
+    private KerberosConfigService kerberosConfigService;
+
     @Override
     public ClusterViewV4Response convert(ClusterApiView source) {
         ClusterViewV4Response clusterViewResponse = super.convert(source);
+        Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(source.getEnvironmentCrn());
         clusterViewResponse.setServerIp(source.getAmbariIp());
         clusterViewResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4ViewResponse.class));
         clusterViewResponse.setStatus(source.getStatus());
-        clusterViewResponse.setSecure(source.getKerberosConfig() != null);
+        clusterViewResponse.setSecure(kerberosConfig.isPresent());
         clusterViewResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         addSharedServiceResponse(source, clusterViewResponse);
-        clusterViewResponse.setKerberosName(getKerberosName(source));
+        // TODO: is it necessary???
+        clusterViewResponse.setKerberosName(null);
         return clusterViewResponse;
     }
 
@@ -56,9 +64,4 @@ public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewT
         }
         clusterResponse.setSharedServiceResponse(sharedServiceResponse);
     }
-
-    private String getKerberosName(ClusterApiView source) {
-        return source.getKerberosConfig() != null ? source.getKerberosConfig().getName() : null;
-    }
-
 }

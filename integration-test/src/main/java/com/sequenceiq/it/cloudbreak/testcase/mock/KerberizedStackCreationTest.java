@@ -33,8 +33,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    // TODO: Update to new kerberos endpoints
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "an ActiveDirectory based kerberos config without realm and domain",
             when = "calling a stack creation with that kerberos config",
@@ -50,7 +49,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .withRealm("realm.addomain.com")
                 .given(KerberosTestDto.class)
                 .withActiveDirectoryDescriptor()
-                .when(kerberosTestClient.createV4())
+                .when(kerberosTestClient.createV1())
                 .given(ClusterTestDto.class)
                 .given(StackTestDto.class)
                 .withCluster()
@@ -61,8 +60,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    // TODO: Update to new kerberos endpoints
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "an ActiveDirectory based kerberos config without realm and with domain",
             when = "calling a stack creation with that kerberos config",
@@ -79,7 +77,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .withRealm("realm.addomain.com")
                 .given(KerberosTestDto.class)
                 .withActiveDirectoryDescriptor()
-                .when(kerberosTestClient.createV4())
+                .when(kerberosTestClient.createV1())
                 .given(ClusterTestDto.class)
                 .given(StackTestDto.class)
                 .withCluster()
@@ -90,8 +88,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    // TODO: Update to new Kerberos endpoints
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a FreeIPA based kerberos config with realm and without domain",
             when = "calling a stack creation with that kerberos config",
@@ -105,7 +102,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .withRealm("realm.freeiparealm.com")
                 .given(KerberosTestDto.class)
                 .withFreeIPADescriptor()
-                .when(kerberosTestClient.createV4())
+                .when(kerberosTestClient.createV1())
                 .given(ClusterTestDto.class)
                 .given(StackTestDto.class)
                 .withCluster()
@@ -116,8 +113,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    // TODO: Update to new kerberos endpoints
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a FreeIPA based kerberos config with realm and domain",
             when = "calling a stack creation with that kerberos config",
@@ -132,7 +128,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .withRealm("realm.freeiparealm.com")
                 .given(KerberosTestDto.class)
                 .withFreeIPADescriptor()
-                .when(kerberosTestClient.createV4())
+                .when(kerberosTestClient.createV1())
                 .given(ClusterTestDto.class)
                 .given(StackTestDto.class)
                 .withCluster()

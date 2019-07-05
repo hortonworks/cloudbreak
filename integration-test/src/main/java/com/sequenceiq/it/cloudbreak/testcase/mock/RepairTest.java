@@ -15,8 +15,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerberosDescriptor;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.it.cloudbreak.action.ClusterRepairAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.DatabaseCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
@@ -139,12 +139,12 @@ public class RepairTest extends AbstractIntegrationTest {
     public void testRepairMasterNodeWithKerberos(MockedTestContext testContext) {
         String ambariRdsName = resourcePropertyProvider().getName();
         createEnvWithResources(testContext);
-        KerberosV4Request kerberosRequest = getKerberosRequest();
+        CreateKerberosConfigRequest kerberosRequest = getKerberosRequest();
         String clusterName = resourcePropertyProvider().getName();
         addAmbariMocks(testContext, clusterName);
         testContext
                 .given(KerberosTestDto.class).withRequest(kerberosRequest).withName(kerberosRequest.getName())
-                .when(kerberosTestAction.createV4())
+                .when(kerberosTestAction.createV1())
                 .given(StackTestDto.class)
                 .withName(clusterName)
                 .withGatewayPort(testContext.getSparkServer().getPort())
@@ -238,8 +238,8 @@ public class RepairTest extends AbstractIntegrationTest {
         dynamicRouteStack.post(AMBARI_CLUSTER_REQUESTS, new AmbariClusterRequestResponse(testContext.getModel().getMockServerAddress(), clusterName));
     }
 
-    private KerberosV4Request getKerberosRequest() {
-        KerberosV4Request request = new KerberosV4Request();
+    private CreateKerberosConfigRequest getKerberosRequest() {
+        CreateKerberosConfigRequest request = new CreateKerberosConfigRequest();
         request.setName("adKerberos");
         ActiveDirectoryKerberosDescriptor activeDirectory = new ActiveDirectoryKerberosDescriptor();
         activeDirectory.setTcpAllowed(true);

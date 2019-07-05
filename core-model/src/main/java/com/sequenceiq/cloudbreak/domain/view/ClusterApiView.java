@@ -14,7 +14,6 @@ import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -24,9 +23,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class ClusterApiView extends CompactView {
     @OneToOne(fetch = FetchType.LAZY)
     private StackApiView stack;
-
-    @ManyToOne
-    private KerberosConfig kerberosConfig;
 
     @OneToMany(mappedBy = "cluster")
     private Set<HostGroupView> hostGroups = new HashSet<>();
@@ -60,14 +56,6 @@ public class ClusterApiView extends CompactView {
 
     public void setStack(StackApiView stack) {
         this.stack = stack;
-    }
-
-    public KerberosConfig getKerberosConfig() {
-        return kerberosConfig;
-    }
-
-    public void setKerberosConfig(KerberosConfig kerberosConfig) {
-        this.kerberosConfig = kerberosConfig;
     }
 
     public Set<HostGroupView> getHostGroups() {

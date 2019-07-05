@@ -2,11 +2,11 @@ package com.sequenceiq.it.cloudbreak.dto.kerberos;
 
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosTypeBase;
-import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.KerberosDescriptorBase;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 
-public abstract class AbstractKerberosDescriptorTestDto<R extends KerberosTypeBase, E extends AbstractKerberosDescriptorTestDto>
+public abstract class AbstractKerberosDescriptorTestDto<R extends KerberosDescriptorBase, E extends AbstractKerberosDescriptorTestDto>
         extends AbstractCloudbreakTestDto<R, Response, E> {
 
     protected AbstractKerberosDescriptorTestDto(R request, TestContext testContext) {

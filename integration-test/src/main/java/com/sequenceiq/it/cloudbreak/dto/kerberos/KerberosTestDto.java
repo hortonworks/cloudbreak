@@ -1,16 +1,19 @@
 package com.sequenceiq.it.cloudbreak.dto.kerberos;
 
+import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
-import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
+import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Prototype
-public class KerberosTestDto extends AbstractCloudbreakTestDto<KerberosV4Request, KerberosV4Response, KerberosTestDto> {
+public class KerberosTestDto extends AbstractFreeIPATestDto<CreateKerberosConfigRequest, DescribeKerberosConfigResponse, KerberosTestDto> {
 
     public static final String DEFAULT_MASTERKEY = "masterkey";
 
@@ -18,15 +21,18 @@ public class KerberosTestDto extends AbstractCloudbreakTestDto<KerberosV4Request
 
     public static final String DEFAULT_ADMIN_PASSWORD = "password";
 
+    @Inject
+    private KerberosTestClient kerberosTestClient;
+
     public KerberosTestDto(TestContext testContext) {
-        super(new KerberosV4Request(), testContext);
+        super(new CreateKerberosConfigRequest(), testContext);
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
+        LOGGER.info("Cleaning up kerberos config with name: {}", getName());
         try {
-            cloudbreakClient.getCloudbreakClient().kerberosConfigV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), getName());
+            when(kerberosTestClient.deleteV1());
         } catch (WebApplicationException ignore) {
             LOGGER.info("Something happend during the kerberos resource delete operation.");
         }
@@ -38,11 +44,17 @@ public class KerberosTestDto extends AbstractCloudbreakTestDto<KerberosV4Request
     }
 
     @Override
-    public KerberosTestDto valid() {
-        return withName(resourceProperyProvider().getName());
+    public String getName() {
+        return getRequest().getEnvironmentCrn();
     }
 
-    public KerberosTestDto withRequest(KerberosV4Request request) {
+    @Override
+    public KerberosTestDto valid() {
+        String name = resourceProperyProvider().getName();
+        return withName(name).withEnvironment(EnvironmentTestDto.class);
+    }
+
+    public KerberosTestDto withRequest(CreateKerberosConfigRequest request) {
         setRequest(request);
         return this;
     }
@@ -51,6 +63,24 @@ public class KerberosTestDto extends AbstractCloudbreakTestDto<KerberosV4Request
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    public KerberosTestDto withEnvironmentCrn(String environmentCrn) {
+        getRequest().setEnvironmentCrn(environmentCrn);
+        return this;
+
+    }
+
+    public KerberosTestDto withEnvironment(Class<EnvironmentTestDto> environmentKey) {
+        return withEnvironmentKey(environmentKey.getSimpleName());
+    }
+
+    public KerberosTestDto withEnvironmentKey(String environmentKey) {
+        EnvironmentTestDto env = getTestContext().get(environmentKey);
+        if (env == null) {
+            throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
+        }
+        return withEnvironmentCrn(env.getResponse().getCrn());
     }
 
     public KerberosTestDto withActiveDirectoryDescriptor() {

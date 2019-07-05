@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
@@ -138,16 +137,9 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateKerberosConfigAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(KerberosTestDto.class)
-                .when(kerberosTestClient.createV4())
-                .when(kerberosTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .when(kerberosTestClient.createV1())
+                .when(kerberosTestClient.describeV1(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
-    }
-
-    private KerberosTestDto getByName(TestContext testContext, KerberosTestDto entity, CloudbreakClient cloudbreakClient) {
-        entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().kerberosConfigV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName())
-        );
-        return entity;
     }
 }
