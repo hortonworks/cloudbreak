@@ -110,9 +110,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
         } catch (Exception ex) {
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(),
-                    environmentDto.getName(),
-                    ex,
-                    environmentDto.getResourceCrn());
+                    environmentDto.getName(), ex, environmentDto.getResourceCrn());
             eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
         }
     }
@@ -124,19 +122,17 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             if (freeIpa.getStatus().equals(CREATE_IN_PROGRESS)) {
                 awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
             }
-        } catch (Exception e) {
-            if (e instanceof NotFoundException) {
-                LOGGER.info("FreeIpa for environmentCrn '{}' was not found, creating a new one. Message: {}", environment.getResourceCrn(), e.getMessage());
-                CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
-                freeIpaV1Endpoint.create(createFreeIpaRequest);
-                awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
-                AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(createFreeIpaRequest, environmentDto);
-                if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
-                    freeIpaV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
-                }
-            } else {
-                throw new CloudbreakException("Failed to create FreeIpa instance.", e);
+        } catch (NotFoundException nfe) {
+            LOGGER.info("FreeIpa for environmentCrn '{}' was not found, creating a new one. Message: {}", environment.getResourceCrn(), nfe.getMessage());
+            CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
+            freeIpaV1Endpoint.create(createFreeIpaRequest);
+            awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
+            AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(createFreeIpaRequest, environmentDto);
+            if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
+                freeIpaV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
             }
+        } catch (Exception e) {
+            throw new CloudbreakException("Failed to create FreeIpa instance.", e);
         }
     }
 
