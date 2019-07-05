@@ -3,6 +3,7 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
@@ -76,8 +78,8 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
                 SecurityRuleV4Request securityRule = new SecurityRuleV4Request();
                 securityRule.setProtocol("tcp");
                 securityRule.setPorts(getPorts(type));
-                setupSecurityAccess(type, securityAccess, securityGroup, securityRule);
                 securityGroup.setSecurityRules(List.of(securityRule));
+                setupSecurityAccess(type, securityAccess, securityGroup);
                 return securityGroup;
             }
             return null;
@@ -93,27 +95,29 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         return ret;
     }
 
-    private void setupSecurityAccess(InstanceGroupType type,
-            SecurityAccessResponse securityAccess,
-            SecurityGroupV4Request securityGroup,
-            SecurityRuleV4Request securityRule) {
+    private void setupSecurityAccess(InstanceGroupType type, SecurityAccessResponse securityAccess, SecurityGroupV4Request securityGroup) {
         String securityGroupIdForKnox = securityAccess.getSecurityGroupIdForKnox();
         String defaultSecurityGroupId = securityAccess.getDefaultSecurityGroupId();
         String cidr = securityAccess.getCidr();
         if (type == InstanceGroupType.GATEWAY) {
-            setSecurityAccess(securityGroup, securityRule, securityGroupIdForKnox, cidr);
+            setSecurityAccess(securityGroup, securityGroupIdForKnox, cidr);
         } else {
-            setSecurityAccess(securityGroup, securityRule, defaultSecurityGroupId, cidr);
+            setSecurityAccess(securityGroup, defaultSecurityGroupId, cidr);
         }
     }
 
-    private void setSecurityAccess(SecurityGroupV4Request securityGroup, SecurityRuleV4Request securityRule, String securityGroupId, String cidr) {
-        if (securityGroupId != null) {
+    private void setSecurityAccess(SecurityGroupV4Request securityGroup, String securityGroupId, String cidr) {
+        if (!Strings.isNullOrEmpty(securityGroupId)) {
             securityGroup.setSecurityGroupIds(Set.of(securityGroupId));
-            securityRule.setSubnet(null);
-        } else if (cidr != null) {
-            securityRule.setSubnet(cidr);
-            securityGroup.setSecurityGroupIds(null);
+            securityGroup.setSecurityRules(new ArrayList<>());
+        } else if (!Strings.isNullOrEmpty(cidr)) {
+            for (SecurityRuleV4Request securityRule : securityGroup.getSecurityRules()) {
+                securityRule.setSubnet(cidr);
+            }
+            securityGroup.setSecurityGroupIds(new HashSet<>());
+        } else {
+            securityGroup.setSecurityRules(new ArrayList<>());
+            securityGroup.setSecurityGroupIds(new HashSet<>());
         }
     }
 }

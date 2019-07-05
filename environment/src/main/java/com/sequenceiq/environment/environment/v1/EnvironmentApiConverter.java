@@ -80,6 +80,13 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
 
+        // TODO temporary until CCM not really integrated
+        if (request.getSecurityAccess() == null) {
+            SecurityAccessDto securityAccess = SecurityAccessDto.builder()
+                    .withCidr("0.0.0.0/0")
+                    .build();
+            builder.withSecurityAccess(securityAccess);
+        }
         return builder.build();
     }
 
