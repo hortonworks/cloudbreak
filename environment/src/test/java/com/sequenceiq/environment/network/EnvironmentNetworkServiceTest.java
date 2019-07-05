@@ -1,21 +1,21 @@
 package com.sequenceiq.environment.network;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
@@ -38,8 +38,8 @@ import com.sequenceiq.environment.network.service.NetworkCreationRequestFactory;
 import com.sequenceiq.environment.network.v1.converter.AwsEnvironmentNetworkConverter;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 
-@RunWith(MockitoJUnitRunner.class)
-public class EnvironmentNetworkServiceTest {
+@ExtendWith(MockitoExtension.class)
+class EnvironmentNetworkServiceTest {
 
     private static final String CLOUD_PLATFORM = "AZURE";
 
@@ -67,14 +67,14 @@ public class EnvironmentNetworkServiceTest {
             credentialToCloudCredentialConverter
     );
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void before() {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
     }
 
     @Test
-    public void testCreateNetworkShouldReturnWithANewNetwork() {
+    void testCreateNetworkShouldReturnWithANewNetwork() {
         EnvironmentDto environmentDto = EnvironmentDto.builder().withCloudPlatform(CLOUD_PLATFORM).build();
         BaseNetwork baseNetwork = new AwsNetwork();
         NetworkCreationRequest networkCreationRequest = new NetworkCreationRequest.Builder().build();
@@ -98,7 +98,7 @@ public class EnvironmentNetworkServiceTest {
     }
 
     @Test
-    public void testDeleteNetworkShouldDeleteTheNetwork() {
+    void testDeleteNetworkShouldDeleteTheNetwork() {
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
         EnvironmentDto environmentDto = createEnvironmentDto(null);
 
@@ -118,7 +118,7 @@ public class EnvironmentNetworkServiceTest {
     }
 
     @Test
-    public void testDeleteNetworkShouldDeleteTheNetworkWithResourceGroup() {
+    void testDeleteNetworkShouldDeleteTheNetworkWithResourceGroup() {
         CloudCredential cloudCredential = new CloudCredential("1", "credName");
         EnvironmentDto environmentDto = createEnvironmentDto("resourceGroup");
 

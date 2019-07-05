@@ -19,12 +19,12 @@ import com.openpojo.validation.rule.impl.SetterMustExistRule;
 import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
 
-public class DomainTest {
+class DomainTest {
 
     private static final String MODEL_PACKAGE = "com.sequenceiq.environment.environment.domain";
 
     @Test
-    public void testPojoStructureAndBehavior() {
+    void testPojoStructureAndBehavior() {
         List<PojoClass> pojoClasses = PojoClassFactory.getPojoClasses(MODEL_PACKAGE, new FilterNonConcrete());
 
         Validator validator = ValidatorBuilder.create()

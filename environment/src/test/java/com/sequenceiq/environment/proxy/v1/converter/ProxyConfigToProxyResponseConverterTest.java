@@ -17,7 +17,7 @@ import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.v1.ProxyTestSource;
 
-public class ProxyConfigToProxyResponseConverterTest extends ProxyConfigToProxyResponseConverter {
+class ProxyConfigToProxyResponseConverterTest extends ProxyConfigToProxyResponseConverter {
 
     public ConversionService getConversionService() {
         ConversionService conversionService = mock(ConversionService.class);
@@ -28,42 +28,42 @@ public class ProxyConfigToProxyResponseConverterTest extends ProxyConfigToProxyR
     }
 
     @Test
-    public void testConvertCrn() {
+    void testConvertCrn() {
         Assertions.assertEquals(ProxyTestSource.RESCRN, convertSourceProxyConfig().getCrn());
     }
 
     @Test
-    public void testConvertCreator() {
+    void testConvertCreator() {
         Assertions.assertEquals(ProxyTestSource.CREATOR, convertSourceProxyConfig().getCreator());
     }
 
     @Test
-    public void testConvertDescription() {
+    void testConvertDescription() {
         Assertions.assertEquals(DESCRIPTION, convertSourceProxyConfig().getDescription());
     }
 
     @Test
-    public void testConvertHost() {
+    void testConvertHost() {
         Assertions.assertEquals(SERVER_HOST, convertSourceProxyConfig().getHost());
     }
 
     @Test
-    public void testConvertProtocol() {
+    void testConvertProtocol() {
         Assertions.assertEquals(PROTOCOL, convertSourceProxyConfig().getProtocol());
     }
 
     @Test
-    public void testConvertName() {
+    void testConvertName() {
         Assertions.assertEquals(NAME, convertSourceProxyConfig().getName());
     }
 
     @Test
-    public void testConvertPort() {
+    void testConvertPort() {
         Assertions.assertEquals(SERVER_PORT, convertSourceProxyConfig().getPort());
     }
 
     @Test
-    public void testConvertCredentials() {
+    void testConvertCredentials() {
         ProxyResponse result = convertEncodedProxyConfig();
         Assertions.assertEquals(ProxyTestSource.USERNAME, result.getUserName().getSecretPath());
         Assertions.assertEquals(ProxyTestSource.PASSWORD, result.getPassword().getSecretPath());

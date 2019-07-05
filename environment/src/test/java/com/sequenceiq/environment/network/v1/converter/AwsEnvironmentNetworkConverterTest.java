@@ -1,16 +1,16 @@
 package com.sequenceiq.environment.network.v1.converter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
@@ -25,8 +25,8 @@ import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AwsEnvironmentNetworkConverterTest {
+@ExtendWith(MockitoExtension.class)
+class AwsEnvironmentNetworkConverterTest {
 
     private static final String LOCATION = "eu-west";
 
@@ -61,7 +61,7 @@ public class AwsEnvironmentNetworkConverterTest {
     private AwsEnvironmentNetworkConverter underTest = new AwsEnvironmentNetworkConverter();
 
     @Test
-    public void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {
+    void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {
         Environment environment = createEnvironment();
         NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
                 .withAws(AwsParams.AwsParamsBuilder.anAwsParams().withVpcId(VPC_ID).build())
@@ -84,7 +84,7 @@ public class AwsEnvironmentNetworkConverterTest {
     }
 
     @Test
-    public void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDtoWhenOptionalFieldsAreNotPresent() {
+    void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDtoWhenOptionalFieldsAreNotPresent() {
         Environment environment = createEnvironment();
         NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
                 .withNetworkCidr(NETWORK_CIDR)
@@ -105,7 +105,7 @@ public class AwsEnvironmentNetworkConverterTest {
     }
 
     @Test
-    public void testConvertToDtoShouldConvertABaseNetworkIntoANetworkDto() {
+    void testConvertToDtoShouldConvertABaseNetworkIntoANetworkDto() {
         AwsNetwork awsNetwork = createAwsNetwork();
 
         NetworkDto actual = underTest.convertToDto(awsNetwork);
@@ -122,7 +122,7 @@ public class AwsEnvironmentNetworkConverterTest {
     }
 
     @Test
-    public void testSetProviderSpecificNetworkShouldPopulateTheExistingNetworkWithTheNewNetworkData() {
+    void testSetProviderSpecificNetworkShouldPopulateTheExistingNetworkWithTheNewNetworkData() {
         BaseNetwork awsNetwork = new AwsNetwork();
         Set<CreatedSubnet> createdSubnets = createCreatedSubnets();
         CreatedCloudNetwork createdCloudNetwork = new CreatedCloudNetwork("network-1", VPC_ID, createdSubnets);
@@ -178,6 +178,7 @@ public class AwsEnvironmentNetworkConverterTest {
         AwsNetwork awsNetwork = new AwsNetwork();
         awsNetwork.setId(1L);
         awsNetwork.setName("network-1");
+        awsNetwork.setSubnetIds(Set.of(SUBNET_1, SUBNET_2, SUBNET_3));
         awsNetwork.setSubnetMetas(Map.of(SUBNET_1, new CloudSubnet(), SUBNET_2, new CloudSubnet(), SUBNET_3, new CloudSubnet()));
         awsNetwork.setNetworkCidr(NETWORK_CIDR);
         awsNetwork.setResourceCrn("crn");

@@ -6,36 +6,37 @@ import org.junit.jupiter.api.Test;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.environment.proxy.v1.ProxyTestSource;
 
-public class ProxyConfigToProxyRequestConverterTest extends ProxyConfigToProxyRequestConverter {
+class ProxyConfigToProxyRequestConverterTest extends ProxyConfigToProxyRequestConverter {
+
     @Test
-    public void testConvertCredentialAreMasked() {
+    void testConvertCredentialAreMasked() {
         ProxyRequest result = converProxyConfig();
         Assertions.assertEquals(FAKE_USERNAME, result.getUserName());
         Assertions.assertEquals(FAKE_PASSWORD, result.getPassword());
     }
 
     @Test
-    public void testConvertName() {
+    void testConvertName() {
         Assertions.assertEquals(ProxyTestSource.NAME, converProxyConfig().getName());
     }
 
     @Test
-    public void testConvertDescription() {
+    void testConvertDescription() {
         Assertions.assertEquals(ProxyTestSource.DESCRIPTION, converProxyConfig().getDescription());
     }
 
     @Test
-    public void testConvertHost() {
+    void testConvertHost() {
         Assertions.assertEquals(ProxyTestSource.SERVER_HOST, converProxyConfig().getHost());
     }
 
     @Test
-    public void testConvertProtocol() {
+    void testConvertProtocol() {
         Assertions.assertEquals(ProxyTestSource.PROTOCOL, converProxyConfig().getProtocol());
     }
 
     @Test
-    public void testConvertPort() {
+    void testConvertPort() {
         Assertions.assertEquals(ProxyTestSource.SERVER_PORT, converProxyConfig().getPort());
     }
 

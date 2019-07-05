@@ -1,18 +1,18 @@
 package com.sequenceiq.environment.network.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
@@ -23,8 +23,8 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
-@RunWith(MockitoJUnitRunner.class)
-public class NetworkCreationRequestFactoryTest {
+@ExtendWith(MockitoExtension.class)
+class NetworkCreationRequestFactoryTest {
 
     private static final String REGION = "us-west-1";
 
@@ -47,7 +47,7 @@ public class NetworkCreationRequestFactoryTest {
     private final NetworkCreationRequestFactory underTest = new NetworkCreationRequestFactory(subnetCidrProvider, credentialToCloudCredentialConverter);
 
     @Test
-    public void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsAreNotPresent() {
+    void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsAreNotPresent() {
         EnvironmentDto environmentDto = createEnvironmentDtoWithoutAureParams().build();
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
@@ -70,7 +70,7 @@ public class NetworkCreationRequestFactoryTest {
     }
 
     @Test
-    public void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsArePresent() {
+    void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsArePresent() {
         EnvironmentDto environmentDto = createEnvironmentDtoWithAureParams().build();
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
