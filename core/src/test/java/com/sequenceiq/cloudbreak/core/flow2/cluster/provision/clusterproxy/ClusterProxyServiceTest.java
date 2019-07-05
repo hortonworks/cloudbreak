@@ -78,10 +78,8 @@ public class ClusterProxyServiceTest {
 
     @Test
     public void shouldRegisterProxyConfigurationWithClusterProxy() throws URISyntaxException, JsonProcessingException {
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStack());
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
-        response.setId("123");
-        response.setKey("X509PublicKey");
+        response.setX509Unwrapped("X509PublicKey");
         mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REGISTER_CONFIG_PATH)))
                 .andExpect(content().json(configRegistrationRequest()))
                 .andExpect(method(HttpMethod.POST))
@@ -89,17 +87,15 @@ public class ClusterProxyServiceTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(JsonUtil.writeValueAsStringSilent(response)));
 
-        ConfigRegistrationResponse registrationResponse = service.registerCluster(STACK_ID);
-        assertEquals("123", registrationResponse.getId());
-        assertEquals("X509PublicKey", registrationResponse.getKey());
+        ConfigRegistrationResponse registrationResponse = service.registerCluster(testStack());
+        assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
     }
 
     @Test
     public void shouldFailIfVaultSecretIsInvalid() throws URISyntaxException {
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithInvalidSecret());
         mockServer.expect(never(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REGISTER_CONFIG_PATH)));
 
-        assertThrows(VaultConfigException.class, () -> service.registerCluster(STACK_ID));
+        assertThrows(VaultConfigException.class, () -> service.registerCluster(testStackWithInvalidSecret()));
     }
 
     @Test

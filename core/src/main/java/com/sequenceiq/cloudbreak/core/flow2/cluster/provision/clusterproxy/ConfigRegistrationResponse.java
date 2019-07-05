@@ -1,28 +1,28 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
 
-class ConfigRegistrationResponse {
-    private String id;
+public class ConfigRegistrationResponse {
+    private String result;
 
-    private String key;
+    private String x509Unwrapped;
 
-    public String getId() {
-        return id;
+    public String getResult() {
+        return result;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setResult(String result) {
+        this.result = result;
     }
 
-    public String getKey() {
-        return key;
+    public String getX509Unwrapped() {
+        return x509Unwrapped;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setX509Unwrapped(String x509Unwrapped) {
+        this.x509Unwrapped = x509Unwrapped;
     }
 
     @Override
     public String toString() {
-        return "ConfigRegistrationResponse{id='" + id + '\'' + ", key='" + key + '\'' + '}';
+        return "ConfigRegistrationResponse{result='" + result + '\'' + ", x509Unwrapped='" + x509Unwrapped + '\'' + '}';
     }
 }
