@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -78,7 +79,8 @@ public class StackTerminationService {
             datalakeResourcesService.findByDatalakeStackId(stack.getId()).ifPresent(datalakeResources ->
                     datalakeResourcesService.deleteWithMdcContextRestore(datalakeResources));
         }
-        executorService.execute(new CleanupFreeIpaTask(stack, freeIpaV1Endpoint, threadBasedUserCrnProvider, threadBasedUserCrnProvider.getUserCrn()));
+        executorService.execute(new CleanupFreeIpaTask(stack, freeIpaV1Endpoint, threadBasedUserCrnProvider, threadBasedUserCrnProvider.getUserCrn(),
+                MDCBuilder.getMdcContextMap()));
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }
 
