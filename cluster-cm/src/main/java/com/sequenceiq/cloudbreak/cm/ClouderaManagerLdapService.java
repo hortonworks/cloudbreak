@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -42,12 +43,18 @@ public class ClouderaManagerLdapService {
             ApiAuthRoleMetadataList roleMetadataList = authRolesResourceApi.readAuthRolesMetadata(null);
             if (roleMetadataList.getItems() != null) {
                 Optional<ApiAuthRoleMetadata> adminMetadata = roleMetadataList.getItems().stream().filter(rm -> "ROLE_ADMIN".equals(rm.getRole())).findFirst();
-                if (adminMetadata.isPresent()) {
+                if (adminMetadata.isPresent() && StringUtils.isNotBlank(ldapView.getAdminGroup())) {
                     addGroupMapping(ldapView, externalUserMappingsResourceApi, adminMetadata.get(), ldapView.getAdminGroup());
+                } else {
+                    LOGGER.info("Cannot setup admin group mapping. Admin metadata present: [{}] Admin group: [{}]",
+                            adminMetadata.isPresent(), ldapView.getAdminGroup());
                 }
                 Optional<ApiAuthRoleMetadata> userMetadata = roleMetadataList.getItems().stream().filter(rm -> "ROLE_USER".equals(rm.getRole())).findFirst();
-                if (userMetadata.isPresent()) {
+                if (userMetadata.isPresent() && StringUtils.isNotBlank(ldapView.getUserGroup())) {
                     addGroupMapping(ldapView, externalUserMappingsResourceApi, userMetadata.get(), ldapView.getUserGroup());
+                } else {
+                    LOGGER.info("Cannot setup user group mapping. User metadata present: [{}] User group: [{}]",
+                            userMetadata.isPresent(), ldapView.getUserGroup());
                 }
             }
         }

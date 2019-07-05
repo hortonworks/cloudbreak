@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -27,17 +29,22 @@ public class CleanupFreeIpaTask implements Runnable {
 
     private final String userCrn;
 
+    private final Map<String, String> mdcContextMap;
+
     private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
-    public CleanupFreeIpaTask(Stack stack, FreeIpaV1Endpoint freeIpaV1Endpoint, ThreadBasedUserCrnProvider threadBasedUserCrnProvider, String userCrn) {
+    public CleanupFreeIpaTask(Stack stack, FreeIpaV1Endpoint freeIpaV1Endpoint, ThreadBasedUserCrnProvider threadBasedUserCrnProvider, String userCrn,
+            Map<String, String> mdcContextMap) {
         this.stack = stack;
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.userCrn = userCrn;
+        this.mdcContextMap = mdcContextMap;
     }
 
     @Override
     public void run() {
+        MDCBuilder.buildMdcContextFromMap(mdcContextMap);
         threadBasedUserCrnProvider.setUserCrn(userCrn);
         Set<String> fqdns = stack.getInstanceMetaDataAsList().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
         CleanupRequest cleanupRequest = new CleanupRequest();
