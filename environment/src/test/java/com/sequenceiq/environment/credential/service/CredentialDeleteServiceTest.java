@@ -34,7 +34,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.notification.Notification;
 import com.sequenceiq.notification.NotificationSender;
 
-public class CredentialDeleteServiceTest {
+class CredentialDeleteServiceTest {
 
     private static final String ACCOUNT_ID = "1";
 
@@ -53,13 +53,13 @@ public class CredentialDeleteServiceTest {
     private EnvironmentViewService environmentViewService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.initMocks(this);
         underTest = new CredentialDeleteService(repository, notificationSender, messagesService, environmentViewService, Set.of("AWS", "AZURE", "YARN"));
     }
 
     @Test
-    public void testMultipleIfAllTheCredentialsAreExistsAndAbleToArchiveThenExpectedCredentialsAreComingBack() {
+    void testMultipleIfAllTheCredentialsAreExistsAndAbleToArchiveThenExpectedCredentialsAreComingBack() {
         String firstCredentialName = "first";
         String secondCredentialName = "second";
         Credential firstCred = createCredentialWithName(firstCredentialName);
@@ -86,7 +86,7 @@ public class CredentialDeleteServiceTest {
     }
 
     @Test
-    public void testMultipleIfOneOfTheCredentialsIsNotExistsThenNotFoundExceptionComes() {
+    void testMultipleIfOneOfTheCredentialsIsNotExistsThenNotFoundExceptionComes() {
         when(repository.findByNameAndAccountId(anyString(), anyString(), any(Set.class))).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> underTest.deleteMultiple(Set.of("someCredNameWhichDoesNotExists"), ACCOUNT_ID));
 
@@ -96,7 +96,7 @@ public class CredentialDeleteServiceTest {
     }
 
     @Test
-    public void testMultipleWhenEnvironmentStillUsesTheCredentialThenBadRequestShouldCome() {
+    void testMultipleWhenEnvironmentStillUsesTheCredentialThenBadRequestShouldCome() {
         String name = "something";
         Credential cred = createCredentialWithName(name);
         cred.setId(1L);
@@ -112,7 +112,7 @@ public class CredentialDeleteServiceTest {
     }
 
     @Test
-    public void testWhenCredentialDeleteIsSuccessfulThenNotificationShouldBeSent() {
+    void testWhenCredentialDeleteIsSuccessfulThenNotificationShouldBeSent() {
         Credential cred = createCredentialWithName("first");
         when(repository.findByNameAndAccountId(eq(cred.getName()), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(cred));
         when(repository.save(cred)).thenReturn(cred);

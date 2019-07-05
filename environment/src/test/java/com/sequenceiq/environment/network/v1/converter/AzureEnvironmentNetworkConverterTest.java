@@ -1,16 +1,16 @@
 package com.sequenceiq.environment.network.v1.converter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
@@ -24,8 +24,8 @@ import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AzureEnvironmentNetworkConverterTest {
+@ExtendWith(MockitoExtension.class)
+class AzureEnvironmentNetworkConverterTest {
 
     private static final String LOCATION = "eu-west";
 
@@ -62,7 +62,7 @@ public class AzureEnvironmentNetworkConverterTest {
     private AzureEnvironmentNetworkConverter underTest = new AzureEnvironmentNetworkConverter();
 
     @Test
-    public void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {
+    void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {
         Environment environment = createEnvironment();
         NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
                 .withAzure(AzureParams.AzureParamsBuilder.anAzureParams()
@@ -93,7 +93,7 @@ public class AzureEnvironmentNetworkConverterTest {
     }
 
     @Test
-    public void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDtoWhenOptionalFieldsAreNotPresent() {
+    void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDtoWhenOptionalFieldsAreNotPresent() {
         Environment environment = createEnvironment();
         NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
                 .withNetworkCidr(NETWORK_CIDR)
@@ -117,7 +117,7 @@ public class AzureEnvironmentNetworkConverterTest {
     }
 
     @Test
-    public void testConvertToDtoShouldConvertABaseNetworkIntoANetworkDto() {
+    void testConvertToDtoShouldConvertABaseNetworkIntoANetworkDto() {
         AzureNetwork azureNetwork = createAzureNetwork();
 
         NetworkDto actual = underTest.convertToDto(azureNetwork);
@@ -134,7 +134,7 @@ public class AzureEnvironmentNetworkConverterTest {
     }
 
     @Test
-    public void testSetProviderSpecificNetworkShouldPopulateTheExistingNetworkWithTheNewNetworkData() {
+    void testSetProviderSpecificNetworkShouldPopulateTheExistingNetworkWithTheNewNetworkData() {
         AzureNetwork azureNetwork = new AzureNetwork();
         Set<CreatedSubnet> createdSubnets = createCreatedSubnets();
         Map<String, Object> properties = Map.of("resourceGroupName", RESOURCE_GROUP_NAME);
@@ -193,6 +193,7 @@ public class AzureEnvironmentNetworkConverterTest {
         AzureNetwork azureNetwork = new AzureNetwork();
         azureNetwork.setId(1L);
         azureNetwork.setName("network-1");
+        azureNetwork.setSubnetIds(Set.of(SUBNET_1, SUBNET_2, SUBNET_3));
         azureNetwork.setSubnetMetas(Map.of(SUBNET_1, new CloudSubnet(), SUBNET_2, new CloudSubnet(), SUBNET_3, new CloudSubnet()));
         azureNetwork.setNetworkCidr(NETWORK_CIDR);
         azureNetwork.setResourceCrn("crn");

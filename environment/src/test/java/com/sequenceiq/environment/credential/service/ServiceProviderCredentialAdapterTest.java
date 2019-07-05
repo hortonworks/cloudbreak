@@ -35,7 +35,7 @@ import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
 
-public class ServiceProviderCredentialAdapterTest {
+class ServiceProviderCredentialAdapterTest {
 
     private static final String ACCOUNT_ID = "anAccountID";
 
@@ -83,7 +83,7 @@ public class ServiceProviderCredentialAdapterTest {
     private InitCodeGrantFlowResponse initCodeGrantFlowResponse;
 
     @BeforeEach
-    public void setUp() throws InterruptedException {
+    void setUp() throws InterruptedException {
         MockitoAnnotations.initMocks(this);
         when(credential.getId()).thenReturn(CREDENTIAL_ID);
         when(credential.getName()).thenReturn(CREDENTIAL_NAME);
@@ -95,7 +95,7 @@ public class ServiceProviderCredentialAdapterTest {
     }
 
     @Test
-    public void testInitCodeGrantFlowWhenInitCodeGrantFlowRequestFailsOnAwaitWithInterruptedExceptionThenOperationExceptionComes() throws InterruptedException {
+    void testInitCodeGrantFlowWhenInitCodeGrantFlowRequestFailsOnAwaitWithInterruptedExceptionThenOperationExceptionComes() throws InterruptedException {
         doThrow(new InterruptedException("Error while executing initialization of authorization code grant based credential creation:"))
                 .when(initCodeGrantFlowRequest).await();
 
@@ -105,7 +105,7 @@ public class ServiceProviderCredentialAdapterTest {
     }
 
     @Test
-    public void testInitCodeGrantFlowWhenInitCodeGrantFlowResponseStatusIsOkThenBadRequestExceptionComes() {
+    void testInitCodeGrantFlowWhenInitCodeGrantFlowResponseStatusIsOkThenBadRequestExceptionComes() {
         Exception exceptionFromResponse = new RuntimeException("some reason");
         when(initCodeGrantFlowResponse.getErrorDetails()).thenReturn(exceptionFromResponse);
         when(initCodeGrantFlowResponse.getStatus()).thenReturn(EventStatus.FAILED);
@@ -116,7 +116,7 @@ public class ServiceProviderCredentialAdapterTest {
     }
 
     @Test
-    public void testInitCodeGrantFlowShouldAddAdditionalAttributesToAzureCodeGrantFlowAttributes() {
+    void testInitCodeGrantFlowShouldAddAdditionalAttributesToAzureCodeGrantFlowAttributes() {
         String expectedAdditionalAttributeKey = "someCloudCredentialKey";
         String expectedAdditionalAttributeValue = "someCloudCredentialValue";
         String initialAttributeKey = "aKey";
