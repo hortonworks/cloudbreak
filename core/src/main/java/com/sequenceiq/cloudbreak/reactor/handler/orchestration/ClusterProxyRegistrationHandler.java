@@ -69,7 +69,6 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
                         cluster.getId(), stack.getEnvironmentCrn());
                 Gateway gateway = cluster.getGateway();
                 gateway.setTokenCert(registerResponse.getX509Unwrapped());
-                gateway.setSsoType(SSOType.SSO_PROVIDER);
                 gatewayService.save(gateway);
             }
             return new ClusterProxyRegistrationSuccess(request.getResourceId());
