@@ -83,6 +83,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSharedService(sdxConverter.getSharedService(source.getSdx(), environment.getCrn()));
         request.setCustomDomain(null);
+        request.setTimeToLive(source.getTimeToLive());
         return request;
     }
 
@@ -112,6 +113,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSharedService(getIfNotNull(source.getSdx(), sdxConverter::getSharedService));
+        request.setTimeToLive(source.getTimeToLive());
         return request;
     }
 

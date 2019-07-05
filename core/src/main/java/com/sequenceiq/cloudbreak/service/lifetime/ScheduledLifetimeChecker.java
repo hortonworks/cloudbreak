@@ -35,6 +35,8 @@ public class ScheduledLifetimeChecker {
         stackService.getAllAlive().forEach(stack ->
                 getStackTimeToLive(stack).ifPresent(ttl -> {
                     if (isInDeletableStatus(stack) && isExceeded(stack.getCluster().getCreationFinished(), ttl.toMillis())) {
+                        LOGGER.info("Stack is exceeded at {}ms because is in deletable status and ttl is expired, ttl: {}",
+                                stack.getCluster().getCreationFinished() + ttl.toMillis(), ttl.toMillis());
                         terminateStack(stack);
                     }
                 }));
