@@ -59,9 +59,6 @@ type SimpleEnvironmentV1Response struct {
 	// Regions of the environment.
 	Regions *CompactRegionV1Response `json:"regions,omitempty"`
 
-	// Security control for FreeIPA and Datalake deployment.
-	SecurityAccess *SecurityAccessV1Response `json:"securityAccess,omitempty"`
-
 	// status reason
 	StatusReason string `json:"statusReason,omitempty"`
 
@@ -94,10 +91,6 @@ func (m *SimpleEnvironmentV1Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRegions(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateSecurityAccess(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -269,24 +262,6 @@ func (m *SimpleEnvironmentV1Response) validateRegions(formats strfmt.Registry) e
 		if err := m.Regions.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("regions")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *SimpleEnvironmentV1Response) validateSecurityAccess(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.SecurityAccess) { // not required
-		return nil
-	}
-
-	if m.SecurityAccess != nil {
-		if err := m.SecurityAccess.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("securityAccess")
 			}
 			return err
 		}

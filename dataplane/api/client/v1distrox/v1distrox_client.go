@@ -175,7 +175,7 @@ func (a *Client) GetDistroXV1(params *GetDistroXV1Params) (*GetDistroXV1OK, erro
 }
 
 /*
-ListDistroXV1 lists stacks
+ListDistroXV1 lists stacks by environment crn
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */

@@ -233,7 +233,7 @@ func (a *Client) GetStackRequestFromNameV4(params *GetStackRequestFromNameV4Para
 }
 
 /*
-ListStackInWorkspaceV4 lists stacks for the given workspace
+ListStackInWorkspaceV4 lists stacks for the given workspace and environment name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */

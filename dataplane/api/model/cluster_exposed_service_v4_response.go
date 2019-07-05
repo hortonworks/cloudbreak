@@ -26,7 +26,7 @@ type ClusterExposedServiceV4Response struct {
 	KnoxService string `json:"knoxService,omitempty"`
 
 	// mode
-	// Enum: [SSO_PROVIDER NONE]
+	// Enum: [SSO_PROVIDER SSO_PROVIDER_FROM_UMS NONE]
 	Mode string `json:"mode,omitempty"`
 
 	// open
@@ -57,7 +57,7 @@ var clusterExposedServiceV4ResponseTypeModePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["SSO_PROVIDER","NONE"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["SSO_PROVIDER","SSO_PROVIDER_FROM_UMS","NONE"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -69,6 +69,9 @@ const (
 
 	// ClusterExposedServiceV4ResponseModeSSOPROVIDER captures enum value "SSO_PROVIDER"
 	ClusterExposedServiceV4ResponseModeSSOPROVIDER string = "SSO_PROVIDER"
+
+	// ClusterExposedServiceV4ResponseModeSSOPROVIDERFROMUMS captures enum value "SSO_PROVIDER_FROM_UMS"
+	ClusterExposedServiceV4ResponseModeSSOPROVIDERFROMUMS string = "SSO_PROVIDER_FROM_UMS"
 
 	// ClusterExposedServiceV4ResponseModeNONE captures enum value "NONE"
 	ClusterExposedServiceV4ResponseModeNONE string = "NONE"
