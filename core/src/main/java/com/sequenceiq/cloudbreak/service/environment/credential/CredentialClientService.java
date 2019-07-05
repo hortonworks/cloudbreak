@@ -57,7 +57,7 @@ public class CredentialClientService {
             CredentialResponse credentialResponse = credentialEndpoint.getByEnvironmentCrn(envCrn);
             return credentialConverter.convert(credentialResponse);
         } catch (WebApplicationException e) {
-            String message = String.format("Failed to GET Credential by environment name: %s, due to: '%s' ", envCrn, e.getMessage());
+            String message = String.format("Failed to GET Credential by environment crn: %s, due to: '%s' ", envCrn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -31,6 +32,9 @@ public abstract class EnvironmentNetworkBase {
 
     @ApiModelProperty(EnvironmentModelDescription.AZURE_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkAzureParams azure;
+
+    @ApiModelProperty(EnvironmentModelDescription.YARN_SPECIFIC_PARAMETERS)
+    private EnvironmentNetworkYarnParams yarn;
 
     public Set<String> getSubnetIds() {
         return subnetIds;
@@ -62,5 +66,13 @@ public abstract class EnvironmentNetworkBase {
 
     public void setAzure(EnvironmentNetworkAzureParams azure) {
         this.azure = azure;
+    }
+
+    public EnvironmentNetworkYarnParams getYarn() {
+        return yarn;
+    }
+
+    public void setYarn(EnvironmentNetworkYarnParams yarn) {
+        this.yarn = yarn;
     }
 }
