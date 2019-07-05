@@ -5,6 +5,7 @@ ALTER TABLE environment
     ADD COLUMN securitygroup_id_default VARCHAR(255),
     ADD COLUMN cidr VARCHAR(43);
 
+UPDATE environment set cidr='0.0.0.0/0';
 
 -- //@UNDO
 

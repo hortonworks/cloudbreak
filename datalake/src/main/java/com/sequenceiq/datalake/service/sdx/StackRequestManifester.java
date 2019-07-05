@@ -3,7 +3,9 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -156,13 +159,18 @@ public class StackRequestManifester {
                 .ifPresent(ig -> {
                     SecurityGroupV4Request securityGroup = ig.getSecurityGroup();
                     if (securityGroup != null) {
-                        if (securityGroupId != null) {
+                        if (!Strings.isNullOrEmpty(securityGroupId)) {
                             securityGroup.setSecurityGroupIds(Set.of(securityGroupId));
-                        } else if (cidr != null) {
+                            securityGroup.setSecurityRules(new ArrayList<>());
+                        } else if (!Strings.isNullOrEmpty(cidr)) {
                             List<SecurityRuleV4Request> securityRules = securityGroup.getSecurityRules();
                             if (securityRules != null) {
                                 securityRules.forEach(sr -> sr.setSubnet(cidr));
                             }
+                            securityGroup.setSecurityGroupIds(new HashSet<>());
+                        } else {
+                            securityGroup.setSecurityGroupIds(new HashSet<>());
+                            securityGroup.setSecurityRules(new ArrayList<>());
                         }
                     }
                 });

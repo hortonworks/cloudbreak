@@ -6,6 +6,8 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -210,11 +213,16 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private void setSecurityAccess(SecurityAccessDto securityAccess, CreateFreeIpaRequest createFreeIpaRequest) {
         SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
-        if (securityAccess.getCidr() != null) {
+        if (!Strings.isNullOrEmpty(securityAccess.getCidr())) {
             SecurityRuleRequest securityRuleRequest = createSecurityRuleRequest(securityAccess.getCidr());
             securityGroupRequest.setSecurityRules(List.of(securityRuleRequest));
-        } else {
+            securityGroupRequest.setSecurityGroupIds(new HashSet<>());
+        } else if (!Strings.isNullOrEmpty(securityAccess.getDefaultSecurityGroupId())) {
             securityGroupRequest.setSecurityGroupIds(Set.of(securityAccess.getDefaultSecurityGroupId()));
+            securityGroupRequest.setSecurityRules(new ArrayList<>());
+        } else {
+            securityGroupRequest.setSecurityRules(new ArrayList<>());
+            securityGroupRequest.setSecurityGroupIds(new HashSet<>());
         }
         InstanceGroupRequest instanceGroupRequest = createInstanceGroupRequest(securityGroupRequest);
         createFreeIpaRequest.setInstanceGroups(List.of(instanceGroupRequest));
