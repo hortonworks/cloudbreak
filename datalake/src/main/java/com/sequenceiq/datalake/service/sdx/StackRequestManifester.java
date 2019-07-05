@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -32,8 +33,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Req
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -79,13 +80,17 @@ public class StackRequestManifester {
             }
             stackRequest.setEnvironmentCrn(sdxCluster.getEnvCrn());
 
-            if (!CloudPlatform.YARN.name().equals(environment.getCloudPlatform())
-                    && environment.getNetwork() != null
+            if (CloudPlatform.YARN.name().equals(environment.getCloudPlatform())) {
+                setupYarnDetails(environment, stackRequest);
+            }
+
+            if (environment.getNetwork() != null
                     && environment.getNetwork().getSubnetMetas() != null
                     && !environment.getNetwork().getSubnetMetas().isEmpty()) {
                 setupPlacement(environment, stackRequest);
                 setupNetwork(environment, stackRequest);
             }
+
             setupAuthentication(environment, stackRequest);
             setupSecurityAccess(environment, stackRequest);
             setupClusterRequest(stackRequest);
@@ -93,6 +98,18 @@ public class StackRequestManifester {
         } catch (IOException e) {
             LOGGER.error("Can not parse json to stack request");
             throw new IllegalStateException("Can not parse json to stack request", e);
+        }
+    }
+
+    private void setupYarnDetails(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
+        if (environment.getNetwork() == null
+                || environment.getNetwork().getYarn() == null
+                || environment.getNetwork().getYarn().getQueue() == null) {
+            throw new BadRequestException("There is no queue defined in your environment, please create a new yarn environment with queue");
+        } else {
+            YarnStackV4Parameters yarnStackV4Parameters = new YarnStackV4Parameters();
+            yarnStackV4Parameters.setYarnQueue(environment.getNetwork().getYarn().getQueue());
+            stackRequest.setYarn(yarnStackV4Parameters);
         }
     }
 
