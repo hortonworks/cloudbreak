@@ -619,8 +619,8 @@ public class ClusterService {
                     if (hg.getRecoveryMode() == RecoveryMode.MANUAL
                             && (repairMode == ManualClusterRepairMode.NODE_ID || repairedHostGroups.contains(hg.getName()))) {
                         for (HostMetadata hmd : hg.getHostMetadata()) {
-                            checkReattachSupportForGateways(inTransactionStack, repairWithReattach, cluster, hmd);
                             if (isRepairNeededForHost(repairMode, instanceHostNames, hmd)) {
+                                checkReattachSupportForGateways(inTransactionStack, repairWithReattach, cluster, hmd);
                                 checkDiskTypeSupported(inTransactionStack, repairWithReattach, hg);
                                 validateRepair(inTransactionStack, hmd, repairWithReattach);
                                 hostGroupToNodesMap.putIfAbsent(hg.getName(), nodesToRepair);
