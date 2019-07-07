@@ -101,7 +101,6 @@ func createSdx(cidr string, clusterShape string, envName string, c *cli.Context,
 	}
 
 	sdxRequest := &sdxModel.SdxClusterRequest{
-		AccessCidr:   &cidr,
 		ClusterShape: &clusterShape,
 		Environment:  &envName,
 		Tags:         nil,
@@ -118,7 +117,6 @@ func createSdx(cidr string, clusterShape string, envName string, c *cli.Context,
 
 func createInternalSdx(cidr string, clusterShape string, envName string, inputJson *sdxModel.StackV4Request, c *cli.Context, name string) {
 	SdxInternalRequest := &sdxModel.SdxInternalClusterRequest{
-		AccessCidr:     &cidr,
 		ClusterShape:   &clusterShape,
 		Environment:    &envName,
 		Tags:           nil,
