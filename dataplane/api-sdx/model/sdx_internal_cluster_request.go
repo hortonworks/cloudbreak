@@ -17,10 +17,6 @@ import (
 // swagger:model SdxInternalClusterRequest
 type SdxInternalClusterRequest struct {
 
-	// access cidr
-	// Required: true
-	AccessCidr *string `json:"accessCidr"`
-
 	// cloud storage
 	CloudStorage *SdxCloudStorageRequest `json:"cloudStorage,omitempty"`
 
@@ -43,10 +39,6 @@ type SdxInternalClusterRequest struct {
 func (m *SdxInternalClusterRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAccessCidr(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateCloudStorage(formats); err != nil {
 		res = append(res, err)
 	}
@@ -66,15 +58,6 @@ func (m *SdxInternalClusterRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *SdxInternalClusterRequest) validateAccessCidr(formats strfmt.Registry) error {
-
-	if err := validate.Required("accessCidr", "body", m.AccessCidr); err != nil {
-		return err
-	}
-
 	return nil
 }
 
