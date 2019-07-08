@@ -134,7 +134,7 @@ public class ClusterProxyServiceTest {
         ClusterServiceCredential credential1 = new ClusterServiceCredential("cbuser", "/cb/test-data/secret/cbpassword");
         ClusterServiceCredential credential2 = new ClusterServiceCredential("dpuser", "/cb/test-data/secret/dppassword");
         ClusterServiceConfig service = new ClusterServiceConfig("cloudera-manager",
-                List.of("https://10.10.10.10:9443"), asList(credential1, credential2));
+                List.of("https://10.10.10.10/clouderamanager"), asList(credential1, credential2));
         return JsonUtil.writeValueAsStringSilent(new ConfigRegistrationRequest("1000", List.of(service)));
     }
 
