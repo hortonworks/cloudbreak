@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -91,18 +91,25 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public Credential updateByAccountId(Credential credential, String accountId) {
-        Credential original = repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
-                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, credential.getName()));
-        if (!Objects.equals(credential.getCloudPlatform(), original.getCloudPlatform())) {
-            throw new BadRequestException("Modifying credential platform is forbidden");
-        }
+        Credential original = getCredentialAndValidateUpdate(credential, accountId);
         credential.setId(original.getId());
         credential.setAccountId(accountId);
         credential.setResourceCrn(original.getResourceCrn());
+        credential.setCreator(original.getCreator());
         Credential updated = repository.save(credentialAdapter.verify(credential, accountId));
         secretService.delete(original.getAttributesSecret());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED);
         return updated;
+    }
+
+    private Credential getCredentialAndValidateUpdate(Credential credential, String accountId) {
+        Credential original = repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
+                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, credential.getName()));
+        ValidationResult validationResult = credentialValidator.validateCredentialUpdate(original, credential);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        return original;
     }
 
     @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
