@@ -6,6 +6,8 @@ public class SdxClusterResponse {
 
     private String name;
 
+    private SdxClusterShape clusterShape;
+
     private SdxClusterStatusResponse status;
 
     private String statusReason;
@@ -48,6 +50,14 @@ public class SdxClusterResponse {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public SdxClusterShape getClusterShape() {
+        return clusterShape;
+    }
+
+    public void setClusterShape(SdxClusterShape clusterShape) {
+        this.clusterShape = clusterShape;
     }
 
     public String getEnvironmentName() {

@@ -31,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Component
 public class CloudProviderProxy implements CloudProvider {
@@ -160,7 +161,7 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public String getClusterShape() {
+    public SdxClusterShape getClusterShape() {
         return delegate.getClusterShape();
     }
 

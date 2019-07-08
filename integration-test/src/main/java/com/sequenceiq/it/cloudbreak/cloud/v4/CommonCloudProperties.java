@@ -5,6 +5,8 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
+
 @Configuration
 @ConfigurationProperties(prefix = "integrationtest")
 public class CommonCloudProperties {
@@ -19,7 +21,7 @@ public class CommonCloudProperties {
 
     private Map<String, String> tags;
 
-    private String clusterShape;
+    private SdxClusterShape clusterShape;
 
     private String imageCatalogName;
 
@@ -71,11 +73,11 @@ public class CommonCloudProperties {
         this.tags = tags;
     }
 
-    public String getClusterShape() {
+    public SdxClusterShape getClusterShape() {
         return clusterShape;
     }
 
-    public void setClusterShape(String clusterShape) {
+    public void setClusterShape(SdxClusterShape clusterShape) {
         this.clusterShape = clusterShape;
     }
 

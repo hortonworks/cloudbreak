@@ -28,7 +28,6 @@
         "roleConfigGroupsRefNames": [
           "ranger-RANGER_ADMIN-BASE",
           "hdfs-DATANODE-BASE",
-          "knox-KNOX_GATEWAY-BASE",
           "hbase-REGIONSERVER-BASE",
           "hbase-MASTER-BASE",
           "atlas-ATLAS_SERVER-BASE"
@@ -328,23 +327,6 @@
         "roleConfigGroups": [
           {
             "base": true,
-            "configs": [
-              {
-                "name": "gateway_master_secret",
-                "value": "cloudera1"
-              }
-            ],
-            "refName": "knox-KNOX_GATEWAY-BASE",
-            "roleType": "KNOX_GATEWAY"
-          },
-          {
-            "base": true,
-            "configs": [
-              {
-                "name": "idbroker_master_secret",
-                "value": "cloudera1"
-              }
-            ],
             "refName": "knox-IDBROKER-BASE",
             "roleType": "IDBROKER"
           }

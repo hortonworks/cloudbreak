@@ -9,9 +9,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,11 +44,13 @@ public class StackRequestManifester {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackRequestManifester.class);
 
-    @Value("${sdx.cluster.definition}")
-    private String clusterDefinition;
+    @Inject
+    private GatewayManifester gatewayManifester;
 
-    public StackV4Request configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        return setupStackRequestForCloudbreak(sdxCluster, environment);
+    public void configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+        StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
+        gatewayManifester.configureGatewayForSdxCluster(generatedStackV4Request);
+        addStackV4RequestAsString(sdxCluster, generatedStackV4Request);
     }
 
     public void addStackV4RequestAsString(SdxCluster sdxCluster, StackV4Request internalRequest) {
@@ -180,7 +183,7 @@ public class StackRequestManifester {
     private void setupClusterRequest(StackV4Request stackRequest) {
         ClusterV4Request cluster = stackRequest.getCluster();
         if (cluster != null && cluster.getBlueprintName() == null) {
-            cluster.setBlueprintName(clusterDefinition);
+            throw new BadRequestException("BlueprintName not defined, should only happen on private API");
         }
         if (cluster != null && cluster.getUserName() == null) {
             cluster.setUserName("admin");

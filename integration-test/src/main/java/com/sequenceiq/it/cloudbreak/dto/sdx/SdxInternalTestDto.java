@@ -41,6 +41,7 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 
@@ -49,7 +50,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     private static final String DEFAULT_SDX_NAME = "test-sdx" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
 
-    private static final String DEFAULT_SDX_BLUEPRINT_NAME = "CDP 1.0 - SDX: Apache Hive Metastore, Apache Ranger, Apache Atlas";
+    private static final String DEFAULT_SDX_BLUEPRINT_NAME = "CDP 1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas";
 
     private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
 
@@ -130,7 +131,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return this;
     }
 
-    public SdxInternalTestDto withClusterShape(String shape) {
+    public SdxInternalTestDto withClusterShape(SdxClusterShape shape) {
         getRequest().setClusterShape(shape);
         return this;
     }

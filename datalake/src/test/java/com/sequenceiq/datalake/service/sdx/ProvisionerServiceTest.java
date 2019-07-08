@@ -57,12 +57,13 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.client.EnvironmentServiceClient;
 import com.sequenceiq.environment.client.EnvironmentServiceEndpoints;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX provisioner service tests")
 class ProvisionerServiceTest {
 
-    private static final String CRN = "crn:altus:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
@@ -99,16 +100,7 @@ class ProvisionerServiceTest {
     @Test
     void startProvisioning() {
         long id = 2L;
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(id);
-        sdxCluster.setClusterShape("big");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
-        sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccountId("hortonworks");
-        sdxCluster.setTags(Json.silent(new HashMap<>()));
-        sdxCluster.setEnvCrn("");
-        sdxCluster.setStackRequestToCloudbreak("{}");
+        SdxCluster sdxCluster = generateValidSdxCluster(id);
 
         CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
         StackV4Endpoint stackEndpointMock = mock(StackV4Endpoint.class);
@@ -141,10 +133,10 @@ class ProvisionerServiceTest {
         long id = 2L;
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(id);
-        sdxCluster.setClusterShape("big");
+        sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(CRN);
+        sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
 
@@ -166,14 +158,7 @@ class ProvisionerServiceTest {
     @Test
     void waitCloudbreakClusterCreationFailedByFailedStack() {
         long id = 2L;
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(id);
-        sdxCluster.setClusterShape("big");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
-        sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccountId("hortonworks");
-        sdxCluster.setTags(Json.silent(new HashMap<>()));
+        SdxCluster sdxCluster = generateValidSdxCluster(id);
 
         CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
         StackV4Endpoint stackEndpointMock = mock(StackV4Endpoint.class);
@@ -193,14 +178,7 @@ class ProvisionerServiceTest {
     @Test
     void waitCloudbreakClusterCreationSuccess() {
         long id = 2L;
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(id);
-        sdxCluster.setClusterShape("big");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
-        sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccountId("hortonworks");
-        sdxCluster.setTags(Json.silent(new HashMap<>()));
+        SdxCluster sdxCluster = generateValidSdxCluster(id);
 
         CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
         StackV4Endpoint stackEndpointMock = mock(StackV4Endpoint.class);
@@ -234,15 +212,7 @@ class ProvisionerServiceTest {
     @Test
     void startStackDeletionStackNotFound() {
         long id = 2L;
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(id);
-        sdxCluster.setClusterShape("big");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
-        sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccountId("hortonworks");
-        sdxCluster.setTags(Json.silent(new HashMap<>()));
-        sdxCluster.setClusterName("envir-sdx-cluster");
+        SdxCluster sdxCluster = generateValidSdxCluster(id);
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
 
         CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
@@ -265,15 +235,7 @@ class ProvisionerServiceTest {
     @Test
     void startStackDeletionStackFound() {
         long id = 2L;
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(id);
-        sdxCluster.setClusterShape("big");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
-        sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccountId("hortonworks");
-        sdxCluster.setTags(Json.silent(new HashMap<>()));
-        sdxCluster.setClusterName("envir-sdx-cluster");
+        SdxCluster sdxCluster = generateValidSdxCluster(id);
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
 
         CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
@@ -296,15 +258,8 @@ class ProvisionerServiceTest {
     @Test
     void startStackDeletionButClientError() {
         long id = 2L;
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(id);
-        sdxCluster.setClusterShape("big");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
-        sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccountId("hortonworks");
-        sdxCluster.setTags(Json.silent(new HashMap<>()));
-        sdxCluster.setClusterName("envir-sdx-cluster");
+        SdxCluster sdxCluster = generateValidSdxCluster(id);
+
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
 
         CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
@@ -328,17 +283,9 @@ class ProvisionerServiceTest {
     @Test
     void waitCloudbreakClusterDeletionButTimeout() {
         long id = 2L;
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(id);
-        sdxCluster.setClusterShape("big");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
-        sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccountId("hortonworks");
-        sdxCluster.setTags(Json.silent(new HashMap<>()));
-        sdxCluster.setClusterName("envir-sdx-cluster");
-        when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
+        SdxCluster sdxCluster = generateValidSdxCluster(id);
 
+        when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
         long stackIdFromCB = 100L;
 
         CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
@@ -359,15 +306,7 @@ class ProvisionerServiceTest {
     @Test
     void waitCloudbreakClusterDeletionButFailed() {
         long id = 2L;
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(id);
-        sdxCluster.setClusterShape("big");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
-        sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccountId("hortonworks");
-        sdxCluster.setTags(Json.silent(new HashMap<>()));
-        sdxCluster.setClusterName("envir-sdx-cluster");
+        SdxCluster sdxCluster = generateValidSdxCluster(id);
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
 
         long stackIdFromCB = 100L;
@@ -394,15 +333,8 @@ class ProvisionerServiceTest {
     @Test
     void waitCloudbreakClusterDeletionSuccessful() {
         long id = 2L;
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(id);
-        sdxCluster.setClusterShape("big");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
-        sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(CRN);
-        sdxCluster.setAccountId("hortonworks");
-        sdxCluster.setTags(Json.silent(new HashMap<>()));
-        sdxCluster.setClusterName("envir-sdx-cluster");
+        SdxCluster sdxCluster = generateValidSdxCluster(id);
+
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
 
         CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
@@ -458,5 +390,19 @@ class ProvisionerServiceTest {
         authentication.setPublicKey("ssh-public-key");
         detailedEnvironmentResponse.setAuthentication(authentication);
         return detailedEnvironmentResponse;
+    }
+
+    private SdxCluster generateValidSdxCluster(long id) {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(id);
+        sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
+        sdxCluster.setEnvName("envir");
+        sdxCluster.setInitiatorUserCrn(USER_CRN);
+        sdxCluster.setAccountId("hortonworks");
+        sdxCluster.setTags(Json.silent(new HashMap<>()));
+        sdxCluster.setEnvCrn("");
+        sdxCluster.setStackRequestToCloudbreak("{}");
+        return sdxCluster;
     }
 }

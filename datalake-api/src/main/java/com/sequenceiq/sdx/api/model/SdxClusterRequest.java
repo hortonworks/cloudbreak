@@ -9,9 +9,8 @@ public class SdxClusterRequest {
     @NotNull
     private String environment;
 
-    // what does it contain?
     @NotNull
-    private String clusterShape;
+    private SdxClusterShape clusterShape;
 
     private SdxCloudStorageRequest cloudStorage;
 
@@ -25,11 +24,11 @@ public class SdxClusterRequest {
         this.environment = environment;
     }
 
-    public String getClusterShape() {
+    public SdxClusterShape getClusterShape() {
         return clusterShape;
     }
 
-    public void setClusterShape(String clusterShape) {
+    public void setClusterShape(SdxClusterShape clusterShape) {
         this.clusterShape = clusterShape;
     }
 

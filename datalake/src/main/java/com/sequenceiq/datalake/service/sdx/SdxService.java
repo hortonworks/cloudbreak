@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,6 +37,7 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.client.EnvironmentServiceClient;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
 public class SdxService {
@@ -115,6 +117,7 @@ public class SdxService {
 
     public SdxCluster createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request) {
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
+        validateInternalSdxRequest(stackV4Request, sdxClusterRequest.getClusterShape());
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setInitiatorUserCrn(userCrn);
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
@@ -147,10 +150,11 @@ public class SdxService {
 
     private StackV4Request prepareStackRequest(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request,
             SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        stackV4Request = getStackRequest(stackV4Request, environment.getCloudPlatform());
+        stackV4Request = getStackRequest(stackV4Request, sdxClusterRequest.getClusterShape(), environment.getCloudPlatform());
         if (isCloudStorageConfigured(sdxClusterRequest)) {
             CloudStorageV4Request cloudStorageConfig =
-                    cloudStorageManifester.getCloudStorageConfig(environment.getCloudPlatform(), sdxCluster, sdxClusterRequest);
+                    cloudStorageManifester.getCloudStorageConfig(environment.getCloudPlatform(),
+                            stackV4Request.getCluster().getBlueprintName(), sdxCluster, sdxClusterRequest);
             stackV4Request.getCluster().setCloudStorage(cloudStorageConfig);
         }
         return stackV4Request;
@@ -161,22 +165,29 @@ public class SdxService {
                 && StringUtils.isNotEmpty(clusterRequest.getCloudStorage().getBaseLocation());
     }
 
-    private StackV4Request getStackRequest(@Nullable StackV4Request internalStackRequest, String cloudPlatform) {
+    private StackV4Request getStackRequest(@Nullable StackV4Request internalStackRequest, SdxClusterShape shape, String cloudPlatform) {
         if (internalStackRequest == null) {
-            return getStackRequestFromFile(cloudPlatform);
+            String clusterTemplatePath = generateClusterTemplatePath(cloudPlatform, shape);
+            LOGGER.info("Using path of {} based on Cloudplatform {} and Shape {}", clusterTemplatePath, cloudPlatform, shape);
+            return getStackRequestFromFile(clusterTemplatePath);
         } else {
             return internalStackRequest;
         }
     }
 
-    private StackV4Request getStackRequestFromFile(String cloudPlatform) {
+    protected StackV4Request getStackRequestFromFile(String templatePath) {
         try {
-            String clusterTemplateJson = FileReaderUtils.readFileFromClasspath("sdx/" + cloudPlatform.toLowerCase() + "/cluster-template.json");
+            String clusterTemplateJson = FileReaderUtils.readFileFromClasspath(templatePath);
             return JsonUtil.readValue(clusterTemplateJson, StackV4Request.class);
         } catch (IOException e) {
-            LOGGER.info("Can not read SDX template for platform {}", cloudPlatform, e);
-            throw new BadRequestException("Can not read template for platform " + cloudPlatform);
+            LOGGER.info("Can not read template from path: " + templatePath, e);
+            throw new BadRequestException("Can not read template from path: " + templatePath);
         }
+    }
+
+    protected String generateClusterTemplatePath(String cloudPlatform, SdxClusterShape shape) {
+        String convertedShape = shape.toString().toLowerCase().replaceAll("_", "-");
+        return "sdx/" + cloudPlatform.toLowerCase() + "/cluster-" + convertedShape + "-template.json";
     }
 
     private void validateSdxRequest(String name, String envName, String accountId) {
@@ -189,6 +200,14 @@ public class SdxService {
                 .ifPresent(existedSdx -> {
                     throw new BadRequestException("SDX cluster exists for environment name: " + existedSdx.getEnvName());
                 });
+    }
+
+    private void validateInternalSdxRequest(StackV4Request stackv4Request, SdxClusterShape clusterShape) {
+        if (stackv4Request != null) {
+            if (!clusterShape.equals(CUSTOM)) {
+                throw new BadRequestException("Cluster shape '" + clusterShape + "' is not accepted on SDX Internal API. Use 'CUSTOM' cluster shape");
+            }
+        }
     }
 
     private void setTagsSafe(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster) {

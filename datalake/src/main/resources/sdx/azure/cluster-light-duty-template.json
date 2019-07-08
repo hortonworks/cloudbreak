@@ -1,18 +1,18 @@
 {
   "cluster": {
-    "validateBlueprint": false
-  },
-  "gatewayPort": 9401,
-  "network": {
-    "mock": {
-      "vpcId": "mock-me-once-more",
-      "internetGatewayId": "youshallnotpass",
-      "subnetId": "1234567"
+    "blueprintName": "CDP 1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+    "validateBlueprint": false,
+    "gateway": {
+      "topologies": [
+        {
+          "topologyName": "dp-proxy",
+          "exposedServices": [
+            "ALL"
+          ]
+        }
+      ],
+      "ssoType": "SSO_PROVIDER"
     }
-  },
-  "image": {
-    "catalog": "mock-static-sdx-image-catalog",
-    "id": "f6e778fc-7f17-4535-9021-515351df3691"
   },
   "customDomain": {
     "domainName": "sdx",
@@ -22,17 +22,17 @@
     {
       "name": "idbroker",
       "template": {
-        "instanceType": "large",
-        "rootVolume": {
-          "size": 50
-        },
+        "instanceType": "Standard_D12_v2",
         "attachedVolumes": [
           {
-            "size": 100,
             "count": 1,
-            "type": "magnetic"
+            "size": 100,
+            "type": "standard"
           }
-        ]
+        ],
+        "rootVolume": {
+          "size": 50
+        }
       },
       "nodeCount": 1,
       "type": "CORE",
@@ -53,17 +53,17 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "large",
-        "rootVolume": {
-          "size": 50
-        },
+        "instanceType": "Standard_D12_v2",
         "attachedVolumes": [
           {
-            "size": 100,
             "count": 1,
-            "type": "magnetic"
+            "size": 100,
+            "type": "standard"
           }
-        ]
+        ],
+        "rootVolume": {
+          "size": 50
+        }
       },
       "nodeCount": 1,
       "type": "GATEWAY",
@@ -75,13 +75,6 @@
             "subnet": "0.0.0.0/0",
             "ports": [
               "9443"
-            ],
-            "protocol": "tcp"
-          },
-          {
-            "subnet": "0.0.0.0/0",
-            "ports": [
-              "8443"
             ],
             "protocol": "tcp"
           },

@@ -18,7 +18,7 @@ integrationtest:
   defaultCredentialDescription: "autotesting credential default description."
   tags:
     auto: tesztelek
-  clusterShape: autoteszt
+  clusterShape: CUSTOM
 
   testsuite:
     pollingInterval: 1000

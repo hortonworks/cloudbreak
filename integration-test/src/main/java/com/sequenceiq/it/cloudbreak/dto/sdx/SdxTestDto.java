@@ -25,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @Prototype
@@ -55,7 +56,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return this;
     }
 
-    public SdxTestDto withClusterShape(String shape) {
+    public SdxTestDto withClusterShape(SdxClusterShape shape) {
         getRequest().setClusterShape(shape);
         return this;
     }

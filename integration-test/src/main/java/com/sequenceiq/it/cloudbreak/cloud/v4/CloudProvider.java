@@ -24,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 public interface CloudProvider {
 
@@ -69,7 +70,7 @@ public interface CloudProvider {
 
     Map<String, String> getTags();
 
-    String getClusterShape();
+    SdxClusterShape getClusterShape();
 
     CloudPlatform getCloudPlatform();
 
