@@ -22,7 +22,7 @@ public class CredentialValidator {
     private CredentialDefinitionService credentialDefinitionService;
 
     public void validateParameters(Platform platform, Json json) {
-        credentialDefinitionService.checkProperties(platform, json);
+        credentialDefinitionService.checkPropertiesRemoveSensitives(platform, json);
     }
 
     public void validateCredentialCloudPlatform(String cloudPlatform) {

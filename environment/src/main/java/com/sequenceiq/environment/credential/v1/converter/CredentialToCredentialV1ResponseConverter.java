@@ -81,7 +81,7 @@ public class CredentialToCredentialV1ResponseConverter {
     private void convertAttributes(Credential source, CredentialResponse response) {
         try {
             Json json = new Json(source.getAttributes());
-            credentialDefinitionService.removeSensitives(platform(source.getCloudPlatform()), json);
+            credentialDefinitionService.checkPropertiesRemoveSensitives(platform(source.getCloudPlatform()), json);
             coverSensitiveData(json);
             CredentialAttributes credentialAttributes = json.get(CredentialAttributes.class);
             doIfNotNull(credentialAttributes.getAws(), param -> response.setAws(awsConverter.convert(param)));

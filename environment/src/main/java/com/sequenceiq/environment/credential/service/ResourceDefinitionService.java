@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.environment.util.ResourceDefinitionRequestFactory;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -28,11 +29,15 @@ public class ResourceDefinitionService {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
+    @Inject
+    private ResourceDefinitionRequestFactory resourceDefinitionRequestFactory;
+
     @Cacheable("resourceDefinitionCache")
     public String getResourceDefinition(String cloudPlatform, String resource) {
         LOGGER.debug("Sending request for {} {} resource property definition", cloudPlatform, resource);
         CloudPlatformVariant platformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.EMPTY);
-        ResourceDefinitionRequest request = new ResourceDefinitionRequest(platformVariant, resource);
+        ResourceDefinitionRequest request = resourceDefinitionRequestFactory
+                .createResourceDefinitionRequest(platformVariant, resource);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             ResourceDefinitionResult result = request.await();
