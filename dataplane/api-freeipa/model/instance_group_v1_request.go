@@ -20,8 +20,7 @@ import (
 type InstanceGroupV1Request struct {
 
 	// instancegroup related template
-	// Required: true
-	InstanceTemplate *InstanceTemplateV1Request `json:"instanceTemplate"`
+	InstanceTemplate *InstanceTemplateV1Request `json:"instanceTemplate,omitempty"`
 
 	// name of the instance group
 	// Required: true
@@ -73,8 +72,8 @@ func (m *InstanceGroupV1Request) Validate(formats strfmt.Registry) error {
 
 func (m *InstanceGroupV1Request) validateInstanceTemplate(formats strfmt.Registry) error {
 
-	if err := validate.Required("instanceTemplate", "body", m.InstanceTemplate); err != nil {
-		return err
+	if swag.IsZero(m.InstanceTemplate) { // not required
+		return nil
 	}
 
 	if m.InstanceTemplate != nil {

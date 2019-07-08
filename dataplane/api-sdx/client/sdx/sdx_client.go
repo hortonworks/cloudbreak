@@ -109,6 +109,62 @@ func (a *Client) GetSdx(params *GetSdxParams) (*GetSdxOK, error) {
 }
 
 /*
+GetSdxByCrn gets s d x cluster by crn
+*/
+func (a *Client) GetSdxByCrn(params *GetSdxByCrnParams) (*GetSdxByCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSdxByCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getSdxByCrn",
+		Method:             "GET",
+		PathPattern:        "/sdx/crn/{clusterCrn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetSdxByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetSdxByCrnOK), nil
+
+}
+
+/*
+GetSdxByEnvCrn gets s d x cluster by environment crn
+*/
+func (a *Client) GetSdxByEnvCrn(params *GetSdxByEnvCrnParams) (*GetSdxByEnvCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSdxByEnvCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getSdxByEnvCrn",
+		Method:             "GET",
+		PathPattern:        "/sdx/envcrn/{envCrn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetSdxByEnvCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetSdxByEnvCrnOK), nil
+
+}
+
+/*
 GetSdxDetail gets s d x cluster detail
 */
 func (a *Client) GetSdxDetail(params *GetSdxDetailParams) (*GetSdxDetailOK, error) {

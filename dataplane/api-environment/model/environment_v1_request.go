@@ -52,6 +52,9 @@ type EnvironmentV1Request struct {
 	// Unique: true
 	Regions []string `json:"regions"`
 
+	// Security control for FreeIPA and Datalake deployment.
+	SecurityAccess *SecurityAccessV1Request `json:"securityAccess,omitempty"`
+
 	// Telemetry related specifics of the environment.
 	Telemetry *TelemetryV1Request `json:"telemetry,omitempty"`
 }
@@ -85,6 +88,10 @@ func (m *EnvironmentV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRegions(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSecurityAccess(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -216,6 +223,24 @@ func (m *EnvironmentV1Request) validateRegions(formats strfmt.Registry) error {
 
 	if err := validate.UniqueItems("regions", "body", m.Regions); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentV1Request) validateSecurityAccess(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SecurityAccess) { // not required
+		return nil
+	}
+
+	if m.SecurityAccess != nil {
+		if err := m.SecurityAccess.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("securityAccess")
+			}
+			return err
+		}
 	}
 
 	return nil

@@ -22,7 +22,6 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_events"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_file_systems"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_imagecatalogs"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kerberos"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kubernetes"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_mpacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_recipes"
@@ -99,8 +98,6 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.V4WorkspaceIDFileSystems = v4_workspace_id_file_systems.New(transport, formats)
 
 	cli.V4WorkspaceIDImagecatalogs = v4_workspace_id_imagecatalogs.New(transport, formats)
-
-	cli.V4WorkspaceIDKerberos = v4_workspace_id_kerberos.New(transport, formats)
 
 	cli.V4WorkspaceIDKubernetes = v4_workspace_id_kubernetes.New(transport, formats)
 
@@ -188,8 +185,6 @@ type Cloudbreak struct {
 
 	V4WorkspaceIDImagecatalogs *v4_workspace_id_imagecatalogs.Client
 
-	V4WorkspaceIDKerberos *v4_workspace_id_kerberos.Client
-
 	V4WorkspaceIDKubernetes *v4_workspace_id_kubernetes.Client
 
 	V4WorkspaceIDMpacks *v4_workspace_id_mpacks.Client
@@ -238,8 +233,6 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.V4WorkspaceIDFileSystems.SetTransport(transport)
 
 	c.V4WorkspaceIDImagecatalogs.SetTransport(transport)
-
-	c.V4WorkspaceIDKerberos.SetTransport(transport)
 
 	c.V4WorkspaceIDKubernetes.SetTransport(transport)
 
