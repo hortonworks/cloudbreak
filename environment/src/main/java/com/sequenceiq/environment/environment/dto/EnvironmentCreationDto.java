@@ -154,7 +154,7 @@ public class EnvironmentCreationDto {
 
         private SecurityAccessDto securityAccess;
 
-        private Builder() {
+        public Builder() {
         }
 
         public static Builder anEnvironmentCreationDto() {
@@ -228,7 +228,7 @@ public class EnvironmentCreationDto {
 
         public Builder withSecurityAccess(SecurityAccessDto securityAccess) {
             this.securityAccess = securityAccess;
-            return null;
+            return this;
         }
 
         public EnvironmentCreationDto build() {

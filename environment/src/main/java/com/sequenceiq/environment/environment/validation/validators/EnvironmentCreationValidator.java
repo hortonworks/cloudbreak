@@ -11,7 +11,9 @@ import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
+import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
+import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
@@ -21,10 +23,14 @@ public class EnvironmentCreationValidator {
 
     private final Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform;
 
+    private final Map<CloudPlatform, EnvironmentSecurityGroupValidator> environmentSecurityGroupValidatorsByCloudPlatform;
+
     public EnvironmentCreationValidator(EnvironmentRegionValidator environmentRegionValidator,
-                                        Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform) {
+                                        Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform,
+                                        Map<CloudPlatform, EnvironmentSecurityGroupValidator> environmentSecurityGroupValidatorsByCloudPlatform) {
         this.environmentRegionValidator = environmentRegionValidator;
         this.environmentNetworkValidatorsByCloudPlatform = environmentNetworkValidatorsByCloudPlatform;
+        this.environmentSecurityGroupValidatorsByCloudPlatform = environmentSecurityGroupValidatorsByCloudPlatform;
     }
 
     public ValidationResult validate(Environment environment, EnvironmentCreationDto creationDto, CloudRegions cloudRegions) {
@@ -33,6 +39,7 @@ public class EnvironmentCreationValidator {
         environmentRegionValidator.validateRegions(creationDto.getRegions(), cloudRegions, cloudPlatform, resultBuilder);
         environmentRegionValidator.validateLocation(creationDto.getLocation(), creationDto.getRegions(), environment, resultBuilder);
         validateNetwork(creationDto, cloudPlatform, resultBuilder);
+        validateSecurityGroup(creationDto, cloudPlatform, resultBuilder);
         return resultBuilder.build();
     }
 
@@ -44,6 +51,20 @@ public class EnvironmentCreationValidator {
                 environmentNetworkValidator.validate(networkDto, resultBuilder);
             } else {
                 resultBuilder.error(String.format("Environment specific network is not supported for cloud platform: '%s'!", cloudPlatform));
+            }
+        }
+    }
+
+    private void validateSecurityGroup(EnvironmentCreationDto request, String cloudPlatform, ValidationResultBuilder resultBuilder) {
+        SecurityAccessDto securityAccess = request.getSecurityAccess();
+        NetworkDto networkDto = request.getNetwork();
+        if (securityAccess != null && networkDto != null && Strings.isNullOrEmpty(securityAccess.getCidr())) {
+            EnvironmentSecurityGroupValidator environmentSecurityGroupValidator =
+                    environmentSecurityGroupValidatorsByCloudPlatform.get(CloudPlatform.valueOf(cloudPlatform));
+            if (environmentSecurityGroupValidator != null) {
+                environmentSecurityGroupValidator.validate(request, resultBuilder);
+            } else {
+                resultBuilder.error(String.format("Environment specific security group is not supported for cloud platform: '%s'!", cloudPlatform));
             }
         }
     }
