@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
+import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.logger.MDCContextFilter;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
@@ -29,6 +30,9 @@ public class AppConfig {
 
     @Inject
     private List<EnvironmentNetworkValidator> environmentNetworkValidators;
+
+    @Inject
+    private List<EnvironmentSecurityGroupValidator> environmentSecurityGroupValidators;
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
@@ -73,6 +77,13 @@ public class AppConfig {
         return environmentNetworkConverters
                 .stream()
                 .collect(Collectors.toMap(EnvironmentNetworkConverter::getCloudPlatform, Function.identity()));
+    }
+
+    @Bean
+    public Map<CloudPlatform, EnvironmentSecurityGroupValidator> environmentSecurityGroupValidatorsByCloudPlatform() {
+        return environmentSecurityGroupValidators
+                .stream()
+                .collect(Collectors.toMap(EnvironmentSecurityGroupValidator::getCloudPlatform, Function.identity()));
     }
 
     @Bean
