@@ -148,7 +148,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         return User.newBuilder()
                 .setUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
                 .setCrn(userCrn)
-                .setEmail(userName + "@ums.mock")
+                .setEmail(userName.contains("@") ? userName : userName + "@ums.mock")
                 .build();
     }
 

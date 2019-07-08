@@ -57,6 +57,10 @@ public class CrnService {
         }
     }
 
+    public String getUserCrn() {
+        return threadBaseUserCrnProvider.getUserCrn();
+    }
+
     public String createCrn(String accountId, Crn.ResourceType resourceType) {
         return Crn.builder()
                 .setService(Crn.Service.FREEIPA)

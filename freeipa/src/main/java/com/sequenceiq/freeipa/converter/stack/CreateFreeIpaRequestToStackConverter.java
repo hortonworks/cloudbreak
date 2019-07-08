@@ -9,6 +9,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -17,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -62,7 +67,10 @@ public class CreateFreeIpaRequestToStackConverter {
     @Value("${cb.nginx.port:9443}")
     private Integer nginxPort;
 
-    public Stack convert(CreateFreeIpaRequest source, String accountId, String userId, String cloudPlatform) {
+    @Value("${freeipa.ums.user.get.timeout:10}")
+    private Long userGetTimeout;
+
+    public Stack convert(CreateFreeIpaRequest source, String accountId, Future<User> userFuture, String cloudPlatform) {
         Stack stack = new Stack();
         stack.setEnvironmentCrn(source.getEnvironmentCrn());
         stack.setAccountId(accountId);
@@ -71,21 +79,32 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setGatewayport(nginxPort);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
-        updateCloudPlatformAndRelatedFields(source, stack, Optional.ofNullable(userId).orElse(accountId), cloudPlatform);
+        updateCloudPlatformAndRelatedFields(source, stack, cloudPlatform);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
         stack.setInstanceGroups(convertInstanceGroups(source, stack, accountId));
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
-        stack.setOwner(Optional.ofNullable(userId).orElse(accountId));
+        updateOwnerRelatedFields(accountId, userFuture, cloudPlatform, stack);
         return stack;
     }
 
-    private void updateCloudPlatformAndRelatedFields(CreateFreeIpaRequest source, Stack stack, String owner, String cloudPlatform) {
+    private void updateOwnerRelatedFields(String accountId, Future<User> userFuture, String cloudPlatform, Stack stack) {
+        String owner = accountId;
+        try {
+            User user = userFuture.get(userGetTimeout, TimeUnit.SECONDS);
+            owner = user.getEmail();
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            LOGGER.error("Couldn't fetch user from UMS", e);
+        }
+        stack.setTags(getTags(owner, cloudPlatform));
+        stack.setOwner(owner);
+    }
+
+    private void updateCloudPlatformAndRelatedFields(CreateFreeIpaRequest source, Stack stack, String cloudPlatform) {
         stack.setRegion(getRegion(source, cloudPlatform));
         stack.setCloudPlatform(cloudPlatform);
-        stack.setTags(getTags(owner, cloudPlatform));
         stack.setPlatformvariant(cloudPlatform);
     }
 
