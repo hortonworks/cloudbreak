@@ -58,13 +58,13 @@ public interface SdxEndpoint {
     @GET
     @Path("/crn/{clusterCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "get SDX cluster by crn", produces = MediaType.APPLICATION_JSON, nickname = "getSdxByCrn")
+    @ApiOperation(value = "get SDX cluster by it's crn", produces = MediaType.APPLICATION_JSON, nickname = "getSdxByCrn")
     SdxClusterResponse getByCrn(@PathParam("clusterCrn") @ValidCrn String clusterCrn);
 
     @GET
     @Path("/envcrn/{envCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "get SDX cluster by crn", produces = MediaType.APPLICATION_JSON, nickname = "getSdxByCrn")
+    @ApiOperation(value = "get SDX cluster by environment crn", produces = MediaType.APPLICATION_JSON, nickname = "getSdxByEnvCrn")
     List<SdxClusterResponse> getByEnvCrn(@PathParam("envCrn") @ValidCrn String envCrn);
 
     @GET
