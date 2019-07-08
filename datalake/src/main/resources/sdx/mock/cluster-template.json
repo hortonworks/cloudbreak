@@ -1,17 +1,6 @@
 {
   "cluster": {
-    "validateBlueprint": false,
-    "gateway": {
-      "topologies": [
-        {
-          "topologyName": "dp-proxy",
-          "exposedServices": [
-            "ALL"
-          ]
-        }
-      ],
-      "ssoType": "SSO_PROVIDER"
-    }
+    "validateBlueprint": false
   },
   "gatewayPort": 9401,
   "network": {
