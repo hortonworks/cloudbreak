@@ -2,6 +2,9 @@
 
 echo "CBD Version: "$TARGET_CBD_VERSION
 echo "CBD URL: "$BASE_URL
+echo "CB BASE URL: "$CB_BASE_URL
+echo "DATALAKE BASE URL: "$DL_BASE_URL
+echo "ENVIRONMENT BASE URL: "$ENV_BASE_URL
 echo "CBD Username: "$USERNAME_CLI
 echo "CBD Password: "$PASSWORD_CLI
 echo "CLI Tests: "$CLI_TEST_FILES
@@ -13,11 +16,8 @@ if [[ "${TARGET_CBD_VERSION}" != "MOCK" ]]; then
     echo "DP CLI version is: "$(dp -v)
 fi
 
-echo "Get DP Token for CLI"
-token=$(wget --continue --no-check-certificate $BASE_URL/oidc/authorize?username=$USERNAME_CLI\&tenant=hortonworks -O -)
-
 echo "Configure DP CLI to Server: $BASE_URL User: $USERNAME_CLI"
-echo $token | dp configure --server $BASE_URL --workspace $USERNAME_CLI --apikeyid Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjpiYmloYXJpQGhvcnRvbndvcmtzLmNvbQ== --privatekey nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g=
+DEBUG=1 dp configure --server $BASE_URL --workspace $USERNAME_CLI --apikeyid Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjpiYmloYXJpQGhvcnRvbndvcmtzLmNvbQ== --privatekey nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g=
 
 echo "Running RSpec with "$CLI_TEST_FILES
 mkdir -p tmp/aruba
@@ -31,6 +31,6 @@ if [[ $RESULT -eq 0 ]]; then
     export RESULT=$?
 fi
 
-chmod -Rf 777 allure
+chmod -Rf 777 allure /aruba/.dp
 
 exit $RESULT

@@ -10,7 +10,7 @@ define_method(:cb) do
   return cb
 end
 
-RSpec.describe 'Workspace test cases', :type => :aruba, :feature => "Workspaces", :severity => :critical do
+RSpec.xdescribe 'Workspace test cases', :type => :aruba, :feature => "Workspaces", :severity => :critical do
   include_context "shared command helpers"
   include_context "mock shared vars"
 

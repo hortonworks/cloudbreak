@@ -2,11 +2,15 @@
 # -e " Exit immediately if a command exits with a non-zero status.
 # -x  Print commands and their arguments as they are executed.
 
-: ${BASE_URL:=https://127.0.0.1}
+: ${BASE_URL:=https://localhost}
+: ${CB_BASE_URL:=http://127.0.0.1:9091}
+: ${DL_BASE_URL:=http://127.0.0.1:8086}
+: ${ENV_BASE_URL:=http://127.0.0.1:8088}
 : ${USERNAME_CLI:=admin@example.com}
 : ${PASSWORD_CLI:=cloudbreak}
-: ${CLI_TEST_FILES:=spec/integration/*.rb}
+: ${CLI_TEST_FILES:=spec/integration/credential.rb}
 : ${CLUSTER_DEFINITION_URL:? required}
+: ${IMAGE_UPDATE:=true}
 
 readonly TEST_CONTAINER_NAME=cli-test-runner
 
@@ -70,6 +74,9 @@ test-regression() {
        -v $(pwd)/../build/Linux:/usr/local/bin \
        -v $(pwd)/scripts/aruba-docker.sh:/entrypoint.sh \
        -e "BASE_URL=$BASE_URL" \
+       -e "CB_BASE_URL=$CB_BASE_URL" \
+       -e "DL_BASE_URL=$DL_BASE_URL" \
+       -e "ENV_BASE_URL=$ENV_BASE_URL" \
        -e "USERNAME_CLI=$USERNAME_CLI" \
        -e "PASSWORD_CLI=$PASSWORD_CLI" \
        -e "OS_V2_ENDPOINT=$OS_V2_ENDPOINT" \
@@ -102,8 +109,10 @@ test-regression() {
 }
 
 main() {
-    image-cleanup
-    image-update
+    if [[ "$IMAGE_UPDATE" == "true" ]]; then
+        image-cleanup
+        image-update
+    fi
     cbd-version
     test-regression
     exit $RESULT

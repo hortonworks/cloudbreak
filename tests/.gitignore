@@ -1,5 +1,5 @@
 # Created by .ignore support plugin (hsz.mobi)
-swagger.json
+swagger-*.json
 *.html
 *.xml
 .cb

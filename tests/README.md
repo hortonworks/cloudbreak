@@ -35,7 +35,6 @@ rspec spec/integration/*.rb
 ```
 rspec -f RspecJunitFormatter -o test-result.xml -f h spec/integration/*.rb | tee test-result.html | ruby -n spec/common/integration_formatter.rb
 ```
-> You can create your own script for test execution like [scripts/test_run.sh](scripts/test_run.sh).
 
 ## Run tests in Docker container
 Your [Docker Machine](https://docs.docker.com/machine/reference/start/) has to be up and running before step forward.

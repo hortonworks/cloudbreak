@@ -10,7 +10,7 @@ define_method(:cb) do
   return cb
 end
 
-RSpec.describe 'Audit test cases', :type => :aruba do
+RSpec.xdescribe 'Audit test cases', :type => :aruba do
   include_context "shared command helpers"    
   include_context "mock shared vars"   
 

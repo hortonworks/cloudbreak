@@ -1,54 +1,56 @@
-traefik:
-    ports:
-        - "8081:8080"
-        - 80:80
-        - 443:443
-        - 9090:8080
-    volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
-        - ${PWD}/tmp/certs:/certs/traefik
-    log_opt:
-        max-size: "10M"
-        max-file: "5"
-    image: traefik:v1.6.6-alpine
-    restart: on-failure
-    command: --debug --web --InsecureSkipVerify=true         --defaultEntryPoints=http,https         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https'         --entryPoints='Name:https Address::443 TLS:/certs/traefik/client.pem,/certs/traefik/client-key.pem'         --maxidleconnsperhost=100         --traefikLogsFile=/opt/traefik/log/traefik.log         --accessLogsFile=/opt/traefik/log/access.log         --docker
-    container_name: cbreak_traefik_1
-
-haveged:
-    labels:
-      - traefik.enable=false
-    privileged: true
-    log_opt:
-        max-size: "10M"
-        max-file: "5"
-    image: hortonworks/haveged:1.1.0
-    container_name: cbreak_haveged_1
-
-caas-api:
-    image: hortonworks/cloudbreak-mock-caas:$GIT_VERSION
-    restart: always
+version: '3'
+networks:
+  mock-cbreak-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.200.0.0/16
+services:
+    cloudbreak:
+        labels:
+          - traefik.port=8080
+          - traefik.frontend.rule=PathPrefix:/cb/
+          - traefik.backend=cloudbreak-backend
+          - traefik.frontend.priority=510
+        ports:
+            - 9091:8080
+        volumes:
+          - ${PWD}/swagger-cloudbreak.json:/cbm/api/swagger.json
+          - ${PWD}/responses:/cbm/responses
+        image: hortonworks/cloud-swagger-mock
+        container_name: cbreak_cloudbreak_1
+        networks:
+          - mock-cbreak-network
     environment:
-    - USERNAME=admin@example.com
-    ports:
-    - "10080:8080"
-    labels:
-    - traefik.frontend.rule=PathPrefix:/auth,/oidc,/idp,/caas/api
-    - traefik.port=8080
-    - traefik.backend=caas-backend
-    - traefik.frontend.priority=5
-    container_name: cbreak_caas-api_1
-
-cloudbreak:
-    labels:
-      - traefik.port=8080
-      - traefik.frontend.rule=PathPrefix:/cb/
-      - traefik.backend=cloudbreak-backend
-      - traefik.frontend.priority=10
-    ports:
-        - 8080:8080
-    volumes:
-      - ${PWD}/tmp/swagger.json:/cbm/api/swagger.json
-      - ${PWD}/tmp/responses:/cbm/responses
-    image: hortonworks/cloud-swagger-mock
-    container_name: cbreak_cloudbreak_1
+        labels:
+          - traefik.port=8080
+          - traefik.frontend.rule=PathPrefix:/environmentservice/
+          - traefik.backend=environment-backend
+          - traefik.frontend.priority=510
+        ports:
+          - 8088:8080
+        volumes:
+          - ${PWD}/swagger-environment.json:/cbm/api/swagger.json
+          - ${PWD}/responses:/cbm/responses
+        image: hortonworks/cloud-swagger-mock
+        command: ['--', '-u','/environmentservice/api', '-s', '/environmentservice/api']
+        container_name: cbreak_environment_1
+        networks:
+          - mock-cbreak-network
+    datalake:
+        labels:
+          - traefik.port=8080
+          - traefik.frontend.rule=PathPrefix:/dl/
+          - traefik.backend=datalake-backend
+          - traefik.frontend.priority=510
+        ports:
+          - 8086:8080
+        volumes:
+          - ${PWD}/swagger-datalake.json:/cbm/api/swagger.json
+          - ${PWD}/responses:/cbm/responses
+        image: hortonworks/cloud-swagger-mock
+        command: ['--', '-u','/dl/api', '-s', '/dl/api']
+        container_name: cbreak_datalake_1
+        networks:
+          - mock-cbreak-network
