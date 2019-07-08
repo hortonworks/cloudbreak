@@ -85,6 +85,9 @@ class ProvisionerServiceTest {
     @Mock
     private StackRequestManifester stackRequestManifester;
 
+    @Mock
+    private GatewayManifester gatewayManifester;
+
     @InjectMocks
     private ProvisionerService provisionerService;
 

@@ -26,6 +26,8 @@ management:
 sdx:
   cluster:
     definition: "CDP 1.0 - SDX: Apache Hive Metastore, Apache Ranger, Apache Atlas"
+  gateway:
+    ssotype: SSO_PROVIDER
 
 datalake:
   cert.dir: /certs/
