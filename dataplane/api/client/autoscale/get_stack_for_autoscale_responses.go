@@ -51,7 +51,7 @@ type GetStackForAutoscaleOK struct {
 }
 
 func (o *GetStackForAutoscaleOK) Error() string {
-	return fmt.Sprintf("[GET /autoscale/stack/{id}][%d] getStackForAutoscaleOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /autoscale/stack/{crn}][%d] getStackForAutoscaleOK  %+v", 200, o.Payload)
 }
 
 func (o *GetStackForAutoscaleOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

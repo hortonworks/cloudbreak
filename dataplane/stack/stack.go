@@ -49,7 +49,7 @@ func (s *stackOut) DataAsStringArray() []string {
 
 func (s *stackOutDescribe) DataAsStringArray() []string {
 	stack := convertResponseToStack(s.StackV4Response)
-	return append(stack.DataAsStringArray(), strconv.FormatInt(s.ID, 10))
+	return append(stack.DataAsStringArray(), s.Crn)
 }
 
 func (s *stackOutRequest) DataAsStringArray() []string {

@@ -35,6 +35,7 @@ type dxOut struct {
 type stackOutDescribe struct {
 	Stack       model.StackV4Response
 	Environment envmodel.DetailedEnvironmentV1Response
+	Crn         string
 }
 
 func (s *dxOut) DataAsStringArray() []string {
@@ -47,7 +48,9 @@ func (s *dxOut) DataAsStringArray() []string {
 
 func (s *stackOutDescribe) DataAsStringArray() []string {
 	stack := convertResponseToDx(s)
-	return append(stack.DataAsStringArray(), s.Stack.StatusReason)
+	arr := append(stack.DataAsStringArray(), s.Stack.StatusReason)
+	arr = append(arr, s.Crn)
+	return arr
 }
 
 func convertResponseToDx(s *stackOutDescribe) *dxOut {
@@ -239,9 +242,10 @@ func DescribeDistroX(c *cli.Context) {
 		commonutils.LogErrorAndExit(err)
 	}
 
-	output.Write(append(stackHeader, "STATUSREASON"), &stackOutDescribe{
+	output.Write(append(stackHeader, "STATUSREASON", "CRN"), &stackOutDescribe{
 		Stack:       *s,
 		Environment: *envResp.Payload,
+		Crn:         s.Crn,
 	})
 }
 

@@ -14,7 +14,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -67,8 +66,8 @@ type FailureReportClusterForAutoscaleParams struct {
 
 	/*Body*/
 	Body *model.FailureReportV4Request
-	/*ID*/
-	ID int64
+	/*Crn*/
+	Crn string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -119,15 +118,15 @@ func (o *FailureReportClusterForAutoscaleParams) SetBody(body *model.FailureRepo
 	o.Body = body
 }
 
-// WithID adds the id to the failure report cluster for autoscale params
-func (o *FailureReportClusterForAutoscaleParams) WithID(id int64) *FailureReportClusterForAutoscaleParams {
-	o.SetID(id)
+// WithCrn adds the crn to the failure report cluster for autoscale params
+func (o *FailureReportClusterForAutoscaleParams) WithCrn(crn string) *FailureReportClusterForAutoscaleParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetID adds the id to the failure report cluster for autoscale params
-func (o *FailureReportClusterForAutoscaleParams) SetID(id int64) {
-	o.ID = id
+// SetCrn adds the crn to the failure report cluster for autoscale params
+func (o *FailureReportClusterForAutoscaleParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -144,8 +143,8 @@ func (o *FailureReportClusterForAutoscaleParams) WriteToRequest(r runtime.Client
 		}
 	}
 
-	// path param id
-	if err := r.SetPathParam("id", swag.FormatInt64(o.ID)); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 

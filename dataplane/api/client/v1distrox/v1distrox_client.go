@@ -25,6 +25,36 @@ type Client struct {
 }
 
 /*
+DeleteDistroXByCrnV1 deletes stack by crn
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) DeleteDistroXByCrnV1(params *DeleteDistroXByCrnV1Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteDistroXByCrnV1Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteDistroXByCrnV1",
+		Method:             "DELETE",
+		PathPattern:        "/v1/distrox/crn/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteDistroXByCrnV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
 DeleteDistroXV1 deletes an workspace by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
@@ -38,7 +68,7 @@ func (a *Client) DeleteDistroXV1(params *DeleteDistroXV1Params) error {
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteDistroXV1",
 		Method:             "DELETE",
-		PathPattern:        "/v1/distrox/{name}",
+		PathPattern:        "/v1/distrox/name/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -115,6 +145,36 @@ func (a *Client) DeleteWithKerberosDistroXV1(params *DeleteWithKerberosDistroXV1
 }
 
 /*
+GetDistroXByCrnV1 gets stack by crn
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) GetDistroXByCrnV1(params *GetDistroXByCrnV1Params) (*GetDistroXByCrnV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetDistroXByCrnV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getDistroXByCrnV1",
+		Method:             "GET",
+		PathPattern:        "/v1/distrox/crn/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetDistroXByCrnV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetDistroXByCrnV1OK), nil
+
+}
+
+/*
 GetDistroXRequestFromNameV1 gets stack request by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
@@ -158,7 +218,7 @@ func (a *Client) GetDistroXV1(params *GetDistroXV1Params) (*GetDistroXV1OK, erro
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getDistroXV1",
 		Method:             "GET",
-		PathPattern:        "/v1/distrox/{name}",
+		PathPattern:        "/v1/distrox/name/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

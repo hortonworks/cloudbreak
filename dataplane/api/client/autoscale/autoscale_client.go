@@ -36,7 +36,7 @@ func (a *Client) AuthorizeForAutoscale(params *AuthorizeForAutoscaleParams) (*Au
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "authorizeForAutoscale",
 		Method:             "GET",
-		PathPattern:        "/autoscale/stack/{id}/authorize/{userId}/{tenant}/{permission}",
+		PathPattern:        "/autoscale/stack/{crn}/authorize/{userId}/{tenant}/{permission}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -66,7 +66,7 @@ func (a *Client) FailureReportClusterForAutoscale(params *FailureReportClusterFo
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "failureReportClusterForAutoscale",
 		Method:             "POST",
-		PathPattern:        "/autoscale/stack/{id}/cluster/failurereport",
+		PathPattern:        "/autoscale/stack/{crn}/cluster/failurereport",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -126,7 +126,7 @@ func (a *Client) GetCertificateStackForAutoscale(params *GetCertificateStackForA
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getCertificateStackForAutoscale",
 		Method:             "GET",
-		PathPattern:        "/autoscale/stack/{id}/certificate",
+		PathPattern:        "/autoscale/stack/{crn}/certificate",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -173,7 +173,7 @@ func (a *Client) GetStackForAmbariForAutoscale(params *GetStackForAmbariForAutos
 }
 
 /*
-GetStackForAutoscale retrieves stack by id
+GetStackForAutoscale retrieves stack by crn
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -186,7 +186,7 @@ func (a *Client) GetStackForAutoscale(params *GetStackForAutoscaleParams) (*GetS
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getStackForAutoscale",
 		Method:             "GET",
-		PathPattern:        "/autoscale/stack/{id}",
+		PathPattern:        "/autoscale/stack/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -216,7 +216,7 @@ func (a *Client) PutClusterForAutoscale(params *PutClusterForAutoscaleParams) er
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "putClusterForAutoscale",
 		Method:             "PUT",
-		PathPattern:        "/autoscale/stack/{id}/{userId}/cluster",
+		PathPattern:        "/autoscale/stack/{crn}/{userId}/cluster",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -246,7 +246,7 @@ func (a *Client) PutStackForAutoscale(params *PutStackForAutoscaleParams) error 
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "putStackForAutoscale",
 		Method:             "PUT",
-		PathPattern:        "/autoscale/stack/{id}/{userId}",
+		PathPattern:        "/autoscale/stack/{crn}/{userId}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

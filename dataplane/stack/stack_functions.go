@@ -99,7 +99,7 @@ func (c *CloudbreakStack) createStack(workspaceID int64, req *model.StackV4Reque
 	}
 	stack = resp.Payload
 
-	log.Infof("[createStack] stack created: %s (id: %d)", *stack.Name, stack.ID)
+	log.Infof("[createStack] stack created: %s (crn: %s)", *stack.Name, stack.Crn)
 	return stack
 }
 

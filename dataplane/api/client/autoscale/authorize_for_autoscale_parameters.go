@@ -14,7 +14,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -63,8 +62,8 @@ for the authorize for autoscale operation typically these are written to a http.
 */
 type AuthorizeForAutoscaleParams struct {
 
-	/*ID*/
-	ID int64
+	/*Crn*/
+	Crn string
 	/*Permission*/
 	Permission string
 	/*Tenant*/
@@ -110,15 +109,15 @@ func (o *AuthorizeForAutoscaleParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithID adds the id to the authorize for autoscale params
-func (o *AuthorizeForAutoscaleParams) WithID(id int64) *AuthorizeForAutoscaleParams {
-	o.SetID(id)
+// WithCrn adds the crn to the authorize for autoscale params
+func (o *AuthorizeForAutoscaleParams) WithCrn(crn string) *AuthorizeForAutoscaleParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetID adds the id to the authorize for autoscale params
-func (o *AuthorizeForAutoscaleParams) SetID(id int64) {
-	o.ID = id
+// SetCrn adds the crn to the authorize for autoscale params
+func (o *AuthorizeForAutoscaleParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WithPermission adds the permission to the authorize for autoscale params
@@ -162,8 +161,8 @@ func (o *AuthorizeForAutoscaleParams) WriteToRequest(r runtime.ClientRequest, re
 	}
 	var res []error
 
-	// path param id
-	if err := r.SetPathParam("id", swag.FormatInt64(o.ID)); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 

@@ -53,7 +53,7 @@ func (o *PutStackForAutoscaleDefault) Code() int {
 }
 
 func (o *PutStackForAutoscaleDefault) Error() string {
-	return fmt.Sprintf("[PUT /autoscale/stack/{id}/{userId}][%d] putStackForAutoscale default ", o._statusCode)
+	return fmt.Sprintf("[PUT /autoscale/stack/{crn}/{userId}][%d] putStackForAutoscale default ", o._statusCode)
 }
 
 func (o *PutStackForAutoscaleDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

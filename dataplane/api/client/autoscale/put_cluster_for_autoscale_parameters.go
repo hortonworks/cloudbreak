@@ -14,7 +14,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -67,8 +66,8 @@ type PutClusterForAutoscaleParams struct {
 
 	/*Body*/
 	Body *model.UpdateClusterV4Request
-	/*ID*/
-	ID int64
+	/*Crn*/
+	Crn string
 	/*UserID*/
 	UserID string
 
@@ -121,15 +120,15 @@ func (o *PutClusterForAutoscaleParams) SetBody(body *model.UpdateClusterV4Reques
 	o.Body = body
 }
 
-// WithID adds the id to the put cluster for autoscale params
-func (o *PutClusterForAutoscaleParams) WithID(id int64) *PutClusterForAutoscaleParams {
-	o.SetID(id)
+// WithCrn adds the crn to the put cluster for autoscale params
+func (o *PutClusterForAutoscaleParams) WithCrn(crn string) *PutClusterForAutoscaleParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetID adds the id to the put cluster for autoscale params
-func (o *PutClusterForAutoscaleParams) SetID(id int64) {
-	o.ID = id
+// SetCrn adds the crn to the put cluster for autoscale params
+func (o *PutClusterForAutoscaleParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WithUserID adds the userID to the put cluster for autoscale params
@@ -157,8 +156,8 @@ func (o *PutClusterForAutoscaleParams) WriteToRequest(r runtime.ClientRequest, r
 		}
 	}
 
-	// path param id
-	if err := r.SetPathParam("id", swag.FormatInt64(o.ID)); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 

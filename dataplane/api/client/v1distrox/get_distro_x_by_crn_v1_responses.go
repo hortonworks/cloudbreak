@@ -16,17 +16,17 @@ import (
 	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
-// GetDistroXV1Reader is a Reader for the GetDistroXV1 structure.
-type GetDistroXV1Reader struct {
+// GetDistroXByCrnV1Reader is a Reader for the GetDistroXByCrnV1 structure.
+type GetDistroXByCrnV1Reader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetDistroXV1Reader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetDistroXByCrnV1Reader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewGetDistroXV1OK()
+		result := NewGetDistroXByCrnV1OK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *GetDistroXV1Reader) ReadResponse(response runtime.ClientResponse, consu
 	}
 }
 
-// NewGetDistroXV1OK creates a GetDistroXV1OK with default headers values
-func NewGetDistroXV1OK() *GetDistroXV1OK {
-	return &GetDistroXV1OK{}
+// NewGetDistroXByCrnV1OK creates a GetDistroXByCrnV1OK with default headers values
+func NewGetDistroXByCrnV1OK() *GetDistroXByCrnV1OK {
+	return &GetDistroXByCrnV1OK{}
 }
 
-/*GetDistroXV1OK handles this case with default header values.
+/*GetDistroXByCrnV1OK handles this case with default header values.
 
 successful operation
 */
-type GetDistroXV1OK struct {
+type GetDistroXByCrnV1OK struct {
 	Payload *model.StackV4Response
 }
 
-func (o *GetDistroXV1OK) Error() string {
-	return fmt.Sprintf("[GET /v1/distrox/name/{name}][%d] getDistroXV1OK  %+v", 200, o.Payload)
+func (o *GetDistroXByCrnV1OK) Error() string {
+	return fmt.Sprintf("[GET /v1/distrox/crn/{crn}][%d] getDistroXByCrnV1OK  %+v", 200, o.Payload)
 }
 
-func (o *GetDistroXV1OK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetDistroXByCrnV1OK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.StackV4Response)
 

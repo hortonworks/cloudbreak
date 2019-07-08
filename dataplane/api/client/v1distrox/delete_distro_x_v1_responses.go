@@ -53,7 +53,7 @@ func (o *DeleteDistroXV1Default) Code() int {
 }
 
 func (o *DeleteDistroXV1Default) Error() string {
-	return fmt.Sprintf("[DELETE /v1/distrox/{name}][%d] deleteDistroXV1 default ", o._statusCode)
+	return fmt.Sprintf("[DELETE /v1/distrox/name/{name}][%d] deleteDistroXV1 default ", o._statusCode)
 }
 
 func (o *DeleteDistroXV1Default) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

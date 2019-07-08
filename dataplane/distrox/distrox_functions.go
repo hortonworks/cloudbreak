@@ -98,6 +98,6 @@ func (c *DistroX) createDistroX(req *model.DistroXV1Request) *model.StackV4Respo
 	}
 	dx = resp.Payload
 
-	log.Infof("[createDistroX] DistroX created: %s (id: %d)", *dx.Name, dx.ID)
+	log.Infof("[createDistroX] DistroX created: %s (crn: %s)", *dx.Name, dx.Crn)
 	return dx
 }

@@ -42,6 +42,9 @@ type AutoscaleStackV4Response struct {
 	// ambari password
 	PasswordPath string `json:"passwordPath,omitempty"`
 
+	// the unique crn of the resource
+	StackCrn string `json:"stackCrn,omitempty"`
+
 	// id of the stack
 	StackID int64 `json:"stackId,omitempty"`
 

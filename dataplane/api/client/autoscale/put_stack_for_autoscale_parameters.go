@@ -14,7 +14,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -67,8 +66,8 @@ type PutStackForAutoscaleParams struct {
 
 	/*Body*/
 	Body *model.UpdateStackV4Request
-	/*ID*/
-	ID int64
+	/*Crn*/
+	Crn string
 	/*UserID*/
 	UserID string
 
@@ -121,15 +120,15 @@ func (o *PutStackForAutoscaleParams) SetBody(body *model.UpdateStackV4Request) {
 	o.Body = body
 }
 
-// WithID adds the id to the put stack for autoscale params
-func (o *PutStackForAutoscaleParams) WithID(id int64) *PutStackForAutoscaleParams {
-	o.SetID(id)
+// WithCrn adds the crn to the put stack for autoscale params
+func (o *PutStackForAutoscaleParams) WithCrn(crn string) *PutStackForAutoscaleParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetID adds the id to the put stack for autoscale params
-func (o *PutStackForAutoscaleParams) SetID(id int64) {
-	o.ID = id
+// SetCrn adds the crn to the put stack for autoscale params
+func (o *PutStackForAutoscaleParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WithUserID adds the userID to the put stack for autoscale params
@@ -157,8 +156,8 @@ func (o *PutStackForAutoscaleParams) WriteToRequest(r runtime.ClientRequest, reg
 		}
 	}
 
-	// path param id
-	if err := r.SetPathParam("id", swag.FormatInt64(o.ID)); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 

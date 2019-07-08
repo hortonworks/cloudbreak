@@ -31,6 +31,9 @@ type StackViewV4Response struct {
 	// credential name
 	CredentialName string `json:"credentialName,omitempty"`
 
+	// the unique crn of the resource
+	Crn string `json:"crn,omitempty"`
+
 	// CRN of the environment which the stack is assigned to
 	EnvironmentCrn string `json:"environmentCrn,omitempty"`
 
@@ -39,9 +42,6 @@ type StackViewV4Response struct {
 
 	// specific version of HDP
 	HdpVersion string `json:"hdpVersion,omitempty"`
-
-	// id of the stack
-	ID int64 `json:"id,omitempty"`
 
 	// name of the stack
 	// Required: true

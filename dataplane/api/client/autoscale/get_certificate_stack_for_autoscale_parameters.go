@@ -14,7 +14,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -63,8 +62,8 @@ for the get certificate stack for autoscale operation typically these are writte
 */
 type GetCertificateStackForAutoscaleParams struct {
 
-	/*ID*/
-	ID int64
+	/*Crn*/
+	Crn string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -104,15 +103,15 @@ func (o *GetCertificateStackForAutoscaleParams) SetHTTPClient(client *http.Clien
 	o.HTTPClient = client
 }
 
-// WithID adds the id to the get certificate stack for autoscale params
-func (o *GetCertificateStackForAutoscaleParams) WithID(id int64) *GetCertificateStackForAutoscaleParams {
-	o.SetID(id)
+// WithCrn adds the crn to the get certificate stack for autoscale params
+func (o *GetCertificateStackForAutoscaleParams) WithCrn(crn string) *GetCertificateStackForAutoscaleParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetID adds the id to the get certificate stack for autoscale params
-func (o *GetCertificateStackForAutoscaleParams) SetID(id int64) {
-	o.ID = id
+// SetCrn adds the crn to the get certificate stack for autoscale params
+func (o *GetCertificateStackForAutoscaleParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -123,8 +122,8 @@ func (o *GetCertificateStackForAutoscaleParams) WriteToRequest(r runtime.ClientR
 	}
 	var res []error
 
-	// path param id
-	if err := r.SetPathParam("id", swag.FormatInt64(o.ID)); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 
