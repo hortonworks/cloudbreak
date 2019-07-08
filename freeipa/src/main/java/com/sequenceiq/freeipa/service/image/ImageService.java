@@ -16,9 +16,7 @@ import javax.inject.Inject;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +24,7 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.converter.image.ImageToImageEntityConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
@@ -51,8 +50,7 @@ public class ImageService {
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Inject
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
+    private ImageToImageEntityConverter imageConverter;
 
     @Inject
     private ImageRepository imageRepository;
@@ -78,7 +76,7 @@ public class ImageService {
         LOGGER.info("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
                 platformString, region, imageName, catalogUrl);
 
-        Image image = conversionService.convert(imageCatalogImage, Image.class);
+        Image image = imageConverter.convert(imageCatalogImage);
         image.setStack(stack);
         image.setUserdata(userData);
         image.setImageName(imageName);

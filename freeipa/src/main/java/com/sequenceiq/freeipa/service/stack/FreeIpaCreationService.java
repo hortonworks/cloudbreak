@@ -1,14 +1,19 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -30,9 +35,9 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.CredentialService;
-import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -74,11 +79,18 @@ public class FreeIpaCreationService {
     @Inject
     private CrnService crnService;
 
+    @Inject
+    private GrpcUmsClient umsClient;
+
+    @Inject
+    private AsyncTaskExecutor intermediateBuilderExecutor;
+
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
         checkIfAlreadyExistsInEnvironment(request, accountId);
-        String userId = crnService.getCurrentUserId();
+        String userCrn = crnService.getUserCrn();
+        Future<User> userFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, Optional.empty()));
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
-        Stack stack = stackConverter.convert(request, accountId, userId, credential.getCloudPlatform());
+        Stack stack = stackConverter.convert(request, accountId, userFuture, credential.getCloudPlatform());
         stack.setResourceCrn(crnService.createCrn(accountId, Crn.ResourceType.FREEIPA));
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
 
