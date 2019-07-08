@@ -73,7 +73,9 @@ public class ProvisionerService {
                                     .get(0L, sdxCluster.getClusterName(), Collections.emptySet());
                             LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
                             if (Status.DELETE_FAILED.equals(stackV4Response.getStatus())) {
-                                return AttemptResults.breakFor("Stack deletion failed " + sdxCluster.getClusterName());
+                                return AttemptResults.breakFor(
+                                        "Stack deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
+                                );
                             } else {
                                 return AttemptResults.justContinue();
                             }
@@ -91,7 +93,7 @@ public class ProvisionerService {
 
     public void startStackProvisioning(Long id, DetailedEnvironmentResponse environment) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
-            stackRequestManifester.configureStackForSdxCluster(sdxCluster,  environment);
+            stackRequestManifester.configureStackForSdxCluster(sdxCluster, environment);
             LOGGER.info("Call cloudbreak with stackrequest");
             try {
                 StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
@@ -136,7 +138,9 @@ public class ProvisionerService {
                                 if (Status.CREATE_FAILED.equals(stackV4Response.getStatus())) {
                                     LOGGER.info("Stack creation failed {}, status reason is: {}",
                                             sdxCluster.getClusterName(), stackV4Response.getStatusReason());
-                                    return AttemptResults.breakFor("Stack creation failed " + sdxCluster.getClusterName());
+                                    return AttemptResults.breakFor(
+                                            "Stack creation failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
+                                    );
                                 } else {
                                     return AttemptResults.justContinue();
                                 }
