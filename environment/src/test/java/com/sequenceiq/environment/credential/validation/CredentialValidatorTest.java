@@ -1,62 +1,52 @@
 package com.sequenceiq.environment.credential.validation;
 
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 
+import java.util.Collections;
 import java.util.Set;
 
-import javax.ws.rs.BadRequestException;
+import org.hamcrest.CoreMatchers;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.util.ReflectionTestUtils;
-
+import com.sequenceiq.cloudbreak.util.ValidationResult;
+import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.validation.definition.CredentialDefinitionService;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
+@RunWith(MockitoJUnitRunner.class)
 public class CredentialValidatorTest {
-    public static final String VALIDATOR_PRIVATE_FIELD_NAME = "enabledPlatforms";
 
-    private static final String PLATFORM_ONE = "provider1";
+    private final CredentialDefinitionService credentialDefinitionService = Mockito.mock(CredentialDefinitionService.class);
 
-    private static final String PLATFORM_TWO = "provider2";
+    private final CredentialValidator credentialValidator
+            = new CredentialValidator(Set.of("AWS", "AZURE"), credentialDefinitionService, Collections.emptyList());
 
-    private CredentialValidator credentialValidatorUnderTest;
+    @Test
+    public void testValidateCredentialUpdate() {
+        Credential original = new Credential();
+        original.setCloudPlatform(CloudPlatform.AWS.name());
+        Credential newCred = new Credential();
+        newCred.setCloudPlatform(CloudPlatform.AWS.name());
 
-    @MockBean
-    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "indirectly used")
-    private CredentialDefinitionService credentialDefinitionService;
-
-    public CredentialValidatorTest() {
-        credentialValidatorUnderTest = new CredentialValidator();
-        credentialDefinitionService = mock(CredentialDefinitionService.class);
+        ValidationResult result = credentialValidator.validateCredentialUpdate(original, newCred);
+        assertFalse(result.hasError());
     }
 
     @Test
-    public void testValidateCredentialCloudPlatformOnlyOne() {
-        ReflectionTestUtils.setField(credentialValidatorUnderTest,
-                VALIDATOR_PRIVATE_FIELD_NAME, Set.of(PLATFORM_ONE));
-        Assertions.assertDoesNotThrow(runValidation());
-    }
+    public void testValidateCredentialUpdateInvalidPlatformChange() {
+        Credential original = new Credential();
+        original.setCloudPlatform(CloudPlatform.AWS.name());
+        Credential newCred = new Credential();
+        newCred.setCloudPlatform(CloudPlatform.AZURE.name());
 
-    @Test
-    public void testValidateCredentialCloudPlatformNotIncluded() {
-        ReflectionTestUtils.setField(credentialValidatorUnderTest,
-                VALIDATOR_PRIVATE_FIELD_NAME, Set.of(PLATFORM_TWO));
-        Assertions.assertThrows(BadRequestException.class, runValidation());
-    }
-
-    @Test
-    public void testValidateCredentialCloudPlatformIncluded() {
-        ReflectionTestUtils.setField(credentialValidatorUnderTest,
-                VALIDATOR_PRIVATE_FIELD_NAME, Set.of(PLATFORM_TWO, PLATFORM_ONE));
-        Assertions.assertDoesNotThrow(runValidation());
-    }
-
-    private Executable runValidation() {
-        return () -> credentialValidatorUnderTest
-                .validateCredentialCloudPlatform(PLATFORM_ONE);
+        ValidationResult result = credentialValidator.validateCredentialUpdate(original, newCred);
+        assertEquals(1, result.getErrors().size());
+        assertThat(result.getErrors().get(0),
+                CoreMatchers.containsString("CloudPlatform of the credential cannot be changed! Original: 'AWS' New: 'AZURE'."));
     }
 }
