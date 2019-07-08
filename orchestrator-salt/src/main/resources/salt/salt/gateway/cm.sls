@@ -49,9 +49,9 @@ cloudera_manager_setup_knox:
     - mode: 777
 
 {% if salt['pillar.get']('gateway:tokencert') != None %}
-{{ gateway.knox_data_root }}/topologies/token.xml:
+{{ gateway.knox_data_root }}/topologies/cdp-token.xml:
   file.managed:
-    - source: salt://gateway/config/cm/token.xml.j2
+    - source: salt://gateway/config/cm/cdp-token.xml.j2
     - template: jinja
     - mode: 777
 {% endif %}
