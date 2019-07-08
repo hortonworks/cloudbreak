@@ -46,9 +46,8 @@ public class StackRequestManifester {
     @Value("${sdx.cluster.definition}")
     private String clusterDefinition;
 
-    public void configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
-        addStackV4RequestAsString(sdxCluster, generatedStackV4Request);
+    public StackV4Request configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+        return setupStackRequestForCloudbreak(sdxCluster, environment);
     }
 
     public void addStackV4RequestAsString(SdxCluster sdxCluster, StackV4Request internalRequest) {
