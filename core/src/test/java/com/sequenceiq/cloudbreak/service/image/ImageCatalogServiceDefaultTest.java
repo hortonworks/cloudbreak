@@ -22,13 +22,13 @@ import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @RunWith(Parameterized.class)
 public class ImageCatalogServiceDefaultTest {
@@ -84,7 +84,7 @@ public class ImageCatalogServiceDefaultTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 { "com/sequenceiq/cloudbreak/service/image/default-hdp-imagecatalog.json", "aws", "HDP", "2.6", "latest-hdp", "5.0.0", "" },
-                { "com/sequenceiq/cloudbreak/service/image/default-hdp-imagecatalog.json", "aws", "HDP", "2.6", "latest-hdp", "5.0.0", "redhat7" },
+                { "com/sequenceiq/cloudbreak/service/image/default-hdp-imagecatalog.json", "aws", "HDP", "2.6", "latest-hdp", "5.0.0", "centos7" },
                 { "com/sequenceiq/cloudbreak/service/image/default-hdp-imagecatalog.json", "aws", "HDP", "2.6", "latest-amazonlinux-hdp",
                     "5.0.0", "amazonlinux2" },
                 { "com/sequenceiq/cloudbreak/service/image/default-hdp-imagecatalog.json", "aws", "HDP", "missing", "third-latest-base-amazonlinux",

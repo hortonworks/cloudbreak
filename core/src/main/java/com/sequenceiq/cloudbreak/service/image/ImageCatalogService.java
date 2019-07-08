@@ -558,7 +558,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     private static Predicate<Image> isMatchingOs(Set<String> operatingSystems) {
-        return img -> operatingSystems.stream().anyMatch(os -> img.getOsType().equalsIgnoreCase(os));
+        return img -> operatingSystems.stream().anyMatch(os -> img.getOs().equalsIgnoreCase(os));
     }
 
     private Optional<Image> getLatestImageDefaultPreferred(List<Image> images) {
