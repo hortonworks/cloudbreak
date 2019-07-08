@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
@@ -30,14 +29,12 @@ public class CloudStorageManifester {
     @Inject
     private CloudbreakUserCrnClient cloudbreakClient;
 
-    @Value("${sdx.cluster.definition}")
-    private String clusterDefinition;
-
-    public CloudStorageV4Request getCloudStorageConfig(String cloudPlatform, SdxCluster sdxCluster, SdxClusterRequest clusterRequest) {
+    public CloudStorageV4Request getCloudStorageConfig(String cloudPlatform, String blueprint, SdxCluster sdxCluster, SdxClusterRequest clusterRequest) {
         SdxCloudStorageRequest cloudStorage = clusterRequest.getCloudStorage();
         validateCloudStorage(cloudPlatform, cloudStorage);
 
         FileSystemParameterV4Responses fileSystemRecommendations = getFileSystemRecommendations(sdxCluster.getInitiatorUserCrn(),
+                blueprint,
                 sdxCluster.getClusterName(),
                 cloudStorage);
 
@@ -65,10 +62,11 @@ public class CloudStorageManifester {
         }
     }
 
-    private FileSystemParameterV4Responses getFileSystemRecommendations(String userCrn, String clusterName, SdxCloudStorageRequest cloudStorageRequest) {
+    private FileSystemParameterV4Responses getFileSystemRecommendations(String userCrn, String blueprint,
+            String clusterName, SdxCloudStorageRequest cloudStorageRequest) {
         return cloudbreakClient.withCrn(userCrn).filesystemV4Endpoint()
                 .getFileSystemParameters(0L,
-                        clusterDefinition,
+                        blueprint,
                         clusterName,
                         "",
                         cloudStorageRequest.getBaseLocation(),

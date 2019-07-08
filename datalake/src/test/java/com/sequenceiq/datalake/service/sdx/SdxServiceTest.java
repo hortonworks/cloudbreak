@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +29,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -38,6 +43,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.client.EnvironmentServiceClient;
 import com.sequenceiq.environment.client.EnvironmentServiceEndpoints;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
@@ -116,7 +122,7 @@ public class SdxServiceTest {
     @Test
     void createSdxIfExists() {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setClusterShape("big");
+        sdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxClusterRequest.setEnvironment("envir");
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
@@ -129,7 +135,7 @@ public class SdxServiceTest {
     @Test
     void createSdx() {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setClusterShape("big");
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
         sdxClusterRequest.setTags(tags);
@@ -150,7 +156,7 @@ public class SdxServiceTest {
         SdxCluster capturedSdx = captor.getValue();
         Assertions.assertEquals("tagecske", capturedSdx.getTags().getValue("mytag"));
         Assertions.assertEquals(sdxName, capturedSdx.getClusterName());
-        Assertions.assertEquals("big", capturedSdx.getClusterShape());
+        Assertions.assertEquals(LIGHT_DUTY, capturedSdx.getClusterShape());
         Assertions.assertEquals("envir", capturedSdx.getEnvName());
         Assertions.assertEquals("hortonworks", capturedSdx.getAccountId());
         Assertions.assertEquals(USER_CRN, capturedSdx.getInitiatorUserCrn());
@@ -205,6 +211,35 @@ public class SdxServiceTest {
                 () -> sdxService.deleteSdx(USER_CRN, "test-sdx-cluster"));
         verify(sdxClusterRepository, times(1))
                 .findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq("test-sdx-cluster"));
+    }
+
+    @Test
+    void validateAllAwsStackRequests() {
+        CloudPlatform cp = CloudPlatform.AWS;
+        Stream.of(SdxClusterShape.values())
+                .filter(a -> !a.equals(SdxClusterShape.CUSTOM))
+                .forEach(a -> assertStackV4Request(cp, a));
+    }
+
+    @Test
+    void validateAllAzureStackRequests() {
+        CloudPlatform cp = CloudPlatform.YARN;
+        Stream.of(SdxClusterShape.values())
+                .filter(a -> !a.equals(SdxClusterShape.CUSTOM))
+                .forEach(a -> assertStackV4Request(cp, a));
+    }
+
+    @Test
+    void validateAllYarnStackRequests() {
+        CloudPlatform cp = CloudPlatform.YARN;
+        Stream.of(SdxClusterShape.values())
+                .filter(a -> !a.equals(SdxClusterShape.CUSTOM))
+                .forEach(a -> assertStackV4Request(cp, a));
+    }
+
+    private void assertStackV4Request(CloudPlatform type, SdxClusterShape shape) {
+        StackV4Request lightDutyStackrequest = sdxService.getStackRequestFromFile(sdxService.generateClusterTemplatePath(type.toString(), shape));
+        assertNotNull("Bp name should be defined in all templates", lightDutyStackrequest.getCluster().getBlueprintName());
     }
 
     @Test

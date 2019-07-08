@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "envname"}))
@@ -47,7 +48,8 @@ public class SdxCluster implements AccountIdAwareResource {
     private String envCrn;
 
     @NotNull
-    private String clusterShape;
+    @Enumerated(EnumType.STRING)
+    private SdxClusterShape clusterShape;
 
     @NotNull
     @Convert(converter = JsonToString.class)
@@ -144,11 +146,11 @@ public class SdxCluster implements AccountIdAwareResource {
         this.envCrn = envCrn;
     }
 
-    public String getClusterShape() {
+    public SdxClusterShape getClusterShape() {
         return clusterShape;
     }
 
-    public void setClusterShape(String clusterShape) {
+    public void setClusterShape(SdxClusterShape clusterShape) {
         this.clusterShape = clusterShape;
     }
 

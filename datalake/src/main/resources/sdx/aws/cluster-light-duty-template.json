@@ -1,5 +1,6 @@
 {
   "cluster": {
+    "blueprintName": "CDP 1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
     "validateBlueprint": false
   },
   "customDomain": {
@@ -10,7 +11,7 @@
     {
       "name": "idbroker",
       "template": {
-        "instanceType": "Standard_D12_v2",
+        "instanceType": "m5.2xlarge",
         "attachedVolumes": [
           {
             "count": 1,
@@ -41,7 +42,7 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "Standard_D12_v2",
+        "instanceType": "m5.2xlarge",
         "attachedVolumes": [
           {
             "count": 1,
@@ -63,6 +64,13 @@
             "subnet": "0.0.0.0/0",
             "ports": [
               "9443"
+            ],
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "8443"
             ],
             "protocol": "tcp"
           },

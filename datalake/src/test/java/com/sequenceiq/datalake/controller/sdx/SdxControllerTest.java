@@ -27,6 +27,7 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.notification.NotificationService;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,16 +57,11 @@ class SdxControllerTest {
 
     @Test
     void createTest() {
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setClusterName("test-sdx-cluster");
-        sdxCluster.setClusterShape("big");
-        sdxCluster.setEnvName("test-env");
-        sdxCluster.setCrn("crn:sdxcluster");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
+        SdxCluster sdxCluster = getValidSdxCluster();
         when(sdxService.createSdx(anyString(), anyString(), any(SdxClusterRequest.class), nullable(StackV4Request.class))).thenReturn(sdxCluster);
 
         SdxClusterRequest createSdxClusterRequest = new SdxClusterRequest();
-        createSdxClusterRequest.setClusterShape("big");
+        createSdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         createSdxClusterRequest.setEnvironment("test-env");
         Map<String, String> tags = new HashMap<>();
         tags.put("tag1", "value1");
@@ -80,12 +76,7 @@ class SdxControllerTest {
 
     @Test
     void getTest() {
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setClusterName("test-sdx-cluster");
-        sdxCluster.setClusterShape("big");
-        sdxCluster.setEnvName("test-env");
-        sdxCluster.setCrn("crn:sdxcluster");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
+        SdxCluster sdxCluster = getValidSdxCluster();
         when(sdxService.getByAccountIdAndSdxName(anyString(), anyString())).thenReturn(sdxCluster);
 
         SdxClusterResponse sdxClusterResponse = sdxController.get("test-sdx-cluster");
@@ -93,6 +84,16 @@ class SdxControllerTest {
         assertEquals("test-env", sdxClusterResponse.getEnvironmentName());
         assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
+    }
+
+    private SdxCluster getValidSdxCluster() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("test-sdx-cluster");
+        sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        sdxCluster.setEnvName("test-env");
+        sdxCluster.setCrn("crn:sdxcluster");
+        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
+        return sdxCluster;
     }
 
 }
