@@ -64,13 +64,15 @@ public class StackRequestManifester {
         try {
             StackV4Request stackRequest = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);
             stackRequest.setName(sdxCluster.getClusterName());
-            TagsV4Request tags = new TagsV4Request();
-            try {
-                tags.setUserDefined(sdxCluster.getTags().get(HashMap.class));
-            } catch (IOException e) {
-                throw new BadRequestException("can not convert from json to tags");
+            if (stackRequest.getTags() == null) {
+                TagsV4Request tags = new TagsV4Request();
+                try {
+                    tags.setUserDefined(sdxCluster.getTags().get(HashMap.class));
+                } catch (IOException e) {
+                    throw new BadRequestException("can not convert from json to tags");
+                }
+                stackRequest.setTags(tags);
             }
-            stackRequest.setTags(tags);
             stackRequest.setEnvironmentCrn(sdxCluster.getEnvCrn());
 
             if (!CloudPlatform.YARN.name().equals(environment.getCloudPlatform())
