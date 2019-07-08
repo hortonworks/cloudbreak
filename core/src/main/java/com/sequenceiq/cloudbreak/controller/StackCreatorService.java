@@ -281,8 +281,7 @@ public class StackCreatorService {
         return (clusterRequest.getAmbari() != null && clusterRequest.getAmbari().getRepository() != null)
                 || (clusterRequest.getAmbari() != null
                 && clusterRequest.getAmbari().getStackRepository() != null
-                && clusterRequest.getAmbari().getStackRepository().customRepoSpecified())
-                || blueprintService.isClouderaManagerTemplate(blueprint);
+                && clusterRequest.getAmbari().getStackRepository().customRepoSpecified());
     }
 
     private Stack prepareSharedServiceIfNeed(Stack stack) {
