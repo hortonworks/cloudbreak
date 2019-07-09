@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.common.database;
 
 import static java.util.Objects.requireNonNull;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -110,20 +111,37 @@ public class DatabaseCommon {
     }
 
     /**
-     * Executes several SQL statements. Statements are not wrapped in a
-     * transaction, so do that if it's important.
+     * Executes several SQL statements. If there is a failure, and a transaction
+     * is in use, the transaction is rolled back.
      *
-     * @param  statement    SQL statement for working with a database
-     * @param  sqlStrings   list of SQL statements to execute
-     * @return              corresponding list of update counts
+     * @param  conn            JDBC connection; expected to have auto-commit on
+     * @param  sqlStrings      list of SQL statements to execute
+     * @param  useTransaction  true to wrap execution of statements in a
+     *                         transaction
+     * @return corresponding list of update counts
      * @throws SQLException if any statement fails
      */
-    public List<Integer> executeUpdates(Statement statement, List<String> sqlStrings) throws SQLException {
-        List<Integer> rowCounts = new ArrayList<>(sqlStrings.size());
-        for (String sqlString : sqlStrings) {
-            rowCounts.add(statement.executeUpdate(sqlString));
+    public List<Integer> executeUpdates(Connection conn, List<String> sqlStrings, boolean useTransaction) throws SQLException {
+        try (Statement statement = conn.createStatement()) {
+            if (useTransaction) {
+                conn.setAutoCommit(false);
+            }
+            List<Integer> rowCounts = new ArrayList<>(sqlStrings.size());
+            for (String sqlString : sqlStrings) {
+                rowCounts.add(statement.executeUpdate(sqlString));
+            }
+            if (useTransaction) {
+                conn.commit();
+            }
+            return rowCounts;
+        } catch (SQLException e) {
+            if (useTransaction) {
+                conn.rollback();
+            }
+            throw e;
+        } finally {
+            conn.setAutoCommit(true);
         }
-        return rowCounts;
     }
 
     public static class JdbcConnectionUrlFields {

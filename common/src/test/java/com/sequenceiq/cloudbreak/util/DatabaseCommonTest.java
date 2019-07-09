@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -12,9 +13,11 @@ import com.sequenceiq.cloudbreak.common.database.DatabaseCommon.JdbcConnectionUr
 
 import java.util.List;
 import java.util.Optional;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.mockito.InOrder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -185,30 +188,81 @@ public class DatabaseCommonTest {
     }
 
     @Test
-    public void testExecuteUpdates() throws SQLException {
+    public void testExecuteUpdatesNoTransaction() throws SQLException {
+        Connection conn = mock(Connection.class);
         Statement statement = mock(Statement.class);
+        when(conn.createStatement()).thenReturn(statement);
         when(statement.executeUpdate(any(String.class))).thenReturn(1);
         List<String> sqlStrings = List.of("sql1", "sql2");
 
-        List<Integer> rowCounts = databaseCommon.executeUpdates(statement, sqlStrings);
+        List<Integer> rowCounts = databaseCommon.executeUpdates(conn, sqlStrings, false);
 
         assertThat(rowCounts).isEqualTo(List.of(1, 1));
         verify(statement).executeUpdate("sql1");
         verify(statement).executeUpdate("sql2");
+        verify(conn, never()).setAutoCommit(false);
+        verify(conn, never()).commit();
     }
 
     @Test
-    public void testExecuteUpdatesFail() throws SQLException {
-        thrown.expect(SQLException.class);
+    public void testExecuteUpdatesTransaction() throws SQLException {
+        Connection conn = mock(Connection.class);
         Statement statement = mock(Statement.class);
+        when(conn.createStatement()).thenReturn(statement);
+        when(statement.executeUpdate(any(String.class))).thenReturn(1);
+        List<String> sqlStrings = List.of("sql1", "sql2");
+
+        List<Integer> rowCounts = databaseCommon.executeUpdates(conn, sqlStrings, true);
+
+        assertThat(rowCounts).isEqualTo(List.of(1, 1));
+        verify(statement).executeUpdate("sql1");
+        verify(statement).executeUpdate("sql2");
+
+        InOrder inOrder = inOrder(conn);
+        inOrder.verify(conn).setAutoCommit(false);
+        inOrder.verify(conn).commit();
+        inOrder.verify(conn, never()).rollback();
+        inOrder.verify(conn).setAutoCommit(true);
+    }
+
+    @Test
+    public void testExecuteUpdatesFailNoTransaction() throws SQLException {
+        thrown.expect(SQLException.class);
+        Connection conn = mock(Connection.class);
+        Statement statement = mock(Statement.class);
+        when(conn.createStatement()).thenReturn(statement);
         when(statement.executeUpdate("sql1")).thenThrow(new SQLException("fail"));
         List<String> sqlStrings = List.of("sql1", "sql2");
 
         try {
-            databaseCommon.executeUpdates(statement, sqlStrings);
+            databaseCommon.executeUpdates(conn, sqlStrings, false);
         } finally {
             verify(statement).executeUpdate("sql1");
             verify(statement, never()).executeUpdate("sql2");
+            verify(conn, never()).rollback();
+        }
+    }
+
+    @Test
+    public void testExecuteUpdatesFailTransaction() throws SQLException {
+        thrown.expect(SQLException.class);
+        Connection conn = mock(Connection.class);
+        Statement statement = mock(Statement.class);
+        when(conn.createStatement()).thenReturn(statement);
+        when(statement.executeUpdate("sql1")).thenThrow(new SQLException("fail"));
+        List<String> sqlStrings = List.of("sql1", "sql2");
+
+        try {
+            databaseCommon.executeUpdates(conn, sqlStrings, true);
+        } finally {
+            verify(statement).executeUpdate("sql1");
+            verify(statement, never()).executeUpdate("sql2");
+
+            InOrder inOrder = inOrder(conn);
+            inOrder.verify(conn).setAutoCommit(false);
+            inOrder.verify(conn).rollback();
+            inOrder.verify(conn, never()).commit();
+            inOrder.verify(conn).setAutoCommit(true);
         }
     }
 }

@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Before;
@@ -44,7 +43,6 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.redbeams.TestData;
@@ -84,9 +82,6 @@ public class DatabaseServerConfigServiceTest {
 
     @Mock
     private CrnService crnService;
-
-    @Mock
-    private TransactionService transactionService;
 
     private DatabaseServerConfig server;
 
@@ -306,9 +301,8 @@ public class DatabaseServerConfigServiceTest {
     }
 
     @Test
-    public void testCreateDatabaseOnServer() throws TransactionService.TransactionExecutionException {
+    public void testCreateDatabaseOnServer() {
         when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv")).thenReturn(Optional.of(server));
-        setupTransactionServiceRequired(Boolean.class);
         when(databaseConfigService.register(any(DatabaseConfig.class)))
             .thenAnswer((Answer<DatabaseConfig>) invocation -> {
                 return invocation.getArgument(0, DatabaseConfig.class);
@@ -336,12 +330,5 @@ public class DatabaseServerConfigServiceTest {
         String databaseUserName = db.getConnectionUserName().getRaw();
         assertNotNull(databaseUserName);
         assertNotEquals(server.getConnectionUserName(), databaseUserName);
-    }
-
-    private <T> void setupTransactionServiceRequired(T supplierReturnType) throws TransactionService.TransactionExecutionException {
-        when(transactionService.required(any())).thenAnswer((Answer<T>) invocation -> {
-            Supplier<T> supplier = invocation.getArgument(0, Supplier.class);
-            return supplier.get();
-        });
     }
 }

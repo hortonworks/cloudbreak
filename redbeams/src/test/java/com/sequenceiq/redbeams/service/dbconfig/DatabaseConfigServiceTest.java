@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.hamcrest.core.Every;
 import org.hibernate.exception.ConstraintViolationException;
@@ -37,7 +36,6 @@ import org.springframework.validation.ObjectError;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.redbeams.TestData;
@@ -82,9 +80,6 @@ public class DatabaseConfigServiceTest {
 
     @Mock
     private CrnService crnService;
-
-    @Mock
-    private TransactionService transactionService;
 
     @Mock
     private DatabaseConnectionValidator connectionValidator;
@@ -147,7 +142,7 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteRegisteredDatabase() throws TransactionService.TransactionExecutionException {
+    public void testDeleteRegisteredDatabase() {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME);
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));
 
@@ -166,7 +161,7 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteCreatedDatabase() throws TransactionService.TransactionExecutionException {
+    public void testDeleteCreatedDatabase() {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setId(1L);
         server.setName("myserver");
@@ -174,7 +169,6 @@ public class DatabaseConfigServiceTest {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
         databaseConfig.setServer(server);
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));
-        setupTransactionServiceRequired(Boolean.class);
 
         underTest.delete(DATABASE_NAME, ENVIRONMENT_CRN);
 
@@ -185,13 +179,12 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteMultiple() throws TransactionService.TransactionExecutionException {
+    public void testDeleteMultiple() {
         Set<DatabaseConfig> databaseConfigs = new HashSet<>();
         databaseConfigs.add(getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME));
         databaseConfigs.add(getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME2));
         Set<String> databasesToDelete = Set.of(DATABASE_NAME, DATABASE_NAME2);
         when(repository.findAllByEnvironmentIdAndNameIn(ENVIRONMENT_CRN, databasesToDelete)).thenReturn(databaseConfigs);
-        setupTransactionServiceRequired(DatabaseConfig.class);
 
         underTest.delete(databasesToDelete, ENVIRONMENT_CRN);
 
@@ -199,13 +192,12 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteMultipleWhenNotFound() throws TransactionService.TransactionExecutionException {
+    public void testDeleteMultipleWhenNotFound() {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage(String.format("Database(s) for %s not found", DATABASE_NAME2));
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
         Set<String> databasesToDelete = Set.of(DATABASE_NAME, DATABASE_NAME2);
         when(repository.findAllByEnvironmentIdAndNameIn(ENVIRONMENT_CRN, databasesToDelete)).thenReturn(Set.of(databaseConfig));
-        setupTransactionServiceRequired(DatabaseConfig.class);
 
         underTest.delete(databasesToDelete, ENVIRONMENT_CRN);
 
@@ -297,13 +289,6 @@ public class DatabaseConfigServiceTest {
 
         assertEquals(ERROR_MESSAGE, result);
         verify(connectionValidator).validate(eq(existingDatabaseConfig), any());
-    }
-
-    private <T> void setupTransactionServiceRequired(T supplierReturnType) throws TransactionService.TransactionExecutionException {
-        when(transactionService.required(any())).thenAnswer((Answer<T>) invocation -> {
-            Supplier<T> supplier = invocation.getArgument(0, Supplier.class);
-            return supplier.get();
-        });
     }
 
     @Test
