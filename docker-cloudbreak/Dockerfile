@@ -9,12 +9,6 @@ ENV VERSION ${VERSION}
 
 WORKDIR /
 
-# Install zip
-RUN apt-get update --no-install-recommends && apt-get install -y zip procps && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install zip
-RUN apt-get update --no-install-recommends && apt-get install -y zip procps
-
 # install the cloudbreak app
 ADD ${REPO_URL}/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar /cloudbreak.jar
 
