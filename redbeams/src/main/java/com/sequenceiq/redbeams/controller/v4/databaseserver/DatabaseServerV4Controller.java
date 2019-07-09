@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.TerminateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerAllocationOutcomeV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -26,6 +27,7 @@ import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestTo
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 
@@ -51,6 +53,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Inject
+    private DBStackService dbStackService;
+
+    @Inject
     private ConverterUtil converterUtil;
 
     @Override
@@ -66,10 +71,16 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    public DatabaseServerAllocationOutcomeV4Response create(AllocateDatabaseServerV4Request request) {
+    public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
         DBStack dbStack = dbStackConverter.convert(request, threadBasedUserCrnProvider.getUserCrn());
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack);
-        return converterUtil.convert(savedDBStack, DatabaseServerAllocationOutcomeV4Response.class);
+        return converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class);
+    }
+
+    @Override
+    public DatabaseServerStatusV4Response getExternalStatus(@NotNull String environmentId, String name) {
+        DBStack dbStack = dbStackService.getByNameAndEnvironmentId(name, environmentId);
+        return converterUtil.convert(dbStack, DatabaseServerStatusV4Response.class);
     }
 
     @Override

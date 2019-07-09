@@ -5,6 +5,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServerV4Identifiers;
@@ -12,7 +21,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.TerminateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerAllocationOutcomeV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -23,15 +32,6 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 public class DatabaseServerV4ControllerTest {
 
@@ -68,7 +68,7 @@ public class DatabaseServerV4ControllerTest {
 
     private AllocateDatabaseServerV4Request allocateRequest;
 
-    private DatabaseServerAllocationOutcomeV4Response allocateResponse;
+    private DatabaseServerStatusV4Response allocateResponse;
 
     private TerminateDatabaseServerV4Request terminateRequest;
 
@@ -103,7 +103,7 @@ public class DatabaseServerV4ControllerTest {
 
         allocateRequest = new AllocateDatabaseServerV4Request();
 
-        allocateResponse = new DatabaseServerAllocationOutcomeV4Response();
+        allocateResponse = new DatabaseServerStatusV4Response();
 
         terminateRequest = new TerminateDatabaseServerV4Request();
 
@@ -142,10 +142,10 @@ public class DatabaseServerV4ControllerTest {
         when(dbStackConverter.convert(allocateRequest, userCrn)).thenReturn(dbStack);
         DBStack savedDBStack = new DBStack();
         when(creationService.launchDatabaseServer(dbStack)).thenReturn(savedDBStack);
-        when(converterUtil.convert(savedDBStack, DatabaseServerAllocationOutcomeV4Response.class))
+        when(converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class))
             .thenReturn(allocateResponse);
 
-        DatabaseServerAllocationOutcomeV4Response response = underTest.create(allocateRequest);
+        DatabaseServerStatusV4Response response = underTest.create(allocateRequest);
 
         assertEquals(allocateResponse, response);
         verify(creationService).launchDatabaseServer(dbStack);

@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.redbeams.api.model.common.Status;
@@ -8,12 +10,10 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.validation.constraints.NotNull;
-
-@ApiModel("DatabaseServerAllocationOutcomeV4Response")
+@ApiModel("ExternalDatabaseServerStatusV4Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DatabaseServerAllocationOutcomeV4Response {
+public class DatabaseServerStatusV4Response {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_ID, required = true)
     private String environmentId;
@@ -30,8 +30,10 @@ public class DatabaseServerAllocationOutcomeV4Response {
     // @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.DATABASE_SERVER, required = true)
     // private DatabaseServerV4Response databaseServerConfig;
 
+    @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.STATUS, required = true)
     private Status status;
 
+    @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.STATUS_REASON, required = true)
     private String statusReason;
 
     public String getEnvironmentId() {
