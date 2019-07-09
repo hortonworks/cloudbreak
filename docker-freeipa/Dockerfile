@@ -12,9 +12,6 @@ WORKDIR /
 # Install zip
 RUN apt-get update --no-install-recommends && apt-get install -y zip procps && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install zip
-RUN apt-get update --no-install-recommends && apt-get install -y zip procps
-
 # install the freeipa app
 ADD ${REPO_URL}/com/sequenceiq/freeipa/$VERSION/freeipa-$VERSION.jar /freeipa.jar
 
