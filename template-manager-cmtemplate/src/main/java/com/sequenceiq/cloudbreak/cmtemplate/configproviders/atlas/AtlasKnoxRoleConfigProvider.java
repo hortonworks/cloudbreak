@@ -16,10 +16,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class AtlasKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
 
-    private static final String ATLAS_KNOX_CONFIG =  "atlas.authentication.method.trustedproxy=true\n"
-            + "atlas.proxyuser.knox.hosts=*\n"
-            + "atlas.proxyuser.knox.users=*\n"
-            + "atlas.proxyuser.knox.groups=*\n";
+    private static final String ATLAS_KNOX_CONFIG =  "atlas.authentication.method.trustedproxy=true";
 
     private static final String ATLAS_CONFIG_SAFETY_VALVE = "conf/atlas-application.properties_role_safety_valve";
 
