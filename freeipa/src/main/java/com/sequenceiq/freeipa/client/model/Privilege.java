@@ -1,18 +1,20 @@
 package com.sequenceiq.freeipa.client.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.sequenceiq.freeipa.client.deserializer.ListFlatteningDeserializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Role {
+public class Privilege {
+
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private String cn;
 
-    private List<String> member = new ArrayList<>();
+    @JsonProperty(value = "member_role")
+    private List<String> member;
 
     public String getCn() {
         return cn;

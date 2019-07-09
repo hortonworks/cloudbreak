@@ -2,9 +2,12 @@ package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,12 +18,15 @@ import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.RoleRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServicePrincipalRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Keytab;
+import com.sequenceiq.freeipa.client.model.Privilege;
+import com.sequenceiq.freeipa.client.model.Role;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -75,12 +81,16 @@ public class KerberosMgmtV1Service {
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
         ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
-        String adminUser = freeIpaClientFactory.getAdminUser();
         hostAdd(request.getServerHostName(), ipaClient);
-        String servicePrincipal = serviceAdd(request.getServiceName(), request.getServerHostName(), realm, adminUser, ipaClient);
-        String serviceKeytab = getServiceKeytab(servicePrincipal, ipaClient);
+        com.sequenceiq.freeipa.client.model.Service service = serviceAdd(request, realm, ipaClient);
+        String serviceKeytab;
+        if (service.getHasKeytab() && request.getDoNotRecreateKeytab()) {
+            serviceKeytab = getExistingServiceKeytab(service.getKrbprincipalname(), ipaClient);
+        } else {
+            serviceKeytab = getServiceKeytab(service.getKrbprincipalname(), ipaClient);
+        }
         response.setKeytab(getSecretResponseForKeytab(accountId, serviceKeytab));
-        response.setServicePrincial(getSecretResponseForPrincipal(accountId, servicePrincipal));
+        response.setServicePrincial(getSecretResponseForPrincipal(accountId, service.getKrbprincipalname()));
         return response;
     }
 
@@ -137,8 +147,9 @@ public class KerberosMgmtV1Service {
         }
     }
 
-    private String serviceAdd(String serviceName, String hostname, String realm, String adminUser, FreeIpaClient ipaClient) throws KeytabCreationException {
-        String canonicalPrincipal = serviceName + "/" + hostname + "@" + realm;
+    private com.sequenceiq.freeipa.client.model.Service serviceAdd(ServiceKeytabRequest request, String realm, FreeIpaClient ipaClient)
+            throws KeytabCreationException {
+        String canonicalPrincipal = request.getServiceName() + "/" + request.getServerHostName() + "@" + realm;
         com.sequenceiq.freeipa.client.model.Service service;
         try {
             try {
@@ -149,12 +160,45 @@ public class KerberosMgmtV1Service {
                 }
                 service = ipaClient.showService(canonicalPrincipal);
             }
-            allowServiceKeytabRetrieval(service.getKrbprincipalname(), adminUser, ipaClient);
+            allowServiceKeytabRetrieval(service.getKrbprincipalname(), freeIpaClientFactory.getAdminUser(), ipaClient);
+            addRoleAndPrivileges(service, request.getRoleRequest(), ipaClient);
         } catch (FreeIpaClientException e) {
             LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
             throw new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED);
         }
-        return service.getKrbprincipalname();
+        return service;
+    }
+
+    private void addRoleAndPrivileges(com.sequenceiq.freeipa.client.model.Service service, RoleRequest roleRequest, FreeIpaClient ipaClient)
+            throws FreeIpaClientException {
+        if (roleRequest != null && StringUtils.isNotBlank(roleRequest.getRoleName())) {
+            Set<Role> allRole = ipaClient.findAllRole();
+            Optional<Role> optionalRole = allRole.stream().filter(role -> role.getCn().equals(roleRequest.getRoleName())).findFirst();
+            Role role = optionalRole.isPresent() ? optionalRole.get() : ipaClient.addRole(roleRequest.getRoleName());
+            addPrivilegesToRole(roleRequest.getPrivileges(), ipaClient, role);
+            role = ipaClient.showRole(role.getCn());
+            boolean roleSetForService = service.getMemberOfRole().stream().anyMatch(member -> member.contains(roleRequest.getRoleName()));
+            if (!roleSetForService) {
+                ipaClient.addRoleMember(role.getCn(), null, null, null, null, Set.of(service.getKrbprincipalname()));
+            }
+        }
+    }
+
+    private void addPrivilegesToRole(Set<String> privileges, FreeIpaClient ipaClient, Role role) throws FreeIpaClientException {
+        if (privileges != null) {
+            Set<String> privilegesToAdd = privileges.stream().filter(privilegeName -> {
+                try {
+                    Privilege privilege = ipaClient.showPrivilege(privilegeName);
+                    return privilege.getMember().stream().noneMatch(member -> member.equals(role.getCn()));
+                } catch (FreeIpaClientException e) {
+                    LOGGER.error("Privilege [{}] show error", privilegeName, e);
+                    return false;
+                }
+            }).collect(Collectors.toSet());
+            if (!privilegesToAdd.isEmpty()) {
+                ipaClient.addRolePriviliges(role.getCn(), privilegesToAdd);
+            }
+        }
     }
 
     private void allowServiceKeytabRetrieval(String canonicalPrincipal, String adminUser, FreeIpaClient ipaClient) throws FreeIpaClientException {

@@ -21,6 +21,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
@@ -123,11 +125,26 @@ public class ClusterCreationActions {
         };
     }
 
-    @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
-    public Action<?, ?> startingAmbariServicesAction() {
+    @Bean(name = "CONFIGURE_KEYTABS_STATE")
+    public Action<?, ?> configureKeytabsAction() {
         return new AbstractClusterAction<>(UploadRecipesSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, UploadRecipesSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, UploadRecipesSuccess payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new KeytabConfigurationRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
+    public Action<?, ?> startingAmbariServicesAction() {
+        return new AbstractClusterAction<>(KeytabConfigurationSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, KeytabConfigurationSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.startingClusterServices(context.getStack());
                 sendEvent(context);
             }
