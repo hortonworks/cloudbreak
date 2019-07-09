@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.AzureCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
@@ -153,10 +154,9 @@ public class CredentialServiceTest {
     @Test
     public void testUpdateByAccountIdModifyPlatformIsForbidden() {
         CREDENTIAL.setName("name");
-        Credential result = new Credential();
-        result.setCloudPlatform("anotherplatform");
         when(repository.findByNameAndAccountId(eq("name"), eq("123"), anyCollection()))
-                .thenReturn(Optional.of(result));
+                .thenThrow(BadRequestException.class);
+
         assertThrows(BadRequestException.class, () -> credentialServiceUnderTest.updateByAccountId(CREDENTIAL, "123"));
     }
 
@@ -173,6 +173,7 @@ public class CredentialServiceTest {
                 .thenReturn(Optional.of(result));
         when(credentialAdapter.verify(any(), anyString())).thenAnswer(i -> i.getArgument(0));
         when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(credentialValidator.validateCredentialUpdate(any(Credential.class), any(Credential.class))).thenReturn(ValidationResult.builder().build());
 
         Credential testResult = credentialServiceUnderTest.updateByAccountId(CREDENTIAL, "123");
 
