@@ -199,9 +199,10 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         }
         CloudGcsView cloudFileSystem = (CloudGcsView) cloudStack.getFileSystem().get().getCloudFileSystem();
         String email = cloudFileSystem.getServiceAccountEmail();
-        return StringUtils.isEmpty(email) ? null : singletonList(new ServiceAccount()
-                .setEmail(email)
-                .setScopes(singletonList("https://www.googleapis.com/auth/cloud-platform")));
+        return StringUtils.isEmpty(email) ? null
+                : singletonList(new ServiceAccount()
+                        .setEmail(email)
+                        .setScopes(singletonList("https://www.googleapis.com/auth/cloud-platform")));
     }
 
     @Override
