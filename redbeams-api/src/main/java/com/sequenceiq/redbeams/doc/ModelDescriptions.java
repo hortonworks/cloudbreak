@@ -43,6 +43,8 @@ public final class ModelDescriptions {
     public static class ExternalDatabaseServer {
         public static final String NAME = "Name of the external database server";
         public static final String DATABASE_SERVER = "The external database server configuration";
+        public static final String STATUS = "Status of the database stack";
+        public static final String STATUS_REASON = "Status message of the database stack";
     }
 
     public static class DBStack {

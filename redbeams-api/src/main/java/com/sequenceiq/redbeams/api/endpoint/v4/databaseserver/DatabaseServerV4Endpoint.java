@@ -25,7 +25,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerAllocationOutcomeV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.doc.ControllerDescriptions;
 import com.sequenceiq.redbeams.doc.Notes;
 import com.sequenceiq.redbeams.doc.OperationDescriptions.DatabaseServerOpDescription;
@@ -60,7 +60,14 @@ public interface DatabaseServerV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "createDatabaseServer")
-    DatabaseServerAllocationOutcomeV4Response create(@Valid AllocateDatabaseServerV4Request request);
+    DatabaseServerStatusV4Response create(@Valid AllocateDatabaseServerV4Request request);
+
+    @GET
+    @Path("external/status/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
+            nickname = "getDatabaseServerStatus")
+    DatabaseServerStatusV4Response getExternalStatus(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
 
     @DELETE
     @Path("external")
