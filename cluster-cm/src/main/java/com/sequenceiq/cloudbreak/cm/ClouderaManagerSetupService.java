@@ -158,7 +158,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 removeRemoteParcelRepos(clouderaManagerResourceApi);
                 refreshParcelRepos(clouderaManagerResourceApi);
             }
-            kerberosService.setupKerberos(client, stack, kerberosConfig);
             installCluster(cluster, apiClusterTemplate, clouderaManagerResourceApi, prewarmed);
             if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)) {
                 kerberosService.configureKerberosViaApi(client, clientConfig, stack, kerberosConfig);
@@ -239,7 +238,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     private void removeRemoteParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi) {
         try {
             ApiConfigList apiConfigList = new ApiConfigList()
-                .addItemsItem(new ApiConfig().name("remote_parcel_repo_urls").value(""));
+                    .addItemsItem(new ApiConfig().name("remote_parcel_repo_urls").value(""));
             clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
         } catch (ApiException e) {
             LOGGER.info("Error while updating remote parcel repos. Message {}, throwable: {}", e.getMessage(), e);

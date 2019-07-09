@@ -1,21 +1,15 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -26,8 +20,6 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
-import com.cloudera.api.swagger.model.ApiConfig;
-import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
@@ -92,44 +84,16 @@ public class ClouderaManagerKerberosServiceTest {
     }
 
     @Test
-    public void testSetupKerberosWithAd() throws ApiException {
-        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
-            .withType(KerberosType.ACTIVE_DIRECTORY)
-            .withRealm("TESTREALM")
-            .withUrl("kdcs")
-            .withAdminUrl("adminhosts")
-            .withContainerDn("container")
-            .withPrincipal("principal")
-            .withPassword("pw")
-            .build();
-        when(clouderaManagerResourceApi.importAdminCredentials("pw", "principal")).thenReturn(new ApiCommand().id(BigDecimal.ONE));
-        when(kerberosDetailService.isAdJoinable(kerberosConfig)).thenReturn(Boolean.TRUE);
-        underTest.setupKerberos(client, stack, kerberosConfig);
-
-        ArgumentCaptor<ApiConfigList> apiConfigListArgumentCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
-        verify(clouderaManagerResourceApi).updateConfig(anyString(), apiConfigListArgumentCaptor.capture());
-        Map<String, String> apiConfigMap =
-                apiConfigListArgumentCaptor.getValue().getItems().stream().collect(Collectors.toMap(ApiConfig::getName, ApiConfig::getValue));
-        assertEquals("Active Directory", apiConfigMap.get("kdc_type"));
-        assertEquals(kerberosConfig.getRealm(), apiConfigMap.get("security_realm"));
-        assertEquals(kerberosConfig.getUrl(), apiConfigMap.get("kdc_host"));
-        assertEquals(kerberosConfig.getAdminUrl(), apiConfigMap.get("kdc_admin_host"));
-        assertEquals(kerberosConfig.getContainerDn(), apiConfigMap.get("ad_kdc_domain"));
-        assertEquals(5L, apiConfigMap.size());
-        verify(clouderaManagerPollingServiceProvider).kerberosConfigurePollingService(stack, client, BigDecimal.ONE);
-    }
-
-    @Test
     public void testConfigureKerberosViaApi() throws CloudbreakException, ApiException {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
-            .withType(KerberosType.ACTIVE_DIRECTORY)
-            .withRealm("TESTREALM")
-            .withUrl("kdcs")
-            .withAdminUrl("adminhosts")
-            .withContainerDn("container")
-            .withPrincipal("principal")
-            .withPassword("pw")
-            .build();
+                .withType(KerberosType.ACTIVE_DIRECTORY)
+                .withRealm("TESTREALM")
+                .withUrl("kdcs")
+                .withAdminUrl("adminhosts")
+                .withContainerDn("container")
+                .withPrincipal("principal")
+                .withPassword("pw")
+                .build();
 
         when(clustersResourceApi.configureForKerberos(eq(cluster.getName()), any(ApiConfigureForKerberosArguments.class)))
                 .thenReturn(new ApiCommand().id(BigDecimal.TEN));
@@ -144,18 +108,6 @@ public class ClouderaManagerKerberosServiceTest {
         verify(clouderaManagerPollingServiceProvider).kerberosConfigurePollingService(stack, client, BigDecimal.ZERO);
         verify(clustersResourceApi).deployClientConfig(cluster.getName());
         verify(modificationService).startCluster(anySet());
-    }
-
-    @Test
-    public void testSetupKerberosWithoutKerberos() throws CloudbreakException, ApiException {
-        when(kerberosDetailService.isAdJoinable(any())).thenReturn(Boolean.FALSE);
-
-        underTest.setupKerberos(client, stack, null);
-
-        verify(clouderaManagerResourceApi, never()).updateConfig(anyString(), any());
-        verify(modificationService, never()).stopCluster();
-        verify(clouderaManagerPollingServiceProvider, never()).kerberosConfigurePollingService(any(), any(), any());
-        verify(modificationService, never()).startCluster(anySet());
     }
 
     @Test

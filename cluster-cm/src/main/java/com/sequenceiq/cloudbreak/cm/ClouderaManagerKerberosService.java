@@ -14,8 +14,6 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
-import com.cloudera.api.swagger.model.ApiConfig;
-import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
@@ -48,36 +46,6 @@ public class ClouderaManagerKerberosService {
 
     @Inject
     private KerberosDetailService kerberosDetailService;
-
-    public void setupKerberos(ApiClient client, Stack stack, KerberosConfig kerberosConfig) throws ApiException {
-        Cluster cluster = stack.getCluster();
-        String clusterName = cluster.getName();
-        if (kerberosDetailService.isAdJoinable(kerberosConfig) || kerberosDetailService.isIpaJoinable(kerberosConfig)) {
-            LOGGER.debug("Configure cluster {} with Kerberos", clusterName);
-            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
-            ApiConfigList apiConfigList = new ApiConfigList()
-                    .addItemsItem(new ApiConfig().name("security_realm").value(kerberosConfig.getRealm()))
-                    .addItemsItem(new ApiConfig().name("kdc_host").value(kerberosConfig.getUrl()))
-                    .addItemsItem(new ApiConfig().name("kdc_admin_host").value(kerberosConfig.getAdminUrl()));
-            if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
-                apiConfigList.addItemsItem(new ApiConfig().name("kdc_type").value(ACTIVE_DIRECTORY));
-                apiConfigList.addItemsItem(new ApiConfig().name("ad_kdc_domain").value(kerberosConfig.getContainerDn()));
-            } else if (kerberosDetailService.isIpaJoinable(kerberosConfig)) {
-                LOGGER.debug("Enable FreeIPA on cluster: {}", clusterName);
-                apiConfigList.addItemsItem(new ApiConfig().name("kdc_type").value(FREEIPA));
-                ApiConfigList enableIpa = new ApiConfigList()
-                        .addItemsItem(new ApiConfig().name(FREEIPA_FEATURE_FLAG).value(Boolean.TRUE.toString()));
-                clouderaManagerResourceApi.updateConfig("Enable FreeIPA", enableIpa);
-            }
-            clouderaManagerResourceApi.updateConfig("Add kerberos configuration", apiConfigList);
-            if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
-                LOGGER.debug("Import kerberos credentials for AD on cluster: {}", clusterName);
-                ApiCommand importAdminCredentials =
-                        clouderaManagerResourceApi.importAdminCredentials(kerberosConfig.getPassword(), kerberosConfig.getPrincipal());
-                clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, importAdminCredentials.getId());
-            }
-        }
-    }
 
     public void configureKerberosViaApi(ApiClient client, HttpClientConfig clientConfig, Stack stack, KerberosConfig kerberosConfig)
             throws ApiException, CloudbreakException {
