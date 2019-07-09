@@ -30,6 +30,10 @@ base:
     - match: grain
     - kerberos.common
 
+  'G@roles:kerberized and G@roles:manager_server':
+    - match: compound
+    - kerberos.cm-keytab
+
   'G@roles:ambari_upgrade and G@roles:ambari_agent':
     - match: compound
     - ambari.agent-upgrade

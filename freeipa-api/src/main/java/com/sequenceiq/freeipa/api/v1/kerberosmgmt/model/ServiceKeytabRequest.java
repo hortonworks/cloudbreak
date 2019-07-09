@@ -25,6 +25,12 @@ public class ServiceKeytabRequest {
     @NotNull
     private String serverHostName;
 
+    @ApiModelProperty(value = KeytabModelDescription.DO_NOT_RECREATE_KEYTAB)
+    private Boolean doNotRecreateKeytab = Boolean.FALSE;
+
+    @ApiModelProperty(value = KeytabModelDescription.ROLE)
+    private RoleRequest roleRequest;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -47,5 +53,21 @@ public class ServiceKeytabRequest {
 
     public void setServerHostName(String serverHostName) {
         this.serverHostName = serverHostName;
+    }
+
+    public Boolean getDoNotRecreateKeytab() {
+        return doNotRecreateKeytab;
+    }
+
+    public void setDoNotRecreateKeytab(Boolean doNotRecreateKeytab) {
+        this.doNotRecreateKeytab = doNotRecreateKeytab;
+    }
+
+    public RoleRequest getRoleRequest() {
+        return roleRequest;
+    }
+
+    public void setRoleRequest(RoleRequest roleRequest) {
+        this.roleRequest = roleRequest;
     }
 }

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
@@ -610,6 +612,30 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
         } catch (Exception e) {
             LOGGER.info("Error occurred during recipe upload", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @Override
+    public void uploadKeytabs(List<GatewayConfig> allGatewayConfigs, Set<KeytabModel> keytabModels, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGatewayConfig = getPrimaryGatewayConfig(allGatewayConfigs);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
+        try (SaltConnector sc = createSaltConnector(primaryGatewayConfig)) {
+            Map<String, Object> properties = new HashMap<>();
+            for (KeytabModel keytabModel : keytabModels) {
+                uploadFileToTargets(sc, gatewayTargets, exitModel, keytabModel.getPath(), keytabModel.getFileName(), keytabModel.getKeytab());
+                Map<String, String> keytabProps = Map.of(
+                        "principal", keytabModel.getPrincipal(),
+                        "path", keytabModel.getPath() + "/" + keytabModel.getFileName());
+                properties.put(keytabModel.getService(), keytabProps);
+            }
+            SaltPillarProperties saltPillarProperties = new SaltPillarProperties("/kerberos/keytab.sls", Collections.singletonMap("keytab", properties));
+            OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargets, saltPillarProperties);
+            Callable<Boolean> runner = runner(pillarSave, exitCriteria, exitModel);
+            runner.call();
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during keytab upload", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }

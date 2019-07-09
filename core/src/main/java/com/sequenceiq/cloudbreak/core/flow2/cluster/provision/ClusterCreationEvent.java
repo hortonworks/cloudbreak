@@ -4,6 +4,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesFailed;
@@ -36,6 +38,8 @@ public enum ClusterCreationEvent implements FlowEvent {
     MOUNT_DISKS_FAILED_EVENT(EventSelectorUtil.selector(MountDisksFailed.class)),
     UPLOAD_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(UploadRecipesSuccess.class)),
     UPLOAD_RECIPES_FAILED_EVENT(EventSelectorUtil.selector(UploadRecipesFailed.class)),
+    CONFIGURE_KEYTABS_FINISHED_EVENT(EventSelectorUtil.selector(KeytabConfigurationSuccess.class)),
+    CONFIGURE_KEYTABS_FAILED_EVENT(EventSelectorUtil.selector(KeytabConfigurationFailed.class)),
     START_AMBARI_SERVICES_FINISHED_EVENT(EventSelectorUtil.selector(StartAmbariServicesSuccess.class)),
     START_AMBARI_SERVICES_FAILED_EVENT(EventSelectorUtil.selector(StartAmbariServicesFailed.class)),
     LDAP_SSO_CONFIGURATION_FINISHED_EVENT(EventSelectorUtil.selector(LdapSSOConfigurationSuccess.class)),

@@ -88,22 +88,34 @@ public class CleanupService {
                 .filter(existingHostFqdn::contains)
                 .filter(h -> !response.getHostCleanupFailed().keySet().contains(h))
                 .collect(Collectors.toSet());
-        Map<String, String> principalCanonicalMap = client.findAllService().stream()
-                .collect(Collectors.toMap(com.sequenceiq.freeipa.client.model.Service::getKrbprincipalname,
-                        com.sequenceiq.freeipa.client.model.Service::getKrbcanonicalname));
+        LOGGER.debug("Hosts to delete: {}", hostsToRemove);
         for (String host : hostsToRemove) {
             try {
                 client.deleteHost(host);
-                Set<String> services = principalCanonicalMap.entrySet().stream().filter(e -> e.getKey().contains(host))
-                        .map(Map.Entry::getValue).collect(Collectors.toSet());
-                for (String service : services) {
-                    client.deleteService(service);
-                }
                 response.getHostCleanupSuccess().add(host);
             } catch (FreeIpaClientException e) {
                 LOGGER.info("Host delete failed for host: {}", host, e);
                 response.getHostCleanupFailed().put(host, e.getMessage());
                 response.getHostCleanupSuccess().remove(host);
+            }
+        }
+        removeHostRelatedServices(client, hostsToRemove);
+    }
+
+    private void removeHostRelatedServices(FreeIpaClient client, Set<String> hostsToRemove) throws FreeIpaClientException {
+        Map<String, String> principalCanonicalMap = client.findAllService().stream()
+                .collect(Collectors.toMap(com.sequenceiq.freeipa.client.model.Service::getKrbprincipalname,
+                        com.sequenceiq.freeipa.client.model.Service::getKrbcanonicalname));
+        for (String host : hostsToRemove) {
+            Set<String> services = principalCanonicalMap.entrySet().stream().filter(e -> e.getKey().contains(host))
+                    .map(Map.Entry::getValue).collect(Collectors.toSet());
+            LOGGER.debug("Services to delete: {}", services);
+            for (String service : services) {
+                try {
+                    client.deleteService(service);
+                } catch (FreeIpaClientException e) {
+                    LOGGER.info("Service delete failed for service: {}", service, e);
+                }
             }
         }
     }
@@ -112,6 +124,7 @@ public class CleanupService {
         Set<String> usersUid = client.userFindAll().stream().map(User::getUid).collect(Collectors.toSet());
         request.getUsers().stream().filter(usersUid::contains).forEach(userUid -> {
             try {
+                LOGGER.debug("Delete user: {}", userUid);
                 client.deleteUser(userUid);
                 response.getUserCleanupSuccess().add(userUid);
             } catch (FreeIpaClientException e) {
@@ -126,10 +139,11 @@ public class CleanupService {
         Set<String> roleNames = client.findAllRole().stream().map(Role::getCn).collect(Collectors.toSet());
         request.getRoles().stream().filter(roleNames::contains).forEach(role -> {
             try {
+                LOGGER.debug("Delete role: {}", role);
                 client.deleteRole(role);
                 response.getRoleCleanupSuccess().add(role);
             } catch (FreeIpaClientException e) {
-                LOGGER.info("User delete failed for user: {}", role, e);
+                LOGGER.info("Role delete failed for role: {}", role, e);
                 response.getRoleCleanupFailed().put(role, e.getMessage());
                 response.getRoleCleanupSuccess().remove(role);
             }

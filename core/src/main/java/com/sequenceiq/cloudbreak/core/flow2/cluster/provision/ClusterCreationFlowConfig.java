@@ -21,6 +21,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_SERVICES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_SERVICES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CONFIGURE_KEYTABS_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CONFIGURE_KEYTABS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_MACHINES_STATE;
@@ -36,6 +38,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.MOUNT_DISKS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_AMBARI_SERVICES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_AMBARI_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CONFIGURE_KEYTABS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.UPLOAD_RECIPES_STATE;
 
 import java.util.List;
@@ -60,8 +63,10 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
                     .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
             .from(MOUNT_DISKS_STATE).to(UPLOAD_RECIPES_STATE).event(MOUNT_DISKS_FINISHED_EVENT)
                     .failureEvent(MOUNT_DISKS_FAILED_EVENT)
-            .from(UPLOAD_RECIPES_STATE).to(STARTING_AMBARI_SERVICES_STATE).event(UPLOAD_RECIPES_FINISHED_EVENT)
+            .from(UPLOAD_RECIPES_STATE).to(CONFIGURE_KEYTABS_STATE).event(UPLOAD_RECIPES_FINISHED_EVENT)
                     .failureEvent(UPLOAD_RECIPES_FAILED_EVENT)
+            .from(CONFIGURE_KEYTABS_STATE).to(STARTING_AMBARI_SERVICES_STATE).event(CONFIGURE_KEYTABS_FINISHED_EVENT)
+                    .failureEvent(CONFIGURE_KEYTABS_FAILED_EVENT)
             .from(STARTING_AMBARI_SERVICES_STATE).to(STARTING_AMBARI_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_SERVICES_FAILED_EVENT)
             .from(STARTING_AMBARI_STATE).to(CONFIGURE_LDAP_SSO_STATE).event(START_AMBARI_FINISHED_EVENT)

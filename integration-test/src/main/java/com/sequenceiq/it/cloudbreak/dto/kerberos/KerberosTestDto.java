@@ -68,7 +68,6 @@ public class KerberosTestDto extends AbstractFreeIPATestDto<CreateKerberosConfig
     public KerberosTestDto withEnvironmentCrn(String environmentCrn) {
         getRequest().setEnvironmentCrn(environmentCrn);
         return this;
-
     }
 
     public KerberosTestDto withEnvironment(Class<EnvironmentTestDto> environmentKey) {

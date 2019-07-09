@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.freeipa.client.model.Ca;
@@ -22,6 +23,7 @@ import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Keytab;
 import com.sequenceiq.freeipa.client.model.Permission;
+import com.sequenceiq.freeipa.client.model.Privilege;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.client.model.Role;
 import com.sequenceiq.freeipa.client.model.Service;
@@ -92,6 +94,12 @@ public class FreeIpaClient {
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, Role.class);
         return (Set<Role>) invoke("role_find", flags, params, type).getResult();
+    }
+
+    public Privilege showPrivilege(String privilegeName) throws FreeIpaClientException {
+        List<String> flags = List.of(privilegeName);
+        Map<String, Object> params = Map.of();
+        return (Privilege) invoke("privilege_show", flags, params, Privilege.class).getResult();
     }
 
     public Set<Host> findAllHost() throws FreeIpaClientException {
@@ -314,9 +322,47 @@ public class FreeIpaClient {
         return (Service) invoke("service_add", flags, params, Service.class).getResult();
     }
 
+    public Role addRole(String roleName) throws FreeIpaClientException {
+        List<String> flags = List.of(roleName);
+        Map<String, Object> params = Map.of();
+        return (Role) invoke("role_add", flags, params, Role.class).getResult();
+    }
+
+    public Role addRolePriviliges(String roleName, Set<String> privilegeNames) throws FreeIpaClientException {
+        List<String> flags = List.of(roleName);
+        Map<String, Object> params = Map.of("privilege", privilegeNames);
+        return (Role) invoke("role_add_privilege", flags, params, Role.class).getResult();
+    }
+
+    public Role showRole(String roleName) throws FreeIpaClientException {
+        List<String> flags = List.of(roleName);
+        Map<String, Object> params = Map.of();
+        return (Role) invoke("role_show", flags, params, Role.class).getResult();
+    }
+
+    public Role addRoleMember(String roleName, Set<String> users, Set<String> groups, Set<String> hosts, Set<String> hostgroups, Set<String> services)
+        throws FreeIpaClientException {
+        List<String> flags = List.of(roleName);
+        Map<String, Object> params = new HashMap<>();
+        addToMapIfNotEmpty(params, "user", users);
+        addToMapIfNotEmpty(params, "group", groups);
+        addToMapIfNotEmpty(params, "hostgroup", hostgroups);
+        addToMapIfNotEmpty(params, "service", services);
+        addToMapIfNotEmpty(params, "host", hosts);
+        return (Role) invoke("role_add_member", flags, params, Role.class).getResult();
+    }
+
+    private void addToMapIfNotEmpty(Map<String, Object> params, String key, Set<String> values) {
+        if (!CollectionUtils.isEmpty(values)) {
+            params.put(key, values);
+        }
+    }
+
     public Service showService(String canonicalPrincipal) throws FreeIpaClientException {
         List<String> flags = List.of(canonicalPrincipal);
-        Map<String, Object> params = Map.of();
+        Map<String, Object> params = Map.of(
+                "rights", true,
+                "all", true);
         return (Service) invoke("service_show", flags, params, Service.class).getResult();
     }
 

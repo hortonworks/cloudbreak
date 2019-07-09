@@ -1,5 +1,6 @@
 {%- from 'sssd/settings.sls' import ipa with context %}
 
+{% if salt['file.directory_exists']('/yarn-private') %}
 {%- if "manager_server" in grains.get('roles', []) %}
 
 create_remove_cm_sa_script:
@@ -22,6 +23,7 @@ remove_cm_service_account:
       - file: create_remove_cm_sa_script
 
 {%- endif %}
+{% endif %}
 
 leave-ipa:
   cmd.run:

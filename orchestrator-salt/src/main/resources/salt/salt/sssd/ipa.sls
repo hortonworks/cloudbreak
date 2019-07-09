@@ -103,6 +103,7 @@ restore_systemctl:
 include:
     - sssd.ssh
 
+{% if salt['file.directory_exists']('/yarn-private') %}
 {%- if "manager_server" in grains.get('roles', []) %}
 
 create_cm_keytab_generation_script:
@@ -130,3 +131,4 @@ generate_cm_freeipa_keytab:
       - file: create_cm_keytab_generation_script
 
 {%- endif %}
+{% endif %}

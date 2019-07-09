@@ -39,6 +39,10 @@ base:
     - match: grain
     - kerberos.init
 
+  'G@roles:kerberized and G@roles:manager_server':
+    - match: compound
+    - kerberos.keytab
+
   'roles:postgresql_server':
     - match: grain
     - postgresql.postgre
