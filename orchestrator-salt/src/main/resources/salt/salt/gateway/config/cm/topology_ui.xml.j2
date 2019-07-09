@@ -3,33 +3,7 @@
     <name>{{ topology_name }}-ui</name>
     <gateway>
 
-        <!-- {{ exposed }} -->
-
-        {% if 'NONE' == salt['pillar.get']('gateway:ssotype') -%}
-
-        <provider>
-           <role>authentication</role>
-           <name>ShiroProvider</name>
-           <enabled>true</enabled>
-           <param>
-              <name>sessionTimeout</name>
-              <value>30</value>
-           </param>
-           <param>
-              <name>main.pamRealm</name>
-              <value>org.apache.hadoop.gateway.shirorealm.KnoxPamRealm</value>
-           </param>
-           <param>
-              <name>main.pamRealm.service</name>
-              <value>login</value>
-           </param>
-           <param>
-              <name>urls./**</name>
-              <value>authcBasic</value>
-           </param>
-        </provider>
-
-        {% elif 'SSO_PROVIDER_FROM_UMS' == salt['pillar.get']('gateway:ssotype') -%}
+        {% if 'SSO_PROVIDER_FROM_UMS' == salt['pillar.get']('gateway:ssotype') -%}
 
         <provider>
             <role>webappsec</role>
@@ -54,16 +28,6 @@
         {%- else %}
 
         <provider>
-            <role>webappsec</role>
-            <name>WebAppSec</name>
-            <enabled>true</enabled>
-            <param>
-                <name>cors.enabled</name>
-                <value>true</value>
-            </param>
-        </provider>
-
-        <provider>
            <role>federation</role>
            <name>SSOCookieProvider</name>
            <enabled>true</enabled>
@@ -74,12 +38,6 @@
         </provider>
 
         {%- endif %}
-
-        <provider>
-            <role>identity-assertion</role>
-            <name>Default</name>
-            <enabled>true</enabled>
-        </provider>
 
         <provider>
             <role>ha</role>
