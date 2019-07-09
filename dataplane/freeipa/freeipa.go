@@ -48,7 +48,7 @@ func DeleteFreeIpa(c *cli.Context) {
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
-	log.Infof("[deleteFreeIpa] FreeIpa cluster delete requested in enviornment %s", envName)
+	log.Infof("[deleteFreeIpa] FreeIpa cluster delete requested in environment %s", envName)
 }
 
 func DescribeFreeIpa(c *cli.Context) {
@@ -138,7 +138,7 @@ func assembleFreeIpaRequest(c *cli.Context) *freeIpaModel.CreateFreeIpaV1Request
 }
 
 func SynchronizeAllUsers(c *cli.Context) {
-	defer commonutils.TimeTrack(time.Now(), "sync users to FreeIpa")
+	defer commonutils.TimeTrack(time.Now(), "sync all users to FreeIpa")
 
 	users := c.StringSlice(fl.FlIpaUsersSlice.Name)
 	environments := c.StringSlice(fl.FlIpaEnvironmentsSlice.Name)
@@ -152,12 +152,17 @@ func SynchronizeAllUsers(c *cli.Context) {
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
-	synchronizeUsersResponse := resp.Payload
-	log.Infof("[synchronizeAllUsers] User sync submitted with status: %s", *synchronizeUsersResponse.Status)
+	syncOperationStatus := resp.Payload
+
+	if c.Bool(fl.FlWaitOptional.Name) && syncOperationStatus.Status == "RUNNING" {
+		getSyncOperationStatus(c, *syncOperationStatus.OperationID, "synchronizeAllUsers")
+	} else {
+		writeSyncOperationStatus(c, syncOperationStatus)
+	}
 }
 
 func SynchronizeCurrentUser(c *cli.Context) {
-	defer commonutils.TimeTrack(time.Now(), "set user password in FreeIpa")
+	defer commonutils.TimeTrack(time.Now(), "sync current user to FreeIpa")
 
 	var req freeIpaModel.SynchronizeUserV1Request
 
@@ -166,16 +171,23 @@ func SynchronizeCurrentUser(c *cli.Context) {
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
-	synchronizeUserResponse := resp.Payload
-	log.Infof("[synchronizeUser] Sync completed: %s", *synchronizeUserResponse)
+	syncOperationStatus := resp.Payload
+
+	if c.Bool(fl.FlWaitOptional.Name) && syncOperationStatus.Status == "RUNNING" {
+		getSyncOperationStatus(c, *syncOperationStatus.OperationID, "synchronizeUser")
+	} else {
+		writeSyncOperationStatus(c, syncOperationStatus)
+	}
 }
 
 func SetPassword(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "set user password in FreeIpa")
 
+	environments := c.StringSlice(fl.FlIpaEnvironmentsSlice.Name)
 	password := c.String(fl.FlIpaUserPassword.Name)
 	SetPasswordV1Request := freeIpaModel.SetPasswordV1Request{
-		Password: password,
+		Environments: environments,
+		Password:     password,
 	}
 
 	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
@@ -183,6 +195,74 @@ func SetPassword(c *cli.Context) {
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
-	setPasswordResponse := resp.Payload
-	log.Infof("[setPassword] Set Password completed: %s", *setPasswordResponse)
+	syncOperationStatus := resp.Payload
+
+	if c.Bool(fl.FlWaitOptional.Name) && syncOperationStatus.Status == "RUNNING" {
+		getSyncOperationStatus(c, *syncOperationStatus.OperationID, "setPassword")
+	} else {
+		writeSyncOperationStatus(c, syncOperationStatus)
+	}
+}
+
+func GetSyncOperationStatus(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "get status of a sync operation")
+
+	operationId := c.String(fl.FlIpaSyncOperationId.Name)
+	getSyncOperationStatus(c, operationId, "getSyncOperationStatus")
+}
+
+func getSyncOperationStatus(c *cli.Context, operationId string, command string) {
+	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
+	resp, err := freeIpaClient.V1freeipauser.GetSyncOperationStatusV1(v1freeipauser.NewGetSyncOperationStatusV1Params().WithOperationID(operationId))
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	syncOperationStatus := resp.Payload
+	for c.Bool(fl.FlWaitOptional.Name) && syncOperationStatus.Status == "RUNNING" {
+		log.Infof("[%s] Status is RUNNING. Sleeping", command)
+		time.Sleep(5 * time.Second)
+		resp, err := freeIpaClient.V1freeipauser.GetSyncOperationStatusV1(v1freeipauser.NewGetSyncOperationStatusV1Params().WithOperationID(operationId))
+		if err != nil {
+			commonutils.LogErrorAndExit(err)
+		}
+		syncOperationStatus = resp.Payload
+	}
+	log.Infof("[%s] Operation completed: %s", command, syncOperationStatus.Status)
+	writeSyncOperationStatus(c, syncOperationStatus)
+}
+
+func writeSyncOperationStatus(c *cli.Context, syncOperationStatus *freeIpaModel.SyncOperationV1Status) {
+	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+	syncStatus := &freeIpaOutSyncOperation{
+		ID:        *syncOperationStatus.OperationID,
+		Status:    syncOperationStatus.Status,
+		SyncType:  *syncOperationStatus.SyncOperationType,
+		Success:   convertSuccessDetailsModel(syncOperationStatus.Success),
+		Failure:   convertFailureDetailsModel(syncOperationStatus.Failure),
+		Error:     syncOperationStatus.Error,
+		StartTime: strconv.FormatInt(syncOperationStatus.StartTime, 10),
+		EndTime:   strconv.FormatInt(syncOperationStatus.EndTime, 10),
+	}
+	output.Write(syncStatusHeader, syncStatus)
+}
+
+func convertSuccessDetailsModel(sd []*freeIpaModel.SuccessDetailsV1) []successDetail {
+	var successDetails = []successDetail{}
+	for _, success := range sd {
+		successDetails = append(successDetails, successDetail{
+			Environment: success.Environment,
+		})
+	}
+	return successDetails
+}
+
+func convertFailureDetailsModel(fd []*freeIpaModel.FailureDetailsV1) []failureDetail {
+	var failureDetails = []failureDetail{}
+	for _, failure := range fd {
+		failureDetails = append(failureDetails, failureDetail{
+			Environment: failure.Environment,
+			Details:     failure.Message,
+		})
+	}
+	return failureDetails
 }

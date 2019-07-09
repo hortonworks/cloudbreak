@@ -8,6 +8,7 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
@@ -16,14 +17,63 @@ import (
 type ServiceKeytabV1Response struct {
 
 	// Keytab that was requested
-	Keytab string `json:"keytab,omitempty"`
+	Keytab *SecretResponse `json:"keytab,omitempty"`
 
 	// Kerberos Service Principal Name
-	ServicePrincial string `json:"servicePrincial,omitempty"`
+	ServicePrincial *SecretResponse `json:"servicePrincial,omitempty"`
 }
 
 // Validate validates this service keytab v1 response
 func (m *ServiceKeytabV1Response) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateKeytab(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateServicePrincial(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ServiceKeytabV1Response) validateKeytab(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Keytab) { // not required
+		return nil
+	}
+
+	if m.Keytab != nil {
+		if err := m.Keytab.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("keytab")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ServiceKeytabV1Response) validateServicePrincial(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ServicePrincial) { // not required
+		return nil
+	}
+
+	if m.ServicePrincial != nil {
+		if err := m.ServicePrincial.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("servicePrincial")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

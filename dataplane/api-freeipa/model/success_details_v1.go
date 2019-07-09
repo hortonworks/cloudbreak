@@ -11,21 +11,21 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// CreateUsersV1Response create users v1 response
-// swagger:model CreateUsersV1Response
-type CreateUsersV1Response struct {
+// SuccessDetailsV1 success details v1
+// swagger:model SuccessDetailsV1
+type SuccessDetailsV1 struct {
 
-	// value
-	Value string `json:"value,omitempty"`
+	// environment
+	Environment string `json:"environment,omitempty"`
 }
 
-// Validate validates this create users v1 response
-func (m *CreateUsersV1Response) Validate(formats strfmt.Registry) error {
+// Validate validates this success details v1
+func (m *SuccessDetailsV1) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *CreateUsersV1Response) MarshalBinary() ([]byte, error) {
+func (m *SuccessDetailsV1) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -33,8 +33,8 @@ func (m *CreateUsersV1Response) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *CreateUsersV1Response) UnmarshalBinary(b []byte) error {
-	var res CreateUsersV1Response
+func (m *SuccessDetailsV1) UnmarshalBinary(b []byte) error {
+	var res SuccessDetailsV1
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

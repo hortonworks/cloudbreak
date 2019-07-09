@@ -25,62 +25,32 @@ type Client struct {
 }
 
 /*
-CreateUsersV1 creates groups and users in the free IP a servers
+GetSyncOperationStatusV1 gets the status of a sync operation
 
 User synchronization and management operations
 */
-func (a *Client) CreateUsersV1(params *CreateUsersV1Params) (*CreateUsersV1OK, error) {
+func (a *Client) GetSyncOperationStatusV1(params *GetSyncOperationStatusV1Params) (*GetSyncOperationStatusV1OK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewCreateUsersV1Params()
+		params = NewGetSyncOperationStatusV1Params()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "createUsersV1",
-		Method:             "POST",
-		PathPattern:        "/v1/freeipa/user/create",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &CreateUsersV1Reader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*CreateUsersV1OK), nil
-
-}
-
-/*
-GetSynchronizeAllUsersStatusV1 gets the status of synchronization operation
-
-User synchronization and management operations
-*/
-func (a *Client) GetSynchronizeAllUsersStatusV1(params *GetSynchronizeAllUsersStatusV1Params) (*GetSynchronizeAllUsersStatusV1OK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetSynchronizeAllUsersStatusV1Params()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getSynchronizeAllUsersStatusV1",
+		ID:                 "getSyncOperationStatusV1",
 		Method:             "GET",
-		PathPattern:        "/v1/freeipa/user/syncAll",
+		PathPattern:        "/v1/freeipa/user/status",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetSynchronizeAllUsersStatusV1Reader{formats: a.formats},
+		Reader:             &GetSyncOperationStatusV1Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetSynchronizeAllUsersStatusV1OK), nil
+	return result.(*GetSyncOperationStatusV1OK), nil
 
 }
 

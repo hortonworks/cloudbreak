@@ -75,10 +75,10 @@ func init() {
 						Usage:       "syncs all users to FreeIpa clusters",
 						Description: `syncs all users to FreeIpa clusters`,
 						Before:      cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:       fl.NewFlagBuilder().AddFlags(fl.FlIpaUsersSlice, fl.FlIpaEnvironmentsSlice).AddAuthenticationFlags().Build(),
+						Flags:       fl.NewFlagBuilder().AddFlags(fl.FlIpaUsersSlice, fl.FlIpaEnvironmentsSlice, fl.FlWaitOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
 						Action:      freeipa.SynchronizeAllUsers,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlIpaUsersSlice, fl.FlIpaEnvironmentsSlice).AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlIpaUsersSlice, fl.FlIpaEnvironmentsSlice, fl.FlWaitOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -88,10 +88,10 @@ func init() {
 						Usage:       "syncs current user to FreeIpa clusters",
 						Description: `syncs current user to FreeIpa clusters`,
 						Before:      cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:       fl.NewFlagBuilder().AddAuthenticationFlags().Build(),
+						Flags:       fl.NewFlagBuilder().AddFlags(fl.FlWaitOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
 						Action:      freeipa.SynchronizeCurrentUser,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlWaitOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -101,10 +101,23 @@ func init() {
 						Usage:       "sets password in FreeIpa clusters",
 						Description: `sets password in FreeIpa clusters`,
 						Before:      cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:       fl.NewFlagBuilder().AddFlags(fl.FlIpaUserPassword).AddAuthenticationFlags().Build(),
+						Flags:       fl.NewFlagBuilder().AddFlags(fl.FlIpaUserPassword, fl.FlIpaEnvironmentsSlice, fl.FlWaitOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
 						Action:      freeipa.SetPassword,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlIpaUserPassword).AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlIpaUserPassword, fl.FlIpaEnvironmentsSlice, fl.FlWaitOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:        "status",
+						Usage:       "gets operation status",
+						Description: `gets operation status`,
+						Before:      cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+						Flags:       fl.NewFlagBuilder().AddFlags(fl.FlIpaSyncOperationId, fl.FlWaitOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
+						Action:      freeipa.GetSyncOperationStatus,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlIpaSyncOperationId, fl.FlWaitOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},

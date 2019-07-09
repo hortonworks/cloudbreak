@@ -47,7 +47,7 @@ func NewSynchronizeUserV1OK() *SynchronizeUserV1OK {
 successful operation
 */
 type SynchronizeUserV1OK struct {
-	Payload *model.SynchronizeUserV1Response
+	Payload *model.SyncOperationV1Status
 }
 
 func (o *SynchronizeUserV1OK) Error() string {
@@ -56,7 +56,7 @@ func (o *SynchronizeUserV1OK) Error() string {
 
 func (o *SynchronizeUserV1OK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.SynchronizeUserV1Response)
+	o.Payload = new(model.SyncOperationV1Status)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

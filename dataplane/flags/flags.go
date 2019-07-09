@@ -1238,6 +1238,13 @@ var (
 			Usage: "password for user in the ipa server",
 		},
 	}
+	FlIpaSyncOperationId = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "operation-id",
+			Usage: "id for the operation",
+		},
+	}
 )
 
 type RequiredFlag struct {

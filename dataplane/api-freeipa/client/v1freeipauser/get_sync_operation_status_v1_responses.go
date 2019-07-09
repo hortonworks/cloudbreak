@@ -16,17 +16,17 @@ import (
 	model "github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
 )
 
-// SetPasswordV1Reader is a Reader for the SetPasswordV1 structure.
-type SetPasswordV1Reader struct {
+// GetSyncOperationStatusV1Reader is a Reader for the GetSyncOperationStatusV1 structure.
+type GetSyncOperationStatusV1Reader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *SetPasswordV1Reader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetSyncOperationStatusV1Reader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewSetPasswordV1OK()
+		result := NewGetSyncOperationStatusV1OK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *SetPasswordV1Reader) ReadResponse(response runtime.ClientResponse, cons
 	}
 }
 
-// NewSetPasswordV1OK creates a SetPasswordV1OK with default headers values
-func NewSetPasswordV1OK() *SetPasswordV1OK {
-	return &SetPasswordV1OK{}
+// NewGetSyncOperationStatusV1OK creates a GetSyncOperationStatusV1OK with default headers values
+func NewGetSyncOperationStatusV1OK() *GetSyncOperationStatusV1OK {
+	return &GetSyncOperationStatusV1OK{}
 }
 
-/*SetPasswordV1OK handles this case with default header values.
+/*GetSyncOperationStatusV1OK handles this case with default header values.
 
 successful operation
 */
-type SetPasswordV1OK struct {
+type GetSyncOperationStatusV1OK struct {
 	Payload *model.SyncOperationV1Status
 }
 
-func (o *SetPasswordV1OK) Error() string {
-	return fmt.Sprintf("[POST /v1/freeipa/user/password][%d] setPasswordV1OK  %+v", 200, o.Payload)
+func (o *GetSyncOperationStatusV1OK) Error() string {
+	return fmt.Sprintf("[GET /v1/freeipa/user/status][%d] getSyncOperationStatusV1OK  %+v", 200, o.Payload)
 }
 
-func (o *SetPasswordV1OK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetSyncOperationStatusV1OK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.SyncOperationV1Status)
 
