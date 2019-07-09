@@ -210,7 +210,6 @@ func WriteConfigToFile(baseDir, server, output, profile, workspace, apiKeyID, pr
 		PrivateKey: privateKey,
 	}
 
-	// in the case the token is empty and command is of type caas we don't want to overide workspace value
 	if len(workspace) != 0 {
 		var p = configList[profile]
 		p.Workspace = workspace

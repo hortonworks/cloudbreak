@@ -866,55 +866,6 @@ var (
 			Usage: "name of user",
 		},
 	}
-	FlCaasStrateyProvider = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "identity-provider-meta-path",
-			Usage: "identity provider meta path url",
-		},
-	}
-	FlCaasStrategyName = StringFlag{
-		RequiredFlag: OPTIONAL,
-		StringFlag: cli.StringFlag{
-			Name:  "strategy-name",
-			Usage: "name of strategy",
-		},
-	}
-	FlCaasTenantName = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "name",
-			Usage: "name of tenant",
-		},
-	}
-	FlCaasTenantLabel = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "label",
-			Usage: "Display name for tenant",
-		},
-	}
-	FlCaasTenantEmail = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "email",
-			Usage: "email of the tenant",
-		},
-	}
-	FlRolesIDs = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "role-ids",
-			Usage: "comma seperated values of roles ids",
-		},
-	}
-	FlRoleNames = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "role-names",
-			Usage: "comma seperated values of role names",
-		},
-	}
 	FlVersion = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
