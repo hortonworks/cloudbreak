@@ -4,7 +4,6 @@ import static com.sequenceiq.redbeams.service.RedbeamsConstants.DATABASE_TEST_RE
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -33,8 +32,6 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -77,9 +74,6 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     @Inject
     private Clock clock;
-
-    @Inject
-    private TransactionService transactionService;
 
     @Inject
     private CrnService crnService;
@@ -209,22 +203,16 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             "GRANT ALL PRIVILEGES ON DATABASE " + databaseName + " TO " + databaseUserName
         );
 
-        try {
-            transactionService.required(() -> {
-                driverFunctions.execWithDatabaseDriver(databaseServerConfig, driver -> {
-                    try (Connection conn = driver.connect(databaseServerConfig); Statement statement = conn.createStatement()) {
-                        databaseCommon.executeUpdates(statement, sqlStrings);
-                    } catch (SQLException e) {
-                        throw new RedbeamsException("Failed to create database " + databaseName, e);
-                    }
-                });
-                return true;
-            });
-        } catch (TransactionExecutionException e) {
-            LOGGER.error("Error / transaction failure while creating database on server", e);
-            String message = Throwables.getCausalChain(e).stream().map(th -> th.getMessage()).collect(Collectors.joining("; "));
-            return "Error / transaction failure while creating database on server: " + message;
-        }
+        // For now, do not use a transaction (PostgreSQL forbids it).
+        boolean createDatabaseInsideTransaction = false;
+
+        driverFunctions.execWithDatabaseDriver(databaseServerConfig, driver -> {
+            try (Connection conn = driver.connect(databaseServerConfig)) {
+                databaseCommon.executeUpdates(conn, sqlStrings, createDatabaseInsideTransaction);
+            } catch (SQLException e) {
+                throw new RedbeamsException("Failed to create database " + databaseName, e);
+            }
+        });
 
         // Only record database on server if successfully created on server
         DatabaseConfig newDatabaseConfig =

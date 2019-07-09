@@ -4,7 +4,6 @@ import static com.sequenceiq.redbeams.service.RedbeamsConstants.DATABASE_TEST_RE
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +28,6 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -66,9 +63,6 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
 
     @Inject
     private CrnService crnService;
-
-    @Inject
-    private TransactionService transactionService;
 
     @Inject
     private DatabaseConnectionValidator connectionValidator;
@@ -191,20 +185,16 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
             sqlStrings.add("DROP USER " + databaseUserName);
         }
 
-        try {
-            transactionService.required(() -> {
-                driverFunctions.execWithDatabaseDriver(databaseServerConfig, driver -> {
-                    try (Connection conn = driver.connect(databaseServerConfig); Statement statement = conn.createStatement()) {
-                        databaseCommon.executeUpdates(statement, sqlStrings);
-                    } catch (SQLException e) {
-                        throw new RedbeamsException("Failed to drop database " + databaseName, e);
-                    }
-                });
-                return true;
-            });
-        } catch (TransactionExecutionException e) {
-            LOGGER.error("Error / transaction failure while deleting database from server", e);
-        }
+        // For now, do not use a transaction (PostgreSQL forbids it).
+        boolean dropDatabaseInsideTransaction = false;
+
+        driverFunctions.execWithDatabaseDriver(databaseServerConfig, driver -> {
+            try (Connection conn = driver.connect(databaseServerConfig)) {
+                databaseCommon.executeUpdates(conn, sqlStrings, dropDatabaseInsideTransaction);
+            } catch (SQLException e) {
+                throw new RedbeamsException("Failed to drop database " + databaseName, e);
+            }
+        });
     }
 
     @Override
