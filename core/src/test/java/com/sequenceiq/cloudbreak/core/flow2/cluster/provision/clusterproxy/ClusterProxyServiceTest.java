@@ -131,8 +131,8 @@ public class ClusterProxyServiceTest {
     }
 
     private String configRegistrationRequest() {
-        ClusterServiceCredential credential1 = new ClusterServiceCredential("cbuser", "/cb/test-data/secret/cbpassword");
-        ClusterServiceCredential credential2 = new ClusterServiceCredential("dpuser", "/cb/test-data/secret/dppassword");
+        ClusterServiceCredential credential1 = new ClusterServiceCredential("cbuser", "/cb/test-data/secret/cbpassword:secret");
+        ClusterServiceCredential credential2 = new ClusterServiceCredential("dpuser", "/cb/test-data/secret/dppassword:secret");
         ClusterServiceConfig service = new ClusterServiceConfig("cloudera-manager",
                 List.of("https://10.10.10.10/clouderamanager"), asList(credential1, credential2));
         return JsonUtil.writeValueAsStringSilent(new ConfigRegistrationRequest("1000", List.of(service)));
