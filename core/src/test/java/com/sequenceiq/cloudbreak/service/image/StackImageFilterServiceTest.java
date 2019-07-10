@@ -204,6 +204,7 @@ public class StackImageFilterServiceTest {
                 Arrays.asList(getImage("a", IMAGE_BASE_ID)),
                 Arrays.asList(getImage("b", IMAGE_HDP_ID)),
                 Arrays.asList(getImage("c", IMAGE_HDF_ID)),
+                Collections.emptyList(),
                 new HashSet<>()
         );
         return StatedImages.statedImages(images, CUSTOM_IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);

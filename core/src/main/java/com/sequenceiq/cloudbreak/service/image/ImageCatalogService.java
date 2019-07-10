@@ -108,7 +108,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             List<Image> baseImages = filterImagesByOperatingSystems(rawImages.getBaseImages(), operatingSystems);
             List<Image> hdpImages = filterImagesByOperatingSystems(rawImages.getHdpImages(), operatingSystems);
             List<Image> hdfImages = filterImagesByOperatingSystems(rawImages.getHdfImages(), operatingSystems);
-            images = statedImages(new Images(baseImages, hdpImages, hdfImages, rawImages.getSuppertedVersions()),
+            images = statedImages(new Images(baseImages, hdpImages, hdfImages, emptyList(), rawImages.getSuppertedVersions()),
                     images.getImageCatalogUrl(), images.getImageCatalogName());
         }
         return images;
@@ -268,7 +268,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     private Images emptyImages() {
-        return new Images(emptyList(), emptyList(), emptyList(), emptySet());
+        return new Images(emptyList(), emptyList(), emptyList(), emptyList(), emptySet());
     }
 
     private Optional<? extends Image> getImage(String imageId, Images images) {
@@ -319,7 +319,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             Stream.concat(Stream.concat(baseImages.stream(), hdpImages.stream()), hdfImages.stream()).collect(Collectors.toList())
                     .forEach(img -> img.setDefaultImage(defaultVMImageUUIDs.contains(img.getUuid())));
 
-            images = statedImages(new Images(baseImages, hdpImages, hdfImages, suppertedVersions),
+            images = statedImages(new Images(baseImages, hdpImages, hdfImages, emptyList(), suppertedVersions),
                     imageFilter.getImageCatalog().getImageCatalogUrl(),
                     imageFilter.getImageCatalog().getName());
         } else {
