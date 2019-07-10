@@ -163,7 +163,7 @@ public class AwsPlatformResources implements PlatformResources {
                 VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
                         .withCpuAndMemory(properties.getCpu(), properties.getMemory())
                         .withPrice(properties.getPrice())
-                        .withVolumeEncryptionSupport(properties.getEncryptionSupported());
+                        .withVolumeEncryptionSupport(Boolean.TRUE.equals(properties.getEncryptionSupported()));
                 for (ConfigSpecification configSpecification : vmSpecification.getMetaSpecification().getConfigSpecification()) {
                     addConfig(builder, configSpecification);
                 }
