@@ -68,6 +68,29 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
     }
 
     @Test
+    public void testValidationWhenOnlyOneGroupDefinedReturnInValid() {
+        String region = "eu-west-1";
+        String sec1 = null;
+        String sec2 = "sec-2";
+        String vpcId = "vpc-123";
+
+        when(platformParameterService.getSecurityGroups(any(PlatformResourceRequest.class)))
+                .thenReturn(cloudSecurityGroups(region, vpcId, sec1, sec2));
+
+        EnvironmentCreationDto environmentDto = EnvironmentCreationDto.Builder
+                .anEnvironmentCreationDto()
+                .withRegions(Sets.newHashSet(region))
+                .withSecurityAccess(getSecurityAccessDto(sec1, sec2))
+                .withNetwork(getNetworkDto(vpcId))
+                .withCredential(getEnvironmentRequest())
+                .build();
+
+        ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
+        underTest.validate(environmentDto, builder);
+        requestIsInValid(builder);
+    }
+
+    @Test
     public void testValidationWhenGroupsInDifferentVpcReturnInValid() {
         String region = "eu-west-1";
         String sec1 = "sec-1";
