@@ -19,10 +19,15 @@ public class AzureEnvironmentSecurityGroupValidator implements EnvironmentSecuri
     @Override
     public void validate(EnvironmentCreationDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder) {
         SecurityAccessDto securityAccessDto = environmentDto.getSecurityAccess();
-        if (securityAccessDto != null && isSecurityGroupIdDefined(securityAccessDto)) {
-            if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getNetworkCidr())) {
-                resultBuilder.error(networkIdMustBePresented(getCloudPlatform().name()));
+        if (securityAccessDto != null) {
+            if (onlyOneSecurityGroupIdDefined(securityAccessDto)) {
+                resultBuilder.error(securityGroupIdsMustBePresented());
                 return;
+            } else if (isSecurityGroupIdDefined(securityAccessDto)) {
+                if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getNetworkCidr())) {
+                    resultBuilder.error(networkIdMustBePresented(getCloudPlatform().name()));
+                    return;
+                }
             }
         }
     }

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
@@ -159,7 +160,10 @@ public class StackRequestManifester {
                 .findFirst()
                 .ifPresent(ig -> {
                     SecurityGroupV4Request securityGroup = ig.getSecurityGroup();
-                    if (securityGroup != null) {
+                    if (securityGroup == null) {
+                        securityGroup = new SecurityGroupV4Request();
+                    }
+                    if (!isInternalApiCall(securityGroup)) {
                         if (!Strings.isNullOrEmpty(securityGroupId)) {
                             securityGroup.setSecurityGroupIds(Set.of(securityGroupId));
                             securityGroup.setSecurityRules(new ArrayList<>());
@@ -175,6 +179,10 @@ public class StackRequestManifester {
                         }
                     }
                 });
+    }
+
+    private boolean isInternalApiCall(SecurityGroupV4Request securityGroup) {
+        return !CollectionUtils.isEmpty(securityGroup.getSecurityGroupIds());
     }
 
     private void setupClusterRequest(StackV4Request stackRequest) {
