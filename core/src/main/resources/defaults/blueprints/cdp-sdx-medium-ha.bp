@@ -48,7 +48,8 @@
         "cardinality": 2,
         "refName": "idbroker",
         "roleConfigGroupsRefNames": [
-          "knox-IDBROKER-BASE"
+          "knox-IDBROKER-BASE",
+          "knox-KNOX_GATEWAY-BASE"
         ]
       }
     ],
@@ -259,7 +260,13 @@
           {
             "base": true,
             "refName": "ranger-RANGER_ADMIN-BASE",
-            "roleType": "RANGER_ADMIN"
+            "roleType": "RANGER_ADMIN",
+            "configs": [
+                {
+                    "name": "ranger.authentication.allow.trustedproxy",
+                    "value": "true"
+                }
+            ]
           }
         ],
         "serviceConfigs": [
@@ -325,6 +332,11 @@
       {
         "refName": "knox",
         "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY"
+          },
           {
             "base": true,
             "refName": "knox-IDBROKER-BASE",

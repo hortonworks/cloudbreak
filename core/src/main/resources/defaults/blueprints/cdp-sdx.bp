@@ -69,7 +69,13 @@
           {
             "base": true,
             "refName": "ranger-RANGER_ADMIN-BASE",
-            "roleType": "RANGER_ADMIN"
+            "roleType": "RANGER_ADMIN",
+            "configs": [
+                {
+                    "name": "ranger.authentication.allow.trustedproxy",
+                    "value": "true"
+                }
+            ]
           }
         ],
         "serviceConfigs": [
