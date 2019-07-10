@@ -216,6 +216,12 @@
             "roleType": "NFSGATEWAY"
           }
         ],
+        "serviceConfigs": [
+            {
+                "name": "enable_ranger_authorization",
+                "value": "true"
+            }
+        ],
         "serviceType": "HDFS"
       },
       {
