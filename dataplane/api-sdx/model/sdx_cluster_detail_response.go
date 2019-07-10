@@ -19,6 +19,10 @@ import (
 // swagger:model SdxClusterDetailResponse
 type SdxClusterDetailResponse struct {
 
+	// cluster shape
+	// Enum: [CUSTOM LIGHT_DUTY MEDIUM_DUTY_HA]
+	ClusterShape string `json:"clusterShape,omitempty"`
+
 	// crn
 	Crn string `json:"crn,omitempty"`
 
@@ -46,6 +50,10 @@ type SdxClusterDetailResponse struct {
 func (m *SdxClusterDetailResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateClusterShape(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateStackV4Response(formats); err != nil {
 		res = append(res, err)
 	}
@@ -57,6 +65,52 @@ func (m *SdxClusterDetailResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+var sdxClusterDetailResponseTypeClusterShapePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["CUSTOM","LIGHT_DUTY","MEDIUM_DUTY_HA"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		sdxClusterDetailResponseTypeClusterShapePropEnum = append(sdxClusterDetailResponseTypeClusterShapePropEnum, v)
+	}
+}
+
+const (
+
+	// SdxClusterDetailResponseClusterShapeCUSTOM captures enum value "CUSTOM"
+	SdxClusterDetailResponseClusterShapeCUSTOM string = "CUSTOM"
+
+	// SdxClusterDetailResponseClusterShapeLIGHTDUTY captures enum value "LIGHT_DUTY"
+	SdxClusterDetailResponseClusterShapeLIGHTDUTY string = "LIGHT_DUTY"
+
+	// SdxClusterDetailResponseClusterShapeMEDIUMDUTYHA captures enum value "MEDIUM_DUTY_HA"
+	SdxClusterDetailResponseClusterShapeMEDIUMDUTYHA string = "MEDIUM_DUTY_HA"
+)
+
+// prop value enum
+func (m *SdxClusterDetailResponse) validateClusterShapeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, sdxClusterDetailResponseTypeClusterShapePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SdxClusterDetailResponse) validateClusterShape(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ClusterShape) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateClusterShapeEnum("clusterShape", "body", m.ClusterShape); err != nil {
+		return err
+	}
+
 	return nil
 }
 

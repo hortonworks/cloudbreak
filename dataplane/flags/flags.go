@@ -602,7 +602,7 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "cluster-shape",
-			Usage: "defines the used cluster shape",
+			Usage: "defines the used cluster shape, can be LIGHT_DUTY, MEDIUM_DUTY_HA",
 		},
 	}
 	FlAvailabilityZoneOptional = StringFlag{

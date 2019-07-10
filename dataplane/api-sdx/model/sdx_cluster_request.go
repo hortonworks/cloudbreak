@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -22,6 +24,7 @@ type SdxClusterRequest struct {
 
 	// cluster shape
 	// Required: true
+	// Enum: [CUSTOM LIGHT_DUTY MEDIUM_DUTY_HA]
 	ClusterShape *string `json:"clusterShape"`
 
 	// environment
@@ -72,9 +75,46 @@ func (m *SdxClusterRequest) validateCloudStorage(formats strfmt.Registry) error 
 	return nil
 }
 
+var sdxClusterRequestTypeClusterShapePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["CUSTOM","LIGHT_DUTY","MEDIUM_DUTY_HA"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		sdxClusterRequestTypeClusterShapePropEnum = append(sdxClusterRequestTypeClusterShapePropEnum, v)
+	}
+}
+
+const (
+
+	// SdxClusterRequestClusterShapeCUSTOM captures enum value "CUSTOM"
+	SdxClusterRequestClusterShapeCUSTOM string = "CUSTOM"
+
+	// SdxClusterRequestClusterShapeLIGHTDUTY captures enum value "LIGHT_DUTY"
+	SdxClusterRequestClusterShapeLIGHTDUTY string = "LIGHT_DUTY"
+
+	// SdxClusterRequestClusterShapeMEDIUMDUTYHA captures enum value "MEDIUM_DUTY_HA"
+	SdxClusterRequestClusterShapeMEDIUMDUTYHA string = "MEDIUM_DUTY_HA"
+)
+
+// prop value enum
+func (m *SdxClusterRequest) validateClusterShapeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, sdxClusterRequestTypeClusterShapePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *SdxClusterRequest) validateClusterShape(formats strfmt.Registry) error {
 
 	if err := validate.Required("clusterShape", "body", m.ClusterShape); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateClusterShapeEnum("clusterShape", "body", *m.ClusterShape); err != nil {
 		return err
 	}
 

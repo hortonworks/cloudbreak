@@ -8,6 +8,7 @@ import (
 	sdxModel "github.com/hortonworks/cb-cli/dataplane/api-sdx/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
+	"github.com/hortonworks/cb-cli/dataplane/types"
 	"github.com/hortonworks/dp-cli-common/utils"
 	commonutils "github.com/hortonworks/dp-cli-common/utils"
 	log "github.com/sirupsen/logrus"
@@ -66,26 +67,20 @@ func CreateSdx(c *cli.Context) {
 
 	name := c.String(fl.FlName.Name)
 	envName := c.String(fl.FlEnvironmentName.Name)
-	cidrOptional := c.String(fl.FlCidrOptional.Name)
 	clusterShape := c.String(fl.FlClusterShape.Name)
 	baseLocation := c.String(fl.FlCloudStorageBaseLocationOptional.Name)
 	instanceProfile := c.String(fl.FlCloudStorageInstanceProfileOptional.Name)
 
-	var cidr string
-	if cidr = cidrOptional; cidrOptional == "" {
-		cidr = "0.0.0.0/0"
-	}
-
 	inputJson := assembleStackRequest(c)
 
 	if inputJson != nil {
-		createInternalSdx(cidr, clusterShape, envName, inputJson, c, name)
+		createInternalSdx(envName, inputJson, c, name)
 	} else {
-		createSdx(cidr, clusterShape, envName, c, name, baseLocation, instanceProfile)
+		createSdx(clusterShape, envName, c, name, baseLocation, instanceProfile)
 	}
 }
 
-func createSdx(cidr string, clusterShape string, envName string, c *cli.Context, name string, cloudStorageBaseLocation string, instanceProfile string) {
+func createSdx(clusterShape string, envName string, c *cli.Context, name string, cloudStorageBaseLocation string, instanceProfile string) {
 	s3CloudStorage := &sdxModel.S3CloudStorageV4Parameters{
 		InstanceProfile: &instanceProfile,
 	}
@@ -115,15 +110,15 @@ func createSdx(cidr string, clusterShape string, envName string, c *cli.Context,
 	log.Infof("[createSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.Name)
 }
 
-func createInternalSdx(cidr string, clusterShape string, envName string, inputJson *sdxModel.StackV4Request, c *cli.Context, name string) {
-	SdxInternalRequest := &sdxModel.SdxInternalClusterRequest{
-		ClusterShape:   &clusterShape,
+func createInternalSdx(envName string, inputJson *sdxModel.StackV4Request, c *cli.Context, name string) {
+	sdxInternalRequest := &sdxModel.SdxInternalClusterRequest{
+		ClusterShape:   &(&types.S{S: sdxModel.SdxClusterRequestClusterShapeCUSTOM}).S,
 		Environment:    &envName,
-		Tags:           nil,
 		StackV4Request: inputJson,
+		Tags:           nil,
 	}
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
-	resp, err := sdxClient.Internalsdx.CreateInternalSdx(internalsdx.NewCreateInternalSdxParams().WithName(name).WithBody(SdxInternalRequest))
+	resp, err := sdxClient.Internalsdx.CreateInternalSdx(internalsdx.NewCreateInternalSdxParams().WithName(name).WithBody(sdxInternalRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

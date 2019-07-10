@@ -19,6 +19,10 @@ import (
 // swagger:model SdxClusterResponse
 type SdxClusterResponse struct {
 
+	// cluster shape
+	// Enum: [CUSTOM LIGHT_DUTY MEDIUM_DUTY_HA]
+	ClusterShape string `json:"clusterShape,omitempty"`
+
 	// crn
 	Crn string `json:"crn,omitempty"`
 
@@ -43,6 +47,10 @@ type SdxClusterResponse struct {
 func (m *SdxClusterResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateClusterShape(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateStatus(formats); err != nil {
 		res = append(res, err)
 	}
@@ -50,6 +58,52 @@ func (m *SdxClusterResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+var sdxClusterResponseTypeClusterShapePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["CUSTOM","LIGHT_DUTY","MEDIUM_DUTY_HA"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		sdxClusterResponseTypeClusterShapePropEnum = append(sdxClusterResponseTypeClusterShapePropEnum, v)
+	}
+}
+
+const (
+
+	// SdxClusterResponseClusterShapeCUSTOM captures enum value "CUSTOM"
+	SdxClusterResponseClusterShapeCUSTOM string = "CUSTOM"
+
+	// SdxClusterResponseClusterShapeLIGHTDUTY captures enum value "LIGHT_DUTY"
+	SdxClusterResponseClusterShapeLIGHTDUTY string = "LIGHT_DUTY"
+
+	// SdxClusterResponseClusterShapeMEDIUMDUTYHA captures enum value "MEDIUM_DUTY_HA"
+	SdxClusterResponseClusterShapeMEDIUMDUTYHA string = "MEDIUM_DUTY_HA"
+)
+
+// prop value enum
+func (m *SdxClusterResponse) validateClusterShapeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, sdxClusterResponseTypeClusterShapePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SdxClusterResponse) validateClusterShape(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ClusterShape) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateClusterShapeEnum("clusterShape", "body", m.ClusterShape); err != nil {
+		return err
+	}
+
 	return nil
 }
 
