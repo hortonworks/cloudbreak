@@ -22,12 +22,6 @@ public class CloudbreakClientConfiguration {
     @Value("${cb.server.contextPath:/cb}")
     private String cbRootContextPath;
 
-    @Value("${periscope.client.id}")
-    private String clientId;
-
-    @Value("${periscope.client.secret}")
-    private String secret;
-
     @Bean
     public CloudbreakUserCrnClient cloudbreakClient() {
         return new CloudbreakUserCrnClientBuilder(cloudbreakUrl + cbRootContextPath)

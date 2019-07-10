@@ -32,7 +32,7 @@ dependencies {
   compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
 
   compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
-  compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
+  compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonDatabindVersion) {
     force = true
   }
   compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion

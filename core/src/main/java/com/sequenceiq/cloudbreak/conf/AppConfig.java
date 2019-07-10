@@ -92,9 +92,6 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${cb.intermediate.threadpool.capacity.size:}")
     private int intermediateQueueCapacity;
 
-    @Value("${cb.client.id}")
-    private String clientId;
-
     @Value("${rest.debug}")
     private boolean restDebug;
 

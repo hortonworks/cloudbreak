@@ -4,13 +4,8 @@ import static com.sequenceiq.periscope.api.AutoscaleApi.API_ROOT_CONTEXT;
 
 import javax.inject.Inject;
 
-import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -24,25 +19,6 @@ import com.sequenceiq.periscope.service.security.TenantBasedPermissionEvaluator;
 
 @Configuration
 public class SecurityConfig {
-
-    @Value("${periscope.client.secret}")
-    private String clientSecret;
-
-    @Bean("PBEStringCleanablePasswordEncryptor")
-    @Scope("prototype")
-    public PBEStringCleanablePasswordEncryptor encryptor() {
-        PBEStringCleanablePasswordEncryptor encryptor = new StandardPBEStringEncryptor();
-        encryptor.setPassword(clientSecret);
-        return encryptor;
-    }
-
-    @Bean("LegacyPBEStringCleanablePasswordEncryptor")
-    @Scope("prototype")
-    public PBEStringCleanablePasswordEncryptor legacyEncryptor() {
-        PBEStringCleanablePasswordEncryptor encryptor = new StandardPBEStringEncryptor();
-        encryptor.setPassword("cbsecret2015");
-        return encryptor;
-    }
 
     @EnableGlobalMethodSecurity(prePostEnabled = true)
     protected static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {

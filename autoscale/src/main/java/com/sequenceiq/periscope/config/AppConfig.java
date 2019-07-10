@@ -46,9 +46,6 @@ public class AppConfig implements AsyncConfigurer {
     @Value("${periscope.threadpool.queue.size:1000}")
     private int queueCapacity;
 
-    @Value("${periscope.client.id}")
-    private String clientId;
-
     @Value("${rest.debug}")
     private boolean restDebug;
 

@@ -33,25 +33,6 @@ import com.sequenceiq.redbeams.service.security.TenantBasedPermissionEvaluator;
 @Configuration
 public class SecurityConfig {
 
-    // @Value("${redbeams.client.secret}")
-    // private String clientSecret;
-
-    // @Bean("PBEStringCleanablePasswordEncryptor")
-    // @Scope("prototype")
-    // public PBEStringCleanablePasswordEncryptor encryptor() {
-    //     PBEStringCleanablePasswordEncryptor encryptor = new StandardPBEStringEncryptor();
-    //     encryptor.setPassword(clientSecret);
-    //     return encryptor;
-    // }
-
-    // @Bean("LegacyPBEStringCleanablePasswordEncryptor")
-    // @Scope("prototype")
-    // public PBEStringCleanablePasswordEncryptor legacyEncryptor() {
-    //     PBEStringCleanablePasswordEncryptor encryptor = new StandardPBEStringEncryptor();
-    //     encryptor.setPassword("cbsecret2015");
-    //     return encryptor;
-    // }
-
     @EnableGlobalMethodSecurity(prePostEnabled = true)
     protected static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
