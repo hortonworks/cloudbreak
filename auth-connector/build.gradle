@@ -27,7 +27,7 @@ dependencies {
   implementation group: 'org.glassfish.jersey.media',   name: 'jersey-media-multipart',         version: jerseyCoreVersion
   implementation group: 'org.apache.httpcomponents',    name: 'httpclient',                     version: httpClientVersion
 
-  compile ("io.grpc:grpc-all:1.19.0") {
+  compile ("io.grpc:grpc-all:1.22.0") {
     exclude group: 'org.mockito'
   }
   testCompile group: 'org.mockito',                     name: 'mockito-core', version: mockitoVersion

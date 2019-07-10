@@ -13,7 +13,10 @@ jar {
 dependencies {
   compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
     exclude group: 'org.slf4j'
+    exclude group: 'xerces.xercesImpl'
   }
+  compile group: 'xerces',              name: 'xercesImpl',            version: xerces
+
   compile (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: cmClientVersion) {
     transitive = false
   }

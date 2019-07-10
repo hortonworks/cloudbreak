@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.services.ServiceAndHostService;
@@ -23,21 +22,6 @@ public class AmbariConfigurationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariConfigurationService.class);
 
     private static final String AZURE_ADDRESS_SUFFIX = "cloudapp.net";
-
-    @Value("${cb.ambari.database.databaseEngine}")
-    private String databaseEngine;
-
-    @Value("${cb.ambari.database.name}")
-    private String name;
-
-    @Value("${cb.ambari.database.host}")
-    private String host;
-
-    @Value("${cb.ambari.database.port}")
-    private Integer port;
-
-    @Value("${cb.ambari.database.username}")
-    private String userName;
 
     static {
         for (ConfigParam param : ConfigParam.values()) {

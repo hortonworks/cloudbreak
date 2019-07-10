@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @WorkspaceResourceType(resource = WorkspaceResource.BLUEPRINT)
 public interface BlueprintViewRepository extends WorkspaceResourceRepository<BlueprintView, Long> {
 
-    @Query("SELECT b FROM Blueprint b WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
+    @Query("SELECT b FROM BlueprintView b WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
     @CheckPermissionsByReturnValue
     Set<BlueprintView> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
 }

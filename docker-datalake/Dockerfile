@@ -9,9 +9,6 @@ ENV VERSION ${VERSION}
 
 WORKDIR /
 
-# Install zip
-RUN apt-get update --no-install-recommends && apt-get install -y zip procps && apt-get clean && rm -rf /var/lib/apt/lists/*
-
 # install the datalake app
 ADD ${REPO_URL}/com/sequenceiq/datalake/$VERSION/datalake-$VERSION.jar /datalake.jar
 
@@ -19,8 +16,7 @@ ADD ${REPO_URL}/com/sequenceiq/datalake/$VERSION/datalake-$VERSION.jar /datalake
 ADD jmx_prometheus_javaagent-0.10.jar /jmx_prometheus_javaagent.jar
 
 # extract schema files
-RUN ( unzip datalake.jar schema/* -d / ) || \
-    ( unzip datalake.jar BOOT-INF/classes/schema/* -d /tmp/ && mv /tmp/BOOT-INF/classes/schema/ /schema/ )
+RUN jar xf datalake.jar && mv /BOOT-INF/classes/schema/ /schema/
 
 # Install starter script for the Datalake application
 COPY bootstrap/start_datalake_app.sh /

@@ -20,7 +20,9 @@ dependencies {
   compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
     exclude group: 'org.slf4j'
     exclude group: 'org.codehouse.groovy'
+    exclude group: 'xerces.xercesImpl'
   }
+  compile group: 'xerces',              name: 'xercesImpl',            version: xerces
   compile project(':cluster-api')
   compile project(':template-manager-blueprint')
 

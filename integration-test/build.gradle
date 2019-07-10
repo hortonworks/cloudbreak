@@ -73,8 +73,11 @@ dependencies {
     transitive = false;
   }
   compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
-    exclude group: 'org.slf4j';
+    exclude group: 'org.slf4j'
+    exclude group: 'xerces.xercesImpl'
   }
+  compile group: 'xerces',              name: 'xercesImpl',            version: xerces
+
   compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion) {
     exclude group: 'commons-logging'
   }

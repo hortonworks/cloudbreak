@@ -25,7 +25,7 @@ dependencies {
   compile group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
   compile group: 'io.projectreactor',                     name: 'reactor-stream',                 version: eventBusVersion
   compile group: 'org.mybatis',                           name: 'mybatis-migrations',             version: '3.2.0'
-  compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonDatabindVersion
   compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   compile group: 'com.google.code.findbugs',              name: 'annotations',                    version: '3.0.1'
 
@@ -43,7 +43,7 @@ dependencies {
   compile group: 'org.springframework',                   name: 'spring-beans',                   version: springFrameworkVersion
   compile group: 'org.springframework',                   name: 'spring-context',                 version: springFrameworkVersion
   compile group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
-  compile group: 'org.springframework.data',              name: 'spring-data-jpa',                version: '2.1.5.RELEASE'
+  compile group: 'org.springframework.data',              name: 'spring-data-jpa',                version: springDataJpaFrameworkVersion
   compile group: 'org.springframework',                   name: 'spring-jdbc',                    version: springFrameworkVersion
   compile group: 'org.springframework',                   name: 'spring-web',                     version: springFrameworkVersion
   compile group: 'org.springframework.retry',             name: 'spring-retry',                   version: '1.2.0.RELEASE'
@@ -55,7 +55,7 @@ dependencies {
   compile group: 'io.swagger',                            name: 'swagger-annotations',            version: swaggerVersion
   compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
 
-  compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
+  compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonDatabindVersion) {
     force = true
   }
   compile group: 'javax.validation',                      name: 'validation-api',                 version: '2.0.1.Final'
