@@ -262,7 +262,7 @@
     <service>
         <role>SOLR</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['SOLR_SERVER'] -%}
-        <url>http://{{ hostloc }}:{{ ports['SOLR'] }}/</url>
+        <url>http://{{ hostloc }}:{{ ports['SOLR'] }}/solr</url>
         {%- endfor %}
     </service>
     {%- endif %}
