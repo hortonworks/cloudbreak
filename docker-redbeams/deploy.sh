@@ -19,7 +19,6 @@ new_version() {
   # Build docker and push to hortonworks repo
   docker build -t ${DOCKER_IMAGE}:${VERSION} --build-arg=REPO_URL=${NEXUS_URL} --build-arg=VERSION=${VERSION} .
   docker push ${DOCKER_IMAGE}:${VERSION}
-  docker rmi ${DOCKER_IMAGE}:${VERSION}
 }
 
 main() {
