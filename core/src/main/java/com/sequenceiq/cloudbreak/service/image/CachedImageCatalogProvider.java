@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static java.util.Collections.emptyList;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -98,12 +99,12 @@ public class CachedImageCatalogProvider {
         List<Image> filteredHdpImages = filterImages(catalogImages.getHdpImages(), enabledOsPredicate());
         List<Image> filteredHdfImages = filterImages(catalogImages.getHdfImages(), enabledOsPredicate());
 
-        Images images = new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, catalogImages.getSuppertedVersions());
+        Images images = new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, emptyList(), catalogImages.getSuppertedVersions());
         return new CloudbreakImageCatalogV2(images, catalog.getVersions());
     }
 
     private List<Image> filterImages(List<Image> imageList, Predicate<Image> predicate) {
-        Map<Boolean, List<Image>> partitionedImages = Optional.ofNullable(imageList).orElse(Collections.emptyList()).stream()
+        Map<Boolean, List<Image>> partitionedImages = Optional.ofNullable(imageList).orElse(emptyList()).stream()
                 .collect(Collectors.partitioningBy(predicate));
         if (hasFiltered(partitionedImages)) {
             LOGGER.debug("Used filter linuxTypes: | {} | Images filtered: {}",
@@ -147,12 +148,16 @@ public class CachedImageCatalogProvider {
     }
 
     private void validateImageCatalogUuids(CloudbreakImageCatalogV2 imageCatalog) throws CloudbreakImageCatalogException {
-        Stream<String> uuidStream = Stream.concat(imageCatalog.getImages().getBaseImages().stream().map(Image::getUuid),
+        Stream<String> uuidStream = Stream.concat(imageCatalog.getImages().getBaseImages().stream()
+                        .map(Image::getUuid),
                 imageCatalog.getImages().getHdpImages().stream().map(Image::getUuid));
         uuidStream = Stream.concat(uuidStream, imageCatalog.getImages().getHdfImages().stream().map(Image::getUuid));
         List<String> uuidList = uuidStream.collect(Collectors.toList());
-        List<String> orphanUuids = imageCatalog.getVersions().getCloudbreakVersions().stream().flatMap(cbv -> cbv.getImageIds().stream()).
-                filter(imageId -> !uuidList.contains(imageId)).collect(Collectors.toList());
+        List<String> orphanUuids = imageCatalog.getVersions().getCloudbreakVersions().stream()
+                .flatMap(cbv -> cbv.getImageIds().stream())
+                .filter(imageId -> !uuidList.contains(imageId))
+                .filter(imageId -> imageCatalog.getImages().getCdhImages().stream().noneMatch(it -> it.getUuid().equals(imageId)))
+                .collect(Collectors.toList());
         if (!orphanUuids.isEmpty()) {
             throw new CloudbreakImageCatalogException(String.format("Images with ids: %s is not present in ambari-images block",
                     StringUtils.join(orphanUuids, ",")));

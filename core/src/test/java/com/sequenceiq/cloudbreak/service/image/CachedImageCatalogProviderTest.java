@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ImageCatalogProviderTest {
+public class CachedImageCatalogProviderTest {
 
     private static final String CB_IMAGE_CATALOG_V2_JSON = "cb-image-catalog-v2.json";
 
@@ -58,6 +58,8 @@ public class ImageCatalogProviderTest {
     private static final String CB_IMAGE_CATALOG_EMPTY_CLOUDBREAK_VERSIONS_JSON = "cb-image-catalog-empty-cloudbreak-versions.json";
 
     private static final String CB_IMAGE_CATALOG_WITHOUT_BASE_IMAGES = "cb-image-catalog-without-base-images.json";
+
+    private static final String CB_IMAGE_CATALOG_WITH_CDH_IMAGES = "cb-image-catalog-with-cdh-images.json";
 
     private static final String CB_IMAGE_CATALOG_WITHOUT_HDP_IMAGES = "cb-image-catalog-without-hdp-images.json";
 
