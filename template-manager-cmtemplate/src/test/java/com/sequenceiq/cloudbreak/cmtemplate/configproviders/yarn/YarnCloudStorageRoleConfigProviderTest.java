@@ -39,11 +39,8 @@ public class YarnCloudStorageRoleConfigProviderTest {
         List<ApiClusterTemplateConfig> yarnStorageConfigs = roleConfigs.get("yarn-NODEMANAGER-BASE");
 
         assertEquals(1, yarnStorageConfigs.size());
-        assertEquals("nodemanager_config_safety_valve", yarnStorageConfigs.get(0).getName());
-        String expected = "<property><name>yarn.nodemanager.remote-app-log-dir</name><value>"
-                + getYarnRemoteAppLogDir().getValue()
-                + "</value></property>";
-        assertEquals(expected, yarnStorageConfigs.get(0).getValue());
+        assertEquals("yarn_nodemanager_remote_app_log_dir", yarnStorageConfigs.get(0).getName());
+        assertEquals("s3a://bucket/yarn/logs", yarnStorageConfigs.get(0).getValue());
     }
 
     @Test

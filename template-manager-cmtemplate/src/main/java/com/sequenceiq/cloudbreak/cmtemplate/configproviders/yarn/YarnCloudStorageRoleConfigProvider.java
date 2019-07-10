@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class YarnCloudStorageRoleConfigProvider extends AbstractRoleConfigProvider {
 
-    private static final String NODEMANAGER_CONFIG_SAFETY_VALVE = "nodemanager_config_safety_valve";
+    private static final String NODEMANAGER_REMOTE_APP_LOG_DIR_TEMPLATE_PARAM = "yarn_nodemanager_remote_app_log_dir";
 
     private static final String NODEMANAGER_REMOTE_APP_LOG_DIR = "yarn.nodemanager.remote-app-log-dir";
 
@@ -23,11 +23,9 @@ public class YarnCloudStorageRoleConfigProvider extends AbstractRoleConfigProvid
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case YarnRoles.NODEMANAGER:
-                String cloudStorageProperty = getCloudStorageProperty(source);
-                if (!cloudStorageProperty.isEmpty()) {
-                    return List.of(config(NODEMANAGER_CONFIG_SAFETY_VALVE, cloudStorageProperty));
-                }
-                return List.of();
+                return ConfigUtils.getStorageLocationForServiceProperty(source, NODEMANAGER_REMOTE_APP_LOG_DIR)
+                        .map(location -> List.of(config(NODEMANAGER_REMOTE_APP_LOG_DIR_TEMPLATE_PARAM, location.getValue())))
+                        .orElseGet(List::of);
             default:
                 return List.of();
         }
@@ -47,14 +45,5 @@ public class YarnCloudStorageRoleConfigProvider extends AbstractRoleConfigProvid
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return source.getFileSystemConfigurationView().isPresent()
                 && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
-    }
-
-    protected String getCloudStorageProperty(TemplatePreparationObject source) {
-        StringBuilder yarnCloudStorage = new StringBuilder();
-        ConfigUtils.getStorageLocationForServiceProperty(source, NODEMANAGER_REMOTE_APP_LOG_DIR).ifPresent(
-                storageLocation -> yarnCloudStorage.append(
-                        ConfigUtils.getSafetyValveProperty(NODEMANAGER_REMOTE_APP_LOG_DIR, storageLocation.getValue()))
-        );
-        return yarnCloudStorage.toString();
     }
 }
