@@ -197,6 +197,10 @@
                     {
                         "name": "redaction_policy_enabled",
                         "value": "false"
+                    },
+                    {
+                        "name": "enable_ranger_authorization",
+                        "value": "true"
                     }
                 ],
                 "serviceType": "HDFS"
