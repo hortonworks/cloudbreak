@@ -56,42 +56,42 @@ public interface DatabaseServerV4Endpoint {
     DatabaseServerV4Response get(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
 
     @POST
-    @Path("external")
+    @Path("/managed")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "createDatabaseServer")
     DatabaseServerStatusV4Response create(@Valid AllocateDatabaseServerV4Request request);
 
     @GET
-    @Path("external/status/{name}")
+    @Path("/managed/status/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "getDatabaseServerStatus")
     DatabaseServerStatusV4Response getExternalStatus(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
 
     @DELETE
-    @Path("external")
+    @Path("/managed")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.TERMINATE, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "terminateDatabaseServer")
     DatabaseServerTerminationOutcomeV4Response terminate(@Valid TerminateDatabaseServerV4Request request);
 
     @POST
-    @Path("register")
+    @Path("/register")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.REGISTER, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
         nickname = "registerDatabaseServer")
     DatabaseServerV4Response register(@Valid DatabaseServerV4Request request);
 
     @DELETE
-    @Path("{name}")
+    @Path("/registered/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
         nickname = "deleteDatabaseServer")
     DatabaseServerV4Response delete(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
 
     @DELETE
-    @Path("")
+    @Path("/registered")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "deleteMultipleDatabaseServers")
