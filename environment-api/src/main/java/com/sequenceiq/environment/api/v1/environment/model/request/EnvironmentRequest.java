@@ -43,6 +43,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
     private TelemetryRequest telemetry;
 
+    @Size(max = 100)
     @ApiModelProperty(EnvironmentModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
