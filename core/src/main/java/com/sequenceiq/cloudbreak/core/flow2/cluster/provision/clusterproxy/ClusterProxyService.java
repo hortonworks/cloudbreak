@@ -135,7 +135,7 @@ public class ClusterProxyService {
 
     private String vaultPath(String vaultSecretJsonString) {
         try {
-            return JsonUtil.readValue(vaultSecretJsonString, VaultSecret.class).getPath();
+            return JsonUtil.readValue(vaultSecretJsonString, VaultSecret.class).getPath() + ":secret";
         } catch (IOException e) {
             throw new VaultConfigException(String.format("Could not parse vault secret string '%s'", vaultSecretJsonString), e);
         }
