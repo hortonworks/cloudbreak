@@ -5,7 +5,6 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent;
-// import com.sequenceiq.redbeams.service.crn.CrnService;
 
 import java.security.SecureRandom;
 import java.util.Random;
@@ -30,15 +29,14 @@ public class RedbeamsTerminationService {
     @Inject
     private RedbeamsFlowManager flowManager;
 
-    // @Inject
-    // private CrnService crnService;
-
     private final Random random = new SecureRandom();
 
     public DBStack terminateDatabaseServer(String dbStackName, String environmentId) {
-        // FIXME log the stack?
-
         DBStack dbStack = dbStackService.getByNameAndEnvironmentId(dbStackName, environmentId);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Terminate called for: {}", dbStack);
+        }
+
         dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.DELETE_REQUESTED);
         // Get the updated entity with the updated status
         dbStack = dbStackService.getById(dbStack.getId());

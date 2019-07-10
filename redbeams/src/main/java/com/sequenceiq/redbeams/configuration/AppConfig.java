@@ -18,7 +18,9 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
+import com.sequenceiq.redbeams.filter.MDCFilter;
 import com.sequenceiq.redbeams.filter.RequestIdFilter;
 import com.sequenceiq.redbeams.filter.RequestIdGeneratingFilter;
 import com.sequenceiq.redbeams.service.ThreadBasedRequestIdProvider;
@@ -36,6 +38,8 @@ public class AppConfig implements ResourceLoaderAware {
     private static final int BEAN_ORDER_REQUEST_ID_GENERATING_FILTER = 100;
 
     private static final int BEAN_ORDER_REQUEST_ID_FILTER = 110;
+
+    private static final int BEAN_ORDER_MDC_FILTER = 200;
 
     @Value("${redbeams.etc.config.dir}")
     private String etcConfigDir;
@@ -85,6 +89,9 @@ public class AppConfig implements ResourceLoaderAware {
     @Inject
     private ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
 
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
     private ResourceLoader resourceLoader;
 
     @PostConstruct
@@ -107,6 +114,15 @@ public class AppConfig implements ResourceLoaderAware {
         RequestIdFilter filter = new RequestIdFilter(threadBasedRequestIdProvider);
         registrationBean.setFilter(filter);
         registrationBean.setOrder(BEAN_ORDER_REQUEST_ID_FILTER);
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<MDCFilter> mdcFilterRegistrationBean() {
+        FilterRegistrationBean<MDCFilter> registrationBean = new FilterRegistrationBean<>();
+        MDCFilter filter = new MDCFilter(threadBasedRequestIdProvider, threadBasedUserCrnProvider);
+        registrationBean.setFilter(filter);
+        registrationBean.setOrder(BEAN_ORDER_MDC_FILTER);
         return registrationBean;
     }
 

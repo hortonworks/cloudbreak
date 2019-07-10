@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
-//import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
@@ -69,8 +69,7 @@ public abstract class AbstractRedbeamsTerminationAction<P extends Payload>
 
         if (optionalDBStack.isPresent()) {
             dbStack = optionalDBStack.get();
-            // FIXME add MDCBuilder stuff
-            // MDCBuilder.buildMdcContext(dbStack);
+            MDCBuilder.buildMdcContext(dbStack);
             Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
             String userName = dbStack.getOwnerCrn().getResource();
             String accountId = dbStack.getOwnerCrn().getAccountId();
