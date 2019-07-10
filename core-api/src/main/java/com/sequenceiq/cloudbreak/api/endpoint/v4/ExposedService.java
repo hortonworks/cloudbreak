@@ -24,7 +24,7 @@ public enum ExposedService {
     RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "RESOURCEMANAGER", "YARNUI", "/yarn/", true, 8088),
     RESOURCEMANAGER_WEB_V2("Resource Manager V2", "RESOURCEMANAGER", "RESOURCEMANAGER", "YARNUIV2", "/yarnuiv2/", true, 8088),
     JOB_HISTORY_SERVER("Job History Server", "HISTORYSERVER", "JOBHISTORY", "JOBHISTORYUI", "/jobhistory/", true, 19888),
-    HIVE_SERVER("Hive Server", "HIVE_SERVER", "HIVESERVER2", "HIVE", "/hive/", false, 10001, 10002),
+    HIVE_SERVER("Hive Server", "HIVE_SERVER", "HIVESERVER2", "HIVE", "/hive/", false, 10001),
     HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "", "HIVE_INTERACTIVE", "/hive/", false, 10501),
     ATLAS("Atlas", "ATLAS_SERVER", "ATLAS_SERVER", "ATLAS", "/atlas/", true, 21000),
     SPARK_HISTORY_SERVER("Spark 1.x History Server", "SPARK_JOBHISTORYSERVER", "SPARK_YARN_HISTORY_SERVER", "SPARKHISTORYUI",
