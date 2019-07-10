@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model;
 
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -12,6 +14,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class EnvironmentNetworkAwsParams {
+
+    @Size(max = 255)
     @ApiModelProperty(value = EnvironmentModelDescription.AWS_VPC_ID, required = true)
     private String vpcId;
 

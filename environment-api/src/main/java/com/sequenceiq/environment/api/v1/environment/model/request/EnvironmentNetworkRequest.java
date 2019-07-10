@@ -2,6 +2,8 @@ package com.sequenceiq.environment.api.v1.environment.model.request;
 
 import java.util.Set;
 
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -19,6 +21,7 @@ public class EnvironmentNetworkRequest {
     @ApiModelProperty(value = EnvironmentModelDescription.SUBNET_IDS, required = true)
     private Set<String> subnetIds;
 
+    @Size(max = 100)
     private String networkCidr;
 
     @ApiModelProperty(EnvironmentModelDescription.AWS_SPECIFIC_PARAMETERS)
