@@ -37,6 +37,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
         "com.sequenceiq.cloudbreak.validation",
         "com.sequenceiq.cloudbreak.common.converter",
         "com.sequenceiq.cloudbreak.json",
+        "com.sequenceiq.cloudbreak.logger",
         "com.sequenceiq.cloudbreak.util",
         "com.sequenceiq.flow",
         "com.sequenceiq.environment.client",

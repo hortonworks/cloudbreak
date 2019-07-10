@@ -1,6 +1,5 @@
 package com.sequenceiq.redbeams.service.stack;
 
-// import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -11,7 +10,6 @@ import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
-// import com.sequenceiq.redbeams.service.crn.CrnService;
 
 import javax.inject.Inject;
 
@@ -33,9 +31,6 @@ public class RedbeamsCreationService {
     @Inject
     private RedbeamsFlowManager flowManager;
 
-    // @Inject
-    // private CrnService crnService;
-
     public DBStack launchDatabaseServer(DBStack dbStack) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Create called with: {}", dbStack);
@@ -45,10 +40,8 @@ public class RedbeamsCreationService {
             throw new BadRequestException("A stack for this database server already exists in the environment");
         }
 
-        // String accountId = crnService.getCurrentAccountId();
-        // String userId = crnService.getCurrentUserId();
-        // crnService doesn't really use dbStack, for now
-        // dbStack.setResourceCrn(crnService.createCrn(dbStack, Crn.ResourceType.DATABASE_SERVER));
+        // The database server does not receive a resource CRN until its stack
+        // is successfully created and it is then registered.
 
         // possible future change is to use a flow here (GetPlatformTemplateRequest, modified for database server)
         // for now, just get it synchronously / within this thread, it ought to be quick
