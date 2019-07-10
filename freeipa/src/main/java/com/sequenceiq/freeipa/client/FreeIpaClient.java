@@ -278,6 +278,19 @@ public class FreeIpaClient {
         return (Set<DnsZoneList>) invoke("dnszone_find", flags, params, type).getResult();
     }
 
+    public Set<DnsZoneList> findDnsZone(String cidr) throws FreeIpaClientException {
+        List<String> flags = List.of();
+        Map<String, Object> params = Map.of(
+                "sizelimit", 0,
+                "pkey_only", true,
+                "raw", true,
+                "name_from_ip", cidr
+        );
+        ParameterizedType type = TypeUtils
+                .parameterize(Set.class, DnsZoneList.class);
+        return (Set<DnsZoneList>) invoke("dnszone_find", flags, params, type).getResult();
+    }
+
     public Set<Service> findAllService() throws FreeIpaClientException {
         List<String> flags = List.of();
         Map<String, Object> params = Map.of(

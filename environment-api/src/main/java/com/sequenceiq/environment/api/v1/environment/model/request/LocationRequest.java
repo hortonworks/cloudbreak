@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
@@ -10,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "LocationV1Request")
 public class LocationRequest {
 
+    @Size(max = 100)
     @ApiModelProperty(EnvironmentModelDescription.LOCATION)
     private @NotNull String name;
 

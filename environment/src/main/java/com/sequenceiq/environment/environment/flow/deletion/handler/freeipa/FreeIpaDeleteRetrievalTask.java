@@ -29,7 +29,7 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
             DescribeFreeIpaResponse freeIpaResponse = freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn);
             if (freeIpaResponse != null) {
                 if (freeIpaResponse.getStatus().equals(Status.DELETE_FAILED)) {
-                    throw new FreeIpaOperationFailedException("FreeIpa delete operation failed: " + freeIpaResponse.getStatusReason());
+                    throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed: " + freeIpaResponse.getStatusReason());
                 }
                 if (!freeIpaResponse.getStatus().isSuccessfullyDeleted()) {
                     return false;
@@ -40,20 +40,26 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
         } catch (FreeIpaOperationFailedException fiofe) {
             throw fiofe;
         } catch (Exception e) {
-            throw new FreeIpaOperationFailedException("FreeIpa delete operation failed", e);
+            throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed. " + e.getMessage(), e);
         }
         return true;
     }
 
     @Override
     public void handleTimeout(FreeIpaPollerObject freeIpaPollerObject) {
-        throw new FreeIpaOperationFailedException("Operation timed out. FreeIpa delete did not succeeded in the given time: "
-                + freeIpaPollerObject.getEnvironmentCrn());
+        try {
+            DescribeFreeIpaResponse freeIpa = freeIpaPollerObject.getFreeIpaV1Endpoint().describe(freeIpaPollerObject.getEnvironmentCrn());
+            throw new FreeIpaOperationFailedException(String.format("Polling operation timed out, FreeIpa deletion failed. FreeIpa status: '%s' "
+                    + "statusReason: '%s'", freeIpa.getStatus(), freeIpa.getStatusReason()));
+        } catch (Exception e) {
+            throw new FreeIpaOperationFailedException("Polling operation timed out, FreeIpa deletion failed. Also failed to get FreeIpa status: "
+                    + e.getMessage(), e);
+        }
     }
 
     @Override
     public String successMessage(FreeIpaPollerObject freeIpaPollerObject) {
-        return "FreeIpa delete successfully finished";
+        return "FreeIpa deletion successfully finished";
     }
 
     @Override

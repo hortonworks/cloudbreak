@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.freeipa.dns;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -94,12 +95,17 @@ public class DnsZoneService {
         Map<String, String> subnetWithCidr = getFilteredSubnetWithCidr(request.getEnvironmentCrn(), stack, request.getSubnetIds());
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         AddDnsZoneForSubnetsResponse response = new AddDnsZoneForSubnetsResponse();
-        for (Map.Entry<String, String> subnet : subnetWithCidr.entrySet()) {
+        for (Entry<String, String> subnet : subnetWithCidr.entrySet()) {
             try {
                 LOGGER.info("Add subnet's [{}] reverse DNS zone", subnet);
-                client.addReverseDnsZone(subnet.getValue());
-                response.getSuccess().add(subnet.getKey());
-                LOGGER.debug("Subnet [{}] added", subnet);
+                String subnetCidr = subnet.getValue();
+                Set<DnsZoneList> dnsZone = client.findDnsZone(subnetCidr);
+                if (dnsZone.isEmpty()) {
+                    LOGGER.debug("Subnet reverse DNS zone does not exists [{}], add it now", subnet);
+                    client.addReverseDnsZone(subnetCidr);
+                    response.getSuccess().add(subnet.getKey());
+                    LOGGER.debug("Subnet [{}] added", subnet);
+                }
             } catch (FreeIpaClientException e) {
                 LOGGER.warn("Can't add subnet's [{}] reverse DNS zone", subnet, e);
                 response.getFailed().put(subnet.getKey(), e.getMessage());

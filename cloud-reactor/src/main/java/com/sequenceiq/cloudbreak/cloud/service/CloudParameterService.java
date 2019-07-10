@@ -94,7 +94,7 @@ public class CloudParameterService {
             LOGGER.debug("Platform variants result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform variants", res.getErrorDetails());
-                throw new GetCloudParameterException(res.getErrorDetails());
+                throw new GetCloudParameterException(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getPlatformVariants();
         } catch (InterruptedException e) {
@@ -125,7 +125,7 @@ public class CloudParameterService {
             LOGGER.debug("Platform disk types result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform disk types", res.getErrorDetails());
-                throw new GetCloudParameterException(res.getErrorDetails());
+                throw new GetCloudParameterException(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getPlatformDisks();
         } catch (InterruptedException e) {
@@ -144,7 +144,7 @@ public class CloudParameterService {
             LOGGER.debug("Platform regions result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform regions", res.getErrorDetails());
-                throw new GetCloudParameterException(res.getErrorDetails());
+                throw new GetCloudParameterException(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getPlatformRegions();
         } catch (InterruptedException e) {
@@ -163,7 +163,7 @@ public class CloudParameterService {
             LOGGER.debug("Platform orchestrators result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform orchestrators", res.getErrorDetails());
-                throw new GetCloudParameterException(res.getErrorDetails());
+                throw new GetCloudParameterException(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getPlatformOrchestrators();
         } catch (InterruptedException e) {
@@ -182,7 +182,7 @@ public class CloudParameterService {
             LOGGER.debug("Platform parameter result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform parameters", res.getErrorDetails());
-                throw new GetCloudParameterException(res.getErrorDetails());
+                throw new GetCloudParameterException(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getPlatformParameters();
         } catch (InterruptedException e) {
@@ -203,7 +203,8 @@ public class CloudParameterService {
             LOGGER.debug("Platform networks types result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform networks", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to get networks for the cloud provider", res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get networks for the cloud provider. "
+                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getCloudNetworks();
         } catch (InterruptedException e) {
@@ -223,7 +224,8 @@ public class CloudParameterService {
             LOGGER.debug("Platform sshkeys types result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform sshkeys", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to get SSH keys for the cloud provider", res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get SSH keys for the cloud provider. "
+                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getCloudSshKeys();
         } catch (InterruptedException e) {
@@ -243,7 +245,8 @@ public class CloudParameterService {
             LOGGER.debug("Platform securitygroups types result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform securitygroups", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to get security groups for the cloud provider", res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get security groups for the cloud provider. "
+                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getCloudSecurityGroups();
         } catch (InterruptedException e) {
@@ -268,7 +271,7 @@ public class CloudParameterService {
             LOGGER.debug("Platform vm recommendation result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform vm recommendation", res.getErrorDetails());
-                throw new GetCloudParameterException(res.getErrorDetails());
+                throw new GetCloudParameterException(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getRecommendations();
         } catch (InterruptedException e) {
@@ -288,7 +291,8 @@ public class CloudParameterService {
             LOGGER.debug("Platform vmtypes result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform vmtypes", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to get VM types for the cloud provider", res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get VM types for the cloud provider. "
+                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getCloudVmTypes();
         } catch (InterruptedException e) {
@@ -308,8 +312,8 @@ public class CloudParameterService {
             LOGGER.debug("Platform regions result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform regions", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to get regions from the cloud provider due to network issues or invalid credential",
-                        res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get regions from the cloud provider due to network issues or invalid credential. "
+                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getCloudRegions();
         } catch (InterruptedException e) {
@@ -329,7 +333,8 @@ public class CloudParameterService {
             LOGGER.debug("Platform gateways result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform gateways", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to get gateways for the cloud provider", res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get gateways for the cloud provider. "
+                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getCloudGateWays();
         } catch (InterruptedException e) {
@@ -349,7 +354,8 @@ public class CloudParameterService {
             LOGGER.debug("Platform publicIpPools result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform publicIpPools", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to get public IP pools for the cloud provider", res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get public IP pools for the cloud provider. "
+                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getCloudIpPools();
         } catch (InterruptedException e) {
@@ -369,7 +375,8 @@ public class CloudParameterService {
             LOGGER.debug("Platform accessConfigs result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform accessConfigs", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to get access configs for the cloud provider", res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get access configs for the cloud provider. "
+                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getCloudAccessConfigs();
         } catch (InterruptedException e) {
@@ -389,7 +396,8 @@ public class CloudParameterService {
             LOGGER.debug("Platform encryptionKeys result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform encryptionKeys", res.getErrorDetails());
-                throw new GetCloudParameterException("Failed to get encryption keys for the cloud provider", res.getErrorDetails());
+                throw new GetCloudParameterException("Failed to get encryption keys for the cloud provider. "
+                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
             }
             return res.getCloudEncryptionKeys();
         } catch (InterruptedException e) {
@@ -411,14 +419,26 @@ public class CloudParameterService {
             LOGGER.debug("Platform instanceGroupParameterResult result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform instanceGroupParameterResult", res.getErrorDetails());
-                throw new GetCloudParameterException(String.format("Failed to instance group parameters for the cloud provider: %s", res.getStatusReason()),
-                        res.getErrorDetails());
+                throw new GetCloudParameterException(String.format("Failed to instance group parameters for the cloud provider: %s. %s",
+                        res.getStatusReason(), getCauseMessages(res.getErrorDetails())), res.getErrorDetails());
             }
             return res.getInstanceGroupParameterResponses();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting the platform publicIpPools", e);
             throw new OperationException(e);
         }
+    }
+
+    private String getCauseMessages(Exception e) {
+        if (e != null) {
+            StringBuilder messageBuilder = new StringBuilder();
+            messageBuilder.append("Causes: [").append(e.getMessage());
+            if (e.getCause() != null) {
+                messageBuilder.append("], [").append(e.getCause().getMessage());
+            }
+            return messageBuilder.append("].").toString();
+        }
+        return "";
     }
 
 }
