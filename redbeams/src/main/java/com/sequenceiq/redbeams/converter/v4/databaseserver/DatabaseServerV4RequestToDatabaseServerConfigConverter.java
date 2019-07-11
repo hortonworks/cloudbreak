@@ -33,17 +33,12 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverter
 
         DatabaseVendor databaseVendor = DatabaseVendor.fromValue(source.getDatabaseVendor());
         server.setDatabaseVendor(databaseVendor);
-        server.setConnectionDriver(databaseVendor.connectionDriver());
+        server.setConnectionDriver(source.getConnectionDriver());
         server.setConnectionUserName(source.getConnectionUserName());
         server.setConnectionPassword(source.getConnectionPassword());
 
         server.setResourceStatus(ResourceStatus.USER_MANAGED);
 
-        if (server.getDatabaseVendor() != DatabaseVendor.POSTGRES && Strings.isNullOrEmpty(source.getConnectorJarUrl())) {
-            String msg = String.format("The 'connectorJarUrl' field needs to be specified for database vendor '%s'.", server.getDatabaseVendor());
-            LOGGER.info(msg);
-            // FIXME: should this fail?
-        }
         server.setConnectorJarUrl(source.getConnectorJarUrl());
 
         server.setArchived(false);

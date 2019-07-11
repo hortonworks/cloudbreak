@@ -33,6 +33,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.ObjectError;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -111,6 +112,7 @@ public class DatabaseConfigServiceTest {
     @Test
     public void testRegister() {
         DatabaseConfig configToRegister = new DatabaseConfig();
+        configToRegister.setConnectionDriver("org.postgresql.MyCustomDriver");
         configToRegister.setResourceCrn(null);
         configToRegister.setCreationDate(null);
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
@@ -125,12 +127,29 @@ public class DatabaseConfigServiceTest {
         assertEquals(CURRENT_TIME_MILLIS, createdConfig.getCreationDate().longValue());
         assertEquals(dbCrn, createdConfig.getResourceCrn());
         assertEquals(dbCrn.getAccountId(), createdConfig.getAccountId());
+        assertEquals("org.postgresql.MyCustomDriver", createdConfig.getConnectionDriver());
+    }
+
+    @Test
+    public void testRegisterWithoutConnectionDriver() {
+        DatabaseConfig configToRegister = new DatabaseConfig();
+        configToRegister.setConnectionDriver(null);
+        configToRegister.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
+        Crn dbCrn = TestData.getTestCrn("database", "name");
+        when(crnService.createCrn(configToRegister)).thenReturn(dbCrn);
+        when(repository.save(configToRegister)).thenReturn(configToRegister);
+
+        DatabaseConfig createdConfig = underTest.register(configToRegister);
+
+        assertEquals(DatabaseVendor.POSTGRES.connectionDriver(), createdConfig.getConnectionDriver());
     }
 
     @Test
     public void testRegisterConnectionFailure() {
         thrown.expect(IllegalArgumentException.class);
         DatabaseConfig configToRegister = new DatabaseConfig();
+        configToRegister.setConnectionDriver("org.postgresql.MyCustomDriver");
         doAnswer((Answer) invocation -> {
             MapBindingResult errors = invocation.getArgument(1, MapBindingResult.class);
             errors.addError(new ObjectError("failed", ERROR_MESSAGE));
@@ -209,6 +228,7 @@ public class DatabaseConfigServiceTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("database config already exists with name");
         DatabaseConfig configToRegister = new DatabaseConfig();
+        configToRegister.setConnectionDriver("org.postgresql.MyCustomDriver");
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
         when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
         when(repository.save(configToRegister)).thenThrow(getDataIntegrityException());
@@ -232,6 +252,7 @@ public class DatabaseConfigServiceTest {
     public void testRegisterHasNoAccess() {
         thrown.expect(AccessDeniedException.class);
         DatabaseConfig configToRegister = new DatabaseConfig();
+        configToRegister.setConnectionDriver("org.postgresql.MyCustomDriver");
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
         when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
         when(repository.save(configToRegister)).thenThrow(new AccessDeniedException("User has no right to access resource"));

@@ -60,6 +60,12 @@ public class RedbeamsCreationService {
             throw new RedbeamsException("Failed to retrieve database stack template for cloud platform", e);
         }
 
+        if (dbStack.getDatabaseServer().getConnectionDriver() == null) {
+            String connectionDriver = dbStack.getDatabaseServer().getDatabaseVendor().connectionDriver();
+            dbStack.getDatabaseServer().setConnectionDriver(connectionDriver);
+            LOGGER.info("Database server allocation request lacked a connection driver; defaulting to {}", connectionDriver);
+        }
+
         DBStack savedStack = dbStackService.save(dbStack);
 
         flowManager.notify(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(),

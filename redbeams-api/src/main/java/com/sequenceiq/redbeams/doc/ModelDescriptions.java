@@ -69,6 +69,8 @@ public final class ModelDescriptions {
     public static class DatabaseServerModelDescription {
         public static final String INSTANCE_TYPE = "Instance type of the database server";
         public static final String DATABASE_VENDOR = "Database vendor of the database server";
+        public static final String CONNECTION_DRIVER = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
+        public static final String CONNECTOR_JAR_URL = "URL that points to the JAR of the connection driver (JDBC connector)";
         public static final String STORAGE_SIZE = "Storage size of the database server, in GB";
         public static final String ROOT_USER_NAME = "Root user name of the database server";
         public static final String ROOT_USER_PASSWORD = "Root user password of the database server";

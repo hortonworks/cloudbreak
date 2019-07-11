@@ -118,6 +118,7 @@ public class DatabaseServerConfigServiceTest {
     @Test
     public void testCreateSuccess() {
         server.setWorkspaceId(-1L);
+        server.setConnectionDriver("org.postgresql.MyCustomDriver");
         server.setResourceCrn(null);
         server.setCreationDate(null);
         when(clock.getCurrentTimeMillis()).thenReturn(12345L);
@@ -132,12 +133,29 @@ public class DatabaseServerConfigServiceTest {
         assertEquals(12345L, createdServer.getCreationDate().longValue());
         assertEquals(serverCrn, createdServer.getResourceCrn());
         assertEquals(serverCrn.getAccountId(), createdServer.getAccountId());
+        assertEquals("org.postgresql.MyCustomDriver", createdServer.getConnectionDriver());
+    }
+
+    @Test
+    public void testCreateSuccessWithoutConnectionDriver() {
+        server.setWorkspaceId(-1L);
+        server.setConnectionDriver(null);
+        server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        when(clock.getCurrentTimeMillis()).thenReturn(12345L);
+        Crn serverCrn = TestData.getTestCrn("databaseServer", "myserver");
+        when(crnService.createCrn(server)).thenReturn(serverCrn);
+        when(repository.save(server)).thenReturn(server);
+
+        DatabaseServerConfig createdServer = underTest.create(server, 0L);
+
+        assertEquals(DatabaseVendor.POSTGRES.connectionDriver(), createdServer.getConnectionDriver());
     }
 
     @Test
     public void testCreateAlreadyExists() {
         thrown.expect(BadRequestException.class);
 
+        server.setConnectionDriver("org.postgresql.MyCustomDriver");
         Crn serverCrn = TestData.getTestCrn("databaseServer", "myserver");
         when(crnService.createCrn(server)).thenReturn(serverCrn);
         AccessDeniedException e = new AccessDeniedException("no way", mock(ConstraintViolationException.class));
@@ -150,6 +168,7 @@ public class DatabaseServerConfigServiceTest {
     public void testCreateFailure() {
         thrown.expect(AccessDeniedException.class);
 
+        server.setConnectionDriver("org.postgresql.MyCustomDriver");
         Crn serverCrn = TestData.getTestCrn("databaseServer", "myserver");
         when(crnService.createCrn(server)).thenReturn(serverCrn);
         AccessDeniedException e = new AccessDeniedException("no way");
@@ -162,6 +181,7 @@ public class DatabaseServerConfigServiceTest {
     public void testCreateConnectionFailure() {
         thrown.expect(IllegalArgumentException.class);
 
+        server.setConnectionDriver("org.postgresql.MyCustomDriver");
         doAnswer(new Answer() {
             public Object answer(InvocationOnMock invocation) {
                 Errors errors = invocation.getArgument(1);

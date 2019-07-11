@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.stacks;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.validation.ValidDatabaseVendor;
+import com.sequenceiq.cloudbreak.validation.ValidUrl;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -15,6 +16,13 @@ public class DatabaseServerV4Base extends ProviderParametersBase {
     @ValidDatabaseVendor
     @ApiModelProperty(DatabaseServerModelDescription.DATABASE_VENDOR)
     private String databaseVendor;
+
+    @ApiModelProperty(DatabaseServerModelDescription.CONNECTION_DRIVER)
+    private String connectionDriver;
+
+    @ValidUrl
+    @ApiModelProperty(DatabaseServerModelDescription.CONNECTOR_JAR_URL)
+    private String connectorJarUrl;
 
     @ApiModelProperty(DatabaseServerModelDescription.STORAGE_SIZE)
     private Long storageSize;
@@ -60,6 +68,22 @@ public class DatabaseServerV4Base extends ProviderParametersBase {
 
     public void setDatabaseVendor(String databaseVendor) {
         this.databaseVendor = databaseVendor;
+    }
+
+    public String getConnectionDriver() {
+        return connectionDriver;
+    }
+
+    public void setConnectionDriver(String connectionDriver) {
+        this.connectionDriver = connectionDriver;
+    }
+
+    public String getConnectorJarUrl() {
+        return connectorJarUrl;
+    }
+
+    public void setConnectorJarUrl(String connectorJarUrl) {
+        this.connectorJarUrl = connectorJarUrl;
     }
 
     public Long getStorageSize() {

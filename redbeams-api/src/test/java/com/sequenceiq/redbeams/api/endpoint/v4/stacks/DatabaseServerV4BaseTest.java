@@ -24,6 +24,12 @@ public class DatabaseServerV4BaseTest {
         underTest.setDatabaseVendor("postgresql");
         assertEquals("postgresql", underTest.getDatabaseVendor());
 
+        underTest.setConnectionDriver("org.postgresql.Driver");
+        assertEquals("org.postgresql.Driver", underTest.getConnectionDriver());
+
+        underTest.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
+        assertEquals("http://drivers.example.com/postgresql.jar", underTest.getConnectorJarUrl());
+
         underTest.setStorageSize(50L);
         assertEquals(50L, underTest.getStorageSize().longValue());
 

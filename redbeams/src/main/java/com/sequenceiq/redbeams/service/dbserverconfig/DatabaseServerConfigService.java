@@ -85,6 +85,13 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     }
 
     public DatabaseServerConfig create(DatabaseServerConfig resource, Long workspaceId) {
+
+        if (resource.getConnectionDriver() == null) {
+            resource.setConnectionDriver(resource.getDatabaseVendor().connectionDriver());
+            LOGGER.info("Database server configuration lacked a connection driver; defaulting to {}",
+                resource.getConnectionDriver());
+        }
+
         // FIXME? Currently no checks if logged-in user has access to workspace
         // Compare with AbstractWorkspaceAwareResourceService
         String testResults = testConnection(resource);
