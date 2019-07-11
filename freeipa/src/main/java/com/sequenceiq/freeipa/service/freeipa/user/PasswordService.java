@@ -18,10 +18,12 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
+import com.sequenceiq.freeipa.converter.freeipa.user.SyncOperationToSyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.SyncOperation;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordResult;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -51,6 +53,9 @@ public class PasswordService {
     @Inject
     private SyncOperationStatusService syncOperationStatusService;
 
+    @Inject
+    private SyncOperationToSyncOperationStatus syncOperationToSyncOperationStatus;
+
     public SyncOperationStatus setPassword(String accountId, String userCrn, String password, Set<String> envs) {
         LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
 
@@ -71,11 +76,11 @@ public class PasswordService {
             throw new NotFoundException("No stacks found for accountId " + accountId);
         }
 
-        SyncOperationStatus response = syncOperationStatusService.startOperation(SyncOperationType.SET_PASSWORD);
+        SyncOperation syncOperation = syncOperationStatusService.startOperation(accountId, SyncOperationType.SET_PASSWORD);
 
-        asyncTaskExecutor.submit(() -> asyncSetPasswords(response.getOperationId(), accountId, userCrn, password, stacks));
+        asyncTaskExecutor.submit(() -> asyncSetPasswords(syncOperation.getOperationId(), accountId, userCrn, password, stacks));
 
-        return response;
+        return syncOperationToSyncOperationStatus.convert(syncOperation);
     }
 
     private void asyncSetPasswords(String operationId, String accountId, String userCrn, String password, List<Stack> stacks) {

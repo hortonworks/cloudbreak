@@ -26,7 +26,9 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.freeipa.converter.freeipa.user.SyncOperationToSyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.SyncOperation;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
@@ -57,16 +59,19 @@ public class UserService {
     @Inject
     private SyncOperationStatusService syncOperationStatusService;
 
+    @Inject
+    private SyncOperationToSyncOperationStatus syncOperationToSyncOperationStatus;
+
     public SyncOperationStatus synchronizeUser(String accountId, String actorCrn, String userCrn) {
         return synchronizeAllUsers(accountId, actorCrn, null, Set.of(userCrn));
     }
 
     public SyncOperationStatus synchronizeAllUsers(String accountId, String actorCrn, Set<String> environmentFilter, Set<String> userCrnFilter) {
-        SyncOperationStatus response = syncOperationStatusService.startOperation(SyncOperationType.USER_SYNC);
+        SyncOperation response = syncOperationStatusService.startOperation(accountId, SyncOperationType.USER_SYNC);
 
         asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(response.getOperationId(), accountId, actorCrn, environmentFilter, userCrnFilter));
 
-        return response;
+        return syncOperationToSyncOperationStatus.convert(response);
     }
 
     public SyncStatusDetail syncAllUsersForStack(String accountId, String actorCrn, Stack stack) {

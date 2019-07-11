@@ -101,22 +101,4 @@ public class SyncOperationStatus {
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
     }
-
-    public void completed(List<SuccessDetails> success, List<FailureDetails> failure) {
-        setStatus(SynchronizationStatus.COMPLETED);
-        setSuccess(success);
-        setFailure(failure);
-        setEndTime(System.currentTimeMillis());
-    }
-
-    public void failed(String error) {
-        setStatus(SynchronizationStatus.FAILED);
-        setError(error);
-        setEndTime(System.currentTimeMillis());
-    }
-
-    public static SyncOperationStatus running(String id, SyncOperationType syncOperationType) {
-        return new SyncOperationStatus(id, syncOperationType, SynchronizationStatus.RUNNING, List.of(), List.of(),
-                null, System.currentTimeMillis(), null);
-    }
 }

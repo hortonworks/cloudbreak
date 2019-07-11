@@ -30,7 +30,7 @@ public class UserV1ControllerTest {
 
     private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
-    private static final String ENV_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
+    private static final String ENV_CRN = "crn:altus:environment:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
 
     @InjectMocks
     private UserV1Controller underTest;
