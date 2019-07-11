@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
@@ -26,6 +28,8 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.notification.ResourceEvent;
 
 @Configuration
 public class EnvCreationActions {
@@ -34,8 +38,11 @@ public class EnvCreationActions {
 
     private final EnvironmentService environmentService;
 
-    public EnvCreationActions(EnvironmentService environmentService) {
+    private final NotificationService notificationService;
+
+    public EnvCreationActions(EnvironmentService environmentService, NotificationService notificationService) {
         this.environmentService = environmentService;
+        this.notificationService = notificationService;
     }
 
     @Bean(name = "NETWORK_CREATION_STARTED_STATE")
@@ -45,13 +52,16 @@ public class EnvCreationActions {
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("NETWORK_CREATION_STARTED_STATE");
-                    sendEvent(context, CREATE_NETWORK_EVENT.selector(), environmentService.getEnvironmentDto(environment));
+                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
+                    notificationService.send(ResourceEvent.ENVIRONMENT_NETWORK_CREATION_STARTED, environmentDto, context.getFlowTriggerUserCrn());
+                    sendEvent(context, CREATE_NETWORK_EVENT.selector(), environmentDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
                             payload.getResourceId(),
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
+                    notificationService.send(ResourceEvent.ENVIRONMENT_NETWORK_CREATION_FAILED, payload, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create network for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
@@ -66,13 +76,16 @@ public class EnvCreationActions {
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("FREEIPA_CREATION_STARTED_STATE");
-                    sendEvent(context, CREATE_FREEIPA_EVENT.selector(), environmentService.getEnvironmentDto(environment));
+                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
+                    notificationService.send(ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_STARTED, environmentDto, context.getFlowTriggerUserCrn());
+                    sendEvent(context, CREATE_FREEIPA_EVENT.selector(), environmentDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
                             payload.getResourceId(),
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
+                    notificationService.send(ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_FAILED, payload, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create freeipa for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
@@ -90,7 +103,8 @@ public class EnvCreationActions {
                         .ifPresentOrElse(environment -> {
                             environment.setStatusReason(null);
                             environment.setStatus(EnvironmentStatus.AVAILABLE);
-                            environmentService.save(environment);
+                            Environment result = environmentService.save(environment);
+                            notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FINISHED, result, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_CREATION_FINISHED_STATE");
@@ -111,6 +125,7 @@ public class EnvCreationActions {
                             environment.setStatusReason(payload.getException().getMessage());
                             environment.setStatus(EnvironmentStatus.CREATE_FAILED);
                             environmentService.save(environment);
+                            notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FAILED, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_CREATION_FAILED_STATE");

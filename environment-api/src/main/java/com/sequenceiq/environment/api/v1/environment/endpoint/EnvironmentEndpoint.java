@@ -16,7 +16,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.environment.api.WelcomeResponse;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -32,12 +31,6 @@ import io.swagger.annotations.ApiOperation;
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/env", protocols = "http,https")
 public interface EnvironmentEndpoint {
-
-    @GET
-    @Path("/welcome")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "welcome", produces = MediaType.APPLICATION_JSON, nickname = "getWelcomeMessage")
-    WelcomeResponse welcome();
 
     @POST
     @Path("")

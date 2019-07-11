@@ -12,7 +12,6 @@ import javax.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.environment.api.WelcomeResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -50,12 +49,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentCreationService = environmentCreationService;
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.environmentModificationService = environmentModificationService;
-    }
-
-    @Override
-    public WelcomeResponse welcome() {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        return new WelcomeResponse(accountId);
     }
 
     @Override

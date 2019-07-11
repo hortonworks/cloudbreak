@@ -48,7 +48,23 @@ public enum ResourceEvent {
     MAINTENANCE_MODE_ENABLED("resource.maintenancemode.enabled"),
     MAINTENANCE_MODE_DISABLED("resource.maintenancemode.disabled"),
     TEST_CONNECTION_SUCCESS("resource.connection.success"),
-    TEST_CONNECTION_FAILED("resource.connection.failed"),;
+    TEST_CONNECTION_FAILED("resource.connection.failed"),
+
+    ENVIRONMENT_NETWORK_CREATION_STARTED("environment.network.creation.started"),
+    ENVIRONMENT_NETWORK_CREATION_FAILED("environment.network.creation.failed"),
+    ENVIRONMENT_FREEIPA_CREATION_STARTED("environment.freeipa.creation.started"),
+    ENVIRONMENT_FREEIPA_CREATION_FAILED("environment.freeipa.creation.failed"),
+    ENVIRONMENT_CREATION_FINISHED("environment.creation.finished"),
+    ENVIRONMENT_CREATION_FAILED("environment.creation.failed"),
+
+    ENVIRONMENT_NETWORK_DELETION_STARTED("environment.network.deletion.started"),
+    ENVIRONMENT_DATABASE_DELETION_STARTED("environment.database.deletion.started"),
+    ENVIRONMENT_FREEIPA_DELETION_STARTED("environment.freeipa.deletion.failed"),
+    ENVIRONMENT_DELETION_FINISHED("environment.deletion.finished"),
+    ENVIRONMENT_DELETION_FAILED("environment.deletion.failed"),
+
+    CREDENTIAL_AZURE_INTERACTIVE_CREATED("credential.azure.interactive.created"),
+    CREDENTIAL_AZURE_INTERACTIVE_FAILED("credential.azure.interactive.failed");
 
     private final String message;
 
