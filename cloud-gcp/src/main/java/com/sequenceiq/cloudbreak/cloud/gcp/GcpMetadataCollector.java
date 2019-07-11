@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,8 @@ public class GcpMetadataCollector implements MetadataCollector {
                 Compute compute = GcpStackUtil.buildCompute(credential);
                 Instance executeInstance = getInstance(cloudContext, credential, compute, cloudResource.getName());
 
-                String privateIp = executeInstance.getNetworkInterfaces().get(0).getNetworkIP();
+                String privateIp = Optional.ofNullable(executeInstance.getNetworkInterfaces().get(0).getNetworkIP())
+                        .orElseThrow(() -> new IOException("Private IP must not be null."));
                 String publicIp = null;
                 List<AccessConfig> acl = executeInstance.getNetworkInterfaces().get(0).getAccessConfigs();
                 if (acl != null && acl.get(0) != null) {
@@ -114,7 +116,10 @@ public class GcpMetadataCollector implements MetadataCollector {
     }
 
     private Instance getInstance(CloudContext context, CloudCredential credential, Compute compute, String instanceName) throws IOException {
-        return compute.instances().get(GcpStackUtil.getProjectId(credential),
-                context.getLocation().getAvailabilityZone().value(), instanceName).execute();
+        Instance instance = compute.instances()
+                .get(GcpStackUtil.getProjectId(credential), context.getLocation().getAvailabilityZone().value(), instanceName)
+                .execute();
+        LOGGER.debug(String.format("Instance %s created with status %s", instance.getName(), instance.getStatus()));
+        return instance;
     }
 }

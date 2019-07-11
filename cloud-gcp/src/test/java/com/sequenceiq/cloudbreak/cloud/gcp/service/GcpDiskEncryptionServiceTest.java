@@ -90,8 +90,8 @@ public class GcpDiskEncryptionServiceTest extends LocalServerTestBase {
         underTest.addEncryptionKeyToDisk(instanceTemplate, disk);
 
         assertNotNull(disk.getDiskEncryptionKey());
-        assertNotNull(disk.getDiskEncryptionKey().getRsaEncryptedKey());
-        assertFalse(disk.getDiskEncryptionKey().getRsaEncryptedKey().isEmpty());
+        assertNotNull(disk.getDiskEncryptionKey().getSha256());
+        assertFalse(disk.getDiskEncryptionKey().getSha256().isEmpty());
     }
 
     @Test
