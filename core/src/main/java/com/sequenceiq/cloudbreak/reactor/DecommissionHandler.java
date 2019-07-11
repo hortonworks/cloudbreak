@@ -20,34 +20,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterKerberosService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.reactor.api.handler.EventHandler;
+import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -90,6 +94,12 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
     @Inject
     private KerberosConfigService kerberosConfigService;
 
+    @Inject
+    private ClusterKerberosService clusterKerberosService;
+
+    @Inject
+    private FreeIpaV1Endpoint freeIpaV1Endpoint;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DecommissionRequest.class);
@@ -124,6 +134,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             hostOrchestrator.stopClusterManagerAgent(gatewayConfig, decommissionedNodes, clusterDeletionBasedModel(stack.getId(), cluster.getId()),
                     kerberosDetailService.isAdJoinable(kerberosConfig), kerberosDetailService.isIpaJoinable(kerberosConfig));
+            cleanUpFreeIpa(stack.getEnvironmentCrn(), hostsToRemove.keySet());
             decomissionedHostNames.stream().map(hostsToRemove::get).forEach(clusterDecomissionService::deleteHostFromCluster);
 
             List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
@@ -138,6 +149,19 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             result = new DecommissionResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
+    }
+
+    private void cleanUpFreeIpa(String environmentCrn, Set<String> hostNames) {
+        CleanupRequest cleanupRequest = new CleanupRequest();
+        cleanupRequest.setHosts(hostNames);
+        cleanupRequest.setEnvironmentCrn(environmentCrn);
+        LOGGER.info("Sending cleanup request to FreeIPA: [{}]", cleanupRequest);
+        try {
+            CleanupResponse cleanupResponse = freeIpaV1Endpoint.cleanup(cleanupRequest);
+            LOGGER.info("FreeIPA cleanup finished: [{}]", cleanupResponse);
+        } catch (Exception e) {
+            LOGGER.error("FreeIPA cleanup failed", e);
+        }
     }
 
     private boolean skipClusterDecomission(DecommissionRequest request, Map<String, HostMetadata> hostsToRemove) {

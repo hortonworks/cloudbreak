@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,6 +62,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound.CompoundType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
@@ -713,25 +715,27 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel, boolean adJoinable,
             boolean ipaJoinable) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
-            LOGGER.debug("Applying role 'cloudera_manager_agent_stop' on nodes: [{}]", nodes);
-            Set<String> targets = nodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(targets, nodes, "roles", "cloudera_manager_agent_stop", CompoundType.IP), exitCriteriaModel);
-            if (adJoinable || ipaJoinable) {
-                String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
-                LOGGER.debug("Applying role '{}' on nodes: [{}]", identityRole, nodes);
-                runSaltCommand(sc, new GrainAddRunner(targets, nodes, "roles", identityRole, CompoundType.IP), exitCriteriaModel);
-            }
+            Set<Node> responsiveNodes = getResponsiveNodes(nodes, sc);
+            if (!responsiveNodes.isEmpty()) {
+                LOGGER.debug("Applying role 'cloudera_manager_agent_stop' on nodes: [{}]", responsiveNodes);
+                Set<String> targets = responsiveNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+                runSaltCommand(sc, new GrainAddRunner(targets, responsiveNodes, "roles", "cloudera_manager_agent_stop", CompoundType.IP), exitCriteriaModel);
+                if (adJoinable || ipaJoinable) {
+                    String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
+                    LOGGER.debug("Applying role '{}' on nodes: [{}]", identityRole, responsiveNodes);
+                    runSaltCommand(sc, new GrainAddRunner(targets, responsiveNodes, "roles", identityRole, CompoundType.IP), exitCriteriaModel);
+                }
 
-            Set<String> all = nodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncAllRunner(all, nodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(all, nodes), exitCriteriaModel, maxRetry, true);
+                Set<String> all = responsiveNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+                runSaltCommand(sc, new SyncAllRunner(all, responsiveNodes), exitCriteriaModel);
+                runNewService(sc, new HighStateRunner(all, responsiveNodes), exitCriteriaModel, maxRetry, true);
 
-            // remove 'recipe' grain from all nodes
-            targets = nodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainRemoveRunner(targets, nodes, "roles", "cloudera_manager_agent_stop", CompoundType.IP), exitCriteriaModel);
-            if (adJoinable || ipaJoinable) {
-                String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
-                runSaltCommand(sc, new GrainRemoveRunner(targets, nodes, "roles", identityRole, CompoundType.IP), exitCriteriaModel);
+                targets = responsiveNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+                runSaltCommand(sc, new GrainRemoveRunner(targets, responsiveNodes, "roles", "cloudera_manager_agent_stop", CompoundType.IP), exitCriteriaModel);
+                if (adJoinable || ipaJoinable) {
+                    String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
+                    runSaltCommand(sc, new GrainRemoveRunner(targets, responsiveNodes, "roles", identityRole, CompoundType.IP), exitCriteriaModel);
+                }
             }
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for cluster manager agent stop).", e);
@@ -931,5 +935,21 @@ public class SaltOrchestrator implements HostOrchestrator {
         } catch (ServiceEndpointLookupException | InterruptedException e) {
             throw new RuntimeException("Cannot determine service endpoint for gateway: " + gatewayConfig, e);
         }
+    }
+
+    private Set<Node> getResponsiveNodes(Set<Node> nodes, SaltConnector sc) {
+        Set<Node> responsiveNodes = new HashSet<>();
+        MinionIpAddressesResponse minionIpAddressesResponse = SaltStates.collectMinionIpAddresses(sc);
+        if (minionIpAddressesResponse != null) {
+            nodes.forEach(node -> {
+                if (minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {
+                    LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
+                    responsiveNodes.add(node);
+                }
+            });
+        } else {
+            LOGGER.info("Minions ip address collection returned null value");
+        }
+        return responsiveNodes;
     }
 }

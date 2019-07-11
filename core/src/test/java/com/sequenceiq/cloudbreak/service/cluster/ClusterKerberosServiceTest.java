@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
-public class PreTerminationStateExecutorTest {
+public class ClusterKerberosServiceTest {
     @Mock
     private HostOrchestratorResolver hostOrchestratorResolver;
 
@@ -52,7 +52,7 @@ public class PreTerminationStateExecutorTest {
     private KerberosConfigService kerberosConfigService;
 
     @InjectMocks
-    private PreTerminationStateExecutor underTest;
+    private ClusterKerberosService underTest;
 
     private Stack stack;
 
@@ -79,7 +79,7 @@ public class PreTerminationStateExecutorTest {
         when(kerberosConfigService.get(anyString())).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.isAdJoinable(any())).thenReturn(Boolean.TRUE);
 
-        underTest.runPreteraminationTasks(stack);
+        underTest.leaveDomains(stack);
 
         verify(hostOrchestrator, times(1)).leaveDomain(any(GatewayConfig.class), any(), eq("ad_member"), eq("ad_leave"), any(ExitCriteriaModel.class));
     }
@@ -89,7 +89,7 @@ public class PreTerminationStateExecutorTest {
         when(kerberosConfigService.get(anyString())).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.isIpaJoinable(any())).thenReturn(Boolean.TRUE);
 
-        underTest.runPreteraminationTasks(stack);
+        underTest.leaveDomains(stack);
 
         verify(hostOrchestrator, times(1)).leaveDomain(any(GatewayConfig.class), any(), eq("ipa_member"), eq("ipa_leave"), any(ExitCriteriaModel.class));
     }
@@ -102,7 +102,7 @@ public class PreTerminationStateExecutorTest {
         doThrow(new CloudbreakOrchestratorFailedException("error")).when(hostOrchestrator)
                 .leaveDomain(any(GatewayConfig.class), any(), eq("ad_member"), eq("ad_leave"), any(ExitCriteriaModel.class));
 
-        underTest.runPreteraminationTasks(stack);
+        underTest.leaveDomains(stack);
     }
 
 }

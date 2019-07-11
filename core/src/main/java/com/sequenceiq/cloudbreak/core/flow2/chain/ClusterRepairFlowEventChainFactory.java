@@ -146,7 +146,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             List<String> hostNames) {
         Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
         flowChainTriggers.add(new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(),
-                hostGroupName, Sets.newHashSet(privateIdsForHostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted(), new ClusterDownscaleDetails()));
+                hostGroupName, Sets.newHashSet(privateIdsForHostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted(), new ClusterDownscaleDetails(true)));
     }
 
     private void addChangePrimaryGateway(ClusterRepairTriggerEvent event, Queue<Selectable> flowChainTriggers) {
