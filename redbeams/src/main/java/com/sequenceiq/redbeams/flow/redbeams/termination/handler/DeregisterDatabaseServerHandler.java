@@ -1,5 +1,11 @@
 package com.sequenceiq.redbeams.flow.redbeams.termination.handler;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -10,12 +16,6 @@ import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.Deregi
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerSuccess;
 import com.sequenceiq.redbeams.repository.DatabaseConfigRepository;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -50,7 +50,7 @@ public class DeregisterDatabaseServerHandler implements EventHandler<DeregisterD
 
         try {
             DatabaseServerConfig dbServerConfig =
-                    databaseServerConfigService.getByName(DEFAULT_WORKSPACE, dbStack.getEnvironmentId(), dbStack.getName());
+                    databaseServerConfigService.getByNameOrCrn(DEFAULT_WORKSPACE, dbStack.getEnvironmentId(), dbStack.getName());
 
             databaseServerConfigService.archive(dbServerConfig);
             eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));

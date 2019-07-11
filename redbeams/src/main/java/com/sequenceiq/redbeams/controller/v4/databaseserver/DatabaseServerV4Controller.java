@@ -65,8 +65,8 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    public DatabaseServerV4Response get(String environmentId, String name) {
-        DatabaseServerConfig server = databaseServerConfigService.getByName(DEFAULT_WORKSPACE, environmentId, name);
+    public DatabaseServerV4Response getByNameOrCrn(String environmentId, String nameOrCrn) {
+        DatabaseServerConfig server = databaseServerConfigService.getByNameOrCrn(DEFAULT_WORKSPACE, environmentId, nameOrCrn);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 

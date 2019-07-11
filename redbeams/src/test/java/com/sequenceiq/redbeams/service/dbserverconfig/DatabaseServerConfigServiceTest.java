@@ -173,7 +173,7 @@ public class DatabaseServerConfigServiceTest {
     public void testGetByNameFound() {
         when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv")).thenReturn(Optional.of(server));
 
-        DatabaseServerConfig foundServer = underTest.getByName(0L, "myenv", server.getName());
+        DatabaseServerConfig foundServer = underTest.getByNameOrCrn(0L, "myenv", server.getName());
 
         assertEquals(server, foundServer);
     }
@@ -184,7 +184,7 @@ public class DatabaseServerConfigServiceTest {
 
         when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv")).thenReturn(Optional.empty());
 
-        underTest.getByName(0L, "myenv", server.getName());
+        underTest.getByNameOrCrn(0L, "myenv", server.getName());
     }
 
     @Test
