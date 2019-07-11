@@ -1,5 +1,8 @@
 package com.sequenceiq.environment.credential.reactor.handler;
 
+import static com.sequenceiq.notification.ResourceEvent.CREDENTIAL_AZURE_INTERACTIVE_CREATED;
+import static com.sequenceiq.notification.ResourceEvent.CREDENTIAL_AZURE_INTERACTIVE_FAILED;
+
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -18,6 +21,8 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
+import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.notification.ResourceEvent;
 
 import reactor.bus.Event;
 
@@ -28,8 +33,8 @@ public class InteractiveCredentialCreationHandler implements EventHandler<Intera
     @Inject
     private CredentialService credentialService;
 
-//    @Inject
-//    private NotificationSender notificationSender;
+    @Inject
+    private NotificationService notificationService;
 
     @Inject
     private CredentialToCredentialV1ResponseConverter extendedCloudCredentialToCredentialConverter;
@@ -47,20 +52,20 @@ public class InteractiveCredentialCreationHandler implements EventHandler<Intera
         Credential credential = extendedCloudCredentialToCredentialConverter.convert(extendedCloudCredential);
         try {
             credentialService.initCodeGrantFlow(credential.getAccountId(), credential, credential.getCreator());
-            sendNotification(credential, extendedCloudCredential.getName(), "CREDENTIAL_APP_CREATED");
+            sendNotification(credential, extendedCloudCredential.getName(), CREDENTIAL_AZURE_INTERACTIVE_CREATED);
         } catch (BadRequestException e) {
-            sendNotification(credential, e.getMessage(), "CREDENTIAL_CREATE_FAILED");
+            sendNotification(credential, e.getMessage(), CREDENTIAL_AZURE_INTERACTIVE_FAILED);
         }
     }
 
-    private void sendNotification(Credential credential, String message, String eventType) {
+    private void sendNotification(Credential credential, String message, ResourceEvent eventType) {
         InteractiveCredentialNotification notification = new InteractiveCredentialNotification()
                 .withEventTimestamp(new Date().getTime())
                 .withUserId(credential.getCreator())
                 .withCloud(credential.getCloudPlatform())
                 .withEventMessage(message)
-                .withEventType(eventType);
-//        notificationSender.send(new Notification<>(notification));
+                .withEventType(eventType.name());
+        notificationService.send(eventType, notification, credential.getCreator());
         LOGGER.info("Interactive credential creation init code grant flow notification: {}", new Json(notification).getValue());
     }
 }

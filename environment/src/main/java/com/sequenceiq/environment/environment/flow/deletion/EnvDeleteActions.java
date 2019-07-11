@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
@@ -30,6 +31,8 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.notification.NotificationService;
+import com.sequenceiq.notification.ResourceEvent;
 
 @Configuration
 public class EnvDeleteActions {
@@ -38,8 +41,11 @@ public class EnvDeleteActions {
 
     private final EnvironmentService environmentService;
 
-    public EnvDeleteActions(EnvironmentService environmentService) {
+    private final NotificationService notificationService;
+
+    public EnvDeleteActions(EnvironmentService environmentService, NotificationService notificationService) {
         this.environmentService = environmentService;
+        this.notificationService = notificationService;
     }
 
     @Bean(name = "NETWORK_DELETE_STARTED_STATE")
@@ -52,6 +58,7 @@ public class EnvDeleteActions {
                         .ifPresentOrElse(environment -> {
                             environment.setStatus(EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS);
                             environmentService.save(environment);
+                            notificationService.send(ResourceEvent.ENVIRONMENT_NETWORK_DELETION_STARTED, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot delete network, because the environment does not exist: {}. "
                                         + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 EnvironmentDto envDto = new EnvironmentDto();
@@ -74,6 +81,7 @@ public class EnvDeleteActions {
                         .ifPresentOrElse(environment -> {
                             environment.setStatus(EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS);
                             environmentService.save(environment);
+                            notificationService.send(ResourceEvent.ENVIRONMENT_DATABASE_DELETION_STARTED, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot delete RDBMS, because the environment does not exist: {}. "
                                         + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 EnvironmentDto envDto = new EnvironmentDto();
@@ -96,12 +104,12 @@ public class EnvDeleteActions {
                         .ifPresentOrElse(environment -> {
                             environment.setStatus(EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS);
                             environmentService.save(environment);
+                            notificationService.send(ResourceEvent.ENVIRONMENT_FREEIPA_DELETION_STARTED, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot delete FreeIPA, because the environment does not exist: {}. "
                                         + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
                 envDto.setResourceCrn(payload.getResourceCrn());
-                envDto.setResourceCrn(payload.getResourceName());
                 LOGGER.info("Flow entered into FREEIPA_DELETE_STARTED_STATE");
                 sendEvent(context, DELETE_FREEIPA_EVENT.selector(), envDto);
             }
@@ -121,7 +129,8 @@ public class EnvDeleteActions {
                             env.setStatusReason(null);
                             env.setStatus(EnvironmentStatus.ARCHIVED);
                             env.setArchived(true);
-                            environmentService.save(env);
+                            Environment result = environmentService.save(env);
+                            notificationService.send(ResourceEvent.ENVIRONMENT_DELETION_FINISHED, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot finish the delete flow, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_DELETE_FINISHED_STATE");
@@ -142,6 +151,7 @@ public class EnvDeleteActions {
                             environment.setStatusReason(payload.getException().getMessage());
                             environment.setStatus(EnvironmentStatus.DELETE_FAILED);
                             environmentService.save(environment);
+                            notificationService.send(ResourceEvent.ENVIRONMENT_DELETION_FAILED, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot set delete failed to env, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_DELETE_FAILED_STATE");
