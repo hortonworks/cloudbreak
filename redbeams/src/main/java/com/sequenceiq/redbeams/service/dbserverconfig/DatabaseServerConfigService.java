@@ -125,7 +125,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         repository.save(resource);
     }
 
-    public DatabaseServerConfig getByName(Long workspaceId, String environmentId, String name) {
+    public DatabaseServerConfig getByNameOrCrn(Long workspaceId, String environmentId, String name) {
         Optional<DatabaseServerConfig> resourceOpt =
                 repository.findByNameAndWorkspaceIdAndEnvironmentId(name, workspaceId, environmentId);
         if (resourceOpt.isEmpty()) {
@@ -137,7 +137,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     }
 
     public DatabaseServerConfig deleteByName(Long workspaceId, String environemntId, String name) {
-        DatabaseServerConfig resource = getByName(workspaceId, environemntId, name);
+        DatabaseServerConfig resource = getByNameOrCrn(workspaceId, environemntId, name);
         return delete(resource);
     }
 
@@ -168,7 +168,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     }
 
     public String testConnection(Long workspaceId, String environmentId, String name) {
-        return testConnection(getByName(workspaceId, environmentId, name));
+        return testConnection(getByNameOrCrn(workspaceId, environmentId, name));
     }
 
     public String testConnection(DatabaseServerConfig resource) {
@@ -193,7 +193,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
         LOGGER.info("Creating database with name: {}", databaseName);
 
-        DatabaseServerConfig databaseServerConfig = getByName(workspaceId, environmentId, serverName);
+        DatabaseServerConfig databaseServerConfig = getByNameOrCrn(workspaceId, environmentId, serverName);
 
         String databaseUserName = generateDatabaseUserName();
         String databasePassword = generateDatabasePassword();

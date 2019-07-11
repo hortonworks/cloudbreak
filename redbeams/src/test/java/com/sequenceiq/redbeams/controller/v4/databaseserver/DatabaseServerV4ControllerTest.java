@@ -127,10 +127,10 @@ public class DatabaseServerV4ControllerTest {
 
     @Test
     public void testGet() {
-        when(service.getByName(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myenv", "myserver")).thenReturn(server);
+        when(service.getByNameOrCrn(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myenv", "myserver")).thenReturn(server);
         when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(response);
 
-        DatabaseServerV4Response response = underTest.get("myenv", "myserver");
+        DatabaseServerV4Response response = underTest.getByNameOrCrn("myenv", "myserver");
 
         assertEquals(1L, response.getId().longValue());
     }

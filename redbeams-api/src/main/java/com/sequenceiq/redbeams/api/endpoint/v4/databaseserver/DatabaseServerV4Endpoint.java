@@ -49,11 +49,11 @@ public interface DatabaseServerV4Endpoint {
         @QueryParam("attachGlobal") @DefaultValue("false") Boolean attachGlobal);
 
     @GET
-    @Path("{name}")
+    @Path("{nameOrCrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
-        nickname = "getDatabaseServer")
-    DatabaseServerV4Response get(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
+    @ApiOperation(value = DatabaseServerOpDescription.GET_BY_NAME_OR_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
+            nickname = "getDatabaseServer")
+    DatabaseServerV4Response getByNameOrCrn(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("nameOrCrn") String nameOrCrn);
 
     @POST
     @Path("external")
