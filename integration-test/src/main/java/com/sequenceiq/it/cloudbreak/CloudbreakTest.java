@@ -33,19 +33,17 @@ public class CloudbreakTest extends GherkinTest {
 
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
 
-    public static final String IDENTITY_URL = "IDENTITY_URL";
-
     public static final String AUTOSCALE_CLIENT_ID = "AUTOSCALE_CLIENTID";
 
     public static final String AUTOSCALE_SECRET = "AUTOSCALE_SECRET";
 
-    public static final String USER = "USER";
+    public static final String ACCESS_KEY = "ACCESS_KEY";
 
-    public static final String PASSWORD = "PASSWORD";
+    public static final String SECRET_KEY = "SECRET_KEY";
 
-    public static final String USER_CRN = "USER_CRN";
+    public static final String SECONDARY_ACCESS_KEY = "SECONDARY_ACCESS_KEY";
 
-    public static final String SECONDARY_REFRESH_TOKEN = "SECONDARY_REFRESH_TOKEN";
+    public static final String SECONDARY_SECRET_KEY = "SECONDARY_SECRET_KEY";
 
     public static final String WORKSPACE_ID = "WORKSPACE_ID";
 
@@ -61,17 +59,11 @@ public class CloudbreakTest extends GherkinTest {
     @Value("${server.contextPath:/cb}")
     private String cbRootContextPath;
 
-    @Value("${integrationtest.user.crn}")
-    private String userCrn;
+    @Value("${integrationtest.user.accesskey}")
+    private String accesskey;
 
-    @Value("${integrationtest.uaa.server}")
-    private String uaaServer;
-
-    @Value("${integrationtest.uaa.user}")
-    private String defaultUaaUser;
-
-    @Value("${integrationtest.uaa.password}")
-    private String defaultUaaPassword;
+    @Value("${integrationtest.user.secretkey}")
+    private String secretkey;
 
     @Value("${integrationtest.uaa.autoscale.clientId:periscope}")
     private String autoscaleUaaClientId;
@@ -98,17 +90,18 @@ public class CloudbreakTest extends GherkinTest {
 
         LOGGER.info("CloudbreakTest default values ::: ");
         IntegrationTestContext testContext = getItContext();
-        if (StringUtils.isEmpty(userCrn)) {
-            throw new NullPointerException("INTEGRATIONTEST_USER_CRN should be set");
+        if (StringUtils.isEmpty(accesskey)) {
+            throw new NullPointerException("INTEGRATIONTEST_USER_ACCESSKEY should be set");
+        }
+        if (StringUtils.isEmpty(secretkey)) {
+            throw new NullPointerException("INTEGRATIONTEST_USER_SECRETKEY should be set");
         }
         testContext.putContextParam(CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
-        testContext.putContextParam(USER_CRN, userCrn);
+        testContext.putContextParam(ACCESS_KEY, accesskey);
+        testContext.putContextParam(SECRET_KEY, secretkey);
         testContext.putContextParam(LOG_SEARCH_QUERY_TYPES, logSearchProps.getQueryTypes());
         testContext.putContextParam(LOG_SEARCH_URL_PREFIX, logSearchProps.getUrl());
 
-        testContext.putContextParam(IDENTITY_URL, uaaServer);
-        testContext.putContextParam(USER, defaultUaaUser);
-        testContext.putContextParam(PASSWORD, defaultUaaPassword);
         testContext.putContextParam(AUTOSCALE_CLIENT_ID, autoscaleUaaClientId);
         testContext.putContextParam(AUTOSCALE_SECRET, autoscaleUaaClientSecret);
 

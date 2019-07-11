@@ -12,10 +12,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.datalake.logger.MDCContextFilter;
-import com.sequenceiq.environment.client.EnvironmentServiceClient;
+import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 
 @Configuration
@@ -44,7 +44,7 @@ public class AppConfig implements AsyncConfigurer {
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Bean
-    public CloudbreakUserCrnClient cloudbreakClient() {
+    public CloudbreakServiceUserCrnClient cloudbreakClient() {
         return new CloudbreakUserCrnClientBuilder(cloudbreakUrl)
                 .withCertificateValidation(certificateValidation)
                 .withIgnorePreValidation(ignorePreValidation)
@@ -53,7 +53,7 @@ public class AppConfig implements AsyncConfigurer {
     }
 
     @Bean
-    public EnvironmentServiceClient environmentServiceClient() {
+    public EnvironmentServiceCrnClient environmentServiceClient() {
         return new EnvironmentServiceClientBuilder(environmentServerUrl)
                 .withCertificateValidation(certificateValidation)
                 .withIgnorePreValidation(ignorePreValidation)

@@ -162,23 +162,23 @@ integrationtest:
 
   # cloudbreak properites
   cloudbreak:
-      server:
+      server: http://localhost
 
   # periscope properites
   periscope:
-      server:
+      server: http://localhost
 
   # freeipa properties
   freeipa:
-      server: http://127.0.0.1:8090
+      server: http://localhost
 
   # environment properties
   environment:
-      server: http://127.0.0.1:8088
+      server: http://localhost
 
   # sdx properties
   sdx:
-      server: http://127.0.0.1:8086
+      server: http://localhost
 
   # gcp credential details
   gcpcredential:

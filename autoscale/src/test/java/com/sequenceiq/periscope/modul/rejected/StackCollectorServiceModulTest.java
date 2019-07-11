@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient.CloudbreakEndpoint;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -94,7 +94,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
     private AmbariClient ambariClient;
 
     @Mock
-    private CloudbreakEndpoint cloudbreakEndpoint;
+    private CloudbreakServiceCrnEndpoints cloudbreakEndpoint;
 
     @Mock
     private AutoscaleV4Endpoint autoscaleEndpoint;

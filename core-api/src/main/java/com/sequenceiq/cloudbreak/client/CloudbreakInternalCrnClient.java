@@ -1,20 +1,19 @@
 package com.sequenceiq.cloudbreak.client;
 
 import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient.CloudbreakEndpoint;
 
 public class CloudbreakInternalCrnClient {
 
-    private CloudbreakUserCrnClient client;
+    private CloudbreakServiceUserCrnClient client;
 
     private InternalCrnBuilder internalCrnBuilder;
 
-    public CloudbreakInternalCrnClient(CloudbreakUserCrnClient crnClient, InternalCrnBuilder builder) {
+    public CloudbreakInternalCrnClient(CloudbreakServiceUserCrnClient crnClient, InternalCrnBuilder builder) {
         client = crnClient;
         internalCrnBuilder = builder;
     }
 
-    public CloudbreakEndpoint withInternalCrn() {
+    public CloudbreakServiceCrnEndpoints withInternalCrn() {
         return client.withCrn(internalCrnBuilder.getInternalCrnForServiceAsString());
     }
 }

@@ -23,16 +23,12 @@ services:
       - ./:/it
     command: java -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp --integrationtest.command=suiteurls --integrationtest.suiteFiles=${INTEGRATIONTEST_SUITEFILES}
     environment:
-      - INTEGRATIONTEST_UAA_SERVER=http://identity:8080
-      - INTEGRATIONTEST_UAA_USER=mock@hortonworks.com
-      - INTEGRATIONTEST_UAA_PASSWORD=cloudbreak
-      - INTEGRATIONTEST_UAA_AUTOSCALE_CLIENTID
-      - INTEGRATIONTEST_UAA_AUTOSCALE_CLIENTSECRET
-      - INTEGRATIONTEST_USER_CRN=${INTEGRATIONTEST_USER_CRN}
-      - INTEGRATIONTEST_CLOUDBREAK_SERVER=http://cloudbreak:8080
-      - INTEGRATIONTEST_FREEIPA_SERVER=http://freeipa:8080
-      - INTEGRATIONTEST_ENVIRONMENT_SERVER=http://environment:8088
-      - INTEGRATIONTEST_SDX_SERVER=http://datalake:8080
+      - INTEGRATIONTEST_USER_ACCESSKEY=${INTEGRATIONTEST_USER_ACCESSKEY}
+      - INTEGRATIONTEST_USER_SECRETKEY=${INTEGRATIONTEST_USER_SECRETKEY}
+      - INTEGRATIONTEST_CLOUDBREAK_SERVER=http://dev-gateway
+      - INTEGRATIONTEST_FREEIPA_SERVER=http://dev-gateway
+      - INTEGRATIONTEST_ENVIRONMENT_SERVER=http://dev-gateway
+      - INTEGRATIONTEST_SDX_SERVER=http://dev-gateway
       - CLOUDBREAK_URL=cloudbreak:8080
       - SPRING_CONFIG_LOCATION=classpath:/application.yml,/it/it-application.yml
       - INTEGRATIONTEST_SUITEFILES

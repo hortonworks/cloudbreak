@@ -13,8 +13,8 @@ import org.springframework.test.context.ActiveProfiles;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
-import com.sequenceiq.environment.client.EnvironmentServiceClient;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
+import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
 import com.sequenceiq.environment.service.integration.testconfiguration.TestConfigurationWithCloudAccess;
 
@@ -35,7 +35,7 @@ public class CloudServiceIntegrationTest {
     @Inject
     private ProxyConfigRepository proxyConfigRepository;
 
-    private EnvironmentServiceClient client;
+    private EnvironmentServiceCrnClient client;
 
     @BeforeEach
     public void setup() {

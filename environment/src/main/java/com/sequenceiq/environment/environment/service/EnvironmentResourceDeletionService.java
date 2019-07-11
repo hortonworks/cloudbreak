@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
@@ -34,13 +34,13 @@ public class EnvironmentResourceDeletionService {
 
     private final SdxEndpoint sdxEndpoint;
 
-    private final CloudbreakUserCrnClient cloudbreakClient;
+    private final CloudbreakServiceUserCrnClient cloudbreakClient;
 
     private final ThreadBasedUserCrnProvider userCrnProvider;
 
     private final EventSender eventSender;
 
-    public EnvironmentResourceDeletionService(SdxEndpoint sdxEndpoint, CloudbreakUserCrnClient cloudbreakClient,
+    public EnvironmentResourceDeletionService(SdxEndpoint sdxEndpoint, CloudbreakServiceUserCrnClient cloudbreakClient,
             ThreadBasedUserCrnProvider userCrnProvider, EventSender eventSender) {
         this.sdxEndpoint = sdxEndpoint;
         this.cloudbreakClient = cloudbreakClient;

@@ -121,6 +121,6 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
 
     @Override
     protected String name(CredentialResponse entity) {
-        return null;
+        return entity.getName();
     }
 }

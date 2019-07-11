@@ -49,7 +49,7 @@ import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponses;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
-import com.sequenceiq.environment.client.EnvironmentServiceEndpoints;
+import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.service.RequestProvider;
@@ -77,7 +77,7 @@ public class EnvironmentServiceIntegrationTest {
 
     private static final String VERIFICATION_URL = "http://cloudera.com";
 
-    private EnvironmentServiceEndpoints client;
+    private EnvironmentServiceCrnEndpoints client;
 
     @LocalServerPort
     private int port;
@@ -109,7 +109,7 @@ public class EnvironmentServiceIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        client = (EnvironmentServiceEndpoints) new EnvironmentServiceClientBuilder(String.format(SERVICE_ADDRESS, port))
+        client = new EnvironmentServiceClientBuilder(String.format(SERVICE_ADDRESS, port))
                 .withCertificateValidation(false)
                 .withDebug(true)
                 .withIgnorePreValidation(true)

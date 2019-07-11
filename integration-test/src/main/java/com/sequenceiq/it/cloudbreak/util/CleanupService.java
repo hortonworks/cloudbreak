@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.util;
 
-import static com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient.CloudbreakEndpoint;
-
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -12,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 
 @Component
 public class CleanupService {
@@ -25,7 +24,7 @@ public class CleanupService {
     @Value("${integrationtest.cleanup.retryCount}")
     private int cleanUpRetryCount;
 
-    public synchronized void deleteTestStacksAndResources(CloudbreakEndpoint cloudbreakClient, Long workspaceId) {
+    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient, Long workspaceId) {
         if (cleanedUp) {
             return;
         }
@@ -60,7 +59,7 @@ public class CleanupService {
                 .forEach(rds -> deleteRdsConfigs(workspaceId, cloudbreakClient, rds.getId()));
     }
 
-    public void deleteBlueprint(Long workspaceId, CloudbreakEndpoint cloudbreakClient, Long blueprintId) {
+    public void deleteBlueprint(Long workspaceId, CloudbreakClient cloudbreakClient, Long blueprintId) {
         if (blueprintId != null) {
             Optional<BlueprintV4ViewResponse> response = cloudbreakClient.blueprintV4Endpoint().list(workspaceId)
                     .getResponses()
@@ -73,7 +72,7 @@ public class CleanupService {
         }
     }
 
-    public void deleteStackAndWait(CloudbreakEndpoint cloudbreakClient, Long workspaceId, String stackName) {
+    public void deleteStackAndWait(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName) {
         for (int i = 0; i < cleanUpRetryCount; i++) {
             if (deleteStack(cloudbreakClient, workspaceId, stackName)) {
                 WaitResult waitResult = CloudbreakUtil.waitForStackStatus(cloudbreakClient, workspaceId, stackName, "DELETE_COMPLETED");
@@ -89,7 +88,7 @@ public class CleanupService {
         }
     }
 
-    public boolean deleteStack(CloudbreakEndpoint cloudbreakClient, Long workspaceId, String stackName) {
+    public boolean deleteStack(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName) {
         boolean result = false;
         if (stackName != null) {
             cloudbreakClient.stackV4Endpoint().delete(workspaceId, stackName, false, false);
@@ -98,7 +97,7 @@ public class CleanupService {
         return result;
     }
 
-    public void deleteRecipe(Long workspaceId, CloudbreakEndpoint cloudbreakClient, Long recipeId) {
+    public void deleteRecipe(Long workspaceId, CloudbreakClient cloudbreakClient, Long recipeId) {
         Optional<RecipeViewV4Response> response = cloudbreakClient.recipeV4Endpoint().list(workspaceId)
                 .getResponses()
                 .stream()
@@ -109,11 +108,11 @@ public class CleanupService {
         }
     }
 
-    public void deleteImageCatalog(CloudbreakEndpoint cloudbreakClient, String name, Long workspaceId) {
+    public void deleteImageCatalog(CloudbreakClient cloudbreakClient, String name, Long workspaceId) {
         cloudbreakClient.imageCatalogV4Endpoint().deleteByName(workspaceId, name);
     }
 
-    public void deleteRdsConfigs(Long workspaceId, CloudbreakEndpoint cloudbreakClient, Long databaseId) {
+    public void deleteRdsConfigs(Long workspaceId, CloudbreakClient cloudbreakClient, Long databaseId) {
         if (databaseId != null) {
             Optional<DatabaseV4Response> response = cloudbreakClient.databaseV4Endpoint().list(workspaceId, null, Boolean.FALSE)
                     .getResponses()

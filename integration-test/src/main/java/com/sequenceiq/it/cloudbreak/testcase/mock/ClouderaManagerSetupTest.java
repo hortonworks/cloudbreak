@@ -6,7 +6,6 @@ import org.springframework.http.HttpMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
-import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -18,9 +17,6 @@ public class ClouderaManagerSetupTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
-
-    @Inject
-    private EnvironmentTestClient environmentTestClient;
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(

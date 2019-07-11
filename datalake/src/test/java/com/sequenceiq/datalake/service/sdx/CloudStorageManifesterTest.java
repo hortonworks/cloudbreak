@@ -21,10 +21,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
-import com.sequenceiq.common.api.cloudstorage.S3CloudStorageV1Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
+import com.sequenceiq.common.api.cloudstorage.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.filesystem.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -40,7 +41,7 @@ public class CloudStorageManifesterTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private CloudbreakUserCrnClient cloudbreakClient;
+    private CloudbreakServiceUserCrnClient cloudbreakClient;
 
     @InjectMocks
     private CloudStorageManifester underTest;
@@ -80,7 +81,7 @@ public class CloudStorageManifesterTest {
     }
 
     private void mockFileSystemResponseForCloudbreakClient() {
-        CloudbreakUserCrnClient.CloudbreakEndpoint mockedEndpoint = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
+        CloudbreakServiceCrnEndpoints mockedEndpoint = mock(CloudbreakServiceCrnEndpoints.class);
         FileSystemV4Endpoint mockedFileSystemV4Endpoint = mock(FileSystemV4Endpoint.class);
         when(mockedEndpoint.filesystemV4Endpoint()).thenReturn(mockedFileSystemV4Endpoint);
         when(cloudbreakClient.withCrn(anyString())).thenReturn(mockedEndpoint);

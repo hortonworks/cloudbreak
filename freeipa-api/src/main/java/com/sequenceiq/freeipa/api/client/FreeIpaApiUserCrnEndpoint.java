@@ -10,7 +10,7 @@ import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 
-public class FreeIpaApiUserCrnEndpoint extends AbstractUserCrnServiceEndpoint implements FreeIpaApiEndpoint {
+public class FreeIpaApiUserCrnEndpoint extends AbstractUserCrnServiceEndpoint implements FreeIpaClient {
     public FreeIpaApiUserCrnEndpoint(WebTarget webTarget, String crn) {
         super(webTarget, crn);
     }
