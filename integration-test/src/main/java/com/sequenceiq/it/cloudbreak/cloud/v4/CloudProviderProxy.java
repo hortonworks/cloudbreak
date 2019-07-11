@@ -166,6 +166,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public SdxClusterShape getInternalClusterShape() {
+        return delegate.getInternalClusterShape();
+    }
+
+    @Override
     public CloudPlatform getCloudPlatform() {
         return delegate.getCloudPlatform();
     }
