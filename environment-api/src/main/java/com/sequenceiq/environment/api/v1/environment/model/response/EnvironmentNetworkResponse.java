@@ -8,13 +8,14 @@ import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
+import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "EnvironmentNetworkV1Response")
-public class EnvironmentNetworkResponse extends EnvironmentNetworkRequest {
+public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
+
     @ApiModelProperty(ModelDescriptions.ID)
     private String crn;
 
