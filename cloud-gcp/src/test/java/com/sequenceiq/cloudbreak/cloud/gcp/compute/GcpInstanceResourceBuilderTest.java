@@ -155,6 +155,7 @@ public class GcpInstanceResourceBuilderTest {
         operation = new Operation();
         operation.setName("operation");
         operation.setHttpErrorStatusCode(null);
+        operation.setError(new Operation.Error());
         GcpResourceNameService resourceNameService = new GcpResourceNameService();
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(builder, "resourceNameService", resourceNameService);

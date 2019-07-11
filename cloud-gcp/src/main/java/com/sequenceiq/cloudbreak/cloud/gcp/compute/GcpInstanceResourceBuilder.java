@@ -169,12 +169,20 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         insert.setPrettyPrint(Boolean.TRUE);
         try {
             Operation operation = insert.execute();
-            if (operation.getHttpErrorStatusCode() != null) {
-                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.get(0).getName());
-            }
+            verifyOperation(operation, buildableResource);
             return singletonList(createOperationAwareCloudResource(buildableResource.get(0), operation));
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
+        }
+    }
+
+    private void verifyOperation(Operation operation, List<CloudResource> buildableResource) {
+        if (operation.getHttpErrorStatusCode() != null) {
+            throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResource.get(0).getName());
+        }
+        if (operation.getError() != null && !operation.getError().isEmpty()) {
+            throw new GcpResourceException(operation.getError().getErrors().stream()
+                    .map(Operation.Error.Errors::getMessage).collect(Collectors.joining(",")), resourceType(), buildableResource.get(0).getName());
         }
     }
 
@@ -184,9 +192,10 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         }
         CloudGcsView cloudFileSystem = (CloudGcsView) cloudStack.getFileSystem().get().getCloudFileSystem();
         String email = cloudFileSystem.getServiceAccountEmail();
-        return StringUtils.isEmpty(email) ? null : singletonList(new ServiceAccount()
-                .setEmail(email)
-                .setScopes(singletonList("https://www.googleapis.com/auth/cloud-platform")));
+        return StringUtils.isEmpty(email) ? null
+                : singletonList(new ServiceAccount()
+                        .setEmail(email)
+                        .setScopes(singletonList("https://www.googleapis.com/auth/cloud-platform")));
     }
 
     @Override
