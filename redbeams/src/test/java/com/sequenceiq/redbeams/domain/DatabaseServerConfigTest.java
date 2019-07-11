@@ -56,8 +56,8 @@ public class DatabaseServerConfigTest {
         config.setDatabaseVendor(DatabaseVendor.POSTGRES);
         assertEquals(DatabaseVendor.POSTGRES, config.getDatabaseVendor());
 
-        config.setConnectionDriver("postgresql.jar");
-        assertEquals("postgresql.jar", config.getConnectionDriver());
+        config.setConnectionDriver("org.postgresql.Driver");
+        assertEquals("org.postgresql.Driver", config.getConnectionDriver());
 
         config.setConnectionUserName("root");
         assertEquals("root", config.getConnectionUserName());
@@ -110,7 +110,7 @@ public class DatabaseServerConfigTest {
         config.setHost("myserver.db.example.com");
         config.setPort(5432);
         config.setDatabaseVendor(DatabaseVendor.POSTGRES);
-        config.setConnectionDriver("postgresql.jar");
+        config.setConnectionDriver("org.postgresql.Driver");
         config.setConnectionUserName("root");
         config.setConnectionPassword("cloudera");
         long now = System.currentTimeMillis();

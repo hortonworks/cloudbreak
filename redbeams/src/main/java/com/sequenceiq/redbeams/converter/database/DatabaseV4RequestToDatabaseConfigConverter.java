@@ -3,7 +3,6 @@ package com.sequenceiq.redbeams.converter.database;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -36,7 +35,7 @@ public class DatabaseV4RequestToDatabaseConfigConverter  extends AbstractConvers
 
         DatabaseVendor databaseVendor = databaseVendorUtil.getVendorByJdbcUrl(source).get();
         databaseConfig.setDatabaseVendor(databaseVendor);
-        databaseConfig.setConnectionDriver(databaseVendor.connectionDriver());
+        databaseConfig.setConnectionDriver(source.getConnectionDriver());
         databaseConfig.setConnectionUserName(source.getConnectionUserName());
         databaseConfig.setConnectionPassword(source.getConnectionPassword());
         databaseConfig.setCreationDate(clock.getCurrentTimeMillis());
@@ -44,11 +43,6 @@ public class DatabaseV4RequestToDatabaseConfigConverter  extends AbstractConvers
         databaseConfig.setType(source.getType());
         databaseConfig.setEnvironmentId(source.getEnvironmentCrn());
 
-        // TODO this should be part of a validator, and delete it from here.
-        if (databaseConfig.getDatabaseVendor() != DatabaseVendor.POSTGRES && StringUtils.isEmpty(source.getConnectorJarUrl())) {
-            String msg = String.format("The 'connectorJarUrl' field needs to be specified for database engine: '%s'.", databaseConfig.getDatabaseVendor());
-            LOGGER.info(msg);
-        }
         databaseConfig.setConnectorJarUrl(source.getConnectorJarUrl());
         return databaseConfig;
     }

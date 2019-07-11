@@ -31,6 +31,9 @@ public class DatabaseServerV4BaseTest {
         base.setDatabaseVendor("postgres");
         assertEquals("postgres", base.getDatabaseVendor());
 
+        base.setConnectionDriver("org.postgresql.Driver");
+        assertEquals("org.postgresql.Driver", base.getConnectionDriver());
+
         base.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
         assertEquals("http://drivers.example.com/postgresql.jar", base.getConnectorJarUrl());
 

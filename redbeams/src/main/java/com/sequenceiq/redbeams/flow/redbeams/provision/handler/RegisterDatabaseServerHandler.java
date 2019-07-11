@@ -60,10 +60,8 @@ public class RegisterDatabaseServerHandler implements EventHandler<RegisterDatab
         dbServerConfig.setAccountId(databaseServer.getAccountId());
         dbServerConfig.setName(dbStack.getName());
         dbServerConfig.setEnvironmentId(dbStack.getEnvironmentId());
-        // TODO: Since the postgres driver is built in, we don't have to worry about setting the driver info.
-        //       However, we'll need to address this when adding in new types of database servers.
-        //dbServerConfig.setConnectionDriver("POSTGRESQL");
-        //dbServerConfig.setConnectorJarUrl("");
+        dbServerConfig.setConnectionDriver(dbStack.getDatabaseServer().getConnectionDriver());
+        dbServerConfig.setConnectorJarUrl(dbStack.getDatabaseServer().getConnectorJarUrl());
         dbServerConfig.setConnectionUserName(dbStack.getDatabaseServer().getRootUserName());
         dbServerConfig.setConnectionPassword(dbStack.getDatabaseServer().getRootPassword());
         dbServerConfig.setDatabaseVendor(dbStack.getDatabaseServer().getDatabaseVendor());

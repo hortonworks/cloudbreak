@@ -43,6 +43,9 @@ public abstract class DatabaseServerV4Base implements Serializable {
     @ApiModelProperty(value = DatabaseServer.DATABASE_VENDOR, required = true)
     private String databaseVendor;
 
+    @ApiModelProperty(value = DatabaseServer.CONNECTION_DRIVER)
+    private String connectionDriver;
+
     @Size(max = 150)
     @ValidUrl
     @ApiModelProperty(DatabaseServer.CONNECTOR_JAR_URL)
@@ -90,6 +93,14 @@ public abstract class DatabaseServerV4Base implements Serializable {
 
     public void setDatabaseVendor(String databaseVendor) {
         this.databaseVendor = databaseVendor;
+    }
+
+    public String getConnectionDriver() {
+        return connectionDriver;
+    }
+
+    public void setConnectionDriver(String connectionDriver) {
+        this.connectionDriver = connectionDriver;
     }
 
     public String getConnectorJarUrl() {

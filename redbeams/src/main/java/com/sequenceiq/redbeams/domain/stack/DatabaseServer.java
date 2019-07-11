@@ -45,6 +45,12 @@ public class DatabaseServer implements AccountIdAwareResource {
     @Enumerated(EnumType.STRING)
     private DatabaseVendor databaseVendor;
 
+    @Column
+    private String connectionDriver;
+
+    @Column
+    private String connectorJarUrl;
+
     private Long storageSize;
 
     @Convert(converter = SecretToString.class)
@@ -114,6 +120,22 @@ public class DatabaseServer implements AccountIdAwareResource {
 
     public void setDatabaseVendor(DatabaseVendor databaseVendor) {
         this.databaseVendor = databaseVendor;
+    }
+
+    public String getConnectionDriver() {
+        return connectionDriver;
+    }
+
+    public void setConnectionDriver(String connectionDriver) {
+        this.connectionDriver = connectionDriver;
+    }
+
+    public String getConnectorJarUrl() {
+        return connectorJarUrl;
+    }
+
+    public void setConnectorJarUrl(String connectorJarUrl) {
+        this.connectorJarUrl = connectorJarUrl;
     }
 
     public Long getStorageSize() {

@@ -59,6 +59,8 @@ public class DBStackToDatabaseStackConverterTest {
         server.setName("myserver");
         server.setInstanceType("db.m3.medium");
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        server.setConnectionDriver("org.postgresql.Driver");
+        server.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
         server.setRootUserName("root");
         server.setRootPassword("cloudera");
         server.setStorageSize(50L);
@@ -81,9 +83,11 @@ public class DBStackToDatabaseStackConverterTest {
         assertEquals("myserver", convertedStack.getDatabaseServer().getServerId());
         assertEquals("db.m3.medium", convertedStack.getDatabaseServer().getFlavor());
         assertEquals(DatabaseEngine.POSTGRESQL, convertedStack.getDatabaseServer().getEngine());
+        assertEquals("org.postgresql.Driver", convertedStack.getDatabaseServer().getConnectionDriver());
+        assertEquals("http://drivers.example.com/postgresql.jar", convertedStack.getDatabaseServer().getConnectorJarUrl());
         assertEquals("root", convertedStack.getDatabaseServer().getRootUserName());
         assertEquals("cloudera", convertedStack.getDatabaseServer().getRootPassword());
-        assertEquals(50L, convertedStack.getDatabaseServer().getStorageSize());
+        assertEquals(50L, convertedStack.getDatabaseServer().getStorageSize().longValue());
         assertEquals(List.of("sg-1234"), convertedStack.getDatabaseServer().getSecurity().getCloudSecurityIds());
         // FIXME test instanceStatus
         assertEquals(1, convertedStack.getDatabaseServer().getParameters().size());

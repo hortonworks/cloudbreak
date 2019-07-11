@@ -43,6 +43,9 @@ public abstract class DatabaseV4Base implements Serializable {
     @ApiModelProperty(value = Database.TYPE, required = true)
     private String type;
 
+    @ApiModelProperty(value = Database.CONNECTION_DRIVER)
+    private String connectionDriver;
+
     @Size(max = 150)
     @ValidUrl
     @ApiModelProperty(Database.CONNECTOR_JAR_URL)
@@ -81,6 +84,14 @@ public abstract class DatabaseV4Base implements Serializable {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getConnectionDriver() {
+        return connectionDriver;
+    }
+
+    public void setConnectionDriver(String connectionDriver) {
+        this.connectionDriver = connectionDriver;
     }
 
     public String getConnectorJarUrl() {

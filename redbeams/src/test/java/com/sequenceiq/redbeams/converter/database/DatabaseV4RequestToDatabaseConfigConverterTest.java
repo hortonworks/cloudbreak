@@ -38,6 +38,8 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
 
     private static final String CONNECTION_USERNAME = "connectionUsername";
 
+    private static final String CONNECTION_DRIVER = "connectionDriver";
+
     private static final String CONNECTOR_JAR_URL = "connectorJarUrl";
 
     @Mock
@@ -67,6 +69,7 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
         request.setConnectionURL(CONNECTION_URL);
         request.setConnectionPassword(CONNECTION_PASSWORD);
         request.setConnectionUserName(CONNECTION_USERNAME);
+        request.setConnectionDriver(CONNECTION_DRIVER);
         request.setConnectorJarUrl(CONNECTOR_JAR_URL);
         when(databaseVendorUtil.getVendorByJdbcUrl(request)).thenReturn(Optional.of(DatabaseVendor.POSTGRES));
 
@@ -79,6 +82,7 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
         assertEquals(CONNECTION_URL, databaseConfig.getConnectionURL());
         assertEquals(CONNECTION_PASSWORD, databaseConfig.getConnectionPassword().getRaw());
         assertEquals(CONNECTION_USERNAME, databaseConfig.getConnectionUserName().getRaw());
+        assertEquals(CONNECTION_DRIVER, databaseConfig.getConnectionDriver());
         assertEquals(CONNECTOR_JAR_URL, databaseConfig.getConnectorJarUrl());
         assertEquals(DatabaseVendor.POSTGRES, databaseConfig.getDatabaseVendor());
         assertEquals(ResourceStatus.USER_MANAGED, databaseConfig.getStatus());

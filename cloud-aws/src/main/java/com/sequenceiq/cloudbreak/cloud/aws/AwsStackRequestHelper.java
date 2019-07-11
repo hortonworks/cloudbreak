@@ -122,6 +122,7 @@ public class AwsStackRequestHelper {
         AwsRdsInstanceView awsRdsInstanceView = new AwsRdsInstanceView(stack.getDatabaseServer());
         AwsRdsDbSubnetGroupView awsRdsDbSubnetGroupView = new AwsRdsDbSubnetGroupView(stack.getDatabaseServer());
         List<Parameter> parameters = new ArrayList<>(asList(
+                // FIXME allocated storage might be null
                 new Parameter().withParameterKey("AllocatedStorageParameter").withParameterValue(Objects.toString(awsRdsInstanceView.getAllocatedStorage())),
                 new Parameter().withParameterKey("BackupRetentionPeriodParameter")
                     .withParameterValue(Objects.toString(awsRdsInstanceView.getBackupRetentionPeriod())),

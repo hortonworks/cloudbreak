@@ -72,6 +72,13 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     public DatabaseConfig register(DatabaseConfig configToSave) {
+
+        if (configToSave.getConnectionDriver() == null) {
+            configToSave.setConnectionDriver(configToSave.getDatabaseVendor().connectionDriver());
+            LOGGER.info("Database configuration lacked a connection driver; defaulting to {}",
+                configToSave.getConnectionDriver());
+        }
+
         String testResults = testConnection(configToSave);
 
         if (!testResults.equals(DATABASE_TEST_RESULT_SUCCESS)) {

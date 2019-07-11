@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
@@ -50,8 +49,6 @@ public class DBStackToDatabaseStackConverter {
             return null;
         }
 
-        String serverId = dbStackDatabaseServer.getName();
-        String flavor = dbStackDatabaseServer.getInstanceType();
         DatabaseEngine engine;
         switch (dbStackDatabaseServer.getDatabaseVendor()) {
             case POSTGRES:
@@ -66,18 +63,27 @@ public class DBStackToDatabaseStackConverter {
             default:
                 throw new BadRequestException("Unsupported database vendor " + dbStackDatabaseServer.getDatabaseVendor());
         }
-        String username = dbStackDatabaseServer.getRootUserName();
-        String password = dbStackDatabaseServer.getRootPassword();
-        Integer port = dbStackDatabaseServer.getPort();
-        Long storageSize = dbStackDatabaseServer.getStorageSize();
+
         Security security = new Security(Collections.emptyList(), dbStackDatabaseServer.getSecurityGroup().getSecurityGroupIds());
-        // TODO / FIXME converter caller decides this?
-        InstanceStatus status = CREATE_REQUESTED;
 
         Json attributes = dbStackDatabaseServer.getAttributes();
         Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
 
-        return new DatabaseServer(serverId, flavor, engine, username, password, port, storageSize, security, status, params);
+        return DatabaseServer.builder()
+            .serverId(dbStackDatabaseServer.getName())
+            .flavor(dbStackDatabaseServer.getInstanceType())
+            .engine(engine)
+            .connectionDriver(dbStackDatabaseServer.getConnectionDriver())
+            .connectorJarUrl(dbStackDatabaseServer.getConnectorJarUrl())
+            .rootUserName(dbStackDatabaseServer.getRootUserName())
+            .rootPassword(dbStackDatabaseServer.getRootPassword())
+            .port(dbStackDatabaseServer.getPort())
+            .storageSize(dbStackDatabaseServer.getStorageSize())
+            .security(security)
+            // TODO / FIXME converter caller decides this?
+            .status(CREATE_REQUESTED)
+            .params(params)
+            .build();
     }
 
     private Map<String, String> getUserDefinedTags(DBStack dbStack) {

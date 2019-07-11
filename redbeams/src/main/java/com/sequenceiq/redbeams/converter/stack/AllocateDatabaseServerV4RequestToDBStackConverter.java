@@ -173,6 +173,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         server.setInstanceType(source.getInstanceType());
         DatabaseVendor databaseVendor = DatabaseVendor.fromValue(source.getDatabaseVendor());
         server.setDatabaseVendor(databaseVendor);
+        server.setConnectionDriver(source.getConnectionDriver());
+        server.setConnectorJarUrl(source.getConnectorJarUrl());
         server.setStorageSize(source.getStorageSize());
         server.setRootUserName(source.getRootUserName() != null ? source.getRootUserName() : userGeneratorService.generateUserName());
         server.setRootPassword(source.getRootUserPassword() != null ? source.getRootUserPassword() : userGeneratorService.generatePassword());

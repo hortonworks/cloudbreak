@@ -160,6 +160,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertNotNull(dbStack.getDatabaseServer().getName());
         assertEquals(databaseServerRequest.getInstanceType(), dbStack.getDatabaseServer().getInstanceType());
         assertEquals(DatabaseVendor.fromValue(databaseServerRequest.getDatabaseVendor()), dbStack.getDatabaseServer().getDatabaseVendor());
+        assertEquals("org.postgresql.Driver", dbStack.getDatabaseServer().getConnectionDriver());
+        assertEquals("http://drivers.example.com/postgresql.jar", dbStack.getDatabaseServer().getConnectorJarUrl());
         assertEquals(databaseServerRequest.getStorageSize(), dbStack.getDatabaseServer().getStorageSize());
         assertEquals(databaseServerRequest.getRootUserName(), dbStack.getDatabaseServer().getRootUserName());
         assertEquals(databaseServerRequest.getRootUserPassword(), dbStack.getDatabaseServer().getRootPassword());
@@ -234,6 +236,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         databaseServerRequest.setInstanceType("db.m3.medium");
         databaseServerRequest.setDatabaseVendor("postgres");
+        databaseServerRequest.setConnectionDriver("org.postgresql.Driver");
+        databaseServerRequest.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
         databaseServerRequest.setStorageSize(50L);
         if (provideOptionalFields) {
             databaseServerRequest.setRootUserName("root");
@@ -252,3 +256,5 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     }
 
 }
+
+
