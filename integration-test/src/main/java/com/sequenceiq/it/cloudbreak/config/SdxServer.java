@@ -22,16 +22,17 @@ public class SdxServer {
 
     private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
-    private static final int SDX_PORT = 8086;
-
     @Value("${integrationtest.sdx.server}")
     private String server;
 
     @Value("${sdx.server.contextPath:/dl}")
     private String sdxRootContextPath;
 
-    @Value("${integrationtest.user.crn:}")
-    private String userCrn;
+    @Value("${integrationtest.user.accesskey:}")
+    private String accessKey;
+
+    @Value("${integrationtest.user.secretkey:}")
+    private String secretKey;
 
     @Inject
     private TestParameter testParameter;
@@ -48,10 +49,12 @@ public class SdxServer {
 
         checkNonEmpty("integrationtest.sdx.server", server);
         checkNonEmpty("sdx.server.contextPath", sdxRootContextPath);
-        checkNonEmpty("integrationtest.user.crn", userCrn);
+        checkNonEmpty("integrationtest.user.accesskey", accessKey);
+        checkNonEmpty("integrationtest.user.privatekey", secretKey);
 
         testParameter.put(SdxTest.SDX_SERVER_ROOT, server + sdxRootContextPath);
-        testParameter.put(SdxTest.USER_CRN, userCrn);
+        testParameter.put(SdxTest.ACCESS_KEY, accessKey);
+        testParameter.put(SdxTest.SECRET_KEY, secretKey);
     }
 
     private void configureFromCliProfile() throws IOException {
@@ -63,8 +66,9 @@ public class SdxServer {
             return;
         }
 
-        server = serverUtil.calculateServerAddressFromProfile(server, profiles, SDX_PORT);
-        userCrn = serverUtil.calculateCrnsFromProfile(userCrn, profiles);
+        server = serverUtil.calculateServerAddressFromProfile(server, profiles);
+        accessKey = serverUtil.calculateApiKeyFromProfile(accessKey, profiles);
+        secretKey = serverUtil.calculatePrivateKeyFromProfile(secretKey, profiles);
     }
 
     private void checkNonEmpty(String name, String value) {

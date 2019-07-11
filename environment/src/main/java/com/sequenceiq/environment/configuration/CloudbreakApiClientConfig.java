@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 
 @Configuration
@@ -27,7 +27,7 @@ public class CloudbreakApiClientConfig {
     private boolean ignorePreValidation;
 
     @Bean
-    public CloudbreakUserCrnClient cloudbreakClient() {
+    public CloudbreakServiceUserCrnClient cloudbreakClient() {
         return new CloudbreakUserCrnClientBuilder(cloudbreakUrl)
                 .withCertificateValidation(certificateValidation)
                 .withIgnorePreValidation(ignorePreValidation)

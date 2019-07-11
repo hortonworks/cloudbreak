@@ -42,7 +42,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient.CloudbreakEndpoint;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -93,7 +93,7 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
     private CloudbreakInternalCrnClient internalCrnClient;
 
     @Mock
-    private CloudbreakEndpoint cbEndpoint;
+    private CloudbreakServiceCrnEndpoints cbEndpoint;
 
     @Before
     public void setUp() throws Exception {

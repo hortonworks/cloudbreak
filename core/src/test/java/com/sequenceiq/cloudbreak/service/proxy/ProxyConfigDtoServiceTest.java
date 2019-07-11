@@ -25,13 +25,13 @@ import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
-import com.sequenceiq.environment.client.EnvironmentServiceClient;
+import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 
 @ExtendWith(MockitoExtension.class)
 class ProxyConfigDtoServiceTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private EnvironmentServiceClient environmentServiceClient;
+    private EnvironmentServiceCrnClient environmentServiceCrnClient;
 
     @Mock
     private SecretService secretService;
@@ -61,7 +61,7 @@ class ProxyConfigDtoServiceTest {
         proxyResponse.setUserName(secretResponse);
         proxyResponse.setPassword(secretResponse);
 
-        when(environmentServiceClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
+        when(environmentServiceCrnClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
         when(proxyEndpoint.getByResourceCrn(anyString())).thenReturn(proxyResponse);
         when(secretService.getByResponse(any(SecretResponse.class))).thenReturn(decryptedSecretValue);
 
@@ -79,7 +79,7 @@ class ProxyConfigDtoServiceTest {
     void testGetWhenProxyConfigCouldNotBeFetchedFromEnvironmentMS() {
         SecretResponse secretResponse = new SecretResponse();
 
-        when(environmentServiceClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
+        when(environmentServiceCrnClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
         when(proxyEndpoint.getByResourceCrn(anyString())).thenThrow(new NotFoundException("The proxy config could not be found!"));
 
 
@@ -105,7 +105,7 @@ class ProxyConfigDtoServiceTest {
         proxyResponse.setUserName(secretResponse);
         proxyResponse.setPassword(secretResponse);
 
-        when(environmentServiceClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
+        when(environmentServiceCrnClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
         when(proxyEndpoint.getByResourceCrn(anyString())).thenReturn(proxyResponse);
         when(secretService.getByResponse(any(SecretResponse.class))).thenThrow(new VaultException("Vault token is invalid!"));
 

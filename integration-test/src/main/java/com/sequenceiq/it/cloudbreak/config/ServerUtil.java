@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.config;
 
-import static org.apache.commons.net.util.Base64.decodeBase64;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
@@ -12,16 +10,36 @@ import org.springframework.util.StringUtils;
 @Component
 class ServerUtil {
 
-    String calculateCrnsFromProfile(String userCrn, Map<String, String> prof) {
-        return StringUtils.isEmpty(userCrn)
-                ? new String(decodeBase64(prof.get("apikeyid")))
-                : userCrn;
+    String calculateApiKeyFromProfile(String apikeyid, Map<String, String> prof) {
+        return StringUtils.isEmpty(apikeyid)
+                ? prof.get("apikeyid")
+                : apikeyid;
     }
 
-    String calculateServerAddressFromProfile(String server, Map<String, String> prof, int port) {
+    String calculatePrivateKeyFromProfile(String privatekey, Map<String, String> prof) {
+        return StringUtils.isEmpty(privatekey)
+                ? prof.get("privatekey")
+                : privatekey;
+    }
+
+    String calculateServerAddressFromProfile(String server, Map<String, String> prof) {
+        return StringUtils.isEmpty(server)
+                ? enforceHttpForServerAddress(prof.get("server"))
+                : server;
+    }
+
+    String calculatePureServerAddressFromProfile(String server, Map<String, String> prof, int port) {
         return StringUtils.isEmpty(server)
                 ? enforceHttpForServerAddress(prof.get("server"), port)
                 : server;
+    }
+
+    private String enforceHttpForServerAddress(String serverRaw) {
+        return "http://" + getDomainFromUrl(serverRaw);
+    }
+
+    private String enforceHttpsForServerAddress(String serverRaw) {
+        return "https://" + getDomainFromUrl(serverRaw);
     }
 
     private String enforceHttpForServerAddress(String serverRaw, int port) {

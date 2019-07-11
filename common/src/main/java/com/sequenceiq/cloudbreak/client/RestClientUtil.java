@@ -37,15 +37,15 @@ public class RestClientUtil {
         return client;
     }
 
-    public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug, Class<?> debugClass) throws Exception {
+    public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug) throws Exception {
         SSLContext sslContext = SSLContexts.custom()
                 .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
                 .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
                 .build();
-        return createClient(sslContext, debug, debugClass);
+        return createClient(sslContext, debug);
     }
 
-    public static Client createClient(SSLContext sslContext, boolean debug, Class<?> debugClass) {
+    public static Client createClient(SSLContext sslContext, boolean debug) {
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
         config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT_MS);

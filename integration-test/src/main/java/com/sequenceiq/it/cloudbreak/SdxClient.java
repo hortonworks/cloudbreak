@@ -6,16 +6,15 @@ import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
-import com.sequenceiq.sdx.client.SdxServiceEndpoints;
+import com.sequenceiq.sdx.client.SdxServiceApiKeyClient;
+import com.sequenceiq.sdx.client.SdxServiceApiKeyEndpoints;
 
 public class SdxClient extends MicroserviceClient {
     public static final String SDX_CLIENT = "SDX_CLIENT";
 
-    private static SdxServiceEndpoints singletonSdxClient;
+    private static SdxServiceApiKeyEndpoints singletonSdxClient;
 
-    private static String crn;
-
-    private SdxServiceEndpoints sdxClient;
+    private SdxServiceApiKeyEndpoints sdxClient;
 
     private String name;
 
@@ -27,7 +26,7 @@ public class SdxClient extends MicroserviceClient {
         this(SDX_CLIENT);
     }
 
-    public static synchronized SdxServiceEndpoints getSingletonSdxClient() {
+    public static synchronized SdxServiceApiKeyEndpoints getSingletonSdxClient() {
         return singletonSdxClient;
     }
 
@@ -48,26 +47,28 @@ public class SdxClient extends MicroserviceClient {
     private static synchronized void createProxySdxClient(IntegrationTestContext integrationTestContext, Entity entity) {
         SdxClient clientEntity = (SdxClient) entity;
         if (singletonSdxClient == null) {
-            singletonSdxClient = new ProxySdxClient(
+            singletonSdxClient = new SdxServiceApiKeyClient(
                     integrationTestContext.getContextParam(SdxTest.SDX_SERVER_ROOT),
-                    new ConfigKey(false, true, true)).withCrn(integrationTestContext.getContextParam(SdxTest.USER_CRN));
+                    new ConfigKey(false, true, true))
+                    .withKeys(integrationTestContext.getContextParam(SdxTest.ACCESS_KEY), integrationTestContext.getContextParam(SdxTest.SECRET_KEY));
         }
         clientEntity.sdxClient = singletonSdxClient;
     }
 
     public static synchronized SdxClient createProxySdxClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
         SdxClient clientEntity = new SdxClient();
-        clientEntity.sdxClient = new ProxySdxClient(
+        clientEntity.sdxClient = new SdxServiceApiKeyClient(
                 testParameter.get(SdxTest.SDX_SERVER_ROOT),
-                new ConfigKey(false, true, true)).withCrn(cloudbreakUser.getToken());
+                new ConfigKey(false, true, true))
+                .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         return clientEntity;
     }
 
-    public SdxServiceEndpoints getSdxClient() {
+    public com.sequenceiq.sdx.client.SdxClient getSdxClient() {
         return sdxClient;
     }
 
-    public void setSdxClient(SdxServiceEndpoints sdxClient) {
+    public void setSdxClient(SdxServiceApiKeyEndpoints sdxClient) {
         this.sdxClient = sdxClient;
     }
 }

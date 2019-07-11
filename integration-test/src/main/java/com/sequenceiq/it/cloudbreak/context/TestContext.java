@@ -214,14 +214,14 @@ public abstract class TestContext implements ApplicationContextAware {
     public TestContext as(Actor actor) {
         checkShutdown();
         CloudbreakUser acting = actor.acting(testParameter);
-        if (clients.get(acting.getToken()) == null) {
+        if (clients.get(acting.getAccessKey()) == null) {
             CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, acting);
             FreeIPAClient freeIPAClient = FreeIPAClient.createProxyFreeIPAClient(testParameter, acting);
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, acting);
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, acting);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
                     FreeIPAClient.class, freeIPAClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient);
-            clients.put(acting.getToken(), clientMap);
+            clients.put(acting.getAccessKey(), clientMap);
             cloudbreakClient.setWorkspaceId(0L);
         }
         return this;
@@ -241,7 +241,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     protected String getDefaultUser() {
-        return testParameter.get(CloudbreakTest.USER_CRN);
+        return testParameter.get(CloudbreakTest.ACCESS_KEY);
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {

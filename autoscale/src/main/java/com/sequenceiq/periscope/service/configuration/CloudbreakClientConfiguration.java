@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.Service;
 import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 
 @Configuration
@@ -23,7 +23,7 @@ public class CloudbreakClientConfiguration {
     private String cbRootContextPath;
 
     @Bean
-    public CloudbreakUserCrnClient cloudbreakClient() {
+    public CloudbreakServiceUserCrnClient cloudbreakClient() {
         return new CloudbreakUserCrnClientBuilder(cloudbreakUrl + cbRootContextPath)
                 .withCertificateValidation(false)
                 .withIgnorePreValidation(true)

@@ -23,7 +23,7 @@ $INTEGCB_LOCATION/.deps/bin/docker-compose up -d caas-mock
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
 cd $INTEGCB_LOCATION
 ./cbd regenerate
-./cbd start-wait commondb vault cloudbreak environment periscope freeipa redbeams datalake
+./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake
 
 if [ $? -ne 0 ]; then
     echo ERROR: Failed to bring up all the necessary services! Process is about to terminate.
@@ -53,12 +53,12 @@ docker rm -f cbreak_redbeams_1
 docker rm -f cbreak_periscope_1
 
 if [[ "$CIRCLECI" ]]; then
-    echo -e "\n\033[1;96m--- Setting User CRN for test variables:\033[0m\n"
-    export INTEGRATIONTEST_USER_CRN="crn:altus:iam:us-west-1:default:user:mockuser@cloudera.com"
+    echo -e "\n\033[1;96m--- Setting ACCESSKEY/SECRETKEY for test variables:\033[0m\n"
+    export INTEGRATIONTEST_USER_ACCESSKEY="Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlcg=="
+    export INTEGRATIONTEST_USER_SECRETKEY="nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g="
 
     export INTEGRATIONTEST_SUITEFILES=$INTEGRATIONTEST_SUITEFILES
     export INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL=$INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL
-
 
     if [[ -n "${INTEGRATIONTEST_YARN_QUEUE}" ]]; then
         echo -e "\n\033[1;96m--- YARN smoke testing variables:\033[0m\n"
@@ -74,6 +74,9 @@ if [[ "$CIRCLECI" ]]; then
     else
         export INTEGRATIONTEST_CLOUDPROVIDER="MOCK"
     fi
+
+    echo -e "\n\033[1;96m--- Env variables started with INTEGRATIONTEST :\033[0m\n"
+    env | grep -i INTEGRATIONTEST
 
     echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"
     echo $INTEGRATIONTEST_SUITEFILES

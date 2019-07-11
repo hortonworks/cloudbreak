@@ -81,7 +81,7 @@ public class PrometheusEvaluator extends EvaluatorExecutor {
 
             TlsConfiguration tlsConfig = tlsSecurityService.getConfiguration(cluster);
             Client client = RestClientUtil.createClient(tlsConfig.getServerCert(),
-                    tlsConfig.getClientCert(), tlsConfig.getClientKey(), true, PrometheusEvaluator.class);
+                    tlsConfig.getClientCert(), tlsConfig.getClientKey(), true);
             String prometheusAddress = String.format("https://%s:%s/prometheus", cluster.getClusterManager().getHost(), cluster.getPort());
             WebTarget target = client.target(prometheusAddress);
 

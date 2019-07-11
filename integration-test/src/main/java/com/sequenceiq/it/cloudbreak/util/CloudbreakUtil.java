@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient.CloudbreakEndpoint;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.context.CloudbreakITContextConstants;
@@ -62,23 +62,23 @@ public class CloudbreakUtil {
         }
     }
 
-    public static void waitAndCheckStackStatus(CloudbreakEndpoint cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
+    public static void waitAndCheckStackStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
         waitAndCheckStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("status", desiredStatus));
     }
 
-    public static void waitAndCheckClusterStatus(CloudbreakEndpoint cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
+    public static void waitAndCheckClusterStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
         waitAndCheckStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("clusterStatus", desiredStatus));
     }
 
-    public static WaitResult waitForStackStatus(CloudbreakEndpoint cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
+    public static WaitResult waitForStackStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
         return waitForStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("status", desiredStatus));
     }
 
-    public static WaitResult waitForClusterStatus(CloudbreakEndpoint cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
+    public static WaitResult waitForClusterStatus(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, String desiredStatus) {
         return waitForStatuses(cloudbreakClient, workspaceId, stackName, Collections.singletonMap("clusterStatus", desiredStatus));
     }
 
-    public static void waitAndCheckStatuses(CloudbreakEndpoint cloudbreakClient, Long workspaceId, String stackName, Map<String, String> desiredStatuses) {
+    public static void waitAndCheckStatuses(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName, Map<String, String> desiredStatuses) {
         for (int i = 0; i < 3; i++) {
             WaitResult waitResult = waitForStatuses(cloudbreakClient, workspaceId, stackName, desiredStatuses);
             if (waitResult == WaitResult.FAILED) {
@@ -210,7 +210,7 @@ public class CloudbreakUtil {
         return ambariIp;
     }
 
-    private static WaitResult waitForStatuses(CloudbreakEndpoint cloudbreakClient, Long workspaceId, String stackName,
+    private static WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName,
             Map<String, String> desiredStatuses) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Map<String, String> currentStatuses = new HashMap<>();

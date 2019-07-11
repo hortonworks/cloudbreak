@@ -56,7 +56,7 @@ public class TlsSetupService {
             TrustManager[] trustManagers = {x509TrustManager};
             SSLContext sslContext = SslConfigurator.newInstance().createSSLContext();
             sslContext.init(null, trustManagers, new SecureRandom());
-            Client client = RestClientUtil.createClient(sslContext, false, null);
+            Client client = RestClientUtil.createClient(sslContext, false);
             Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataRepository.findAllInStack(stackId);
             InstanceMetaData instanceMetaData = instanceMetaDataSet.iterator().next();
             String ip = instanceMetaData.getPublicIpWrapper();

@@ -54,7 +54,7 @@ public class TlsSetupService {
             TrustManager[] trustManagers = {x509TrustManager};
             SSLContext sslContext = SslConfigurator.newInstance().createSSLContext();
             sslContext.init(null, trustManagers, new SecureRandom());
-            Client client = RestClientUtil.createClient(sslContext, false, null);
+            Client client = RestClientUtil.createClient(sslContext, false);
             Integer gatewayPort = stack.getGatewayPort();
             String ip = gatewayConfigService.getGatewayIp(stack, gwInstance);
             LOGGER.debug("Trying to fetch the server's certificate: {}:{}", ip, gatewayPort);
