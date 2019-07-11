@@ -13,6 +13,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import net.sf.json.JSONObject;
 
@@ -41,6 +42,10 @@ public class Json implements Serializable {
     }
 
     public <T> T get(Class<T> valueType) throws IOException {
+        return JsonUtil.readValue(value, valueType);
+    }
+
+    public <T> T get(TypeReference<T> valueType) throws IOException {
         return JsonUtil.readValue(value, valueType);
     }
 
