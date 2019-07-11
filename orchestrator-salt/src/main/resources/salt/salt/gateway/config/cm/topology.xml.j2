@@ -201,7 +201,7 @@
     <service>
         <role>ZEPPELINWS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_SERVER'] -%}
-        <url>ws://{{ hostloc }}:9995/ws</url>
+        <url>ws://{{ hostloc }}:{{ ports['ZEPPELIN'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
