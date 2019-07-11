@@ -164,7 +164,12 @@
         "iam:ListInstanceProfiles",
         "iam:PutRolePolicy",
         "iam:PassRole",
-        "iam:GetRole"
+        "iam:GetRole",
+        "iam:AddRoleToInstanceProfile",
+        "iam:RemoveRoleFromInstanceProfile",
+        "iam:DetachRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:AttachRolePolicy"
       ],
       "Effect": "Allow",
       "Resource": [
@@ -210,7 +215,10 @@
         "kms:DescribeKey",
         "kms:ListAliases",
         "kms:Encrypt",
-        "kms:TagResource"
+        "kms:TagResource",
+        "kms:DeleteAlias",
+        "kms:PutKeyPolicy",
+        "kms:ScheduleKeyDeletion"
       ],
       "Effect": "Allow",
       "Resource": "*"
