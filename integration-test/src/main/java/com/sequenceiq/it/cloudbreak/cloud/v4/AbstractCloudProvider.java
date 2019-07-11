@@ -92,6 +92,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
+    public SdxClusterShape getInternalClusterShape() {
+        return commonCloudProperties.getInternalClusterShape();
+    }
+
+    @Override
     public Integer gatewayPort(StackTestDtoBase stackEntity) {
         return commonCloudProperties.getGatewayPort();
     }

@@ -23,6 +23,8 @@ public class CommonCloudProperties {
 
     private SdxClusterShape clusterShape;
 
+    private SdxClusterShape internalClusterShape;
+
     private String imageCatalogName;
 
     private Integer gatewayPort;
@@ -79,6 +81,14 @@ public class CommonCloudProperties {
 
     public void setClusterShape(SdxClusterShape clusterShape) {
         this.clusterShape = clusterShape;
+    }
+
+    public SdxClusterShape getInternalClusterShape() {
+        return internalClusterShape;
+    }
+
+    public void setInternalClusterShape(SdxClusterShape internalClusterShape) {
+        this.internalClusterShape = internalClusterShape;
     }
 
     public String getImageCatalogName() {

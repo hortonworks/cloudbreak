@@ -73,7 +73,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         withName(resourceProperyProvider().getName())
                 .withStackRequest()
                 .withEnvironment(getTestContext().get(EnvironmentTestDto.class).getName())
-                .withClusterShape(getCloudProvider().getClusterShape())
+                .withClusterShape(getCloudProvider().getInternalClusterShape())
                 .withTags(getCloudProvider().getTags());
         return getCloudProvider().sdxInternal(this);
     }

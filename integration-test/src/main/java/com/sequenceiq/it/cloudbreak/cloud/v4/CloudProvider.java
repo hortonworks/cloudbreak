@@ -72,6 +72,8 @@ public interface CloudProvider {
 
     SdxClusterShape getClusterShape();
 
+    SdxClusterShape getInternalClusterShape();
+
     CloudPlatform getCloudPlatform();
 
     CredentialTestDto credential(CredentialTestDto credential);
