@@ -38,8 +38,8 @@ public class AwsInstanceTerminatedStatusCheckerTask extends PollBooleanStateTask
         LOGGER.debug("Checking if AWS instance '{}' is terminated.", instanceId);
         DescribeInstancesResult result = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId));
         List<Reservation> reservations = result.getReservations();
-        List<Instance> instances = reservations.get(0).getInstances();
-        if (CollectionUtils.isEmpty(reservations) || CollectionUtils.isEmpty(instances)) {
+        List<Instance> instances = CollectionUtils.isEmpty(reservations) ? List.of() : reservations.get(0).getInstances();
+        if (CollectionUtils.isEmpty(instances)) {
             LOGGER.debug("Instance '{}' no longer on provider", instanceId);
             return Boolean.TRUE;
         } else {

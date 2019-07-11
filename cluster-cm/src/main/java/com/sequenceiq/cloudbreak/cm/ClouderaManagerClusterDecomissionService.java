@@ -54,7 +54,7 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     @Override
     public void verifyNodesAreRemovable(Multimap<Long, HostMetadata> hostGroupWithInstances, Set<HostGroup> hostGroups, int defaultRootVolumeSize,
             List<InstanceMetaData> notDeletedNodes) {
-        clouderaManagerDecomissioner.verifyNodesAreRemovable(stack, hostGroupWithInstances, hostGroups, defaultRootVolumeSize, client, notDeletedNodes);
+        clouderaManagerDecomissioner.verifyNodesAreRemovable(stack, hostGroupWithInstances, hostGroups, client);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +19,11 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
+import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
@@ -28,24 +31,32 @@ import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostNameList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiHostTemplate;
+import com.cloudera.api.swagger.model.ApiHostTemplateList;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.cluster.service.NotEnoughNodeException;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Component
 public class ClouderaManagerDecomissioner {
@@ -56,6 +67,12 @@ public class ClouderaManagerDecomissioner {
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
+
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Inject
+    private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
     private final Comparator<? super ApiHost> hostHealthComparator = (host1, host2) -> {
         boolean host1Healthy = ApiHealthSummary.GOOD.equals(host1.getHealthSummary());
@@ -70,18 +87,36 @@ public class ClouderaManagerDecomissioner {
         }
     };
 
-    public void verifyNodesAreRemovable(Stack stack, Multimap<Long, HostMetadata> hostGroupWithInstances, Set<HostGroup> hostGroups, int defaultRootVolumeSize,
-            ApiClient client, List<InstanceMetaData> notDeletedNodes) {
+    public void verifyNodesAreRemovable(Stack stack, Multimap<Long, HostMetadata> hostGroupWithInstances, Set<HostGroup> hostGroups, ApiClient client) {
+        try {
+            HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerClientFactory.getHostTemplatesResourceApi(client);
+            ApiHostTemplateList hostTemplates = hostTemplatesResourceApi.readHostTemplates(stack.getName());
 
+            for (HostGroup hostGroup : hostGroups) {
+                Collection<HostMetadata> removableHostsInHostGroup = hostGroupWithInstances.get(hostGroup.getId());
+                if (removableHostsInHostGroup != null && !removableHostsInHostGroup.isEmpty()) {
+                    String hostGroupName = hostGroup.getName();
+                    int replication = hostGroupNodesAreDataNodes(hostTemplates, hostGroupName) ? getReplicationFactor(client, stack.getName()) : 0;
+                    verifyNodeCount(replication, removableHostsInHostGroup.size(), hostGroup.getHostMetadata().size(), 0, stack);
+                }
+            }
+        } catch (ApiException ex) {
+            throw new CloudbreakServiceException("Could not verify if nodes are removable or not", ex);
+        }
     }
 
     public Set<String> collectDownscaleCandidates(ApiClient client, Stack stack, HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
             Set<InstanceMetaData> instanceMetaDatasInStack) {
         LOGGER.debug("Collecting downscale candidates");
         List<String> hostsInHostGroup = hostGroup.getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList());
-        ClustersResourceApi clustersResourceApi = new ClustersResourceApi(client);
-        HostsResourceApi hostsResourceApi = new HostsResourceApi(client);
+        ClustersResourceApi clustersResourceApi = clouderaManagerClientFactory.getClustersResourceApi(client);
+        HostsResourceApi hostsResourceApi = clouderaManagerClientFactory.getHostsResourceApi(client);
         try {
+            HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerClientFactory.getHostTemplatesResourceApi(client);
+            ApiHostTemplateList hostTemplates = hostTemplatesResourceApi.readHostTemplates(stack.getName());
+            int replication = hostGroupNodesAreDataNodes(hostTemplates, hostGroup.getName()) ? getReplicationFactor(client, stack.getName()) : 0;
+            verifyNodeCount(replication, scalingAdjustment, hostGroup.getHostMetadata().size(), 0, stack);
+
             ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName());
             List<ApiHost> apiHosts = hostRefList.getItems().stream()
                     .filter(host -> hostsInHostGroup.contains(host.getHostname()))
@@ -157,6 +192,41 @@ public class ClouderaManagerDecomissioner {
         } catch (ApiException e) {
             LOGGER.error("Failed to decommission hosts: {}", hostsToRemove.keySet(), e);
             throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    private int getReplicationFactor(ApiClient client, String clusterName) {
+        try {
+            ServicesResourceApi servicesResourceApi = clouderaManagerClientFactory.getServicesResourceApi(client);
+            ApiServiceConfig apiServiceConfig = servicesResourceApi.readServiceConfig(clusterName, "hdfs", "full");
+            Optional<ApiConfig> dfsReplicationConfig =
+                    apiServiceConfig.getItems().stream().filter(apiConfig -> "dfs_replication".equals(apiConfig.getName())).findFirst();
+            return dfsReplicationConfig.map(rc -> Integer.parseInt(StringUtils.isEmpty(rc.getValue()) ? rc.getDefault() : rc.getValue())).orElse(0);
+        } catch (ApiException ex) {
+            throw new CloudbreakServiceException(ex.getMessage(), ex);
+        }
+    }
+
+    private boolean hostGroupNodesAreDataNodes(ApiHostTemplateList hostTemplates, String hostGroupName) {
+        Optional<ApiHostTemplate> hostTemplate = hostTemplates.getItems().stream().filter(ht -> ht.getName().equals(hostGroupName)).findFirst();
+        if (hostTemplate.isPresent()) {
+            return hostTemplate.get().getRoleConfigGroupRefs().stream()
+                    .filter(rcg -> rcg.getRoleConfigGroupName().contains("DATANODE")).findFirst().isPresent();
+        } else {
+            return false;
+        }
+    }
+
+    private void verifyNodeCount(int replication, int scalingAdjustment, int hostSize, int reservedInstances, Stack stack) {
+        boolean repairInProgress = stack.getDiskResources().stream()
+                .map(resource -> resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class))
+                .flatMap(Optional::stream)
+                .map(VolumeSetAttributes::getDeleteOnTermination)
+                .anyMatch(Boolean.FALSE::equals);
+        int adjustment = Math.abs(scalingAdjustment);
+        if (!repairInProgress && (hostSize + reservedInstances - adjustment < replication || hostSize < adjustment)) {
+            LOGGER.info("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
+            throw new NotEnoughNodeException("There is not enough node to downscale. Check the replication factor.");
         }
     }
 
