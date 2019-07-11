@@ -59,6 +59,12 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
+            {% if 'WEBHDFS' in exposed and 'NAMENODE' in salt['pillar.get']('gateway:location')  -%}
+            <param>
+                <name>WEBHDFS</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
             {% if 'OOZIE' in exposed and 'OOZIE_SERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>OOZIE</name>
@@ -89,9 +95,9 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'WEBHDFS' in exposed and 'NAMENODE' in salt['pillar.get']('gateway:location')  -%}
+            {% if 'SOLR' in exposed and 'SOLR_SERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
-                <name>WEBHDFS</name>
+                <name>SOLR</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
@@ -150,8 +156,16 @@
     {%- endif %}
     {%- endif %}
 
-    <!-- TODO - NAMENODE -->
-    <!-- TODO - OOZIE -->
+    {% if 'OOZIE_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'OOZIE' in exposed -%}
+    <service>
+        <role>OOZIE</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['OOZIE_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['OOZIE'] }}/oozie/</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
 
     {% if 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
     {% if 'RANGER' in exposed -%}
@@ -164,8 +178,27 @@
     {%- endif %}
     {%- endif %}
 
-    <!-- TODO - RESOURCEMANAGER -->
-    <!-- TODO - SOLR -->
+    {% if 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'YARNUI' in exposed -%}
+    <service>
+        <role>RESOURCEMANAGER</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['YARNUI'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'SOLR_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SOLR' in exposed -%}
+    <service>
+        <role>SOLR</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['SOLR_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['SOLR'] }}/solr</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
 
     {% if 'NAMENODE' in salt['pillar.get']('gateway:location') -%}
     {% if 'WEBHDFS' in exposed -%}
