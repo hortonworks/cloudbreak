@@ -21,7 +21,7 @@ public class EnvironmentNetworkRequest {
     @ApiModelProperty(value = EnvironmentModelDescription.SUBNET_IDS, required = true)
     private Set<String> subnetIds;
 
-    @Size(max = 100)
+    @Size(max = 255)
     private String networkCidr;
 
     @ApiModelProperty(EnvironmentModelDescription.AWS_SPECIFIC_PARAMETERS)
