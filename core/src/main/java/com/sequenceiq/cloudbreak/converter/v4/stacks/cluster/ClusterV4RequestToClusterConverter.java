@@ -87,6 +87,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
         cluster.setDpAmbariUser(cmMgmtUsername);
         cluster.setDpAmbariPassword(PasswordUtil.generatePassword());
+        cluster.setDatabaseServerCrn(source.getDatabaseServerCrn());
         cluster.setBlueprint(getBlueprint(source.getBlueprintName(), workspace));
         convertGateway(source, cluster);
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {

@@ -260,6 +260,7 @@ public class ModelDescriptions {
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_IDS = "RDS configuration ids for the cluster";
         public static final String RDSCONFIG_NAMES = "RDS configuration names for the cluster";
+        public static final String READBEAMS_DB_SERVER_CRN = "Contains valid Crn for a readbeams database server";
         public static final String DATABASES = "Database configurations for the cluster";
         public static final String LDAP_CONFIG_ID = "LDAP config id for the cluster";
         public static final String LDAP_CONFIG_NAME = "LDAP config name for the cluster";

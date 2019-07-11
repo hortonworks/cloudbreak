@@ -37,6 +37,12 @@ public abstract class AbstractRdsConfigProvider {
     @Inject
     private ClusterService clusterService;
 
+    @Inject
+    private RedbeamsDbServerConfigurer dbServerConfigurer;
+
+    @Inject
+    private RedbeamsClientService redbeamsClientService;
+
     public Map<String, Object> createServicePillarConfigMapIfNeeded(Stack stack, Cluster cluster) {
         if (isRdsConfigNeeded(cluster.getBlueprint())) {
             Set<RDSConfig> rdsConfigs = createPostgresRdsConfigIfNeeded(stack, cluster);
@@ -44,6 +50,12 @@ public abstract class AbstractRdsConfigProvider {
             if (rdsConfig.getStatus() == ResourceStatus.DEFAULT && rdsConfig.getDatabaseEngine() != DatabaseVendor.EMBEDDED) {
                 Map<String, Object> postgres = new HashMap<>();
                 String db = getDb();
+                if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster)) {
+                    postgres.put("remote_db_url", dbServerConfigurer.getHostFromJdbcUrl(rdsConfig.getConnectionURL()));
+                    postgres.put("remote_db_port", dbServerConfigurer.getPortFromJdbcUrl(rdsConfig.getConnectionURL()));
+                    postgres.put("remote_admin", rdsConfig.getConnectionUserName());
+                    postgres.put("remote_admin_pw", rdsConfig.getConnectionPassword());
+                }
                 postgres.put("database", db);
                 postgres.put("user", getDbUser());
                 postgres.put("password", rdsConfig.getConnectionPassword());
@@ -59,9 +71,26 @@ public abstract class AbstractRdsConfigProvider {
         rdsConfigs = rdsConfigs.stream().map(c -> rdsConfigService.resolveVaultValues(c)).collect(Collectors.toSet());
         if (isRdsConfigNeeded(cluster.getBlueprint())
                 && rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(getRdsType().name()))) {
-            LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
-            rdsConfigs = createPostgresRdsConf(stack, cluster, rdsConfigs, getDbUser(), getDbPort(), getDb());
+            if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster)) {
+                RDSConfig rbRdsConfig = dbServerConfigurer.getRdsConfig(stack, cluster, getDb(), getRdsType());
+                rdsConfigs = populateRdsConfig(rdsConfigs, stack, cluster, rbRdsConfig);
+            } else {
+                LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
+                rdsConfigs = createPostgresRdsConf(stack, cluster, rdsConfigs, getDbUser(), getDbPort(), getDb());
+            }
         }
+        return rdsConfigs;
+    }
+
+    private Set<RDSConfig> populateRdsConfig(Set<RDSConfig> rdsConfigs, Stack stack, Cluster cluster, RDSConfig rdsConfig) {
+        rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getWorkspace().getId());
+        if (rdsConfigs == null) {
+            rdsConfigs = new HashSet<>();
+        }
+        rdsConfigs.add(rdsConfig);
+        cluster.setRdsConfigs(rdsConfigs);
+        clusterService.save(cluster);
+
         return rdsConfigs;
     }
 
@@ -79,15 +108,7 @@ public abstract class AbstractRdsConfigProvider {
         rdsConfig.setStatus(ResourceStatus.DEFAULT);
         rdsConfig.setCreationDate(new Date().getTime());
         rdsConfig.setClusters(Collections.singleton(cluster));
-        rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getWorkspace().getId());
-
-        if (rdsConfigs == null) {
-            rdsConfigs = new HashSet<>();
-        }
-        rdsConfigs.add(rdsConfig);
-        cluster.setRdsConfigs(rdsConfigs);
-        clusterService.save(cluster);
-        return rdsConfigs;
+        return populateRdsConfig(rdsConfigs, stack, cluster, rdsConfig);
     }
 
     protected List<String[]> createPathListFromConfigurations(String[] path, String[] configurations) {

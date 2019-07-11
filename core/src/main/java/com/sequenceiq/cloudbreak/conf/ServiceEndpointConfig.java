@@ -41,6 +41,15 @@ public class ServiceEndpointConfig {
     @Value("${cb.freeipa.serviceid:}")
     private String freeipaServiceId;
 
+    @Value("${cb.redbeams.url}")
+    private String redbeamsipaServiceUrl;
+
+    @Value("${cb.redbeams.contextPath}")
+    private String redbeamsContextPath;
+
+    @Value("${cb.freeipa.serviceid:}")
+    private String redbeamsServiceId;
+
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -59,5 +68,10 @@ public class ServiceEndpointConfig {
     @Bean
     public String freeIpaServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveUrl(freeipaServiceUrl + freeipaContextPath, "http", freeipaServiceId);
+    }
+
+    @Bean
+    public String redbeamsServerUrl() throws ServiceAddressResolvingException {
+        return serviceAddressResolver().resolveUrl(redbeamsipaServiceUrl + redbeamsContextPath, "http", redbeamsServiceId);
     }
 }

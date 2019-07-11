@@ -67,6 +67,7 @@ import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiClientParams;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClient;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClientBuilder;
+import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
 
 @Configuration
 @EnableRetry
@@ -135,6 +136,10 @@ public class AppConfig implements ResourceLoaderAware {
     @Inject
     @Named("freeIpaServerUrl")
     private String freeIpaServerUrl;
+
+    @Inject
+    @Named("redbeamsServerUrl")
+    private String redbeamsServerUrl;
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
@@ -253,6 +258,11 @@ public class AppConfig implements ResourceLoaderAware {
     @Bean
     public EnvironmentApiClientParams environmentApiClientParams() {
         return new EnvironmentApiClientParams(restDebug, certificateValidation, ignorePreValidation, environmentServerUrl);
+    }
+
+    @Bean
+    public RedbeamsApiClientParams redbeamsApiClientParams() {
+        return new RedbeamsApiClientParams(restDebug, certificateValidation, ignorePreValidation, redbeamsServerUrl);
     }
 
     @Bean

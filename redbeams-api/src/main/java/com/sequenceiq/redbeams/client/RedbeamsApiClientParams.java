@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.client;
 
 public class RedbeamsApiClientParams {
+
     private boolean restDebug;
 
     private boolean certificateValidation;

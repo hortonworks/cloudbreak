@@ -174,6 +174,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     private String proxyConfigCrn;
 
+    private String databaseServerCrn;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -528,6 +530,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setProxyConfigCrn(String proxyConfigCrn) {
         this.proxyConfigCrn = proxyConfigCrn;
+    }
+
+    public String getDatabaseServerCrn() {
+        return databaseServerCrn;
+    }
+
+    public void setDatabaseServerCrn(String databaseServerCrn) {
+        this.databaseServerCrn = databaseServerCrn;
     }
 
     @Override

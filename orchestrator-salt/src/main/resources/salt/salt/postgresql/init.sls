@@ -1,3 +1,23 @@
+{% set configure_remote_db = salt['pillar.get']('postgres:configure_remote_db', 'None') %}
+
+{% if 'None' != configure_remote_db %}
+
+/opt/salt/scripts/init_db_remote.sh:
+  file.managed:
+    - makedirs: True
+    - mode: 755
+    - source: salt://postgresql/scripts/init_db_remote.sh
+    - template: jinja
+
+init-services-db-remote:
+  cmd.run:
+    - name: runuser -l postgres -c '/opt/salt/scripts/init_db_remote.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/init-services-db-remote-executed
+    - unless: test -f /var/log/init-services-db-remote-executed
+    - require:
+      - file: /opt/salt/scripts/init_db_remote.sh
+
+{%- else %}
+
 init-db-with-utf8:
   cmd.run:
     - name: rm -rf /var/lib/pgsql/data && runuser -l postgres sh -c 'initdb --locale=en_US.UTF-8 /var/lib/pgsql/data > /var/lib/pgsql/initdb.log' && rm /var/log/pgsql_listen_address_configured
@@ -60,5 +80,6 @@ restart-postgresql:
       - cmd: configure-listen-address
       - cmd: init-services-db
 
+{% endif %}
 
 {% endif %}

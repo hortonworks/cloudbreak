@@ -225,6 +225,7 @@ dependencies {
   compile project(':workspace-authorization')
   compile project(':environment-api')
   compile project(':freeipa-api')
+  compile project(':redbeams-api')
 
   runtime project(':orchestrator-salt')
   runtime project(':orchestrator-salt')
