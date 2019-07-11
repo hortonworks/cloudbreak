@@ -18,7 +18,9 @@ import com.sequenceiq.environment.environment.domain.Environment;
 @Transactional(TxType.REQUIRED)
 public interface EnvironmentRepository extends JpaRepository<Environment, Long> {
 
-    Set<Environment> findByAccountId(String accountId);
+    @Query("SELECT e FROM Environment e LEFT JOIN FETCH e.network n LEFT JOIN FETCH e.credential c "
+            + "LEFT JOIN FETCH e.authentication a WHERE e.accountId = :accountId")
+    Set<Environment> findByAccountId(@Param("accountId") String accountId);
 
     Set<Environment> findByNameInAndAccountId(Set<String> names, String accountId);
 

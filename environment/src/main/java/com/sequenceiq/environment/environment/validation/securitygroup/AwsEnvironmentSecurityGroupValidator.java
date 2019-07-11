@@ -26,17 +26,21 @@ public class AwsEnvironmentSecurityGroupValidator implements EnvironmentSecurity
     @Override
     public void validate(EnvironmentCreationDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder) {
         SecurityAccessDto securityAccessDto = environmentDto.getSecurityAccess();
-
-        if (securityAccessDto != null && isSecurityGroupIdDefined(securityAccessDto)) {
-            if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getNetworkCidr())) {
-                resultBuilder.error(networkIdMustBePresented(getCloudPlatform().name()));
+        if (securityAccessDto != null) {
+            if (onlyOneSecurityGroupIdDefined(securityAccessDto)) {
+                resultBuilder.error(securityGroupIdsMustBePresented());
                 return;
-            }
-            if (!Strings.isNullOrEmpty(securityAccessDto.getDefaultSecurityGroupId())) {
-                checkSecurityGroupVpc(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getDefaultSecurityGroupId());
-            }
-            if (!Strings.isNullOrEmpty(securityAccessDto.getSecurityGroupIdForKnox())) {
-                checkSecurityGroupVpc(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getSecurityGroupIdForKnox());
+            } else if (isSecurityGroupIdDefined(securityAccessDto)) {
+                if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getNetworkCidr())) {
+                    resultBuilder.error(networkIdMustBePresented(getCloudPlatform().name()));
+                    return;
+                }
+                if (!Strings.isNullOrEmpty(securityAccessDto.getDefaultSecurityGroupId())) {
+                    checkSecurityGroupVpc(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getDefaultSecurityGroupId());
+                }
+                if (!Strings.isNullOrEmpty(securityAccessDto.getSecurityGroupIdForKnox())) {
+                    checkSecurityGroupVpc(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getSecurityGroupIdForKnox());
+                }
             }
         }
     }

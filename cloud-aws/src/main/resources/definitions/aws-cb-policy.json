@@ -141,12 +141,12 @@
     {
       "Sid": "ElasticComputeCloudLimited",
       "Action": [
-          "ec2:DeleteTags"
+        "ec2:DeleteTags"
       ],
       "Effect": "Allow",
       "Resource": [
-          "arn:aws:ec2:*:*:subnet/*",
-          "arn:aws:ec2:*:*:vpc/*"
+        "arn:aws:ec2:*:*:subnet/*",
+        "arn:aws:ec2:*:*:vpc/*"
       ]
     },
     {
@@ -185,7 +185,8 @@
         "ForAnyValue:StringLike": {
           "iam:AWSServiceName": [
             "rds.amazonaws.com",
-            "elasticloadbalancing.amazonaws.com"
+            "elasticloadbalancing.amazonaws.com",
+            "autoscaling.amazonaws.com"
           ]
         }
       }
