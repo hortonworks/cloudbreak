@@ -18,7 +18,7 @@ public class EnvironmentAuthenticationRequest {
     @ApiModelProperty(EnvironmentModelDescription.PUBLIC_KEY)
     private String publicKey;
 
-    @Size(max = 100, message = "Maximum length of the publicKeyId is 100 characters.")
+    @Size(max = 255, message = "Maximum length of the publicKeyId is 255 characters.")
     @ApiModelProperty(EnvironmentModelDescription.PUBLIC_KEY_ID)
     private String publicKeyId;
 

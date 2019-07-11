@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "EnvironmentV1Request")
 public class EnvironmentRequest extends EnvironmentBaseRequest implements CredentialAwareEnvRequest {
 
-    @Size(max = 100, min = 5, message = "The length of the environments's name has to be in range of 5 to 100")
+    @Size(max = 255, min = 5, message = "The length of the environments's name has to be in range of 5 to 255")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The environments's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
