@@ -223,7 +223,7 @@
     <service>
         <role>OOZIEUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['OOZIE_SERVER'] -%}
-        <url>http://{{ hostloc }}:{{ ports['OOZIE'] }}/oozie</url>
+        <url>http://{{ hostloc }}:{{ ports['OOZIE'] }}/oozie/</url>
         {%- endfor %}
     </service>
     {%- endif %}
