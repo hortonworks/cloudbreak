@@ -201,6 +201,8 @@ public class ServiceEndpointCollector {
                 return getHiveJdbcUrl(gateway, managerIp);
             } else if (ExposedService.NAMENODE.equals(exposedService)) {
                 return getHdfsUIUrl(gateway, managerIp, privateIps.get(ExposedService.NAMENODE.getCmServiceName()).iterator().next());
+            } else if (ExposedService.HBASE_UI.equals(exposedService)) {
+                return getHBaseServiceUrl(gateway, managerIp, privateIps.get(ExposedService.HBASE_UI.getCmServiceName()).iterator().next());
             } else {
                 return Optional.of(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService));
             }
@@ -209,7 +211,7 @@ public class ServiceEndpointCollector {
     }
 
     private boolean hasKnoxUrl(ExposedService exposedService) {
-        return StringUtils.isNotEmpty(exposedService.getKnoxUrl());
+        return isNotEmpty(exposedService.getKnoxUrl());
     }
 
     private boolean isExposed(ExposedService exposedService, Collection<String> exposedServices) {
@@ -224,8 +226,8 @@ public class ServiceEndpointCollector {
         return getGatewayTopology(ExposedService.HIVE_SERVER, gateway);
     }
 
-    private Optional<GatewayTopology> getGatewayTopologyWithNameNode(Gateway gateway) {
-        return getGatewayTopology(ExposedService.NAMENODE, gateway);
+    private Optional<GatewayTopology> getGatewayTopologyWithExposedService(Gateway gateway, ExposedService exposedService) {
+        return getGatewayTopology(exposedService, gateway);
     }
 
     private Optional<GatewayTopology> getGatewayTopology(ExposedService exposedService, Gateway gateway) {
@@ -243,9 +245,14 @@ public class ServiceEndpointCollector {
                 : String.format("https://%s:%s/%s/%s%s", managerIp, knoxPort, gateway.getPath(), topologyName, exposedService.getKnoxUrl());
     }
 
-    private Optional<String> getHdfsUIUrl(Gateway gateway, String ambariIp, String nameNodePrivateIp) {
-        return getGatewayTopologyWithNameNode(gateway)
-                .map(gt -> getHdfsUIUrlWithHostParameterFromGatewayTopology(ambariIp, gt, nameNodePrivateIp));
+    private Optional<String> getHdfsUIUrl(Gateway gateway, String managerIp, String nameNodePrivateIp) {
+        return getGatewayTopologyWithExposedService(gateway, ExposedService.NAMENODE)
+                .map(gt -> getHdfsUIUrlWithHostParameterFromGatewayTopology(managerIp, gt, nameNodePrivateIp));
+    }
+
+    private Optional<String> getHBaseServiceUrl(Gateway gateway, String managerIp, String hbaseMasterPrivateIp) {
+        return getGatewayTopologyWithExposedService(gateway, ExposedService.HBASE_UI)
+                .map(gt -> getHBaseUIUrlWithHostParameterFromGatewayTopology(managerIp, gt, hbaseMasterPrivateIp));
     }
 
     private Optional<String> getHiveJdbcUrl(Gateway gateway, String ambariIp) {
@@ -259,10 +266,17 @@ public class ServiceEndpointCollector {
                 + "transportMode=http;httpPath=%s/%s/hive", ambariIp, knoxPort, gateway.getPath(), gt.getTopologyName());
     }
 
-    private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String ambariIp, GatewayTopology gt, String nameNodePrivateIp) {
+    private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp) {
         Gateway gateway = gt.getGateway();
-        String url = String.format("https://%s:%s/%s/%s%s?host=http://%s:%s", ambariIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
+        String url = String.format("https://%s:%s/%s/%s%s?host=http://%s:%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
                 ExposedService.NAMENODE.getKnoxUrl(), nameNodePrivateIp, ExposedService.NAMENODE.getCmPort());
+        return url;
+    }
+
+    private String getHBaseUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp) {
+        Gateway gateway = gt.getGateway();
+        String url = String.format("https://%s:%s/%s/%s%s?host=%s?port=%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
+                ExposedService.HBASE_UI.getKnoxUrl(), nameNodePrivateIp, ExposedService.HBASE_UI.getCmPort());
         return url;
     }
 }

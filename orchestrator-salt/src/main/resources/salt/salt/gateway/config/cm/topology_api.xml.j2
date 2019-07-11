@@ -83,7 +83,7 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'HBASE' in exposed and 'HBASE' in salt['pillar.get']('gateway:location') -%}
+            {% if 'WEBHBASE' in exposed and 'HBASERESTSERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>WEBHBASE</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
@@ -166,7 +166,6 @@
 
     <!-- TODO - RESOURCEMANAGER -->
     <!-- TODO - SOLR -->
-    <!-- TODO - WEBHBASE -->
 
     {% if 'NAMENODE' in salt['pillar.get']('gateway:location') -%}
     {% if 'WEBHDFS' in exposed -%}
@@ -178,4 +177,16 @@
     </service>
     {%- endif %}
     {%- endif %}
+
+    {% if 'HBASERESTSERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'WEBHBASE' in exposed -%}
+    <service>
+        <role>WEBHBASE</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['HBASERESTSERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['WEBHBASE'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
 </topology>

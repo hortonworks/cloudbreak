@@ -20,7 +20,7 @@ public enum ExposedService {
     CLOUDERA_MANAGER_UI("CM-UI", "CM-UI", "CM-UI", "CM-UI", "/cmf/home", true, null, 7180),
     AMBARI("Ambari", "AMBARI_SERVER", "", "AMBARI", "/ambari/", true, 8080, null),
     HUE("HUE", "", "HUE_LOAD_BALANCER", "HUE", "/hue/", true, null, 8889),
-    WEBHDFS("WebHDFS", "NAMENODE", "NAMENODE", "WEBHDFS", "/webhdfs/v1", false, 50070, 9870),
+    WEBHDFS("WebHDFS", "NAMENODE", "NAMENODE", "WEBHDFS", "/webhdfs/v1", true, 50070, 9870),
     NAMENODE("Name Node", "NAMENODE", "NAMENODE", "HDFSUI", "/hdfs/", true, 50070, 9870),
     RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "RESOURCEMANAGER", "YARNUI", "/yarn/", true, 8088),
     RESOURCEMANAGER_WEB_V2("Resource Manager V2", "RESOURCEMANAGER", "RESOURCEMANAGER", "YARNUIV2", "/yarnuiv2/", true, 8088),
@@ -41,7 +41,8 @@ public enum ExposedService {
     LIVY_SERVER("Livy Server", "", "LIVY_SERVER", "LIVYSERVER1", "/livy/ui", true, null, 8998),
     OOZIE_UI("Oozie Server", "", "OOZIE_SERVER", "OOZIE", "/oozie/", true, null, 11000),
     SOLR("Solr Server", "", "SOLR_SERVER", "SOLR", "/solr/", true, null, 8983),
-    HBASE("HBase", "", "HBASE", "HBASE", "/hbase/webui/", true, null, 16010);
+    HBASE_UI("HBase UI", "", "MASTER", "HBASEUI", "/hbase/webui/master", true, null, 16010),
+    HBASE_REST("HBase Rest", "", "HBASERESTSERVER", "WEBHBASE", "/hbase/", true, null, 20550);
 
     private final String ambariServiceName;
     private final String cmServiceName;

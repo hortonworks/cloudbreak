@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
-public class HbaseKnoxServiceConfigProvider implements CmTemplateComponentConfigProvider {
+public class HbaseRestKnoxServiceConfigProvider implements CmTemplateComponentConfigProvider {
 
     private static final String RESTSERVER_SECURITY_AUTHENTICATION = "hbase_restserver_security_authentication";
 
@@ -38,7 +38,7 @@ public class HbaseKnoxServiceConfigProvider implements CmTemplateComponentConfig
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.HBASE.getKnoxService());
+                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.HBASE_REST.getKnoxService());
     }
 
 }

@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
-public class HbaseKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
+public class HbaseRestKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String CONFIG_SAFETY_VALVE = "hbase_restserver_config_safety_valve";
 
@@ -42,7 +42,7 @@ public class HbaseKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.HBASE.getKnoxService());
+                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.HBASE_REST.getKnoxService());
     }
 
 }

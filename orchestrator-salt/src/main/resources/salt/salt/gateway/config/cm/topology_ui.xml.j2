@@ -53,7 +53,7 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'HBASE' in exposed and 'HBASE' in salt['pillar.get']('gateway:location') -%}
+            {% if 'HBASEUI' in exposed and 'MASTER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>HBASEUI</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
