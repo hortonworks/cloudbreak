@@ -52,25 +52,32 @@ public interface DatabaseServerV4Endpoint {
     @Path("{nameOrCrn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.GET_BY_NAME_OR_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
-            nickname = "getDatabaseServer")
+            nickname = "getDatabaseServerByNameOrCrn")
     DatabaseServerV4Response getByNameOrCrn(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("nameOrCrn") String nameOrCrn);
 
+    @GET
+    @Path("/crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
+            nickname = "getDatabaseServerByCrn")
+    DatabaseServerV4Response getByCrn(@PathParam("crn") String crn);
+
     @POST
-    @Path("external")
+    @Path("managed")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "createDatabaseServer")
     DatabaseServerStatusV4Response create(@Valid AllocateDatabaseServerV4Request request);
 
     @GET
-    @Path("external/status/{name}")
+    @Path("managed/status/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "getDatabaseServerStatus")
     DatabaseServerStatusV4Response getExternalStatus(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
 
     @DELETE
-    @Path("external")
+    @Path("managed")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.TERMINATE, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "terminateDatabaseServer")

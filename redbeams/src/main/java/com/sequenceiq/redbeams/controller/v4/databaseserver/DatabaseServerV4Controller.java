@@ -71,6 +71,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
+    public DatabaseServerV4Response getByCrn(String crn) {
+        DatabaseServerConfig server = databaseServerConfigService.getByCrn(crn);
+        return converterUtil.convert(server, DatabaseServerV4Response.class);
+    }
+
+    @Override
     public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
         DBStack dbStack = dbStackConverter.convert(request, threadBasedUserCrnProvider.getUserCrn());
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack);
