@@ -106,8 +106,8 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             return repository.save(resource);
         } catch (AccessDeniedException | DataIntegrityViolationException e) {
             Optional<Throwable> cve = Throwables.getCausalChain(e).stream()
-                .filter(c -> c instanceof ConstraintViolationException)
-                .findFirst();
+                    .filter(c -> c instanceof ConstraintViolationException)
+                    .findFirst();
             if (cve.isPresent()) {
                 String message = String.format("%s already exists with name '%s' in workspace %d",
                         resource().getShortName(), resource.getName(), resource.getWorkspaceId());
@@ -131,6 +131,16 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         if (resourceOpt.isEmpty()) {
             throw new NotFoundException(String.format("No %s found with name '%s' in environment '%s'",
                     resource().getShortName(), name, environmentId));
+        }
+        MDCBuilder.buildMdcContext(resourceOpt.get());
+        return resourceOpt.get();
+    }
+
+    public DatabaseServerConfig getByCrn(String resourceCrn) {
+        Crn crn = Crn.safeFromString(resourceCrn);
+        Optional<DatabaseServerConfig> resourceOpt = repository.findByResourceCrn(crn);
+        if (resourceOpt.isEmpty()) {
+            throw new NotFoundException(String.format("No %s found with crn '%s'", resource().getShortName(), resourceCrn));
         }
         MDCBuilder.buildMdcContext(resourceOpt.get());
         return resourceOpt.get();
@@ -178,12 +188,12 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             return DATABASE_TEST_RESULT_SUCCESS;
         }
         return errors.getAllErrors().stream()
-            .map(e -> (e instanceof FieldError ? ((FieldError) e).getField() + ": " : "") + e.getDefaultMessage())
-            .collect(Collectors.joining("; "));
+                .map(e -> (e instanceof FieldError ? ((FieldError) e).getField() + ": " : "") + e.getDefaultMessage())
+                .collect(Collectors.joining("; "));
     }
 
     public String createDatabaseOnServer(Long workspaceId, String environmentId, String serverName, String databaseName,
-        String databaseType) {
+            String databaseType) {
         // Prepared statements cannot be used for DDL statements, so we have to scrub the databaseName ourselves.
         // This is a subset of valid SQL identifiers, but I believe it's a sane constraint to put on database name
         // identifiers that protects us from SQL injections
@@ -198,9 +208,9 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         String databaseUserName = generateDatabaseUserName();
         String databasePassword = generateDatabasePassword();
         List<String> sqlStrings = List.of(
-            "CREATE DATABASE " + databaseName,
-            "CREATE USER " + databaseUserName + " WITH ENCRYPTED PASSWORD '" + databasePassword + "'",
-            "GRANT ALL PRIVILEGES ON DATABASE " + databaseName + " TO " + databaseUserName
+                "CREATE DATABASE " + databaseName,
+                "CREATE USER " + databaseUserName + " WITH ENCRYPTED PASSWORD '" + databasePassword + "'",
+                "GRANT ALL PRIVILEGES ON DATABASE " + databaseName + " TO " + databaseUserName
         );
 
         // For now, do not use a transaction (PostgreSQL forbids it).
@@ -216,8 +226,8 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
         // Only record database on server if successfully created on server
         DatabaseConfig newDatabaseConfig =
-            databaseServerConfig.createDatabaseConfig(databaseName, databaseType, ResourceStatus.SERVICE_MANAGED,
-                databaseUserName, databasePassword);
+                databaseServerConfig.createDatabaseConfig(databaseName, databaseType, ResourceStatus.SERVICE_MANAGED,
+                        databaseUserName, databasePassword);
         databaseConfigService.register(newDatabaseConfig);
 
         return "created";
@@ -225,9 +235,9 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     private String generateDatabaseUserName() {
         return ThreadLocalRandom.current().ints(0, MAX_RANDOM_INT_FOR_CHARACTER)
-            .limit(USER_NAME_LENGTH).boxed()
-            .map(i -> Character.toString((char) ('a' + i)))
-            .collect(Collectors.joining());
+                .limit(USER_NAME_LENGTH).boxed()
+                .map(i -> Character.toString((char) ('a' + i)))
+                .collect(Collectors.joining());
     }
 
     private String generateDatabasePassword() {

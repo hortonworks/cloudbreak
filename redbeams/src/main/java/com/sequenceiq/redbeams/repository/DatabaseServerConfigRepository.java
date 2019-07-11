@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.redbeams.authorization.CheckPermissionsByReturnValue;
 import com.sequenceiq.redbeams.authorization.ResourceAction;
@@ -21,6 +22,9 @@ public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseSe
 
     @CheckPermissionsByReturnValue(action = ResourceAction.READ)
     Set<DatabaseServerConfig> findByWorkspaceIdAndEnvironmentId(Long workspaceId, String environmentId);
+
+    @CheckPermissionsByReturnValue(action = ResourceAction.READ)
+    Optional<DatabaseServerConfig> findByResourceCrn(Crn crn);
 
     @CheckPermissionsByReturnValue(action = ResourceAction.READ)
     @Query("SELECT s FROM DatabaseServerConfig s WHERE s.workspaceId = :workspaceId AND s.environmentId = :environmentId "
