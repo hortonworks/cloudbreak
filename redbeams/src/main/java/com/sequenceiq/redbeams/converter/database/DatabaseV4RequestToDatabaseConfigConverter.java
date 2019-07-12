@@ -33,7 +33,7 @@ public class DatabaseV4RequestToDatabaseConfigConverter  extends AbstractConvers
         databaseConfig.setDescription(source.getDescription());
         databaseConfig.setConnectionURL(source.getConnectionURL());
 
-        DatabaseVendor databaseVendor = databaseVendorUtil.getVendorByJdbcUrl(source).get();
+        DatabaseVendor databaseVendor = databaseVendorUtil.getVendorByJdbcUrl(source.getConnectionURL()).get();
         databaseConfig.setDatabaseVendor(databaseVendor);
         databaseConfig.setConnectionDriver(source.getConnectionDriver());
         databaseConfig.setConnectionUserName(source.getConnectionUserName());
