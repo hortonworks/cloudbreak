@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.controller.mapper;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
+import com.sequenceiq.cloudbreak.common.json.ExceptionResult;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
