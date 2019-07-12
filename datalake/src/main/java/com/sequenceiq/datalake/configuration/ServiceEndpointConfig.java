@@ -24,6 +24,15 @@ public class ServiceEndpointConfig {
     @Value("${datalake.db.serviceid:}")
     private String databaseId;
 
+    @Value("${datalake.redbeams.url:}")
+    private String redbeamsServerUrl;
+
+    @Value("${datalake.redbeams.contextPath:/redbeams}")
+    private String redbeamsRootContextPath;
+
+    @Value("${datalake.redbeams.serviceid:}")
+    private String redbeamsServiceId;
+
     @Value("${datalake.cloudbreak.url:}")
     private String cloudbreakUrl;
 
@@ -63,5 +72,11 @@ public class ServiceEndpointConfig {
     @DependsOn("serviceAddressResolver")
     public String environmentServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(environmentServerUrl + environmentRootContextPath, "http", environmentServiceId);
+    }
+
+    @Bean
+    @DependsOn("serviceAddressResolver")
+    public String redbeamsServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(redbeamsServerUrl + redbeamsRootContextPath, "http", redbeamsServiceId);
     }
 }

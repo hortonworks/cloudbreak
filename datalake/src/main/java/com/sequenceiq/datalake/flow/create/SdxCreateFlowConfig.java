@@ -6,6 +6,7 @@ import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_FA
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_START_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_WAIT_ENV_STATE;
+import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_WAIT_RDS_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_STACK_CREATION_IN_PROGRESS_STATE;
 
 import java.util.List;
@@ -24,8 +25,11 @@ public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateStat
             .to(SDX_CREATION_WAIT_ENV_STATE)
             .event(SdxCreateEvent.ENV_WAIT_EVENT).defaultFailureEvent()
             .from(SDX_CREATION_WAIT_ENV_STATE)
-            .to(SDX_CREATION_START_STATE)
+            .to(SDX_CREATION_WAIT_RDS_STATE)
             .event(SdxCreateEvent.ENV_WAIT_SUCCESS_EVENT).defaultFailureEvent()
+            .from(SDX_CREATION_WAIT_RDS_STATE)
+            .to(SDX_CREATION_START_STATE)
+            .event(SdxCreateEvent.RDS_WAIT_SUCCESS_EVENT).defaultFailureEvent()
             .from(SDX_CREATION_START_STATE)
             .to(SDX_STACK_CREATION_IN_PROGRESS_STATE)
             .event(SdxCreateEvent.SDX_STACK_CREATION_IN_PROGRESS_EVENT).defaultFailureEvent()

@@ -58,6 +58,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
@@ -110,11 +111,11 @@ class ProvisionerServiceTest {
         when(cbEndpointMock.stackV4Endpoint()).thenReturn(stackEndpointMock);
         when(cloudbreakClient.withCrn(anyString())).thenReturn(cbEndpointMock);
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
-        provisionerService.startStackProvisioning(id, getEnvironmentResponse());
+        provisionerService.startStackProvisioning(id, getEnvironmentResponse(), getDatabaseServerResponse());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster postedSdxCluster = captor.getValue();
-        Assertions.assertEquals(SdxClusterStatus.REQUESTED_FROM_CLOUDBREAK, postedSdxCluster.getStatus());
+        Assertions.assertEquals(SdxClusterStatus.STACK_CREATION_IN_PROGRESS, postedSdxCluster.getStatus());
     }
 
     @Test
@@ -123,7 +124,7 @@ class ProvisionerServiceTest {
 
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.empty());
         Assertions.assertThrows(com.sequenceiq.cloudbreak.exception.NotFoundException.class,
-                () -> provisionerService.startStackProvisioning(id, getEnvironmentResponse()));
+                () -> provisionerService.startStackProvisioning(id, getEnvironmentResponse(), getDatabaseServerResponse()));
     }
 
     @Test
@@ -331,7 +332,11 @@ class ProvisionerServiceTest {
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster postedSdxCluster = captor.getValue();
 
-        Assertions.assertEquals(SdxClusterStatus.DELETED, postedSdxCluster.getStatus());
+        Assertions.assertEquals(SdxClusterStatus.STACK_DELETED, postedSdxCluster.getStatus());
+    }
+
+    private DatabaseServerStatusV4Response getDatabaseServerResponse() {
+        return new DatabaseServerStatusV4Response();
     }
 
     private DetailedEnvironmentResponse getEnvironmentResponse() {

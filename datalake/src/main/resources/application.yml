@@ -39,6 +39,8 @@ datalake:
     url: http://localhost:9091
   environmentservice:
     url: http://localhost:8088
+  redbeams:
+    url: http://localhost:8087
   db:
     port.5432.tcp:
       port: 5432
