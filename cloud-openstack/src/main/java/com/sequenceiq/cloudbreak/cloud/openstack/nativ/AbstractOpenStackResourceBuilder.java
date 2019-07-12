@@ -26,8 +26,8 @@ import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.OpenStackVariant;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
-import com.sequenceiq.cloudbreak.common.type.CommonStatus;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 public abstract class AbstractOpenStackResourceBuilder implements CloudPlatformAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractOpenStackResourceBuilder.class);

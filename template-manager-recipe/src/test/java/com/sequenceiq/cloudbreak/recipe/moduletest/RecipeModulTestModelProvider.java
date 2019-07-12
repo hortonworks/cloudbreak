@@ -20,11 +20,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
+import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
+import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.common.api.filesystem.GcsFileSystem;
+import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.recipe.testrepeater.TestFile;

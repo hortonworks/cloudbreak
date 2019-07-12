@@ -3,8 +3,8 @@ package com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.common.type.EncryptionType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
+import com.sequenceiq.common.api.type.EncryptionType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

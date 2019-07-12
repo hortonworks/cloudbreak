@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 

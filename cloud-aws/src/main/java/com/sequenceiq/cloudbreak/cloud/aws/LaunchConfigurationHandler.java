@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.mapper.LaunchConfigurationMapper;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class LaunchConfigurationHandler {

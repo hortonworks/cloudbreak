@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.template.filesystem.wasb;
 
 import java.util.Collection;
 
-import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
+import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 public class WasbFileSystemConfigurationsView extends BaseFileSystemConfigurationsView {
 

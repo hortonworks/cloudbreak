@@ -55,6 +55,8 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
     private SecurityAccessResponse securityAccess;
 
+    private CloudStorageResponse logCloudStorage;
+
     public String getCrn() {
         return crn;
     }
@@ -181,5 +183,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setSecurityAccess(SecurityAccessResponse securityAccess) {
         this.securityAccess = securityAccess;
+    }
+
+    public CloudStorageResponse getLogCloudStorage() {
+        return logCloudStorage;
+    }
+
+    public void setLogCloudStorage(CloudStorageResponse logCloudStorage) {
+        this.logCloudStorage = logCloudStorage;
     }
 }

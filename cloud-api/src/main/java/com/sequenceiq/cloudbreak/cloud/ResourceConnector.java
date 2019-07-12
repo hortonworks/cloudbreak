@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
+import com.sequenceiq.common.api.type.AdjustmentType;
 
 /**
  * Cloudbreak handles the entities on the Cloud provider side as generic resources and supports CRUD operations on them.
@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
  * - GCP_ATTACHED_DISK
  * - GCP_INSTANCE
  * <br>
- * Take a look at {@link com.sequenceiq.cloudbreak.common.type.ResourceType} for more resource types.
+ * Take a look at {@link com.sequenceiq.common.api.type.ResourceType} for more resource types.
  * <br>
  * Cloud providers which support template based deployments (like AWS Cloudformation, Azure ARM or OpenStack Heat) usually use only one {@link
  * CloudResource} which is  CLOUDFORMATION_STACK, HEAT_STACK or ARM_TEMPLATE and all the infrastructure related changes are done through that resource.
@@ -175,6 +175,7 @@ public interface ResourceConnector<R> {
      * @return the status of updated resources
      */
     R collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms);
+
     /**
      * Gets the Cloud platform related tls info.
      *

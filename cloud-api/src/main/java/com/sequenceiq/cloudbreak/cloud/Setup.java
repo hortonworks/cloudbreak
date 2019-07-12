@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
+import com.sequenceiq.common.api.type.ImageStatusResult;
 
 /**
  * Collection of basic methods to prepare the Cloud provider to launch a given stack.

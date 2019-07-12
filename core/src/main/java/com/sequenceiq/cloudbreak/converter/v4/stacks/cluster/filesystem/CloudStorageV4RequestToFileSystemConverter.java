@@ -9,23 +9,23 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.BaseFileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageV1Parameters;
+import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
+import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.common.api.filesystem.BaseFileSystem;
+import com.sequenceiq.common.api.filesystem.GcsFileSystem;
+import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 @Component
 public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversionServiceAwareConverter<CloudStorageV4Request, FileSystem> {
@@ -40,7 +40,7 @@ public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversi
     public FileSystem convert(CloudStorageV4Request source) {
         FileSystem fileSystem = new FileSystem();
         fileSystem.setName(nameGenerator.generateName(FILESYSTEM));
-        CloudStorageV4Parameters cloudStorageParameters = fileSystemResolver.propagateConfiguration(source);
+        CloudStorageV1Parameters cloudStorageParameters = fileSystemResolver.propagateConfiguration(source);
         fileSystem.setType(cloudStorageParameters.getType());
 
         Set<StorageLocation> locations = new HashSet<>();

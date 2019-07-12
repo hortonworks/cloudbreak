@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class EncryptedSnapshotService {

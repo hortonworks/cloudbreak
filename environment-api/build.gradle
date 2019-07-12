@@ -18,6 +18,7 @@ dependencies {
   implementation project(':common')
   implementation project(':cloud-api')
   implementation project(':auth-connector')
+  implementation project(':common-model')
 
   implementation     group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   implementation     group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: "1.5.21"

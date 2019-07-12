@@ -15,8 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.type.CommonResourceType;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.CommonResourceType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AwsUpdateService {

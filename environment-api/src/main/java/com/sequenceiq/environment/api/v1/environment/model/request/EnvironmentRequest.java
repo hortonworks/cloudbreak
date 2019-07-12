@@ -47,14 +47,19 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
+    @Valid
     @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
-    private @Valid EnvironmentAuthenticationRequest authentication;
+    private EnvironmentAuthenticationRequest authentication;
 
     @ApiModelProperty(EnvironmentModelDescription.FREE_IPA)
     private AttachedFreeIpaRequest freeIpa;
 
+    @Valid
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
-    private @Valid SecurityAccessRequest securityAccess;
+    private SecurityAccessRequest securityAccess;
+
+    @ApiModelProperty(EnvironmentModelDescription.LOG_CLOUD_STORAGE)
+    private CloudStorageRequest logCloudStorage;
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
@@ -144,5 +149,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setSecurityAccess(SecurityAccessRequest securityAccess) {
         this.securityAccess = securityAccess;
+    }
+
+    public CloudStorageRequest getLogCloudStorage() {
+        return logCloudStorage;
+    }
+
+    public void setLogCloudStorage(CloudStorageRequest logCloudStorage) {
+        this.logCloudStorage = logCloudStorage;
     }
 }

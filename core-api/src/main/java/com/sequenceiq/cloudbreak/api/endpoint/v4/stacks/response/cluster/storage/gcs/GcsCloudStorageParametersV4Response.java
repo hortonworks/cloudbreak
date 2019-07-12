@@ -5,8 +5,8 @@ import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageParametersV4Response;
-import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.validation.ValidGcsCloudStorageParameters;
+import com.sequenceiq.common.api.cloudstorage.validation.ValidGcsCloudStorageParameters;
+import com.sequenceiq.common.api.filesystem.FileSystemType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

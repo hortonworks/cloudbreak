@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
+import com.sequenceiq.common.api.filesystem.FileSystemType;
 
 public interface FileSystemConfigurator<T extends BaseFileSystemConfigurationsView> {
 

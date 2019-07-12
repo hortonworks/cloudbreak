@@ -2,17 +2,17 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsGen2CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.common.api.cloudstorage.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 
 @Component
 public class AdlsGen2FileSystemToAdlsGen2CloudStorageParametersConverter
-        extends AbstractConversionServiceAwareConverter<AdlsGen2FileSystem, AdlsGen2CloudStorageV4Parameters> {
+        extends AbstractConversionServiceAwareConverter<AdlsGen2FileSystem, AdlsGen2CloudStorageV1Parameters> {
 
     @Override
-    public AdlsGen2CloudStorageV4Parameters convert(AdlsGen2FileSystem source) {
-        AdlsGen2CloudStorageV4Parameters adlsGen2CloudStorageParameters = new AdlsGen2CloudStorageV4Parameters();
+    public AdlsGen2CloudStorageV1Parameters convert(AdlsGen2FileSystem source) {
+        AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageParameters = new AdlsGen2CloudStorageV1Parameters();
         adlsGen2CloudStorageParameters.setAccountName(source.getAccountName());
         adlsGen2CloudStorageParameters.setAccountKey(source.getAccountKey());
         adlsGen2CloudStorageParameters.setSecure(source.isSecure());

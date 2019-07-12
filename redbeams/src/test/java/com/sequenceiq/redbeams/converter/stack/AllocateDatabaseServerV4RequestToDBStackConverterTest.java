@@ -110,7 +110,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         securityGroupRequest.setSecurityGroupIds(Set.of("sg-1234"));
 
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.aDetailedEnvironmentResponse()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
             .withCloudPlatform(CloudPlatform.AWS.name()).build();
         when(environmentService.getByCrn("myenv")).thenReturn(environment);
 

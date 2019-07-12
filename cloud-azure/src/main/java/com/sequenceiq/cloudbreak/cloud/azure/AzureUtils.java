@@ -42,8 +42,8 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
-import com.sequenceiq.cloudbreak.common.type.CommonStatus;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class AzureUtils {

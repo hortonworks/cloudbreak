@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import static com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType.WASB;
+import static com.sequenceiq.common.api.filesystem.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
@@ -20,17 +20,17 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.GcsCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
+import com.sequenceiq.common.api.cloudstorage.AdlsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.GcsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.WasbCloudStorageV1Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
-import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
+import com.sequenceiq.common.api.filesystem.FileSystemType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileSystemRequestToSpiFileSystemConverterTest {
@@ -51,7 +51,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenAdlsNotNullThenCloudAdlsShouldBeInReturningObject() {
-        AdlsCloudStorageV4Parameters adls = mock(AdlsCloudStorageV4Parameters.class);
+        AdlsCloudStorageV1Parameters adls = mock(AdlsCloudStorageV1Parameters.class);
         CloudAdlsView expected = mock(CloudAdlsView.class);
         when(request.getAdls()).thenReturn(adls);
         when(conversionService.convert(adls, CloudAdlsView.class)).thenReturn(expected);
@@ -68,7 +68,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenGcsNotNullThenCloudGcsShouldBeInReturningObject() {
-        GcsCloudStorageV4Parameters gcs = mock(GcsCloudStorageV4Parameters.class);
+        GcsCloudStorageV1Parameters gcs = mock(GcsCloudStorageV1Parameters.class);
         CloudGcsView expected = mock(CloudGcsView.class);
         when(request.getGcs()).thenReturn(gcs);
         when(conversionService.convert(gcs, CloudGcsView.class)).thenReturn(expected);
@@ -85,7 +85,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenS3NotNullThenCloudS3ShouldBeInReturningObject() {
-        S3CloudStorageV4Parameters s3 = mock(S3CloudStorageV4Parameters.class);
+        S3CloudStorageV1Parameters s3 = mock(S3CloudStorageV1Parameters.class);
         CloudS3View expected = mock(CloudS3View.class);
         when(request.getS3()).thenReturn(s3);
         when(conversionService.convert(s3, CloudS3View.class)).thenReturn(expected);
@@ -102,7 +102,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
     @Test
     public void testConvertWhenWasbNotNullThenCloudWasbShouldBeInReturningObject() {
-        WasbCloudStorageV4Parameters wasb = mock(WasbCloudStorageV4Parameters.class);
+        WasbCloudStorageV1Parameters wasb = mock(WasbCloudStorageV1Parameters.class);
         CloudWasbView expected = mock(CloudWasbView.class);
         when(request.getWasb()).thenReturn(wasb);
         when(conversionService.convert(wasb, CloudWasbView.class)).thenReturn(expected);

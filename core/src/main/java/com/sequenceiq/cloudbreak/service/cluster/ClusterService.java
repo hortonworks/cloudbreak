@@ -75,8 +75,8 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;

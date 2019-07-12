@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.cumulus.yarn;
 
-import static com.sequenceiq.cloudbreak.common.type.ResourceType.CUMULUS_YARN_SERVICE;
+import static com.sequenceiq.common.api.type.ResourceType.CUMULUS_YARN_SERVICE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
-import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
+import com.sequenceiq.common.api.type.AdjustmentType;
 
 @org.springframework.stereotype.Service
 public class CumulusYarnResourceConnector implements ResourceConnector<Object> {

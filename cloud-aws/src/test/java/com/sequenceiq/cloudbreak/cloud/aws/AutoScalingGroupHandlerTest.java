@@ -26,7 +26,7 @@ import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.StackResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 public class AutoScalingGroupHandlerTest {
 

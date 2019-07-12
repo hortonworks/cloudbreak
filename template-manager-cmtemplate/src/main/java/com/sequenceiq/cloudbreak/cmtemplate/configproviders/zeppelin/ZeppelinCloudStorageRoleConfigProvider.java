@@ -11,8 +11,8 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
-import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.common.api.filesystem.FileSystemType;
 
 @Component
 public class ZeppelinCloudStorageRoleConfigProvider extends AbstractRoleConfigProvider {

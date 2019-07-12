@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.GATEWAY;
+import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;

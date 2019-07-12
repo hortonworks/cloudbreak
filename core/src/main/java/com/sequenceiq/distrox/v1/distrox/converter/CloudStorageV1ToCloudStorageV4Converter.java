@@ -15,26 +15,25 @@ public class CloudStorageV1ToCloudStorageV4Converter {
     @Inject
     private LocationV4ToLocationV1Converter locationConverter;
 
-    @Inject
-    private  CloudStorageConverter cloudStorageConverter;
-
     public CloudStorageV4Request convert(CloudStorageV1Request source) {
         CloudStorageV4Request response = new CloudStorageV4Request();
         response.setLocations(getIfNotNull(source.getLocations(), locationConverter::convertTo));
-        response.setS3(getIfNotNull(source.getS3(), cloudStorageConverter::convert));
-        response.setAdls(getIfNotNull(source.getAdls(), cloudStorageConverter::convert));
-        response.setAdlsGen2(getIfNotNull(source.getAdlsGen2(), cloudStorageConverter::convert));
-        response.setAdlsGen2(getIfNotNull(source.getAdlsGen2(), cloudStorageConverter::convert));
+        response.setS3(source.getS3());
+        response.setAdls(source.getAdls());
+        response.setAdlsGen2(source.getAdlsGen2());
+        response.setGcs(source.getGcs());
+        response.setWasb(source.getWasb());
         return response;
     }
 
     public CloudStorageV1Request convert(CloudStorageV4Request source) {
         CloudStorageV1Request response = new CloudStorageV1Request();
         response.setLocations(getIfNotNull(source.getLocations(), locationConverter::convertFrom));
-        response.setS3(getIfNotNull(source.getS3(), cloudStorageConverter::convert));
-        response.setAdls(getIfNotNull(source.getAdls(), cloudStorageConverter::convert));
-        response.setAdlsGen2(getIfNotNull(source.getAdlsGen2(), cloudStorageConverter::convert));
-        response.setAdlsGen2(getIfNotNull(source.getAdlsGen2(), cloudStorageConverter::convert));
+        response.setS3(source.getS3());
+        response.setAdls(source.getAdls());
+        response.setAdlsGen2(source.getAdlsGen2());
+        response.setGcs(source.getGcs());
+        response.setWasb(source.getWasb());
         return response;
     }
 }

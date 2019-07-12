@@ -7,11 +7,11 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsGen2CloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.GcsCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
+import com.sequenceiq.common.api.cloudstorage.AdlsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.GcsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.WasbCloudStorageV1Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
 
@@ -35,23 +35,23 @@ public class FileSystemValidationV4Request implements JsonEntity {
 
     @Valid
     @ApiModelProperty
-    private AdlsCloudStorageV4Parameters adls;
+    private AdlsCloudStorageV1Parameters adls;
 
     @Valid
     @ApiModelProperty
-    private WasbCloudStorageV4Parameters wasb;
+    private WasbCloudStorageV1Parameters wasb;
 
     @Valid
     @ApiModelProperty
-    private GcsCloudStorageV4Parameters gcs;
+    private GcsCloudStorageV1Parameters gcs;
 
     @Valid
     @ApiModelProperty
-    private S3CloudStorageV4Parameters s3;
+    private S3CloudStorageV1Parameters s3;
 
     @Valid
     @ApiModelProperty
-    private AdlsGen2CloudStorageV4Parameters adlsGen2;
+    private AdlsGen2CloudStorageV1Parameters adlsGen2;
 
     public Set<StorageLocationV4Request> getLocations() {
         return locations;
@@ -77,43 +77,43 @@ public class FileSystemValidationV4Request implements JsonEntity {
         this.type = type;
     }
 
-    public AdlsCloudStorageV4Parameters getAdls() {
+    public AdlsCloudStorageV1Parameters getAdls() {
         return adls;
     }
 
-    public void setAdls(AdlsCloudStorageV4Parameters adls) {
+    public void setAdls(AdlsCloudStorageV1Parameters adls) {
         this.adls = adls;
     }
 
-    public WasbCloudStorageV4Parameters getWasb() {
+    public WasbCloudStorageV1Parameters getWasb() {
         return wasb;
     }
 
-    public void setWasb(WasbCloudStorageV4Parameters wasb) {
+    public void setWasb(WasbCloudStorageV1Parameters wasb) {
         this.wasb = wasb;
     }
 
-    public GcsCloudStorageV4Parameters getGcs() {
+    public GcsCloudStorageV1Parameters getGcs() {
         return gcs;
     }
 
-    public void setGcs(GcsCloudStorageV4Parameters gcs) {
+    public void setGcs(GcsCloudStorageV1Parameters gcs) {
         this.gcs = gcs;
     }
 
-    public S3CloudStorageV4Parameters getS3() {
+    public S3CloudStorageV1Parameters getS3() {
         return s3;
     }
 
-    public void setS3(S3CloudStorageV4Parameters s3) {
+    public void setS3(S3CloudStorageV1Parameters s3) {
         this.s3 = s3;
     }
 
-    public AdlsGen2CloudStorageV4Parameters getAdlsGen2() {
+    public AdlsGen2CloudStorageV1Parameters getAdlsGen2() {
         return adlsGen2;
     }
 
-    public void setAdlsGen2(AdlsGen2CloudStorageV4Parameters adlsGen2) {
+    public void setAdlsGen2(AdlsGen2CloudStorageV1Parameters adlsGen2) {
         this.adlsGen2 = adlsGen2;
     }
 }

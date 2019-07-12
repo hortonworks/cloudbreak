@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -130,9 +130,9 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         return null;
     }
 
-    private CloudStorageV4Response getCloudStorage(Cluster source) {
+    private CloudStorageV1Response getCloudStorage(Cluster source) {
         if (source.getFileSystem() != null) {
-            return getConversionService().convert(source.getFileSystem(), CloudStorageV4Response.class);
+            return getConversionService().convert(source.getFileSystem(), CloudStorageV1Response.class);
         }
         return null;
     }

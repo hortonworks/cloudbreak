@@ -64,8 +64,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {

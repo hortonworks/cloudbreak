@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
-import com.sequenceiq.cloudbreak.common.type.EncryptionType;
+import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;

@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class HostgroupView {
 

@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.GcsCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
+import com.sequenceiq.common.api.cloudstorage.GcsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 
 public class GcsCloudStorageParametersToGcsFileSystemConverterTest {
 
@@ -29,8 +29,8 @@ public class GcsCloudStorageParametersToGcsFileSystemConverterTest {
         assertEquals(result, expected);
     }
 
-    private GcsCloudStorageV4Parameters createGcsCloudStorageParameters() {
-        GcsCloudStorageV4Parameters gcs = new GcsCloudStorageV4Parameters();
+    private GcsCloudStorageV1Parameters createGcsCloudStorageParameters() {
+        GcsCloudStorageV1Parameters gcs = new GcsCloudStorageV1Parameters();
         gcs.setServiceAccountEmail(TEST_SERVICE_ACCOUNT_EMAIL);
         return gcs;
     }

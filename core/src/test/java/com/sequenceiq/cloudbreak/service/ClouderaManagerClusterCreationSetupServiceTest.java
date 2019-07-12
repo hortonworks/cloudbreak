@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 public class AzureResourceException extends CloudConnectorException {
     public AzureResourceException(Throwable cause) {

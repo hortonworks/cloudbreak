@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
+import com.sequenceiq.common.api.type.AdjustmentType;
 
 import freemarker.template.Configuration;
 

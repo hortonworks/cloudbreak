@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.nativ.context.OpenStackContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.nativ.service.OpenStackResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.CinderVolumeView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NovaInstanceView;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackComputeResourceBuilder {

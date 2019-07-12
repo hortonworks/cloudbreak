@@ -5,11 +5,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.template.BlueprintComponentConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
 public class KnoxConfigProvider implements BlueprintComponentConfigProvider {

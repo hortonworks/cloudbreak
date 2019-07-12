@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.status.HeatStackStatus;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class OpenStackUtils {

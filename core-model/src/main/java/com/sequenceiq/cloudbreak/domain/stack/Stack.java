@@ -50,8 +50,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -67,6 +65,8 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))

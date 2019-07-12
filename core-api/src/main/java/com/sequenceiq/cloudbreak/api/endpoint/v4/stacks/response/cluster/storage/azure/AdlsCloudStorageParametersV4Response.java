@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageParametersV4Response;
-import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.validation.ValidAdlsCloudStorageParameters;
+import com.sequenceiq.common.api.cloudstorage.validation.ValidAdlsCloudStorageParameters;
+import com.sequenceiq.common.api.filesystem.FileSystemType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

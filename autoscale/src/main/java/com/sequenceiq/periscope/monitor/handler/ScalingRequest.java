@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
-import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
+import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Cluster;

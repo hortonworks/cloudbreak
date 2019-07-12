@@ -9,16 +9,16 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
-import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.adlsgen2.AdlsGen2FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.gcs.GcsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
+import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
+import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.common.api.filesystem.GcsFileSystem;
+import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 @Service
 public class FileSystemConfigurationsViewProvider {

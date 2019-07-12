@@ -50,8 +50,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 public class EncryptedImageCopyServiceTest {
 

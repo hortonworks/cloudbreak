@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
+import com.sequenceiq.common.api.cloudstorage.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 public class WasbFileSystemToWasbCloudStorageParametersConverterTest {
 
@@ -23,11 +23,11 @@ public class WasbFileSystemToWasbCloudStorageParametersConverterTest {
 
     @Test
     public void testConvertCheckEveryParameterHasPassedProperly() {
-        WasbCloudStorageV4Parameters expected = new WasbCloudStorageV4Parameters();
+        WasbCloudStorageV1Parameters expected = new WasbCloudStorageV1Parameters();
         expected.setAccountKey(TEST_ACCOUNT_KEY);
         expected.setAccountName(TEST_ACCOUNT_NAME);
 
-        WasbCloudStorageV4Parameters result = underTest.convert(createWasbFileSystem());
+        WasbCloudStorageV1Parameters result = underTest.convert(createWasbFileSystem());
 
         assertEquals(expected, result);
     }

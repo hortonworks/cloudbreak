@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProviderProcess
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnVolumeConfigProvider;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;

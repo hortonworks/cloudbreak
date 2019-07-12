@@ -2,7 +2,7 @@ package com.sequenceiq.redbeams.flow.redbeams.provision.handler;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;

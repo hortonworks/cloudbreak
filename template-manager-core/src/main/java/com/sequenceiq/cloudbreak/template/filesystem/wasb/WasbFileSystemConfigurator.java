@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.template.filesystem.wasb;
 
-import static com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType.WASB;
+import static com.sequenceiq.common.api.filesystem.FileSystemType.WASB;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.AbstractFileSystemConfigurator;
+import com.sequenceiq.common.api.filesystem.FileSystemType;
 
 @Component
 public class WasbFileSystemConfigurator extends AbstractFileSystemConfigurator<WasbFileSystemConfigurationsView> {

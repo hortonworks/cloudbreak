@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.cloudbreak.common.type.CommonResourceType;
+import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;

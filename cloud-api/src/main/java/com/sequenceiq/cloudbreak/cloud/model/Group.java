@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class Group extends DynamicModel {
 

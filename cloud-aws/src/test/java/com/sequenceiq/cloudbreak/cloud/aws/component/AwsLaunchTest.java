@@ -46,8 +46,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsCreateStackStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 @MockBeans(@MockBean(AwsCreateStackStatusCheckerTask.class))

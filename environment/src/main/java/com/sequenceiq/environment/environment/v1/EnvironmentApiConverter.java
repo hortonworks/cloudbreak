@@ -143,7 +143,7 @@ public class EnvironmentApiConverter {
     }
 
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
-        DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.Builder.aDetailedEnvironmentResponse()
+        DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.Builder.builder()
                 .withCrn(environmentDto.getResourceCrn())
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())

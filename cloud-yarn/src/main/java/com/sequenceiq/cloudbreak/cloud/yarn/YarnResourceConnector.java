@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.yarn;
 
-import static com.sequenceiq.cloudbreak.common.type.ResourceType.YARN_APPLICATION;
+import static com.sequenceiq.common.api.type.ResourceType.YARN_APPLICATION;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDet
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationErrorResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
 import com.sequenceiq.cloudbreak.cloud.yarn.status.YarnApplicationStatus;
-import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
+import com.sequenceiq.common.api.type.AdjustmentType;
 
 @Service
 public class YarnResourceConnector implements ResourceConnector<Object> {

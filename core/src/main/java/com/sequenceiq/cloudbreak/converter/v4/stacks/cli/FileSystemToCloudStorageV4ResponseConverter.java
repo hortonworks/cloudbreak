@@ -8,49 +8,49 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsGen2CloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.GcsCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.location.StorageLocationV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
-import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
+import com.sequenceiq.common.api.cloudstorage.AdlsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.GcsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
+import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.common.api.filesystem.GcsFileSystem;
+import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 @Component
-public class FileSystemToCloudStorageV4ResponseConverter extends AbstractConversionServiceAwareConverter<FileSystem, CloudStorageV4Response> {
+public class FileSystemToCloudStorageV4ResponseConverter extends AbstractConversionServiceAwareConverter<FileSystem, CloudStorageV1Response> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemToCloudStorageV4ResponseConverter.class);
 
     @Override
-    public CloudStorageV4Response convert(FileSystem source) {
-        CloudStorageV4Response response = new CloudStorageV4Response();
+    public CloudStorageV1Response convert(FileSystem source) {
+        CloudStorageV1Response response = new CloudStorageV1Response();
         response.setId(source.getId());
         response.setName(source.getName());
         response.setLocations(getStorageLocationRequests(source));
         try {
             if (source.getType().isAdls()) {
-                AdlsCloudStorageV4Parameters adls = getConversionService()
-                        .convert(source.getConfigurations().get(AdlsFileSystem.class), AdlsCloudStorageV4Parameters.class);
+                AdlsCloudStorageV1Parameters adls = getConversionService()
+                        .convert(source.getConfigurations().get(AdlsFileSystem.class), AdlsCloudStorageV1Parameters.class);
                 adls.setCredential(null);
                 response.setAdls(adls);
             } else if (source.getType().isGcs()) {
-                response.setGcs(getConversionService().convert(source.getConfigurations().get(GcsFileSystem.class), GcsCloudStorageV4Parameters.class));
+                response.setGcs(getConversionService().convert(source.getConfigurations().get(GcsFileSystem.class), GcsCloudStorageV1Parameters.class));
             } else if (source.getType().isS3()) {
-                response.setS3(getConversionService().convert(source.getConfigurations().get(S3FileSystem.class), S3CloudStorageV4Parameters.class));
+                response.setS3(getConversionService().convert(source.getConfigurations().get(S3FileSystem.class), S3CloudStorageV1Parameters.class));
             } else if (source.getType().isWasb()) {
-                response.setWasb(getConversionService().convert(source.getConfigurations().get(WasbFileSystem.class), WasbCloudStorageV4Parameters.class));
+                response.setWasb(getConversionService().convert(source.getConfigurations().get(WasbFileSystem.class), WasbCloudStorageV1Parameters.class));
             } else if (source.getType().isAdlsGen2()) {
                 response.setAdlsGen2(getConversionService().convert(source.getConfigurations().get(AdlsGen2FileSystem.class),
-                        AdlsGen2CloudStorageV4Parameters.class));
+                        AdlsGen2CloudStorageV1Parameters.class));
             }
         } catch (IOException ioe) {
             LOGGER.info("Something happened while we tried to obtain/convert file system", ioe);

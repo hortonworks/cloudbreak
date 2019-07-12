@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 /**
  * Cloud providers which do not support template based deployments (like AWS Cloudformation, Azure ARM or OpenStack Heat) this interface is used to create the

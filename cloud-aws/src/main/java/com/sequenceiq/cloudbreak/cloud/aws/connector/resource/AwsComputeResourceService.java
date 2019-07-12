@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
-import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
+import com.sequenceiq.common.api.type.AdjustmentType;
 
 @Service
 public class AwsComputeResourceService {

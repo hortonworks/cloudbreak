@@ -10,8 +10,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class NovaInstanceView {
 

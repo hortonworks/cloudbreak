@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.cloud;
 
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.it.TestParameter;
 
 public enum HostGroupType {

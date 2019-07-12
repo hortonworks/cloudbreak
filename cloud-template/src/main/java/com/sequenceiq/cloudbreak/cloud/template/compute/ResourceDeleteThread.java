@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
-import com.sequenceiq.cloudbreak.common.type.CommonStatus;
+import com.sequenceiq.common.api.type.CommonStatus;
 
 @Component(ResourceDeleteThread.NAME)
 @Scope("prototype")

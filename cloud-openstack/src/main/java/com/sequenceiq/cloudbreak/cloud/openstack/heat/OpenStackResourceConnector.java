@@ -43,10 +43,10 @@ import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.heat.HeatTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
-import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
+import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class OpenStackResourceConnector implements ResourceConnector<Object> {

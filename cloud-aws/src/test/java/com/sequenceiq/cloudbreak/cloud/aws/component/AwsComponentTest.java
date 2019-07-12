@@ -70,7 +70,7 @@ import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerScheduledExecutor;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
