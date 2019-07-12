@@ -24,6 +24,7 @@ dependencies {
   compile project(':datalake-api')
   compile project(':secret-engine')
   compile project(':environment-api')
+  compile project(':redbeams-api')
   compile (project(':notification-sender')) {
     exclude module: 'workspace-authorization'
   }

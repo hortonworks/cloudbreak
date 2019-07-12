@@ -22,6 +22,8 @@ import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitSuccessEvent;
+import com.sequenceiq.datalake.flow.create.event.RdsWaitRequest;
+import com.sequenceiq.datalake.flow.create.event.RdsWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
@@ -74,10 +76,9 @@ public class SdxCreateActions {
         };
     }
 
-    @Bean(name = "SDX_CREATION_START_STATE")
-    public Action<?, ?> sdxCreation() {
+    @Bean(name = "SDX_CREATION_WAIT_RDS_STATE")
+    public Action<?, ?> rdsCreation() {
         return new AbstractSdxAction<>(EnvWaitSuccessEvent.class) {
-
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     EnvWaitSuccessEvent payload) {
@@ -86,15 +87,39 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, EnvWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
+                RdsWaitRequest req = new RdsWaitRequest(context.getSdxId(), context.getUserId(), payload.getDetailedEnvironmentResponse());
+                sendEvent(context, req.selector(), req);
+            }
+
+            @Override
+            protected Object getFailurePayload(EnvWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return new SdxCreateFailedEvent(payload.getResourceId(), payload.getUserId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "SDX_CREATION_START_STATE")
+    public Action<?, ?> sdxCreation() {
+        return new AbstractSdxAction<>(RdsWaitSuccessEvent.class) {
+
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    RdsWaitSuccessEvent payload) {
+                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId());
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, RdsWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 notificationService.send(ResourceEvent.SDX_ENVIRONMENT_FINISHED, payload.getDetailedEnvironmentResponse(), context.getUserId());
-                provisionerService.startStackProvisioning(payload.getResourceId(), payload.getDetailedEnvironmentResponse());
+                provisionerService.startStackProvisioning(payload.getResourceId(),
+                        payload.getDetailedEnvironmentResponse(), payload.getDatabaseServerResponse());
                 notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, context.getUserId());
 
                 sendEvent(context, SDX_STACK_CREATION_IN_PROGRESS_EVENT.event(), payload);
             }
 
             @Override
-            protected Object getFailurePayload(EnvWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(RdsWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return new SdxCreateFailedEvent(payload.getResourceId(), payload.getUserId(), ex);
             }
         };

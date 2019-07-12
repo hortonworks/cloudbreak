@@ -7,6 +7,7 @@ import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 public enum SdxCreateState implements FlowState {
     INIT_STATE,
     SDX_CREATION_WAIT_ENV_STATE,
+    SDX_CREATION_WAIT_RDS_STATE,
     SDX_CREATION_START_STATE,
     SDX_STACK_CREATION_IN_PROGRESS_STATE,
     SDX_CREATION_FAILED_STATE,

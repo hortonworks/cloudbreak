@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.datalake.logger.MDCContextFilter;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
+import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
 
 @Configuration
 @EnableAsync
@@ -30,6 +31,10 @@ public class AppConfig implements AsyncConfigurer {
     @Inject
     @Named("environmentServerUrl")
     private String environmentServerUrl;
+
+    @Inject
+    @Named("redbeamsServerUrl")
+    private String redbeamsServerUrl;
 
     @Value("${rest.debug:false}")
     private boolean restDebug;
@@ -70,4 +75,8 @@ public class AppConfig implements AsyncConfigurer {
         return registrationBean;
     }
 
+    @Bean
+    public RedbeamsApiClientParams redbeamsApiClientParams() {
+        return new RedbeamsApiClientParams(restDebug, certificateValidation, ignorePreValidation, redbeamsServerUrl);
+    }
 }

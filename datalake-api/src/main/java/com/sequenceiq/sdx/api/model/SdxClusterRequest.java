@@ -14,6 +14,8 @@ public class SdxClusterRequest {
 
     private SdxCloudStorageRequest cloudStorage;
 
+    private SdxDatabaseRequest externalDatabase;
+
     private Map<String, String> tags;
 
     public String getEnvironment() {
@@ -46,5 +48,13 @@ public class SdxClusterRequest {
 
     public void setCloudStorage(SdxCloudStorageRequest cloudStorage) {
         this.cloudStorage = cloudStorage;
+    }
+
+    public SdxDatabaseRequest getExternalDatabase() {
+        return externalDatabase;
+    }
+
+    public void setExternalDatabase(SdxDatabaseRequest externalDatabase) {
+        this.externalDatabase = externalDatabase;
     }
 }
