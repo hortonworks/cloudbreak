@@ -4,7 +4,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
+import com.sequenceiq.cloudbreak.common.json.ExceptionResult;
 
 @Component
 public class RuntimeExceptionMapper extends BaseExceptionMapper<RuntimeException> {

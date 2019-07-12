@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller.json;
+package com.sequenceiq.cloudbreak.common.json;
 
 public class ExceptionResult {
 

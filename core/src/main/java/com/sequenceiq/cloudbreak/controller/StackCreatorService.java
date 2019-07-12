@@ -146,6 +146,7 @@ public class StackCreatorService {
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest) {
         long start = System.currentTimeMillis();
 
+        blueprintService.updateDefaultBlueprintCollection(workspace.getId());
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
         if (validationResult.getState() == State.ERROR) {
             LOGGER.debug("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());

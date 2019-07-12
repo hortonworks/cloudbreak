@@ -6,7 +6,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
+import com.sequenceiq.cloudbreak.common.json.ExceptionResult;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 import ch.qos.logback.classic.Level;

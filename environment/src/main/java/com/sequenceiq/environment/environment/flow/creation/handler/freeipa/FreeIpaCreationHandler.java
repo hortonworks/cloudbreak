@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -131,6 +133,10 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
                 freeIpaV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
             }
+        } catch (ClientErrorException e) {
+            String errorMessage = ClientErrorExceptionHandler.getErrorMessage(e);
+            LOGGER.info("Can not start FreeIPA provisioning: {}", errorMessage, e);
+            throw new CloudbreakException("Can not start FreeIPA provisioning, client error happened on FreeIPA side: " + errorMessage, e);
         } catch (Exception e) {
             throw new CloudbreakException("Failed to create FreeIpa instance.", e);
         }

@@ -13,7 +13,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
+import com.sequenceiq.cloudbreak.common.json.ExceptionResult;
 
 import ch.qos.logback.classic.Level;
 

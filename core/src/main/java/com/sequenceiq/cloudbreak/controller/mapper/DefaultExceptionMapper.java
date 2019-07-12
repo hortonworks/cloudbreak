@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.controller.mapper;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
-import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
+import com.sequenceiq.cloudbreak.common.json.ExceptionResult;
 
 @Provider
 public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {

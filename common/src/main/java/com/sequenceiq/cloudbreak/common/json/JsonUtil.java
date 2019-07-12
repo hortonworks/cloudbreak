@@ -18,6 +18,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -34,6 +35,7 @@ public class JsonUtil {
     static {
         MAPPER.enable(Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
         MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);
+        MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
 
     private JsonUtil() {
