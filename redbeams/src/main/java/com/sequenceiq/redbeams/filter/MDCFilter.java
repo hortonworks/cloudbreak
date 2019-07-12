@@ -44,13 +44,22 @@ public class MDCFilter extends OncePerRequestFilter {
         LOGGER.info("Added request ID {} to MDC", requestId);
 
         String userCrnString = threadBaseUserCrnProvider.getUserCrn();
+        buildMdcContext(userCrnString);
+
+        filterChain.doFilter(request, response);
+    }
+
+    private void buildMdcContext(String userCrnString) {
+        if (userCrnString == null) {
+            LOGGER.warn("User CRN is null, not including its information in MDC");
+            return;
+        }
+
         try {
             MDCBuilder.buildMdcContextFromCrn(Crn.safeFromString(userCrnString));
             LOGGER.info("Added user CRN information from {} to MDC", userCrnString);
         } catch (CrnParseException e) {
             LOGGER.warn("Failed to parse user CRN, not including its information in MDC", e);
         }
-
-        filterChain.doFilter(request, response);
     }
 }
