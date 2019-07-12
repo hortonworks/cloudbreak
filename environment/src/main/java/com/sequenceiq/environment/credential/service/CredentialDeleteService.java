@@ -58,7 +58,7 @@ public class CredentialDeleteService extends AbstractCredentialService {
     }
 
     public Credential deleteByCrn(String crn, String accountId) {
-        Credential credential = repository.findByNameAndAccountId(crn, accountId, getEnabledPlatforms())
+        Credential credential = repository.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms())
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", crn);

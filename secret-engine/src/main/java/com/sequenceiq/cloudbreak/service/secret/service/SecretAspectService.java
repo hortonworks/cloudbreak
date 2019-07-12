@@ -114,6 +114,10 @@ public class SecretAspectService {
     }
 
     public Collection<Object> convertFirstArgToCollection(ProceedingJoinPoint proceedingJoinPoint) {
+        if (proceedingJoinPoint.getArgs().length == 0) {
+            return Collections.emptySet();
+        }
+
         Object arg = proceedingJoinPoint.getArgs()[0];
         return arg instanceof Collection ? (Collection<Object>) arg : Collections.singleton(arg);
     }

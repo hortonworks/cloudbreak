@@ -27,6 +27,10 @@ public class ProxyTestSource {
 
     public static final String CREATOR = "creator";
 
+    public static final String ACCOUNT_ID = "accid";
+
+    public static final long ID = 1L;
+
     static {
         USERNAME_SECRET = new SecretResponse();
         USERNAME_SECRET.setEnginePath("-");
@@ -46,9 +50,9 @@ public class ProxyTestSource {
         testSource.setUserName(USERNAME);
         testSource.setName(NAME);
         testSource.setDescription(DESCRIPTION);
-        testSource.setAccountId("accid");
+        testSource.setAccountId(ACCOUNT_ID);
         testSource.setCreator(CREATOR);
-        testSource.setId(1L);
+        testSource.setId(ID);
         testSource.setProtocol(PROTOCOL);
         testSource.setServerHost(SERVER_HOST);
         testSource.setResourceCrn(RESCRN);

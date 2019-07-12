@@ -90,7 +90,7 @@ dependencies {
   }
   testImplementation group: 'com.openpojo',              name: 'openpojo'
   testImplementation group: 'org.ow2.asm',               name: 'asm',                            version: asmVersion
-
+  testCompile group: 'com.h2database', name: 'h2', version: '1.3.148'
   testImplementation group: 'org.mockito',               name: 'mockito-core'
   testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter'
 
@@ -155,6 +155,7 @@ bootJar {
 
 test{
   useJUnitPlatform {
+    excludeTags 'outofscope'
     includeEngines 'junit-jupiter', 'junit-vintage'
   }
 }

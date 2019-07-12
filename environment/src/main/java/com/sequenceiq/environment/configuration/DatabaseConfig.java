@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -36,6 +37,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @EnableTransactionManagement
+@ConditionalOnProperty(name = "environment.db.enabled", havingValue = "true", matchIfMissing = true)
 public class DatabaseConfig {
 
     private static final String DEFAULT_SCHEMA_NAME = "public";
