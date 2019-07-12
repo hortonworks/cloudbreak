@@ -15,6 +15,7 @@ public class DBStackToDatabaseServerTerminationOutcomeV4ResponseConverter
         DatabaseServerTerminationOutcomeV4Response response = new DatabaseServerTerminationOutcomeV4Response();
         response.setName(source.getName());
         response.setEnvironmentId(source.getEnvironmentId());
+        response.setResourceCrn(source.getResourceCrn().toString());
 
         response.setStatus(source.getStatus());
         response.setStatusReason(source.getStatusReason());

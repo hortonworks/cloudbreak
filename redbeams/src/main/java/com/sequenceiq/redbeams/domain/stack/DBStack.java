@@ -75,6 +75,9 @@ public class DBStack {
     @Convert(converter = CrnConverter.class)
     private Crn ownerCrn;
 
+    @Convert(converter = CrnConverter.class)
+    private Crn resourceCrn;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "dbStack")
     private DBStackStatus dbStackStatus;
 
@@ -198,6 +201,14 @@ public class DBStack {
         this.ownerCrn = ownerCrn;
     }
 
+    public Crn getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(Crn resourceCrn) {
+        this.resourceCrn = resourceCrn;
+    }
+
     public String getAccountId() {
         return ownerCrn != null ? ownerCrn.getAccountId() : null;
     }
@@ -236,6 +247,7 @@ public class DBStack {
             + "',platformVariant='" + platformVariant
             + "',environmentId='" + environmentId
             + "',ownerCrn='" + (ownerCrn != null ? ownerCrn.toString() : "null")
+            + "',resourceCrn='" + (resourceCrn != null ? resourceCrn.toString() : "null")
             + '}';
     }
 }

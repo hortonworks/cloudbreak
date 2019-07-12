@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 
 @Service
 public class CrnService {
@@ -41,6 +42,12 @@ public class CrnService {
     }
 
     public Crn createCrn(DatabaseServerConfig resource) {
+        return createCrn(resource, Crn.ResourceType.DATABASE_SERVER);
+    }
+
+    public Crn createCrn(DBStack resource) {
+        // We want this resource to be DATABASE_SERVER as well, since this resource will end up
+        // being attached to a database server.
         return createCrn(resource, Crn.ResourceType.DATABASE_SERVER);
     }
 
