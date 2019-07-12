@@ -20,12 +20,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
@@ -55,13 +57,13 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
@@ -278,11 +280,16 @@ public class StackCreatorService {
         }
     }
 
-    private boolean shouldUseBaseImage(ClusterV4Request clusterRequest, Blueprint blueprint) {
+    private boolean shouldUseBaseAmbariImage(ClusterV4Request clusterRequest) {
         return (clusterRequest.getAmbari() != null && clusterRequest.getAmbari().getRepository() != null)
                 || (clusterRequest.getAmbari() != null
                 && clusterRequest.getAmbari().getStackRepository() != null
                 && clusterRequest.getAmbari().getStackRepository().customRepoSpecified());
+    }
+
+    boolean shouldUseBaseCMImage(ClusterV4Request clusterRequest) {
+        ClouderaManagerV4Request cmRequest = clusterRequest.getCm();
+        return (cmRequest != null && !CollectionUtils.isEmpty(cmRequest.getProducts())) || (cmRequest != null && cmRequest.getRepository() != null);
     }
 
     private Stack prepareSharedServiceIfNeed(Stack stack) {
@@ -320,13 +327,14 @@ public class StackCreatorService {
 
     private Future<StatedImage> determineImageCatalog(String stackName, String platformString, StackV4Request stackRequest, Blueprint blueprint,
             User user, Workspace workspace) {
-        if (stackRequest.getCluster() == null) {
+        ClusterV4Request clusterRequest = stackRequest.getCluster();
+        if (clusterRequest == null) {
             return null;
         }
         return executorService.submit(() -> {
             try {
-                return imageService.determineImageFromCatalog(workspace.getId(), stackRequest.getImage(), platformString, blueprint,
-                        shouldUseBaseImage(stackRequest.getCluster(), blueprint), user);
+                boolean base = blueprintService.isAmbariBlueprint(blueprint) ? shouldUseBaseAmbariImage(clusterRequest) : shouldUseBaseCMImage(clusterRequest);
+                return imageService.determineImageFromCatalog(workspace.getId(), stackRequest.getImage(), platformString, blueprint, base, user);
             } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                 throw new BadRequestException(e.getMessage(), e);
             }

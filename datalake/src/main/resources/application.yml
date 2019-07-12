@@ -25,6 +25,8 @@ management:
 
 sdx:
   gateway:
+    topology:
+      name: cdp-proxy
     ssotype: SSO_PROVIDER
 
 datalake:
