@@ -2,17 +2,17 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.GcsCloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
+import com.sequenceiq.common.api.cloudstorage.GcsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 
 @Component
 public class GcsFileSystemToGcsCloudStorageParametersV4Converter
-        extends AbstractConversionServiceAwareConverter<GcsFileSystem, GcsCloudStorageV4Parameters> {
+        extends AbstractConversionServiceAwareConverter<GcsFileSystem, GcsCloudStorageV1Parameters> {
 
     @Override
-    public GcsCloudStorageV4Parameters convert(GcsFileSystem source) {
-        GcsCloudStorageV4Parameters fileSystemConfigurations = new GcsCloudStorageV4Parameters();
+    public GcsCloudStorageV1Parameters convert(GcsFileSystem source) {
+        GcsCloudStorageV1Parameters fileSystemConfigurations = new GcsCloudStorageV1Parameters();
         fileSystemConfigurations.setServiceAccountEmail(source.getServiceAccountEmail());
         return fileSystemConfigurations;
     }

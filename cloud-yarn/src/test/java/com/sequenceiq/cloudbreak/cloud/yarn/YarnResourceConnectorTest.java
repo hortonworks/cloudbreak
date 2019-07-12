@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.yarn;
 
-import static com.sequenceiq.cloudbreak.common.type.ResourceType.YARN_APPLICATION;
+import static com.sequenceiq.common.api.type.ResourceType.YARN_APPLICATION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -49,9 +49,9 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.ApplicationDeta
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.CreateApplicationRequest;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDetailResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
-import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
-import com.sequenceiq.cloudbreak.common.type.CommonStatus;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class YarnResourceConnectorTest {

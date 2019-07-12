@@ -20,8 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
-import com.sequenceiq.cloudbreak.common.type.ImageStatus;
-import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
+import com.sequenceiq.common.api.type.ImageStatus;
+import com.sequenceiq.common.api.type.ImageStatusResult;
 
 @Component
 public class OpenStackSetup implements Setup {

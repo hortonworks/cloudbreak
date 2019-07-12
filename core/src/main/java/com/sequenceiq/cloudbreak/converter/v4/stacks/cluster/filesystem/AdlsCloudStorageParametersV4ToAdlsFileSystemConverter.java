@@ -2,16 +2,16 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
+import com.sequenceiq.common.api.cloudstorage.AdlsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 
 @Component
 public class AdlsCloudStorageParametersV4ToAdlsFileSystemConverter
-        extends AbstractConversionServiceAwareConverter<AdlsCloudStorageV4Parameters, AdlsFileSystem> {
+        extends AbstractConversionServiceAwareConverter<AdlsCloudStorageV1Parameters, AdlsFileSystem> {
 
     @Override
-    public AdlsFileSystem convert(AdlsCloudStorageV4Parameters source) {
+    public AdlsFileSystem convert(AdlsCloudStorageV1Parameters source) {
         AdlsFileSystem fileSystemConfigurations = new AdlsFileSystem();
         fileSystemConfigurations.setClientId(source.getClientId());
         fileSystemConfigurations.setAccountName(source.getAccountName());

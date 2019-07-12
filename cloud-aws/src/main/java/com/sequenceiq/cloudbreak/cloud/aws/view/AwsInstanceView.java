@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.common.type.EncryptionType;
+import com.sequenceiq.common.api.type.EncryptionType;
 
 public class AwsInstanceView {
 

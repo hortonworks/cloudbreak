@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.resourcepersister;
 
-import com.sequenceiq.cloudbreak.common.type.CommonResourceType;
+import com.sequenceiq.common.api.type.CommonResourceType;
 
 public enum ResourceType {
     // AWS

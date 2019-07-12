@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Resource;
 
 @EntityType(entityClass = Resource.class)

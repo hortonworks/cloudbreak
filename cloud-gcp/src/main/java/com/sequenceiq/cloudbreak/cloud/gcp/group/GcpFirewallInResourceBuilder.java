@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.group;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingNetwork;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
-import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_FIREWALL_IN;
+import static com.sequenceiq.common.api.type.ResourceType.GCP_FIREWALL_IN;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceNotNeededException;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {

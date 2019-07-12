@@ -7,8 +7,8 @@ import java.util.Optional;
 
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
-import com.sequenceiq.cloudbreak.common.type.CommonStatus;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 /**
  * Cloudbreak handles the entities on the Cloud provider side as Generic resources, and this class represent a generic resource.

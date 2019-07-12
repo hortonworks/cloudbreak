@@ -1,9 +1,9 @@
 package com.sequenceiq.sdx.api.model;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.CloudStorageV4Base;
-import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageV1Base;
+import com.sequenceiq.common.api.filesystem.FileSystemType;
 
-public class SdxCloudStorageRequest extends CloudStorageV4Base {
+public class SdxCloudStorageRequest extends CloudStorageV1Base {
 
     private FileSystemType fileSystemType;
 

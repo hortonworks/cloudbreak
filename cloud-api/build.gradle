@@ -17,6 +17,7 @@ jar {
 dependencies {
 
   compile project(":common")
+  compile project(':common-model')
 
   compile group: 'io.swagger', name: 'swagger-annotations', version: swaggerVersion
 

@@ -46,10 +46,10 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.cloudbreak.common.type.ImageStatus;
-import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
+import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.api.type.ImageStatus;
+import com.sequenceiq.common.api.type.ImageStatusResult;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class AzureSetup implements Setup {

@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import static com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType.ADLS;
-import static com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType.GCS;
-import static com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType.S3;
-import static com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType.WASB;
+import static com.sequenceiq.common.api.filesystem.FileSystemType.ADLS;
+import static com.sequenceiq.common.api.filesystem.FileSystemType.GCS;
+import static com.sequenceiq.common.api.filesystem.FileSystemType.S3;
+import static com.sequenceiq.common.api.filesystem.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,12 +24,12 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
+import com.sequenceiq.common.api.filesystem.GcsFileSystem;
+import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 public class FileSystemToSpiFileSystemConverterTest {
 

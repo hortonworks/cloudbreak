@@ -6,18 +6,18 @@ import javax.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.common.type.filesystem.BaseFileSystem;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageV1Parameters;
+import com.sequenceiq.common.api.filesystem.BaseFileSystem;
 
 @Service
 public class FileSystemResolver {
 
     private static final String NOT_SUPPORTED_FS_PROVIDED = "Unable to determine file system type, or unsupported file system type provided!";
 
-    public CloudStorageV4Parameters propagateConfiguration(CloudStorageV4Request source) {
-        CloudStorageV4Parameters cloudStorageParameters;
+    public CloudStorageV1Parameters propagateConfiguration(CloudStorageV4Request source) {
+        CloudStorageV1Parameters cloudStorageParameters;
         if (source.getAdls() != null) {
             cloudStorageParameters = source.getAdls();
         } else if (source.getGcs() != null) {

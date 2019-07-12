@@ -43,10 +43,12 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private SecurityAccessResponse securityAccess;
 
+        private CloudStorageResponse logCloudStorage;
+
         private Builder() {
         }
 
-        public static Builder aDetailedEnvironmentResponse() {
+        public static Builder builder() {
             return new Builder();
         }
 
@@ -125,6 +127,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withLogCloudStorage(CloudStorageResponse logCloudStorage) {
+            this.logCloudStorage = logCloudStorage;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -142,6 +149,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setAuthentication(authentication);
             detailedEnvironmentResponse.setTelemetry(telemetry);
             detailedEnvironmentResponse.setSecurityAccess(securityAccess);
+            detailedEnvironmentResponse.setLogCloudStorage(logCloudStorage);
             return detailedEnvironmentResponse;
         }
     }

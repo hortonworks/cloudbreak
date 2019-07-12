@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint.knox;
 
-import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.CORE;
-import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.GATEWAY;
+import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
+import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

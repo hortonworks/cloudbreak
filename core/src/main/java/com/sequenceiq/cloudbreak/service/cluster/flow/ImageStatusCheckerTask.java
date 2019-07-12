@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.common.type.ImageStatus;
-import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
+import com.sequenceiq.common.api.type.ImageStatus;
+import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;

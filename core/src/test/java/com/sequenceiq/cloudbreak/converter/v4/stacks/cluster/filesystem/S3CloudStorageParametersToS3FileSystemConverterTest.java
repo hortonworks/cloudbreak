@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.cloudstorage.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.filesystem.S3FileSystem;
 
 public class S3CloudStorageParametersToS3FileSystemConverterTest {
 
@@ -29,8 +29,8 @@ public class S3CloudStorageParametersToS3FileSystemConverterTest {
         assertEquals(expected, result);
     }
 
-    private S3CloudStorageV4Parameters createS3CloudStorageParameters() {
-        S3CloudStorageV4Parameters s3 = new S3CloudStorageV4Parameters();
+    private S3CloudStorageV1Parameters createS3CloudStorageParameters() {
+        S3CloudStorageV1Parameters s3 = new S3CloudStorageV1Parameters();
         s3.setInstanceProfile(TEST_INSTANCE_PROFILE);
         return s3;
     }
