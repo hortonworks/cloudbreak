@@ -27,6 +27,8 @@ sdx:
   cluster:
     definition: "CDP 1.0 - SDX: Apache Hive Metastore, Apache Ranger, Apache Atlas"
   gateway:
+    topology:
+      name: cdp-proxy
     ssotype: SSO_PROVIDER
 
 datalake:

@@ -16,6 +16,9 @@ public class GatewayManifester {
     @Value("${sdx.gateway.ssotype}")
     private SSOType defaultSsoType;
 
+    @Value("${sdx.gateway.topology.name}")
+    private String topologyName;
+
     public StackV4Request configureGatewayForSdxCluster(StackV4Request stackV4Request) {
         if (stackV4Request.getCluster().getGateway() == null) {
             GatewayV4Request gatewayV4Request = new GatewayV4Request();
@@ -31,7 +34,7 @@ public class GatewayManifester {
 
     private GatewayTopologyV4Request getGatewayTopologyV4Request() {
         GatewayTopologyV4Request gatewayTopologyV4Request = new GatewayTopologyV4Request();
-        gatewayTopologyV4Request.setTopologyName("dp-proxy");
+        gatewayTopologyV4Request.setTopologyName(topologyName);
         gatewayTopologyV4Request.setExposedServices(List.of("ALL"));
         return gatewayTopologyV4Request;
     }
