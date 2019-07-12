@@ -52,6 +52,8 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     private static final Pattern VALID_DATABASE_NAME = Pattern.compile("^[\\p{Alnum}_][\\p{Alnum}_-]*$");
 
+    private static final Long DEFAULT_WORKSPACE = 0L;
+
     @Inject
     private DatabaseServerConfigRepository repository;
 
@@ -76,7 +78,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     @Inject
     private UserGeneratorService userGeneratorService;
 
-    public Set<DatabaseServerConfig> findAll(Long workspaceId, String environmentId, Boolean attachGlobal) {
+    public Set<DatabaseServerConfig> findAll(Long workspaceId, String environmentId) {
         if (environmentId == null) {
             throw new IllegalArgumentException("No environmentId supplied.");
         }
@@ -130,9 +132,8 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         repository.save(resource);
     }
 
-    public DatabaseServerConfig getByNameOrCrn(Long workspaceId, String environmentId, String name) {
-        Optional<DatabaseServerConfig> resourceOpt =
-                repository.findByNameAndWorkspaceIdAndEnvironmentId(name, workspaceId, environmentId);
+    public DatabaseServerConfig getByName(Long workspaceId, String environmentId, String name) {
+        Optional<DatabaseServerConfig> resourceOpt = repository.findByNameAndWorkspaceIdAndEnvironmentId(name, workspaceId, environmentId);
         if (resourceOpt.isEmpty()) {
             throw new NotFoundException(String.format("No %s found with name '%s' in environment '%s'",
                     resource().getShortName(), name, environmentId));
@@ -151,8 +152,13 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return resourceOpt.get();
     }
 
-    public DatabaseServerConfig deleteByName(Long workspaceId, String environemntId, String name) {
-        DatabaseServerConfig resource = getByNameOrCrn(workspaceId, environemntId, name);
+    public DatabaseServerConfig deleteByName(String environmentCrn, String name) {
+        DatabaseServerConfig resource = getByName(DEFAULT_WORKSPACE, environmentCrn, name);
+        return delete(resource);
+    }
+
+    public DatabaseServerConfig deleteByCrn(String crn) {
+        DatabaseServerConfig resource = getByCrn(crn);
         return delete(resource);
     }
 
@@ -161,14 +167,21 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return repository;
     }
 
-    public Set<DatabaseServerConfig> deleteMultipleByName(Long workspaceId, String environmentId, Set<String> names) {
-        Set<DatabaseServerConfig> resources = getByNames(workspaceId, environmentId, names);
+    public Set<DatabaseServerConfig> deleteMultipleByCrn(Set<String> crns) {
+        Set<DatabaseServerConfig> resources = getByCrns(crns);
         return resources.stream()
                 .map(this::delete)
                 .collect(Collectors.toSet());
     }
 
-    Set<DatabaseServerConfig> getByNames(Long workspaceId, String environmentId, Set<String> names) {
+    //    public Set<DatabaseServerConfig> deleteMultipleByName(Long workspaceId, String environmentId, Set<String> names) {
+//        Set<DatabaseServerConfig> resources = getByNames(workspaceId, environmentId, names);
+//        return resources.stream()
+//                .map(this::delete)
+//                .collect(Collectors.toSet());
+//    }
+
+    private Set<DatabaseServerConfig> getByNames(Long workspaceId, String environmentId, Set<String> names) {
         Set<DatabaseServerConfig> resources =
                 repository.findByNameInAndWorkspaceIdAndEnvironmentId(names, workspaceId, environmentId);
         Set<String> notFound = Sets.difference(names,
@@ -182,8 +195,23 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return resources;
     }
 
-    public String testConnection(Long workspaceId, String environmentId, String name) {
-        return testConnection(getByNameOrCrn(workspaceId, environmentId, name));
+    private Set<DatabaseServerConfig> getByCrns(Set<String> crns) {
+        Set<Crn> parsedCrns = crns.stream()
+                .map(Crn::safeFromString)
+                .collect(Collectors.toSet());
+        Set<DatabaseServerConfig> resources = repository.findByResourceCrnIn(parsedCrns);
+        Set<String> notFound = Sets.difference(crns,
+                resources.stream().map(dsc -> dsc.getResourceCrn().toString()).collect(Collectors.toSet()));
+
+        if (!notFound.isEmpty()) {
+            throw new NotFoundException(String.format("No %s(s) found with crn(s) %s ", resource().getShortName(), String.join(", ", notFound)));
+        }
+
+        return resources;
+    }
+
+    public String testConnection(String crn) {
+        return testConnection(getByCrn(crn));
     }
 
     public String testConnection(DatabaseServerConfig resource) {
@@ -197,8 +225,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                 .collect(Collectors.joining("; "));
     }
 
-    public String createDatabaseOnServer(Long workspaceId, String environmentId, String serverName, String databaseName,
-            String databaseType) {
+    public String createDatabaseOnServer(String serverCrn, String databaseName, String databaseType) {
         // Prepared statements cannot be used for DDL statements, so we have to scrub the databaseName ourselves.
         // This is a subset of valid SQL identifiers, but I believe it's a sane constraint to put on database name
         // identifiers that protects us from SQL injections
@@ -208,7 +235,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
         LOGGER.info("Creating database with name: {}", databaseName);
 
-        DatabaseServerConfig databaseServerConfig = getByNameOrCrn(workspaceId, environmentId, serverName);
+        DatabaseServerConfig databaseServerConfig = getByCrn(serverCrn);
 
         String databaseUserName = userGeneratorService.generateUserName();
         String databasePassword = userGeneratorService.generatePassword();

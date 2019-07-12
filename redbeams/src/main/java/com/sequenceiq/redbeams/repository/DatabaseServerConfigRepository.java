@@ -27,12 +27,10 @@ public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseSe
     Optional<DatabaseServerConfig> findByResourceCrn(Crn crn);
 
     @CheckPermissionsByReturnValue(action = ResourceAction.READ)
-    @Query("SELECT s FROM DatabaseServerConfig s WHERE s.workspaceId = :workspaceId AND s.environmentId = :environmentId "
-            + "AND (s.name = :name OR s.resourceCrn = :name)")
-    Optional<DatabaseServerConfig> findByNameAndWorkspaceIdAndEnvironmentId(
-            @Param("name") String name,
-            @Param("workspaceId") Long workspaceId,
-            @Param("environmentId") String environmentId);
+    Optional<DatabaseServerConfig> findByNameAndWorkspaceIdAndEnvironmentId(String name, Long workspaceId, String environmentId);
+
+    @CheckPermissionsByReturnValue(action = ResourceAction.READ)
+    Set<DatabaseServerConfig> findByResourceCrnIn(Set<Crn> resourceCrns);
 
     @CheckPermissionsByReturnValue(action = ResourceAction.READ)
     @Query("SELECT s FROM DatabaseServerConfig s WHERE s.workspaceId = :workspaceId AND s.environmentId = :environmentId "

@@ -19,13 +19,16 @@ public final class OperationDescriptions {
     public static final class DatabaseServerOpDescription {
         public static final String TEST_CONNECTION = "test database server connectivity";
         public static final String LIST = "list database servers";
-        public static final String GET_BY_NAME_OR_CRN = "get a database server by name or crn";
+        public static final String GET_BY_NAME = "get a database server by name";
         public static final String GET_BY_CRN = "get a database server by crn";
+        public static final String GET_STATUS_BY_CRN = "get the status of an allocated database server by crn";
         public static final String GET_STATUS_BY_NAME = "get the status of an allocated database server by name";
         public static final String CREATE = "creates and registers a database server in a cloud provider";
         public static final String TERMINATE = "terminates a database server in a cloud provider and deregisters it";
         public static final String REGISTER = "register a database server";
-        public static final String DELETE_BY_NAME = "deregister or terminate a database server by name";
+        public static final String DELETE_BY_CRN = "deregister a database server by crn";
+        public static final String DELETE_BY_NAME = "deregister a database server by name";
+        public static final String DELETE_MULTIPLE_BY_CRN = "deregister or terminate multiple database servers by crn";
         public static final String DELETE_MULTIPLE_BY_NAME = "deregister or terminate multiple database servers by name";
         // public static final String GET_REQUEST_IN_WORKSPACE = "get request in workspace";
         public static final String CREATE_DATABASE = "create a database on an existing database server";

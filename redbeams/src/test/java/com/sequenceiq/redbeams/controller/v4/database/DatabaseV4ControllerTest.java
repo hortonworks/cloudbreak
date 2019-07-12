@@ -133,8 +133,8 @@ public class DatabaseV4ControllerTest {
     // public void testTestWithName() {
     //     when(service.testConnection(DatabaseV4Controller.DEFAULT_WORKSPACE, "id", "mydb")).thenReturn("yeahhh");
     //     DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
-    //     testRequest.setEnvironmentCrn("id");
-    //     testRequest.setExistingDatabaseServerName("mydb");
+    //     testRequest.setEnvironmentId("id");
+    //     testRequest.setExistingDatabaseServerCrn("mydb");
 
     //     DatabaseServerTestV4Response response = underTest.test(testRequest);
 

@@ -1,5 +1,11 @@
 package com.sequenceiq.redbeams.service.stack;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -10,12 +16,6 @@ import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class RedbeamsCreationService {
@@ -36,7 +36,7 @@ public class RedbeamsCreationService {
             LOGGER.debug("Create called with: {}", dbStack);
         }
 
-        if (dbStackService.findByNameAndEnvironmentId(dbStack.getName(), dbStack.getEnvironmentId()).isPresent()) {
+        if (dbStackService.findByNameAndEnvironmentCrn(dbStack.getName(), dbStack.getEnvironmentId()).isPresent()) {
             throw new BadRequestException("A stack for this database server already exists in the environment");
         }
 

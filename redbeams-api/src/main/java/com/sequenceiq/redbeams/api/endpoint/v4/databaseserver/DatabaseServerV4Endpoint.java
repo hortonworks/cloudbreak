@@ -6,7 +6,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -20,12 +19,11 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabase
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.TerminateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.doc.ControllerDescriptions;
 import com.sequenceiq.redbeams.doc.Notes;
 import com.sequenceiq.redbeams.doc.OperationDescriptions.DatabaseServerOpDescription;
@@ -45,22 +43,21 @@ public interface DatabaseServerV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
         nickname = "listDatabaseServers")
-    DatabaseServerV4Responses list(@NotNull @QueryParam("environmentId") String environmentId,
-        @QueryParam("attachGlobal") @DefaultValue("false") Boolean attachGlobal);
+    DatabaseServerV4Responses list(@NotNull @QueryParam("environmentCrn") String environmentCrn);
 
     @GET
-    @Path("{nameOrCrn}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseServerOpDescription.GET_BY_NAME_OR_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
-            nickname = "getDatabaseServerByNameOrCrn")
-    DatabaseServerV4Response getByNameOrCrn(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("nameOrCrn") String nameOrCrn);
-
-    @GET
-    @Path("/crn/{crn}")
+    @Path("{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "getDatabaseServerByCrn")
     DatabaseServerV4Response getByCrn(@PathParam("crn") String crn);
+
+    @GET
+    @Path("name/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
+            nickname = "getDatabaseServerByName")
+    DatabaseServerV4Response getByName(@NotNull @QueryParam("environmentCrn") String environmentCrn, @PathParam("name") String name);
 
     @POST
     @Path("managed")
@@ -70,18 +67,28 @@ public interface DatabaseServerV4Endpoint {
     DatabaseServerStatusV4Response create(@Valid AllocateDatabaseServerV4Request request);
 
     @GET
-    @Path("managed/status/{name}")
+    @Path("managed/status/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
+            nickname = "getDatabaseServerStatusByCrn")
+    DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByCrn(@PathParam("crn") String crn);
+
+    @GET
+    @Path("managed/status/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
-            nickname = "getDatabaseServerStatus")
-    DatabaseServerStatusV4Response getExternalStatus(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
+            nickname = "getDatabaseServerStatusByName")
+    DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByName(
+            @NotNull @PathParam("environmentCrn") String environmentCrn,
+            @NotNull @PathParam("name") String name
+    );
 
     @DELETE
-    @Path("managed")
+    @Path("managed/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.TERMINATE, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
-            nickname = "terminateDatabaseServer")
-    DatabaseServerTerminationOutcomeV4Response terminate(@Valid TerminateDatabaseServerV4Request request);
+            nickname = "terminateManagedDatabaseServer")
+    DatabaseServerTerminationOutcomeV4Response terminate(@PathParam("crn") String crn);
 
     @POST
     @Path("register")
@@ -91,18 +98,25 @@ public interface DatabaseServerV4Endpoint {
     DatabaseServerV4Response register(@Valid DatabaseServerV4Request request);
 
     @DELETE
-    @Path("{name}")
+    @Path("{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
+        nickname = "deleteDatabaseServerByCrn")
+    DatabaseServerV4Response deleteByCrn(@PathParam("crn") String crn);
+
+    @DELETE
+    @Path("/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
-        nickname = "deleteDatabaseServer")
-    DatabaseServerV4Response delete(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
+            nickname = "deleteDatabaseServerByName")
+    DatabaseServerV4Response deleteByName(@NotNull @QueryParam("environmentCrn") String environmentCrn, @PathParam("name") String name);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
-            nickname = "deleteMultipleDatabaseServers")
-    DatabaseServerV4Responses deleteMultiple(@NotNull @QueryParam("environmentId") String environmentId, Set<String> names);
+            nickname = "deleteMultipleDatabaseServersByCrn")
+    DatabaseServerV4Responses deleteMultiple(Set<String> crns);
 
 //    @GET
 //    @Path("{name}/request")

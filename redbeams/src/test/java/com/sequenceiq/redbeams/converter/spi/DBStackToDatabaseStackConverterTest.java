@@ -4,15 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
-import com.sequenceiq.redbeams.domain.stack.Network;
-import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +12,15 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
+import com.sequenceiq.redbeams.domain.stack.Network;
+import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 
 public class DBStackToDatabaseStackConverterTest {
 

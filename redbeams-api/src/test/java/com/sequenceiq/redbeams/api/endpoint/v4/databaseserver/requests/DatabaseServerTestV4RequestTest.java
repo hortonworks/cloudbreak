@@ -2,8 +2,6 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests;
 
 import static org.junit.Assert.assertEquals;
 
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServerV4Identifiers;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,9 +16,8 @@ public class DatabaseServerTestV4RequestTest {
 
     @Test
     public void testGettersAndSetters() {
-        DatabaseServerV4Identifiers identifiers = new DatabaseServerV4Identifiers();
-        request.setExistingDatabaseServer(identifiers);
-        assertEquals(identifiers, request.getExistingDatabaseServer());
+        request.setExistingDatabaseServerCrn("crn");
+        assertEquals("crn", request.getExistingDatabaseServerCrn());
 
         DatabaseServerV4Request serverRequest = new DatabaseServerV4Request();
         serverRequest.setName("mydb1");

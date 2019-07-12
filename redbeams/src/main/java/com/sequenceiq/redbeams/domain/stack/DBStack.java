@@ -1,12 +1,5 @@
 package com.sequenceiq.redbeams.domain.stack;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonToString;
-import com.sequenceiq.cloudbreak.service.secret.SecretValue;
-import com.sequenceiq.redbeams.api.model.common.Status;
-import com.sequenceiq.redbeams.converter.CrnConverter;
-
 import java.util.Map;
 
 import javax.persistence.CascadeType;
@@ -18,11 +11,18 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.redbeams.api.model.common.Status;
+import com.sequenceiq.redbeams.converter.CrnConverter;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "environment_id"}))
@@ -32,6 +32,10 @@ public class DBStack {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "dbstack_generator")
     @SequenceGenerator(name = "dbstack_generator", sequenceName = "dbstack_id_seq", allocationSize = 1)
     private Long id;
+
+    @Convert(converter = CrnConverter.class)
+    @Column(nullable = false)
+    private Crn resourceCrn;
 
     private String name;
 
@@ -74,9 +78,6 @@ public class DBStack {
 
     @Convert(converter = CrnConverter.class)
     private Crn ownerCrn;
-
-    @Convert(converter = CrnConverter.class)
-    private Crn resourceCrn;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "dbStack")
     private DBStackStatus dbStackStatus;
