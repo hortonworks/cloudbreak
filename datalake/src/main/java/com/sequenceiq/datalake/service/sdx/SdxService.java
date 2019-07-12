@@ -128,6 +128,7 @@ public class SdxService {
         sdxCluster.setCreateDatabase(sdxClusterRequest.getExternalDatabase() != null && sdxClusterRequest.getExternalDatabase().getCreate());
 
         DetailedEnvironmentResponse environment = getEnvironment(userCrn, sdxClusterRequest);
+        validateDatabaseRequest(sdxCluster, environment);
         sdxCluster.setEnvName(environment.getName());
         sdxCluster.setEnvCrn(environment.getCrn());
 
@@ -147,6 +148,14 @@ public class SdxService {
         sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
 
         return sdxCluster;
+    }
+
+    private void validateDatabaseRequest(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+        if (sdxCluster.getCreateDatabase() && !"AWS".equals(environment.getCloudPlatform())) {
+            String message = String.format("Cannot create external database for sdx: %s, for now only AWS is supported", sdxCluster.getClusterName());
+            LOGGER.debug(message);
+            throw new BadRequestException(message);
+        }
     }
 
     private StackV4Request prepareStackRequest(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request,
