@@ -19,7 +19,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -57,6 +56,26 @@ import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValida
 public class DatabaseServerConfigServiceTest {
 
     private static final String USERNAME = "username";
+
+    private static final String SERVER_NAME = "myserver";
+
+    private static final long WORKSPACE_ID = 0;
+
+    private static final String ENVIRONMENT_CRN = "envCrn";
+
+    private static final Crn SERVER_CRN = Crn.builder()
+            .setService(Crn.Service.IAM)
+            .setAccountId("accountId")
+            .setResourceType(Crn.ResourceType.DATABASE_SERVER)
+            .setResource("resource")
+            .build();
+
+    private static final Crn SERVER_2_CRN = Crn.builder()
+            .setService(Crn.Service.IAM)
+            .setAccountId("accountId")
+            .setResourceType(Crn.ResourceType.DATABASE_SERVER)
+            .setResource("resourceother")
+            .build();
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -98,18 +117,20 @@ public class DatabaseServerConfigServiceTest {
 
         server = new DatabaseServerConfig();
         server.setId(1L);
-        server.setName("myserver");
+        server.setResourceCrn(SERVER_CRN);
+        server.setName(SERVER_NAME);
 
         server2 = new DatabaseServerConfig();
         server2.setId(2L);
         server2.setName("myotherserver");
+        server2.setResourceCrn(SERVER_2_CRN);
     }
 
     @Test
     public void testFindAll() {
-        when(repository.findByWorkspaceIdAndEnvironmentId(0L, "myenv")).thenReturn(Collections.singleton(server));
+        when(repository.findByWorkspaceIdAndEnvironmentId(0L, ENVIRONMENT_CRN)).thenReturn(Collections.singleton(server));
 
-        Set<DatabaseServerConfig> servers = underTest.findAll(0L, "myenv", false);
+        Set<DatabaseServerConfig> servers = underTest.findAll(0L, ENVIRONMENT_CRN);
 
         assertEquals(1, servers.size());
         assertEquals(1L, servers.iterator().next().getId().longValue());
@@ -195,10 +216,27 @@ public class DatabaseServerConfigServiceTest {
     }
 
     @Test
-    public void testGetByNameFound() {
-        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv")).thenReturn(Optional.of(server));
+    public void testGetByCrnFound() {
+        when(repository.findByResourceCrn(any())).thenReturn(Optional.of(server));
 
-        DatabaseServerConfig foundServer = underTest.getByNameOrCrn(0L, "myenv", server.getName());
+        DatabaseServerConfig foundServer = underTest.getByCrn(SERVER_CRN.toString());
+
+        assertEquals(server, foundServer);
+    }
+
+    @Test
+    public void testGetByCrnNotFound() {
+        thrown.expect(NotFoundException.class);
+        when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.empty());
+
+        underTest.getByCrn(server.getResourceCrn().toString());
+    }
+
+    @Test
+    public void testGetByNameFound() {
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(SERVER_NAME, WORKSPACE_ID, ENVIRONMENT_CRN)).thenReturn(Optional.of(server));
+
+        DatabaseServerConfig foundServer = underTest.getByName(WORKSPACE_ID, ENVIRONMENT_CRN, server.getName());
 
         assertEquals(server, foundServer);
     }
@@ -207,16 +245,36 @@ public class DatabaseServerConfigServiceTest {
     public void testGetByNameNotFound() {
         thrown.expect(NotFoundException.class);
 
-        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv")).thenReturn(Optional.empty());
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(SERVER_NAME, WORKSPACE_ID, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
 
-        underTest.getByNameOrCrn(0L, "myenv", server.getName());
+        underTest.getByName(WORKSPACE_ID, ENVIRONMENT_CRN, server.getName());
+    }
+
+    @Test
+    public void testDeleteByCrnFound() {
+        when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.of(server));
+
+        DatabaseServerConfig deletedServer = underTest.deleteByCrn(server.getResourceCrn().toString());
+
+        assertEquals(server, deletedServer);
+        assertTrue(deletedServer.isArchived());
+        verify(repository, never()).delete(server);
+    }
+
+    @Test
+    public void testDeleteByCrnNotFound() {
+        thrown.expect(NotFoundException.class);
+
+        when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.empty());
+
+        underTest.deleteByCrn(server.getResourceCrn().toString());
     }
 
     @Test
     public void testDeleteByNameFound() {
-        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv")).thenReturn(Optional.of(server));
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(SERVER_NAME, WORKSPACE_ID, ENVIRONMENT_CRN)).thenReturn(Optional.of(server));
 
-        DatabaseServerConfig deletedServer = underTest.deleteByName(0L, "myenv", server.getName());
+        DatabaseServerConfig deletedServer = underTest.deleteByName(ENVIRONMENT_CRN, SERVER_NAME);
 
         assertEquals(server, deletedServer);
         assertTrue(deletedServer.isArchived());
@@ -227,26 +285,18 @@ public class DatabaseServerConfigServiceTest {
     public void testDeleteByNameNotFound() {
         thrown.expect(NotFoundException.class);
 
-        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv")).thenReturn(Optional.empty());
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(SERVER_NAME, WORKSPACE_ID, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
 
-        try {
-            underTest.deleteByName(0L, "myenv", server.getName());
-        } finally {
-            verify(repository, never()).delete(server);
-        }
+        underTest.deleteByName(ENVIRONMENT_CRN, SERVER_NAME);
     }
 
     @Test
     public void testDeleteMultipleByNameFound() {
-        Set<String> nameSet = new HashSet<>();
-        nameSet.add(server.getName());
-        nameSet.add(server2.getName());
-        Set<DatabaseServerConfig> serverSet = new HashSet<>();
-        serverSet.add(server);
-        serverSet.add(server2);
-        when(repository.findByNameInAndWorkspaceIdAndEnvironmentId(nameSet, 0L, "myenv")).thenReturn(serverSet);
+        Set<String> crnSet = Set.of(SERVER_CRN.toString(), SERVER_2_CRN.toString());
+        Set<DatabaseServerConfig> serverSet = Set.of(server, server2);
+        when(repository.findByResourceCrnIn(any())).thenReturn(serverSet);
 
-        Set<DatabaseServerConfig> deletedServerSet = underTest.deleteMultipleByName(0L, "myenv", nameSet);
+        Set<DatabaseServerConfig> deletedServerSet = underTest.deleteMultipleByCrn(crnSet);
 
         assertEquals(2, deletedServerSet.size());
         assertThat(deletedServerSet, everyItem(hasProperty("archived", is(true))));
@@ -267,28 +317,20 @@ public class DatabaseServerConfigServiceTest {
     @Test
     public void testDeleteMultipleByNameNotFound() {
         thrown.expect(NotFoundException.class);
+        thrown.expectMessage("found with crn(s) " + SERVER_2_CRN);
 
-        Set<String> nameSet = new HashSet<>();
-        nameSet.add(server.getName());
-        nameSet.add(server2.getName());
-        Set<DatabaseServerConfig> serverSet = new HashSet<>();
-        serverSet.add(server);
-        when(repository.findByNameInAndWorkspaceIdAndEnvironmentId(nameSet, 0L, "myenv")).thenReturn(serverSet);
+        Set<String> crnSet = Set.of(SERVER_CRN.toString(), SERVER_2_CRN.toString());
+        Set<DatabaseServerConfig> serverSet = Set.of(server);
+        when(repository.findByResourceCrnIn(Set.of(SERVER_CRN, SERVER_2_CRN))).thenReturn(serverSet);
 
-        try {
-            underTest.deleteMultipleByName(0L, "myenv", nameSet);
-        } finally {
-            verify(repository, never()).delete(server);
-            verify(repository, never()).delete(server2);
-        }
+        underTest.deleteMultipleByCrn(crnSet);
     }
 
     @Test
     public void testTestConnectionSuccess() {
-        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv"))
-                .thenReturn(Optional.of(server));
+        when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.of(server));
 
-        String result = underTest.testConnection(0L, "myenv", server.getName());
+        String result = underTest.testConnection(SERVER_CRN.toString());
 
         assertEquals("success", result);
         verify(connectionValidator).validate(eq(server), any(Errors.class));
@@ -296,8 +338,7 @@ public class DatabaseServerConfigServiceTest {
 
     @Test
     public void testTestConnectionFailure() {
-        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv"))
-                .thenReturn(Optional.of(server));
+        when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.of(server));
         doAnswer(new Answer() {
             public Object answer(InvocationOnMock invocation) {
                 Errors errors = invocation.getArgument(1);
@@ -307,7 +348,7 @@ public class DatabaseServerConfigServiceTest {
             }
         }).when(connectionValidator).validate(eq(server), any(Errors.class));
 
-        String result = underTest.testConnection(0L, "myenv", server.getName());
+        String result = underTest.testConnection(SERVER_CRN.toString());
 
         assertTrue(result.contains("epic fail"));
         assertTrue(result.contains("connectorJarUrl: bad jar"));
@@ -327,11 +368,11 @@ public class DatabaseServerConfigServiceTest {
 
     @Test
     public void testCreateDatabaseOnServer() {
-        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv")).thenReturn(Optional.of(server));
+        when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.of(server));
         when(databaseConfigService.register(any(DatabaseConfig.class)))
-            .thenAnswer((Answer<DatabaseConfig>) invocation -> {
-                return invocation.getArgument(0, DatabaseConfig.class);
-            });
+                .thenAnswer((Answer<DatabaseConfig>) invocation -> {
+                    return invocation.getArgument(0, DatabaseConfig.class);
+                });
         when(userGeneratorService.generateUserName()).thenReturn(USERNAME);
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
         server.setHost("myhost");
@@ -341,7 +382,7 @@ public class DatabaseServerConfigServiceTest {
         String databaseName = "mydb";
         String databaseType = "hive";
 
-        String result = underTest.createDatabaseOnServer(0L, "myenv", server.getName(), databaseName, databaseType);
+        String result = underTest.createDatabaseOnServer(SERVER_CRN.toString(), databaseName, databaseType);
 
         assertEquals("created", result);
         verify(driverFunctions).execWithDatabaseDriver(eq(server), any());

@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 
-import static com.sequenceiq.redbeams.doc.ModelDescriptions.ENVIRONMENT_CRN;
-
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,11 +16,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateDatabaseV4Request implements Serializable {
 
-    @ApiModelProperty(ENVIRONMENT_CRN)
-    private String environmentCrn;
-
-    @ApiModelProperty(DatabaseServer.NAME)
-    private String existingDatabaseServerName;
+    @ApiModelProperty(DatabaseServer.CRN)
+    private String existingDatabaseServerCrn;
 
     @ApiModelProperty(Database.NAME)
     private String databaseName;
@@ -31,41 +26,21 @@ public class CreateDatabaseV4Request implements Serializable {
     private String type;
 
     /**
-     * Gets the environment ID associated with the existing database server. This will also be used
-     * as the environment for the created database.
-     *
-     * @return the environment ID
-     */
-    public String getEnvironmentCrn() {
-        return environmentCrn;
-    }
-
-    /**
-     * Gets the environment ID associated with the existing database server. This will also be used
-     * as the environment for the created database.
-     *
-     * @param environmentCrn the environment ID
-     */
-    public void setEnvironmentCrn(String environmentCrn) {
-        this.environmentCrn = environmentCrn;
-    }
-
-    /**
-     * Gets the name of the existing database on which to create the schema.
+     * Gets the crn of the existing database on which to create the schema.
      *
      * @return the existing database name
      */
-    public String getExistingDatabaseServerName() {
-        return existingDatabaseServerName;
+    public String getExistingDatabaseServerCrn() {
+        return existingDatabaseServerCrn;
     }
 
     /**
-     * Sets the name of the existing database on which to create the schema.
+     * Sets the crn of the existing database on which to create the schema.
      *
-     * @param existingDatabaseServerName the existing database name
+     * @param existingDatabaseServerCrn the existing database name
      */
-    public void setExistingDatabaseServerName(String existingDatabaseServerName) {
-        this.existingDatabaseServerName = existingDatabaseServerName;
+    public void setExistingDatabaseServerCrn(String existingDatabaseServerCrn) {
+        this.existingDatabaseServerCrn = existingDatabaseServerCrn;
     }
 
     /**

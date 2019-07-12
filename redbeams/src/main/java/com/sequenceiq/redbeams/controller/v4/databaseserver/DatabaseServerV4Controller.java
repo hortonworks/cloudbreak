@@ -5,7 +5,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4En
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.TerminateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
@@ -63,14 +61,14 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private CrnService crnService;
 
     @Override
-    public DatabaseServerV4Responses list(String environmentId, Boolean attachGlobal) {
-        Set<DatabaseServerConfig> all = databaseServerConfigService.findAll(DEFAULT_WORKSPACE, environmentId, attachGlobal);
+    public DatabaseServerV4Responses list(String environmentCrn) {
+        Set<DatabaseServerConfig> all = databaseServerConfigService.findAll(DEFAULT_WORKSPACE, environmentCrn);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(all, DatabaseServerV4Response.class));
     }
 
     @Override
-    public DatabaseServerV4Response getByNameOrCrn(String environmentId, String nameOrCrn) {
-        DatabaseServerConfig server = databaseServerConfigService.getByNameOrCrn(DEFAULT_WORKSPACE, environmentId, nameOrCrn);
+    public DatabaseServerV4Response getByName(String environmentCrn, String name) {
+        DatabaseServerConfig server = databaseServerConfigService.getByName(DEFAULT_WORKSPACE, environmentCrn, name);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
@@ -89,14 +87,20 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    public DatabaseServerStatusV4Response getExternalStatus(@NotNull String environmentId, String name) {
-        DBStack dbStack = dbStackService.getByNameAndEnvironmentId(name, environmentId);
+    public DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByCrn(String crn) {
+        DBStack dbStack = dbStackService.getByCrn(crn);
         return converterUtil.convert(dbStack, DatabaseServerStatusV4Response.class);
     }
 
     @Override
-    public DatabaseServerTerminationOutcomeV4Response terminate(TerminateDatabaseServerV4Request request) {
-        DBStack dbStack = redbeamsTerminationService.terminateDatabaseServer(request.getName(), request.getEnvironmentId());
+    public DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByName(String environmentCrn, String name) {
+        DBStack dbStack = dbStackService.getByNameAndEnvironmentCrn(name, environmentCrn);
+        return converterUtil.convert(dbStack, DatabaseServerStatusV4Response.class);
+    }
+
+    @Override
+    public DatabaseServerTerminationOutcomeV4Response terminate(String crn) {
+        DBStack dbStack = redbeamsTerminationService.terminateDatabaseServer(crn);
         return converterUtil.convert(dbStack, DatabaseServerTerminationOutcomeV4Response.class);
     }
 
@@ -108,17 +112,21 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    public DatabaseServerV4Response delete(String environmentId, String name) {
-        DatabaseServerConfig deleted =
-                databaseServerConfigService.deleteByName(DEFAULT_WORKSPACE, environmentId, name);
+    public DatabaseServerV4Response deleteByCrn(String crn) {
+        DatabaseServerConfig deleted = databaseServerConfigService.deleteByCrn(crn);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
         return converterUtil.convert(deleted, DatabaseServerV4Response.class);
     }
 
     @Override
-    public DatabaseServerV4Responses deleteMultiple(String environmentId, Set<String> names) {
-        Set<DatabaseServerConfig> deleted =
-                databaseServerConfigService.deleteMultipleByName(DEFAULT_WORKSPACE, environmentId, names);
+    public DatabaseServerV4Response deleteByName(String environmentCrn, String name) {
+        DatabaseServerConfig deleted = databaseServerConfigService.deleteByName(environmentCrn, name);
+        return converterUtil.convert(deleted, DatabaseServerV4Response.class);
+    }
+
+    @Override
+    public DatabaseServerV4Responses deleteMultiple(Set<String> crns) {
+        Set<DatabaseServerConfig> deleted = databaseServerConfigService.deleteMultipleByCrn(crns);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(deleted, DatabaseServerV4Response.class));
     }
@@ -126,10 +134,8 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     public DatabaseServerTestV4Response test(DatabaseServerTestV4Request request) {
         String connectionResult;
-        if (request.getExistingDatabaseServer() != null) {
-            String name = request.getExistingDatabaseServer().getName();
-            String environmentId = request.getExistingDatabaseServer().getEnvironmentCrn();
-            connectionResult = databaseServerConfigService.testConnection(DEFAULT_WORKSPACE, environmentId, name);
+        if (request.getExistingDatabaseServerCrn() != null) {
+            connectionResult = databaseServerConfigService.testConnection(request.getExistingDatabaseServerCrn());
         } else {
             DatabaseServerConfig server = converterUtil.convert(request.getDatabaseServer(), DatabaseServerConfig.class);
             connectionResult = databaseServerConfigService.testConnection(server);
@@ -139,8 +145,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     public CreateDatabaseV4Response createDatabase(CreateDatabaseV4Request request) {
-        String result = databaseServerConfigService.createDatabaseOnServer(DEFAULT_WORKSPACE,
-                request.getEnvironmentCrn(), request.getExistingDatabaseServerName(), request.getDatabaseName(),
+        String result = databaseServerConfigService.createDatabaseOnServer(
+                request.getExistingDatabaseServerCrn(),
+                request.getDatabaseName(),
                 request.getType());
         return new CreateDatabaseV4Response(result);
     }

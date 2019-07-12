@@ -27,6 +27,7 @@ public final class ModelDescriptions {
 
     public static class DatabaseServer {
         public static final String NAME = "Name of the database server";
+        public static final String CRN = "Crn of the database server";
         public static final String HOST = "Host of the database server";
         public static final String PORT = "Port of the database server";
         public static final String DATABASE_VENDOR = "Name of the database vendor (MYSQL, POSTGRES, ...)";
@@ -35,7 +36,7 @@ public final class ModelDescriptions {
         public static final String CONNECTOR_JAR_URL = "URL that points to the JAR of the connection driver (JDBC connector)";
         public static final String CONNECTION_USER_NAME = "User name of the administrative user of the database server";
         public static final String CONNECTION_PASSWORD = "Password of the administrative user of the database server";
-        public static final String DATABASE_SERVER_TEST_EXISTING_REQUEST = "Identifiers of saved database server config to be tested for connectivity";
+        public static final String DATABASE_SERVER_TEST_EXISTING_CRN = "Crn of saved database server config to be tested for connectivity";
         public static final String DATABASE_SERVER_TEST_NEW_REQUEST = "Unsaved database server config to be tested for connectivity";
         public static final String DATABASE_SERVER_CONNECTION_TEST_RESULT = "Result of database server connection test";
     }

@@ -16,11 +16,10 @@ import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServerV4Identifiers;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.TerminateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
@@ -35,6 +34,19 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 
 public class DatabaseServerV4ControllerTest {
+
+    private static final Crn CRN = Crn.builder()
+            .setService(Crn.Service.IAM)
+            .setAccountId("account")
+            .setResourceType(Crn.ResourceType.DATABASE_SERVER)
+            .setResource("resource")
+            .build();
+
+    private static final String SERVER_CRN = "myserver";
+
+    private static final String ENVIRONMENT_CRN = "myenv";
+
+    private static final String USER_CRN = "userCrn";
 
     @InjectMocks
     private DatabaseServerV4Controller underTest;
@@ -74,8 +86,6 @@ public class DatabaseServerV4ControllerTest {
 
     private DatabaseServerStatusV4Response allocateResponse;
 
-    private TerminateDatabaseServerV4Request terminateRequest;
-
     private DatabaseServerTerminationOutcomeV4Response terminateResponse;
 
     private DBStack dbStack;
@@ -86,20 +96,21 @@ public class DatabaseServerV4ControllerTest {
 
         server = new DatabaseServerConfig();
         server.setId(1L);
-        server.setName("myserver");
-        server.setEnvironmentId("myenv");
+        server.setName(SERVER_CRN);
+        server.setEnvironmentId(ENVIRONMENT_CRN);
+        server.setResourceCrn(CRN);
 
         server2 = new DatabaseServerConfig();
         server2.setId(2L);
         server2.setName("myotherserver");
-        server2.setEnvironmentId("myenv");
+        server2.setEnvironmentId(ENVIRONMENT_CRN);
 
         request = new DatabaseServerV4Request();
-        request.setName("myserver");
+        request.setName(SERVER_CRN);
 
         response = new DatabaseServerV4Response();
         response.setId(1L);
-        response.setName("myserver");
+        response.setName(SERVER_CRN);
 
         response2 = new DatabaseServerV4Response();
         response2.setId(2L);
@@ -109,8 +120,6 @@ public class DatabaseServerV4ControllerTest {
 
         allocateResponse = new DatabaseServerStatusV4Response();
 
-        terminateRequest = new TerminateDatabaseServerV4Request();
-
         terminateResponse = new DatabaseServerTerminationOutcomeV4Response();
 
         dbStack = new DBStack();
@@ -119,29 +128,39 @@ public class DatabaseServerV4ControllerTest {
     @Test
     public void testList() {
         Set<DatabaseServerConfig> serverSet = Collections.singleton(server);
-        when(service.findAll(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myenv", Boolean.TRUE)).thenReturn(serverSet);
+        when(service.findAll(DatabaseServerV4Controller.DEFAULT_WORKSPACE, ENVIRONMENT_CRN)).thenReturn(serverSet);
         Set<DatabaseServerV4Response> responseSet = Collections.singleton(response);
         when(converterUtil.convertAllAsSet(serverSet, DatabaseServerV4Response.class)).thenReturn(responseSet);
 
-        DatabaseServerV4Responses responses = underTest.list("myenv", Boolean.TRUE);
+        DatabaseServerV4Responses responses = underTest.list(ENVIRONMENT_CRN);
 
         assertEquals(1, responses.getResponses().size());
         assertEquals(response.getId(), responses.getResponses().iterator().next().getId());
     }
 
     @Test
-    public void testGet() {
-        when(service.getByNameOrCrn(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myenv", "myserver")).thenReturn(server);
+    public void testGetByName() {
+        when(service.getByName(DatabaseServerV4Controller.DEFAULT_WORKSPACE, ENVIRONMENT_CRN, SERVER_CRN)).thenReturn(server);
         when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(response);
 
-        DatabaseServerV4Response response = underTest.getByNameOrCrn("myenv", "myserver");
+        DatabaseServerV4Response response = underTest.getByName(ENVIRONMENT_CRN, SERVER_CRN);
+
+        assertEquals(1L, response.getId().longValue());
+    }
+
+    @Test
+    public void testGetByCrn() {
+        when(service.getByCrn(SERVER_CRN)).thenReturn(server);
+        when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(response);
+
+        DatabaseServerV4Response response = underTest.getByCrn(SERVER_CRN);
 
         assertEquals(1L, response.getId().longValue());
     }
 
     @Test
     public void testCreate() {
-        String userCrn = "userCrn";
+        String userCrn = USER_CRN;
         when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(userCrn);
         when(dbStackConverter.convert(allocateRequest, userCrn)).thenReturn(dbStack);
         DBStack savedDBStack = new DBStack();
@@ -157,16 +176,14 @@ public class DatabaseServerV4ControllerTest {
 
     @Test
     public void testTerminate() {
-        terminateRequest.setName(server.getName());
-        terminateRequest.setEnvironmentId(server.getEnvironmentId());
-        when(terminationService.terminateDatabaseServer(server.getName(), server.getEnvironmentId())).thenReturn(dbStack);
+        when(terminationService.terminateDatabaseServer(server.getResourceCrn().toString())).thenReturn(dbStack);
         when(converterUtil.convert(dbStack, DatabaseServerTerminationOutcomeV4Response.class))
             .thenReturn(terminateResponse);
 
-        DatabaseServerTerminationOutcomeV4Response response = underTest.terminate(terminateRequest);
+        DatabaseServerTerminationOutcomeV4Response response = underTest.terminate(server.getResourceCrn().toString());
 
         assertEquals(terminateResponse, response);
-        verify(terminationService).terminateDatabaseServer(server.getName(), server.getEnvironmentId());
+        verify(terminationService).terminateDatabaseServer(server.getResourceCrn().toString());
     }
 
     @Test
@@ -182,10 +199,10 @@ public class DatabaseServerV4ControllerTest {
 
     @Test
     public void testDelete() {
-        when(service.deleteByName(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myenv", "myserver")).thenReturn(server);
+        when(service.deleteByCrn(SERVER_CRN)).thenReturn(server);
         when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(response);
 
-        DatabaseServerV4Response response = underTest.delete("myenv", "myserver");
+        DatabaseServerV4Response response = underTest.deleteByCrn(SERVER_CRN);
 
         assertEquals(1L, response.getId().longValue());
     }
@@ -198,25 +215,22 @@ public class DatabaseServerV4ControllerTest {
         Set<DatabaseServerConfig> serverSet = new HashSet<>();
         serverSet.add(server);
         serverSet.add(server2);
-        when(service.deleteMultipleByName(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myenv", nameSet)).thenReturn(serverSet);
+        when(service.deleteMultipleByCrn(nameSet)).thenReturn(serverSet);
         Set<DatabaseServerV4Response> responseSet = new HashSet<>();
         responseSet.add(response);
         responseSet.add(response2);
         when(converterUtil.convertAllAsSet(serverSet, DatabaseServerV4Response.class)).thenReturn(responseSet);
 
-        DatabaseServerV4Responses responses = underTest.deleteMultiple("myenv", nameSet);
+        DatabaseServerV4Responses responses = underTest.deleteMultiple(nameSet);
 
         assertEquals(2, responses.getResponses().size());
     }
 
     @Test
     public void testTestWithIdentifiers() {
-        when(service.testConnection(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myenv", "myserver")).thenReturn("yeahhh");
-        DatabaseServerV4Identifiers testIdentifiers = new DatabaseServerV4Identifiers();
-        testIdentifiers.setName("myserver");
-        testIdentifiers.setEnvironmentCrn("myenv");
+        when(service.testConnection(SERVER_CRN)).thenReturn("yeahhh");
         DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
-        testRequest.setExistingDatabaseServer(testIdentifiers);
+        testRequest.setExistingDatabaseServerCrn(SERVER_CRN);
 
         DatabaseServerTestV4Response response = underTest.test(testRequest);
 

@@ -1,11 +1,5 @@
 package com.sequenceiq.redbeams.service.stack;
 
-import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
-import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
-import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent;
-
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -14,6 +8,12 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent;
 
 @Service
 public class RedbeamsTerminationService {
@@ -31,8 +31,8 @@ public class RedbeamsTerminationService {
 
     private final Random random = new SecureRandom();
 
-    public DBStack terminateDatabaseServer(String dbStackName, String environmentId) {
-        DBStack dbStack = dbStackService.getByNameAndEnvironmentId(dbStackName, environmentId);
+    public DBStack terminateDatabaseServer(String crn) {
+        DBStack dbStack = dbStackService.getByCrn(crn);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Terminate called for: {}", dbStack);
         }

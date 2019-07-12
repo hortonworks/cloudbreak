@@ -49,8 +49,7 @@ public class DeregisterDatabaseServerHandler implements EventHandler<DeregisterD
         DBStack dbStack = request.getDbStack();
 
         try {
-            DatabaseServerConfig dbServerConfig =
-                    databaseServerConfigService.getByNameOrCrn(DEFAULT_WORKSPACE, dbStack.getEnvironmentId(), dbStack.getName());
+            DatabaseServerConfig dbServerConfig = databaseServerConfigService.getByCrn(dbStack.getResourceCrn().toString());
 
             databaseServerConfigService.archive(dbServerConfig);
             eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));

@@ -5,10 +5,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.repository.DBStackRepository;
-
 import java.util.Optional;
 
 import org.junit.Before;
@@ -17,6 +13,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.repository.DBStackRepository;
 
 public class DBStackServiceTest {
 
@@ -57,7 +57,7 @@ public class DBStackServiceTest {
     public void testGetByNameAndEnvironmentId() {
         when(dbStackRepository.findByNameAndEnvironmentId("mystack", "myenv")).thenReturn(Optional.of(dbStack));
 
-        assertEquals(dbStack, underTest.getByNameAndEnvironmentId("mystack", "myenv"));
+        assertEquals(dbStack, underTest.getByNameAndEnvironmentCrn("mystack", "myenv"));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class DBStackServiceTest {
         thrown.expect(NotFoundException.class);
         when(dbStackRepository.findByNameAndEnvironmentId("mystack", "myenv")).thenReturn(Optional.empty());
 
-        underTest.getByNameAndEnvironmentId("mystack", "myenv");
+        underTest.getByNameAndEnvironmentCrn("mystack", "myenv");
     }
 
     @Test

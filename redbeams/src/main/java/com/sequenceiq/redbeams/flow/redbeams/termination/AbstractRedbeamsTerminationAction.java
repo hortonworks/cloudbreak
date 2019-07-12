@@ -3,6 +3,15 @@ package com.sequenceiq.redbeams.flow.redbeams.termination;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+
+import java.util.Map;
+import java.util.Optional;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import org.springframework.statemachine.StateContext;
+
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -19,14 +28,6 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
-
-import java.util.Map;
-import java.util.Optional;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.springframework.statemachine.StateContext;
 
 public abstract class AbstractRedbeamsTerminationAction<P extends Payload>
         extends AbstractAction<RedbeamsTerminationState, RedbeamsTerminationEvent, RedbeamsContext, P> {
@@ -75,7 +76,6 @@ public abstract class AbstractRedbeamsTerminationAction<P extends Payload>
             String accountId = dbStack.getOwnerCrn().getAccountId();
             cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getCloudPlatform(), dbStack.getPlatformVariant(),
                     location, userName, accountId);
-            // FIXME must use CRN
             Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
             cloudCredential = credentialConverter.convert(credential);
             databaseStack = databaseStackConverter.convert(dbStack);
