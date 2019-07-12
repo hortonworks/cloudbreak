@@ -1,0 +1,138 @@
+server.servlet.context-path: "/environmentservice"
+
+server.port: 8088
+
+management:
+  endpoints:
+    web:
+      base-path: "/"
+      exposure:
+        include: info,health,prometheus
+      path-mapping:
+        prometheus: metrics
+  endpoint:
+    metrics:
+      enabled: true
+      export:
+        prometheus:
+          enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    distribution:
+      sla:
+        "[http.server.requests]": "125ms, 250ms, 500ms, 1s, 2s"
+      percentiles:
+        "[http.server.requests]": "0.5, 0.95"
+
+altus:
+  ums:
+    host: localhost
+
+secret:
+  application: env/shared
+  engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
+
+vault:
+  config.enabled: false
+#  addr: localhost
+#  port: 8200
+#  ssl.enabled: false
+#  kv.engine.v2.path: secret
+#  auth:
+#    type: "token"
+#    kubernetes:
+#      service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
+#      mount.path: "dps-dev"
+#      login.role: "cloudbreak.default"
+
+environment:
+  cert.dir: /certs/
+  structuredevent:
+    rest:
+      enabled: false
+  cloudbreak:
+    url: http://localhost:9091
+    contextPath: /cb
+  redbeams:
+    url: http://localhost:8087
+    contextPath: /redbeams
+    supportedPlatforms: AWS,AZURE
+  freeipa:
+    url: http://localhost:8090
+    contextPath: /freeipa
+    supportedPlatforms: AWS,AZURE
+  sdx:
+    url: http://localhost:8086
+  db:
+    enabled: false
+#    host: localhost
+#    port: 5432
+#    env:
+#      user: postgres
+#      pass:
+#      db: environmentdb
+#      schema: public
+#      cert.file: database.crt
+#      ssl: false
+  enabledplatforms: AWS, AZURE, YARN
+
+cb:
+  schema:
+    migration:
+      auto: false
+  authentication:
+    disabled: false
+  intermediate.threadpool:
+    core.size: 40
+    capacity.size: 4000
+  max:
+    azure.resource.name.length: 120
+    gcp.resource.name.length: 63
+    aws.resource.name.length: 50
+    openstack.resource.name.length: 120
+    yarn.resource.name.length: 63
+  etc.config.dir: /etc/cloudbreak
+  yarn:
+    domain: default.com
+    defaultQueue: "default"
+    defaultLifeTime: -1
+  os:
+    enable.autoimport: true
+    import:
+      root.url.pattern: http://public-repo-1.hortonworks.com/HDP/cloudbreak/%s.img
+      from.format: qcow2
+      disk.format: qcow2
+      container.format: bare
+  openstack:
+    api.debug: false
+    hostkey.verify: false
+  gcp:
+    hostkey.verify: false
+    disk.encryption.url: https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem
+  aws:
+    spotinstances.enabled: true
+    disabled.instance.types: c5d,f1,i3,m5d,p3dn,r5d,z1d
+    hostkey.verify: false
+    external.id: provision-ambari
+    role.session.name: hadoop-provisioning
+    cf.template.new.path: templates/aws-cf-stack.ftl
+    cf.network.template.path: templates/aws-cf-network.ftl
+    cf.template.newdb.path: templates/aws-cf-dbstack.ftl
+    default.inbound.security.group:
+    vpc:
+  arm:
+    network.template.path: templates/arm-network.ftl
+    app.creation.template:
+      resource:
+        app.id: 797f4846-ba00-4fd7-ba43-dac1f8f63013
+        access.scope.id: 41094075-9dad-400e-a0bd-54e686782033
+  azure:
+    host.name.prefix.length: 255
+
+spring:
+  freemarker:
+    template-loader-path: file:/etc/cloudbreak,classpath:/
+    prefer-file-system-access: false
+  datasource:
+    maxActive: 30

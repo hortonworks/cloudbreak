@@ -140,10 +140,17 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public String initCodeGrantFlow(String accountId, @Nonnull Credential credential, String userId) {
+        repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
+                .map(Credential::getName)
+                .ifPresent(name -> {
+                    throw new BadRequestException("Credential already exists with name: " + name);
+                });
         credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform());
         validateDeploymentAddress(credential);
         Credential created = credentialAdapter.initCodeGrantFlow(credential, accountId, userId);
         created.setResourceCrn(createCRN(accountId));
+        created.setAccountId(accountId);
+        created.setCreator(userId);
         created = repository.save(created);
         return getCodeGrantFlowAppLoginUrl(created);
     }

@@ -18,7 +18,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionResult;
 import com.sequenceiq.cloudbreak.service.OperationException;
-import com.sequenceiq.environment.util.ResourceDefinitionRequestFactory;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -39,7 +38,7 @@ public class ResourceDefinitionServiceTest {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @MockBean
-    private ResourceDefinitionRequestFactory resourceDefinitionRequestFactory;
+    private RequestProvider requestProvider;
 
     @Mock
     private ResourceDefinitionRequest resourceDefinitionRequest;
@@ -52,7 +51,7 @@ public class ResourceDefinitionServiceTest {
 
     @Test
     public void testResourceDefinitionServiceAnswered() throws InterruptedException {
-        when(resourceDefinitionRequestFactory.createResourceDefinitionRequest(any(), anyString())).thenReturn(resourceDefinitionRequest);
+        when(requestProvider.getResourceDefinitionRequest(any(), anyString())).thenReturn(resourceDefinitionRequest);
         when(resourceDefinitionRequest.await()).thenReturn(resourceDefinitionResult);
         when(resourceDefinitionResult.getDefinition()).thenReturn(SAMPLE_RESULT);
         Assertions.assertEquals(
@@ -63,7 +62,7 @@ public class ResourceDefinitionServiceTest {
 
     @Test
     public void testResourceDefinitionServiceUnanswered() throws InterruptedException {
-        when(resourceDefinitionRequestFactory.createResourceDefinitionRequest(any(), anyString())).thenReturn(resourceDefinitionRequest);
+        when(requestProvider.getResourceDefinitionRequest(any(), anyString())).thenReturn(resourceDefinitionRequest);
         when(resourceDefinitionRequest.await()).thenThrow(InterruptedException.class);
         Assertions.assertThrows(OperationException.class, () ->
                 resourceDefinitionServiceUnderTest.getResourceDefinition(CLOUD_PLATFORM, RESOURCE));

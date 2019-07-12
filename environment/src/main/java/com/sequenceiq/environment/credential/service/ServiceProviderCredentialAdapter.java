@@ -66,7 +66,7 @@ public class ServiceProviderCredentialAdapter {
                 new CloudContext(credential.getId(), credential.getName(), credential.getCloudPlatform(), TEMP_USER_ID, accountId);
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
-        CredentialVerificationRequest request = new CredentialVerificationRequest(cloudContext, cloudCredential);
+        CredentialVerificationRequest request = requestProvider.getCredentialVerificationRequest(cloudContext, cloudCredential);
         LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
@@ -94,7 +94,7 @@ public class ServiceProviderCredentialAdapter {
         CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(),
                 credential.getCloudPlatform(), userId, accountId);
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
-        InteractiveLoginRequest request = new InteractiveLoginRequest(cloudContext, cloudCredential);
+        InteractiveLoginRequest request = requestProvider.getInteractiveLoginRequest(cloudContext, cloudCredential);
         LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {

@@ -112,10 +112,10 @@ public interface CredentialEndpoint {
     CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(@PathParam("cloudPlatform") String platform,
             @QueryParam("deploymentAddress") String deploymentAddress);
 
-    @GET
+    @POST
     @Path("code_grant_flow/init")
-    @ApiOperation(value = CredentialOpDescription.INIT_CODE_GRANT_FLOW, notes = CredentialDescriptor.CREDENTIAL_NOTES,
-            nickname = "codeGrantFlowBasedCredentialV1", httpMethod = "GET")
+    @ApiOperation(value = CredentialOpDescription.INIT_CODE_GRANT_FLOW, produces = MediaType.APPLICATION_JSON, notes = CredentialDescriptor.CREDENTIAL_NOTES,
+            nickname = "codeGrantFlowBasedCredentialV1", httpMethod = "POST")
     Response initCodeGrantFlow(@Valid CredentialRequest credentialRequest);
 
     @GET
