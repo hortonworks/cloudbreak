@@ -24,8 +24,6 @@ FROM (SELECT *
 
 ALTER TABLE "history" ALTER COLUMN cb_stack_crn SET NOT NULL;
 
-ALTER TABLE "history" ADD CONSTRAINT history_cb_stack_crn_uq UNIQUE (cb_stack_crn);
-
 -- //@UNDO
 -- SQL to undo the change goes here.
 ALTER TABLE "cluster" DROP COLUMN IF EXISTS cb_stack_crn;
