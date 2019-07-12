@@ -79,6 +79,6 @@ public class DatabaseConfigToDatabaseV4ResponseConverterTest {
         assertEquals(DatabaseVendor.MYSQL.name(), response.getDatabaseEngine());
         assertEquals(TYPE, response.getType());
         assertEquals(CONNECTOR_JAR_URL, response.getConnectorJarUrl());
-        assertEquals(ENVIRONMENT_ID, response.getEnvironmentId());
+        assertEquals(ENVIRONMENT_ID, response.getEnvironmentCrn());
     }
 }

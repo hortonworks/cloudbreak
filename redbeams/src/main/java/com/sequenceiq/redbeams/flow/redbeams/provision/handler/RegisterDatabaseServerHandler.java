@@ -1,5 +1,14 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.handler;
 
+import java.util.List;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -13,15 +22,6 @@ import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDa
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerSuccess;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
-
-import java.util.List;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;

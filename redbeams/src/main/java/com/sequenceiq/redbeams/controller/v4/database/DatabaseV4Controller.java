@@ -76,7 +76,7 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
         if (databaseTestV4Request.getExistingDatabase() != null) {
             result = databaseConfigService.testConnection(
                     databaseTestV4Request.getExistingDatabase().getName(),
-                    databaseTestV4Request.getExistingDatabase().getEnvironmentId()
+                    databaseTestV4Request.getExistingDatabase().getEnvironmentCrn()
             );
         } else {
             DatabaseConfig databaseConfig = redbeamsConverterUtil.convert(databaseTestV4Request.getDatabase(), DatabaseConfig.class);

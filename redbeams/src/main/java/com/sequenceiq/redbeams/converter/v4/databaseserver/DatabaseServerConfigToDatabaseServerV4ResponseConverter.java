@@ -30,7 +30,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter
 
         response.setCreationDate(source.getCreationDate());
 
-        response.setEnvironmentId(source.getEnvironmentId());
+        response.setEnvironmentCrn(source.getEnvironmentId());
 
         return response;
     }

@@ -49,7 +49,7 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverter
         server.setArchived(false);
         server.setDeletionTimestamp(null);
 
-        server.setEnvironmentId(source.getEnvironmentId());
+        server.setEnvironmentId(source.getEnvironmentCrn());
 
         return server;
     }

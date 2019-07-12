@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.AwsDBStackV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class AllocateDatabaseServerV4RequestTest {
 
@@ -25,8 +25,8 @@ public class AllocateDatabaseServerV4RequestTest {
         request.setName("myallocation");
         assertEquals("myallocation", request.getName());
 
-        request.setEnvironmentId("myenv");
-        assertEquals("myenv", request.getEnvironmentId());
+        request.setEnvironmentCrn("myenv");
+        assertEquals("myenv", request.getEnvironmentCrn());
 
         NetworkV4Request network = new NetworkV4Request();
         request.setNetwork(network);

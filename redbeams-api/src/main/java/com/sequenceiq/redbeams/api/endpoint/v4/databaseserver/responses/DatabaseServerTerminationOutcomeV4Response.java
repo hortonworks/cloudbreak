@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.redbeams.api.model.common.Status;
@@ -8,15 +10,13 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.validation.constraints.NotNull;
-
 @ApiModel("DatabaseServerAllocationOutcomeV4Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DatabaseServerTerminationOutcomeV4Response {
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_ID, required = true)
-    private String environmentId;
+    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    private String environmentCrn;
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.NAME, required = true)
@@ -34,12 +34,12 @@ public class DatabaseServerTerminationOutcomeV4Response {
 
     private String statusReason;
 
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public String getResourceCrn() {

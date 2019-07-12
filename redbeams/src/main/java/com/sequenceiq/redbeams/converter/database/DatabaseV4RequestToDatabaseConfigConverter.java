@@ -42,7 +42,7 @@ public class DatabaseV4RequestToDatabaseConfigConverter  extends AbstractConvers
         databaseConfig.setCreationDate(clock.getCurrentTimeMillis());
         databaseConfig.setStatus(ResourceStatus.USER_MANAGED);
         databaseConfig.setType(source.getType());
-        databaseConfig.setEnvironmentId(source.getEnvironmentId());
+        databaseConfig.setEnvironmentId(source.getEnvironmentCrn());
 
         // TODO this should be part of a validator, and delete it from here.
         if (databaseConfig.getDatabaseVendor() != DatabaseVendor.POSTGRES && StringUtils.isEmpty(source.getConnectorJarUrl())) {

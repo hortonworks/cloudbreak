@@ -62,7 +62,7 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
         DatabaseV4Request request = new DatabaseV4Request();
         request.setType(TYPE);
         request.setName(NAME);
-        request.setEnvironmentId(ENVIRONMENT_ID);
+        request.setEnvironmentCrn(ENVIRONMENT_ID);
         request.setDescription(DESCRIPTION);
         request.setConnectionURL(CONNECTION_URL);
         request.setConnectionPassword(CONNECTION_PASSWORD);

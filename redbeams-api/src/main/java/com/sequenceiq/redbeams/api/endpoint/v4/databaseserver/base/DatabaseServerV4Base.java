@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base;
 
-import static com.sequenceiq.redbeams.doc.ModelDescriptions.ENVIRONMENT_ID;
+import static com.sequenceiq.redbeams.doc.ModelDescriptions.ENVIRONMENT_CRN;
 
 import java.io.Serializable;
 
@@ -49,8 +49,8 @@ public abstract class DatabaseServerV4Base implements Serializable {
     private String connectorJarUrl;
 
     @NotNull
-    @ApiModelProperty(value = ENVIRONMENT_ID, required = true)
-    private String environmentId;
+    @ApiModelProperty(value = ENVIRONMENT_CRN, required = true)
+    private String environmentCrn;
 
     public String getName() {
         return name;
@@ -100,11 +100,11 @@ public abstract class DatabaseServerV4Base implements Serializable {
         this.connectorJarUrl = connectorJarUrl;
     }
 
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 }

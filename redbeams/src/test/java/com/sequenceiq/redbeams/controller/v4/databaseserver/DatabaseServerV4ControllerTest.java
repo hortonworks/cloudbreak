@@ -214,7 +214,7 @@ public class DatabaseServerV4ControllerTest {
         when(service.testConnection(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myenv", "myserver")).thenReturn("yeahhh");
         DatabaseServerV4Identifiers testIdentifiers = new DatabaseServerV4Identifiers();
         testIdentifiers.setName("myserver");
-        testIdentifiers.setEnvironmentId("myenv");
+        testIdentifiers.setEnvironmentCrn("myenv");
         DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
         testRequest.setExistingDatabaseServer(testIdentifiers);
 

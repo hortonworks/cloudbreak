@@ -15,8 +15,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DatabaseServerStatusV4Response {
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_ID, required = true)
-    private String environmentId;
+    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    private String environmentCrn;
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.NAME, required = true)
@@ -36,12 +36,12 @@ public class DatabaseServerStatusV4Response {
     @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.STATUS_REASON, required = true)
     private String statusReason;
 
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public String getResourceCrn() {

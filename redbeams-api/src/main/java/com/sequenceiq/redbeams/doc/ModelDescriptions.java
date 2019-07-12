@@ -6,7 +6,7 @@ public final class ModelDescriptions {
     public static final String CRN = "CRN of the resource";
     public static final String DESCRIPTION = "Description of the resource";
     public static final String CREATION_DATE = "Creation date / time of the resource, in epoch milliseconds";
-    public static final String ENVIRONMENT_ID = "ID of the environment of the resource";
+    public static final String ENVIRONMENT_CRN = "Crn of the environment of the resource";
 
     public static class Database {
         public static final String CONNECTION_URL = "JDBC connection URL in the form of JDBC:<db-type>://<address>:<port>/<db>";

@@ -19,8 +19,8 @@ public class DatabaseV4IdentifiersTest {
         ids.setName("mydb");
         assertEquals("mydb", ids.getName());
 
-        ids.setEnvironmentId("myenvironment");
-        assertEquals("myenvironment", ids.getEnvironmentId());
+        ids.setEnvironmentCrn("myenvironment");
+        assertEquals("myenvironment", ids.getEnvironmentCrn());
 
     }
 

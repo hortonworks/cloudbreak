@@ -67,7 +67,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertNotNull(response.getConnectionPassword());
         assertEquals(server.getConnectorJarUrl(), response.getConnectorJarUrl());
         assertEquals(server.getCreationDate(), response.getCreationDate());
-        assertEquals(server.getEnvironmentId(), response.getEnvironmentId());
+        assertEquals(server.getEnvironmentId(), response.getEnvironmentCrn());
     }
 
 }

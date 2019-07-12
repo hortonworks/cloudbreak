@@ -23,7 +23,7 @@ public class DatabaseServerConfigToDatabaseServerV4RequestConverter
         request.setConnectionPassword("REDACTED");
         request.setConnectorJarUrl(source.getConnectorJarUrl());
 
-        request.setEnvironmentId(source.getEnvironmentId());
+        request.setEnvironmentCrn(source.getEnvironmentId());
 
         return request;
     }

@@ -42,7 +42,7 @@ public class DatabaseServerConfigToDatabaseServerV4RequestConverterTest {
         assertNotEquals(server.getConnectionUserName(), request.getConnectionUserName());
         assertNotEquals(server.getConnectionPassword(), request.getConnectionPassword());
         assertEquals(server.getConnectorJarUrl(), request.getConnectorJarUrl());
-        assertEquals(server.getEnvironmentId(), request.getEnvironmentId());
+        assertEquals(server.getEnvironmentId(), request.getEnvironmentCrn());
     }
 
 }
