@@ -293,7 +293,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         Cluster cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
-        ApiClient rootClient = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
+        ApiClient rootClient = clouderaManagerClientFactory.getRootClient(stack.getGatewayPort(), user, password, clientConfig);
         CdpResourceApi cdpResourceApi = new CdpResourceApi(rootClient);
         try {
             LOGGER.debug("Get remote context from SDX cluster: {}", stack.getName());
