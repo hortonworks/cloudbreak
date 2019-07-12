@@ -5,11 +5,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.redbeams.service.ThreadBasedRequestIdProvider;
-
 import java.io.IOException;
 import java.util.Map;
 
@@ -21,6 +16,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.redbeams.service.ThreadBasedRequestIdProvider;
 
 public class MDCFilterTest {
 
@@ -65,6 +65,21 @@ public class MDCFilterTest {
         Map<String, String> mdcMap = MDCBuilder.getMdcContextMap();
         assertEquals(REQUEST_ID, mdcMap.get(LoggerContextKey.REQUEST_ID.toString()));
         assertEquals(USER_CRN, mdcMap.get(LoggerContextKey.USER_CRN.toString()));
+    }
+
+    @Test
+    public void testDoFilterInternalWhenNoUserCrn() throws IOException, ServletException {
+        when(threadBasedRequestIdProvider.getRequestId()).thenReturn(REQUEST_ID);
+        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(null);
+
+        underTest.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+
+        // highly coupled verification :(
+        Map<String, String> mdcMap = MDCBuilder.getMdcContextMap();
+        assertEquals(REQUEST_ID, mdcMap.get(LoggerContextKey.REQUEST_ID.toString()));
+        assertEquals(null, mdcMap.get(LoggerContextKey.USER_CRN.toString()));
     }
 
 }
