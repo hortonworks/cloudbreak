@@ -13,7 +13,6 @@ import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDa
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerSuccess;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
-import com.sequenceiq.redbeams.service.crn.CrnService;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,9 +35,6 @@ public class RegisterDatabaseServerHandler implements EventHandler<RegisterDatab
 
     @Inject
     private EventBus eventBus;
-
-    @Inject
-    private CrnService crnService;
 
     @Inject
     private DatabaseServerConfigRepository databaseServerConfigRepository;
@@ -85,7 +81,7 @@ public class RegisterDatabaseServerHandler implements EventHandler<RegisterDatab
 
         dbServerConfig.setHost(dbHostname.get().getName());
         dbServerConfig.setPort(Integer.parseInt(dbPort.get().getName()));
-        dbServerConfig.setResourceCrn(crnService.createCrn(dbServerConfig));
+        dbServerConfig.setResourceCrn(dbStack.getResourceCrn());
 
         Selectable response;
         try {
