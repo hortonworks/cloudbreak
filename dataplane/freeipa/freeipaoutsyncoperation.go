@@ -36,5 +36,5 @@ func (f *freeIpaOutSyncOperation) DataAsStringArray() []string {
 		failureString += fmt.Sprintf("Environment: %s\n", failure.Environment)
 		failureString += fmt.Sprintf("Details: %s\n\n", failure.Details)
 	}
-	return []string{f.ID, successString, failureString, f.Error, f.StartTime, f.EndTime}
+	return []string{f.ID, f.Status, f.SyncType, successString, failureString, f.Error, f.StartTime, f.EndTime}
 }
