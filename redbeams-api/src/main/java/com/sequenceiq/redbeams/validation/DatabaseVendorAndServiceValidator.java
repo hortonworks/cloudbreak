@@ -21,7 +21,7 @@ public class DatabaseVendorAndServiceValidator implements ConstraintValidator<Va
 
     @Override
     public boolean isValid(DatabaseV4Request request, ConstraintValidatorContext context) {
-        Optional<DatabaseVendor> vendorByJdbcUrl = databaseVendorUtil.getVendorByJdbcUrl(request);
+        Optional<DatabaseVendor> vendorByJdbcUrl = databaseVendorUtil.getVendorByJdbcUrl(request.getConnectionURL());
         if (!vendorByJdbcUrl.isPresent()) {
             ValidatorUtil.addConstraintViolation(context, "Could not determine database vendor from JDBC URL "
                 + request.getConnectionURL(), "connectionURL");

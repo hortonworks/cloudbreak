@@ -33,7 +33,7 @@ public class DriverFunctions {
      * @throws DriverLoadingException if there was a problem loading the driver
      */
     public void execWithDatabaseDriver(DatabaseConfig databaseConfig, Consumer<DriverWithConnectivity> consumer) {
-        execWithDatabaseDriver(databaseConfig.getConnectorJarUrl(), databaseConfig.getDatabaseVendor(), consumer);
+        execWithDatabaseDriver(databaseConfig.getName(), databaseConfig.getConnectorJarUrl(), databaseConfig.getDatabaseVendor(), consumer);
     }
 
     /**
@@ -44,26 +44,29 @@ public class DriverFunctions {
      */
     public void execWithDatabaseDriver(DatabaseServerConfig databaseServerConfig,
         Consumer<DriverWithConnectivity> consumer) {
-        execWithDatabaseDriver(databaseServerConfig.getConnectorJarUrl(), databaseServerConfig.getDatabaseVendor(),
+        execWithDatabaseDriver(databaseServerConfig.getName(), databaseServerConfig.getConnectorJarUrl(), databaseServerConfig.getDatabaseVendor(),
                 consumer);
     }
 
     /**
      * Executes the given function with the associated driver.
      *
+     * @param resourceName    name of database / database server
      * @param connectorJarUrl the URL to the connector jar
      * @param databaseVendor  the database vendor
      * @param consumer        the function to execute
      * @throws DriverLoadingException if there was a problem loading the driver
      */
-    public void execWithDatabaseDriver(String connectorJarUrl, DatabaseVendor databaseVendor,
+    private void execWithDatabaseDriver(String resourceName, String connectorJarUrl, DatabaseVendor databaseVendor,
         Consumer<DriverWithConnectivity> consumer) {
         if (StringUtils.isEmpty(connectorJarUrl)) {
             if (databaseVendor == DatabaseVendor.POSTGRES) {
+                LOGGER.warn("There is no connector JAR URL associated with {}, using internal PostgreSQL driver",
+                            resourceName);
                 consumer.accept(new DriverWithConnectivity(new org.postgresql.Driver()));
             } else {
                 throw new DriverLoadingException("connectorJarUrl", "missingjarurl",
-                        "Only PostgreSQL can be validated without a connector JAR URL");
+                        "Only PostgreSQL database access is supported without a connector JAR URL");
             }
         } else {
             try {

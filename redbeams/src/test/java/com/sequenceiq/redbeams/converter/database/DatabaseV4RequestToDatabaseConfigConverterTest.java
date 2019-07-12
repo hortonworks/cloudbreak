@@ -71,7 +71,7 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
         request.setConnectionUserName(CONNECTION_USERNAME);
         request.setConnectionDriver(CONNECTION_DRIVER);
         request.setConnectorJarUrl(CONNECTOR_JAR_URL);
-        when(databaseVendorUtil.getVendorByJdbcUrl(request)).thenReturn(Optional.of(DatabaseVendor.POSTGRES));
+        when(databaseVendorUtil.getVendorByJdbcUrl(CONNECTION_URL)).thenReturn(Optional.of(DatabaseVendor.POSTGRES));
 
         DatabaseConfig databaseConfig = underTest.convert(request);
 
@@ -86,7 +86,7 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
         assertEquals(CONNECTOR_JAR_URL, databaseConfig.getConnectorJarUrl());
         assertEquals(DatabaseVendor.POSTGRES, databaseConfig.getDatabaseVendor());
         assertEquals(ResourceStatus.USER_MANAGED, databaseConfig.getStatus());
-        verify(databaseVendorUtil).getVendorByJdbcUrl(request);
+        verify(databaseVendorUtil).getVendorByJdbcUrl(CONNECTION_URL);
         verify(missingResourceNameGenerator, never()).generateName(any());
     }
 }
