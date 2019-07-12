@@ -1,20 +1,20 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.AwsDBStackV4Parameters;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
-import com.sequenceiq.redbeams.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.common.mappable.Mappable;
-import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.common.mappable.Mappable;
+import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.AwsDBStackV4Parameters;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
+import com.sequenceiq.redbeams.doc.ModelDescriptions;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -28,12 +28,8 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_ID, required = true)
-    private String environmentId;
-
-    @NotNull
-    @ApiModelProperty(ModelDescriptions.DBStack.REGION)
-    private String region;
+    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    private String environmentCrn;
 
     @Valid
     @ApiModelProperty(ModelDescriptions.DBStack.NETWORK)
@@ -54,20 +50,12 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
         this.name = name;
     }
 
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public NetworkV4Request getNetwork() {

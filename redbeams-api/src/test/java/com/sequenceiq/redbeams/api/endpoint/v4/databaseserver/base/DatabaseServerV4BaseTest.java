@@ -34,8 +34,8 @@ public class DatabaseServerV4BaseTest {
         base.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
         assertEquals("http://drivers.example.com/postgresql.jar", base.getConnectorJarUrl());
 
-        base.setEnvironmentId("myenvironment");
-        assertEquals("myenvironment", base.getEnvironmentId());
+        base.setEnvironmentCrn("myenvironment");
+        assertEquals("myenvironment", base.getEnvironmentCrn());
 
     }
 

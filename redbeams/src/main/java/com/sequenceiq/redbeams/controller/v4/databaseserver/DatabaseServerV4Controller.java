@@ -128,7 +128,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         String connectionResult;
         if (request.getExistingDatabaseServer() != null) {
             String name = request.getExistingDatabaseServer().getName();
-            String environmentId = request.getExistingDatabaseServer().getEnvironmentId();
+            String environmentId = request.getExistingDatabaseServer().getEnvironmentCrn();
             connectionResult = databaseServerConfigService.testConnection(DEFAULT_WORKSPACE, environmentId, name);
         } else {
             DatabaseServerConfig server = converterUtil.convert(request.getDatabaseServer(), DatabaseServerConfig.class);
@@ -140,7 +140,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     public CreateDatabaseV4Response createDatabase(CreateDatabaseV4Request request) {
         String result = databaseServerConfigService.createDatabaseOnServer(DEFAULT_WORKSPACE,
-                request.getEnvironmentId(), request.getExistingDatabaseServerName(), request.getDatabaseName(),
+                request.getEnvironmentCrn(), request.getExistingDatabaseServerName(), request.getDatabaseName(),
                 request.getType());
         return new CreateDatabaseV4Response(result);
     }

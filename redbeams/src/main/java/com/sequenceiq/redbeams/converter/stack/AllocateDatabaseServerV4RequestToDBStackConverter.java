@@ -5,12 +5,29 @@ import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_USE
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_VERSION;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -26,19 +43,11 @@ import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
+import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.service.EnvironmentService;
-
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import com.sequenceiq.redbeams.service.UserGeneratorService;
+import com.sequenceiq.redbeams.service.network.NetworkParameterFactoryService;
+import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 
 @Component
 public class AllocateDatabaseServerV4RequestToDBStackConverter {
@@ -59,19 +68,28 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     @Inject
     private Clock clock;
 
+    @Inject
+    private SubnetChooserService subnetChooserService;
+
+    @Inject
+    private UserGeneratorService userGeneratorService;
+
+    @Inject
+    private NetworkParameterFactoryService networkParameterFactoryService;
+
     public DBStack convert(AllocateDatabaseServerV4Request source, String ownerCrnString) {
         Crn ownerCrn = Crn.safeFromString(ownerCrnString);
 
+        DetailedEnvironmentResponse environment = environmentService.getByCrn(source.getEnvironmentCrn());
+
         DBStack dbStack = new DBStack();
         dbStack.setName(source.getName());
-        dbStack.setEnvironmentId(source.getEnvironmentId());
-        dbStack.setRegion(source.getRegion());
+        dbStack.setEnvironmentId(source.getEnvironmentCrn());
+        setRegion(dbStack, environment);
+        dbStack.setNetwork(buildNetwork(source.getNetwork(), environment));
 
         updateCloudPlatformAndRelatedFields(source, dbStack);
 
-        if (source.getNetwork() != null) {
-            dbStack.setNetwork(buildNetwork(source.getNetwork()));
-        }
         if (source.getDatabaseServer() != null) {
             dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), source.getName(), ownerCrn));
         }
@@ -91,12 +109,19 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return dbStack;
     }
 
+    private void setRegion(DBStack dbStack, DetailedEnvironmentResponse environment) {
+        if (environment.getLocation() == null) {
+            throw new RedbeamsException("Environment does not contain region");
+        }
+        dbStack.setRegion(environment.getLocation().getName());
+    }
+
     private void updateCloudPlatformAndRelatedFields(AllocateDatabaseServerV4Request source, DBStack dbStack) {
         String cloudPlatform;
         if (source.getCloudPlatform() != null) {
             cloudPlatform = source.getCloudPlatform().name();
         } else {
-            DetailedEnvironmentResponse environment = environmentService.getByCrn(source.getEnvironmentId());
+            DetailedEnvironmentResponse environment = environmentService.getByCrn(source.getEnvironmentCrn());
             cloudPlatform = environment.getCloudPlatform();
         }
         LOGGER.debug("Cloud platform is {}", cloudPlatform);
@@ -111,11 +136,26 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         dbStack.setPlatformVariant(cloudPlatform);
     }
 
-    private Network buildNetwork(NetworkV4Request source) {
+    private MappableBase getNetworkFromEnvironment(DetailedEnvironmentResponse environmentResponse) {
+        if (environmentResponse.getNetwork() == null || environmentResponse.getNetwork().getSubnetMetas() == null) {
+            throw new RedbeamsException("Environment does not contain metadata for subnets");
+        }
+        List<CloudSubnet> subnetMetas = new ArrayList<>(environmentResponse.getNetwork().getSubnetMetas().values());
+        List<String> chosenSubnetIds = subnetChooserService.chooseSubnetsFromDifferentAzs(subnetMetas).stream()
+                .map(CloudSubnet::getId)
+                .collect(Collectors.toList());
+
+        return networkParameterFactoryService.createNetworkParameters(chosenSubnetIds, environmentResponse.getCloudPlatform());
+    }
+
+    private Network buildNetwork(NetworkV4Request source, DetailedEnvironmentResponse environmentResponse) {
         Network network = new Network();
         network.setName(generateNetworkName());
 
-        Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
+        Map<String, Object> parameters = source != null
+                ? providerParameterCalculator.get(source).asMap()
+                : getNetworkFromEnvironment(environmentResponse).asMap();
+
         if (parameters != null) {
             try {
                 network.setAttributes(new Json(parameters));
@@ -134,8 +174,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         DatabaseVendor databaseVendor = DatabaseVendor.fromValue(source.getDatabaseVendor());
         server.setDatabaseVendor(databaseVendor);
         server.setStorageSize(source.getStorageSize());
-        server.setRootUserName(source.getRootUserName());
-        server.setRootPassword(source.getRootUserPassword());
+        server.setRootUserName(source.getRootUserName() != null ? source.getRootUserName() : userGeneratorService.generateUserName());
+        server.setRootPassword(source.getRootUserPassword() != null ? source.getRootUserPassword() : userGeneratorService.generatePassword());
         server.setPort(source.getPort());
         server.setSecurityGroup(buildSecurityGroup(source.getSecurityGroup()));
 
@@ -170,7 +210,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         defaultTags.put(safeTagString(CB_VERSION.key(), cloudPlatform), safeTagString(version, cloudPlatform));
         defaultTags.put(safeTagString(OWNER.key(), cloudPlatform), safeTagString(user, cloudPlatform));
         defaultTags.put(safeTagString(CB_CREATION_TIMESTAMP.key(), cloudPlatform),
-            safeTagString(String.valueOf(now), cloudPlatform));
+                safeTagString(String.valueOf(now), cloudPlatform));
 
         return new Json(new StackTags(new HashMap<>(), new HashMap<>(), defaultTags));
     }

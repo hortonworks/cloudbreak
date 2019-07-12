@@ -6,7 +6,6 @@ import static org.hamcrest.core.Every.everyItem;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
@@ -49,12 +48,15 @@ import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
+import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 public class DatabaseServerConfigServiceTest {
+
+    private static final String USERNAME = "username";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -82,6 +84,9 @@ public class DatabaseServerConfigServiceTest {
 
     @Mock
     private CrnService crnService;
+
+    @Mock
+    private UserGeneratorService userGeneratorService;
 
     private DatabaseServerConfig server;
 
@@ -307,7 +312,7 @@ public class DatabaseServerConfigServiceTest {
             .thenAnswer((Answer<DatabaseConfig>) invocation -> {
                 return invocation.getArgument(0, DatabaseConfig.class);
             });
-
+        when(userGeneratorService.generateUserName()).thenReturn(USERNAME);
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
         server.setHost("myhost");
         server.setPort(5432);
@@ -315,20 +320,18 @@ public class DatabaseServerConfigServiceTest {
         server.setConnectionPassword("rootpassword");
         String databaseName = "mydb";
         String databaseType = "hive";
+
         String result = underTest.createDatabaseOnServer(0L, "myenv", server.getName(), databaseName, databaseType);
 
         assertEquals("created", result);
-
         verify(driverFunctions).execWithDatabaseDriver(eq(server), any());
-
         ArgumentCaptor<DatabaseConfig> captor = ArgumentCaptor.forClass(DatabaseConfig.class);
         verify(databaseConfigService).register(captor.capture());
         DatabaseConfig db = captor.getValue();
         assertEquals(databaseName, db.getName());
         assertEquals(databaseType, db.getType());
-
         String databaseUserName = db.getConnectionUserName().getRaw();
-        assertNotNull(databaseUserName);
+        assertEquals(USERNAME, databaseUserName);
         assertNotEquals(server.getConnectionUserName(), databaseUserName);
     }
 }

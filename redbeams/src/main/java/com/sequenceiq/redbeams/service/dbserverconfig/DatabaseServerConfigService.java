@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -22,8 +20,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.MapBindingResult;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
@@ -41,6 +39,7 @@ import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
+import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
@@ -52,10 +51,6 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseServerConfigService.class);
 
     private static final Pattern VALID_DATABASE_NAME = Pattern.compile("^[\\p{Alnum}_][\\p{Alnum}_-]*$");
-
-    private static final int MAX_RANDOM_INT_FOR_CHARACTER = 26;
-
-    private static final int USER_NAME_LENGTH = 10;
 
     @Inject
     private DatabaseServerConfigRepository repository;
@@ -77,6 +72,9 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     @Inject
     private CrnService crnService;
+
+    @Inject
+    private UserGeneratorService userGeneratorService;
 
     public Set<DatabaseServerConfig> findAll(Long workspaceId, String environmentId, Boolean attachGlobal) {
         if (environmentId == null) {
@@ -205,8 +203,8 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
         DatabaseServerConfig databaseServerConfig = getByNameOrCrn(workspaceId, environmentId, serverName);
 
-        String databaseUserName = generateDatabaseUserName();
-        String databasePassword = generateDatabasePassword();
+        String databaseUserName = userGeneratorService.generateUserName();
+        String databasePassword = userGeneratorService.generatePassword();
         List<String> sqlStrings = List.of(
                 "CREATE DATABASE " + databaseName,
                 "CREATE USER " + databaseUserName + " WITH ENCRYPTED PASSWORD '" + databasePassword + "'",
@@ -231,17 +229,6 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         databaseConfigService.register(newDatabaseConfig);
 
         return "created";
-    }
-
-    private String generateDatabaseUserName() {
-        return ThreadLocalRandom.current().ints(0, MAX_RANDOM_INT_FOR_CHARACTER)
-                .limit(USER_NAME_LENGTH).boxed()
-                .map(i -> Character.toString((char) ('a' + i)))
-                .collect(Collectors.joining());
-    }
-
-    private String generateDatabasePassword() {
-        return UUID.randomUUID().toString();
     }
 
     public WorkspaceResource resource() {

@@ -1,16 +1,16 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database.base;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.redbeams.doc.ModelDescriptions;
-import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
-
-import io.swagger.annotations.ApiModelProperty;
-
 import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.redbeams.doc.ModelDescriptions;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
+
+import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseV4Identifiers implements Serializable {
@@ -23,8 +23,8 @@ public class DatabaseV4Identifiers implements Serializable {
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_ID, required = true)
-    private String environmentId;
+    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    private String environmentCrn;
 
     public String getName() {
         return name;
@@ -34,12 +34,12 @@ public class DatabaseV4Identifiers implements Serializable {
         this.name = name;
     }
 
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
 }

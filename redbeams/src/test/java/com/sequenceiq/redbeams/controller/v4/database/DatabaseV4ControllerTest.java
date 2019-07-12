@@ -4,23 +4,24 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-// import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseTestV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
-// import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseTestV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Responses;
-import com.sequenceiq.redbeams.domain.DatabaseConfig;
-import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
-
 import java.util.Collections;
-// import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Responses;
+import com.sequenceiq.redbeams.domain.DatabaseConfig;
+import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
+
+// import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseTestV4Request;
+// import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseTestV4Response;
+// import java.util.HashSet;
 
 public class DatabaseV4ControllerTest {
 
@@ -132,7 +133,7 @@ public class DatabaseV4ControllerTest {
     // public void testTestWithName() {
     //     when(service.testConnection(DatabaseV4Controller.DEFAULT_WORKSPACE, "id", "mydb")).thenReturn("yeahhh");
     //     DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
-    //     testRequest.setEnvironmentId("id");
+    //     testRequest.setEnvironmentCrn("id");
     //     testRequest.setExistingDatabaseServerName("mydb");
 
     //     DatabaseServerTestV4Response response = underTest.test(testRequest);

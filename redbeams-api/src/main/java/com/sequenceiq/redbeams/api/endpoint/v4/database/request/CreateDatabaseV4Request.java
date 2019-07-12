@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 
-import static com.sequenceiq.redbeams.doc.ModelDescriptions.ENVIRONMENT_ID;
+import static com.sequenceiq.redbeams.doc.ModelDescriptions.ENVIRONMENT_CRN;
 
 import java.io.Serializable;
 
@@ -18,8 +18,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateDatabaseV4Request implements Serializable {
 
-    @ApiModelProperty(ENVIRONMENT_ID)
-    private String environmentId;
+    @ApiModelProperty(ENVIRONMENT_CRN)
+    private String environmentCrn;
 
     @ApiModelProperty(DatabaseServer.NAME)
     private String existingDatabaseServerName;
@@ -36,18 +36,18 @@ public class CreateDatabaseV4Request implements Serializable {
      *
      * @return the environment ID
      */
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
     /**
      * Gets the environment ID associated with the existing database server. This will also be used
      * as the environment for the created database.
      *
-     * @param environmentId the environment ID
+     * @param environmentCrn the environment ID
      */
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     /**

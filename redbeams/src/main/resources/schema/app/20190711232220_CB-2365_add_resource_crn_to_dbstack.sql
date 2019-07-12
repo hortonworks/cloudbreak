@@ -8,5 +8,5 @@ ALTER TABLE dbStack
 -- SQL to undo the change goes here.
 
 ALTER TABLE dbStack
-    DROP COLUMN resourcecrn TEXT;
+    DROP COLUMN resourcecrn;
 
