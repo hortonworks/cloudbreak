@@ -112,7 +112,7 @@ public class ClusterProxyService {
         String dpPasswordVaultPath = vaultPath(cluster.getDpAmbariPasswordSecret());
 
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
-                new ClusterServiceCredential(dpUser, dpPasswordVaultPath));
+                new ClusterServiceCredential(dpUser, dpPasswordVaultPath, true));
         ClusterServiceConfig serviceConfig = new ClusterServiceConfig("cloudera-manager", singletonList(clusterManagerUrl(stack)), credentials);
         return new ConfigRegistrationRequest(clusterCrn(cluster), singletonList(serviceConfig));
     }
