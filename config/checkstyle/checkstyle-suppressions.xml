@@ -30,6 +30,7 @@
     <suppress checks=".*" files="ModulTest.java"/>
     <suppress id="IllegalTransaction" files="com.sequenceiq.flow.*|com.sequenceiq.cloudbreak.common.service.TransactionService.java|com.sequenceiq.cloudbreak.controller.*|com.sequenceiq.cloudbreak.workspace.repository.*|com.sequenceiq.freeipa.controller.*|com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory|com.sequenceiq.cloudbreak.repository.*Repository.java|com.sequenceiq.freeipa.repository.*Repository.java|com.sequenceiq.cloudbreak.structuredevent.db.*Repository.java|com.sequenceiq.redbeams.controller.*|com.sequenceiq.redbeams.repository.*Repository.java"/>
     <suppress checks="RegexpSingleline" files="FlexSubscription.java"/>
+    <suppress checks="RegexpSingleline" files="ClusterServiceCredential.java"/>
     <suppress id="hashtable-instantiation" files="LdapConfigValidator.java"/>
     <suppress checks="MethodName" files="EnvironmentResourceRepository.java"/>
     <suppress checks="IllegalCatch|CyclomaticComplexity" files="SecretAspects.java|SecretAspectService.java"/>
