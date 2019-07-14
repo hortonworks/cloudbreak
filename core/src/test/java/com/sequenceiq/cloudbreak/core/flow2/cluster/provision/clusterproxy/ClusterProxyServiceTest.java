@@ -131,10 +131,10 @@ public class ClusterProxyServiceTest {
     }
 
     private String configRegistrationRequest() {
-        ClusterServiceCredential credential1 = new ClusterServiceCredential("cbuser", "/cb/test-data/secret/cbpassword:secret");
-        ClusterServiceCredential credential2 = new ClusterServiceCredential("dpuser", "/cb/test-data/secret/dppassword:secret");
+        ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
+        ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
         ClusterServiceConfig service = new ClusterServiceConfig("cloudera-manager",
-                List.of("https://10.10.10.10/clouderamanager"), asList(credential1, credential2));
+                List.of("https://10.10.10.10/clouderamanager"), asList(cloudbreakUser, dpUser));
         return JsonUtil.writeValueAsStringSilent(new ConfigRegistrationRequest("1000", List.of(service)));
     }
 
@@ -182,9 +182,9 @@ public class ClusterProxyServiceTest {
     private Cluster testCluster() {
         Cluster cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
-        cluster.setCloudbreakAmbariUser("cbuser");
+        cluster.setCloudbreakAmbariUser("cloudbreak");
         ReflectionTestUtils.setField(cluster, "cloudbreakAmbariPassword", new Secret("cbpassword", vaultSecretString("cbpassword")));
-        cluster.setDpAmbariUser("dpuser");
+        cluster.setDpAmbariUser("cmmgmt");
         ReflectionTestUtils.setField(cluster, "dpAmbariPassword", new Secret("dppassword", vaultSecretString("dppassword")));
         return cluster;
     }
