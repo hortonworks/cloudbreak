@@ -136,12 +136,12 @@ public class FreeIpaClient {
         return (Role) invoke("role_del", flags, params, Role.class).getResult();
     }
 
-    public User userAdd(String user, String firstName, String lastName, String password) throws FreeIpaClientException {
+    public User userAdd(String user, String firstName, String lastName) throws FreeIpaClientException {
         List<String> flags = List.of(user);
         Map<String, Object> params = Map.of(
                 "givenname", firstName,
                 "sn", lastName,
-                "userpassword", password,
+                "random", true,
                 "setattr", "krbPasswordExpiration=20380101000000Z"
         );
         return (User) invoke("user_add", flags, params, User.class).getResult();
