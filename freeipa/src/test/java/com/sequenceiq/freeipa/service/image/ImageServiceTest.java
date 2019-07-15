@@ -46,6 +46,8 @@ public class ImageServiceTest {
 
     private static final String NON_EXISTING_ID = "fake-ami-0a6931aea1415eb0e";
 
+    private static final String NON_EXISTING_OS = "Ubuntu7";
+
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
@@ -77,6 +79,15 @@ public class ImageServiceTest {
     @Test
     public void testGetImageGivenAllInput() {
         ImageSettingsRequest is = setupImageSettingsRequest(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS);
+        Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
+        assertEquals(DEFAULT_OS, image.getOs());
+        assertEquals("Assuming the latest image to be selected", LATEST_DATE, image.getDate());
+        assertEquals("61851893-8340-411d-afb7-e1b55107fb10", image.getUuid());
+    }
+
+    @Test
+    public void testGetImageGivenAllInputNonExistentOS() {
+        ImageSettingsRequest is = setupImageSettingsRequest(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, NON_EXISTING_OS);
         Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals("Assuming the latest image to be selected", LATEST_DATE, image.getDate());
