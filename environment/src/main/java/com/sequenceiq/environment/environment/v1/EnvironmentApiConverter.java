@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.v1;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest.DEFAULT_USER_NAME;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
@@ -7,7 +8,6 @@ import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCreden
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
@@ -32,13 +32,12 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
-import com.sequenceiq.environment.environment.v1.converter.RegionConverter;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
-public class EnvironmentApiConverter {
+class EnvironmentApiConverter {
 
     private static final String DUMMY_SSH_KEY = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
             + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
@@ -53,18 +52,20 @@ public class EnvironmentApiConverter {
 
     private final TelemetryApiConverter telemetryApiConverter;
 
-    public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
-            RegionConverter regionConverter,
-            CredentialToCredentialV1ResponseConverter credentialConverter,
-            TelemetryApiConverter telemetryApiConverter) {
+    private final CloudStorageApiConverter cloudStorageApiConverter;
+
+    public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider, RegionConverter regionConverter,
+            CredentialToCredentialV1ResponseConverter credentialConverter, TelemetryApiConverter telemetryApiConverter,
+            CloudStorageApiConverter cloudStorageApiConverter) {
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.regionConverter = regionConverter;
         this.credentialConverter = credentialConverter;
         this.telemetryApiConverter = telemetryApiConverter;
+        this.cloudStorageApiConverter = cloudStorageApiConverter;
     }
 
-    public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
-        EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.Builder.anEnvironmentCreationDto()
+    EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
+        EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.builder()
                 .withAccountId(threadBasedUserCrnProvider.getAccountId())
                 .withName(request.getName())
                 .withDescription(request.getDescription())
@@ -77,8 +78,10 @@ public class EnvironmentApiConverter {
                 .withRegions(request.getRegions())
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()));
 
-        NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
-        NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
+        doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
+        doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
+        doIfNotNull(request.getLogCloudStorage(), cloudStorage
+                -> builder.withLogCloudStorage(cloudStorageApiConverter.requestToDto(request.getLogCloudStorage())));
 
         // TODO temporary until CCM not really integrated
         if (request.getSecurityAccess() == null) {
@@ -90,7 +93,7 @@ public class EnvironmentApiConverter {
         return builder.build();
     }
 
-    public LocationDto locationRequestToDto(LocationRequest location) {
+    private LocationDto locationRequestToDto(LocationRequest location) {
         return LocationDto.LocationDtoBuilder.aLocationDto()
                 .withName(location.getName())
                 .withLatitude(location.getLatitude())
@@ -99,7 +102,7 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
-    public NetworkDto networkRequestToDto(EnvironmentNetworkRequest network) {
+    private NetworkDto networkRequestToDto(EnvironmentNetworkRequest network) {
         NetworkDto.Builder builder = NetworkDto.Builder.aNetworkDto();
         if (network.getAws() != null) {
             AwsParams awsParams = new AwsParams();
@@ -142,7 +145,7 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
-    public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
+    DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
         DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.Builder.builder()
                 .withCrn(environmentDto.getResourceCrn())
                 .withName(environmentDto.getName())
@@ -159,12 +162,14 @@ public class EnvironmentApiConverter {
                 .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
-        NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
-        NullUtil.doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));
+        doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
+        doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));
+        doIfNotNull(environmentDto.getLogCloudStorage(), cloudStorage
+                -> builder.withLogCloudStorage(cloudStorageApiConverter.dtoToResponse(cloudStorage)));
         return builder.build();
     }
 
-    public SimpleEnvironmentResponse dtoToSimpleResponse(EnvironmentDto environmentDto) {
+    SimpleEnvironmentResponse dtoToSimpleResponse(EnvironmentDto environmentDto) {
         SimpleEnvironmentResponse.Builder builder = SimpleEnvironmentResponse.builder()
                 .withCrn(environmentDto.getResourceCrn())
                 .withName(environmentDto.getName())
@@ -179,11 +184,13 @@ public class EnvironmentApiConverter {
                 .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
-        NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
+        doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
+        doIfNotNull(environmentDto.getLogCloudStorage(), cloudStorage
+                -> builder.withLogCloudStorage(cloudStorageApiConverter.dtoToResponse(cloudStorage)));
         return builder.build();
     }
 
-    public EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network) {
+    private EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network) {
         return EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
                 .withCrn(network.getResourceCrn())
                 .withSubnetIds(network.getSubnetIds())
@@ -200,7 +207,7 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
-    public LocationResponse locationDtoToResponse(LocationDto locationDto) {
+    private LocationResponse locationDtoToResponse(LocationDto locationDto) {
         return LocationResponse.LocationResponseBuilder.aLocationResponse()
                 .withName(locationDto.getName())
                 .withDisplayName(locationDto.getDisplayName())
@@ -209,26 +216,26 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
-    public EnvironmentEditDto initEditDto(EnvironmentEditRequest request) {
+    EnvironmentEditDto initEditDto(EnvironmentEditRequest request) {
         EnvironmentEditDto.EnvironmentEditDtoBuilder builder = EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
                 .withDescription(request.getDescription())
                 .withAccountId(threadBasedUserCrnProvider.getAccountId())
                 .withRegions(request.getRegions());
-        NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
-        NullUtil.doIfNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
-        NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
-        NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry())));
-        NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
+        doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
+        doIfNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
+        doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
+        doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry())));
+        doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
         return builder.build();
     }
 
-    public EnvironmentChangeCredentialDto convertEnvironmentChangeCredentialDto(EnvironmentChangeCredentialRequest request) {
+    EnvironmentChangeCredentialDto convertEnvironmentChangeCredentialDto(EnvironmentChangeCredentialRequest request) {
         return anEnvironmentChangeCredentialDto()
                 .withCredentialName(request.getCredential() != null ? request.getCredential().getName() : request.getCredentialName())
                 .build();
     }
 
-    public EnvironmentAuthenticationResponse authenticationDtoToResponse(AuthenticationDto authenticationDto) {
+    private EnvironmentAuthenticationResponse authenticationDtoToResponse(AuthenticationDto authenticationDto) {
         return EnvironmentAuthenticationResponse.builder()
                 .withLoginUserName(authenticationDto.getLoginUserName())
                 .withPublicKey(authenticationDto.getPublicKey())

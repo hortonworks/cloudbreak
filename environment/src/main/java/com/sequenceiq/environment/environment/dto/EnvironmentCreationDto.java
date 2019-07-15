@@ -39,11 +39,13 @@ public class EnvironmentCreationDto {
 
     private final SecurityAccessDto securityAccess;
 
+    private final CloudStorageDto logCloudStorage;
+
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
-            Long created, Telemetry telemetry, SecurityAccessDto securityAccess) {
+            Long created, Telemetry telemetry, SecurityAccessDto securityAccess, CloudStorageDto logCloudStorage) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -67,6 +69,11 @@ public class EnvironmentCreationDto {
         this.authentication = authentication;
         this.telemetry = telemetry;
         this.securityAccess = securityAccess;
+        this.logCloudStorage = logCloudStorage;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public String getName() {
@@ -125,6 +132,10 @@ public class EnvironmentCreationDto {
         return securityAccess;
     }
 
+    public CloudStorageDto getLogCloudStorage() {
+        return logCloudStorage;
+    }
+
     public static final class Builder {
         private String name;
 
@@ -154,11 +165,9 @@ public class EnvironmentCreationDto {
 
         private SecurityAccessDto securityAccess;
 
-        public Builder() {
-        }
+        private CloudStorageDto logCloudStorage;
 
-        public static Builder anEnvironmentCreationDto() {
-            return new Builder();
+        public Builder() {
         }
 
         public Builder withName(String name) {
@@ -231,9 +240,14 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withLogCloudStorage(CloudStorageDto logCloudStorage) {
+            this.logCloudStorage = logCloudStorage;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId,
-                    location, network, credential, regions, proxyNames, createFreeIpa, authentication, created, telemetry, securityAccess);
+                    location, network, credential, regions, proxyNames, createFreeIpa, authentication, created, telemetry, securityAccess, logCloudStorage);
         }
     }
 }

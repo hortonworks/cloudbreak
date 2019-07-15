@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.v1.converter;
+package com.sequenceiq.environment.environment.v1;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,8 +11,9 @@ import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegio
 import com.sequenceiq.environment.environment.domain.Region;
 
 @Component
-public class RegionConverter {
-    public CompactRegionResponse convertRegions(Set<Region> regions) {
+class RegionConverter {
+
+    CompactRegionResponse convertRegions(Set<Region> regions) {
         CompactRegionResponse compactRegionResponse = new CompactRegionResponse();
         Set<String> values = new HashSet<>();
         Map<String, String> displayNames = new HashMap<>();

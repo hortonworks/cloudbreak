@@ -59,6 +59,8 @@ public class EnvironmentDto implements Payload {
 
     private SecurityAccessDto securityAccess;
 
+    private CloudStorageDto logCloudStorage;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -237,6 +239,14 @@ public class EnvironmentDto implements Payload {
         this.securityAccess = securityAccess;
     }
 
+    public CloudStorageDto getLogCloudStorage() {
+        return logCloudStorage;
+    }
+
+    public void setLogCloudStorage(CloudStorageDto logCloudStorage) {
+        this.logCloudStorage = logCloudStorage;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -283,6 +293,8 @@ public class EnvironmentDto implements Payload {
         private Long created;
 
         private SecurityAccessDto securityAccess;
+
+        private CloudStorageDto logCloudStorage;
 
         private Builder() {
         }
@@ -392,6 +404,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withLogCloudStorage(CloudStorageDto logCloudStorage) {
+            this.logCloudStorage = logCloudStorage;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -415,6 +432,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setStatusReason(statusReason);
             environmentDto.setCreated(created);
             environmentDto.setSecurityAccess(securityAccess);
+            environmentDto.setLogCloudStorage(logCloudStorage);
             return environmentDto;
         }
     }

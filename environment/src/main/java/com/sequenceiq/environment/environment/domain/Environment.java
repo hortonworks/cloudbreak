@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.dto.CloudStorageDto;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.store.EnvironmentStatusUpdater;
 
@@ -110,6 +111,9 @@ public class Environment implements AuthResource {
     private String defaultSecurityGroupId;
 
     private String cidr;
+
+    @Convert(converter = JsonToString.class)
+    private Json logCloudStorage;
 
     public Environment() {
         regions = new Json(new HashSet<Region>());
@@ -328,5 +332,16 @@ public class Environment implements AuthResource {
 
     public void setCidr(String cidr) {
         this.cidr = cidr;
+    }
+
+    public CloudStorageDto getLogCloudStorage() {
+        if (logCloudStorage != null) {
+            return JsonUtil.jsonToType(logCloudStorage.getValue(), new EmptyTypeReference<>());
+        }
+        return null;
+    }
+
+    public void setLogCloudStorage(CloudStorageDto logCloudStorage) {
+        this.logCloudStorage = new Json(logCloudStorage);
     }
 }
