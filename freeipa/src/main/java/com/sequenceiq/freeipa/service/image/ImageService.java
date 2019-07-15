@@ -126,19 +126,22 @@ public class ImageService {
         throw new RuntimeException(msg);
     }
 
-    private List<com.sequenceiq.freeipa.api.model.image.Image> filterImages(List<com.sequenceiq.freeipa.api.model.image.Image> imageList, String osType) {
-        Predicate<com.sequenceiq.freeipa.api.model.image.Image> predicate = img -> img.getOs().equalsIgnoreCase(osType);
+    private List<com.sequenceiq.freeipa.api.model.image.Image> filterImages(List<com.sequenceiq.freeipa.api.model.image.Image> imageList, String os,
+            String platform) {
+        Predicate<com.sequenceiq.freeipa.api.model.image.Image> predicate = img -> img.getOs().equalsIgnoreCase(os)
+                && img.getImageSetsByProvider().containsKey(platform);
         Map<Boolean, List<com.sequenceiq.freeipa.api.model.image.Image>> partitionedImages =
                 Optional.ofNullable(imageList).orElse(Collections.emptyList()).stream()
                 .collect(Collectors.partitioningBy(predicate));
         if (hasFiltered(partitionedImages)) {
             LOGGER.debug("Used filter for: | {} | Images filtered: {}",
-                    osType,
+                    os,
                     partitionedImages.get(false).stream().map(com.sequenceiq.freeipa.api.model.image.Image::toString).collect(Collectors.joining(", ")));
+            return partitionedImages.get(true);
         } else {
-            throw new RuntimeException(String.format("Could not find any image with filter for: '%s'.", osType));
+            LOGGER.warn("No FreeIPA image found with OS {}, falling back to the latest available one if such exists!", os);
+            return imageList;
         }
-        return partitionedImages.get(true);
     }
 
     private boolean hasFiltered(Map<Boolean, List<com.sequenceiq.freeipa.api.model.image.Image>> partitioned) {
@@ -148,14 +151,14 @@ public class ImageService {
     private Optional<? extends com.sequenceiq.freeipa.api.model.image.Image> findImage(String imageId, String imageOs,
             List<com.sequenceiq.freeipa.api.model.image.Image> images, String region, String platform) {
         if (Objects.nonNull(imageOs) && !imageOs.isEmpty()) {
-            images = filterImages(images, imageOs);
+            images = filterImages(images, imageOs, platform);
         }
         if (Objects.nonNull(imageId) && !imageId.isEmpty()) {
             return images.stream()
                     .filter(img -> img.getImageSetsByProvider().get(platform).get(region).equalsIgnoreCase(imageId))
                     .max(Comparator.comparing(com.sequenceiq.freeipa.api.model.image.Image::getDate));
         } else {
-            return images.stream()
+            return images.stream().filter(image -> image.getImageSetsByProvider().containsKey(platform))
                     .max(Comparator.comparing(com.sequenceiq.freeipa.api.model.image.Image::getDate));
         }
     }
