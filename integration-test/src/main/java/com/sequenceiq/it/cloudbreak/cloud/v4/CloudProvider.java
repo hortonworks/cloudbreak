@@ -20,6 +20,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTest
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -87,6 +88,8 @@ public interface CloudProvider {
     StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity);
 
     Integer gatewayPort(StackTestDtoBase stackEntity);
+
+    Integer gatewayPort(FreeIPATestDto stackEntity);
 
     String getBlueprintName();
 

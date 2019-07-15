@@ -12,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -98,6 +99,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public Integer gatewayPort(StackTestDtoBase stackEntity) {
+        return commonCloudProperties.getGatewayPort();
+    }
+
+    @Override
+    public Integer gatewayPort(FreeIPATestDto stackEntity) {
         return commonCloudProperties.getGatewayPort();
     }
 

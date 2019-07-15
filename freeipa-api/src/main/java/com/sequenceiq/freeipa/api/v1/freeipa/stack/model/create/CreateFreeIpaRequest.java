@@ -3,6 +3,8 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -53,6 +55,11 @@ public class CreateFreeIpaRequest {
     @NotNull
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_SERVER_SETTINGS, required = true)
     private FreeIpaServerRequest freeIpa;
+
+    @ApiModelProperty(value = FreeIpaModelDescriptions.GATEWAY_PORT, allowableValues = "1025-65535")
+    @Min(value = 1025, message = "Port should be between 1025 and 65535")
+    @Max(value = 65535, message = "Port should be between 1025 and 65535")
+    private Integer gatewayPort;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -116,5 +123,13 @@ public class CreateFreeIpaRequest {
 
     public void setFreeIpa(FreeIpaServerRequest freeIpa) {
         this.freeIpa = freeIpa;
+    }
+
+    public Integer getGatewayPort() {
+        return gatewayPort;
+    }
+
+    public void setGatewayPort(Integer gatewayPort) {
+        this.gatewayPort = gatewayPort;
     }
 }

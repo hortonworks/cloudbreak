@@ -82,4 +82,18 @@ public class RPCResponse<R> {
     public void setTruncated(Boolean truncated) {
         this.truncated = truncated;
     }
+
+    @Override
+    public String toString() {
+        return "RPCResponse{"
+                + "count=" + count
+                + ", messages=" + messages
+                + ", failed=" + failed
+                + ", completed=" + completed
+                + ", value=" + value
+                + ", summary='" + summary + '\''
+                + ", truncated=" + truncated
+                + ", result=" + result
+                + '}';
+    }
 }
