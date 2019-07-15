@@ -111,8 +111,9 @@ dependencyManagement {
     dependencySet(group: 'org.junit.jupiter', version: '5.2.0') {
       entry 'junit-jupiter-api'
       entry 'junit-jupiter-engine'
+      entry 'junit-jupiter-params'
     }
-    
+
     dependency group: 'org.junit.vintage',                  name: 'junit-vintage-engine',        version: '5.2.0'
 
     dependency group: 'org.testng',                         name: 'testng',                      version: testNgVersion
@@ -251,6 +252,7 @@ dependencies {
   testCompile group: 'org.mockito',              name: 'mockito-junit-jupiter'
   testCompile group: 'org.junit.vintage',        name: 'junit-vintage-engine'
   testCompile group: 'org.junit.jupiter',        name: 'junit-jupiter-api'
+  testCompile group: 'org.junit.jupiter',        name: 'junit-jupiter-params'
   testRuntime group: 'org.junit.jupiter',        name: 'junit-jupiter-engine'
   testCompile group: 'org.testng',               name: 'testng'
 }
