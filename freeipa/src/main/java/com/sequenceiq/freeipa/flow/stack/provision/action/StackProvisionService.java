@@ -117,7 +117,7 @@ public class StackProvisionService {
     }
 
     public void stackCreationFinished(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED, "Stack provisioned.");
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STACK_PROVISIONED, "Stack provisioned.");
     }
 
     public void handleStackCreationFailure(Stack stack, Exception errorDetails) {
@@ -127,26 +127,15 @@ public class StackProvisionService {
             LOGGER.debug("The flow has been cancelled.");
         } else {
             if (!stack.isStackInDeletionPhase()) {
-//                handleFailure(stack, errorReason);
+                handleFailure(stack, errorReason);
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
             }
         }
     }
 
-    //FIXME
-    /*private void handleFailure(Stack stack, String errorReason) {
-        try {
-            if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
-                LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
-            } else {
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ROLLING_BACK);
-                connector.rollback(stack, stack.getResources());
-            }
-        } catch (Exception ex) {
-            LOGGER.info("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, format("Rollback failed: %s", ex.getMessage()));
-        }
-    }*/
+    private void handleFailure(Stack stack, String errorReason) {
+        LOGGER.debug("Nothing to do.");
+    }
 
     private long calculateStackCreationTime(Date startDate) {
         long result = 0;
