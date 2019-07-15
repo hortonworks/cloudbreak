@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -182,7 +181,7 @@ public class UserService {
 
             try {
                 com.sequenceiq.freeipa.client.model.User userAdd = freeIpaClient.userAdd(
-                        username, user.getFirstName(), user.getLastName(), generateRandomPassword());
+                        username, user.getFirstName(), user.getLastName());
                 LOGGER.debug("Success: {}", userAdd);
             } catch (FreeIpaClientException e) {
                 // TODO propagate this information out to API
@@ -222,9 +221,5 @@ public class UserService {
                 LOGGER.error("Failed to add {} to group", users, group, e);
             }
         }
-    }
-
-    private String generateRandomPassword() {
-        return UUID.randomUUID().toString();
     }
 }
