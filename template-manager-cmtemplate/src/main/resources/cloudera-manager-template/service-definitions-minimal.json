@@ -320,6 +320,57 @@
         }
       ],
       "dependencies": ["ZOOKEEPER", "HDFS", "HBASE", "KAFKA", "SOLR"]
+    },
+    {
+      "name": "RANGER",
+      "displayName": "Ranger",
+      "components": [
+        {
+          "name": "RANGER_ADMIN",
+          "groups": ["master"],
+          "base": true
+        },
+        {
+          "name": "RANGER_TAGSYNC",
+          "groups": ["master"],
+          "base": true
+        },
+        {
+          "name": "RANGER_USERSYNC",
+          "groups": ["master"],
+          "base": true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER","HDFS", "YARN", "HIVE"]
+    },
+    {
+      "name": "ATLAS",
+      "displayName": "Atlas",
+      "components": [
+        {
+          "name": "ATLAS_SERVER",
+          "groups": ["master"],
+          "base": true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER","HDFS", "YARN", "HIVE"]
+    },
+    {
+      "name": "KNOX",
+      "displayName": "Knox",
+      "components": [
+        {
+          "name": "KNOX_GATEWAY",
+          "groups": ["master"],
+          "base": true
+        },
+        {
+          "name": "IDBROKER",
+          "groups": ["master"],
+          "base": true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER","HDFS", "YARN", "HIVE"]
     }
   ]
 }

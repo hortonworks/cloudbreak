@@ -67,6 +67,18 @@
     {
       "name": "ZEPPELIN",
       "version": "0.8.0"
+    },
+    {
+      "name": "KNOX",
+      "version": "1.0.0"
+    },
+    {
+      "name": "RANGER",
+      "version": "1.0.0"
+    },
+    {
+      "name": "ATLAS",
+      "version": "1.0.0"
     }
   ],
   "version": "7.0.0",
