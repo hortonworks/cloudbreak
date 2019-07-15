@@ -26,16 +26,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.TelemetryV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.logging.LoggingV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.workload.WorkloadAnalyticsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.Logging;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
-import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalytics;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -76,7 +70,6 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         prepareDatalakeRequest(source, stackV4Request);
         stackV4Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
         prepareInputs(source, stackV4Request);
-        prepareTelemetry(source, stackV4Request);
         stackV4Request.setTimeToLive(getStackTimeToLive(source));
         return stackV4Request;
     }
@@ -117,32 +110,6 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
             stackV2Request.setImage(is);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info(e.toString());
-        }
-    }
-
-    private void prepareTelemetry(Stack source, StackV4Request stackV4Request) {
-        Telemetry telemetry = componentConfigProviderService.getTelemetry(source.getId());
-        if (telemetry != null) {
-            TelemetryV4Request telemetryV4Request = new TelemetryV4Request();
-            if (telemetry.getLogging() != null) {
-                Logging logging = telemetry.getLogging();
-                LoggingV4Request loggingV4Request = new LoggingV4Request();
-                loggingV4Request.setEnabled(logging.isEnabled());
-                loggingV4Request.setAttributes(logging.getAttributes());
-                loggingV4Request.setOutput(logging.getOutputType());
-                telemetryV4Request.setLogging(loggingV4Request);
-            }
-            if (telemetry.getWorkloadAnalytics() != null) {
-                WorkloadAnalytics wa = telemetry.getWorkloadAnalytics();
-                WorkloadAnalyticsV4Request waV4Request = new WorkloadAnalyticsV4Request();
-                waV4Request.setAccessKey(wa.getAccessKey());
-                waV4Request.setPrivateKey(wa.getPrivateKey());
-                waV4Request.setAttributes(wa.getAttributes());
-                waV4Request.setDatabusEndpoint(wa.getDatabusEndpoint());
-                waV4Request.setEnabled(wa.isEnabled());
-                telemetryV4Request.setWorkloadAnalytics(waV4Request);
-            }
-            stackV4Request.setTelemetry(telemetryV4Request);
         }
     }
 

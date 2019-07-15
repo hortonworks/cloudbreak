@@ -5,14 +5,15 @@ import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.common.api.cloudstorage.validation.ValidWasbCloudStorageParameters;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemAwareCloudStorage;
+import com.sequenceiq.common.model.FileSystemType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @ValidWasbCloudStorageParameters
-public class WasbCloudStorageV1Parameters implements CloudStorageV1Parameters {
+public class WasbCloudStorageV1Parameters implements FileSystemAwareCloudStorage {
 
     @ApiModelProperty
     @NotNull

@@ -5,14 +5,15 @@ import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.common.api.cloudstorage.validation.ValidS3CloudStorageParameters;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemAwareCloudStorage;
+import com.sequenceiq.common.model.FileSystemType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @ValidS3CloudStorageParameters
-public class S3CloudStorageV1Parameters implements CloudStorageV1Parameters {
+public class S3CloudStorageV1Parameters implements FileSystemAwareCloudStorage {
 
     @ApiModelProperty
     @NotNull

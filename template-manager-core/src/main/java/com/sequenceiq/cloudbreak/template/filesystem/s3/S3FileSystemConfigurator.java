@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.template.filesystem.s3;
 
-import static com.sequenceiq.common.api.filesystem.FileSystemType.S3;
+import static com.sequenceiq.common.model.FileSystemType.S3;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.template.filesystem.AbstractFileSystemConfigurator;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 
 @Component
 public class S3FileSystemConfigurator extends AbstractFileSystemConfigurator<S3FileSystemConfigurationsView> {

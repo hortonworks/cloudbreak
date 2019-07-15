@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
-import static com.sequenceiq.common.api.filesystem.FileSystemType.WASB;
+import static com.sequenceiq.common.model.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileSystemRequestToSpiFileSystemConverterTest {

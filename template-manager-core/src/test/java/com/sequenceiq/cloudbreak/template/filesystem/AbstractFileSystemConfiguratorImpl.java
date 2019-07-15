@@ -6,7 +6,7 @@ import java.util.List;
 import com.sequenceiq.cloudbreak.common.type.ExecutionType;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 
 public class AbstractFileSystemConfiguratorImpl extends AbstractFileSystemConfigurator<AdlsFileSystemConfigurationsView> {

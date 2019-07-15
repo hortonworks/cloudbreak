@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cli;
 
-import static com.sequenceiq.common.api.filesystem.FileSystemType.ADLS;
-import static com.sequenceiq.common.api.filesystem.FileSystemType.ADLS_GEN_2;
-import static com.sequenceiq.common.api.filesystem.FileSystemType.GCS;
-import static com.sequenceiq.common.api.filesystem.FileSystemType.S3;
-import static com.sequenceiq.common.api.filesystem.FileSystemType.WASB;
+import static com.sequenceiq.common.model.FileSystemType.ADLS;
+import static com.sequenceiq.common.model.FileSystemType.ADLS_GEN_2;
+import static com.sequenceiq.common.model.FileSystemType.GCS;
+import static com.sequenceiq.common.model.FileSystemType.S3;
+import static com.sequenceiq.common.model.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -41,7 +41,7 @@ import com.sequenceiq.common.api.cloudstorage.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.BaseFileSystem;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;

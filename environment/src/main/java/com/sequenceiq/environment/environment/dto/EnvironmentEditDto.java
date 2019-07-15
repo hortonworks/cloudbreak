@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -17,7 +17,7 @@ public class EnvironmentEditDto {
 
     private final String accountId;
 
-    private final Telemetry telemetry;
+    private final EnvironmentTelemetry telemetry;
 
     private LocationDto location;
 
@@ -36,7 +36,7 @@ public class EnvironmentEditDto {
             LocationDto location,
             NetworkDto network,
             AuthenticationDto authentication,
-            Telemetry telemetry,
+            EnvironmentTelemetry telemetry,
             SecurityAccessDto securityAccess,
             Tunnel tunnel) {
         this.description = description;
@@ -82,7 +82,7 @@ public class EnvironmentEditDto {
         return authentication;
     }
 
-    public Telemetry getTelemetry() {
+    public EnvironmentTelemetry getTelemetry() {
         return telemetry;
     }
 
@@ -107,7 +107,7 @@ public class EnvironmentEditDto {
 
         private AuthenticationDto authentication;
 
-        private Telemetry telemetry;
+        private EnvironmentTelemetry telemetry;
 
         private SecurityAccessDto securityAccess;
 
@@ -150,7 +150,7 @@ public class EnvironmentEditDto {
             return this;
         }
 
-        public EnvironmentEditDtoBuilder withTelemetry(Telemetry telemetry) {
+        public EnvironmentEditDtoBuilder withTelemetry(EnvironmentTelemetry telemetry) {
             this.telemetry = telemetry;
             return this;
         }

@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.common.api.cloudstorage.validation.ValidAdlsCloudStorageParameters;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemAwareCloudStorage;
+import com.sequenceiq.common.model.FileSystemType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,7 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ValidAdlsCloudStorageParameters
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AdlsCloudStorageV1Parameters implements CloudStorageV1Parameters {
+public class AdlsCloudStorageV1Parameters implements FileSystemAwareCloudStorage {
 
     @ApiModelProperty
     @NotNull

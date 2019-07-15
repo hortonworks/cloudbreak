@@ -11,6 +11,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
@@ -31,7 +32,7 @@ public class EnvironmentDto implements Payload {
 
     private Json regions;
 
-    private Json telemetry;
+    private EnvironmentTelemetry telemetry;
 
     private boolean archived;
 
@@ -128,11 +129,11 @@ public class EnvironmentDto implements Payload {
         this.regions = regions;
     }
 
-    public Json getTelemetry() {
+    public EnvironmentTelemetry getTelemetry() {
         return telemetry;
     }
 
-    public void setTelemetry(Json telemetry) {
+    public void setTelemetry(EnvironmentTelemetry telemetry) {
         this.telemetry = telemetry;
     }
 
@@ -267,7 +268,7 @@ public class EnvironmentDto implements Payload {
 
         private Json regions;
 
-        private Json telemetry;
+        private EnvironmentTelemetry telemetry;
 
         private boolean archived;
 
@@ -335,11 +336,6 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
-        public Builder withTelemetry(Json telemetry) {
-            this.telemetry = telemetry;
-            return this;
-        }
-
         public Builder withArchived(boolean archived) {
             this.archived = archived;
             return this;
@@ -382,6 +378,11 @@ public class EnvironmentDto implements Payload {
 
         public Builder withCreateFreeIpa(boolean createFreeIpa) {
             this.createFreeIpa = createFreeIpa;
+            return this;
+        }
+
+        public Builder withTelemetry(EnvironmentTelemetry telemetry) {
+            this.telemetry = telemetry;
             return this;
         }
 

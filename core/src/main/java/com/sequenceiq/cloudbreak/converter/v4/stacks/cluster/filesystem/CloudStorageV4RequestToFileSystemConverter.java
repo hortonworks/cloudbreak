@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
-import com.sequenceiq.common.api.cloudstorage.CloudStorageV1Parameters;
+import com.sequenceiq.common.model.FileSystemAwareCloudStorage;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.BaseFileSystem;
@@ -40,7 +40,7 @@ public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversi
     public FileSystem convert(CloudStorageV4Request source) {
         FileSystem fileSystem = new FileSystem();
         fileSystem.setName(nameGenerator.generateName(FILESYSTEM));
-        CloudStorageV1Parameters cloudStorageParameters = fileSystemResolver.propagateConfiguration(source);
+        FileSystemAwareCloudStorage cloudStorageParameters = fileSystemResolver.propagateConfiguration(source);
         fileSystem.setType(cloudStorageParameters.getType());
 
         Set<StorageLocation> locations = new HashSet<>();

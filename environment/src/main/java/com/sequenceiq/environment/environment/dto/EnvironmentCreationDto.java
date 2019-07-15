@@ -5,9 +5,9 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public class EnvironmentCreationDto {
@@ -34,7 +34,7 @@ public class EnvironmentCreationDto {
 
     private final AuthenticationDto authentication;
 
-    private final Telemetry telemetry;
+    private final EnvironmentTelemetry telemetry;
 
     private final Long created;
 
@@ -46,7 +46,7 @@ public class EnvironmentCreationDto {
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
-            Long created, Telemetry telemetry, SecurityAccessDto securityAccess, Tunnel tunnel) {
+            Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, Tunnel tunnel) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -109,7 +109,7 @@ public class EnvironmentCreationDto {
         return credential;
     }
 
-    public Telemetry getTelemetry() {
+    public EnvironmentTelemetry getTelemetry() {
         return telemetry;
     }
 
@@ -152,7 +152,7 @@ public class EnvironmentCreationDto {
 
         private Set<String> proxyNames;
 
-        private Telemetry telemetry;
+        private EnvironmentTelemetry telemetry;
 
         private boolean createFreeIpa = true;
 
@@ -236,7 +236,7 @@ public class EnvironmentCreationDto {
             return this;
         }
 
-        public Builder withTelemetry(Telemetry telemetry) {
+        public Builder withTelemetry(EnvironmentTelemetry telemetry) {
             this.telemetry = telemetry;
             return this;
         }

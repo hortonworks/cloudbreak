@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -125,7 +125,6 @@ public class ClusterBuilderService {
         cluster.setExtendedBlueprintText(blueprintText);
         clusterService.updateCluster(cluster);
         final Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
-
 
         Set<DatalakeResources> datalakeResources = datalakeResourcesService
                 .findDatalakeResourcesByWorkspaceAndEnvironment(stack.getWorkspace().getId(), stack.getEnvironmentCrn());

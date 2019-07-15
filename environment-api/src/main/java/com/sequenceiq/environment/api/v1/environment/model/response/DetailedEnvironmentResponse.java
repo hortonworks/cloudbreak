@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 
@@ -43,8 +44,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private EnvironmentAuthenticationResponse authentication;
 
         private SecurityAccessResponse securityAccess;
-
-        private CloudStorageResponse logCloudStorage;
 
         private Tunnel tunnel;
 
@@ -130,11 +129,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withLogCloudStorage(CloudStorageResponse logCloudStorage) {
-            this.logCloudStorage = logCloudStorage;
-            return this;
-        }
-
         public Builder withTunnel(Tunnel tunnel) {
             this.tunnel = tunnel;
             return this;
@@ -158,7 +152,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setTelemetry(telemetry);
             detailedEnvironmentResponse.setSecurityAccess(securityAccess);
             detailedEnvironmentResponse.setTunnel(tunnel);
-            detailedEnvironmentResponse.setLogCloudStorage(logCloudStorage);
             return detailedEnvironmentResponse;
         }
     }

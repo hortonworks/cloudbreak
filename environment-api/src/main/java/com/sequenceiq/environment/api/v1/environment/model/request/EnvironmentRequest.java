@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
@@ -58,9 +59,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
     private SecurityAccessRequest securityAccess;
-
-    @ApiModelProperty(EnvironmentModelDescription.LOG_CLOUD_STORAGE)
-    private CloudStorageRequest logCloudStorage;
 
     @ApiModelProperty(EnvironmentModelDescription.TUNNEL)
     private Tunnel tunnel;
@@ -153,14 +151,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setSecurityAccess(SecurityAccessRequest securityAccess) {
         this.securityAccess = securityAccess;
-    }
-
-    public CloudStorageRequest getLogCloudStorage() {
-        return logCloudStorage;
-    }
-
-    public void setLogCloudStorage(CloudStorageRequest logCloudStorage) {
-        this.logCloudStorage = logCloudStorage;
     }
 
     public Tunnel getTunnel() {

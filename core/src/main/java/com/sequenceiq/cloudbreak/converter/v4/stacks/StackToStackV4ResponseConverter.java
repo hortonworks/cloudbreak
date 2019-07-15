@@ -28,21 +28,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.MountedVolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.telemetry.TelemetryV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.telemetry.logging.LoggingV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.telemetry.workload.WorkloadAnalyticsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.Logging;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
-import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalytics;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
@@ -52,11 +47,12 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 
 @Component
 public class StackToStackV4ResponseConverter extends AbstractConversionServiceAwareConverter<Stack, StackV4Response> {
@@ -74,6 +70,9 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
+
+    @Inject
+    private TelemetryConverter telemetryConverter;
 
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
@@ -171,32 +170,14 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
     }
 
     private void convertTelemetryComponent(StackV4Response response, Stack source) {
-        TelemetryV4Response telemetryV4Response = null;
+        TelemetryResponse telemetryResponse = null;
         try {
             Telemetry telemetry = componentConfigProviderService.getTelemetry(source.getId());
-            if (telemetry != null) {
-                telemetryV4Response = new TelemetryV4Response();
-                if (telemetry.getLogging() != null) {
-                    LoggingV4Response loggingV4Response = new LoggingV4Response();
-                    Logging logging = telemetry.getLogging();
-                    loggingV4Response.setEnabled(logging.isEnabled());
-                    loggingV4Response.setOutput(logging.getOutputType());
-                    loggingV4Response.setAttributes(logging.getAttributes());
-                    telemetryV4Response.setLogging(loggingV4Response);
-                }
-                if (telemetry.getWorkloadAnalytics() != null) {
-                    WorkloadAnalyticsV4Response waResponse = new WorkloadAnalyticsV4Response();
-                    WorkloadAnalytics wa = telemetry.getWorkloadAnalytics();
-                    waResponse.setEnabled(wa.isEnabled());
-                    waResponse.setAttributes(wa.getAttributes());
-                    waResponse.setDatabusEndpoint(wa.getDatabusEndpoint());
-                    telemetryV4Response.setWorkloadAnalytics(waResponse);
-                }
-            }
+            telemetryResponse = telemetryConverter.convert(telemetry);
         } catch (CloudbreakServiceException exc) {
             LOGGER.debug(exc.getMessage());
         }
-        response.setTelemetry(telemetryV4Response);
+        response.setTelemetry(telemetryResponse);
     }
 
     private void convertComponentConfig(StackV4Response stackV4Response, Stack source) {

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.template.filesystem.gcs;
 
-import static com.sequenceiq.common.api.filesystem.FileSystemType.GCS;
+import static com.sequenceiq.common.model.FileSystemType.GCS;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.template.filesystem.AbstractFileSystemConfigurator;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 
 @Component
 public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<GcsFileSystemConfigurationsView> {

@@ -28,18 +28,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.TelemetryV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.logging.LoggingV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.workload.WorkloadAnalyticsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.Logging;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
-import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalytics;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
@@ -48,7 +42,6 @@ import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.converter.util.TelemetryMergerUtil;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -71,8 +64,9 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.TelemetryResponse;
 
 @Component
 public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
@@ -108,6 +102,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     @Inject
     private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
+
+    @Inject
+    private TelemetryConverter telemetryConverter;
 
     @Inject
     private KerberosConfigService kerberosConfigService;
@@ -150,7 +147,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         updateCluster(source, stack, workspace);
-        stack.getComponents().add(getTelemetryComponent(source, stack, environment));
+        stack.getComponents().add(getTelemetryComponent(stack, environment));
         setNetworkIfApplicable(source, stack, environment);
 
         stack.setGatewayPort(source.getGatewayPort());
@@ -200,23 +197,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
+    private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(Stack stack, DetailedEnvironmentResponse environment) {
         TelemetryResponse envTelemetryResp = environment != null ? environment.getTelemetry() : null;
-        TelemetryV4Request telemetryRequest = source.getTelemetry();
-        Logging logging = null;
-        WorkloadAnalytics workloadAnalytics = null;
-        if (telemetryRequest != null) {
-            if (telemetryRequest.getLogging() != null) {
-                LoggingV4Request loggingRequest = telemetryRequest.getLogging();
-                logging = new Logging(loggingRequest.isEnabled(), loggingRequest.getOutput(), loggingRequest.getAttributes());
-            }
-            if (telemetryRequest.getWorkloadAnalytics() != null) {
-                WorkloadAnalyticsV4Request waRequest = telemetryRequest.getWorkloadAnalytics();
-                workloadAnalytics = new WorkloadAnalytics(waRequest.isEnabled(), waRequest.getDatabusEndpoint(),
-                        waRequest.getAccessKey(), waRequest.getPrivateKey(), waRequest.getAttributes());
-            }
-        }
-        Telemetry telemetry = TelemetryMergerUtil.mergeGlobalAndStackLevelTelemetry(envTelemetryResp, new Telemetry(logging, workloadAnalytics));
+        Telemetry telemetry = telemetryConverter.convert(envTelemetryResp);
         try {
             return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.TELEMETRY, ComponentType.TELEMETRY.name(), Json.silent(telemetry), stack);
         } catch (Exception e) {

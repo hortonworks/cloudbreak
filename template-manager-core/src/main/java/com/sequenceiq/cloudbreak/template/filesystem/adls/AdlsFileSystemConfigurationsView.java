@@ -5,7 +5,7 @@ import java.util.Collection;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 
 public class AdlsFileSystemConfigurationsView extends BaseFileSystemConfigurationsView {
 

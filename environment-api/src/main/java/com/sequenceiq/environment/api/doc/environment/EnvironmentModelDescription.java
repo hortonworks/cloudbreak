@@ -29,13 +29,6 @@ public class EnvironmentModelDescription {
     public static final String LOCATION_DISPLAY_NAME = "Display name of the location of the environment.";
     public static final String NETWORK = "Network related specifics of the environment.";
     public static final String TELEMETRY = "Telemetry related specifics of the environment.";
-    public static final String TELEMETRY_LOGGING = "Logging related specifics of the environment.";
-    public static final String TELEMETRY_WORKLOAD_ANALYTICS = "Workload analytics related specifics of the environment.";
-    public static final String TELEMETRY_LOGGING_OUTPUT_TYPE = "Logging output type of the environment";
-    public static final String TELEMETRY_LOGGING_ATTRIBUTES = "Logging component specific attributes of the environment";
-    public static final String TELEMETRY_FEATURE_ENABLED = "Enable telemetry component feature of the environment";
-    public static final String TELEMETRY_WA_DATABUS_ENDPOINT = "Databus endpoint for workload analytics (environment)";
-    public static final String TELEMETRY_WA_ATTRIBUTES = "Workload analytics attributes of the environment";
 
     public static final String CREDENTIAL_RESPONSE = "Credential of the environment.";
     public static final String PROXY_CONFIGS_RESPONSE = "Proxy configurations in the environment.";
@@ -53,7 +46,6 @@ public class EnvironmentModelDescription {
     public static final String DEFAULT_SECURITY_GROUP = "Security group where all other hosts are placed.";
     public static final String SECURITY_CIDR = "CIDR range which is allowed for inbound traffic. Either IPv4 or IPv6 is allowed.";
     public static final String TUNNEL = "Configuration that the connection going directly or with ccm.";
-    public static final String LOG_CLOUD_STORAGE = "Cloud storage configuration for this environment. Service logs will be stored in the defined location.";
 
     private EnvironmentModelDescription() {
     }

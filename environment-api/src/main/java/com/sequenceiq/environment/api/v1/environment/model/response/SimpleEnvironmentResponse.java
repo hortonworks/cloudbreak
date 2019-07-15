@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 
@@ -38,8 +39,6 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
         private String statusReason;
 
         private Long created;
-
-        private CloudStorageResponse logCloudStorage;
 
         private Tunnel tunnel;
 
@@ -116,11 +115,6 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withLogCloudStorage(CloudStorageResponse logCloudStorage) {
-            this.logCloudStorage = logCloudStorage;
-            return this;
-        }
-
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -136,7 +130,6 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setStatusReason(statusReason);
             simpleEnvironmentResponse.setCreated(created);
             simpleEnvironmentResponse.setTelemetry(telemetry);
-            simpleEnvironmentResponse.setLogCloudStorage(logCloudStorage);
             simpleEnvironmentResponse.setTunnel(tunnel);
             return simpleEnvironmentResponse;
         }

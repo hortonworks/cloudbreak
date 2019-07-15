@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.store.EnvironmentStatusUpdater;
 
@@ -237,12 +238,17 @@ public class Environment implements AuthResource {
         this.network = network;
     }
 
-    public Json getTelemetry() {
-        return telemetry;
+    public EnvironmentTelemetry getTelemetry() {
+        if (telemetry != null && telemetry.getValue() != null) {
+            return JsonUtil.readValueOpt(telemetry.getValue(), EnvironmentTelemetry.class).orElse(null);
+        }
+        return null;
     }
 
-    public void setTelemetry(Json telemetry) {
-        this.telemetry = telemetry;
+    public void setTelemetry(EnvironmentTelemetry telemetry) {
+        if (telemetry != null) {
+            this.telemetry = new Json(telemetry);
+        }
     }
 
     @Override

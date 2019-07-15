@@ -13,7 +13,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.telemetry.TelemetryV1Request;
 
 import io.swagger.annotations.ApiModel;
 
@@ -35,8 +34,6 @@ public class DistroXV1Request extends DistroXV1Base {
     private SdxV1Request sdx;
 
     private TagsV1Request tags;
-
-    private TelemetryV1Request telemetry;
 
     private Map<String, Object> inputs = new HashMap<>();
 
@@ -102,13 +99,5 @@ public class DistroXV1Request extends DistroXV1Base {
 
     public void setTags(TagsV1Request tags) {
         this.tags = tags;
-    }
-
-    public TelemetryV1Request getTelemetry() {
-        return telemetry;
-    }
-
-    public void setTelemetry(TelemetryV1Request telemetry) {
-        this.telemetry = telemetry;
     }
 }
