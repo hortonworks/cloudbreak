@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.entity;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -59,6 +61,8 @@ public class SyncOperation {
     @PrePersist
     protected void onCreate() {
         startTime = System.currentTimeMillis();
+        successList = emptyListIfNull(successList);
+        failureList = emptyListIfNull(failureList);
     }
 
     public Long getId() {
@@ -106,7 +110,7 @@ public class SyncOperation {
     }
 
     public void setSuccessList(Json successList) {
-        this.successList = successList;
+        this.successList = emptyListIfNull(successList);
     }
 
     public Json getFailureList() {
@@ -114,7 +118,7 @@ public class SyncOperation {
     }
 
     public void setFailureList(Json failureList) {
-        this.failureList = failureList;
+        this.failureList = emptyListIfNull(failureList);
     }
 
     public String getError() {
@@ -139,5 +143,12 @@ public class SyncOperation {
 
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+
+    private Json emptyListIfNull(Json listJson) {
+        if (listJson == null || listJson.getValue() == null) {
+            return new Json(List.of());
+        }
+        return listJson;
     }
 }
