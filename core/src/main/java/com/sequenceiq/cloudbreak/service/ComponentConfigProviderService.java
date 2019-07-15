@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;

@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.template.filesystem.adls;
 
-import static com.sequenceiq.common.api.filesystem.FileSystemType.ADLS;
+import static com.sequenceiq.common.model.FileSystemType.ADLS;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.template.filesystem.AbstractFileSystemConfigurator;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 
 @Component
 public class AdlsFileSystemConfigurator extends AbstractFileSystemConfigurator<AdlsFileSystemConfigurationsView> {

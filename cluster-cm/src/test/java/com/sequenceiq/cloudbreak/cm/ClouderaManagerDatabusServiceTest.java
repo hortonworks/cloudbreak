@@ -1,11 +1,17 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Map;
+import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,8 +22,6 @@ import org.mockito.MockitoAnnotations;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
-import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalytics;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -71,15 +75,12 @@ public class ClouderaManagerDatabusServiceTest {
     @Test
     public void testCleanupMachineUser() {
         // GIVEN
-        WorkloadAnalytics wa = new WorkloadAnalytics(true, null, null, null, null);
-        Telemetry telemetry = new Telemetry(null, wa);
-
         doNothing().when(umsClient).unassignMachineUserRole(any(), any(), any(), any());
         doNothing().when(umsClient).deleteMachineUserAccessKeys(any(), any(), any());
         doNothing().when(umsClient).deleteMachineUser(any(), any(), any());
 
         // WHEN
-        underTest.cleanUpMachineUser(stack, telemetry);
+        underTest.cleanUpMachineUser(stack);
 
         // THEN
         verify(umsClient, times(1)).unassignMachineUserRole(any(), any(), any(), any());
@@ -88,16 +89,30 @@ public class ClouderaManagerDatabusServiceTest {
     }
 
     @Test
-    public void testCleanupMachineUserWithProvidedKeys() {
+    public void testGetAltusCredential() {
         // GIVEN
-        WorkloadAnalytics wa = new WorkloadAnalytics(true, null, "access", "private", null);
-        Telemetry telemetry = new Telemetry(null, wa);
-
+        AltusCredential credential = new AltusCredential("accessKey", "secretKey".toCharArray());
+        UserManagementProto.MachineUser machineUser = UserManagementProto.MachineUser.newBuilder()
+                .setMachineUserName("machineUser")
+                .setCrn(USER_CRN)
+                .build();
+        when(umsClient.createMachineUser(any(), any(), any())).thenReturn(machineUser);
+        doNothing().when(umsClient).assignMachineUserRole(any(), any(), any(), any());
+        when(umsClient.generateAccessSecretKeyPair(any(), any(), any())).thenReturn(credential);
         // WHEN
-        underTest.cleanUpMachineUser(stack, telemetry);
-
+        AltusCredential result = underTest.getAltusCredential(stack);
         // THEN
-        verify(umsClient, times(0)).unassignMachineUserRole(any(), any(), any(), any());
+        assertEquals("secretKey", new String(result.getPrivateKey()));
+    }
+
+    @Test
+    public void testTrimAndReplace() {
+        // GIVEN
+        String rawPrivateKey = "BEGIN\nline1\nline2\nlastline";
+        // WHEN
+        String result = underTest.trimAndReplacePrivateKey(rawPrivateKey.toCharArray());
+        // THEN
+        assertEquals("BEGIN\\nline1\\nline2\\nlastline", result);
     }
 
     @Test
@@ -107,5 +122,17 @@ public class ClouderaManagerDatabusServiceTest {
         String result = underTest.getBuiltInDatabusCrn();
         // THEN
         assertEquals("crn:altus:iam:us-west-1:altus:role:DbusUploader", result);
+    }
+
+    @Test
+    public void testParseINI() throws IOException {
+        // GIVEN
+        StringReader srData = new StringReader("[default]\naltus_access_key_id=accesKey\naltus_private_key=privateKey");
+        // WHEN
+        Map<String, Properties> result = underTest.parseINI(srData);
+        // THEN
+        assertTrue(result.containsKey("default"));
+        assertEquals(result.get("default").getProperty("altus_access_key_id"), "accesKey");
+        assertEquals(result.get("default").getProperty("altus_private_key"), "privateKey");
     }
 }

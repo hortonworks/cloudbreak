@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.template.HandlebarUtils;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntries;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 
 @Service
 public class CloudStorageConfigDetails {

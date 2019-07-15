@@ -57,7 +57,7 @@ import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;

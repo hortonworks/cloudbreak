@@ -9,10 +9,10 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -26,10 +26,9 @@ import com.cloudera.api.swagger.model.ApiRoleList;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
-import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalytics;
-import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalyticsAttributesHolder;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 
 @Service
 public class ClouderaManagerMgmtTelemetryService {
@@ -71,9 +70,6 @@ public class ClouderaManagerMgmtTelemetryService {
 
     private static final String TELEMETRY_WA_DEFAULT_CLUSTER_TYPE = "DISTROX";
 
-    @Value("${altus.databus.endpoint:}")
-    private String databusEndpoint;
-
     @Inject
     private ClouderaManagerExternalAccountService externalAccountService;
 
@@ -88,7 +84,7 @@ public class ClouderaManagerMgmtTelemetryService {
             ApiConfigList apiConfigList = buildTelemetryCMConfigList(workloadAnalytics);
             cmResourceApi.updateConfig("Adding telemetry settings.", apiConfigList);
 
-            AltusCredential credentials = getAltusCredential(stack, workloadAnalytics);
+            AltusCredential credentials = clouderaManagerDatabusService.getAltusCredential(stack);
             Map<String, String> accountConfigs = new HashMap<>();
             accountConfigs.put(ALTUS_CREDENTIAL_ACCESS_KEY_NAME, credentials.getAccessKey());
             accountConfigs.put(ALTUS_CREDENTIAL_PRIVATE_KEY_NAME, new String(credentials.getPrivateKey()));
@@ -129,59 +125,31 @@ public class ClouderaManagerMgmtTelemetryService {
     }
 
     @VisibleForTesting
-    ApiConfigList buildTelemetryCMConfigList(WorkloadAnalytics wa) {
+    ApiConfigList buildTelemetryCMConfigList(WorkloadAnalytics workloadAnalytics) {
         final Map<String, String> configsToUpdate = new HashMap<>();
         configsToUpdate.put(TELEMETRY_MASTER, "true");
         configsToUpdate.put(TELEMETRY_WA, "true");
         configsToUpdate.put(TELEMETRY_COLLECT_JOB_LOGS, "true");
         configsToUpdate.put(TELEMETRY_ALTUS_ACCOUNT, ALTUS_CREDENTIAL_NAME);
-        if (StringUtils.isNotEmpty(wa.getDatabusEndpoint())) {
-            configsToUpdate.put(TELEMETRY_ALTUS_URL, wa.getDatabusEndpoint());
-        } else if (StringUtils.isNotEmpty(databusEndpoint)) {
-            configsToUpdate.put(TELEMETRY_ALTUS_URL, databusEndpoint);
+        if (StringUtils.isNotEmpty(workloadAnalytics.getDatabusEndpoint())) {
+            configsToUpdate.put(TELEMETRY_ALTUS_URL, workloadAnalytics.getDatabusEndpoint());
         }
         return makeApiConfigList(configsToUpdate);
     }
 
-    @VisibleForTesting
-    AltusCredential getAltusCredential(Stack stack, WorkloadAnalytics wa) {
-        String accessKey = "";
-        String privateKey = "";
-        if (wa.getAccessKey() == null || wa.getPrivateKey() == null) {
-            AltusCredential credential = clouderaManagerDatabusService.createMachineUserAndGenerateKeys(stack);
-            accessKey = credential.getAccessKey();
-            privateKey = trimAndReplacePrivateKey(credential.getPrivateKey());
-        } else {
-            LOGGER.warn("Altus access / private key pair is set directly.");
-            accessKey = wa.getAccessKey();
-            privateKey = trimAndReplacePrivateKey(wa.getPrivateKey().toCharArray());
-        }
-        return new AltusCredential(accessKey, privateKey.toCharArray());
-    }
-
     // TODO: Add sdx id & name from sdx context if it is filled
     @VisibleForTesting
-    void enrichWithSdxData(String sdxContext, Stack stack, WorkloadAnalytics wa, Map<String, String> telemetrySafetyValveMap) {
-        final String sdxId;
-        final String sdxName;
-        WorkloadAnalyticsAttributesHolder attributes = wa.getAttributes();
-        if (attributes != null && StringUtils.isNoneEmpty(attributes.getSdxId(), attributes.getSdxName())) {
-            sdxId = attributes.getSdxId();
-            sdxName = attributes.getSdxName();
-        } else {
-            sdxName = String.format("%s-%s", stack.getCluster().getName(), stack.getCluster().getId().toString());
-            sdxId = UUID.nameUUIDFromBytes(sdxName.getBytes()).toString();
-        }
+    void enrichWithSdxData(String sdxContext, Stack stack, WorkloadAnalytics workloadAnalytics,
+            Map<String, String> telemetrySafetyValveMap) {
+        final String sdxName = String.format("%s-%s", stack.getCluster().getName(), stack.getCluster().getId().toString());
+        final String sdxId = UUID.nameUUIDFromBytes(sdxName.getBytes()).toString();
         telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_ID, sdxId);
         telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_NAME, sdxName);
-    }
-
-    // CM expects the private key to come in as a single line, so we need to
-    // encode the newlines. We trim it to avoid a CM warning that the key
-    // should not start or end with whitespace.
-    @VisibleForTesting
-    String trimAndReplacePrivateKey(char[] privateKey) {
-        return new String(privateKey).trim().replace("\n", "\\n");
+        if (workloadAnalytics.getAttributes() != null) {
+            for (Map.Entry<String, Object> entry : workloadAnalytics.getAttributes().entrySet()) {
+                telemetrySafetyValveMap.put(entry.getKey(), ObjectUtils.defaultIfNull(entry.getValue().toString(), ""));
+            }
+        }
     }
 
     private String createStringFromSafetyValveMap(Map<String, String> telemetrySafetyValveMap) {
@@ -194,7 +162,6 @@ public class ClouderaManagerMgmtTelemetryService {
     private boolean isWorkflowAnalyticsEnabled(Stack stack, Telemetry telemetry) {
         return telemetry != null
                 && telemetry.getWorkloadAnalytics() != null
-                && telemetry.getWorkloadAnalytics().isEnabled()
                 && !StackType.DATALAKE.equals(stack.getType());
     }
 }

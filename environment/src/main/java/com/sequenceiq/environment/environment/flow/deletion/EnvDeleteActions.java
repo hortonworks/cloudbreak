@@ -179,7 +179,11 @@ public class EnvDeleteActions {
 
         @Override
         protected void prepareExecution(P payload, Map<Object, Object> variables) {
-            MdcContext.builder().resourceCrn(payload.getResourceCrn()).buildMdc();
+            if (payload != null) {
+                MdcContext.builder().resourceCrn(payload.getResourceCrn()).buildMdc();
+            } else {
+                LOGGER.warn("Payload was null in prepareExecution so resourceCrn cannot be added to the MdcContext!");
+            }
         }
     }
 

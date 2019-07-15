@@ -78,7 +78,7 @@ import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GcpInstanceResourceBuilderTest {

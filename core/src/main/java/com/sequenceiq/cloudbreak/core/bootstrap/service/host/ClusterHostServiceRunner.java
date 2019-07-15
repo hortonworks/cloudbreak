@@ -36,11 +36,11 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -58,6 +58,8 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.fluent.FluentConfigService;
+import com.sequenceiq.cloudbreak.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
@@ -70,7 +72,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -90,6 +91,7 @@ import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -168,6 +170,12 @@ public class ClusterHostServiceRunner {
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
+    @Inject
+    private FluentConfigService fluentConfigService;
+
+    @Inject
+    private TelemetryDecorator telemetryDecorator;
+
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster) {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
@@ -220,23 +228,7 @@ public class ClusterHostServiceRunner {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
         saveCustomNameservers(stack, kerberosConfig, servicePillar);
-        if (kerberosConfig != null
-                && kerberosDetailService.isAmbariManagedKerberosPackages(kerberosConfig)
-                && !kerberosDetailService.isAmbariManagedKrb5Conf(kerberosConfig)) {
-            Map<String, String> kerberosPillarConf = new HashMap<>();
-            if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
-                putIfNotNull(kerberosPillarConf, kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kerberosConfig.getUrl()), "adminUrl");
-                putIfNotNull(kerberosPillarConf, kerberosConfig.getRealm(), "realm");
-            } else {
-                Map<String, Object> properties = kerberosDetailService.getKerberosEnvProperties(kerberosConfig);
-                putIfNotNull(kerberosPillarConf, properties.get("kdc_hosts"), "url");
-                putIfNotNull(kerberosPillarConf, properties.get("admin_server_host"), "adminUrl");
-                putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
-            }
-            putIfNotNull(kerberosPillarConf, kerberosConfig.getVerifyKdcTrust().toString(), "verifyKdcTrust");
-            servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
-        }
+        addKerberosConfig(servicePillar, kerberosConfig);
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls",
                 singletonMap("cluster", singletonMap("name", stack.getCluster().getName()))));
@@ -246,28 +238,9 @@ public class ClusterHostServiceRunner {
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
         if (blueprintService.isClouderaManagerTemplate(cluster.getBlueprint())) {
-            Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
-            new TelemetryDecorator(servicePillar).decoratePillar(telemetry, cluster.getName(), stack.getType(), stack.getCloudPlatform());
-            decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
-            decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
-            decoratePillarWithClouderaManagerRepo(stack.getId(), cluster.getId(), servicePillar);
-            decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
+            addClouderaManagerConfig(stack, cluster, servicePillar);
         } else {
-            AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
-            if (ambariRepo != null) {
-                Map<String, Object> ambariRepoMap = ambariRepo.asMap();
-                String blueprintText = cluster.getBlueprint().getBlueprintText();
-                Json blueprint = new Json(blueprintText);
-                ambariRepoMap.put("stack_version", blueprint.getValue("Blueprints.stack_version"));
-                ambariRepoMap.put("stack_type", blueprint.getValue("Blueprints.stack_name").toString().toLowerCase());
-                servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepoMap))));
-                boolean setupLdapAndSsoOnApi = connector.isLdapAndSSOReady(ambariRepo);
-                servicePillar.put("setup-ldap-and-sso-on-api", new SaltPillarProperties("/ambari/config.sls",
-                        singletonMap("ambari", singletonMap("setup_ldap_and_sso_on_api", setupLdapAndSsoOnApi))));
-            }
-            servicePillar.put("ambari-gpl-repo", new SaltPillarProperties("/ambari/gpl.sls", singletonMap("ambari", singletonMap("gpl", singletonMap("enabled",
-                    clusterComponentConfigProvider.getHDPRepo(cluster.getId()).isEnableGplRepo())))));
-            decoratePillarWithAmbariDatabase(cluster, servicePillar);
+            addAmbariConfig(cluster, servicePillar, connector);
         }
 
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn());
@@ -289,6 +262,60 @@ public class ClusterHostServiceRunner {
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
+    }
+
+    private void addKerberosConfig(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) throws IOException {
+        if (isKerberosNeeded(kerberosConfig)) {
+            Map<String, String> kerberosPillarConf = new HashMap<>();
+            if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
+                putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
+                putIfNotNull(kerberosPillarConf, kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kerberosConfig.getUrl()), "adminUrl");
+                putIfNotNull(kerberosPillarConf, kerberosConfig.getRealm(), "realm");
+            } else {
+                Map<String, Object> properties = kerberosDetailService.getKerberosEnvProperties(kerberosConfig);
+                putIfNotNull(kerberosPillarConf, properties.get("kdc_hosts"), "url");
+                putIfNotNull(kerberosPillarConf, properties.get("admin_server_host"), "adminUrl");
+                putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
+            }
+            putIfNotNull(kerberosPillarConf, kerberosConfig.getVerifyKdcTrust().toString(), "verifyKdcTrust");
+            servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
+        }
+    }
+
+    private boolean isKerberosNeeded(KerberosConfig kerberosConfig) throws IOException {
+        return kerberosConfig != null
+                && kerberosDetailService.isAmbariManagedKerberosPackages(kerberosConfig)
+                && !kerberosDetailService.isAmbariManagedKrb5Conf(kerberosConfig);
+    }
+
+    private void addClouderaManagerConfig(Stack stack, Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
+            throws CloudbreakOrchestratorFailedException {
+        Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
+        FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(stack, telemetry);
+        telemetryDecorator.decoratePillar(servicePillar, fluentConfigView);
+        decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
+        decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
+        decoratePillarWithClouderaManagerRepo(stack.getId(), cluster.getId(), servicePillar);
+        decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
+    }
+
+    private void addAmbariConfig(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, ClusterPreCreationApi connector)
+            throws CloudbreakOrchestratorFailedException {
+        AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
+        if (ambariRepo != null) {
+            Map<String, Object> ambariRepoMap = ambariRepo.asMap();
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
+            Json blueprint = new Json(blueprintText);
+            ambariRepoMap.put("stack_version", blueprint.getValue("Blueprints.stack_version"));
+            ambariRepoMap.put("stack_type", blueprint.getValue("Blueprints.stack_name").toString().toLowerCase());
+            servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepoMap))));
+            boolean setupLdapAndSsoOnApi = connector.isLdapAndSSOReady(ambariRepo);
+            servicePillar.put("setup-ldap-and-sso-on-api", new SaltPillarProperties("/ambari/config.sls",
+                    singletonMap("ambari", singletonMap("setup_ldap_and_sso_on_api", setupLdapAndSsoOnApi))));
+        }
+        servicePillar.put("ambari-gpl-repo", new SaltPillarProperties("/ambari/gpl.sls", singletonMap("ambari", singletonMap("gpl", singletonMap("enabled",
+                clusterComponentConfigProvider.getHDPRepo(cluster.getId()).isEnableGplRepo())))));
+        decoratePillarWithAmbariDatabase(cluster, servicePillar);
     }
 
     private void saveSssdAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
@@ -341,7 +368,7 @@ public class ClusterHostServiceRunner {
     // Right now we are assuming that CM enterprise is enabled if workload analytics is used
     // In the future that should be enabled based on the license
     private void decorateWithClouderaManagerEntrerpriseDetails(Telemetry telemetry, Map<String, SaltPillarProperties> servicePillar) {
-        if (telemetry != null && telemetry.getWorkloadAnalytics() != null && telemetry.getWorkloadAnalytics().isEnabled()) {
+        if (telemetry != null && telemetry.getWorkloadAnalytics() != null) {
             servicePillar.put("cloudera-manager-cme",
                     new SaltPillarProperties("/cloudera-manager/cme.sls", singletonMap("cloudera-manager", singletonMap("cme_enabled", true))));
         }

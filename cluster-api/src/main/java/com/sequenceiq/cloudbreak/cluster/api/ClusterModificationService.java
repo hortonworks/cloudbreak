@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;

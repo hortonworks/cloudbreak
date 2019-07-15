@@ -34,24 +34,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.Cu
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.telemetry.TelemetryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.Logging;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
-import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalytics;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -65,6 +61,11 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.common.api.telemetry.model.Logging;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
 public class StackToStackV4ResponseConverterTest extends AbstractEntityConverterTest<Stack> {
@@ -88,6 +89,9 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     private ConverterUtil converterUtil;
 
     @Mock
+    private TelemetryConverter telemetryConverter;
+
+    @Mock
     private ProviderParameterCalculator providerParameterCalculator;
 
     @Mock
@@ -107,8 +111,8 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         when(componentConfigProviderService.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
         when(componentConfigProviderService.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
         when(componentConfigProviderService.getTelemetry(anyLong())).thenReturn(new Telemetry(
-                new Logging(false, null, null),
-                new WorkloadAnalytics(false, null, null, null, null)));
+                new Logging(),
+                new WorkloadAnalytics()));
         when(clusterComponentConfigProvider.getHDPRepo(anyLong())).thenReturn(new StackRepoDetails());
         when(clusterComponentConfigProvider.getAmbariRepo(anyLong())).thenReturn(new AmbariRepo());
         DatalakeResources datalakeResources = new DatalakeResources();
@@ -132,13 +136,13 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(WorkspaceResourceV4Response.class))).willReturn(new WorkspaceResourceV4Response());
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
-        given(conversionService.convert(any(), eq(TelemetryV4Response.class))).willReturn(new TelemetryV4Response());
+        given(conversionService.convert(any(), eq(TelemetryResponse.class))).willReturn(new TelemetryResponse());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "environmentName", "credentialName"));
+                "environmentName", "credentialName", "telemetry"));
     }
 
     @Test
@@ -154,7 +158,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(WorkspaceResourceV4Response.class))).willReturn(new WorkspaceResourceV4Response());
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
-        given(conversionService.convert(any(), eq(TelemetryV4Response.class))).willReturn(new TelemetryV4Response());
+        given(conversionService.convert(any(), eq(TelemetryResponse.class))).willReturn(new TelemetryResponse());
         given(environmentClientService.getByCrn(anyString())).willReturn(builder()
                 .withCredential(credentialResponse)
                 .withName("env-name")
@@ -164,7 +168,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName"));
+                "telemetry", "environmentName", "credentialName", "telemetry"));
 
         assertNull(result.getCluster());
     }
@@ -182,7 +186,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(WorkspaceResourceV4Response.class))).willReturn(new WorkspaceResourceV4Response());
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
-        given(conversionService.convert(any(), eq(TelemetryV4Response.class))).willReturn(new TelemetryV4Response());
+        given(conversionService.convert(any(), eq(TelemetryResponse.class))).willReturn(new TelemetryResponse());
         given(environmentClientService.getByCrn(anyString())).willReturn(builder()
                 .withCredential(credentialResponse)
                 .withName("env-name")
@@ -192,7 +196,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("network", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName"));
+                "telemetry", "environmentName", "credentialName", "telemetry"));
 
         assertNull(result.getNetwork());
     }

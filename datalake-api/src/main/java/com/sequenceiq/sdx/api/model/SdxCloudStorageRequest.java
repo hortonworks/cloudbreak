@@ -1,7 +1,7 @@
 package com.sequenceiq.sdx.api.model;
 
 import com.sequenceiq.common.api.cloudstorage.CloudStorageV1Base;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 
 public class SdxCloudStorageRequest extends CloudStorageV1Base {
 

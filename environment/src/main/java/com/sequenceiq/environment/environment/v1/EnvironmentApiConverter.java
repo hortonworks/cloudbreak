@@ -24,7 +24,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.LocationResp
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
-import com.sequenceiq.environment.credential.v1.converter.TelemetryApiConverter;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
@@ -33,7 +32,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
-import com.sequenceiq.environment.environment.v1.converter.RegionConverter;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -162,7 +160,7 @@ public class EnvironmentApiConverter {
                 .withAuthentication(authenticationDtoToResponse(environmentDto.getAuthentication()))
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
-                .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
+                .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withTunnel(environmentDto.getTunnel())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
@@ -184,7 +182,7 @@ public class EnvironmentApiConverter {
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
                 .withTunnel(environmentDto.getTunnel())
-                .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
+                .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));

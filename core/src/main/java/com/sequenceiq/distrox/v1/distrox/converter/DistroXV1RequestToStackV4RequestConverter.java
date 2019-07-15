@@ -37,9 +37,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private DistroXClusterToClusterConverter clusterConverter;
 
     @Inject
-    private DistroXTelemetryToTelemetryV4Converter telemetryConverter;
-
-    @Inject
     private InstanceGroupV1ToInstanceGroupV4Converter instanceGroupConverter;
 
     @Inject
@@ -70,7 +67,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setType(StackType.WORKLOAD);
         request.setCloudPlatform(getCloudPlatform(environment));
         request.setEnvironmentCrn(environment.getCrn());
-        request.setTelemetry(getIfNotNull(source.getTelemetry(), telemetryConverter::convert));
         request.setAuthentication(getIfNotNull(environment.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
@@ -100,7 +96,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         }
         request.setName(source.getName());
         request.setType(StackType.WORKLOAD);
-        request.setTelemetry(getIfNotNull(source.getTelemetry(), telemetryConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
         DetailedEnvironmentResponse environmentRef = environment;

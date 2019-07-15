@@ -25,12 +25,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.telemetry.TelemetryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -97,7 +97,7 @@ public class StackV4Response extends StackV4Base {
     private TagsV4Response tags;
 
     @ApiModelProperty(StackModelDescription.TELEMETRY)
-    private TelemetryV4Response telemetry;
+    private TelemetryResponse telemetry;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
@@ -268,11 +268,11 @@ public class StackV4Response extends StackV4Base {
         this.tags = tags;
     }
 
-    public TelemetryV4Response getTelemetry() {
+    public TelemetryResponse getTelemetry() {
         return telemetry;
     }
 
-    public void setTelemetry(TelemetryV4Response telemetry) {
+    public void setTelemetry(TelemetryResponse telemetry) {
         this.telemetry = telemetry;
     }
 

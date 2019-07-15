@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 

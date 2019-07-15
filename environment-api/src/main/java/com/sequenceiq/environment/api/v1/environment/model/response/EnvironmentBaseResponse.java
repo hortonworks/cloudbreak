@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -58,8 +59,6 @@ public abstract class EnvironmentBaseResponse {
 
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
     private SecurityAccessResponse securityAccess;
-
-    private CloudStorageResponse logCloudStorage;
 
     public String getCrn() {
         return crn;
@@ -187,14 +186,6 @@ public abstract class EnvironmentBaseResponse {
 
     public void setSecurityAccess(SecurityAccessResponse securityAccess) {
         this.securityAccess = securityAccess;
-    }
-
-    public CloudStorageResponse getLogCloudStorage() {
-        return logCloudStorage;
-    }
-
-    public void setLogCloudStorage(CloudStorageResponse logCloudStorage) {
-        this.logCloudStorage = logCloudStorage;
     }
 
     public Tunnel getTunnel() {

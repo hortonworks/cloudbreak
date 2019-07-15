@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;

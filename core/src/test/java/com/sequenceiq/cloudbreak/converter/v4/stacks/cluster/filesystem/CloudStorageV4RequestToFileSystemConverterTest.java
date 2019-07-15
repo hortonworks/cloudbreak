@@ -30,7 +30,7 @@ import com.sequenceiq.common.api.cloudstorage.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
-import com.sequenceiq.common.api.filesystem.FileSystemType;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 

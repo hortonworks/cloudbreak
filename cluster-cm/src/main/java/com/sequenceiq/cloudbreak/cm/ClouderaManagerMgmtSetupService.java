@@ -29,7 +29,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cm.database.DatabaseProperties;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;

@@ -46,7 +46,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.cloudbreak.ambari.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
