@@ -66,6 +66,9 @@ dependencies {
   compile (project(':freeipa-api')) {
     transitive = false;
   }
+  compile (project(':freeipa-client')) {
+    transitive = false;
+  }
   compile (project(':environment-api')) {
     transitive = false;
   }

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.plac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
@@ -26,9 +27,12 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.Securit
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.FreeIPATestClient;
+import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIPATestDto;
@@ -40,7 +44,8 @@ import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Prototype
-public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIPATestDto> {
+public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIPATestDto>
+        implements Purgable<ListFreeIpaResponse, FreeIPAClient> {
 
     @Inject
     private FreeIPATestClient freeIPATestClient;
@@ -56,6 +61,7 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()))
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
+                .withGatewayPort(getCloudProvider().gatewayPort(this))
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withFreeIPA("ipatest.local", "ipaserver", "admin1234");
     }
@@ -141,10 +147,12 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
     private FreeIPATestDto withNetwork(NetworkV4TestDto network) {
         NetworkV4Request request = network.getRequest();
         NetworkRequest networkRequest = new NetworkRequest();
-        AwsNetworkParameters params = new AwsNetworkParameters();
-        params.setSubnetId(request.getAws().getSubnetId());
-        params.setVpcId(request.getAws().getVpcId());
-        networkRequest.setAws(params);
+        if (request.getAws() != null) {
+            AwsNetworkParameters params = new AwsNetworkParameters();
+            params.setSubnetId(request.getAws().getSubnetId());
+            params.setVpcId(request.getAws().getVpcId());
+            networkRequest.setAws(params);
+        }
         getRequest().setNetwork(networkRequest);
         return this;
     }
@@ -164,6 +172,13 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return this;
     }
 
+    public FreeIPATestDto withCatalog(String catalog) {
+        ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
+        imageSettingsRequest.setCatalog(catalog);
+        getRequest().setImage(imageSettingsRequest);
+        return this;
+    }
+
     public FreeIPATestDto await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status status) {
         return await(status, emptyRunningParameter());
     }
@@ -172,8 +187,33 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return getTestContext().await(this, status, runningParameter);
     }
 
+    public FreeIPATestDto withGatewayPort(Integer port) {
+        getRequest().setGatewayPort(port);
+        return this;
+    }
+
     @Override
     public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
         return when(freeIPATestClient.describe(), key("refresh-freeipa-" + getName()));
+    }
+
+    @Override
+    public Collection<ListFreeIpaResponse> getAll(FreeIPAClient client) {
+        return client.getFreeIpaClient().getFreeIpaV1Endpoint().list();
+    }
+
+    @Override
+    public boolean deletable(ListFreeIpaResponse entity) {
+        return entity.getName().startsWith(resourceProperyProvider().prefix());
+    }
+
+    @Override
+    public void delete(TestContext testContext, ListFreeIpaResponse entity, FreeIPAClient client) {
+        client.getFreeIpaClient().getFreeIpaV1Endpoint().delete(entity.getEnvironmentCrn());
+    }
+
+    @Override
+    public Class<FreeIPAClient> client() {
+        return FreeIPAClient.class;
     }
 }

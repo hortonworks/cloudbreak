@@ -81,6 +81,7 @@ dependencies {
   implementation project(':orchestrator-api')
   implementation project(':flow')
   implementation project(':freeipa-api')
+  implementation project(':freeipa-client')
   implementation project(':common')
   implementation project(':core-api')
   implementation project(':secret-engine')

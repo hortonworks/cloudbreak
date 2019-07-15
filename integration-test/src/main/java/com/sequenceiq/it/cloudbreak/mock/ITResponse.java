@@ -21,7 +21,11 @@ public abstract class ITResponse implements Route {
 
     public static final String SALT_BOOT_ROOT = "/saltboot";
 
+    public static final String FREEIPA_ROOT = "/ipa";
+
     public static final String IMAGE_CATALOG = "/imagecatalog";
+
+    public static final String FREEIPA_IMAGE_CATALOG = "/freeipaimagecatalog";
 
     public static final String IMAGE_CATALOG_PREWARMED = "/imagecatalogwithprewarmed";
 

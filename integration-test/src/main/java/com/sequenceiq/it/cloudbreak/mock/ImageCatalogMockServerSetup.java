@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.mock;
 
 import static com.sequenceiq.it.cloudbreak.CloudbreakTest.CLOUDBREAK_SERVER_ROOT;
+import static com.sequenceiq.it.cloudbreak.mock.ITResponse.FREEIPA_IMAGE_CATALOG;
 import static com.sequenceiq.it.cloudbreak.mock.ITResponse.IMAGE_CATALOG;
 import static com.sequenceiq.it.cloudbreak.mock.ITResponse.IMAGE_CATALOG_PREWARMED;
 
@@ -38,6 +39,7 @@ public class ImageCatalogMockServerSetup implements AutoCloseable {
     public void configureImgCatalogMock() {
         sparkServer = sparkServerFactory.construct();
         startImageCatalog();
+        startFreeIpaImageCatalog();
     }
 
     public void startImageCatalog() {
@@ -48,6 +50,20 @@ public class ImageCatalogMockServerSetup implements AutoCloseable {
             return "";
         });
         LOGGER.info("ImageCatalog has started at: {}", sparkServer.getEndpoint() + IMAGE_CATALOG);
+    }
+
+    public void startFreeIpaImageCatalog() {
+        String jsonCatalogResponse = responseFromJsonFile("imagecatalog/freeipa.json");
+        sparkServer.getSparkService().get(FREEIPA_IMAGE_CATALOG, (request, response) -> jsonCatalogResponse);
+        sparkServer.getSparkService().head(FREEIPA_IMAGE_CATALOG, (request, response) -> {
+            response.header("Content-Length", String.valueOf(jsonCatalogResponse.length()));
+            return "";
+        });
+        LOGGER.info("FreeIPA ImageCatalog has started at: {}", sparkServer.getEndpoint() + FREEIPA_IMAGE_CATALOG);
+    }
+
+    public String getFreeIpaImageCatalogUrl() {
+        return String.join("", sparkServer.getEndpoint(), FREEIPA_IMAGE_CATALOG);
     }
 
     public String getImageCatalogUrl() {

@@ -31,7 +31,7 @@ public class ListFlatteningDeserializer<T> extends JsonDeserializer<T> implement
             return mapper.convertValue(actual, targetClass);
         }
 
-        return null;
+        return mapper.convertValue(node, targetClass);
     }
 
     @Override

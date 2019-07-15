@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTest
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -202,6 +203,11 @@ public class CloudProviderProxy implements CloudProvider {
 
     @Override
     public Integer gatewayPort(StackTestDtoBase stackEntity) {
+        return delegate.gatewayPort(stackEntity);
+    }
+
+    @Override
+    public Integer gatewayPort(FreeIPATestDto stackEntity) {
         return delegate.gatewayPort(stackEntity);
     }
 

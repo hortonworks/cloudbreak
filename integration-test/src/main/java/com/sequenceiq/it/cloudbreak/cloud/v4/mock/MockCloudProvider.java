@@ -31,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTest
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
@@ -245,6 +246,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public Integer gatewayPort(StackTestDtoBase stackEntity) {
+        MockedTestContext mockedTestContext = (MockedTestContext) stackEntity.getTestContext();
+        return mockedTestContext.getSparkServer().getPort();
+    }
+
+    @Override
+    public Integer gatewayPort(FreeIPATestDto stackEntity) {
         MockedTestContext mockedTestContext = (MockedTestContext) stackEntity.getTestContext();
         return mockedTestContext.getSparkServer().getPort();
     }

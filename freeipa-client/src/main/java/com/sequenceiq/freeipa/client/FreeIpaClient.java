@@ -11,7 +11,6 @@ import java.util.Set;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.freeipa.client.model.Ca;
@@ -341,7 +340,7 @@ public class FreeIpaClient {
     }
 
     public Role addRoleMember(String roleName, Set<String> users, Set<String> groups, Set<String> hosts, Set<String> hostgroups, Set<String> services)
-        throws FreeIpaClientException {
+            throws FreeIpaClientException {
         List<String> flags = List.of(roleName);
         Map<String, Object> params = new HashMap<>();
         addToMapIfNotEmpty(params, "user", users);
@@ -353,7 +352,7 @@ public class FreeIpaClient {
     }
 
     private void addToMapIfNotEmpty(Map<String, Object> params, String key, Set<String> values) {
-        if (!CollectionUtils.isEmpty(values)) {
+        if (values != null && !values.isEmpty()) {
             params.put(key, values);
         }
     }
