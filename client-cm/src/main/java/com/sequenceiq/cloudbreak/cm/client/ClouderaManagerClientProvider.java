@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.client;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.ssl.SSLContexts;
@@ -54,6 +56,9 @@ public class ClouderaManagerClientProvider {
                     .build();
             cmClient.getHttpClient().setSslSocketFactory(sslContext.getSocketFactory());
             cmClient.getHttpClient().setHostnameVerifier(CertificateTrustManager.hostnameVerifier());
+            cmClient.getHttpClient().setConnectTimeout(1L, TimeUnit.MINUTES);
+            cmClient.getHttpClient().setReadTimeout(1L, TimeUnit.MINUTES);
+            cmClient.getHttpClient().setWriteTimeout(1L, TimeUnit.MINUTES);
             return cmClient;
         } catch (Exception e) {
             LOGGER.info("Can not create SSL context for Cloudera Manager", e);
