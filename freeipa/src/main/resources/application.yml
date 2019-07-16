@@ -34,7 +34,7 @@ freeipa:
       ssl: false
   image.catalog:
     url: https://cloudbreak-imagecatalog.s3.amazonaws.com/freeipa-image-catalog.json
-    default.os: centos7
+    default.os: redhat7
     cache.ttl: 15
   platform.default.instanceType:
     AWS: m5.large
