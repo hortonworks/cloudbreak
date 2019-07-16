@@ -147,8 +147,8 @@ public class StackCreatorService {
 
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest) {
         long start = System.currentTimeMillis();
-
         blueprintService.updateDefaultBlueprintCollection(workspace.getId());
+        LOGGER.info("Validate Stack request.");
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
         if (validationResult.getState() == State.ERROR) {
             LOGGER.debug("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -156,7 +156,7 @@ public class StackCreatorService {
         }
 
         String stackName = stackRequest.getName();
-
+        LOGGER.info("Check that stack with {} name does not exist.", stackName);
         ensureStackDoesNotExists(stackRequest.getName(), workspace);
 
         Stack stackStub = measure(() -> converterUtil.convert(stackRequest, Stack.class),
@@ -167,43 +167,52 @@ public class StackCreatorService {
         MDCBuilder.buildMdcContext(stackStub);
 
         String platformString = stackStub.getCloudPlatform().toLowerCase();
+        LOGGER.info("Determine blueprint for stack with {} name ", stackName);
         Blueprint blueprint = determineBlueprint(stackRequest, workspace);
+        LOGGER.info("Determine image for stack with {} name ", stackName);
         Future<StatedImage> imgFromCatalogFuture = determineImageCatalog(stackName, platformString, stackRequest, blueprint, user, workspace);
 
         Stack savedStack;
         try {
             savedStack = transactionService.required(() -> {
+                LOGGER.info("Decorate stack with {} name ", stackName);
                 Stack stack = stackDecorator.decorate(stackStub, stackRequest, user, workspace);
 
+                LOGGER.info("Get credential from environment service with {} environmentCrn.", stack.getEnvironmentCrn());
                 Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
                 CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
+                LOGGER.info("Validate Stack parameter for {} name.", stackName);
                 ParametersValidationRequest parametersValidationRequest = parametersValidator.triggerValidate(stackRequest.getCloudPlatform().name(),
                         cloudCredential, stack.getParameters(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
 
                 if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
+                    LOGGER.info("Validate orchestrator for {} name.", stackName);
                     stackService.validateOrchestrator(stack.getOrchestrator());
                 }
 
                 measure(() -> {
                     for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                        LOGGER.info("Validate template for {} name with {} instanceGroup.", stackName, instanceGroup.toString());
                         templateValidator.validateTemplateRequest(credential, instanceGroup.getTemplate(), stack.getRegion(),
                                 stack.getAvailabilityZone(), stack.getPlatformVariant());
                     }
                 }, LOGGER, "Stack's instance templates have been validated in {} ms for stack {}", stackName);
 
                 if (stackRequest.getCluster() != null) {
+                    LOGGER.info("Cluster not null so creating cluster for stack name {}.", stackName);
                     StackValidationV4Request stackValidationRequest = measure(() -> converterUtil.convert(stackRequest, StackValidationV4Request.class),
                             LOGGER, "Stack validation request has been created in {} ms for stack {}", stackName);
-
 
                     StackValidation stackValidation = measure(() -> converterUtil.convert(stackValidationRequest, StackValidation.class),
                             LOGGER, "Stack validation object has been created in {} ms for stack {}", stackName);
 
+                    LOGGER.info("Validate Datalake related properties for stack {}.", stackName);
                     setStackTypeAndValidateDatalake(stack, blueprint);
 
                     stackService.validateStack(stackValidation);
 
+                    LOGGER.info("Validate Filesystem for stack {}.", stackName);
                     fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential,
                             stackValidationRequest.getFileSystem(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
 
@@ -211,20 +220,23 @@ public class StackCreatorService {
                     clusterCreationService.validate(stackRequest.getCluster(), cloudCredential, stack, user, workspace, environment);
                 }
 
+                LOGGER.info("Fill up instanceMetadata for stack {}.", stackName);
                 fillInstanceMetadata(stack);
 
                 parametersValidator.waitResult(parametersValidationRequest);
 
+                LOGGER.info("Get image catalog for stack {}.", stackName);
                 StatedImage imgFromCatalog = getImageCatalog(imgFromCatalogFuture);
 
                 Stack newStack = stackService.create(stack, platformString, imgFromCatalog, user, workspace);
 
-                decorateWithDatalakeResourceIdFromEnvironment(newStack);
                 try {
+                    LOGGER.info("Create cluster enity in the database with name {}.", stackName);
                     createClusterIfNeed(user, workspace, stackRequest, newStack, stackName, blueprint);
                 } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
+                LOGGER.info("Shared service preparation if required with name {}.", stackName);
                 return prepareSharedServiceIfNeed(newStack);
             });
         } catch (TransactionExecutionException e) {
@@ -247,19 +259,11 @@ public class StackCreatorService {
         return response;
     }
 
-    private void decorateWithDatalakeResourceIdFromEnvironment(Stack stack) {
-//        Set<DatalakeResources> datalakeResources = datalakeResourcesService
-//                .findDatalakeResourcesByWorkspaceAndEnvironment(stack.getWorkspace().getId(), stack.getEnvironmentCrn());
-//        if (stack.getEnvironmentCrn() != null && !CollectionUtils.isEmpty(datalakeResources)
-//                && datalakeResources.size() == 1 && stack.getDatalakeResourceId() == null) {
-//            stack.setDatalakeResourceId(datalakeResources.stream().findFirst().get().getId());
-//        }
-    }
-
     private void setStackTypeAndValidateDatalake(Stack stack, Blueprint blueprint) {
         if (blueprintService.isDatalakeBlueprint(blueprint)) {
             stack.setType(StackType.DATALAKE);
             if (stack.getEnvironmentCrn() != null) {
+                LOGGER.info("Get datalake count in environment {}", stack.getEnvironmentCrn());
                 Long datalakesInEnv = datalakeResourcesService.countDatalakeResourcesInEnvironment(stack.getEnvironmentCrn());
                 if (datalakesInEnv >= 1L) {
                     throw new BadRequestException("Only 1 datalake cluster / environment is allowed.");
@@ -334,6 +338,7 @@ public class StackCreatorService {
         return executorService.submit(() -> {
             try {
                 boolean base = blueprintService.isAmbariBlueprint(blueprint) ? shouldUseBaseAmbariImage(clusterRequest) : shouldUseBaseCMImage(clusterRequest);
+                LOGGER.info("The stack with name {} will use base image: {}", stackName, base);
                 return imageService.determineImageFromCatalog(workspace.getId(), stackRequest.getImage(), platformString, blueprint, base, user);
             } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                 throw new BadRequestException(e.getMessage(), e);

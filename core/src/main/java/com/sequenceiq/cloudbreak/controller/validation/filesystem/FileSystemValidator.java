@@ -40,14 +40,14 @@ public class FileSystemValidator {
         if (cloudStorageV4Request == null) {
             return;
         }
-        LOGGER.debug("Sending fileSystemRequest to {} to validate the file system", platform);
+        LOGGER.info("Sending fileSystemRequest to {} to validate the file system", platform);
         CloudContext cloudContext = new CloudContext(null, null, platform, userId, workspaceId);
         SpiFileSystem spiFileSystem = converterUtil.convert(cloudStorageV4Request, SpiFileSystem.class);
         FileSystemValidationRequest request = new FileSystemValidationRequest(spiFileSystem, cloudCredential, cloudContext);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             FileSystemValidationResult result = request.await();
-            LOGGER.debug("File system validation result: {}", result);
+            LOGGER.info("File system validation result: {}", result);
             Exception exception = result.getErrorDetails();
             if (exception != null) {
                 throw new BadRequestException(result.getStatusReason(), exception);
@@ -64,14 +64,14 @@ public class FileSystemValidator {
         if (fileSystemValidationV4Request == null) {
             return;
         }
-        LOGGER.debug("Sending fileSystemRequest to {} to validate the file system", platform);
+        LOGGER.info("Sending fileSystemRequest to {} to validate the file system", platform);
         CloudContext cloudContext = new CloudContext(null, null, platform, userId, workspaceId);
         SpiFileSystem spiFileSystem = converterUtil.convert(fileSystemValidationV4Request, SpiFileSystem.class);
         FileSystemValidationRequest request = new FileSystemValidationRequest(spiFileSystem, cloudCredential, cloudContext);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             FileSystemValidationResult result = request.await();
-            LOGGER.debug("File system validation result: {}", result);
+            LOGGER.info("File system validation result: {}", result);
             Exception exception = result.getErrorDetails();
             if (exception != null) {
                 throw new BadRequestException(result.getStatusReason(), exception);

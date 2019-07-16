@@ -704,16 +704,6 @@ public class StackService {
         }
     }
 
-    public void deleteByName(Stack stack, Boolean forced, Boolean deleteDependencies) {
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Stack delete requested.");
-        if (!stack.isDeleteCompleted()) {
-            flowManager.triggerTermination(stack.getId(), forced, deleteDependencies);
-        } else {
-            LOGGER.debug("Stack is already deleted.");
-        }
-    }
-
     public void decorateWithCrn(Stack stack) {
         stack.setResourceCrn(createCRN(threadBasedUserCrnProvider.getAccountId()));
     }
@@ -904,11 +894,13 @@ public class StackService {
     }
 
     private void deleteByName(Stack stack, Boolean forced, Boolean deleteDependencies, User user) {
+        LOGGER.info("Check permission for stack {} in environment {}.", stack.getName(), stack.getEnvironmentCrn());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        LOGGER.info("Check stack that no cluster is attached to {} in environment.", stack.getName(), stack.getEnvironmentCrn());
         checkStackHasNoAttachedClusters(stack);
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Stack delete requested.");
         if (stack.isDeleteInProgress() && forced) {
+            LOGGER.info("stack {} in environment {} is already delete in progress.", stack.getName(), stack.getEnvironmentCrn());
             List<FlowLog> flowLogs = flowLogService.findAllByStackIdOrderByCreatedDesc(stack.getId());
             Optional<FlowLog> flowLog = flowLogs.stream()
                     .filter(fl -> StackTerminationState.PRE_TERMINATION_STATE.name().equalsIgnoreCase(fl.getCurrentState()))
@@ -917,10 +909,13 @@ public class StackService {
                 Map<Object, Object> variables = (Map<Object, Object>) JsonReader.jsonToJava(fl.getVariables());
                 boolean runningFlowForced = variables.get("FORCEDTERMINATION") != null && Boolean.valueOf(variables.get("FORCEDTERMINATION").toString());
                 if (!runningFlowForced) {
+                    LOGGER.info("Terminate stack {} in environment {} because the current flow is not force termination.",
+                            stack.getName(), stack.getEnvironmentCrn());
                     flowManager.triggerTermination(stack.getId(), true, deleteDependencies);
                 }
             });
         } else if (!stack.isDeleteCompleted() && !stack.isDeleteInProgress()) {
+            LOGGER.info("Terminate stack {} in environment {}.", stack.getName(), stack.getEnvironmentCrn());
             flowManager.triggerTermination(stack.getId(), forced, deleteDependencies);
         } else {
             LOGGER.debug("Stack is already deleted.");
@@ -949,7 +944,8 @@ public class StackService {
     private void addCloudbreakDetailsForStack(Stack stack) {
         CloudbreakDetails cbDetails = new CloudbreakDetails(cbVersion);
         try {
-            Component cbDetailsComponent = new Component(ComponentType.CLOUDBREAK_DETAILS, ComponentType.CLOUDBREAK_DETAILS.name(), new Json(cbDetails), stack);
+            Component cbDetailsComponent = new Component(ComponentType.CLOUDBREAK_DETAILS,
+                    ComponentType.CLOUDBREAK_DETAILS.name(), new Json(cbDetails), stack);
             componentConfigProviderService.store(cbDetailsComponent);
         } catch (IllegalArgumentException e) {
             LOGGER.info("Could not create Cloudbreak details component.", e);
