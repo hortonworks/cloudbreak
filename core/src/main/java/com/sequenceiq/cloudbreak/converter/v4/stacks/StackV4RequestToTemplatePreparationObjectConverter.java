@@ -152,6 +152,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                 gatewaySignKey = gateway.getSignKey();
             }
             Builder builder = Builder.builder()
+                    .withCloudPlatform(source.getCloudPlatform())
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
                     .withGateway(gateway, gatewaySignKey)

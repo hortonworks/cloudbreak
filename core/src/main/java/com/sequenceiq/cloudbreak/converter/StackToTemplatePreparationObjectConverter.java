@@ -122,6 +122,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                 gatewaySignKey = gateway.getSignKey();
             }
             Builder builder = Builder.builder()
+                    .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
                     .withGateway(gateway, gatewaySignKey)

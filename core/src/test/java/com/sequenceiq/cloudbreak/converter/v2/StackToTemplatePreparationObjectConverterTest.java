@@ -35,12 +35,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
-import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -64,11 +64,9 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockIdentityMappingService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
-import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
@@ -108,9 +106,6 @@ public class StackToTemplatePreparationObjectConverterTest {
     private InstanceGroupMetadataCollector instanceGroupMetadataCollector;
 
     @Mock
-    private StackInfoService stackInfoService;
-
-    @Mock
     private HdfConfigProvider hdfConfigProvider;
 
     @Mock
@@ -118,9 +113,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private ClusterService clusterService;
@@ -154,9 +146,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private Json stackInputs;
-
-    @Mock
-    private BlueprintStackInfo blueprintStackInfo;
 
     @Mock
     private BlueprintViewProvider blueprintViewProvider;
@@ -197,7 +186,6 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackMock.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
-        when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))
@@ -341,12 +329,8 @@ public class StackToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertWhenProvidingStackAndBlueprintStackInfoThenExpectedBlueprintViewShouldBeStored() {
-        String type = "HDF";
-        String version = "2.6";
+    public void testConvertBlueprintViewShouldMatch() {
         BlueprintView expected = mock(BlueprintView.class);
-        when(blueprintStackInfo.getType()).thenReturn(type);
-        when(blueprintStackInfo.getVersion()).thenReturn(version);
         when(blueprintViewProvider.getBlueprintView(blueprint)).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
@@ -413,6 +397,12 @@ public class StackToTemplatePreparationObjectConverterTest {
         expectedException.expectCause(is(invokedException));
 
         underTest.convert(stackMock);
+    }
+
+    @Test
+    public void testConvertCloudPlatformMatches() {
+        TemplatePreparationObject result = underTest.convert(stackMock);
+        assertEquals(CloudPlatform.AWS, result.getCloudPlatform());
     }
 
     @Test
