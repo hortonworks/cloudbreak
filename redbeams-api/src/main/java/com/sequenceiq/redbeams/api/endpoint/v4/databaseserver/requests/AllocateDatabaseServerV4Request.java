@@ -23,8 +23,7 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
     @Size(max = 40, min = 5, message = "The length of the name must be between 5 to 40 inclusive")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and must start with an alphanumeric character")
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.DBStack.STACK_NAME, required = true)
+    @ApiModelProperty(value = ModelDescriptions.DBStack.STACK_NAME)
     private String name;
 
     @NotNull

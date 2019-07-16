@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_CRE
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_USER_NAME;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_VERSION;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -206,6 +208,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
+        assertThat(dbStack.getName(), containsString("dbstck"));
         assertEquals(PASSWORD, dbStack.getDatabaseServer().getRootPassword());
         assertEquals(USERNAME, dbStack.getDatabaseServer().getRootUserName());
         assertNotNull(dbStack.getNetwork().getName());
@@ -221,11 +224,11 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private void setupAllocateRequest(boolean provideOptionalFields) {
 
-        allocateRequest.setName("myallocation");
         allocateRequest.setEnvironmentCrn("myenv");
 //        allocateRequest.setRegion("us-east-1");
         // allocateRequest.setCloudPlatform(CloudPlatform.AWS);
         if (provideOptionalFields) {
+            allocateRequest.setName("myallocation");
             AwsNetworkV4Parameters awsNetworkV4Parameters = new AwsNetworkV4Parameters();
             awsNetworkV4Parameters.setSubnetId("subnet-1,subnet-2");
             allocateRequest.getNetwork().setAws(awsNetworkV4Parameters);

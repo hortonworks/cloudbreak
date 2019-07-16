@@ -83,7 +83,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         DetailedEnvironmentResponse environment = environmentService.getByCrn(source.getEnvironmentCrn());
 
         DBStack dbStack = new DBStack();
-        dbStack.setName(source.getName());
+        dbStack.setName(source.getName() != null ? source.getName() : generateDatabaseServerStackName());
         dbStack.setEnvironmentId(source.getEnvironmentCrn());
         setRegion(dbStack, environment);
         dbStack.setNetwork(buildNetwork(source.getNetwork(), environment));
@@ -234,5 +234,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return String.format("dbsvr-%s", UUID.randomUUID().toString());
     }
 
+    private static String generateDatabaseServerStackName() {
+        return String.format("dbstck-%s", UUID.randomUUID().toString());
+    }
 }
 
