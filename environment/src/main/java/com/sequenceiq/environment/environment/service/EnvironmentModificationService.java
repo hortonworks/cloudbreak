@@ -190,6 +190,12 @@ public class EnvironmentModificationService {
         }
     }
 
+    private void editTunnelIfChanged(EnvironmentEditDto editDto, Environment environment) {
+        if (editDto.getTunnel() != null) {
+            environment.setTunnel(editDto.getTunnel());
+        }
+    }
+
     private void editSecurityAccessIfChanged(EnvironmentEditDto editDto, Environment environment) {
         SecurityAccessDto securityAccessDto = editDto.getSecurityAccess();
         if (securityAccessDto != null) {

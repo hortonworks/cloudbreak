@@ -10,6 +10,7 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -60,6 +61,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     @ApiModelProperty(EnvironmentModelDescription.LOG_CLOUD_STORAGE)
     private CloudStorageRequest logCloudStorage;
+
+    @ApiModelProperty(EnvironmentModelDescription.TUNNEL)
+    private Tunnel tunnel;
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
@@ -157,5 +161,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setLogCloudStorage(CloudStorageRequest logCloudStorage) {
         this.logCloudStorage = logCloudStorage;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
     }
 }

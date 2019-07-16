@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
+import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -41,6 +42,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private EnvironmentServiceDecorator environmentServiceDecorator;
+
     @Override
     public ClusterTemplateV4Response post(Long workspaceId, @Valid ClusterTemplateV4Request request) {
         ClusterTemplate clusterTemplate = clusterTemplateService.createForLoggedInUser(converterUtil.convert(request, ClusterTemplate.class), workspaceId);
@@ -54,6 +58,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
             clusterTemplateService.updateDefaultClusterTemplates(workspaceId);
             Set<ClusterTemplateViewV4Response> responses = transactionService.required(() ->
                     converterUtil.convertAllAsSet(clusterTemplateService.getAllAvailableViewInWorkspace(workspaceId), ClusterTemplateViewV4Response.class));
+            environmentServiceDecorator.prepareEnvironments(responses);
             return new ClusterTemplateViewV4Responses(responses);
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -63,8 +68,10 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     public ClusterTemplateV4Response get(Long workspaceId, String name) {
         try {
-            return transactionService.required(() ->
+            ClusterTemplateV4Response clusterTemplateV4Response = transactionService.required(() ->
                     converterUtil.convert(clusterTemplateService.getByNameForWorkspaceId(name, workspaceId), ClusterTemplateV4Response.class));
+            environmentServiceDecorator.prepareEnvironment(clusterTemplateV4Response);
+            return clusterTemplateV4Response;
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }

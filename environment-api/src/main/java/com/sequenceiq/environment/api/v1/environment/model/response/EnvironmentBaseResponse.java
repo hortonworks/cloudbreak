@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -51,6 +52,9 @@ public abstract class EnvironmentBaseResponse {
     private String statusReason;
 
     private Long created;
+
+    @ApiModelProperty(EnvironmentModelDescription.TUNNEL)
+    private Tunnel tunnel;
 
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
     private SecurityAccessResponse securityAccess;
@@ -191,5 +195,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setLogCloudStorage(CloudStorageResponse logCloudStorage) {
         this.logCloudStorage = logCloudStorage;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
     }
 }
