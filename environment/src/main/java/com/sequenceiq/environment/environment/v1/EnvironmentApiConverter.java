@@ -25,6 +25,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAcce
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.TelemetryApiConverter;
+import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
@@ -53,14 +54,18 @@ public class EnvironmentApiConverter {
 
     private final TelemetryApiConverter telemetryApiConverter;
 
+    private final TunnelConverter tunnelConverter;
+
     public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
             RegionConverter regionConverter,
             CredentialToCredentialV1ResponseConverter credentialConverter,
-            TelemetryApiConverter telemetryApiConverter) {
+            TelemetryApiConverter telemetryApiConverter,
+            TunnelConverter tunnelConverter) {
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.regionConverter = regionConverter;
         this.credentialConverter = credentialConverter;
         this.telemetryApiConverter = telemetryApiConverter;
+        this.tunnelConverter = tunnelConverter;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -71,6 +76,7 @@ public class EnvironmentApiConverter {
                 .withCloudPlatform(request.getCloudPlatform())
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
+                .withTunnel(tunnelConverter.convert(request.getTunnel()))
                 .withCreateFreeIpa(request.getFreeIpa() == null ? true : request.getFreeIpa().getCreate())
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry()))
@@ -157,6 +163,7 @@ public class EnvironmentApiConverter {
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
                 .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
+                .withTunnel(environmentDto.getTunnel())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
@@ -176,6 +183,7 @@ public class EnvironmentApiConverter {
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
+                .withTunnel(environmentDto.getTunnel())
                 .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 

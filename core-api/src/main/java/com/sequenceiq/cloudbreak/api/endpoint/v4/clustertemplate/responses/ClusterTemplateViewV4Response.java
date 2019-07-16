@@ -40,6 +40,9 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
     @ApiModelProperty
     private String environmentCrn;
 
+    @ApiModelProperty
+    private String environmentName;
+
     public ResourceStatus getStatus() {
         return status;
     }
@@ -102,5 +105,13 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 }

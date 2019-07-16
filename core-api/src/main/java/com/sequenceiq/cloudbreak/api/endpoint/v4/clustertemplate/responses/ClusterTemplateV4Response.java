@@ -28,6 +28,8 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
     private String environmentCrn;
 
+    private String environmentName;
+
     public ResourceStatus getStatus() {
         return status;
     }
@@ -58,5 +60,13 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 }

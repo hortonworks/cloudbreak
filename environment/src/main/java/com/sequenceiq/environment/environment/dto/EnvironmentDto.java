@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -58,6 +59,8 @@ public class EnvironmentDto implements Payload {
     private Long created;
 
     private SecurityAccessDto securityAccess;
+
+    private Tunnel tunnel;
 
     @Override
     public Long getResourceId() {
@@ -237,6 +240,14 @@ public class EnvironmentDto implements Payload {
         this.securityAccess = securityAccess;
     }
 
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -283,6 +294,8 @@ public class EnvironmentDto implements Payload {
         private Long created;
 
         private SecurityAccessDto securityAccess;
+
+        private Tunnel tunnel;
 
         private Builder() {
         }
@@ -392,6 +405,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withTunnel(Tunnel tunnel) {
+            this.tunnel = tunnel;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -415,6 +433,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setStatusReason(statusReason);
             environmentDto.setCreated(created);
             environmentDto.setSecurityAccess(securityAccess);
+            environmentDto.setTunnel(tunnel);
             return environmentDto;
         }
     }

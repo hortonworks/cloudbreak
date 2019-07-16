@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -44,6 +46,27 @@ public class EnvironmentServiceDecorator {
             stackResponse.setCredentialName(byCrn.getCredential().getName());
         } catch (Exception e) {
             LOGGER.warn("Environment deleted which had crn: {}.", stackResponse.getEnvironmentCrn());
+        }
+    }
+
+    public void prepareEnvironments(Set<ClusterTemplateViewV4Response> clusterTemplateViewV4Responses) {
+        Collection<SimpleEnvironmentResponse> responses = environmentClientService.list().getResponses();
+        for (ClusterTemplateViewV4Response clusterTemplateViewV4Response : clusterTemplateViewV4Responses) {
+            Optional<SimpleEnvironmentResponse> first = responses.stream()
+                    .filter(x -> x.getCrn().equals(clusterTemplateViewV4Response.getEnvironmentCrn()))
+                    .findFirst();
+            if (first.isPresent()) {
+                clusterTemplateViewV4Response.setEnvironmentName(first.get().getName());
+            }
+        }
+    }
+
+    public void prepareEnvironment(ClusterTemplateV4Response clusterTemplateV4Response) {
+        try {
+            DetailedEnvironmentResponse byCrn = environmentClientService.getByCrn(clusterTemplateV4Response.getEnvironmentCrn());
+            clusterTemplateV4Response.setEnvironmentName(byCrn.getName());
+        } catch (Exception e) {
+            LOGGER.warn("Environment deleted which had crn: {}.", clusterTemplateV4Response.getEnvironmentCrn());
         }
     }
 

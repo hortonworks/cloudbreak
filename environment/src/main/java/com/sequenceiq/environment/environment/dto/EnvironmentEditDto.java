@@ -6,6 +6,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
+import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public class EnvironmentEditDto {
@@ -26,6 +27,8 @@ public class EnvironmentEditDto {
 
     private final SecurityAccessDto securityAccess;
 
+    private final Tunnel tunnel;
+
     public EnvironmentEditDto(
             String description,
             Set<String> regions,
@@ -34,7 +37,8 @@ public class EnvironmentEditDto {
             NetworkDto network,
             AuthenticationDto authentication,
             Telemetry telemetry,
-            SecurityAccessDto securityAccess) {
+            SecurityAccessDto securityAccess,
+            Tunnel tunnel) {
         this.description = description;
         this.accountId = accountId;
         if (CollectionUtils.isEmpty(regions)) {
@@ -47,6 +51,7 @@ public class EnvironmentEditDto {
         this.authentication = authentication;
         this.telemetry = telemetry;
         this.securityAccess = securityAccess;
+        this.tunnel = tunnel;
     }
 
     public String getDescription() {
@@ -85,6 +90,10 @@ public class EnvironmentEditDto {
         return securityAccess;
     }
 
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
     public static final class EnvironmentEditDtoBuilder {
         private String description;
 
@@ -101,6 +110,8 @@ public class EnvironmentEditDto {
         private Telemetry telemetry;
 
         private SecurityAccessDto securityAccess;
+
+        private Tunnel tunnel;
 
         private EnvironmentEditDtoBuilder() {
         }
@@ -149,8 +160,13 @@ public class EnvironmentEditDto {
             return this;
         }
 
+        public EnvironmentEditDtoBuilder withTunnel(Tunnel tunnel) {
+            this.tunnel = tunnel;
+            return this;
+        }
+
         public EnvironmentEditDto build() {
-            return new EnvironmentEditDto(description, regions, accountId, location, network, authentication, telemetry, securityAccess);
+            return new EnvironmentEditDto(description, regions, accountId, location, network, authentication, telemetry, securityAccess, tunnel);
         }
     }
 }

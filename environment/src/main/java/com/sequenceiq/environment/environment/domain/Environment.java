@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -110,6 +111,9 @@ public class Environment implements AuthResource {
     private String defaultSecurityGroupId;
 
     private String cidr;
+
+    @Enumerated(EnumType.STRING)
+    private Tunnel tunnel;
 
     public Environment() {
         regions = new Json(new HashSet<Region>());
@@ -328,5 +332,13 @@ public class Environment implements AuthResource {
 
     public void setCidr(String cidr) {
         this.cidr = cidr;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
     }
 }
