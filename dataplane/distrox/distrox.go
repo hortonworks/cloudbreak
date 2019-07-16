@@ -66,13 +66,13 @@ func convertResponseToDx(s *stackOutDescribe) *dxOut {
 	}
 }
 
-func convertViewResponseToStack(s *model.StackViewV4Response, env *envmodel.DetailedEnvironmentV1Response) *dxOut {
+func convertViewResponseToStack(s *model.StackViewV4Response) *dxOut {
 	return &dxOut{
 		CloudResourceOut: common.CloudResourceOut{
 			Name:          *s.Name,
-			CloudPlatform: env.CloudPlatform,
+			CloudPlatform: s.CloudPlatform,
 		},
-		Environment:   env.Name,
+		Environment:   s.EnvironmentName,
 		DistroXStatus: s.Status,
 		ClusterStatus: utils.SafeClusterViewStatusConvert(s),
 	}
@@ -260,15 +260,9 @@ func ListDistroXs(c *cli.Context) {
 		commonutils.LogErrorAndExit(err)
 	}
 
-	envClient := oauth.Environment(*oauth.NewEnvironmentClientFromContext(c)).Environment
-
 	var tableRows []commonutils.Row
 	for _, stack := range resp.Payload.Responses {
-		envResp, err := envClient.V1env.GetEnvironmentV1ByCrn(v1env.NewGetEnvironmentV1ByCrnParams().WithCrn(stack.EnvironmentCrn))
-		if err != nil {
-			commonutils.LogErrorAndExit(err)
-		}
-		tableRows = append(tableRows, convertViewResponseToStack(stack, envResp.Payload))
+		tableRows = append(tableRows, convertViewResponseToStack(stack))
 	}
 
 	output.WriteList(stackHeader, tableRows)
