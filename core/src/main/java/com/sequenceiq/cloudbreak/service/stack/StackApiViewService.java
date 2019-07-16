@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -8,15 +7,12 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -27,17 +23,13 @@ import com.sequenceiq.flow.core.FlowLogService;
 @Service
 public class StackApiViewService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackApiViewService.class);
+
     @Inject
     private StackApiViewRepository stackApiViewRepository;
 
     @Inject
-    private TransactionService transactionService;
-
-    @Inject
     private FlowLogService flowLogService;
-
-    @Inject
-    private ConverterUtil converterUtil;
 
     @Inject
     private EnvironmentClientService environmentClientService;
@@ -63,13 +55,16 @@ public class StackApiViewService {
 
         Set<StackApiView> stackViewResponses;
         if (StringUtils.isEmpty(environmentName)) {
+            LOGGER.info("Environment name was empty so we will query all the stack.");
             stackViewResponses = getAllByWorkspace(workspaceId, showTerminatedClustersAfterConfig);
         } else {
+            LOGGER.info("Environment name was defined so we will query all the stack in the {} environment.", environmentName);
             DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(environmentName);
             stackViewResponses = getAllByWorkspaceAndEnvironment(workspaceId, environmentResponse.getCrn(), showTerminatedClustersAfterConfig);
         }
 
         if (stackType != null) {
+            LOGGER.info("Stacktype {} was defined so we are filtering the stacks.", stackType);
             stackViewResponses = filterByStackType(stackType, stackViewResponses);
         }
         return stackViewResponses;
@@ -80,27 +75,19 @@ public class StackApiViewService {
 
         Set<StackApiView> stackViewResponses;
         if (StringUtils.isEmpty(environmentCrn)) {
+            LOGGER.info("Environment crn was empty so we will query all the stack.");
             stackViewResponses = getAllByWorkspace(workspaceId, showTerminatedClustersAfterConfig);
         } else {
+            LOGGER.info("Environment crn was defined so we will query all the stack in the {} environment.", environmentCrn);
             DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(environmentCrn);
             stackViewResponses = getAllByWorkspaceAndEnvironment(workspaceId, environmentResponse.getCrn(), showTerminatedClustersAfterConfig);
         }
 
         if (stackType != null) {
+            LOGGER.info("Stacktype {} was defined so we are filtering the stacks.", stackType);
             stackViewResponses = filterByStackType(stackType, stackViewResponses);
         }
         return stackViewResponses;
-    }
-
-    public StackViewV4Response retrieveById(Long stackId) {
-        try {
-            return transactionService.required(() -> {
-                Optional<StackApiView> byId = stackApiViewRepository.findById(stackId);
-                return converterUtil.convert(byId.orElse(null), StackViewV4Response.class);
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
     }
 
     private Set<StackApiView> filterByStackType(StackType stackType, Set<StackApiView> stackViewResponses) {
@@ -124,9 +111,5 @@ public class StackApiViewService {
                 workspaceId,
                 showTerminatedClustersAfter.isActive(),
                 showTerminatedClustersAfter.showAfterMillisecs());
-    }
-
-    private Set<StackViewV4Response> convertStackViews(Set<StackApiView> stacks) {
-        return converterUtil.convertAllAsSet(stacks, StackViewV4Response.class);
     }
 }
