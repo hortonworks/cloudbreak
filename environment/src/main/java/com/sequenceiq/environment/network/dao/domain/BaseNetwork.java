@@ -23,6 +23,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -46,6 +47,7 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     private String name;
 
     @OneToOne
+    @JsonIgnore
     @JoinColumn(nullable = false)
     private EnvironmentView environment;
 
@@ -78,6 +80,7 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     }
 
     @Override
+    @JsonIgnore
     public Set<EnvironmentView> getEnvironments() {
         Set<EnvironmentView> environmentViews = new HashSet<>();
         environmentViews.add(environment);
@@ -85,6 +88,7 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     }
 
     @Override
+    @JsonIgnore
     public void setEnvironments(Set<EnvironmentView> environments) {
         if (environments.size() != 1) {
             throw new IllegalArgumentException("Environment set size cannot differ from 1.");

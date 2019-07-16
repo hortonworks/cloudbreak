@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -95,9 +94,9 @@ public class EnvCreationActions {
 
     @Bean(name = "ENV_CREATION_FINISHED_STATE")
     public Action<?, ?> finishedAction() {
-        return new AbstractVpcCreateAction<>(ResourceCrnPayload.class) {
+        return new AbstractVpcCreateAction<>(EnvCreationEvent.class) {
             @Override
-            protected void doExecute(CommonContext context, ResourceCrnPayload payload, Map<Object, Object> variables) {
+            protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
@@ -149,7 +148,7 @@ public class EnvCreationActions {
 
         @Override
         protected Object getFailurePayload(P payload, Optional<CommonContext> flowContext, Exception ex) {
-            return (Payload) () -> null;
+            return payload;
         }
 
         @Override
