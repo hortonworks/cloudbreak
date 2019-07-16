@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -27,6 +28,8 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 public class TemplatePreparationObject {
+
+    private final CloudPlatform cloudPlatform;
 
     private final GatewayView gatewayView;
 
@@ -59,6 +62,7 @@ public class TemplatePreparationObject {
     private final Map<String, String> identityUserMapping;
 
     private TemplatePreparationObject(Builder builder) {
+        cloudPlatform = builder.cloudPlatform;
         rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
                 rdsConfig -> rdsConfig.getType().toLowerCase(),
                 Function.identity()
@@ -84,6 +88,10 @@ public class TemplatePreparationObject {
                 .getHostGroupsWithComponent(component);
         return getHostgroupViews().stream()
                 .filter(hostGroup -> groups.contains(hostGroup.getName()));
+    }
+
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
     }
 
     public Set<RDSConfig> getRdsConfigs() {
@@ -152,6 +160,8 @@ public class TemplatePreparationObject {
 
     public static class Builder {
 
+        private CloudPlatform cloudPlatform;
+
         private Set<RDSConfig> rdsConfigs = new HashSet<>();
 
         private Set<HostgroupView> hostgroupViews = new HashSet<>();
@@ -184,6 +194,11 @@ public class TemplatePreparationObject {
 
         public static Builder builder() {
             return new Builder();
+        }
+
+        public Builder withCloudPlatform(CloudPlatform cloudPlatform) {
+            this.cloudPlatform = cloudPlatform;
+            return this;
         }
 
         public Builder withRdsConfigs(Set<RDSConfig> rdsConfigs) {
@@ -286,4 +301,5 @@ public class TemplatePreparationObject {
             return new TemplatePreparationObject(this);
         }
     }
+
 }

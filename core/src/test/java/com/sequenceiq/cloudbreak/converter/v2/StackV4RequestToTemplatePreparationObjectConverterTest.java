@@ -36,12 +36,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
-import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
@@ -71,6 +70,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -86,7 +86,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     private static final String TEST_VERSION = "2.6";
 
-    private static final String TEST_KERBEROS_NAME = "somename";
+    private static final String TEST_ENVIRONMENT_CRN = "envCrn";
 
     @InjectMocks
     private StackV4RequestToTemplatePreparationObjectConverter underTest;
@@ -138,9 +138,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private Workspace workspace;
 
     @Mock
-    private EnvironmentSettingsV4Request environment;
-
-    @Mock
     private Credential credential;
 
     @Mock
@@ -180,9 +177,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        when(source.getEnvironmentCrn()).thenReturn("envCrn");
-        when(environment.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
+        when(source.getEnvironmentCrn()).thenReturn(TEST_ENVIRONMENT_CRN);
         when(source.getCluster()).thenReturn(cluster);
+        when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
         when(cluster.getAmbari()).thenReturn(ambari);
         when(cluster.getBlueprintName()).thenReturn(TEST_BLUEPRINT_NAME);
         when(blueprintService.getByNameForWorkspace(TEST_BLUEPRINT_NAME, workspace)).thenReturn(blueprint);
@@ -203,7 +200,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testConvertWhenKerberosNameIsNullInAmbariThenEmptyKerberosShouldBeStored() {
-        when(kerberosConfigService.get("envCrn")).thenReturn(Optional.empty());
+        when(kerberosConfigService.get(TEST_ENVIRONMENT_CRN)).thenReturn(Optional.empty());
         TemplatePreparationObject result = underTest.convert(source);
 
         assertNotNull(result);
@@ -213,7 +210,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenKerberosNameIsNotNullInAmbariAndSecurityTrueThenExpectedKerberosConfigShouldBeStored() {
         KerberosConfig expected = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().build();
-        when(kerberosConfigService.get("envCrn")).thenReturn(Optional.of(expected));
+        when(kerberosConfigService.get(TEST_ENVIRONMENT_CRN)).thenReturn(Optional.of(expected));
 
         TemplatePreparationObject result = underTest.convert(source);
 
@@ -349,11 +346,17 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
                 .withBindDn("")
                 .withBindPassword("")
                 .build();
-        when(ldapConfigService.get("envCrn")).thenReturn(Optional.of(expected));
+        when(ldapConfigService.get(TEST_ENVIRONMENT_CRN)).thenReturn(Optional.of(expected));
 
         TemplatePreparationObject result = underTest.convert(source);
 
         assertTrue(result.getLdapConfig().isPresent());
+    }
+
+    @Test
+    public void testConvertCloudPlatformMatches() {
+        TemplatePreparationObject result = underTest.convert(source);
+        assertEquals(CloudPlatform.AWS, result.getCloudPlatform());
     }
 
     private Set<String> createRdsConfigNames() {
