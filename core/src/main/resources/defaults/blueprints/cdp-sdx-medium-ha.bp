@@ -39,6 +39,7 @@
         "roleConfigGroupsRefNames": [
           "hdfs-BALANCER-BASE",
           "hdfs-JOURNALNODE-BASE",
+          "knox-KNOX_GATEWAY-BASE",
           "ranger-RANGER_USERSYNC-BASE",
           "ranger-RANGER_TAGSYNC-BASE",
           "zookeeper-SERVER-BASE"
@@ -327,15 +328,20 @@
         "serviceType": "ZOOKEEPER"
       },
       {
+        "serviceType": "KNOX",
         "refName": "knox",
         "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY"
+          },
           {
             "base": true,
             "refName": "knox-IDBROKER-BASE",
             "roleType": "IDBROKER"
           }
-        ],
-        "serviceType": "KNOX"
+        ]
       }
     ]
   }
