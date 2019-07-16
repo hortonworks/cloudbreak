@@ -11,7 +11,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse {
 
     public SdxClusterDetailResponse(SdxClusterResponse sdxClusterResponse, StackV4Response stackV4Response) {
         super(sdxClusterResponse.getCrn(), sdxClusterResponse.getName(), sdxClusterResponse.getStatus(),
-                sdxClusterResponse.getStatusReason(), sdxClusterResponse.getEnvironmentName(), sdxClusterResponse.getEnvironmentCrn());
+                sdxClusterResponse.getStatusReason(), sdxClusterResponse.getEnvironmentName(),
+                sdxClusterResponse.getEnvironmentCrn(), sdxClusterResponse.getClusterShape());
         this.stackV4Response = stackV4Response;
     }
 
