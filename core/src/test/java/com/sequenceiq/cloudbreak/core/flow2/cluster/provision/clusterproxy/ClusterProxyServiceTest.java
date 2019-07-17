@@ -15,7 +15,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
@@ -49,6 +48,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 public class ClusterProxyServiceTest {
     private static final long STACK_ID = 100L;
 
+    private static final long CLUSTER_ID = 1000L;
+
     private static final String CLUSTER_PROXY_URL = "http://localhost:10080/cluster-proxy";
 
     private static final String REGISTER_CONFIG_PATH = "/rpc/registerConfig";
@@ -56,8 +57,6 @@ public class ClusterProxyServiceTest {
     private static final String UPDATE_CONFIG_PATH = "/rpc/updateConfig";
 
     private static final String REMOVE_CONFIG_PATH = "/rpc/removeConfig";
-
-    private static final String STACK_CRN = UUID.randomUUID().toString();
 
     @Mock
     private StackService stackService;
@@ -122,13 +121,13 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void shouldDeregisterCluster() throws URISyntaxException, JsonProcessingException {
+    public void shouldDeregisterClsuter() throws URISyntaxException, JsonProcessingException {
         mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REMOVE_CONFIG_PATH)))
-                .andExpect(content().json(JsonUtil.writeValueAsStringSilent(of("clusterCrn", STACK_CRN))))
+                .andExpect(content().json(JsonUtil.writeValueAsStringSilent(of("clusterCrn", String.valueOf(CLUSTER_ID)))))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withStatus(HttpStatus.OK));
 
-        service.deregisterCluster(testStack());
+        service.deregisterCluster(testCluster());
     }
 
     private String configRegistrationRequest() {
@@ -136,11 +135,11 @@ public class ClusterProxyServiceTest {
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
         ClusterServiceConfig service = new ClusterServiceConfig("cloudera-manager",
                 List.of("https://10.10.10.10/clouderamanager"), asList(cloudbreakUser, dpUser));
-        return JsonUtil.writeValueAsStringSilent(new ConfigRegistrationRequest(STACK_CRN, List.of(service)));
+        return JsonUtil.writeValueAsStringSilent(new ConfigRegistrationRequest("1000", List.of(service)));
     }
 
     private String configUpdateRequest() {
-        return JsonUtil.writeValueAsStringSilent(of("clusterCrn", STACK_CRN,
+        return JsonUtil.writeValueAsStringSilent(of("clusterCrn", String.valueOf(CLUSTER_ID),
                 "uriOfKnox", "https://10.10.10.10:8443/test-cluster"));
     }
 
@@ -154,7 +153,6 @@ public class ClusterProxyServiceTest {
         stack.setId(STACK_ID);
         stack.setCluster(testCluster());
         stack.setGatewayPort(9443);
-        stack.setResourceCrn(STACK_CRN);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         InstanceMetaData primaryInstanceMetaData = new InstanceMetaData();
@@ -183,6 +181,7 @@ public class ClusterProxyServiceTest {
 
     private Cluster testCluster() {
         Cluster cluster = new Cluster();
+        cluster.setId(CLUSTER_ID);
         cluster.setCloudbreakAmbariUser("cloudbreak");
         ReflectionTestUtils.setField(cluster, "cloudbreakAmbariPassword", new Secret("cbpassword", vaultSecretString("cbpassword")));
         cluster.setDpAmbariUser("cmmgmt");

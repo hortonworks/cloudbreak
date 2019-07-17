@@ -42,7 +42,7 @@ public class ClusterProxyDeregisterHandler implements EventHandler<ClusterProxyD
         Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
         if (clusterProxyIntegrationEnabled) {
             try {
-                clusterProxyService.deregisterCluster(stack);
+                clusterProxyService.deregisterCluster(stack.getCluster());
             } catch (Exception ex) {
                 LOGGER.error("Cluster proxy deregister failed", ex);
             }
