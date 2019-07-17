@@ -149,6 +149,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 .setUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
                 .setCrn(userCrn)
                 .setEmail(userName.contains("@") ? userName : userName + "@ums.mock")
+                .setWorkloadUsername(userName)
                 .build();
     }
 
@@ -237,6 +238,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                             .addMachineUser(MachineUser.newBuilder()
                                     .setMachineUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
                                     .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
+                                    .setWorkloadUsername(userName)
                                     .build())
                             .build());
         }
