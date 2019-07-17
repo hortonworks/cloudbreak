@@ -123,10 +123,13 @@ public class AzureSetup implements Setup {
                 return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
             } else {
                 int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
-                LOGGER.debug("CopyStatus Pending {} byte/{} byte: %.4s %% {}%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
+                LOGGER.info("CopyStatus, Total:{} / Pending:{} bytes, %.4s %% {}%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
                 return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
             }
-        } catch (RuntimeException ignored) {
+        } catch (RuntimeException ex) {
+            String msg = String.format("Failed to check the status of the image in resource group '%s', image storage name '%s'",
+                    imageResourceGroupName, imageStorageName);
+            LOGGER.warn(msg, ex);
             return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);
         }
     }
