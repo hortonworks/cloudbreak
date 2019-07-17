@@ -1,14 +1,18 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -21,6 +25,7 @@ import com.sequenceiq.freeipa.repository.SyncOperationRepository;
 
 @Service
 public class SyncOperationStatusService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SyncOperationStatusService.class);
 
     @Inject
     private SyncOperationRepository syncOperationRepository;
@@ -28,20 +33,43 @@ public class SyncOperationStatusService {
     @Inject
     private SyncOperationToSyncOperationStatus syncOperationToSyncOperationStatus;
 
-    public SyncOperation startOperation(String accountId, SyncOperationType syncOperationType) {
-        SyncOperation syncOperation = new SyncOperation();
-        syncOperation.setOperationId(UUID.randomUUID().toString());
-        syncOperation.setStatus(SynchronizationStatus.RUNNING);
-        syncOperation.setAccountId(accountId);
-        syncOperation.setSyncOperationType(syncOperationType);
+    @Inject
+    private List<SyncOperationAcceptor> syncOperationAcceptorList;
+
+    private Map<SyncOperationType, SyncOperationAcceptor> syncOperationAcceptorMap = new HashMap<>();
+
+    @PostConstruct
+    public void init() {
+        syncOperationAcceptorList.stream()
+                .peek(a -> LOGGER.info("Registering acceptor for {}", a.selector()))
+                .forEach(a -> syncOperationAcceptorMap.put(a.selector(), a));
+
+        for (SyncOperationType syncOperationType : SyncOperationType.values()) {
+            if (!syncOperationAcceptorMap.containsKey(syncOperationType)) {
+                throw new IllegalStateException("No Acceptor injected for SyncOperationType " + syncOperationType);
+            }
+        }
+    }
+
+    public SyncOperation startOperation(String accountId, SyncOperationType syncOperationType, List<String> environments, List<String> users) {
+        SyncOperation syncOperation = requestOperation(accountId, syncOperationType, environments, users);
+        SyncOperationAcceptor acceptor = syncOperationAcceptorMap.get(syncOperationType);
+
+        AcceptResult acceptResult = acceptor.accept(syncOperation);
+        if (acceptResult.isAccepted()) {
+            syncOperation = acceptOperation(syncOperation);
+        } else {
+            syncOperation = rejectOperation(syncOperation, acceptResult.getRejectionMessage().orElse("Rejected for unspecified reason."));
+        }
+
         return syncOperationRepository.save(syncOperation);
     }
 
     public SyncOperation completeOperation(String operationId, List<SuccessDetails> success, List<FailureDetails> failure) {
         SyncOperation syncOperation = getSyncOperationForOperationId(operationId);
         syncOperation.setStatus(SynchronizationStatus.COMPLETED);
-        syncOperation.setSuccessList(new Json(success));
-        syncOperation.setFailureList(new Json(failure));
+        syncOperation.setSuccessList(success);
+        syncOperation.setFailureList(failure);
         syncOperation.setEndTime(System.currentTimeMillis());
         return syncOperationRepository.save(syncOperation);
     }
@@ -56,6 +84,29 @@ public class SyncOperationStatusService {
 
     public SyncOperationStatus getStatus(String operationId) {
         return syncOperationToSyncOperationStatus.convert(getSyncOperationForOperationId(operationId));
+    }
+
+    private SyncOperation requestOperation(String accountId, SyncOperationType syncOperationType, List<String> environments, List<String> users) {
+        SyncOperation syncOperation = new SyncOperation();
+        syncOperation.setOperationId(UUID.randomUUID().toString());
+        syncOperation.setStatus(SynchronizationStatus.REQUESTED);
+        syncOperation.setAccountId(accountId);
+        syncOperation.setSyncOperationType(syncOperationType);
+        syncOperation.setEnvironmentList(environments);
+        syncOperation.setUserList(users);
+        return syncOperationRepository.save(syncOperation);
+    }
+
+    private SyncOperation acceptOperation(SyncOperation syncOperation) {
+        syncOperation.setStatus(SynchronizationStatus.RUNNING);
+        return syncOperation;
+    }
+
+    private SyncOperation rejectOperation(SyncOperation syncOperation, String reason) {
+        syncOperation.setStatus(SynchronizationStatus.REJECTED);
+        syncOperation.setEndTime(System.currentTimeMillis());
+        syncOperation.setError(reason);
+        return syncOperation;
     }
 
     private SyncOperation getSyncOperationForOperationId(String operationId) {

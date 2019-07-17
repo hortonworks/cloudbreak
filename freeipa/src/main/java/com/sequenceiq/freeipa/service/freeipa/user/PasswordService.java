@@ -20,6 +20,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.converter.freeipa.user.SyncOperationToSyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -76,9 +77,12 @@ public class PasswordService {
             throw new NotFoundException("No stacks found for accountId " + accountId);
         }
 
-        SyncOperation syncOperation = syncOperationStatusService.startOperation(accountId, SyncOperationType.SET_PASSWORD);
-
-        asyncTaskExecutor.submit(() -> asyncSetPasswords(syncOperation.getOperationId(), accountId, userCrn, password, stacks));
+        SyncOperation syncOperation = syncOperationStatusService.startOperation(accountId, SyncOperationType.SET_PASSWORD,
+                envs == null ? List.of() : List.copyOf(envs),
+                List.of(userCrn));
+        if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
+            asyncTaskExecutor.submit(() -> asyncSetPasswords(syncOperation.getOperationId(), accountId, userCrn, password, stacks));
+        }
 
         return syncOperationToSyncOperationStatus.convert(syncOperation);
     }

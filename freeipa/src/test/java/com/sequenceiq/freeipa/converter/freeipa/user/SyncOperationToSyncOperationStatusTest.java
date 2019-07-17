@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -51,16 +50,14 @@ class SyncOperationToSyncOperationStatusTest {
                 new SuccessDetails("environment1"),
                 new SuccessDetails("environment2")
         );
-        Json successDetailsJson = new Json(successDetails);
         List<FailureDetails> failureDetails = List.of(
                 new FailureDetails("environment3", "failure message1"),
                 new FailureDetails("environment4", "failure message2")
         );
-        Json failureDetailsJson = new Json(failureDetails);
 
         SyncOperation syncOperation = createSyncOperation(synchronizationStatus);
-        syncOperation.setSuccessList(successDetailsJson);
-        syncOperation.setFailureList(failureDetailsJson);
+        syncOperation.setSuccessList(successDetails);
+        syncOperation.setFailureList(failureDetails);
 
         SyncOperationStatus actual = underTest.convert(syncOperation);
 
