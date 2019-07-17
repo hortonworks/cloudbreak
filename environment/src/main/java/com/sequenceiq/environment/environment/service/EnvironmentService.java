@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.ArrayList;
@@ -77,8 +78,8 @@ public class EnvironmentService {
 
     public EnvironmentDto getByNameAndAccountId(String environmentName, String accountId) {
         Optional<Environment> environment = environmentRepository.findByNameAndAccountId(environmentName, accountId);
-        MDCBuilder.buildMdcContext(environment.orElseThrow(()
-                -> new NotFoundException(String.format("No environment found with name '%s'", environmentName))));
+        MDCBuilder.buildMdcContext(environment
+                .orElseThrow(notFound("Environment with name:", environmentName)));
         return environmentDtoConverter.environmentToDto(environment.get());
     }
 
@@ -121,9 +122,11 @@ public class EnvironmentService {
 
     public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn) {
         List<EnvironmentDto> environmentDtos = new ArrayList<>();
+        //TODO: it can have less results than the desired - is it okay?
         Set<Environment> environments = environmentRepository.findByNameInAndAccountId(environmentNames, accountId);
         for (Environment environment : environments) {
             LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
+            //TODO: it will fail with the n th element and finished - this is a bug
             delete(environment, actualUserCrn);
             environmentDtos.add(environmentDtoConverter.environmentToDto(environment));
         }
@@ -132,9 +135,11 @@ public class EnvironmentService {
 
     public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn) {
         List<EnvironmentDto> environmentDtos = new ArrayList<>();
+        //TODO: it can have less results than the desired - is it okay?
         Set<Environment> environments = environmentRepository.findByResourceCrnInAndAccountId(crns, accountId);
         for (Environment environment : environments) {
             LOGGER.debug(String.format("Starting to archive environment [CRN: %s]", environment.getName()));
+            //TODO: it will fail with the n th element and finished - this is a bug
             delete(environment, actualUserCrn);
             environmentDtos.add(environmentDtoConverter.environmentToDto(environment));
         }
@@ -174,7 +179,7 @@ public class EnvironmentService {
                 environment.setLongitude(coordinate.getLongitude());
             } else if (requestedLocation.getLatitude() != null && requestedLocation.getLongitude() != null) {
                 environment.setLocation(requestedLocation.getName());
-                environment.setLocationDisplayName(requestedLocation.getName());
+                environment.setLocationDisplayName(requestedLocation.getDisplayName());
                 environment.setLatitude(requestedLocation.getLatitude());
                 environment.setLongitude(requestedLocation.getLongitude());
             } else {

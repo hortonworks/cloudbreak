@@ -48,11 +48,4 @@ public class EnvironmentResourceService {
         }
         return network;
     }
-
-    private void validatePlatform(Environment environment, String requestedPlatform) {
-        if (!environment.getCloudPlatform().equals(requestedPlatform)) {
-            throw new BadRequestException(String.format("The requested credential's cloud platform [%s] "
-                    + "does not match with the environments cloud platform [%s].", requestedPlatform, environment.getCloudPlatform()));
-        }
-    }
 }

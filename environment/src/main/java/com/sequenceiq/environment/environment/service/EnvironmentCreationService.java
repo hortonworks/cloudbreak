@@ -50,6 +50,7 @@ public class EnvironmentCreationService {
         this.authenticationDtoConverter = authenticationDtoConverter;
     }
 
+    //TODO: accountId is kind of duplicated - creationDto also has accountId. should be removed?
     public EnvironmentDto create(EnvironmentCreationDto creationDto, String accountId, String creator) {
         if (environmentService.isNameOccupied(creationDto.getName(), creationDto.getAccountId())) {
             throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",

@@ -174,7 +174,7 @@ public class Environment implements AuthResource {
     }
 
     public Set<Region> getRegionSet() {
-        return JsonUtil.readValueOpt(regions.getValue(), Set.class).orElse(new HashSet<Region>());
+        return JsonUtil.jsonToType(regions.getValue(), new RegionSetTypeReference());
     }
 
     public String getCloudPlatform() {
