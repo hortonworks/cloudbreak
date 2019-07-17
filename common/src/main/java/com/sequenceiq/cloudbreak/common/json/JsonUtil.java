@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +35,7 @@ public class JsonUtil {
 
     static {
         MAPPER.enable(Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
+        MAPPER.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
         MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);
         MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
