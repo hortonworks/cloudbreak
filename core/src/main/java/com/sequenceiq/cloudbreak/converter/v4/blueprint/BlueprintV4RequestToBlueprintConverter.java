@@ -68,7 +68,13 @@ public class BlueprintV4RequestToBlueprintConverter
                     clusterTemplateGeneratorService.generateTemplateByServices(json.getServices(), json.getPlatform());
             blueprint.setBlueprintText(generatedCmTemplate.getTemplate());
         } else {
-            blueprint.setBlueprintText(json.getBlueprint());
+            try {
+                String blueprintText = json.getBlueprint();
+                jsonHelper.createJsonFromString(blueprintText);
+                blueprint.setBlueprintText(blueprintText);
+            } catch (CloudbreakApiException e) {
+                throw new BadRequestException("Invalid Json format.", e);
+            }
         }
 
         try {
