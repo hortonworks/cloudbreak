@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.freeipa.service.user.model.UmsState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState;
 
 @Service
 public class UmsUsersStateProvider {

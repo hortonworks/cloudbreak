@@ -13,9 +13,11 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningException;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
 import com.sequenceiq.freeipa.service.freeipa.user.SyncOperationStatusService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserService;
@@ -43,14 +45,14 @@ public class UserV1Controller implements UserV1Endpoint {
         LOGGER.debug("synchronizeUser() requested for user {}", userCrn);
         String accountId = threadBaseUserCrnProvider.getAccountId();
 
-        return userService.synchronizeUser(accountId, userCrn, userCrn);
+        return checkOperationRejected(userService.synchronizeUser(accountId, userCrn, userCrn));
     }
 
     @Override
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkUserCrn();
         String accountId = threadBaseUserCrnProvider.getAccountId();
-        return userService.synchronizeAllUsers(accountId, userCrn, request.getEnvironments(), request.getUsers());
+        return checkOperationRejected(userService.synchronizeAllUsers(accountId, userCrn, request.getEnvironments(), request.getUsers()));
     }
 
     @Override
@@ -59,13 +61,20 @@ public class UserV1Controller implements UserV1Endpoint {
         LOGGER.debug("setPassword() requested for user {}", userCrn);
         String accountId = threadBaseUserCrnProvider.getAccountId();
         Set<String> envs = request.getEnvironments();
-        return passwordService.setPassword(accountId, userCrn, request.getPassword(), envs);
+        return checkOperationRejected(passwordService.setPassword(accountId, userCrn, request.getPassword(), envs));
     }
 
     @Override
     public SyncOperationStatus getSyncOperationStatus(@NotNull String operationId) {
         LOGGER.debug("getSyncOperationStatus() requested for operation {}", operationId);
         return syncOperationStatusService.getStatus(operationId);
+    }
+
+    private SyncOperationStatus checkOperationRejected(SyncOperationStatus syncOperationStatus) {
+        if (syncOperationStatus.getStatus() == SynchronizationStatus.REJECTED) {
+            throw new SyncOperationAlreadyRunningException(syncOperationStatus.getError());
+        }
+        return syncOperationStatus;
     }
 
     private String checkUserCrn() {

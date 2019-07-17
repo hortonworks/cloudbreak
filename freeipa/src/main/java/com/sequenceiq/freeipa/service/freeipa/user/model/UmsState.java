@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.user.model;
+package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import static java.util.Objects.requireNonNull;
 
@@ -11,7 +11,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 
 public class UmsState {
     private Map<String, Group> groupMap;
