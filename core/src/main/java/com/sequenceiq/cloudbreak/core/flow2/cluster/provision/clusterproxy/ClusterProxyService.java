@@ -77,11 +77,11 @@ public class ClusterProxyService {
 
     }
 
-    public void deregisterCluster(Stack stack) throws JsonProcessingException {
-        LOGGER.debug("Removing cluster proxy configuration for cluster with crn: {}", clusterCrn(stack));
+    public void deregisterCluster(Cluster cluster) throws JsonProcessingException {
+        LOGGER.debug("Removing cluster proxy configuration for cluster with crn: {}", clusterCrn(cluster));
         restTemplate.postForEntity(clusterProxyUrl + removeConfigPath,
-                requestEntity(new ConfigDeleteRequest(clusterCrn(stack))), ConfigRegistrationResponse.class);
-        LOGGER.debug("Removed cluster proxy configuration for cluster with crn: {}", clusterCrn(stack));
+                requestEntity(new ConfigDeleteRequest(clusterCrn(cluster))), ConfigRegistrationResponse.class);
+        LOGGER.debug("Removed cluster proxy configuration for cluster with crn: {}", clusterCrn(cluster));
     }
 
     private HttpEntity<String> requestEntity(ConfigRegistrationRequest proxyConfigRequest) throws JsonProcessingException {
@@ -114,18 +114,18 @@ public class ClusterProxyService {
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
                 new ClusterServiceCredential(dpUser, dpPasswordVaultPath, true));
         ClusterServiceConfig serviceConfig = new ClusterServiceConfig("cloudera-manager", singletonList(clusterManagerUrl(stack)), credentials);
-        return new ConfigRegistrationRequest(clusterCrn(stack), singletonList(serviceConfig));
+        return new ConfigRegistrationRequest(clusterCrn(cluster), singletonList(serviceConfig));
     }
 
     private ConfigUpdateRequest createProxyConfigUpdateRequest(Stack stack) {
         String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
         Cluster cluster = stack.getCluster();
         String knoxUrl = String.format("https://%s:8443/%s", gatewayIp, cluster.getGateway().getPath());
-        return new ConfigUpdateRequest(clusterCrn(stack), knoxUrl);
+        return new ConfigUpdateRequest(clusterCrn(cluster), knoxUrl);
     }
 
-    private String clusterCrn(Stack stack) {
-        return stack.getResourceCrn();
+    private String clusterCrn(Cluster cluster) {
+        return cluster.getId().toString();
     }
 
     private String clusterManagerUrl(Stack stack) {
