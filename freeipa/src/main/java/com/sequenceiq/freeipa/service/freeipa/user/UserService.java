@@ -21,6 +21,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -32,8 +33,8 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.service.user.model.SyncStatusDetail;
-import com.sequenceiq.freeipa.service.user.model.UmsState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState;
 
 @Service
 public class UserService {
@@ -66,11 +67,16 @@ public class UserService {
     }
 
     public SyncOperationStatus synchronizeAllUsers(String accountId, String actorCrn, Set<String> environmentFilter, Set<String> userCrnFilter) {
-        SyncOperation response = syncOperationStatusService.startOperation(accountId, SyncOperationType.USER_SYNC);
+        SyncOperation syncOperation = syncOperationStatusService
+                .startOperation(accountId, SyncOperationType.USER_SYNC,
+                        environmentFilter == null ? List.of() : List.copyOf(environmentFilter),
+                        userCrnFilter == null ? List.of() : List.copyOf(userCrnFilter));
 
-        asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(response.getOperationId(), accountId, actorCrn, environmentFilter, userCrnFilter));
+        if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
+            asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(syncOperation.getOperationId(), accountId, actorCrn, environmentFilter, userCrnFilter));
+        }
 
-        return syncOperationToSyncOperationStatus.convert(response);
+        return syncOperationToSyncOperationStatus.convert(syncOperation);
     }
 
     public SyncStatusDetail syncAllUsersForStack(String accountId, String actorCrn, Stack stack) {

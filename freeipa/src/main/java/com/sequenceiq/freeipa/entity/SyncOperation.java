@@ -13,11 +13,15 @@ import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
+import com.sequenceiq.freeipa.entity.util.ListFailureDetailsToString;
+import com.sequenceiq.freeipa.entity.util.ListStringToString;
+import com.sequenceiq.freeipa.entity.util.ListSuccessDetailsToString;
 
 @Entity
 @Table(name = "syncoperation")
@@ -41,14 +45,21 @@ public class SyncOperation {
     @Column(nullable = false)
     private SynchronizationStatus status;
 
-    // TODO can I store these as JSON?
-    @Convert(converter = JsonToString.class)
+    @Convert(converter = ListStringToString.class)
     @Column(columnDefinition = "TEXT")
-    private Json successList;
+    private List<String> environmentList = List.of();
 
-    @Convert(converter = JsonToString.class)
+    @Convert(converter = ListStringToString.class)
     @Column(columnDefinition = "TEXT")
-    private Json failureList;
+    private List<String> userList = List.of();
+
+    @Convert(converter = ListSuccessDetailsToString.class)
+    @Column(columnDefinition = "TEXT")
+    private List<SuccessDetails> successList = List.of();
+
+    @Convert(converter = ListFailureDetailsToString.class)
+    @Column(columnDefinition = "TEXT")
+    private List<FailureDetails> failureList = List.of();
 
     @Column(columnDefinition = "TEXT")
     private String error;
@@ -58,11 +69,12 @@ public class SyncOperation {
 
     private Long endTime;
 
+    @Version
+    private Long version;
+
     @PrePersist
     protected void onCreate() {
         startTime = System.currentTimeMillis();
-        successList = emptyListIfNull(successList);
-        failureList = emptyListIfNull(failureList);
     }
 
     public Long getId() {
@@ -105,20 +117,36 @@ public class SyncOperation {
         this.status = status;
     }
 
-    public Json getSuccessList() {
-        return successList;
+    public List<String> getEnvironmentList() {
+        return nullToEmpty(environmentList);
     }
 
-    public void setSuccessList(Json successList) {
-        this.successList = emptyListIfNull(successList);
+    public void setEnvironmentList(List<String> environmentList) {
+        this.environmentList = nullToEmpty(environmentList);
     }
 
-    public Json getFailureList() {
-        return failureList;
+    public List<String> getUserList() {
+        return nullToEmpty(userList);
     }
 
-    public void setFailureList(Json failureList) {
-        this.failureList = emptyListIfNull(failureList);
+    public void setUserList(List<String> userList) {
+        this.userList = nullToEmpty(userList);
+    }
+
+    public List<SuccessDetails> getSuccessList() {
+        return nullToEmpty(successList);
+    }
+
+    public void setSuccessList(List<SuccessDetails> successList) {
+        this.successList = nullToEmpty(successList);
+    }
+
+    public List<FailureDetails> getFailureList() {
+        return nullToEmpty(failureList);
+    }
+
+    public void setFailureList(List<FailureDetails> failureList) {
+        this.failureList = nullToEmpty(failureList);
     }
 
     public String getError() {
@@ -145,10 +173,18 @@ public class SyncOperation {
         this.endTime = endTime;
     }
 
-    private Json emptyListIfNull(Json listJson) {
-        if (listJson == null || listJson.getValue() == null) {
-            return new Json(List.of());
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    private <U> List<U> nullToEmpty(List<U> list) {
+        if (list == null) {
+            return List.of();
         }
-        return listJson;
+        return list;
     }
 }
