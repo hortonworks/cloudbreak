@@ -61,6 +61,9 @@ public class DistroXClusterV1Request implements Serializable {
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
 
+    @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
+    private Boolean validateBlueprint = Boolean.FALSE;
+
     public String getUserName() {
         return userName;
     }
@@ -123,5 +126,13 @@ public class DistroXClusterV1Request implements Serializable {
 
     public void setProxy(String proxy) {
         this.proxy = proxy;
+    }
+
+    public Boolean getValidateBlueprint() {
+        return validateBlueprint;
+    }
+
+    public void setValidateBlueprint(Boolean validateBlueprint) {
+        this.validateBlueprint = validateBlueprint;
     }
 }

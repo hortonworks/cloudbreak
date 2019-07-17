@@ -53,7 +53,7 @@ public class DistroXClusterToClusterConverter {
         response.setProxyConfigCrn(getIfNotNull(source.getProxy(), this::getProxyCrnByName));
         response.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
         response.setCloudStorage(getIfNotNull(source.getCloudStorage(), cloudStorageConverter::convert));
-        response.setValidateBlueprint(false);
+        response.setValidateBlueprint(source.getValidateBlueprint());
         response.setExecutorType(ExecutorType.DEFAULT);
         response.setCustomContainer(null);
         response.setCustomQueue(null);
