@@ -33,17 +33,20 @@ public class AmbariBlueprintValidator implements BlueprintValidator {
     private StackServiceComponentDescriptors stackServiceComponentDescs;
 
     @Override
-    public void validateBlueprintForStack(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups) {
+    public void validate(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups,
+        boolean validateServiceCardinality) {
         try {
             JsonNode hostGroupsNode = getHostGroupNode(blueprint);
             BlueprintValidatorUtil.validateHostGroupsMatch(hostGroups, getHostGroupsFromBlueprint(hostGroupsNode));
             BlueprintValidatorUtil.validateInstanceGroups(hostGroups, instanceGroups);
-            Map<String, HostGroup> hostGroupMap = BlueprintValidatorUtil.createHostGroupMap(hostGroups);
-            Map<String, BlueprintServiceComponent> blueprintServiceComponentMap = Maps.newHashMap();
-            for (JsonNode hostGroupNode : hostGroupsNode) {
-                validateHostGroup(hostGroupNode, hostGroupMap, blueprintServiceComponentMap);
+            if (validateServiceCardinality) {
+                Map<String, HostGroup> hostGroupMap = BlueprintValidatorUtil.createHostGroupMap(hostGroups);
+                Map<String, BlueprintServiceComponent> blueprintServiceComponentMap = Maps.newHashMap();
+                for (JsonNode hostGroupNode : hostGroupsNode) {
+                    validateHostGroup(hostGroupNode, hostGroupMap, blueprintServiceComponentMap);
+                }
+                validateBlueprintServiceComponents(blueprintServiceComponentMap);
             }
-            validateBlueprintServiceComponents(blueprintServiceComponentMap);
         } catch (IOException e) {
             throw new BlueprintValidationException(String.format("Blueprint [%s] can not be parsed from JSON.", blueprint.getId()), e);
         }

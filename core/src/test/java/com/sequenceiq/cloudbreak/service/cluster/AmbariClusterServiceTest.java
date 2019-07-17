@@ -2,9 +2,13 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -41,6 +45,7 @@ import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -86,6 +91,9 @@ public class AmbariClusterServiceTest {
     @Mock
     private ClusterRepository repository;
 
+    @Mock
+    private BlueprintValidatorFactory blueprintValidatorFactory;
+
     @InjectMocks
     private ClusterService clusterService;
 
@@ -99,6 +107,8 @@ public class AmbariClusterServiceTest {
         stack.setOrchestrator(new Orchestrator());
         stack.setCluster(cluster);
         when(clusterService.findById(any(Long.class))).thenReturn(Optional.of(cluster));
+        when(blueprintValidatorFactory.createBlueprintValidator(any(Blueprint.class))).thenReturn(ambariBlueprintValidator);
+        doNothing().when(ambariBlueprintValidator).validate(any(Blueprint.class), anySet(), anyCollection(), anyBoolean());
         when(stackService.getByIdWithListsInTransaction(any(Long.class))).thenReturn(stack);
         when(orchestratorTypeResolver.resolveType(nullable(Orchestrator.class))).thenReturn(OrchestratorType.HOST);
         when(orchestratorTypeResolver.resolveType(nullable(String.class))).thenReturn(OrchestratorType.HOST);
