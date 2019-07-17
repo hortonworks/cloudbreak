@@ -92,7 +92,8 @@ public class DnsZoneService {
 
     public AddDnsZoneForSubnetsResponse addDnsZonesForSubnetIds(AddDnsZoneForSubnetIdsRequest request, String accountId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
-        Map<String, String> subnetWithCidr = getFilteredSubnetWithCidr(request.getEnvironmentCrn(), stack, request.getSubnetIds());
+        Map<String, String> subnetWithCidr = getFilteredSubnetWithCidr(request.getEnvironmentCrn(), stack, request.getAddDnsZoneNetwork().getNetworkId(),
+                request.getAddDnsZoneNetwork().getSubnetIds());
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         AddDnsZoneForSubnetsResponse response = new AddDnsZoneForSubnetsResponse();
         for (Entry<String, String> subnet : subnetWithCidr.entrySet()) {
@@ -114,22 +115,28 @@ public class DnsZoneService {
         return response;
     }
 
-    private Map<String, String> getFilteredSubnetWithCidr(String environmentCrn, Stack stack, Collection<String> subnetIds) {
+    private Map<String, String> getFilteredSubnetWithCidr(String environmentCrn, Stack stack, String networkId, Collection<String> subnetIds) {
         Credential credential = credentialService.getCredentialByEnvCrn(environmentCrn);
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
         CloudNetworks cloudNetworks =
                 cloudParameterService.getCloudNetworks(cloudCredential, stack.getRegion(), stack.getPlatformvariant(), Collections.emptyMap());
         LOGGER.debug("Received Cloud networks for region [{}]: {}", stack.getRegion(), cloudNetworks.getCloudNetworkResponses().get(stack.getRegion()));
         return cloudNetworks.getCloudNetworkResponses().getOrDefault(stack.getRegion(), Collections.emptySet()).stream()
+                .filter(cloudNetwork -> {
+                    // support for azure
+                    String[] splittedNetworkId = cloudNetwork.getId().split("/");
+                    String cloudNetworkId = splittedNetworkId[splittedNetworkId.length - 1];
+                    return networkId.equals(cloudNetworkId);
+                })
                 .flatMap(cloudNetwork -> cloudNetwork.getSubnetsMeta().stream())
                 .filter(cloudSubnet -> StringUtils.isNoneBlank(cloudSubnet.getId(), cloudSubnet.getCidr()))
                 .filter(cloudSubnet -> subnetIds.contains(cloudSubnet.getId()))
                 .collect(Collectors.toMap(CloudSubnet::getId, CloudSubnet::getCidr));
     }
 
-    public void deleteDnsZoneBySubnetId(String environmentCrn, String accountId, String subnetId) throws FreeIpaClientException {
+    public void deleteDnsZoneBySubnetId(String environmentCrn, String accountId, String networkId, String subnetId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
-        Map<String, String> subnetWithCidr = getFilteredSubnetWithCidr(environmentCrn, stack, Collections.singletonList(subnetId));
+        Map<String, String> subnetWithCidr = getFilteredSubnetWithCidr(environmentCrn, stack, networkId, Collections.singletonList(subnetId));
         for (String cidr : subnetWithCidr.values()) {
             deleteDnsZoneBySubnet(environmentCrn, accountId, cidr);
         }

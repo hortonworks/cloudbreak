@@ -16,6 +16,8 @@ public class NetworkDto {
 
     private String name;
 
+    private final String networkId;
+
     private final String resourceCrn;
 
     private final AwsParams aws;
@@ -40,6 +42,7 @@ public class NetworkDto {
         this.subnetIds = CollectionUtils.isEmpty(builder.subnetIds) ? new HashSet<>() : builder.subnetIds;
         this.subnetMetas = MapUtils.isEmpty(builder.subnetMetas) ? new HashMap<>() : builder.subnetMetas;
         this.networkCidr = builder.networkCidr;
+        this.networkId = builder.networkId;
     }
 
     public Long getId() {
@@ -82,10 +85,20 @@ public class NetworkDto {
         return subnetMetas;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getNetworkId() {
+        return networkId;
+    }
+
     public static final class Builder {
         private Long id;
 
         private String name;
+
+        private String networkId;
 
         private String resourceCrn;
 
@@ -150,6 +163,11 @@ public class NetworkDto {
 
         public Builder withNetworkCidr(String networkCidr) {
             this.networkCidr = networkCidr;
+            return this;
+        }
+
+        public Builder withNetworkId(String networkId) {
+            this.networkId = networkId;
             return this;
         }
 

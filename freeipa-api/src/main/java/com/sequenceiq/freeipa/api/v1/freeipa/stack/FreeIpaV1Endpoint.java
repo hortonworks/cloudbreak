@@ -104,7 +104,7 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET_ID, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "deleteDnsZoneBySubnetIdV1")
-    void deleteDnsZoneBySubnetId(@QueryParam("environment") @NotEmpty String environmentCrn,
+    void deleteDnsZoneBySubnetId(@QueryParam("environment") @NotEmpty String environmentCrn, @QueryParam("networkId") @NotEmpty String networkId,
             @QueryParam("subnetId") @NotEmpty String subnetId) throws Exception;
 
     @POST

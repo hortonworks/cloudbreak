@@ -164,6 +164,8 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
         });
     }
 
+    public abstract String getNetworkId();
+
     public boolean isArchived() {
         return archived;
     }

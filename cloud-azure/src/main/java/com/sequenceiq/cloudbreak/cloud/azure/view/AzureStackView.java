@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzurePlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -49,8 +50,10 @@ public class AzureStackView {
                     InstanceTemplate template = instance.getTemplate();
                     String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
                     boolean managedDisk = !Boolean.FALSE.equals(instance.getTemplate().getParameter("managedDisk", Boolean.class));
+                    String attachedDiskStorageType = template.getVolumes().isEmpty() ? AzurePlatformParameters.defaultDiskType().value()
+                            : template.getVolumes().get(0).getType();
                     AzureInstanceView azureInstance = new AzureInstanceView(stackName, stackNamePrefixLength, instance, group.getType(),
-                            attachedDiskStorageName, template.getVolumes().get(0).getType(), group.getName(), instanceGroupView.getAvailabilitySetName(),
+                            attachedDiskStorageName, attachedDiskStorageType, group.getName(), instanceGroupView.getAvailabilitySetName(),
                             managedDisk, getInstanceSubnetId(instance, subnetStrategy), group.getRootVolumeSize(),
                             customImageNamePerInstance.get(instance.getInstanceId()));
                     existingInstances.add(azureInstance);
@@ -88,7 +91,9 @@ public class AzureStackView {
         Map<String, AzureDiskType> storageAccounts = new HashMap<>();
         for (List<AzureInstanceView> list : groups.values()) {
             for (AzureInstanceView armInstanceView : list) {
-                storageAccounts.put(armInstanceView.getAttachedDiskStorageName(), AzureDiskType.getByValue(armInstanceView.getAttachedDiskStorageType()));
+                if (StringUtils.isNoneBlank(armInstanceView.getAttachedDiskStorageName(), armInstanceView.getAttachedDiskStorageType())) {
+                    storageAccounts.put(armInstanceView.getAttachedDiskStorageName(), AzureDiskType.getByValue(armInstanceView.getAttachedDiskStorageType()));
+                }
             }
         }
         return storageAccounts;

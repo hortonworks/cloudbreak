@@ -213,10 +213,14 @@ public class AzureUtils {
     public void validateStorageType(CloudStack stack) {
         for (Group group : stack.getGroups()) {
             InstanceTemplate template = group.getReferenceInstanceConfiguration().getTemplate();
-            String flavor = template.getFlavor();
-            String volumeType = template.getVolumes().get(0).getType();
-            AzureDiskType diskType = AzureDiskType.getByValue(volumeType);
-            validateStorageTypeForGroup(diskType, flavor);
+            if (!template.getVolumes().isEmpty()) {
+                String volumeType = template.getVolumes().get(0).getType();
+                String flavor = template.getFlavor();
+                AzureDiskType diskType = AzureDiskType.getByValue(volumeType);
+                validateStorageTypeForGroup(diskType, flavor);
+            } else {
+                LOGGER.debug("No volume was attached for instance group {}, skipping storage validation", group.getName());
+            }
         }
     }
 

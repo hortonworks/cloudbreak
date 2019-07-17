@@ -1,8 +1,5 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.dns;
 
-import java.util.Set;
-
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,8 +17,8 @@ public class AddDnsZoneForSubnetIdsRequest {
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
-    @NotEmpty(message = "subnet must be present and have at least one member")
-    private Set<String> subnetIds;
+    @NotNull
+    private AddDnsZoneNetwork addDnsZoneNetwork;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -31,11 +28,19 @@ public class AddDnsZoneForSubnetIdsRequest {
         this.environmentCrn = environmentCrn;
     }
 
-    public Set<String> getSubnetIds() {
-        return subnetIds;
+    public AddDnsZoneNetwork getAddDnsZoneNetwork() {
+        return addDnsZoneNetwork;
     }
 
-    public void setSubnetIds(Set<String> subnetIds) {
-        this.subnetIds = subnetIds;
+    public void setAddDnsZoneNetwork(AddDnsZoneNetwork addDnsZoneNetwork) {
+        this.addDnsZoneNetwork = addDnsZoneNetwork;
+    }
+
+    @Override
+    public String toString() {
+        return "AddDnsZoneForSubnetIdsRequest{"
+                + "environmentCrn='" + environmentCrn + '\''
+                + ", addDnsZoneNetwork=" + addDnsZoneNetwork
+                + '}';
     }
 }

@@ -25,7 +25,8 @@ public class AzureStorageView {
     }
 
     public String getAttachedDiskStorageName(InstanceTemplate template) {
-        return armStorage.getAttachedDiskStorageName(armAttachedStorageOption, acv, template.getPrivateId(),
+        return template.getVolumes().isEmpty() ? null
+                : armStorage.getAttachedDiskStorageName(armAttachedStorageOption, acv, template.getPrivateId(),
                 cloudContext, AzureDiskType.getByValue(template.getVolumes().get(0).getType()));
     }
 }

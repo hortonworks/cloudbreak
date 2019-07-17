@@ -5,7 +5,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,9 +129,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    public void deleteDnsZoneBySubnetId(@NotEmpty String environmentCrn, @NotEmpty String subnetId) throws FreeIpaClientException {
+    public void deleteDnsZoneBySubnetId(String environmentCrn, String networkId, String subnetId) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
-        dnsZoneService.deleteDnsZoneBySubnetId(environmentCrn, accountId, subnetId);
+        dnsZoneService.deleteDnsZoneBySubnetId(environmentCrn, accountId, networkId, subnetId);
     }
 
     @Override

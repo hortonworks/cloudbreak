@@ -15,4 +15,9 @@ public class AwsNetwork extends BaseNetwork {
     public void setVpcId(String vpcId) {
         this.vpcId = vpcId;
     }
+
+    @Override
+    public String getNetworkId() {
+        return vpcId;
+    }
 }

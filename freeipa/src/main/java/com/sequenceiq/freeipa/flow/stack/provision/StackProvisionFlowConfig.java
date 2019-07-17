@@ -6,6 +6,11 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.CR
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.CREATE_CREDENTIAL_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.GET_TLS_INFO_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.GET_TLS_INFO_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_COPY_CHECK_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_COPY_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_COPY_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_PREPARATION_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_PREPARATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.LAUNCH_STACK_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.LAUNCH_STACK_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.SETUP_FAILED_EVENT;
@@ -22,6 +27,8 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.CO
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.CREATE_CREDENTIAL_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.GET_TLS_INFO_STATE;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IMAGESETUP_STATE;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IMAGE_CHECK_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.PROVISIONING_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.SETUP_STATE;
@@ -46,7 +53,10 @@ public class StackProvisionFlowConfig extends AbstractFlowConfiguration<StackPro
             .defaultFailureEvent(STACK_CREATION_FAILED_EVENT)
             .from(INIT_STATE).to(VALIDATION_STATE).event(START_CREATION_EVENT).noFailureEvent()
             .from(VALIDATION_STATE).to(SETUP_STATE).event(VALIDATION_FINISHED_EVENT).failureEvent(VALIDATION_FAILED_EVENT)
-            .from(SETUP_STATE).to(CREATE_CREDENTIAL_STATE).event(SETUP_FINISHED_EVENT).failureEvent(SETUP_FAILED_EVENT)
+            .from(SETUP_STATE).to(IMAGESETUP_STATE).event(SETUP_FINISHED_EVENT).failureEvent(SETUP_FAILED_EVENT)
+            .from(IMAGESETUP_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+            .from(IMAGE_CHECK_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_COPY_CHECK_EVENT).failureEvent(IMAGE_COPY_FAILED_EVENT)
+            .from(IMAGE_CHECK_STATE).to(CREATE_CREDENTIAL_STATE).event(IMAGE_COPY_FINISHED_EVENT).failureEvent(IMAGE_COPY_FAILED_EVENT)
             .from(CREATE_CREDENTIAL_STATE).to(START_PROVISIONING_STATE).event(CREATE_CREDENTIAL_FINISHED_EVENT).failureEvent(CREATE_CREDENTIAL_FAILED_EVENT)
             .from(START_PROVISIONING_STATE).to(PROVISIONING_FINISHED_STATE).event(LAUNCH_STACK_FINISHED_EVENT).failureEvent(LAUNCH_STACK_FAILED_EVENT)
             .from(PROVISIONING_FINISHED_STATE).to(COLLECTMETADATA_STATE).event(COLLECT_METADATA_FINISHED_EVENT).failureEvent(COLLECT_METADATA_FAILED_EVENT)

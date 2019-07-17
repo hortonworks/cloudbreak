@@ -15,4 +15,9 @@ public class YarnNetwork extends BaseNetwork {
     public void setQueue(String queue) {
         this.queue = queue;
     }
+
+    @Override
+    public String getNetworkId() {
+        return null;
+    }
 }

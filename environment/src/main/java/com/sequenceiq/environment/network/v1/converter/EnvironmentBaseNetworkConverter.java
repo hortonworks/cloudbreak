@@ -33,7 +33,8 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
                 .withSubnetIds(source.getSubnetIdsSet())
                 .withSubnetMetas(source.getSubnetMetasMap())
                 .withNetworkCidr(source.getNetworkCidr())
-                .withResourceCrn(source.getResourceCrn());
+                .withResourceCrn(source.getResourceCrn())
+                .withNetworkId(source.getNetworkId());
         return setProviderSpecificFields(builder, source);
     }
 
