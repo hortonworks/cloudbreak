@@ -39,7 +39,7 @@ type EnvironmentEditV1Request struct {
 	SecurityAccess *SecurityAccessV1Request `json:"securityAccess,omitempty"`
 
 	// Telemetry related specifics of the environment.
-	Telemetry *TelemetryV1Request `json:"telemetry,omitempty"`
+	Telemetry *TelemetryRequest `json:"telemetry,omitempty"`
 }
 
 // Validate validates this environment edit v1 request

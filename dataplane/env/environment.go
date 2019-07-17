@@ -41,13 +41,13 @@ type environmentOutJsonDescribe struct {
 	*environment
 	ProxyConfigs []string                           `json:"ProxyConfigs" yaml:"ProxyConfigs"`
 	Network      model.EnvironmentNetworkV1Response `json:"Network" yaml:"Network"`
-	Telemetry    model.TelemetryV1Response          `json:"Telemetry" yaml:"Telemetry"`
+	Telemetry    model.TelemetryResponse            `json:"Telemetry" yaml:"Telemetry"`
 }
 
 type environmentListJsonDescribe struct {
 	*environment
 	Network   model.EnvironmentNetworkV1Response `json:"Network" yaml:"Network"`
-	Telemetry model.TelemetryV1Response          `json:"Telemetry" yaml:"Telemetry"`
+	Telemetry model.TelemetryResponse            `json:"Telemetry" yaml:"Telemetry"`
 }
 
 type environmentClient interface {

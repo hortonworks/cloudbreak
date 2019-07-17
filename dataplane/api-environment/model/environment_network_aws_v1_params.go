@@ -19,6 +19,8 @@ type EnvironmentNetworkAwsV1Params struct {
 
 	// Subnet ids of the specified networks
 	// Required: true
+	// Max Length: 255
+	// Min Length: 0
 	VpcID *string `json:"vpcId"`
 }
 
@@ -39,6 +41,14 @@ func (m *EnvironmentNetworkAwsV1Params) Validate(formats strfmt.Registry) error 
 func (m *EnvironmentNetworkAwsV1Params) validateVpcID(formats strfmt.Registry) error {
 
 	if err := validate.Required("vpcId", "body", m.VpcID); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("vpcId", "body", string(*m.VpcID), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("vpcId", "body", string(*m.VpcID), 255); err != nil {
 		return err
 	}
 

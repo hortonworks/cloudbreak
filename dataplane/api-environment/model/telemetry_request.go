@@ -12,19 +12,19 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// TelemetryV1Response telemetry v1 response
-// swagger:model TelemetryV1Response
-type TelemetryV1Response struct {
+// TelemetryRequest telemetry request
+// swagger:model TelemetryRequest
+type TelemetryRequest struct {
 
-	// logging
-	Logging *LoggingV1Response `json:"logging,omitempty"`
+	// Cloud Logging (telemetry) settings.
+	Logging *LoggingRequest `json:"logging,omitempty"`
 
-	// workload analytics
-	WorkloadAnalytics *WorkloadAnalyticsV1Response `json:"workloadAnalytics,omitempty"`
+	// Workload analytics (telemetry) settings.
+	WorkloadAnalytics *WorkloadAnalyticsRequest `json:"workloadAnalytics,omitempty"`
 }
 
-// Validate validates this telemetry v1 response
-func (m *TelemetryV1Response) Validate(formats strfmt.Registry) error {
+// Validate validates this telemetry request
+func (m *TelemetryRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateLogging(formats); err != nil {
@@ -41,7 +41,7 @@ func (m *TelemetryV1Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *TelemetryV1Response) validateLogging(formats strfmt.Registry) error {
+func (m *TelemetryRequest) validateLogging(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Logging) { // not required
 		return nil
@@ -59,7 +59,7 @@ func (m *TelemetryV1Response) validateLogging(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *TelemetryV1Response) validateWorkloadAnalytics(formats strfmt.Registry) error {
+func (m *TelemetryRequest) validateWorkloadAnalytics(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.WorkloadAnalytics) { // not required
 		return nil
@@ -78,7 +78,7 @@ func (m *TelemetryV1Response) validateWorkloadAnalytics(formats strfmt.Registry)
 }
 
 // MarshalBinary interface implementation
-func (m *TelemetryV1Response) MarshalBinary() ([]byte, error) {
+func (m *TelemetryRequest) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -86,8 +86,8 @@ func (m *TelemetryV1Response) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *TelemetryV1Response) UnmarshalBinary(b []byte) error {
-	var res TelemetryV1Response
+func (m *TelemetryRequest) UnmarshalBinary(b []byte) error {
+	var res TelemetryRequest
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

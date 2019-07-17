@@ -67,9 +67,9 @@ func (a *Client) CodeGrantFlowBasedCredentialV1(params *CodeGrantFlowBasedCreden
 
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "codeGrantFlowBasedCredentialV1",
-		Method:             "GET",
+		Method:             "POST",
 		PathPattern:        "/v1/credentials/code_grant_flow/init",
-		ProducesMediaTypes: []string{""},
+		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,

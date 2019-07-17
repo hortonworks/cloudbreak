@@ -31,7 +31,9 @@ type EnvironmentNetworkV1Response struct {
 	Name *string `json:"name"`
 
 	// network cidr
-	NetworkCidr string `json:"networkCidr,omitempty"`
+	// Max Length: 255
+	// Min Length: 0
+	NetworkCidr *string `json:"networkCidr,omitempty"`
 
 	// Subnet ids of the specified networks
 	// Required: true
@@ -55,6 +57,10 @@ func (m *EnvironmentNetworkV1Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateNetworkCidr(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -111,6 +117,23 @@ func (m *EnvironmentNetworkV1Response) validateAzure(formats strfmt.Registry) er
 func (m *EnvironmentNetworkV1Response) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentNetworkV1Response) validateNetworkCidr(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.NetworkCidr) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("networkCidr", "body", string(*m.NetworkCidr), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("networkCidr", "body", string(*m.NetworkCidr), 255); err != nil {
 		return err
 	}
 

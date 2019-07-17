@@ -19,6 +19,8 @@ type EnvironmentNetworkAzureV1Params struct {
 
 	// Subnet ids of the specified networks
 	// Required: true
+	// Max Length: 255
+	// Min Length: 0
 	NetworkID *string `json:"networkId"`
 
 	// Subnet ids of the specified networks
@@ -31,6 +33,8 @@ type EnvironmentNetworkAzureV1Params struct {
 
 	// Subnet ids of the specified networks
 	// Required: true
+	// Max Length: 255
+	// Min Length: 0
 	ResourceGroupName *string `json:"resourceGroupName"`
 }
 
@@ -66,6 +70,14 @@ func (m *EnvironmentNetworkAzureV1Params) validateNetworkID(formats strfmt.Regis
 		return err
 	}
 
+	if err := validate.MinLength("networkId", "body", string(*m.NetworkID), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("networkId", "body", string(*m.NetworkID), 255); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -90,6 +102,14 @@ func (m *EnvironmentNetworkAzureV1Params) validateNoPublicIP(formats strfmt.Regi
 func (m *EnvironmentNetworkAzureV1Params) validateResourceGroupName(formats strfmt.Registry) error {
 
 	if err := validate.Required("resourceGroupName", "body", m.ResourceGroupName); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("resourceGroupName", "body", string(*m.ResourceGroupName), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("resourceGroupName", "body", string(*m.ResourceGroupName), 255); err != nil {
 		return err
 	}
 

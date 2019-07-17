@@ -355,34 +355,6 @@ func (a *Client) GetEnvironmentV1ByName(params *GetEnvironmentV1ByNameParams) (*
 }
 
 /*
-GetWelcomeMessage welcomes
-*/
-func (a *Client) GetWelcomeMessage(params *GetWelcomeMessageParams) (*GetWelcomeMessageOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetWelcomeMessageParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getWelcomeMessage",
-		Method:             "GET",
-		PathPattern:        "/v1/env/welcome",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetWelcomeMessageReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetWelcomeMessageOK), nil
-
-}
-
-/*
 ListEnvironmentV1 lists all environments
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
