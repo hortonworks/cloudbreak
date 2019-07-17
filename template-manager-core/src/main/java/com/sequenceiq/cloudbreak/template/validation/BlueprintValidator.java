@@ -9,7 +9,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
 public interface BlueprintValidator {
 
-    void validateBlueprintForStack(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups)
+    void validate(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups,
+        boolean validateServiceCardinality)
             throws BlueprintValidationException;
 
     void validateHostGroupScalingRequest(Blueprint blueprint, HostGroup hostGroup, Integer adjustment)
