@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.json.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -72,6 +73,15 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         assertEquals("{}", result.getTags().getValue());
         assertEquals("HDP", result.getStackType());
         assertEquals("2.3", result.getStackVersion());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertShouldThrowExceptionWhenTheBlueprintJsonIsInvalid() {
+        BlueprintV4Request request = new BlueprintV4Request();
+        String blueprint = "{}";
+        request.setBlueprint(blueprint);
+        when(jsonHelper.createJsonFromString(blueprint)).thenThrow(new CloudbreakApiException("Invalid Json"));
+        underTest.convert(request);
     }
 
     @Test
