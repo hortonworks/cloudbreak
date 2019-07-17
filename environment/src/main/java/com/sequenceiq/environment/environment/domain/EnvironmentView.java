@@ -80,7 +80,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
     }
 
     public Set<Region> getRegionSet() {
-        return JsonUtil.jsonToType(regions.getValue(), new EmptyTypeReference<>());
+        return JsonUtil.jsonToType(regions.getValue(), new RegionSetTypeReference());
     }
 
     public Json getTelemetry() {
