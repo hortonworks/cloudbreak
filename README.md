@@ -39,6 +39,7 @@ export ULU_SUBSCRIBE_TO_NOTIFICATIONS=true
 export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 export CB_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/core/src/main/resources/schema
 export ENVIRONMENT_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/environment/src/main/resources/schema
+export REDBEAMS_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/redbeams/src/main/resources/schema
 export UAA_DEFAULT_USER_PW=YOUR_PASSWORD
 export VAULT_AUTO_UNSEAL=true
 ```
