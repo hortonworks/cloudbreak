@@ -16,6 +16,7 @@ import java.util.Set;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,7 @@ import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetIdsRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneNetwork;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
@@ -143,13 +145,17 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private boolean shouldSendSubnetIdsToFreeIpa(AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest) {
-        return !addDnsZoneForSubnetIdsRequest.getSubnetIds().isEmpty();
+        AddDnsZoneNetwork addDnsZoneNetwork = addDnsZoneForSubnetIdsRequest.getAddDnsZoneNetwork();
+        return StringUtils.isNotBlank(addDnsZoneNetwork.getNetworkId()) && !addDnsZoneNetwork.getSubnetIds().isEmpty();
     }
 
     private AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest(CreateFreeIpaRequest createFreeIpaRequest, EnvironmentDto environmentDto) {
         AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = new AddDnsZoneForSubnetIdsRequest();
         addDnsZoneForSubnetIdsRequest.setEnvironmentCrn(environmentDto.getResourceCrn());
-        addDnsZoneForSubnetIdsRequest.setSubnetIds(environmentDto.getNetwork().getSubnetIds());
+        AddDnsZoneNetwork addDnsZoneNetwork = new AddDnsZoneNetwork();
+        addDnsZoneNetwork.setNetworkId(environmentDto.getNetwork().getNetworkId());
+        addDnsZoneNetwork.setSubnetIds(environmentDto.getNetwork().getSubnetIds());
+        addDnsZoneForSubnetIdsRequest.setAddDnsZoneNetwork(addDnsZoneNetwork);
         return addDnsZoneForSubnetIdsRequest;
     }
 

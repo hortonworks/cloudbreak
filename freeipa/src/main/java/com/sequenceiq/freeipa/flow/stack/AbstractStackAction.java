@@ -10,6 +10,7 @@ import com.sequenceiq.flow.core.FlowState;
 
 public abstract class AbstractStackAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload>
         extends AbstractAction<S, E, C, P> {
+
     protected AbstractStackAction(Class<P> payloadClass) {
         super(payloadClass);
     }

@@ -113,7 +113,7 @@ public class AzurePlatformParameters implements PlatformParameters {
         return map;
     }
 
-    private DiskType defaultDiskType() {
+    public static DiskType defaultDiskType() {
         return diskType(LOCALLY_REDUNDANT.value());
     }
 

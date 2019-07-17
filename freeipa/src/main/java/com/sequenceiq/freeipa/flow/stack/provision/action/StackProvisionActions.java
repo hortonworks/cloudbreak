@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.flow.stack.provision.action;
 
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionConstants.START_DATE;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -22,19 +21,25 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
+import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
+import com.sequenceiq.freeipa.converter.image.ImageConverter;
+import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
@@ -44,6 +49,7 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Configuration
@@ -51,6 +57,9 @@ public class StackProvisionActions {
 
     @Inject
     private ImageService imageService;
+
+    @Inject
+    private ImageConverter imageConverter;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
@@ -63,6 +72,12 @@ public class StackProvisionActions {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private ResourceToCloudResourceConverter resourceConverter;
+
+    @Inject
+    private ResourceService resourceService;
 
     @Bean(name = "VALIDATION_STATE")
     public Action<?, ?> provisioningValidationAction() {
@@ -95,11 +110,29 @@ public class StackProvisionActions {
         };
     }
 
-    @Bean(name = "CREATE_CREDENTIAL_STATE")
-    public Action<?, ?> createCredentialAction() {
+    @Bean(name = "IMAGESETUP_STATE")
+    public Action<?, ?> prepareImageAction() {
         return new AbstractStackProvisionAction<>(SetupResult.class) {
             @Override
             protected void doExecute(StackContext context, SetupResult payload, Map<Object, Object> variables) {
+                stackProvisionService.prepareImage(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                CloudStack cloudStack = cloudStackConverter.convert(context.getStack());
+                Image image = imageConverter.convert(imageService.getByStack(context.getStack()));
+                return new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image);
+            }
+        };
+    }
+
+    @Bean(name = "CREATE_CREDENTIAL_STATE")
+    public Action<?, ?> createCredentialAction() {
+        return new AbstractStackProvisionAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 variables.put(START_DATE, new Date());
                 stackProvisionService.startProvisioning(context);
                 sendEvent(context);
@@ -143,8 +176,9 @@ public class StackProvisionActions {
             @Override
             protected Selectable createRequest(StackContext context) {
                 List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(context.getStack());
-//                List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
-                return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), Collections.emptyList(), cloudInstances,
+                List<Resource> resources = resourceService.findAllByStackId(context.getStack().getId());
+                List<CloudResource> cloudResources = resourceConverter.convert(resources);
+                return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances,
                         cloudInstances);
             }
         };

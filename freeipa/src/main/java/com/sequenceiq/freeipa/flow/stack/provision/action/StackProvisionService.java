@@ -22,26 +22,33 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
+import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.service.TlsSetupService;
 import com.sequenceiq.freeipa.service.image.ImageService;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
-import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
+
+import reactor.bus.EventBus;
 
 @Component
 public class StackProvisionService {
@@ -58,6 +65,9 @@ public class StackProvisionService {
     private ImageService imageService;
 
     @Inject
+    private ImageConverter imageConverter;
+
+    @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
@@ -68,6 +78,12 @@ public class StackProvisionService {
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
+    @Inject
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
+
+    @Inject
+    private EventBus eventBus;
 
     public void setupProvision(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_SETUP, "Provisioning setup");
@@ -162,6 +178,29 @@ public class StackProvisionService {
         if (!failedResources.isEmpty()) {
             throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext, failedResources));
         }
+    }
+
+    public CheckImageResult checkImage(StackContext context) {
+        try {
+            Stack stack = context.getStack();
+            com.sequenceiq.cloudbreak.cloud.model.Image image = imageConverter.convert(imageService.getByStack(stack));
+            CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(),
+                    cloudStackConverter.convert(stack), image);
+            LOGGER.debug("Triggering event: {}", checkImageRequest);
+            eventBus.notify(checkImageRequest.selector(), eventFactory.createEvent(checkImageRequest));
+            CheckImageResult result = checkImageRequest.await();
+            LOGGER.debug("Result: {}", result);
+            return result;
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while executing check image", e);
+            throw new OperationException(e);
+        } catch (Exception e) {
+            throw new CloudbreakServiceException(e);
+        }
+    }
+
+    public void prepareImage(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.IMAGE_SETUP, "Image setup");
     }
 
     private List<CloudResourceStatus> removeFailedMetadata(Long stackId, List<CloudResourceStatus> statuses, Group group) {
