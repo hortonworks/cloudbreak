@@ -416,7 +416,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     private AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack,
             Map<String, Integer> availableIPs, AuthenticatedContext ac) {
-        Map<String, String> customImageNamePerInstance = getcustomImageNamePerInstance(ac, cloudStack);
+        Map<String, String> customImageNamePerInstance = getCustomImageNamePerInstance(ac, cloudStack);
         return new AzureStackView(ac.getCloudContext().getName(), stackNamePrefixLength, cloudStack.getGroups(), new AzureStorageView(azureCredentialView,
                 ac.getCloudContext(),
                 azureStorage, azureStorage.getArmAttachedStorageOption(cloudStack.getParameters())),
@@ -424,7 +424,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 customImageNamePerInstance);
     }
 
-    private Map<String, String> getcustomImageNamePerInstance(AuthenticatedContext ac, CloudStack cloudStack) {
+    private Map<String, String> getCustomImageNamePerInstance(AuthenticatedContext ac, CloudStack cloudStack) {
         AzureClient client = ac.getParameter(AzureClient.class);
         Map<String, String> imageNameMap = new HashMap<>();
         Map<String, String> customImageNamePerInstance = new HashMap<>();

@@ -67,6 +67,7 @@ import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.microsoft.rest.LogLevel;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
+import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -433,7 +434,7 @@ public class AzureClient {
 
     public String getCustomImageId(String resourceGroup, String fromVhdUri, String region) {
         String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
-        String imageName = vhdName + '-' + region.toLowerCase().replaceAll("\\s", "");
+        String imageName = CustomVMImageNameProvider.get(region, vhdName);
         PagedList<VirtualMachineCustomImage> customImageList = getCustomImageList(resourceGroup);
         Optional<VirtualMachineCustomImage> virtualMachineCustomImage = customImageList.stream()
                 .filter(customImage -> customImage.name().equals(imageName) && customImage.region().label().equals(region)).findFirst();
@@ -453,11 +454,12 @@ public class AzureClient {
 
     private VirtualMachineCustomImage createCustomImage(String imageName, String resourceGroup, String fromVhdUri, String region) {
         return handleAuthException(() -> {
-            LOGGER.info("create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
-                    fromVhdUri, imageName, resourceGroup, region);
+            LOGGER.info("check the existence of resource group '{}', creating if it doesn't exist on Azure side", resourceGroup);
             if (!azure.resourceGroups().contain(resourceGroup)) {
                 azure.resourceGroups().define(resourceGroup).withRegion(region).create();
             }
+            LOGGER.info("create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
+                    fromVhdUri, imageName, resourceGroup, region);
             return azure.virtualMachineCustomImages()
                     .define(imageName)
                     .withRegion(region)
@@ -574,5 +576,4 @@ public class AzureClient {
         }
         return ipList;
     }
-
 }
