@@ -115,8 +115,12 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         Cluster cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
-        ApiClient client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
-        kerberosService.deleteCredentials(client, clientConfig, stack);
+        try {
+            ApiClient client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
+            kerberosService.deleteCredentials(client, clientConfig, stack);
+        } catch (Exception e) {
+            LOGGER.warn("Couldn't cleanup kerberos. It's possible CM isn't started.", e);
+        }
     }
 
     @Override
