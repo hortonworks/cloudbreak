@@ -21,7 +21,6 @@ new_version() {
   docker push ${DOCKER_IMAGE}:${VERSION}
   docker tag ${DOCKER_IMAGE}:${VERSION} ${INTERNAL_IMAGE_NAME}:${VERSION}
   docker push ${INTERNAL_IMAGE_NAME}:${VERSION}
-  docker rmi ${DOCKER_IMAGE}:${VERSION}
 }
 
 main() {
