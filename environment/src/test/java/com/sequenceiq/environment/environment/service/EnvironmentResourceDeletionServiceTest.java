@@ -1,10 +1,14 @@
 package com.sequenceiq.environment.environment.service;
 
+import static com.sequenceiq.environment.environment.service.EnvironmentTestData.CRN;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.USER;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,6 +66,7 @@ class EnvironmentResourceDeletionServiceTest {
     void setup() {
         environment = new Environment();
         environment.setId(1L);
+        environment.setCreator(CRN);
         environment.setName(ENVIRONMENT_NAME);
     }
 
@@ -84,9 +89,9 @@ class EnvironmentResourceDeletionServiceTest {
     void getAttachedDistroXClusterNames() {
         when(cloudbreakClient.withCrn(any())).thenReturn(endpoint);
         when(endpoint.distroXV1Endpoint()).thenReturn(distroXEndpoint);
-        when(distroXEndpoint.list(anyString())).thenReturn(new StackViewV4Responses());
+        when(distroXEndpoint.list(anyString(), anyObject())).thenReturn(new StackViewV4Responses());
         environmentResourceDeletionServiceUnderTest.getAttachedDistroXClusterNames(environment);
-        verify(distroXEndpoint).list(eq(ENVIRONMENT_NAME));
+        verify(distroXEndpoint, times(1)).list(eq(ENVIRONMENT_NAME), isNull());
     }
 
     @Test

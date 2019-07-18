@@ -17,6 +17,7 @@ public class ClusterTemplateViewToClusterTemplateViewV4ResponseConverter
         ClusterTemplateViewV4Response clusterTemplateViewV4Response = new ClusterTemplateViewV4Response();
         clusterTemplateViewV4Response.setName(source.getName());
         clusterTemplateViewV4Response.setDescription(source.getDescription());
+        clusterTemplateViewV4Response.setCrn(source.getResourceCrn());
         clusterTemplateViewV4Response.setCloudPlatform(source.getCloudPlatform());
         clusterTemplateViewV4Response.setStatus(source.getStatus());
         clusterTemplateViewV4Response.setId(source.getId());

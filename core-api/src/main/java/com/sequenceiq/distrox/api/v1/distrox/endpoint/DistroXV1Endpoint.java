@@ -1,18 +1,25 @@
 package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
-import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_CRN;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.WorkspaceOpDescription.DELETE_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CREATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_BY_CRN;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_INSTANCE_BY_ID;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_INSTANCE_BY_ID_BY_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_INSTANCE_BY_ID_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS_BY_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_NAME;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STACK_REQUEST;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STACK_REQUEST_BY_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STACK_REQUEST_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT_BY_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RETRY_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SCALE_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.START_BY_NAME;
@@ -58,94 +65,189 @@ public interface DistroXV1Endpoint {
     @Path("")
     @ApiOperation(value = LIST, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "listDistroXV1")
-    StackViewV4Responses list(@QueryParam("environment") String environmentName);
+    StackViewV4Responses list(
+        @QueryParam("environmentName") String environmentName,
+        @QueryParam("environmentCrn") String environmentCrn);
 
     @POST
     @Path("")
-    @ApiOperation(value = CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "postDistroXV1")
+    @ApiOperation(value = CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "postDistroXV1")
     StackV4Response post(@Valid DistroXV1Request request);
 
     @GET
     @Path("name/{name}")
-    @ApiOperation(value = GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getDistroXV1")
+    @ApiOperation(value = GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "getDistroXV1ByName")
     StackV4Response getByName(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
 
     @GET
     @Path("crn/{crn}")
-    @ApiOperation(value = GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getDistroXByCrnV1")
+    @ApiOperation(value = GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "getDistroXV1ByCrn")
     StackV4Response getByCrn(@PathParam("crn") String crn, @QueryParam("entries") Set<String> entries);
 
     @DELETE
     @Path("name/{name}")
-    @ApiOperation(value = DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "deleteDistroXV1")
+    @ApiOperation(value = DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteDistroXV1ByName")
     void deleteByName(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @DELETE
     @Path("crn/{crn}")
-    @ApiOperation(value = DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "deleteDistroXByCrnV1")
+    @ApiOperation(value = DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteDistroXV1ByCrn")
     void deleteByCrn(@PathParam("crn") String crn, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @PUT
-    @Path("{name}/sync")
-    @ApiOperation(value = SYNC_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "syncDistroXV1")
-    void putSync(@PathParam("name") String name);
+    @Path("name/{name}/sync")
+    @ApiOperation(value = SYNC_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "syncDistroXV1ByName")
+    void putSyncByName(@PathParam("name") String name);
 
     @PUT
-    @Path("{name}/retry")
-    @ApiOperation(value = RETRY_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES, nickname = "retryDistroXV1")
-    void putRetry(@PathParam("name") String name);
+    @Path("crn/{crn}/sync")
+    @ApiOperation(value = SYNC_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "syncDistroXV1ByCrn")
+    void putSyncByCrn(@PathParam("crn") String crn);
 
     @PUT
-    @Path("{name}/stop")
-    @ApiOperation(value = STOP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "stopDistroXV1")
-    void putStop(@PathParam("name") String name);
+    @Path("name/{name}/retry")
+    @ApiOperation(value = RETRY_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
+            nickname = "retryDistroXV1ByName")
+    void putRetryByName(@PathParam("name") String name);
 
     @PUT
-    @Path("{name}/start")
-    @ApiOperation(value = START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "startDistroXV1")
-    void putStart(@PathParam("name") String name);
+    @Path("crn/{crn}/retry")
+    @ApiOperation(value = RETRY_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
+            nickname = "retryDistroXV1ByCrn")
+    void putRetryByCrn(@PathParam("crn") String crn);
 
     @PUT
-    @Path("{name}/scaling")
-    @ApiOperation(value = SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putScalingDistroXV1")
-    void putScaling(@PathParam("name") String name, @Valid DistroXScaleV1Request updateRequest);
+    @Path("name/{name}/stop")
+    @ApiOperation(value = STOP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "stopDistroXV1ByName")
+    void putStopByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("crn/{crn}/stop")
+    @ApiOperation(value = STOP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "stopDistroXV1ByCrn")
+    void putStopByCrn(@PathParam("crn") String crn);
+
+    @PUT
+    @Path("name/{name}/start")
+    @ApiOperation(value = START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "startDistroXV1ByName")
+    void putStartByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("crn/{crn}/start")
+    @ApiOperation(value = START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "startDistroXV1ByCrn")
+    void putStartByCrn(@PathParam("crn") String crn);
+
+    @PUT
+    @Path("name/{name}/scaling")
+    @ApiOperation(value = SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "putScalingDistroXV1ByName")
+    void putScalingByName(@PathParam("name") String name, @Valid DistroXScaleV1Request updateRequest);
+
+    @PUT
+    @Path("crn/{crn}/scaling")
+    @ApiOperation(value = SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "putScalingDistroXV1ByCrn")
+    void putScalingByCrn(@PathParam("crn") String crn, @Valid DistroXScaleV1Request updateRequest);
 
     @POST
-    @Path("{name}/manual_repair")
-    @ApiOperation(value = REPAIR_CLUSTER, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_REPAIR_NOTES, nickname = "repairDistroXV1")
-    void repairCluster(@PathParam("name") String name, @Valid DistroXRepairV1Request clusterRepairRequest);
+    @Path("name/{name}/manual_repair")
+    @ApiOperation(value = REPAIR_CLUSTER_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
+            nickname = "repairDistroXV1ByName")
+    void repairClusterByName(@PathParam("name") String name, @Valid DistroXRepairV1Request clusterRepairRequest);
 
     @POST
-    @Path("{name}/blueprint")
+    @Path("crn/{crn}/manual_repair")
+    @ApiOperation(value = REPAIR_CLUSTER_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
+            nickname = "repairDistroXV1ByCrn")
+    void repairClusterByCrn(@PathParam("crn") String crn, @Valid DistroXRepairV1Request clusterRepairRequest);
+
+    @POST
+    @Path("name/{name}/blueprint")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = POST_STACK_FOR_BLUEPRINT, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "postDistroXForBlueprintV1")
-    GeneratedBlueprintV4Response postStackForBlueprint(@PathParam("name") String name, @Valid DistroXV1Request stackRequest);
+    @ApiOperation(value = POST_STACK_FOR_BLUEPRINT_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "postDistroXForBlueprintV1ByName")
+    GeneratedBlueprintV4Response postStackForBlueprintByName(@PathParam("name") String name, @Valid DistroXV1Request stackRequest);
+
+    @POST
+    @Path("crn/{crn}/blueprint")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = POST_STACK_FOR_BLUEPRINT_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "postDistroXForBlueprintV1ByCrn")
+    GeneratedBlueprintV4Response postStackForBlueprintByCrn(@PathParam("crn") String crn, @Valid DistroXV1Request stackRequest);
 
     @GET
-    @Path("{name}/request")
-    @ApiOperation(value = GET_STACK_REQUEST, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getDistroXRequestFromNameV1")
+    @Path("name/{name}/request")
+    @ApiOperation(value = GET_STACK_REQUEST_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "getDistroXRequestV1ByName")
     DistroXV1Request getRequestfromName(@PathParam("name") String name);
 
     @GET
-    @Path("{name}/status")
-    @ApiOperation(value = GET_STATUS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "statusDistroXV1")
+    @Path("crn/{crn}/request")
+    @ApiOperation(value = GET_STACK_REQUEST_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "getDistroXRequestV1ByCrn")
+    DistroXV1Request getRequestfromCrn(@PathParam("crn") String crn);
+
+    @GET
+    @Path("name/{name}/status")
+    @ApiOperation(value = GET_STATUS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "statusDistroXV1ByName")
     StackStatusV4Response getStatusByName(@PathParam("name") String name);
 
+    @GET
+    @Path("crn/{crn}/status")
+    @ApiOperation(value = GET_STATUS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "statusDistroXV1ByCrn")
+    StackStatusV4Response getStatusByCrn(@PathParam("crn") String crn);
+
     @DELETE
-    @Path("{name}/instance")
-    @ApiOperation(value = DELETE_INSTANCE_BY_ID, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "deleteInstanceDistroXV1")
-    void deleteInstance(@PathParam("name") String name,
+    @Path("name/{name}/instance")
+    @ApiOperation(value = DELETE_INSTANCE_BY_ID_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteInstanceDistroXV1ByName")
+    void deleteInstanceByName(@PathParam("name") String name,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("instanceId") String instanceId);
 
+    @DELETE
+    @Path("crn/{crn}/instance")
+    @ApiOperation(value = DELETE_INSTANCE_BY_ID_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteInstanceDistroXV1ByCrn")
+    void deleteInstanceByCrn(@PathParam("crn") String crn,
+                        @QueryParam("forced") @DefaultValue("false") Boolean forced,
+                        @QueryParam("instanceId") String instanceId);
+
     @PUT
-    @Path("{name}/maintenance")
-    @ApiOperation(value = SET_MAINTENANCE_MODE, produces = MediaType.APPLICATION_JSON, notes = Notes.MAINTENANCE_NOTES, nickname = "setDistroXMaintenanceMode")
-    void setClusterMaintenanceMode(@PathParam("name") String name,
+    @Path("name/{name}/maintenance")
+    @ApiOperation(value = SET_MAINTENANCE_MODE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.MAINTENANCE_NOTES,
+            nickname = "setDistroXMaintenanceModeByName")
+    void setClusterMaintenanceModeByName(@PathParam("name") String name,
             @NotNull DistroXMaintenanceModeV1Request maintenanceMode);
 
+    @PUT
+    @Path("crn/{crn}/maintenance")
+    @ApiOperation(value = SET_MAINTENANCE_MODE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.MAINTENANCE_NOTES,
+            nickname = "setDistroXMaintenanceModeByCrn")
+    void setClusterMaintenanceModeByCrn(@PathParam("crn") String crn,
+        @NotNull DistroXMaintenanceModeV1Request maintenanceMode);
+
     @DELETE
-    @Path("{name}/cluster")
-    @ApiOperation(value = DELETE_WITH_KERBEROS, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES, nickname = "deleteWithKerberosDistroXV1")
-    void deleteWithKerberos(@PathParam("name") String name);
+    @Path("name/{name}/cluster")
+    @ApiOperation(value = DELETE_WITH_KERBEROS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES,
+            nickname = "deleteWithKerberosDistroXV1ByName")
+    void deleteWithKerberosByName(@PathParam("name") String name);
+
+    @DELETE
+    @Path("crn/{crn}/cluster")
+    @ApiOperation(value = DELETE_WITH_KERBEROS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES,
+            nickname = "deleteWithKerberosDistroXV1ByCrn")
+    void deleteWithKerberosByCrn(@PathParam("crn") String crn);
 }

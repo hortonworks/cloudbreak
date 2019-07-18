@@ -21,7 +21,7 @@ public class DistroXBlueprintRequestAction implements Action<DistroXTestDto, Clo
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
         logJSON(LOGGER, " Stack get blueprint:\n", testDto.getRequest());
-        GeneratedBlueprintV4Response bp = client.getCloudbreakClient().distroXV1Endpoint().postStackForBlueprint(
+        GeneratedBlueprintV4Response bp = client.getCloudbreakClient().distroXV1Endpoint().postStackForBlueprintByName(
                 testDto.getName(),
                 testDto.getRequest());
         testDto.withGeneratedBlueprint(bp);

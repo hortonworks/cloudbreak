@@ -85,6 +85,11 @@ public class CredentialService extends AbstractCredentialService {
                 .orElseThrow(notFound("Credential with environmentCrn:", environmentCrn));
     }
 
+    public Credential getByEnvironmentNameAndAccountId(String environmentName, String accountId) {
+        return repository.findByEnvironmentNameAndAccountId(environmentName, accountId, getEnabledPlatforms())
+                .orElseThrow(notFound("Credential with environmentName:", environmentName));
+    }
+
     public Map<String, String> interactiveLogin(String accountId, String userId, Credential credential) {
         validateDeploymentAddress(credential);
         return credentialAdapter.interactiveLogin(credential, accountId, userId);

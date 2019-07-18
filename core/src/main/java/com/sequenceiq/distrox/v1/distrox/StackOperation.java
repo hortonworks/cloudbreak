@@ -142,84 +142,132 @@ public class StackOperation {
         }
     }
 
-    public void putSync(Long workspaceId, String name) {
-        LOGGER.info("Sync Stack in workspace {} with name {}.", workspaceId, name);
-        stackCommonService.putSyncInWorkspace(name, workspaceId);
+    public void putSync(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.putSyncInWorkspace(stackAccessDto.getName(), null, workspaceId);
+        } else {
+            stackCommonService.putSyncInWorkspace(null, stackAccessDto.getCrn(), workspaceId);
+        }
     }
 
-    public void putRetry(Long workspaceId, String name) {
-        LOGGER.info("Retry Stack in workspace {} with name {}.", workspaceId, name);
-        stackCommonService.retryInWorkspace(name, workspaceId);
+    public void putRetry(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.retryInWorkspaceByName(stackAccessDto.getName(), workspaceId);
+        } else {
+            stackCommonService.retryInWorkspaceByCrn(stackAccessDto.getCrn(), workspaceId);
+        }
     }
 
-    public void putStop(Long workspaceId, String name) {
-        LOGGER.info("Stop Stack in workspace {} with name {}.", workspaceId, name);
-        stackCommonService.putStopInWorkspace(name, workspaceId);
+    public void putStop(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.putStopInWorkspaceByName(stackAccessDto.getName(), workspaceId);
+        } else {
+            stackCommonService.putStopInWorkspaceByCrn(stackAccessDto.getCrn(), workspaceId);
+        }
     }
 
-    public void putStart(Long workspaceId, String name) {
-        LOGGER.info("Put Stack in workspace {} with name {}.", workspaceId, name);
-        stackCommonService.putStartInWorkspace(name, workspaceId);
+    public void putStart(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
+        stackCommonService.putStartInWorkspace(stackAccessDto.getName(), workspaceId);
     }
 
-    public void putScaling(Long workspaceId, String name, @Valid StackScaleV4Request updateRequest) {
-        LOGGER.info("Scaling Stack in workspace {} with name {}.", workspaceId, name);
-        stackCommonService.putScalingInWorkspace(name, workspaceId, updateRequest);
+    public void putScaling(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @Valid StackScaleV4Request updateRequest) {
+        stackCommonService.putScalingInWorkspace(stackAccessDto.getName(), workspaceId, updateRequest);
     }
 
-    public void repairCluster(Long workspaceId, String name, @Valid ClusterRepairV4Request clusterRepairRequest) {
-        LOGGER.info("Repair Stack in workspace {} with name {}.", workspaceId, name);
-        stackCommonService.repairCluster(workspaceId, name, clusterRepairRequest);
+    public void repairCluster(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @Valid ClusterRepairV4Request clusterRepairRequest) {
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.repairClusterByName(workspaceId, stackAccessDto.getName(), clusterRepairRequest);
+        } else {
+            stackCommonService.repairClusterByCrn(workspaceId, stackAccessDto.getCrn(), clusterRepairRequest);
+        }
     }
 
-    public GeneratedBlueprintV4Response postStackForBlueprint(Long workspaceId, String name, @Valid StackV4Request stackRequest) {
-        LOGGER.info("Generate blueprint for Stack in workspace {} with name {}.", workspaceId, name);
+    public GeneratedBlueprintV4Response postStackForBlueprint(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @Valid StackV4Request stackRequest) {
         return stackCommonService.postStackForBlueprint(stackRequest);
     }
 
-    public void changeImage(Long workspaceId, String name, @Valid StackImageChangeV4Request stackImageChangeRequest) {
-        LOGGER.info("Change image for Stack in workspace {} with name {}.", workspaceId, name);
-        stackCommonService.changeImageByNameInWorkspace(name, workspaceId, stackImageChangeRequest);
+    public void changeImage(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @Valid StackImageChangeV4Request stackImageChangeRequest) {
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.changeImageByNameInWorkspace(stackAccessDto.getName(), workspaceId, stackImageChangeRequest);
+        } else {
+            stackCommonService.changeImageByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, stackImageChangeRequest);
+        }
     }
 
-    public void deleteWithKerberos(Long workspaceId, String name, Boolean withStackDelete, Boolean deleteDependencies) {
-        LOGGER.info("Delete with Kerberos for Stack in workspace {} with name {}.", workspaceId, name);
-        stackCommonService.deleteWithKerbereosInWorkspace(name, workspaceId, withStackDelete, deleteDependencies);
+    public void deleteWithKerberos(@NotNull StackAccessDto stackAccessDto, Long workspaceId, Boolean withStackDelete, Boolean deleteDependencies) {
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.deleteWithKerberosByNameInWorkspace(stackAccessDto.getName(), workspaceId, withStackDelete, deleteDependencies);
+        } else {
+            stackCommonService.deleteWithKerberosByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, withStackDelete, deleteDependencies);
+        }
     }
 
-    public StackV4Request getRequestfromName(Long workspaceId, String name) {
-        LOGGER.info("Get request for Stack in workspace {} with name {}.", workspaceId, name);
-        return stackService.getStackRequestByNameInWorkspaceId(name, workspaceId);
+    public StackV4Request getRequest(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
+        if (isNotEmpty(stackAccessDto.getName())) {
+            return stackService.getStackRequestByNameInWorkspaceId(stackAccessDto.getName(), workspaceId);
+        } else {
+            return stackService.getStackRequestByCrnInWorkspaceId(stackAccessDto.getCrn(), workspaceId);
+        }
     }
 
-    public StackStatusV4Response getStatusByName(Long workspaceId, String name) {
-        LOGGER.info("Get status for Stack in workspace {} with name {}.", workspaceId, name);
-        return converterUtil.convert(stackService.getByNameInWorkspace(name, workspaceId), StackStatusV4Response.class);
+    public StackStatusV4Response getStatus(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
+        Stack stack;
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stack = stackService.getByNameInWorkspace(stackAccessDto.getName(), workspaceId);
+        } else {
+            stack = stackService.getByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId);
+        }
+        return converterUtil.convert(stack, StackStatusV4Response.class);
     }
 
-    public void deleteInstance(Long workspaceId, String name, Boolean forced, String instanceId) {
-        LOGGER.info("Delete instance for Stack in workspace {} with name {}.", workspaceId, name);
-        stackCommonService.deleteInstanceByNameInWorkspace(name, workspaceId, instanceId, forced);
+    public StackStatusV4Response getStatusByCrn(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
+        Stack stack;
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stack = stackService.getByCrnInWorkspace(stackAccessDto.getName(), workspaceId);
+        } else {
+            stack = stackService.getByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId);
+        }
+        return converterUtil.convert(stack, StackStatusV4Response.class);
     }
 
-    public void putPassword(Long workspaceId, String name, @Valid UserNamePasswordV4Request userNamePasswordJson) {
-        LOGGER.info("Put Stack password in workspace {} with name {}.", workspaceId, name);
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+    public void deleteInstance(@NotNull StackAccessDto stackAccessDto, Long workspaceId, Boolean forced, String instanceId) {
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stackCommonService.deleteInstanceByNameInWorkspace(stackAccessDto.getName(), workspaceId, instanceId, forced);
+        } else {
+            stackCommonService.deleteInstanceByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, instanceId, forced);
+        }
+    }
+
+    public void putPassword(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
+        Stack stack;
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stack = stackService.getByNameInWorkspace(stackAccessDto.getName(), workspaceId);
+        } else {
+            stack = stackService.getByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId);
+        }
         UpdateClusterV4Request updateClusterJson = converterUtil.convert(userNamePasswordJson, UpdateClusterV4Request.class);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterCommonService.put(stack.getResourceCrn(), updateClusterJson, user, workspace);
     }
 
-    public void setClusterMaintenanceMode(Long workspaceId, String name, @NotNull MaintenanceModeV4Request maintenanceMode) {
-        LOGGER.info("Put Stack maintenance mode in workspace {} with name {}.", workspaceId, name);
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+    public void setClusterMaintenanceMode(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @NotNull MaintenanceModeV4Request maintenanceMode) {
+        Stack stack;
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stack = stackService.getByNameInWorkspace(stackAccessDto.getName(), workspaceId);
+        } else {
+            stack = stackService.getByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId);
+        }
         clusterCommonService.setMaintenanceMode(stack, maintenanceMode.getStatus());
     }
 
-    public void putCluster(Long workspaceId, String name, @Valid UpdateClusterV4Request updateJson) {
-        LOGGER.info("Put Cluster in workspace {} with name {}.", workspaceId, name);
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+    public void putCluster(@NotNull StackAccessDto stackAccessDto, Long workspaceId, @Valid UpdateClusterV4Request updateJson) {
+        Stack stack;
+        if (isNotEmpty(stackAccessDto.getName())) {
+            stack = stackService.getByNameInWorkspace(stackAccessDto.getName(), workspaceId);
+        } else {
+            stack = stackService.getByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId);
+        }
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterCommonService.put(stack.getResourceCrn(), updateJson, user, workspace);
@@ -233,6 +281,10 @@ public class StackOperation {
 
     public Stack getStackByName(String name) {
         return stackService.getByNameInWorkspace(name, workspaceService.getForCurrentUser().getId());
+    }
+
+    public Stack getStackByCrn(String crn) {
+        return stackService.getByCrnInWorkspace(crn, workspaceService.getForCurrentUser().getId());
     }
 
     private void validateAccessDto(StackAccessDto dto) {

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks;
 
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.PUT_BY_STACK_ID;
-import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CREATE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_BY_NAME_IN_WORKSPACE;
@@ -176,7 +176,7 @@ public interface StackV4Endpoint {
     @PUT
     @Path("{name}/maintenance")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SET_MAINTENANCE_MODE, produces = ContentType.JSON, notes = Notes.MAINTENANCE_NOTES,
+    @ApiOperation(value = SET_MAINTENANCE_MODE_BY_NAME, produces = ContentType.JSON, notes = Notes.MAINTENANCE_NOTES,
             nickname = "setClusterMaintenanceMode")
     void setClusterMaintenanceMode(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @NotNull MaintenanceModeV4Request maintenanceMode);

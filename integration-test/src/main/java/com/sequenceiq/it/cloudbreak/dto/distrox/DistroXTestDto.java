@@ -57,7 +57,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public List<StackV4Response> getAll(CloudbreakClient client) {
         DistroXV1Endpoint distroXV1Endpoint = client.getCloudbreakClient().distroXV1Endpoint();
-        return distroXV1Endpoint.list(null).getResponses().stream()
+        return distroXV1Endpoint.list(null, null).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
                     StackV4Response stackResponse = new StackV4Response();

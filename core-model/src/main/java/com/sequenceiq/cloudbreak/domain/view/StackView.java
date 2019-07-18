@@ -42,6 +42,8 @@ public class StackView extends CompactView {
 
     private Long terminated;
 
+    private String resourceCrn;
+
     public StackView() {
     }
 
@@ -110,6 +112,14 @@ public class StackView extends CompactView {
 
     public boolean isStackInDeletionPhase() {
         return DELETE_COMPLETED.equals(getStatus()) || DELETE_IN_PROGRESS.equals(getStatus());
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 
     public Long getTerminated() {

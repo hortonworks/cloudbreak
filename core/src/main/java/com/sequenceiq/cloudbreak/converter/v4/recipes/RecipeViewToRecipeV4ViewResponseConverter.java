@@ -12,6 +12,7 @@ public class RecipeViewToRecipeV4ViewResponseConverter extends CompactViewToComp
     public RecipeViewV4Response convert(RecipeView recipe) {
         RecipeViewV4Response json = super.convert(recipe);
         json.setType(recipe.getRecipeType());
+        json.setCrn(recipe.getCrn());
         return json;
     }
 

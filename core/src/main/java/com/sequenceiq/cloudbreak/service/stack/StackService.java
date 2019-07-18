@@ -220,15 +220,6 @@ public class StackService {
     @Value("${info.app.version:}")
     private String cbVersion;
 
-    public Set<StackV4Response> retrieveStacksByWorkspaceId(Long workspaceId) {
-        try {
-            return transactionService.required(() ->
-                    converterUtil.convertAllAsSet(stackRepository.findForWorkspaceIdWithLists(workspaceId), StackV4Response.class));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-    }
-
     public Optional<Stack> findStackByNameAndWorkspaceId(String name, Long workspaceId) {
         return findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
@@ -435,9 +426,32 @@ public class StackService {
         }
     }
 
+    public StackV4Request getStackRequestByCrnInWorkspaceId(String crn, Long workspaceId) {
+        try {
+            return transactionService.required(() -> {
+                ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
+                Optional<Stack> stack = findByCrnAndWorkspaceIdWithLists(crn, workspaceId, null, showTerminatedClustersAfterConfig);
+                if (stack.isEmpty()) {
+                    throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, crn));
+                }
+                StackV4Request request = converterUtil.convert(stack.get(), StackV4Request.class);
+                request.getCluster().setName(null);
+                request.setName(stack.get().getName());
+                return request;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
     public Stack getByNameInWorkspace(String name, Long workspaceId) {
         return stackRepository.findByNameAndWorkspaceId(name, workspaceId)
                 .orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
+    }
+
+    public Stack getByCrnInWorkspace(String crn, Long workspaceId) {
+        return stackRepository.findByCrnAndWorkspaceId(crn, workspaceId)
+                .orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, crn)));
     }
 
     public Optional<Stack> getByNameInWorkspaceWithLists(String name, Long workspaceId) {

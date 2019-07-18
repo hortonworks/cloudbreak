@@ -23,6 +23,8 @@ public class ClusterTemplateView extends CompactView {
 
     private String cloudPlatform;
 
+    private String resourceCrn;
+
     @Enumerated(EnumType.STRING)
     private DatalakeRequired datalakeRequired;
 
@@ -75,6 +77,14 @@ public class ClusterTemplateView extends CompactView {
 
     public void setStackTemplate(StackApiView stackTemplate) {
         this.stackTemplate = stackTemplate;
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 
     public Integer getFullNodeCount() {

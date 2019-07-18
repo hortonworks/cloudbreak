@@ -15,6 +15,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -88,6 +89,11 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         if (resource.getStatus() == ResourceStatus.DEFAULT || resource.getStatus() == ResourceStatus.DEFAULT_DELETED) {
             throw new AccessDeniedException("Default template deletion is forbidden");
         }
+    }
+
+    public ClusterTemplate createForLoggedInUser(ClusterTemplate resource, Long workspaceId, String accountId) {
+        resource.setResourceCrn(createCRN(accountId));
+        return super.createForLoggedInUser(resource, workspaceId);
     }
 
     @Override
@@ -200,5 +206,15 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     public Set<ClusterTemplate> deleteMultiple(Set<String> names, Long workspaceId) {
         return names.stream().map(name -> delete(name, workspaceId)).collect(Collectors.toSet());
+    }
+
+    private String createCRN(String accountId) {
+        return Crn.builder()
+                .setService(Crn.Service.CLOUDBREAK)
+                .setAccountId(accountId)
+                .setResourceType(Crn.ResourceType.CLUSTER_TEMPLATE)
+                .setResource(UUID.randomUUID().toString())
+                .build()
+                .toString();
     }
 }
