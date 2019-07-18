@@ -64,7 +64,8 @@ install_fluentd_plugins:
   cmd.run:
     - names:
       - /opt/td-agent/embedded/bin/fluent-gem source -a {{ fluent.clouderaPublicGemRepo }}
-      - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-databus fluent-plugin-cloudwatch-logs
+      - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
+      - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-databus -v {{ fluent.clouderaDatabusPluginVersion }}
       {% if fluent.platform == 'AZURE' %}
       - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-azurestorage -v {{ fluent.clouderaAzurePluginVersion }} -s {{ fluent.clouderaPublicGemRepo }}
       {% endif %}
