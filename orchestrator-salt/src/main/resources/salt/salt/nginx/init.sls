@@ -4,6 +4,7 @@
   file.managed:
     - makedirs: True
     - source: salt://nginx/conf/ssl.conf
+    - replace: False
 
 /etc/nginx/sites-enabled/ssl-locations.d/consul.conf:
   file.managed:
@@ -96,6 +97,7 @@ generate_user_facing_cert:
   {% elif "manager_server" in grains.get('roles', []) %}
     - source: salt://nginx/conf/clouderamanager-ssl-user-facing.conf
   {% endif %}
+    - replace: False
 
 restart_nginx_after_ssl_reconfig_with_user_facing:
   service.running:

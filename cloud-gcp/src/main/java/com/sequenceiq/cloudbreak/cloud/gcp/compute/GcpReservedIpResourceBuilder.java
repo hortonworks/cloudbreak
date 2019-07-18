@@ -58,10 +58,10 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
             Address address = new Address();
             address.setName(resource.getName());
 
-            Map<String, String> customTags = new HashMap<>();
+            Map<String, Object> customTags = new HashMap<>();
             customTags.putAll(cloudStack.getTags());
             customTags.putAll(defaultCostTaggingService.prepareIpTagging());
-            address.setLabels(customTags);
+            address.setUnknownKeys(customTags);
             Insert networkInsert = context.getCompute().addresses().insert(projectId, region, address);
             try {
                 Operation operation = networkInsert.execute();
