@@ -1,19 +1,12 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
@@ -28,22 +21,12 @@ public class ClouderaManagerDatabusService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerDatabusService.class);
 
-    private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
-
-    private static final String ALTUS_PRIVATE_KEY = "altus_private_key";
-
-    private static final String DATABUS_CRN_PATTERN = "dataeng-wa-publisher-%s-%s";
+    private static final String DATABUS_CRN_PATTERN = "dataeng-wa-publisher-%s";
 
     private static final String DATABUS_UPLOADER_RESOURCE_NAME = "DbusUploader";
 
     @Inject
     private GrpcUmsClient umsClient;
-
-    @Value("${altus.databus.credential.file:}")
-    private String altusDatabusCredentialFile;
-
-    @Value("${altus.databus.credential.profile:default}")
-    private String altusDatabusCredentialProfile;
 
     /**
      * Generate new machine user (if it is needed) and access api key for this user.
@@ -53,7 +36,7 @@ public class ClouderaManagerDatabusService {
      */
     AltusCredential createMachineUserAndGenerateKeys(Stack stack) {
         String userCrn = stack.getCreator().getUserCrn();
-        String machineUserName = getWAMachineUserName(userCrn, stack.getCluster().getId().toString());
+        String machineUserName = getWAMachineUserName(userCrn, stack);
         UserManagementProto.MachineUser machineUser = umsClient.createMachineUser(machineUserName, userCrn, Optional.empty());
         String builtInDbusRoleCrn = getBuiltInDatabusCrn();
         umsClient.assignMachineUserRole(userCrn, machineUser.getCrn(), builtInDbusRoleCrn, Optional.empty());
@@ -65,45 +48,24 @@ public class ClouderaManagerDatabusService {
      * @param stack stack that is used to get user crn
      */
     void cleanUpMachineUser(Stack stack) {
-        if (isAltusDatabusCredentialNotFilled()) {
-            try {
-                String userCrn = stack.getCreator().getUserCrn();
-                String machineUserName = getWAMachineUserName(userCrn, stack.getCluster().getId().toString());
-                String builtInDbusRoleCrn = getBuiltInDatabusCrn();
-                umsClient.unassignMachineUserRole(userCrn, machineUserName, builtInDbusRoleCrn, Optional.empty());
-                umsClient.deleteMachineUserAccessKeys(userCrn, machineUserName, Optional.empty());
-                umsClient.deleteMachineUser(machineUserName, userCrn, Optional.empty());
-            } catch (Exception e) {
-                LOGGER.warn("Cluster Databus resource cleanup failed. It is not a fatal issue, "
-                        + "but note that you could have remaining UMS resources for your account", e);
-            }
-        } else {
-            LOGGER.info("Skipping machine user deletion as api keys were provided manually.");
+        try {
+            String userCrn = stack.getCreator().getUserCrn();
+            String machineUserName = getWAMachineUserName(userCrn, stack);
+            String builtInDbusRoleCrn = getBuiltInDatabusCrn();
+            umsClient.unassignMachineUserRole(userCrn, machineUserName, builtInDbusRoleCrn, Optional.empty());
+            umsClient.deleteMachineUserAccessKeys(userCrn, machineUserName, Optional.empty());
+            umsClient.deleteMachineUser(machineUserName, userCrn, Optional.empty());
+        } catch (Exception e) {
+            LOGGER.warn("Cluster Databus resource cleanup failed. It is not a fatal issue, "
+                    + "but note that you could have remaining UMS resources for your account", e);
         }
     }
 
     @VisibleForTesting
     AltusCredential getAltusCredential(Stack stack) {
-        String accessKey = "";
-        String privateKey = "";
-        if (isAltusDatabusCredentialNotFilled()) {
-            AltusCredential credential = createMachineUserAndGenerateKeys(stack);
-            accessKey = credential.getAccessKey();
-            privateKey = trimAndReplacePrivateKey(credential.getPrivateKey());
-        } else {
-            LOGGER.warn("Altus access / private key pair is set directly through a file: {} (with profile: {})",
-                    altusDatabusCredentialFile, altusDatabusCredentialProfile);
-            try {
-                FileReader fileReader = new FileReader(altusDatabusCredentialFile);
-                Map<String, Properties> credPropsMap = parseINI(fileReader);
-                Properties credPros = credPropsMap.get(altusDatabusCredentialProfile);
-                accessKey = credPros.getProperty(ALTUS_ACCESS_KEY_ID);
-                privateKey = trimAndReplacePrivateKey(credPros.getProperty(ALTUS_PRIVATE_KEY).toCharArray());
-            } catch (IOException e) {
-                LOGGER.error("Exception during reading altus credential file:", e);
-                throw new RuntimeException(e);
-            }
-        }
+        AltusCredential credential = createMachineUserAndGenerateKeys(stack);
+        String accessKey = credential.getAccessKey();
+        String privateKey = trimAndReplacePrivateKey(credential.getPrivateKey());
         return new AltusCredential(accessKey, privateKey.toCharArray());
     }
 
@@ -128,42 +90,13 @@ public class ClouderaManagerDatabusService {
         return new String(privateKey).trim().replace("\n", "\\n");
     }
 
-    @VisibleForTesting
-    Map<String, Properties> parseINI(Reader reader) throws IOException {
-        Map<String, Properties> result = new HashMap<>();
-        new Properties() {
-
-            private Properties section;
-
-            @Override
-            public Object put(Object key, Object value) {
-                String header = String.format("%s %s", key, value).trim();
-                if (header.startsWith("[") && header.endsWith("]")) {
-                    section = new Properties();
-                    return result.put(header.substring(1, header.length() - 1), section);
-                } else {
-                    return section.put(key, value);
-                }
-            }
-
-            @Override
-            public synchronized boolean equals(Object o) {
-                return super.equals(o);
-            }
-
-            @Override
-            public synchronized int hashCode() {
-                return super.hashCode();
-            }
-        }.load(reader);
-        return result;
-    }
-
-    private String getWAMachineUserName(String userCrn, String clusterId) {
-        return String.format(DATABUS_CRN_PATTERN, Crn.fromString(userCrn).getAccountId(), clusterId);
-    }
-
-    private boolean isAltusDatabusCredentialNotFilled() {
-        return StringUtils.isEmpty(altusDatabusCredentialFile) || StringUtils.isEmpty(altusDatabusCredentialProfile);
+    private String getWAMachineUserName(String userCrn, Stack stack) {
+        String machineUserSuffix = null;
+        if (StringUtils.isNotEmpty(stack.getResourceCrn())) {
+            machineUserSuffix = Crn.fromString(stack.getResourceCrn()).getResource();
+        } else {
+            machineUserSuffix = String.format("%s-%s", Crn.fromString(userCrn).getAccountId(), stack.getCluster().getId());
+        }
+        return String.format(DATABUS_CRN_PATTERN, machineUserSuffix);
     }
 }

@@ -76,11 +76,12 @@ public class ClouderaManagerMgmtSetupService {
      * @param cmHostRef  reference to the CM host
      * @param rdsConfigs the set of all database configs
      * @param telemetry  telemetry (logging/workload/billing etc.) details
-     * @param sdxContext sdx data holder
+     * @param sdxContextName sdx name holder
+     * @param sdxStackCrn sdx stack crn holder
      * @throws ApiException if there's a problem setting up management services
      */
     public void setupMgmtServices(Stack stack, ApiClient client, ApiHostRef cmHostRef,
-            Set<RDSConfig> rdsConfigs, Telemetry telemetry, String sdxContext)
+            Set<RDSConfig> rdsConfigs, Telemetry telemetry, String sdxContextName, String sdxStackCrn)
             throws ApiException {
         licenseService.beginTrialIfNeeded(stack.getCreator(), client);
         MgmtServiceResourceApi mgmtServiceResourceApi = new MgmtServiceResourceApi(client);
@@ -105,7 +106,7 @@ public class ClouderaManagerMgmtSetupService {
         }
         telemetryService.setupTelemetryRole(stack, client, cmHostRef, mgmtRoles, telemetry);
         createMgmtRoles(mgmtRolesResourceApi, mgmtRoles);
-        telemetryService.updateTelemetryConfigs(stack, client, telemetry, sdxContext);
+        telemetryService.updateTelemetryConfigs(stack, client, telemetry, sdxContextName, sdxStackCrn);
         createMgmtDatabases(client, rdsConfigs);
         startMgmtServices(stack, client, mgmtServiceResourceApi);
     }

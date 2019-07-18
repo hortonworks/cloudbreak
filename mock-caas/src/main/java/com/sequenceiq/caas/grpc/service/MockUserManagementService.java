@@ -7,6 +7,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.springframework.security.jwt.JwtHelper.decodeAndVerify;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -23,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,8 +56,10 @@ import com.google.common.io.Resources;
 import com.sequenceiq.caas.grpc.GrpcActorContext;
 import com.sequenceiq.caas.model.AltusToken;
 import com.sequenceiq.caas.util.CrnHelper;
+import com.sequenceiq.caas.util.IniUtil;
 import com.sequenceiq.caas.util.JsonUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -70,21 +75,37 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final Random RANDOM = new Random();
 
+    private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
+
+    private static final String ALTUS_PRIVATE_KEY = "altus_private_key";
+
     @Inject
     private JsonUtil jsonUtil;
+
+    @Inject
+    private IniUtil iniUtil;
 
     @Value("#{'${auth.config.dir:}/${auth.license.file:}'}")
     private String cbLicenseFilePath;
 
+    @Value("#{'${auth.config.dir:}/${auth.altus.credential.file:}'}")
+    private String altusCredentialFile;
+
+    @Value("${auth.altus.credential.profile:default}")
+    private String altusCredentialProfile;
+
     private String cbLicense;
+
+    private AltusCredential altusCredential;
 
     private final Map<String, Set<String>> accountUsers = new ConcurrentHashMap<>();
 
     private final Map<String, Map<String, Group>> accountGroups = new ConcurrentHashMap<>();
 
     @PostConstruct
-    public void setLicense() {
+    public void init() {
         this.cbLicense = getLicense();
+        this.altusCredential = getAltusCredential();
     }
 
     @Override
@@ -338,10 +359,19 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Override
     public void createAccessKey(UserManagementProto.CreateAccessKeyRequest request,
             StreamObserver<UserManagementProto.CreateAccessKeyResponse> responseObserver) {
+        String accessKeyId = null;
+        String privateKey = null;
+        if (altusCredential != null) {
+            accessKeyId = altusCredential.getAccessKey();
+            privateKey = new String(altusCredential.getPrivateKey());
+        } else {
+            accessKeyId = UUID.randomUUID().toString();
+            privateKey = UUID.randomUUID().toString();
+        }
         responseObserver.onNext(UserManagementProto.CreateAccessKeyResponse.newBuilder()
-                .setPrivateKey(UUID.randomUUID().toString())
+                .setPrivateKey(privateKey)
                 .setAccessKey(UserManagementProto.AccessKey.newBuilder()
-                        .setAccessKeyId(UUID.randomUUID().toString())
+                        .setAccessKeyId(accessKeyId)
                         .build())
                 .build());
         responseObserver.onCompleted();
@@ -424,6 +454,24 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             LOG.warn("Error during reading license.", e);
         }
         return license;
+    }
+
+    private AltusCredential getAltusCredential() {
+        if (StringUtils.isNoneEmpty(altusCredentialFile, altusCredentialProfile)
+                && Files.exists(Paths.get(altusCredentialFile))) {
+            try {
+                Map<String, Properties> propsMap = iniUtil.parseIni(new FileReader(altusCredentialFile));
+                if (propsMap.containsKey(altusCredentialProfile)) {
+                    Properties prop = propsMap.get(altusCredentialProfile);
+                    String accessKey = prop.getProperty(ALTUS_ACCESS_KEY_ID);
+                    String privateKey = prop.getProperty(ALTUS_PRIVATE_KEY);
+                    return new AltusCredential(accessKey, privateKey.toCharArray());
+                }
+            } catch (IOException e) {
+                LOG.warn("Error during reading altus credential.", e);
+            }
+        }
+        return null;
     }
 
     private UserManagementProto.ResourceAssignee createResourceAssignee(String resourceCrn) {

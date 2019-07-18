@@ -1,6 +1,9 @@
 package com.sequenceiq.caas.grpc.service;
 
-import com.sequenceiq.caas.util.JsonUtil;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,9 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import com.sequenceiq.caas.util.JsonUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MockUserManagementServiceTest {
@@ -31,7 +32,7 @@ public class MockUserManagementServiceTest {
         Path licenseFilePath = Files.createTempFile("license", "txt");
         Files.writeString(licenseFilePath, VALID_LICENSE);
         ReflectionTestUtils.setField(underTest, "cbLicenseFilePath", licenseFilePath.toString());
-        underTest.setLicense();
+        underTest.init();
 
         String actual = ReflectionTestUtils.getField(underTest, "cbLicense").toString();
 
@@ -42,7 +43,7 @@ public class MockUserManagementServiceTest {
     @Test
     public void testSetLicenseShouldEmptyStringWhenTheFileIsNotExists() {
         ReflectionTestUtils.setField(underTest, "cbLicenseFilePath", "/etc/license");
-        underTest.setLicense();
+        underTest.init();
 
         String actual = ReflectionTestUtils.getField(underTest, "cbLicense").toString();
 

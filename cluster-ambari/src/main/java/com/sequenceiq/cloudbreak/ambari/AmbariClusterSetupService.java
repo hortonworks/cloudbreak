@@ -127,7 +127,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
     @Override
     public Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext, Telemetry telemetry, KerberosConfig kerberosConfig) {
+            Set<HostMetadata> hostsInCluster, String sdxContext, String sdxStackCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
         Cluster cluster = stack.getCluster();
         try {
             ambariRepositoryVersionService.setBaseRepoURL(stack.getName(), cluster.getId(), ambariClient);

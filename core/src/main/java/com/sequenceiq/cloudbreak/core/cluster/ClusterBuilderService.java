@@ -128,16 +128,22 @@ public class ClusterBuilderService {
 
         Set<DatalakeResources> datalakeResources = datalakeResourcesService
                 .findDatalakeResourcesByWorkspaceAndEnvironment(stack.getWorkspace().getId(), stack.getEnvironmentCrn());
-        String sdxContext = Optional.ofNullable(datalakeResources)
+
+        Optional<Stack> sdxStack = Optional.ofNullable(datalakeResources)
                 .map(Set::stream).flatMap(Stream::findFirst)
                 .map(DatalakeResources::getDatalakeStackId)
-                .map(stackService::getByIdWithListsInTransaction)
+                .map(stackService::getByIdWithListsInTransaction);
+
+        String sdxContext = sdxStack
                 .map(clusterApiConnectors::getConnector)
                 .map(ClusterApi::getSdxContext).orElse(null);
+        String sdxStackCrn = sdxStack
+                .map(Stack::getResourceCrn)
+                .orElse(null);
 
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
         clusterService.save(connector.clusterSetupService().buildCluster(
-                instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, telemetry, kerberosConfig));
+                instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, sdxStackCrn, telemetry, kerberosConfig));
         recipeEngine.executePostInstallRecipes(stack, instanceMetaDataByHostGroup.keySet());
         clusterCreationSuccessHandler.handleClusterCreationSuccess(stack);
         if (StackType.DATALAKE == stack.getType()) {

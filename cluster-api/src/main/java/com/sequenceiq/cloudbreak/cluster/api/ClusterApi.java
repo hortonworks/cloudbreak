@@ -32,8 +32,8 @@ public interface ClusterApi {
     }
 
     default Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext, Telemetry telemetry, KerberosConfig kerberosConfig) {
-        return clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, telemetry,
+            Set<HostMetadata> hostsInCluster, String sdxContext, String sdxCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
+        return clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, sdxCrn, telemetry,
                 kerberosConfig);
     }
 

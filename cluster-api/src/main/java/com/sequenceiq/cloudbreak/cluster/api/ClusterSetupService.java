@@ -20,7 +20,7 @@ public interface ClusterSetupService {
     void waitForServer() throws CloudbreakException;
 
     Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext, Telemetry telemetry, KerberosConfig kerberosConfig);
+            Set<HostMetadata> hostsInCluster, String sdxContext, String sdxStackCrn, Telemetry telemetry, KerberosConfig kerberosConfig);
 
     void waitForHosts(Set<HostMetadata> hostsInCluster);
 

@@ -47,6 +47,8 @@ public class SdxCluster implements AccountIdAwareResource {
     @NotNull
     private String envCrn;
 
+    private String stackCrn;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     private SdxClusterShape clusterShape;
@@ -192,5 +194,13 @@ public class SdxCluster implements AccountIdAwareResource {
 
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
+    }
+
+    public String getStackCrn() {
+        return stackCrn;
+    }
+
+    public void setStackCrn(String stackCrn) {
+        this.stackCrn = stackCrn;
     }
 }

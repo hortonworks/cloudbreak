@@ -106,6 +106,7 @@ public class ProvisionerService {
                         .stackV4Endpoint()
                         .post(0L, JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class));
                 sdxCluster.setStackId(stackV4Response.getId());
+                sdxCluster.setStackCrn(stackV4Response.getCrn());
                 sdxCluster.setStatus(SdxClusterStatus.REQUESTED_FROM_CLOUDBREAK);
                 sdxClusterRepository.save(sdxCluster);
                 LOGGER.info("Sdx cluster updated");

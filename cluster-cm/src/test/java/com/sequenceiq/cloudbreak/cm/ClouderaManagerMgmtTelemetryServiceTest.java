@@ -129,7 +129,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         stack.setCluster(cluster);
         WorkloadAnalytics wa = new WorkloadAnalytics();
         // WHEN
-        ApiConfigList result = underTest.buildTelemetryConfigList(stack, wa, null);
+        ApiConfigList result = underTest.buildTelemetryConfigList(stack, wa, null, null);
         // THEN
         assertEquals(1, result.getItems().size());
     }
@@ -146,11 +146,26 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
         workloadAnalytics.setDatabusEndpoint("customEndpoint");
         // WHEN
-        underTest.enrichWithSdxData(null, stack, workloadAnalytics, safetyValveMap);
+        underTest.enrichWithSdxData(null, null, stack, workloadAnalytics, safetyValveMap);
         // THEN
         assertTrue(safetyValveMap.containsKey("databus.header.sdx.id"));
         assertTrue(safetyValveMap.containsKey("databus.header.sdx.name"));
         assertEquals(safetyValveMap.get("databus.header.sdx.name"), "cl1-1");
+    }
+
+    @Test
+    public void testEnrichWithSdxDataWithExistingSdxData() {
+        // GIVEN
+        Map<String, String> safetyValveMap = new HashMap<>();
+        WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
+        workloadAnalytics.setDatabusEndpoint("customEndpoint");
+        // WHEN
+        underTest.enrichWithSdxData("mySdxName", "crn:altus:iam:us-west-1:accountId:user:mySdxId", null, workloadAnalytics, safetyValveMap);
+        // THEN
+        assertTrue(safetyValveMap.containsKey("databus.header.sdx.id"));
+        assertTrue(safetyValveMap.containsKey("databus.header.sdx.name"));
+        assertEquals(safetyValveMap.get("databus.header.sdx.id"), "mySdxId");
+        assertEquals(safetyValveMap.get("databus.header.sdx.name"), "mySdxName");
     }
 
     @Test
@@ -169,7 +184,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         workloadAnalytics.setDatabusEndpoint("customEndpoint");
         workloadAnalytics.setAttributes(attributes);
         // WHEN
-        underTest.enrichWithSdxData(null, stack, workloadAnalytics, safetyValveMap);
+        underTest.enrichWithSdxData(null, null, stack, workloadAnalytics, safetyValveMap);
         // THEN
         assertEquals(safetyValveMap.get("databus.header.sdx.id"), "mySdxId");
         assertEquals(safetyValveMap.get("databus.header.sdx.name"), "mySdxName");
