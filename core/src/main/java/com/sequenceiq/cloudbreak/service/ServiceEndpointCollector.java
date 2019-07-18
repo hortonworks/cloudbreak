@@ -19,7 +19,6 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,6 +52,8 @@ import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 public class ServiceEndpointCollector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceEndpointCollector.class);
+
+    private static final String API_TOPOLOGY_POSTFIX = "-api";
 
     @Value("${cb.knox.port}")
     private String knoxPort;
@@ -89,7 +90,7 @@ public class ServiceEndpointCollector {
                     ExposedService exposedService = isNotEmpty(variant) && variant.equals(ClusterApi.CLOUDERA_MANAGER)
                             ? ExposedService.CLOUDERA_MANAGER_UI : ExposedService.AMBARI;
                     Optional<GatewayTopology> gatewayTopology = getGatewayTopologyForService(gateway, exposedService);
-                    Optional<String> managerUrl = gatewayTopology.map(t -> getExposedServiceUrl(managerIp, gateway, t.getTopologyName(), exposedService));
+                    Optional<String> managerUrl = gatewayTopology.map(t -> getExposedServiceUrl(managerIp, gateway, t.getTopologyName(), exposedService, false));
                     // when knox gateway is enabled, but ambari/cm is not exposed, use the default url
                     return managerUrl.orElse(String.format("https://%s/", managerIp));
                 }
@@ -102,7 +103,7 @@ public class ServiceEndpointCollector {
     public Map<String, Collection<ClusterExposedServiceV4Response>> prepareClusterExposedServices(Cluster cluster, String managerIp) {
         if (cluster.getBlueprint() != null) {
             String blueprintText = cluster.getBlueprint().getBlueprintText();
-            if (StringUtils.isNotEmpty(blueprintText)) {
+            if (isNotEmpty(blueprintText)) {
                 boolean ambariBlueprint = blueprintService.isAmbariBlueprint(cluster.getBlueprint());
                 BlueprintTextProcessor processor = ambariBlueprint
                         ? ambariBlueprintProcessorFactory.get(blueprintText)
@@ -116,30 +117,50 @@ public class ServiceEndpointCollector {
                         knownExposedServices.stream().map(ExposedService::getCmServiceName).collect(Collectors.toSet()));
                 if (gateway != null) {
                     for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
-                        List<ClusterExposedServiceV4Response> clusterExposedServiceResponses = new ArrayList<>();
                         Set<String> exposedServicesInTopology = gateway.getTopologies().stream()
                                 .flatMap(this::getExposedServiceStream)
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
+                        List<ClusterExposedServiceV4Response> uiServices = new ArrayList<>();
+                        List<ClusterExposedServiceV4Response> apiServices = new ArrayList<>();
                         for (ExposedService exposedService : knownExposedServices) {
-                            ClusterExposedServiceV4Response clusterExposedServiceResponse = new ClusterExposedServiceV4Response();
-                            clusterExposedServiceResponse.setMode(exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.NONE);
-                            clusterExposedServiceResponse.setDisplayName(exposedService.getDisplayName());
-                            clusterExposedServiceResponse.setKnoxService(exposedService.getKnoxService());
-                            clusterExposedServiceResponse.setServiceName(exposedService.getAmbariServiceName());
-                            Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, managerIp,
-                                    gateway, gatewayTopology.getTopologyName(), privateIps);
-                            serviceUrlForService.ifPresent(clusterExposedServiceResponse::setServiceUrl);
-                            clusterExposedServiceResponse.setOpen(isExposed(exposedService, exposedServicesInTopology));
-                            clusterExposedServiceResponses.add(clusterExposedServiceResponse);
+                            if (exposedService.isUISupported()) {
+                                ClusterExposedServiceV4Response uiService = createServiceEntry(exposedService, gateway, gatewayTopology,
+                                        managerIp, privateIps, exposedServicesInTopology, false);
+                                uiServices.add(uiService);
+                            }
+                            if (exposedService.isAPISupported()) {
+                                ClusterExposedServiceV4Response apiService = createServiceEntry(exposedService, gateway, gatewayTopology,
+                                        managerIp, privateIps, exposedServicesInTopology, true);
+                                apiServices.add(apiService);
+                            }
                         }
-                        clusterExposedServiceMap.put(gatewayTopology.getTopologyName(), clusterExposedServiceResponses);
+                        clusterExposedServiceMap.put(gatewayTopology.getTopologyName(), uiServices);
+                        clusterExposedServiceMap.put(gatewayTopology.getTopologyName() + API_TOPOLOGY_POSTFIX, apiServices);
                     }
                 }
                 return clusterExposedServiceMap;
             }
         }
         return Collections.emptyMap();
+    }
+
+    private ClusterExposedServiceV4Response createServiceEntry(ExposedService exposedService, Gateway gateway, GatewayTopology gatewayTopology,
+            String managerIp, Map<String, List<String>> privateIps, Set<String> exposedServicesInTopology, boolean api) {
+        ClusterExposedServiceV4Response service = new ClusterExposedServiceV4Response();
+        service.setMode(api ? SSOType.PAM : getSSOType(exposedService, gateway));
+        service.setDisplayName(exposedService.getDisplayName());
+        service.setKnoxService(exposedService.getKnoxService());
+        service.setServiceName(exposedService.getCmServiceName());
+        Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, managerIp,
+                gateway, gatewayTopology.getTopologyName(), privateIps, api);
+        serviceUrlForService.ifPresent(service::setServiceUrl);
+        service.setOpen(isExposed(exposedService, exposedServicesInTopology));
+        return service;
+    }
+
+    private SSOType getSSOType(ExposedService exposedService, Gateway gateway) {
+        return exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.NONE;
     }
 
     private Collection<ExposedService> getExposedServices(AmbariBlueprintTextProcessor ambariBlueprintTextProcessor, Set<String> removableComponents) {
@@ -195,7 +216,7 @@ public class ServiceEndpointCollector {
     }
 
     private Optional<String> getServiceUrlForService(ExposedService exposedService, String managerIp, Gateway gateway,
-            String topologyName, Map<String, List<String>> privateIps) {
+            String topologyName, Map<String, List<String>> privateIps, boolean api) {
         if (hasKnoxUrl(exposedService) && managerIp != null) {
             if (ExposedService.HIVE_SERVER.equals(exposedService) || ExposedService.HIVE_SERVER_INTERACTIVE.equals(exposedService)) {
                 return getHiveJdbcUrl(gateway, managerIp);
@@ -204,7 +225,7 @@ public class ServiceEndpointCollector {
             } else if (ExposedService.HBASE_UI.equals(exposedService)) {
                 return getHBaseServiceUrl(gateway, managerIp, privateIps.get(ExposedService.HBASE_UI.getCmServiceName()).iterator().next());
             } else {
-                return Optional.of(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService));
+                return Optional.of(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService, api));
             }
         }
         return Optional.empty();
@@ -239,10 +260,11 @@ public class ServiceEndpointCollector {
                 .findFirst();
     }
 
-    private String getExposedServiceUrl(String managerIp, Gateway gateway, String topologyName, ExposedService exposedService) {
+    private String getExposedServiceUrl(String managerIp, Gateway gateway, String topologyName, ExposedService exposedService, boolean api) {
+        String topology = api ? topologyName + API_TOPOLOGY_POSTFIX : topologyName;
         return GatewayType.CENTRAL == gateway.getGatewayType()
-                ? String.format("/%s/%s%s", gateway.getPath(), topologyName, exposedService.getKnoxUrl())
-                : String.format("https://%s:%s/%s/%s%s", managerIp, knoxPort, gateway.getPath(), topologyName, exposedService.getKnoxUrl());
+                ? String.format("/%s/%s%s", gateway.getPath(), topology, exposedService.getKnoxUrl())
+                : String.format("https://%s:%s/%s/%s%s", managerIp, knoxPort, gateway.getPath(), topology, exposedService.getKnoxUrl());
     }
 
     private Optional<String> getHdfsUIUrl(Gateway gateway, String managerIp, String nameNodePrivateIp) {
@@ -260,10 +282,10 @@ public class ServiceEndpointCollector {
                 .map(gt -> getHiveJdbcUrlFromGatewayTopology(ambariIp, gt));
     }
 
-    private String getHiveJdbcUrlFromGatewayTopology(String ambariIp, GatewayTopology gt) {
+    private String getHiveJdbcUrlFromGatewayTopology(String managerIp, GatewayTopology gt) {
         Gateway gateway = gt.getGateway();
         return String.format("jdbc:hive2://%s:%s/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword=${GATEWAY_JKS_PASSWORD};"
-                + "transportMode=http;httpPath=%s/%s/hive", ambariIp, knoxPort, gateway.getPath(), gt.getTopologyName());
+                + "transportMode=http;httpPath=%s/%s%s/hive", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(), API_TOPOLOGY_POSTFIX);
     }
 
     private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp) {
