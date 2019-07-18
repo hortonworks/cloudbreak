@@ -167,7 +167,7 @@ public class ServiceEndpointCollectorTest {
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
                 underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
 
-        assertEquals(2L, clusterExposedServicesMap.keySet().size());
+        assertEquals(4L, clusterExposedServicesMap.keySet().size());
 
         Collection<ClusterExposedServiceV4Response> topology2ClusterExposedServiceV4Responses = clusterExposedServicesMap.get("topology2");
         Optional<ClusterExposedServiceV4Response> webHDFS =
@@ -179,8 +179,6 @@ public class ServiceEndpointCollectorTest {
             assertEquals("WebHDFS", webHDFS.get().getDisplayName());
             assertEquals("NAMENODE", webHDFS.get().getServiceName());
             assertTrue(webHDFS.get().isOpen());
-        } else {
-            Assert.fail("no WEBHDFS in returned exposed services for topology2");
         }
 
         Optional<ClusterExposedServiceV4Response> sparkHistoryUI =
@@ -189,7 +187,7 @@ public class ServiceEndpointCollectorTest {
             assertEquals("https://10.0.0.1:8443/gateway-path/topology2/sparkhistory/", sparkHistoryUI.get().getServiceUrl());
             assertEquals("SPARKHISTORYUI", sparkHistoryUI.get().getKnoxService());
             assertEquals("Spark 1.x History Server", sparkHistoryUI.get().getDisplayName());
-            assertEquals("SPARK_JOBHISTORYSERVER", sparkHistoryUI.get().getServiceName());
+            assertEquals("SPARK_YARN_HISTORY_SERVER", sparkHistoryUI.get().getServiceName());
             assertFalse(sparkHistoryUI.get().isOpen());
         } else {
             Assert.fail("no SPARKHISTORYUI in returned exposed services for topology2");
@@ -204,8 +202,6 @@ public class ServiceEndpointCollectorTest {
             assertEquals("Hive Server", hiveServer.get().getDisplayName());
             assertEquals("HIVE_SERVER", hiveServer.get().getServiceName());
             assertTrue(hiveServer.get().isOpen());
-        } else {
-            Assert.fail("no HIVE in returned exposed services for topology2");
         }
     }
 
@@ -275,7 +271,7 @@ public class ServiceEndpointCollectorTest {
         mockComponentLocator(Lists.newArrayList("10.0.0.1"));
 
         Map<String, Collection<ClusterExposedServiceV4Response>> exposedServiceResponses = underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
-        assertEquals(3L, exposedServiceResponses.get("topology1").size());
+        assertEquals(2L, exposedServiceResponses.get("topology1").size());
         assertTrue(exposedServiceResponses.values()
                 .stream()
                 .anyMatch(exposedServiceResponse -> exposedServiceResponse.stream()
@@ -290,7 +286,7 @@ public class ServiceEndpointCollectorTest {
         mockComponentLocator(Lists.newArrayList("ip-10-0-0-1"));
 
         Map<String, Collection<ClusterExposedServiceV4Response>> exposedServiceResponses = underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
-        assertEquals(3L, exposedServiceResponses.get("topology1").size());
+        assertEquals(2L, exposedServiceResponses.get("topology1").size());
         assertTrue(exposedServiceResponses.values()
                 .stream()
                 .anyMatch(exposedServiceResponse -> exposedServiceResponse.stream()
