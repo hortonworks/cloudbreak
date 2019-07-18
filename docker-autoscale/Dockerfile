@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/cldr-java:11.0-jdk-slim
+FROM hortonworks/hwx_openjdk:11.0-jdk-slim
 MAINTAINER info@hortonworks.com
 
 # REPO URL to download jar
