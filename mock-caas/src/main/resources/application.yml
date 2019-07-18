@@ -3,3 +3,6 @@ auth:
     file: license.txt
   config:
     dir: /etc/auth
+  altus:
+    credential:
+      file: altus_credentials

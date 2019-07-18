@@ -123,7 +123,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext, Telemetry telemetry, KerberosConfig kerberosConfig) {
+            Set<HostMetadata> hostsInCluster, String sdxContext, String sdxCrn, Telemetry telemetry, KerberosConfig kerberosConfig) {
         Cluster cluster = stack.getCluster();
         Long clusterId = cluster.getId();
         try {
@@ -133,18 +133,17 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                     .findFirst();
 
             clouderaManagerLicenseService.beginTrialIfNeeded(stack.getCreator(), client);
+            String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
 
             if (optionalCmHost.isPresent()) {
                 ApiHost cmHost = optionalCmHost.get();
                 ApiHostRef cmHostRef = new ApiHostRef();
                 cmHostRef.setHostId(cmHost.getHostId());
                 cmHostRef.setHostname(cmHost.getHostname());
-                mgmtSetupService.setupMgmtServices(stack, client, cmHostRef, templatePreparationObject.getRdsConfigs(), telemetry, sdxContext);
+                mgmtSetupService.setupMgmtServices(stack, client, cmHostRef, templatePreparationObject.getRdsConfigs(), telemetry, sdxContextName, sdxCrn);
             } else {
                 LOGGER.warn("Unable to determine Cloudera Manager host. Skipping management services installation.");
             }
-
-            String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
             List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);

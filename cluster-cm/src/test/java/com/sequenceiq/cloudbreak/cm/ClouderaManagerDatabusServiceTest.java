@@ -1,17 +1,11 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Map;
-import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -122,17 +116,5 @@ public class ClouderaManagerDatabusServiceTest {
         String result = underTest.getBuiltInDatabusCrn();
         // THEN
         assertEquals("crn:altus:iam:us-west-1:altus:role:DbusUploader", result);
-    }
-
-    @Test
-    public void testParseINI() throws IOException {
-        // GIVEN
-        StringReader srData = new StringReader("[default]\naltus_access_key_id=accesKey\naltus_private_key=privateKey");
-        // WHEN
-        Map<String, Properties> result = underTest.parseINI(srData);
-        // THEN
-        assertTrue(result.containsKey("default"));
-        assertEquals(result.get("default").getProperty("altus_access_key_id"), "accesKey");
-        assertEquals(result.get("default").getProperty("altus_private_key"), "privateKey");
     }
 }

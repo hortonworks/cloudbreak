@@ -20,6 +20,7 @@ public class SdxClusterConverter {
         sdxClusterResponse.setClusterShape(sdxCluster.getClusterShape());
         sdxClusterResponse.setEnvironmentName(sdxCluster.getEnvName());
         sdxClusterResponse.setEnvironmentCrn(sdxCluster.getEnvCrn());
+        sdxClusterResponse.setStackCrn(sdxCluster.getStackCrn());
         return sdxClusterResponse;
     }
 }

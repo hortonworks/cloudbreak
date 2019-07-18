@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -11,6 +13,17 @@ import com.sequenceiq.common.api.telemetry.response.WorkloadAnalyticsResponse;
 
 @Component
 public class TelemetryConverter {
+
+    private final boolean telemetryPublisherEnabled;
+
+    private final String databusEndpoint;
+
+    public TelemetryConverter(
+            @Value("${cb.cm.telemetrypublisher.enabled:false}") boolean telemetryPublisherEnabled,
+            @Value("${altus.databus.endpoint:}") String databusEndpoint) {
+        this.telemetryPublisherEnabled = telemetryPublisherEnabled;
+        this.databusEndpoint = databusEndpoint;
+    }
 
     public TelemetryResponse convert(Telemetry telemetry) {
         TelemetryResponse response = null;
@@ -54,6 +67,11 @@ public class TelemetryConverter {
                 workloadAnalytics = new WorkloadAnalytics();
                 workloadAnalytics.setAttributes(waResponse.getAttributes());
                 workloadAnalytics.setDatabusEndpoint(waResponse.getDatabusEndpoint());
+            } else if (telemetryPublisherEnabled) {
+                workloadAnalytics = new WorkloadAnalytics();
+                if (StringUtils.isNotEmpty(databusEndpoint)) {
+                    workloadAnalytics.setDatabusEndpoint(databusEndpoint);
+                }
             }
             telemetry = new Telemetry(logging, workloadAnalytics);
         }

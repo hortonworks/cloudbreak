@@ -25,6 +25,7 @@ import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -103,22 +104,22 @@ public class ClouderaManagerMgmtTelemetryService {
     }
 
     public void updateTelemetryConfigs(final Stack stack, final ApiClient client,
-            final Telemetry telemetry, final String sdxContext) throws ApiException {
+            final Telemetry telemetry, final String sdxContextName, final String sdxStackCrn) throws ApiException {
         if (isWorkflowAnalyticsEnabled(stack, telemetry)) {
             MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = new MgmtRoleConfigGroupsResourceApi(client);
-            ApiConfigList configList = buildTelemetryConfigList(stack, telemetry.getWorkloadAnalytics(), sdxContext);
+            ApiConfigList configList = buildTelemetryConfigList(stack, telemetry.getWorkloadAnalytics(), sdxContextName, sdxStackCrn);
             mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, TELEMETRYPUBLISHER),
                     "Set configs for Telemetry publisher by CB", configList);
         }
     }
 
     @VisibleForTesting
-    ApiConfigList buildTelemetryConfigList(Stack stack, WorkloadAnalytics wa, String sdxContext) {
+    ApiConfigList buildTelemetryConfigList(Stack stack, WorkloadAnalytics wa, String sdxContextName, String sdxCrn) {
         final Map<String, String> configsToUpdate = new HashMap<>();
         Map<String, String> telemetrySafetyValveMap = new HashMap<>();
         telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER,
                 TELEMETRY_WA_DEFAULT_CLUSTER_TYPE);
-        enrichWithSdxData(sdxContext, stack, wa, telemetrySafetyValveMap);
+        enrichWithSdxData(sdxContextName, sdxCrn, stack, wa, telemetrySafetyValveMap);
         telemetrySafetyValveMap.put(TELEMETRY_UPLOAD_LOGS, "true");
         configsToUpdate.put(TELEMETRY_SAFETY_VALVE, createStringFromSafetyValveMap(telemetrySafetyValveMap));
         return makeApiConfigList(configsToUpdate);
@@ -137,14 +138,15 @@ public class ClouderaManagerMgmtTelemetryService {
         return makeApiConfigList(configsToUpdate);
     }
 
-    // TODO: Add sdx id & name from sdx context if it is filled
     @VisibleForTesting
-    void enrichWithSdxData(String sdxContext, Stack stack, WorkloadAnalytics workloadAnalytics,
+    void enrichWithSdxData(String sdxContextName, String sdxCrn, Stack stack, WorkloadAnalytics workloadAnalytics,
             Map<String, String> telemetrySafetyValveMap) {
-        final String sdxName = String.format("%s-%s", stack.getCluster().getName(), stack.getCluster().getId().toString());
-        final String sdxId = UUID.nameUUIDFromBytes(sdxName.getBytes()).toString();
+        sdxContextName = StringUtils.isNotEmpty(sdxContextName)
+                ? sdxContextName : String.format("%s-%s", stack.getCluster().getName(), stack.getCluster().getId().toString());
+        String sdxId = sdxCrn != null && Crn.fromString(sdxCrn) != null
+                ? Crn.fromString(sdxCrn).getResource() : UUID.nameUUIDFromBytes(sdxContextName.getBytes()).toString();
         telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_ID, sdxId);
-        telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_NAME, sdxName);
+        telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_NAME, sdxContextName);
         if (workloadAnalytics.getAttributes() != null) {
             for (Map.Entry<String, Object> entry : workloadAnalytics.getAttributes().entrySet()) {
                 telemetrySafetyValveMap.put(entry.getKey(), ObjectUtils.defaultIfNull(entry.getValue().toString(), ""));
