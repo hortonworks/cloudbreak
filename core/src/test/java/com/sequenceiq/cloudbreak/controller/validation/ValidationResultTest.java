@@ -5,8 +5,9 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
-import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
 public class ValidationResultTest {
 

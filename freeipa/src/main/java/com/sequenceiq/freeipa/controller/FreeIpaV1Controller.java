@@ -7,8 +7,14 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
+import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetIdsRequest;
@@ -30,6 +36,8 @@ import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
 public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaV1Controller.class);
 
     @Inject
     private FreeIpaCreationService freeIpaCreationService;
@@ -55,8 +63,16 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @Inject
     private CrnService crnService;
 
+    @Inject
+    private Validator<CreateFreeIpaRequest> createFreeIpaRequestValidator;
+
     @Override
     public DescribeFreeIpaResponse create(@Valid CreateFreeIpaRequest request) {
+        ValidationResult validationResult = createFreeIpaRequestValidator.validate(request);
+        if (validationResult.getState() == State.ERROR) {
+            LOGGER.debug("FreeIPA request has validation error(s): {}.", validationResult.getFormattedErrors());
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
         String accountId = crnService.getCurrentAccountId();
         return freeIpaCreationService.launchFreeIpa(request, accountId);
     }

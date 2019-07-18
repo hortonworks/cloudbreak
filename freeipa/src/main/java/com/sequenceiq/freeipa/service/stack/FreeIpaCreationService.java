@@ -21,7 +21,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSetti
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.stack.CreateFreeIpaRequestToStackConverter;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
@@ -86,7 +85,6 @@ public class FreeIpaCreationService {
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
-        checkIfAlreadyExistsInEnvironment(request, accountId);
         String userCrn = crnService.getUserCrn();
         Future<User> userFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, Optional.empty()));
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
@@ -108,12 +106,6 @@ public class FreeIpaCreationService {
         flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT, new StackEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stack.getId()));
         InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
         return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa);
-    }
-
-    private void checkIfAlreadyExistsInEnvironment(CreateFreeIpaRequest request, String accountId) {
-        if (!stackService.findAllByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId).isEmpty()) {
-            throw new BadRequestException("FreeIPA already exists in environment");
-        }
     }
 
     private void fillInstanceMetadata(Stack stack) {
