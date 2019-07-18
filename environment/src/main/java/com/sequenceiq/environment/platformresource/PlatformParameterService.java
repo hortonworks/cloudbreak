@@ -54,6 +54,7 @@ public class PlatformParameterService {
         } else {
             throw new BadRequestException("The credentialId or the credentialName must be specified in the request");
         }
+
         if (!Strings.isNullOrEmpty(platformVariant)) {
             platformResourceRequest.setCloudPlatform(platformResourceRequest.getCredential().getCloudPlatform());
         } else {
