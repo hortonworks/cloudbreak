@@ -25,6 +25,8 @@ public class BlueprintView extends CompactView {
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
+    private String crn;
+
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json tags;
@@ -67,6 +69,14 @@ public class BlueprintView extends CompactView {
 
     public void setTags(Json tags) {
         this.tags = tags;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     @Override

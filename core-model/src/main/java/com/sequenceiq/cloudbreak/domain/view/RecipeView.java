@@ -17,6 +17,8 @@ public class RecipeView extends CompactView {
     @Enumerated(EnumType.STRING)
     private RecipeV4Type recipeType;
 
+    private String crn;
+
     private boolean archived;
 
     public RecipeV4Type getRecipeType() {
@@ -30,5 +32,13 @@ public class RecipeView extends CompactView {
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.RECIPE;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 }

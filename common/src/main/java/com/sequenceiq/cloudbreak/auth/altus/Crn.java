@@ -240,6 +240,7 @@ public class Crn {
         DATABASE("database"),
         DATABASE_SERVER("databaseServer"),
         BLUEPRINT("blueprint"),
+        CLUSTER_TEMPLATE("clustertemplate"),
         STACK("stack"),
         CREDENTIAL("credential"),
         NETWORK("network"),

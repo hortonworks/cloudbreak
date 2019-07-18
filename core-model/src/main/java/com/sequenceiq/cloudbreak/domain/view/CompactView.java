@@ -60,4 +60,5 @@ public abstract class CompactView implements ProvisionEntity, WorkspaceAwareReso
     public void setDescription(String description) {
         this.description = description;
     }
+
 }

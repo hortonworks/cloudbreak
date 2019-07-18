@@ -60,77 +60,77 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public void putSync(Long workspaceId, String name) {
-        stackOperation.putSync(workspaceId, name);
+        stackOperation.putSync(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
     }
 
     @Override
     public void putRetry(Long workspaceId, String name) {
-        stackOperation.putRetry(workspaceId, name);
+        stackOperation.putRetry(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
     }
 
     @Override
     public void putStop(Long workspaceId, String name) {
-        stackOperation.putStop(workspaceId, name);
+        stackOperation.putStop(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
     }
 
     @Override
     public void putStart(Long workspaceId, String name) {
-        stackOperation.putStart(workspaceId, name);
+        stackOperation.putStart(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
     }
 
     @Override
     public void putScaling(Long workspaceId, String name, @Valid StackScaleV4Request updateRequest) {
-        stackOperation.putScaling(workspaceId, name, updateRequest);
+        stackOperation.putScaling(aStackAccessDtoBuilder().withName(name).build(), workspaceId, updateRequest);
     }
 
     @Override
     public void repairCluster(Long workspaceId, String name, @Valid ClusterRepairV4Request clusterRepairRequest) {
-        stackOperation.repairCluster(workspaceId, name, clusterRepairRequest);
+        stackOperation.repairCluster(aStackAccessDtoBuilder().withName(name).build(), workspaceId, clusterRepairRequest);
     }
 
     @Override
     public GeneratedBlueprintV4Response postStackForBlueprint(Long workspaceId, String name, @Valid StackV4Request stackRequest) {
-        return stackOperation.postStackForBlueprint(workspaceId, name, stackRequest);
+        return stackOperation.postStackForBlueprint(aStackAccessDtoBuilder().withName(name).build(), workspaceId, stackRequest);
     }
 
     @Override
     public void changeImage(Long workspaceId, String name, @Valid StackImageChangeV4Request stackImageChangeRequest) {
-        stackOperation.changeImage(workspaceId, name, stackImageChangeRequest);
+        stackOperation.changeImage(aStackAccessDtoBuilder().withName(name).build(), workspaceId, stackImageChangeRequest);
     }
 
     @Override
     public void deleteWithKerberos(Long workspaceId, String name, Boolean withStackDelete, Boolean deleteDependencies) {
-        stackOperation.deleteWithKerberos(workspaceId, name, withStackDelete, deleteDependencies);
+        stackOperation.deleteWithKerberos(aStackAccessDtoBuilder().withName(name).build(), workspaceId, withStackDelete, deleteDependencies);
     }
 
     @Override
     public StackV4Request getRequestfromName(Long workspaceId, String name) {
-        return stackOperation.getRequestfromName(workspaceId, name);
+        return stackOperation.getRequest(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
     }
 
     @Override
     public StackStatusV4Response getStatusByName(Long workspaceId, String name) {
-        return stackOperation.getStatusByName(workspaceId, name);
+        return stackOperation.getStatus(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
     }
 
     @Override
     public void deleteInstance(Long workspaceId, String name, Boolean forced, String instanceId) {
-        stackOperation.deleteInstance(workspaceId, name, forced, instanceId);
+        stackOperation.deleteInstance(aStackAccessDtoBuilder().withName(name).build(), workspaceId, forced, instanceId);
     }
 
     @Override
     public void putPassword(Long workspaceId, String name, @Valid UserNamePasswordV4Request userNamePasswordJson) {
-        stackOperation.putPassword(workspaceId, name, userNamePasswordJson);
+        stackOperation.putPassword(aStackAccessDtoBuilder().withName(name).build(), workspaceId, userNamePasswordJson);
     }
 
     @Override
     public void setClusterMaintenanceMode(Long workspaceId, String name, @NotNull MaintenanceModeV4Request maintenanceMode) {
-        stackOperation.setClusterMaintenanceMode(workspaceId, name, maintenanceMode);
+        stackOperation.setClusterMaintenanceMode(aStackAccessDtoBuilder().withName(name).build(), workspaceId, maintenanceMode);
     }
 
     @Override
     public void putCluster(Long workspaceId, String name, @Valid UpdateClusterV4Request updateJson) {
-        stackOperation.putCluster(workspaceId, name, updateJson);
+        stackOperation.putCluster(aStackAccessDtoBuilder().withName(name).build(), workspaceId, updateJson);
     }
 
     @Override

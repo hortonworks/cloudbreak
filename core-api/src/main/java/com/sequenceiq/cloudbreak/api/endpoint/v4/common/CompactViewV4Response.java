@@ -22,6 +22,9 @@ public class CompactViewV4Response implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
+    @ApiModelProperty(ModelDescriptions.CRN)
+    private String crn;
+
     public Long getId() {
         return id;
     }
@@ -44,5 +47,13 @@ public class CompactViewV4Response implements JsonEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 }

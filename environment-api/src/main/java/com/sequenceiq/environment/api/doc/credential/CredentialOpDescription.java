@@ -10,6 +10,7 @@ public class CredentialOpDescription {
     public static final String GET_BY_NAME = "get credential by name";
     public static final String GET_BY_CRN = "get credential by crn";
     public static final String GET_BY_ENVIRONMENT_CRN = "get credential by environment crn";
+    public static final String GET_BY_ENVIRONMENT_NAME = "get credential by environment name";
     public static final String CREATE = "create credential";
     public static final String DELETE_BY_NAME = "delete credential by name";
     public static final String DELETE_BY_CRN = "delete credential by crn";

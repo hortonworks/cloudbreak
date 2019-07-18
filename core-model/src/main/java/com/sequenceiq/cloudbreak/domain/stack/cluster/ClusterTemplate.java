@@ -58,6 +58,9 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String templateContent;
 
+    @Column(nullable = false)
+    private String resourceCrn;
+
     public ClusterTemplate() {
 
     }
@@ -157,5 +160,13 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
 
     public void setTemplateContent(String templateContent) {
         this.templateContent = templateContent;
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 }

@@ -94,7 +94,7 @@ public class EnvironmentResourceDeletionService {
             Set<String> distroXClusterNames = cloudbreakClient
                     .withCrn(environment.getCreator())
                     .distroXV1Endpoint()
-                    .list(environment.getName())
+                    .list(environment.getName(), environment.getResourceCrn())
                     .getResponses()
                     .stream()
                     .map(StackViewV4Response::getName)
