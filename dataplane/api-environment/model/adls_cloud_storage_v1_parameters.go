@@ -13,9 +13,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// AdlsCloudStorageV4Parameters adls cloud storage v4 parameters
-// swagger:model AdlsCloudStorageV4Parameters
-type AdlsCloudStorageV4Parameters struct {
+// AdlsCloudStorageV1Parameters adls cloud storage v1 parameters
+// swagger:model AdlsCloudStorageV1Parameters
+type AdlsCloudStorageV1Parameters struct {
 
 	// account name
 	// Required: true
@@ -33,8 +33,8 @@ type AdlsCloudStorageV4Parameters struct {
 	TenantID string `json:"tenantId,omitempty"`
 }
 
-// Validate validates this adls cloud storage v4 parameters
-func (m *AdlsCloudStorageV4Parameters) Validate(formats strfmt.Registry) error {
+// Validate validates this adls cloud storage v1 parameters
+func (m *AdlsCloudStorageV1Parameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAccountName(formats); err != nil {
@@ -55,7 +55,7 @@ func (m *AdlsCloudStorageV4Parameters) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *AdlsCloudStorageV4Parameters) validateAccountName(formats strfmt.Registry) error {
+func (m *AdlsCloudStorageV1Parameters) validateAccountName(formats strfmt.Registry) error {
 
 	if err := validate.Required("accountName", "body", m.AccountName); err != nil {
 		return err
@@ -64,7 +64,7 @@ func (m *AdlsCloudStorageV4Parameters) validateAccountName(formats strfmt.Regist
 	return nil
 }
 
-func (m *AdlsCloudStorageV4Parameters) validateClientID(formats strfmt.Registry) error {
+func (m *AdlsCloudStorageV1Parameters) validateClientID(formats strfmt.Registry) error {
 
 	if err := validate.Required("clientId", "body", m.ClientID); err != nil {
 		return err
@@ -73,7 +73,7 @@ func (m *AdlsCloudStorageV4Parameters) validateClientID(formats strfmt.Registry)
 	return nil
 }
 
-func (m *AdlsCloudStorageV4Parameters) validateCredential(formats strfmt.Registry) error {
+func (m *AdlsCloudStorageV1Parameters) validateCredential(formats strfmt.Registry) error {
 
 	if err := validate.Required("credential", "body", m.Credential); err != nil {
 		return err
@@ -83,7 +83,7 @@ func (m *AdlsCloudStorageV4Parameters) validateCredential(formats strfmt.Registr
 }
 
 // MarshalBinary interface implementation
-func (m *AdlsCloudStorageV4Parameters) MarshalBinary() ([]byte, error) {
+func (m *AdlsCloudStorageV1Parameters) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -91,8 +91,8 @@ func (m *AdlsCloudStorageV4Parameters) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *AdlsCloudStorageV4Parameters) UnmarshalBinary(b []byte) error {
-	var res AdlsCloudStorageV4Parameters
+func (m *AdlsCloudStorageV1Parameters) UnmarshalBinary(b []byte) error {
+	var res AdlsCloudStorageV1Parameters
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

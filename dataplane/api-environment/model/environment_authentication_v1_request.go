@@ -27,7 +27,9 @@ type EnvironmentAuthenticationV1Request struct {
 	PublicKey string `json:"publicKey,omitempty"`
 
 	// Public key ID registered at the cloud provider.
-	PublicKeyID string `json:"publicKeyId,omitempty"`
+	// Max Length: 255
+	// Min Length: 0
+	PublicKeyID *string `json:"publicKeyId,omitempty"`
 }
 
 // Validate validates this environment authentication v1 request
@@ -35,6 +37,10 @@ func (m *EnvironmentAuthenticationV1Request) Validate(formats strfmt.Registry) e
 	var res []error
 
 	if err := m.validateLoginUserName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePublicKeyID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -59,6 +65,23 @@ func (m *EnvironmentAuthenticationV1Request) validateLoginUserName(formats strfm
 	}
 
 	if err := validate.Pattern("loginUserName", "body", string(m.LoginUserName), `(^[a-z_]([a-z0-9_-]{0,31}|[a-z0-9_-]{0,30}\$)$)`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentAuthenticationV1Request) validatePublicKeyID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.PublicKeyID) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("publicKeyId", "body", string(*m.PublicKeyID), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("publicKeyId", "body", string(*m.PublicKeyID), 255); err != nil {
 		return err
 	}
 

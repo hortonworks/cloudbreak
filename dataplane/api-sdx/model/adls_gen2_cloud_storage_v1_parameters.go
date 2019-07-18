@@ -13,9 +13,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// WasbCloudStorageV4Parameters wasb cloud storage v4 parameters
-// swagger:model WasbCloudStorageV4Parameters
-type WasbCloudStorageV4Parameters struct {
+// AdlsGen2CloudStorageV1Parameters adls gen2 cloud storage v1 parameters
+// swagger:model AdlsGen2CloudStorageV1Parameters
+type AdlsGen2CloudStorageV1Parameters struct {
 
 	// account key
 	// Required: true
@@ -29,8 +29,8 @@ type WasbCloudStorageV4Parameters struct {
 	Secure bool `json:"secure,omitempty"`
 }
 
-// Validate validates this wasb cloud storage v4 parameters
-func (m *WasbCloudStorageV4Parameters) Validate(formats strfmt.Registry) error {
+// Validate validates this adls gen2 cloud storage v1 parameters
+func (m *AdlsGen2CloudStorageV1Parameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAccountKey(formats); err != nil {
@@ -47,7 +47,7 @@ func (m *WasbCloudStorageV4Parameters) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *WasbCloudStorageV4Parameters) validateAccountKey(formats strfmt.Registry) error {
+func (m *AdlsGen2CloudStorageV1Parameters) validateAccountKey(formats strfmt.Registry) error {
 
 	if err := validate.Required("accountKey", "body", m.AccountKey); err != nil {
 		return err
@@ -56,7 +56,7 @@ func (m *WasbCloudStorageV4Parameters) validateAccountKey(formats strfmt.Registr
 	return nil
 }
 
-func (m *WasbCloudStorageV4Parameters) validateAccountName(formats strfmt.Registry) error {
+func (m *AdlsGen2CloudStorageV1Parameters) validateAccountName(formats strfmt.Registry) error {
 
 	if err := validate.Required("accountName", "body", m.AccountName); err != nil {
 		return err
@@ -66,7 +66,7 @@ func (m *WasbCloudStorageV4Parameters) validateAccountName(formats strfmt.Regist
 }
 
 // MarshalBinary interface implementation
-func (m *WasbCloudStorageV4Parameters) MarshalBinary() ([]byte, error) {
+func (m *AdlsGen2CloudStorageV1Parameters) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -74,8 +74,8 @@ func (m *WasbCloudStorageV4Parameters) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *WasbCloudStorageV4Parameters) UnmarshalBinary(b []byte) error {
-	var res WasbCloudStorageV4Parameters
+func (m *AdlsGen2CloudStorageV1Parameters) UnmarshalBinary(b []byte) error {
+	var res AdlsGen2CloudStorageV1Parameters
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

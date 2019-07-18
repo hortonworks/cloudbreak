@@ -13,17 +13,17 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// S3CloudStorageV4Parameters s3 cloud storage v4 parameters
-// swagger:model S3CloudStorageV4Parameters
-type S3CloudStorageV4Parameters struct {
+// S3CloudStorageV1Parameters s3 cloud storage v1 parameters
+// swagger:model S3CloudStorageV1Parameters
+type S3CloudStorageV1Parameters struct {
 
 	// instance profile
 	// Required: true
 	InstanceProfile *string `json:"instanceProfile"`
 }
 
-// Validate validates this s3 cloud storage v4 parameters
-func (m *S3CloudStorageV4Parameters) Validate(formats strfmt.Registry) error {
+// Validate validates this s3 cloud storage v1 parameters
+func (m *S3CloudStorageV1Parameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateInstanceProfile(formats); err != nil {
@@ -36,7 +36,7 @@ func (m *S3CloudStorageV4Parameters) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *S3CloudStorageV4Parameters) validateInstanceProfile(formats strfmt.Registry) error {
+func (m *S3CloudStorageV1Parameters) validateInstanceProfile(formats strfmt.Registry) error {
 
 	if err := validate.Required("instanceProfile", "body", m.InstanceProfile); err != nil {
 		return err
@@ -46,7 +46,7 @@ func (m *S3CloudStorageV4Parameters) validateInstanceProfile(formats strfmt.Regi
 }
 
 // MarshalBinary interface implementation
-func (m *S3CloudStorageV4Parameters) MarshalBinary() ([]byte, error) {
+func (m *S3CloudStorageV1Parameters) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -54,8 +54,8 @@ func (m *S3CloudStorageV4Parameters) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *S3CloudStorageV4Parameters) UnmarshalBinary(b []byte) error {
-	var res S3CloudStorageV4Parameters
+func (m *S3CloudStorageV1Parameters) UnmarshalBinary(b []byte) error {
+	var res S3CloudStorageV1Parameters
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

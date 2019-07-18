@@ -48,6 +48,9 @@ type StackV4Response struct {
 	// credential name
 	CredentialName string `json:"credentialName,omitempty"`
 
+	// crn
+	Crn string `json:"crn,omitempty"`
+
 	// custom domains
 	CustomDomains *CustomDomainSettingsV4Response `json:"customDomains,omitempty"`
 
@@ -67,7 +70,7 @@ type StackV4Response struct {
 	// Unique: true
 	HardwareInfoGroups []*HardwareInfoGroupV4Response `json:"hardwareInfoGroups"`
 
-	// id of the stack
+	// id
 	ID int64 `json:"id,omitempty"`
 
 	// image of the stack

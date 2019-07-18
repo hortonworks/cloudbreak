@@ -53,7 +53,7 @@ func (o *CodeGrantFlowBasedCredentialV1Default) Code() int {
 }
 
 func (o *CodeGrantFlowBasedCredentialV1Default) Error() string {
-	return fmt.Sprintf("[GET /v1/credentials/code_grant_flow/init][%d] codeGrantFlowBasedCredentialV1 default ", o._statusCode)
+	return fmt.Sprintf("[POST /v1/credentials/code_grant_flow/init][%d] codeGrantFlowBasedCredentialV1 default ", o._statusCode)
 }
 
 func (o *CodeGrantFlowBasedCredentialV1Default) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

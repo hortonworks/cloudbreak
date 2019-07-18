@@ -31,7 +31,9 @@ type EnvironmentNetworkV1Response struct {
 	Name *string `json:"name"`
 
 	// network cidr
-	NetworkCidr string `json:"networkCidr,omitempty"`
+	// Max Length: 255
+	// Min Length: 0
+	NetworkCidr *string `json:"networkCidr,omitempty"`
 
 	// Subnet ids of the specified networks
 	// Required: true
@@ -40,6 +42,9 @@ type EnvironmentNetworkV1Response struct {
 
 	// Subnet metadata of the specified networks
 	SubnetMetas map[string]CloudSubnet `json:"subnetMetas,omitempty"`
+
+	// Yarn parameters
+	Yarn *EnvironmentNetworkYarnV1Params `json:"yarn,omitempty"`
 }
 
 // Validate validates this environment network v1 response
@@ -58,11 +63,19 @@ func (m *EnvironmentNetworkV1Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateNetworkCidr(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateSubnetIds(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateSubnetMetas(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateYarn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -117,6 +130,23 @@ func (m *EnvironmentNetworkV1Response) validateName(formats strfmt.Registry) err
 	return nil
 }
 
+func (m *EnvironmentNetworkV1Response) validateNetworkCidr(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.NetworkCidr) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("networkCidr", "body", string(*m.NetworkCidr), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("networkCidr", "body", string(*m.NetworkCidr), 255); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *EnvironmentNetworkV1Response) validateSubnetIds(formats strfmt.Registry) error {
 
 	if err := validate.Required("subnetIds", "body", m.SubnetIds); err != nil {
@@ -147,6 +177,24 @@ func (m *EnvironmentNetworkV1Response) validateSubnetMetas(formats strfmt.Regist
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *EnvironmentNetworkV1Response) validateYarn(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Yarn) { // not required
+		return nil
+	}
+
+	if m.Yarn != nil {
+		if err := m.Yarn.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("yarn")
+			}
+			return err
+		}
 	}
 
 	return nil

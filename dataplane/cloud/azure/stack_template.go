@@ -33,7 +33,7 @@ func (p *AzureProvider) GenerateDefaultNetworkWithParams(getFlags func(string) s
 	case cloud.NEW_NETWORK_NEW_SUBNET:
 		networkCidr := getFlags(fl.FlNetworkCidr.Name)
 		return &envmodel.EnvironmentNetworkV1Request{
-			NetworkCidr: networkCidr,
+			NetworkCidr: &networkCidr,
 		}
 	case cloud.EXISTING_NETWORK_EXISTING_SUBNET:
 		networkId := getFlags(fl.FlNetworkId.Name)
@@ -57,7 +57,7 @@ func (p *AzureProvider) GenerateDefaultNetworkWithParams(getFlags func(string) s
 				NoFirewallRules:   &(&types.B{B: false}).B,
 			},
 			SubnetIds:   []string{"____"},
-			NetworkCidr: "____",
+			NetworkCidr: &(&types.S{S: "____"}).S,
 		}
 	}
 }

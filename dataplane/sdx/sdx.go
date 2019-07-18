@@ -81,7 +81,7 @@ func CreateSdx(c *cli.Context) {
 }
 
 func createSdx(clusterShape string, envName string, c *cli.Context, name string, cloudStorageBaseLocation string, instanceProfile string) {
-	s3CloudStorage := &sdxModel.S3CloudStorageV4Parameters{
+	s3CloudStorage := &sdxModel.S3CloudStorageV1Parameters{
 		InstanceProfile: &instanceProfile,
 	}
 

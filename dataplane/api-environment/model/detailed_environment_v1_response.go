@@ -50,6 +50,9 @@ type DetailedEnvironmentV1Response struct {
 	// Location of the environment.
 	Location *LocationV1Response `json:"location,omitempty"`
 
+	// log cloud storage
+	LogCloudStorage *CloudStorageV1Response `json:"logCloudStorage,omitempty"`
+
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
@@ -67,6 +70,10 @@ type DetailedEnvironmentV1Response struct {
 
 	// Telemetry related specifics of the environment.
 	Telemetry *TelemetryV1Response `json:"telemetry,omitempty"`
+
+	// Configuration that the connection going directly or with ccm.
+	// Enum: [DIRECT CCM]
+	Tunnel string `json:"tunnel,omitempty"`
 }
 
 // Validate validates this detailed environment v1 response
@@ -89,6 +96,10 @@ func (m *DetailedEnvironmentV1Response) Validate(formats strfmt.Registry) error 
 		res = append(res, err)
 	}
 
+	if err := m.validateLogCloudStorage(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateNetwork(formats); err != nil {
 		res = append(res, err)
 	}
@@ -102,6 +113,10 @@ func (m *DetailedEnvironmentV1Response) Validate(formats strfmt.Registry) error 
 	}
 
 	if err := m.validateTelemetry(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateTunnel(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -241,6 +256,24 @@ func (m *DetailedEnvironmentV1Response) validateLocation(formats strfmt.Registry
 	return nil
 }
 
+func (m *DetailedEnvironmentV1Response) validateLogCloudStorage(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.LogCloudStorage) { // not required
+		return nil
+	}
+
+	if m.LogCloudStorage != nil {
+		if err := m.LogCloudStorage.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("logCloudStorage")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *DetailedEnvironmentV1Response) validateNetwork(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Network) { // not required
@@ -308,6 +341,49 @@ func (m *DetailedEnvironmentV1Response) validateTelemetry(formats strfmt.Registr
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+var detailedEnvironmentV1ResponseTypeTunnelPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["DIRECT","CCM"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		detailedEnvironmentV1ResponseTypeTunnelPropEnum = append(detailedEnvironmentV1ResponseTypeTunnelPropEnum, v)
+	}
+}
+
+const (
+
+	// DetailedEnvironmentV1ResponseTunnelDIRECT captures enum value "DIRECT"
+	DetailedEnvironmentV1ResponseTunnelDIRECT string = "DIRECT"
+
+	// DetailedEnvironmentV1ResponseTunnelCCM captures enum value "CCM"
+	DetailedEnvironmentV1ResponseTunnelCCM string = "CCM"
+)
+
+// prop value enum
+func (m *DetailedEnvironmentV1Response) validateTunnelEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, detailedEnvironmentV1ResponseTypeTunnelPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *DetailedEnvironmentV1Response) validateTunnel(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Tunnel) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateTunnelEnum("tunnel", "body", m.Tunnel); err != nil {
+		return err
 	}
 
 	return nil

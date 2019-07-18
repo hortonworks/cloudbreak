@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -21,7 +23,9 @@ type EnvironmentV1Request struct {
 	Authentication *EnvironmentAuthenticationV1Request `json:"authentication,omitempty"`
 
 	// Cloud platform of the environment.
-	CloudPlatform string `json:"cloudPlatform,omitempty"`
+	// Max Length: 100
+	// Min Length: 0
+	CloudPlatform *string `json:"cloudPlatform,omitempty"`
 
 	// Name of the credential of the environment. If the name is given, the detailed credential is ignored in the request.
 	CredentialName string `json:"credentialName,omitempty"`
@@ -38,9 +42,12 @@ type EnvironmentV1Request struct {
 	// Required: true
 	Location *LocationV1Request `json:"location"`
 
+	// Cloud storage configuration for this environment. Service logs will be stored in the defined location.
+	LogCloudStorage *CloudStorageV1Request `json:"logCloudStorage,omitempty"`
+
 	// name of the resource
 	// Required: true
-	// Max Length: 100
+	// Max Length: 255
 	// Min Length: 5
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
@@ -57,6 +64,10 @@ type EnvironmentV1Request struct {
 
 	// Telemetry related specifics of the environment.
 	Telemetry *TelemetryV1Request `json:"telemetry,omitempty"`
+
+	// Configuration that the connection going directly or with ccm.
+	// Enum: [DIRECT CCM]
+	Tunnel string `json:"tunnel,omitempty"`
 }
 
 // Validate validates this environment v1 request
@@ -64,6 +75,10 @@ func (m *EnvironmentV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAuthentication(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCloudPlatform(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -76,6 +91,10 @@ func (m *EnvironmentV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateLocation(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateLogCloudStorage(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -99,6 +118,10 @@ func (m *EnvironmentV1Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateTunnel(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -118,6 +141,23 @@ func (m *EnvironmentV1Request) validateAuthentication(formats strfmt.Registry) e
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *EnvironmentV1Request) validateCloudPlatform(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CloudPlatform) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("cloudPlatform", "body", string(*m.CloudPlatform), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("cloudPlatform", "body", string(*m.CloudPlatform), 100); err != nil {
+		return err
 	}
 
 	return nil
@@ -176,6 +216,24 @@ func (m *EnvironmentV1Request) validateLocation(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *EnvironmentV1Request) validateLogCloudStorage(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.LogCloudStorage) { // not required
+		return nil
+	}
+
+	if m.LogCloudStorage != nil {
+		if err := m.LogCloudStorage.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("logCloudStorage")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *EnvironmentV1Request) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
@@ -186,7 +244,7 @@ func (m *EnvironmentV1Request) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MaxLength("name", "body", string(*m.Name), 100); err != nil {
+	if err := validate.MaxLength("name", "body", string(*m.Name), 255); err != nil {
 		return err
 	}
 
@@ -259,6 +317,49 @@ func (m *EnvironmentV1Request) validateTelemetry(formats strfmt.Registry) error 
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+var environmentV1RequestTypeTunnelPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["DIRECT","CCM"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		environmentV1RequestTypeTunnelPropEnum = append(environmentV1RequestTypeTunnelPropEnum, v)
+	}
+}
+
+const (
+
+	// EnvironmentV1RequestTunnelDIRECT captures enum value "DIRECT"
+	EnvironmentV1RequestTunnelDIRECT string = "DIRECT"
+
+	// EnvironmentV1RequestTunnelCCM captures enum value "CCM"
+	EnvironmentV1RequestTunnelCCM string = "CCM"
+)
+
+// prop value enum
+func (m *EnvironmentV1Request) validateTunnelEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, environmentV1RequestTypeTunnelPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *EnvironmentV1Request) validateTunnel(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Tunnel) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateTunnelEnum("tunnel", "body", m.Tunnel); err != nil {
+		return err
 	}
 
 	return nil

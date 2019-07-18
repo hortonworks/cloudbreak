@@ -24,12 +24,17 @@ type EnvironmentNetworkV1Request struct {
 	Azure *EnvironmentNetworkAzureV1Params `json:"azure,omitempty"`
 
 	// network cidr
-	NetworkCidr string `json:"networkCidr,omitempty"`
+	// Max Length: 255
+	// Min Length: 0
+	NetworkCidr *string `json:"networkCidr,omitempty"`
 
 	// Subnet ids of the specified networks
 	// Required: true
 	// Unique: true
 	SubnetIds []string `json:"subnetIds"`
+
+	// Yarn parameters
+	Yarn *EnvironmentNetworkYarnV1Params `json:"yarn,omitempty"`
 }
 
 // Validate validates this environment network v1 request
@@ -44,7 +49,15 @@ func (m *EnvironmentNetworkV1Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateNetworkCidr(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateSubnetIds(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateYarn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -90,6 +103,23 @@ func (m *EnvironmentNetworkV1Request) validateAzure(formats strfmt.Registry) err
 	return nil
 }
 
+func (m *EnvironmentNetworkV1Request) validateNetworkCidr(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.NetworkCidr) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("networkCidr", "body", string(*m.NetworkCidr), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("networkCidr", "body", string(*m.NetworkCidr), 255); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *EnvironmentNetworkV1Request) validateSubnetIds(formats strfmt.Registry) error {
 
 	if err := validate.Required("subnetIds", "body", m.SubnetIds); err != nil {
@@ -98,6 +128,24 @@ func (m *EnvironmentNetworkV1Request) validateSubnetIds(formats strfmt.Registry)
 
 	if err := validate.UniqueItems("subnetIds", "body", m.SubnetIds); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentNetworkV1Request) validateYarn(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Yarn) { // not required
+		return nil
+	}
+
+	if m.Yarn != nil {
+		if err := m.Yarn.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("yarn")
+			}
+			return err
+		}
 	}
 
 	return nil

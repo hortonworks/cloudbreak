@@ -15,9 +15,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// SdxCloudStorageRequest sdx cloud storage request
-// swagger:model SdxCloudStorageRequest
-type SdxCloudStorageRequest struct {
+// CloudStorageV1Response cloud storage v1 response
+// swagger:model CloudStorageV1Response
+type CloudStorageV1Response struct {
 
 	// adls
 	Adls *AdlsCloudStorageV1Parameters `json:"adls,omitempty"`
@@ -42,8 +42,8 @@ type SdxCloudStorageRequest struct {
 	Wasb *WasbCloudStorageV1Parameters `json:"wasb,omitempty"`
 }
 
-// Validate validates this sdx cloud storage request
-func (m *SdxCloudStorageRequest) Validate(formats strfmt.Registry) error {
+// Validate validates this cloud storage v1 response
+func (m *CloudStorageV1Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdls(formats); err != nil {
@@ -76,7 +76,7 @@ func (m *SdxCloudStorageRequest) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SdxCloudStorageRequest) validateAdls(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateAdls(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Adls) { // not required
 		return nil
@@ -94,7 +94,7 @@ func (m *SdxCloudStorageRequest) validateAdls(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SdxCloudStorageRequest) validateAdlsGen2(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateAdlsGen2(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.AdlsGen2) { // not required
 		return nil
@@ -112,7 +112,7 @@ func (m *SdxCloudStorageRequest) validateAdlsGen2(formats strfmt.Registry) error
 	return nil
 }
 
-var sdxCloudStorageRequestTypeFileSystemTypePropEnum []interface{}
+var cloudStorageV1ResponseTypeFileSystemTypePropEnum []interface{}
 
 func init() {
 	var res []string
@@ -120,40 +120,40 @@ func init() {
 		panic(err)
 	}
 	for _, v := range res {
-		sdxCloudStorageRequestTypeFileSystemTypePropEnum = append(sdxCloudStorageRequestTypeFileSystemTypePropEnum, v)
+		cloudStorageV1ResponseTypeFileSystemTypePropEnum = append(cloudStorageV1ResponseTypeFileSystemTypePropEnum, v)
 	}
 }
 
 const (
 
-	// SdxCloudStorageRequestFileSystemTypeWASBINTEGRATED captures enum value "WASB_INTEGRATED"
-	SdxCloudStorageRequestFileSystemTypeWASBINTEGRATED string = "WASB_INTEGRATED"
+	// CloudStorageV1ResponseFileSystemTypeWASBINTEGRATED captures enum value "WASB_INTEGRATED"
+	CloudStorageV1ResponseFileSystemTypeWASBINTEGRATED string = "WASB_INTEGRATED"
 
-	// SdxCloudStorageRequestFileSystemTypeGCS captures enum value "GCS"
-	SdxCloudStorageRequestFileSystemTypeGCS string = "GCS"
+	// CloudStorageV1ResponseFileSystemTypeGCS captures enum value "GCS"
+	CloudStorageV1ResponseFileSystemTypeGCS string = "GCS"
 
-	// SdxCloudStorageRequestFileSystemTypeWASB captures enum value "WASB"
-	SdxCloudStorageRequestFileSystemTypeWASB string = "WASB"
+	// CloudStorageV1ResponseFileSystemTypeWASB captures enum value "WASB"
+	CloudStorageV1ResponseFileSystemTypeWASB string = "WASB"
 
-	// SdxCloudStorageRequestFileSystemTypeADLS captures enum value "ADLS"
-	SdxCloudStorageRequestFileSystemTypeADLS string = "ADLS"
+	// CloudStorageV1ResponseFileSystemTypeADLS captures enum value "ADLS"
+	CloudStorageV1ResponseFileSystemTypeADLS string = "ADLS"
 
-	// SdxCloudStorageRequestFileSystemTypeADLSGEN2 captures enum value "ADLS_GEN_2"
-	SdxCloudStorageRequestFileSystemTypeADLSGEN2 string = "ADLS_GEN_2"
+	// CloudStorageV1ResponseFileSystemTypeADLSGEN2 captures enum value "ADLS_GEN_2"
+	CloudStorageV1ResponseFileSystemTypeADLSGEN2 string = "ADLS_GEN_2"
 
-	// SdxCloudStorageRequestFileSystemTypeS3 captures enum value "S3"
-	SdxCloudStorageRequestFileSystemTypeS3 string = "S3"
+	// CloudStorageV1ResponseFileSystemTypeS3 captures enum value "S3"
+	CloudStorageV1ResponseFileSystemTypeS3 string = "S3"
 )
 
 // prop value enum
-func (m *SdxCloudStorageRequest) validateFileSystemTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, sdxCloudStorageRequestTypeFileSystemTypePropEnum); err != nil {
+func (m *CloudStorageV1Response) validateFileSystemTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, cloudStorageV1ResponseTypeFileSystemTypePropEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *SdxCloudStorageRequest) validateFileSystemType(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateFileSystemType(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.FileSystemType) { // not required
 		return nil
@@ -167,7 +167,7 @@ func (m *SdxCloudStorageRequest) validateFileSystemType(formats strfmt.Registry)
 	return nil
 }
 
-func (m *SdxCloudStorageRequest) validateGcs(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateGcs(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Gcs) { // not required
 		return nil
@@ -185,7 +185,7 @@ func (m *SdxCloudStorageRequest) validateGcs(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SdxCloudStorageRequest) validateS3(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateS3(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.S3) { // not required
 		return nil
@@ -203,7 +203,7 @@ func (m *SdxCloudStorageRequest) validateS3(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SdxCloudStorageRequest) validateWasb(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateWasb(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Wasb) { // not required
 		return nil
@@ -222,7 +222,7 @@ func (m *SdxCloudStorageRequest) validateWasb(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *SdxCloudStorageRequest) MarshalBinary() ([]byte, error) {
+func (m *CloudStorageV1Response) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -230,8 +230,8 @@ func (m *SdxCloudStorageRequest) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *SdxCloudStorageRequest) UnmarshalBinary(b []byte) error {
-	var res SdxCloudStorageRequest
+func (m *CloudStorageV1Response) UnmarshalBinary(b []byte) error {
+	var res CloudStorageV1Response
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

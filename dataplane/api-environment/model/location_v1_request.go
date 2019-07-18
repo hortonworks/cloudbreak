@@ -25,6 +25,8 @@ type LocationV1Request struct {
 
 	// Location of the environment.
 	// Required: true
+	// Max Length: 100
+	// Min Length: 0
 	Name *string `json:"name"`
 }
 
@@ -45,6 +47,14 @@ func (m *LocationV1Request) Validate(formats strfmt.Registry) error {
 func (m *LocationV1Request) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("name", "body", string(*m.Name), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("name", "body", string(*m.Name), 100); err != nil {
 		return err
 	}
 
