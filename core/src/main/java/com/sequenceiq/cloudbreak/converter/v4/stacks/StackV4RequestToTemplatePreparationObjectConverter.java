@@ -18,7 +18,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
@@ -34,13 +36,13 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.identitymapping.AwsIdentityMappingService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnector;
@@ -121,6 +123,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     @Inject
     private CredentialConverter credentialConverter;
 
+    @Inject
+    private AwsIdentityMappingService awsIdentityMappingService;
+
     @Override
     public TemplatePreparationObject convert(StackV4Request source) {
         try {
@@ -170,6 +175,12 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     throw new CloudbreakServiceException("Cannot collect shared service resources from datalake!");
                 }
             }
+            // TODO: add feature switch here for mocked identity mapping
+            if (source.getCloudPlatform() == CloudPlatform.AWS) {
+                Map<String, String> groupMapping = awsIdentityMappingService.getIdentityGroupMapping(credential);
+                builder.withIdentityGroupMapping(groupMapping);
+            }
+
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);

@@ -86,4 +86,12 @@ public interface CloudConnector<R> extends CloudPlatformAware {
      */
     NetworkConnector networkConnector();
 
+    /**
+     * Access to the {@link IdentityService} object.
+     *
+     * @return the {@link IdentityService} object
+     */
+    default IdentityService identityService() {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 }
