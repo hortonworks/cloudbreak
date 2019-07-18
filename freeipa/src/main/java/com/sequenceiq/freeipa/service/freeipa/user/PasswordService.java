@@ -118,8 +118,7 @@ public class PasswordService {
 
     private String getUserIdFromUserCrn(String userCrn) {
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User user = umsClient.getUserDetails(userCrn, userCrn, Optional.empty());
-        // TODO replace this code with workloadUsername in DISTX-184
-        return user.getEmail().split("@")[0];
+        return user.getWorkloadUsername();
     }
 
     private SetPasswordRequest triggerSetPassword(Stack stack, String environment, String username, String password) {

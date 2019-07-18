@@ -128,7 +128,7 @@ public class GcpDiskEncryptionService {
         byte[] rsaWrapped = encrypt(publicKey, getEncryptionKeyBytes(encryptionKey));
 
         CustomerEncryptionKey customerEncryptionKey = new CustomerEncryptionKey();
-        customerEncryptionKey.setRsaEncryptedKey(encode(rsaWrapped));
+        customerEncryptionKey.setSha256(encode(rsaWrapped));
         return customerEncryptionKey;
     }
 

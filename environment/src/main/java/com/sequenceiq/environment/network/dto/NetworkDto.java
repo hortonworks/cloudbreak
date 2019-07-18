@@ -22,6 +22,8 @@ public class NetworkDto {
 
     private final AzureParams azure;
 
+    private final YarnParams yarn;
+
     private final Set<String> subnetIds;
 
     private final String networkCidr;
@@ -34,6 +36,7 @@ public class NetworkDto {
         this.name = builder.name;
         this.aws = builder.aws;
         this.azure = builder.azure;
+        this.yarn = builder.yarn;
         this.subnetIds = CollectionUtils.isEmpty(builder.subnetIds) ? new HashSet<>() : builder.subnetIds;
         this.subnetMetas = MapUtils.isEmpty(builder.subnetMetas) ? new HashMap<>() : builder.subnetMetas;
         this.networkCidr = builder.networkCidr;
@@ -63,6 +66,10 @@ public class NetworkDto {
         return azure;
     }
 
+    public YarnParams getYarn() {
+        return yarn;
+    }
+
     public Set<String> getSubnetIds() {
         return subnetIds;
     }
@@ -85,6 +92,8 @@ public class NetworkDto {
         private AwsParams aws;
 
         private AzureParams azure;
+
+        private YarnParams yarn;
 
         private Set<String> subnetIds;
 
@@ -116,6 +125,11 @@ public class NetworkDto {
 
         public Builder withAzure(AzureParams azure) {
             this.azure = azure;
+            return this;
+        }
+
+        public Builder withYarn(YarnParams yarn) {
+            this.yarn = yarn;
             return this;
         }
 

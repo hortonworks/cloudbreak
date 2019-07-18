@@ -66,7 +66,6 @@ public class CredentialPrerequisiteService {
     }
 
     public Credential decorateCredential(Credential credential) {
-        boolean attributesChanged = false;
         CredentialAttributes credentialAttributes = getCredentialAttributes(credential);
         if (isRoleArnSet(credentialAttributes)) {
             credentialAttributes.getAws().getRoleBased().setExternalId(userPreferencesService.getExternalIdForCurrentUser());

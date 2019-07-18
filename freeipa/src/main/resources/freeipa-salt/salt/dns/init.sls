@@ -1,20 +1,11 @@
 dhcp-enter-hook:
   file.managed:
-    - name: /etc/dhcp/dhclient-enter-hooks.d/nodnsupdate
+    - name: /etc/dhcp/dhclient-enter-hooks
     - source: salt://dns/scripts/nodnsupdate
     - makedirs: True
     - user: root
     - group: root
     - mode: 755
-
-nm-nodns-config:
-  file.managed:
-    - name: /etc/NetworkManager/conf.d/nodnsupdate.conf
-    - source: salt://dns/conf/nodnsupdate.conf
-    - user: root
-    - group: root
-    - mode: 740
-    - makedirs: true
 
 set-peerdns-script:
   file.managed:
@@ -31,6 +22,17 @@ run-set-peerdns:
     - require:
         - file: set-peerdns-script
 
+{% if salt['pkg.version']('NetworkManager') %}
+
+nm-nodns-config:
+  file.managed:
+    - name: /etc/NetworkManager/conf.d/nodnsupdate.conf
+    - source: salt://dns/conf/nodnsupdate.conf
+    - user: root
+    - group: root
+    - mode: 740
+    - makedirs: true
+
 restart-nm:
   service.running:
     - name: NetworkManager
@@ -38,3 +40,5 @@ restart-nm:
         - file: dhcp-enter-hook
         - file: nm-nodns-config
         - cmd: run-set-peerdns
+
+{% endif %}

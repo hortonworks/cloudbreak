@@ -23,13 +23,16 @@ public class CmTemplateValidator implements BlueprintValidator {
     private CmTemplateProcessorFactory processorFactory;
 
     @Override
-    public void validateBlueprintForStack(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups) {
+    public void validate(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups,
+        boolean validateServiceCardinality) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
         Map<String, InstanceCount> blueprintHostGroupCardinality = templateProcessor.getCardinalityByHostGroup();
 
         BlueprintValidatorUtil.validateHostGroupsMatch(hostGroups, blueprintHostGroupCardinality.keySet());
         BlueprintValidatorUtil.validateInstanceGroups(hostGroups, instanceGroups);
-        BlueprintValidatorUtil.validateHostGroupCardinality(hostGroups, blueprintHostGroupCardinality);
+        if (validateServiceCardinality) {
+            BlueprintValidatorUtil.validateHostGroupCardinality(hostGroups, blueprintHostGroupCardinality);
+        }
     }
 
     @Override

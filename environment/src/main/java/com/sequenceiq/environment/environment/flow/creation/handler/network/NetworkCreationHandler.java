@@ -110,7 +110,9 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private boolean hasNetwork(Environment environment) {
-        return Objects.nonNull(environment.getNetwork()) && enabledPlatforms.contains(environment.getCloudPlatform());
+        return Objects.nonNull(environment.getNetwork())
+                && !CloudPlatform.YARN.name().equals(environment.getCloudPlatform())
+                && enabledPlatforms.contains(environment.getCloudPlatform());
     }
 
     private boolean hasExistingNetwork(Environment environment) {

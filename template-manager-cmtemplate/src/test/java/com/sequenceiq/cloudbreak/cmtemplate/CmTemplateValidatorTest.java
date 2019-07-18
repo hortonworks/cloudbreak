@@ -43,7 +43,7 @@ public class CmTemplateValidatorTest {
         Collection<InstanceGroup> instanceGroups = hostGroups.stream()
                 .map(hg -> hg.getConstraint().getInstanceGroup())
                 .collect(toSet());
-        subject.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        subject.validate(blueprint, hostGroups, instanceGroups, true);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class CmTemplateValidatorTest {
         Collection<InstanceGroup> instanceGroups = hostGroups.stream()
                 .map(hg -> hg.getConstraint().getInstanceGroup())
                 .collect(toSet());
-        subject.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        subject.validate(blueprint, hostGroups, instanceGroups, true);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class CmTemplateValidatorTest {
                 .map(hg -> hg.getConstraint().getInstanceGroup())
                 .collect(toSet());
 
-        assertThrows(BlueprintValidationException.class, () -> subject.validateBlueprintForStack(blueprint, hostGroups, instanceGroups));
+        assertThrows(BlueprintValidationException.class, () -> subject.validate(blueprint, hostGroups, instanceGroups, true));
     }
 
 }

@@ -207,6 +207,18 @@
         "spark_on_yarn-GATEWAY-BASE",
         "yarn-NODEMANAGER-BASE"
       ]
+    },
+    {
+        "refName": "compute",
+          "cardinality": 1,
+          "roleConfigGroupsRefNames": [
+            "hbase-REGIONSERVER-BASE",
+            "hdfs-DATANODE-BASE",
+            "hive-GATEWAY-BASE",
+            "impala-IMPALAD-BASE",
+            "spark_on_yarn-GATEWAY-BASE",
+            "yarn-NODEMANAGER-BASE"
+          ]
     }
   ]
 }

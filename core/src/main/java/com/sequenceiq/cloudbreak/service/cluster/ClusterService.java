@@ -899,10 +899,8 @@ public class ClusterService {
                 throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
                         + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
             }
-            if (validateBlueprint) {
-                BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(blueprint);
-                blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackWithLists.getInstanceGroups());
-            }
+            BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(blueprint);
+            blueprintValidator.validate(blueprint, hostGroups, stackWithLists.getInstanceGroups(), validateBlueprint);
             boolean containerOrchestrator;
             try {
                 containerOrchestrator = orchestratorTypeResolver.resolveType(stackWithLists.getOrchestrator()).containerOrchestrator();

@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -35,6 +36,7 @@ import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.network.dto.YarnParams;
 
 @Component
 public class EnvironmentApiConverter {
@@ -117,6 +119,11 @@ public class EnvironmentApiConverter {
             azureParams.setNoPublicIp(network.getAzure().getNoPublicIp());
             azureParams.setResourceGroupName(network.getAzure().getResourceGroupName());
             builder.withAzure(azureParams);
+        }
+        if (network.getYarn() != null) {
+            YarnParams yarnParams = new YarnParams();
+            yarnParams.setQueue(network.getYarn().getQueue());
+            builder.withYarn(yarnParams);
         }
         return builder
                 .withSubnetIds(network.getSubnetIds())
@@ -202,6 +209,9 @@ public class EnvironmentApiConverter {
                         .withResourceGroupName(getIfNotNull(network.getAzure(), AzureParams::getResourceGroupName))
                         .withNoFirewallRules(getIfNotNull(network.getAzure(), AzureParams::isNoFirewallRules))
                         .withNoPublicIp(getIfNotNull(network.getAzure(), AzureParams::isNoPublicIp))
+                        .build())
+                .withYarn(EnvironmentNetworkYarnParams.EnvironmentNetworkYarnParamsBuilder.anEnvironmentNetworkYarnParams()
+                        .withQueue(getIfNotNull(network.getYarn(), YarnParams::getQueue))
                         .build())
                 .build();
     }

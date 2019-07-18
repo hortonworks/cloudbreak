@@ -66,10 +66,9 @@ public class ClusterDecorator {
     }
 
     private void validateBlueprintIfRequired(Cluster subject, ClusterV4Request request, Stack stack) {
-        if (request.getValidateBlueprint()) {
-            BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(subject.getBlueprint());
-            blueprintValidator.validateBlueprintForStack(subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups());
-        }
+        BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(subject.getBlueprint());
+        blueprintValidator.validate(subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups(),
+                request.getValidateBlueprint());
     }
 
     private void prepareBlueprint(Cluster subject, ClusterV4Request request, Workspace workspace, Stack stack,

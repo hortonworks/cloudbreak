@@ -91,7 +91,7 @@ public class AmbariBlueprintValidatorTest {
         thrown.expectMessage("Blueprint [null] can not be parsed from JSON.");
         thrown.expectCause(is(expectedException));
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        underTest.validate(blueprint, hostGroups, instanceGroups, true);
         // THEN throw exception
     }
 
@@ -106,7 +106,7 @@ public class AmbariBlueprintValidatorTest {
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage(Matchers.containsString("host groups are missing"));
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        underTest.validate(blueprint, hostGroups, instanceGroups, true);
         // THEN throw exception
     }
 
@@ -122,7 +122,7 @@ public class AmbariBlueprintValidatorTest {
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage("The node count '2' for hostgroup 'group2' cannot be less than '1' or more than '1' because of 'mastercomp2' component");
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        underTest.validate(blueprint, hostGroups, instanceGroups, true);
         // THEN throw exception
     }
 
@@ -138,7 +138,7 @@ public class AmbariBlueprintValidatorTest {
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage(Matchers.containsString("Each host group must have"));
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        underTest.validate(blueprint, hostGroups, instanceGroups, true);
         // THEN throw exception
     }
 
@@ -153,7 +153,7 @@ public class AmbariBlueprintValidatorTest {
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage(Matchers.startsWith("Unknown host groups are present"));
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        underTest.validate(blueprint, hostGroups, instanceGroups, true);
         // THEN throw exception
     }
 
@@ -169,7 +169,7 @@ public class AmbariBlueprintValidatorTest {
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage("Incorrect number of 'mastercomp3' components are in '[group1, group3]' hostgroups: count: 4, min: 1 max: 3");
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        underTest.validate(blueprint, hostGroups, instanceGroups, true);
         // THEN throw exception
     }
 
@@ -185,7 +185,7 @@ public class AmbariBlueprintValidatorTest {
         thrown.expect(BlueprintValidationException.class);
         thrown.expectMessage("Incorrect number of 'slavecomp2' components are in '[group3]' hostgroups: count: 3, min: 5 max: 6");
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        underTest.validate(blueprint, hostGroups, instanceGroups, true);
         // THEN throw exception
     }
 
@@ -199,7 +199,7 @@ public class AmbariBlueprintValidatorTest {
         JsonNode blueprintJsonTree = createJsonTree();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        underTest.validate(blueprint, hostGroups, instanceGroups, true);
         // THEN doesn't throw exception
     }
 
@@ -213,7 +213,7 @@ public class AmbariBlueprintValidatorTest {
         JsonNode blueprintJsonTree = createJsonTreeWithUnknownComponent();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         // WHEN
-        underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
+        underTest.validate(blueprint, hostGroups, instanceGroups, true);
         // THEN doesn't throw exception
     }
 
