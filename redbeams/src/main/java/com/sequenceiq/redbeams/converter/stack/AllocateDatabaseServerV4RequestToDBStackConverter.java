@@ -177,7 +177,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         server.setConnectorJarUrl(source.getConnectorJarUrl());
         server.setStorageSize(source.getStorageSize());
         server.setRootUserName(source.getRootUserName() != null ? source.getRootUserName() : userGeneratorService.generateUserName());
-        server.setRootPassword(source.getRootUserPassword() != null ? source.getRootUserPassword() : userGeneratorService.generatePassword());
+        server.setRootPassword(source.getRootUserPassword() != null ? source.getRootUserPassword() : userGeneratorService.generatePassword()
+        );
         server.setPort(source.getPort());
         server.setSecurityGroup(buildSecurityGroup(source.getSecurityGroup()));
 
