@@ -54,6 +54,10 @@ public class TemplatePreparationObject {
 
     private final Map<String, Object> fixInputs;
 
+    private final Map<String, String> identityGroupMapping;
+
+    private final Map<String, String> identityUserMapping;
+
     private TemplatePreparationObject(Builder builder) {
         rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
                 rdsConfig -> rdsConfig.getType().toLowerCase(),
@@ -71,6 +75,8 @@ public class TemplatePreparationObject {
         sharedServiceConfigs = builder.sharedServiceConfigs;
         customInputs = builder.customInputs;
         fixInputs = builder.fixInputs;
+        identityGroupMapping = builder.identityGroupMapping;
+        identityUserMapping = builder.identityUserMapping;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -164,6 +170,10 @@ public class TemplatePreparationObject {
 
         private Map<String, Object> fixInputs = new HashMap<>();
 
+        private Map<String, String> identityGroupMapping = new HashMap<>();
+
+        private Map<String, String> identityUserMapping = new HashMap<>();
+
         public static Builder builder() {
             return new Builder();
         }
@@ -251,6 +261,16 @@ public class TemplatePreparationObject {
 
         public Builder withFixInputs(Map<String, Object> fixInputs) {
             this.fixInputs = fixInputs == null ? new HashMap<>() : fixInputs;
+            return this;
+        }
+
+        public Builder withIdentityGroupMapping(Map<String, String> groupMapping) {
+            identityGroupMapping = groupMapping == null ? new HashMap<>() : groupMapping;
+            return this;
+        }
+
+        public Builder withIdentityUserMapping(Map<String, String> userMapping) {
+            identityUserMapping = userMapping == null ? new HashMap<>() : userMapping;
             return this;
         }
 
