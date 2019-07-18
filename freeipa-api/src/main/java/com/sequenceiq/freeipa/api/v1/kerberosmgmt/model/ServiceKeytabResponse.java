@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.api.v1.kerberosmgmt.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabModelDescription;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,24 +11,24 @@ import io.swagger.annotations.ApiModelProperty;
 public class ServiceKeytabResponse {
 
     @ApiModelProperty (KeytabModelDescription.PRINCIPAL)
-    private SecretResponse servicePrincial;
+    private String servicePrincipal;
 
     @ApiModelProperty (KeytabModelDescription.KEYTAB)
-    private SecretResponse keytab;
+    private String keytab;
 
-    public SecretResponse getServicePrincial() {
-        return servicePrincial;
+    public String getServicePrincipal() {
+        return servicePrincipal;
     }
 
-    public void setServicePrincial(SecretResponse servicePrincial) {
-        this.servicePrincial = servicePrincial;
+    public void setServicePrincipal(String servicePrincipal) {
+        this.servicePrincipal = servicePrincipal;
     }
 
-    public SecretResponse getKeytab() {
+    public String getKeytab() {
         return keytab;
     }
 
-    public void setKeytab(SecretResponse keytab) {
+    public void setKeytab(String keytab) {
         this.keytab = keytab;
     }
 }

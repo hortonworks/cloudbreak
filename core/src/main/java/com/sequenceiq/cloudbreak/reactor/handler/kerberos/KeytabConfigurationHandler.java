@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationF
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -64,9 +63,6 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
     @Inject
     private HostOrchestrator hostOrchestrator;
 
-    @Inject
-    private SecretService secretService;
-
     @Override
     public String selector() {
         return EventSelectorUtil.selector(KeytabConfigurationRequest.class);
@@ -97,9 +93,9 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
     }
 
     private KeytabModel buildKeytabModel(ServiceKeytabResponse serviceKeytabResponse) {
-        String keytabInBase64 = secretService.getByResponse(serviceKeytabResponse.getKeytab());
+        String keytabInBase64 = serviceKeytabResponse.getKeytab();
         byte[] keytab = Base64.getDecoder().decode(keytabInBase64.getBytes(StandardCharsets.UTF_8));
-        String principal = secretService.getByResponse(serviceKeytabResponse.getServicePrincial());
+        String principal = serviceKeytabResponse.getServicePrincipal();
         return new KeytabModel("CM", "/etc/cloudera-scm-server", "cmf.keytab", principal, keytab);
     }
 
