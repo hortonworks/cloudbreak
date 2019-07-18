@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.cloudbreak.controller.validation.Validator;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
 
 @Component

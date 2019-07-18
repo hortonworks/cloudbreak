@@ -1,7 +1,7 @@
-package com.sequenceiq.cloudbreak.controller.validation;
+package com.sequenceiq.cloudbreak.validation;
 
-import static com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State.ERROR;
-import static com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State.VALID;
+import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.ERROR;
+import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.VALID;
 
 import java.util.ArrayList;
 import java.util.List;

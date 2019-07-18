@@ -9,8 +9,8 @@ import java.util.List;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 
 public class ExposedServiceListValidatorTest {
 

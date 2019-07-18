@@ -53,6 +53,7 @@ public class CreateFreeIpaRequest {
     private ImageSettingsRequest image;
 
     @NotNull
+    @Valid
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_SERVER_SETTINGS, required = true)
     private FreeIpaServerRequest freeIpa;
 
