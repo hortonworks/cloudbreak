@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 
 import io.swagger.annotations.ApiModel;
@@ -47,6 +48,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private CloudStorageResponse logCloudStorage;
 
         private Tunnel tunnel;
+
+        private IdBrokerMappingSource idBrokerMappingSource;
 
         private Builder() {
         }
@@ -140,6 +143,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
+            this.idBrokerMappingSource = idBrokerMappingSource;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -159,6 +167,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setSecurityAccess(securityAccess);
             detailedEnvironmentResponse.setTunnel(tunnel);
             detailedEnvironmentResponse.setLogCloudStorage(logCloudStorage);
+            detailedEnvironmentResponse.setIdBrokerMappingSource(idBrokerMappingSource);
             return detailedEnvironmentResponse;
         }
     }

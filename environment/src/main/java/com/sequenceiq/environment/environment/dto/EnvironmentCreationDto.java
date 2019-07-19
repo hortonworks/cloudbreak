@@ -6,6 +6,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -42,11 +43,13 @@ public class EnvironmentCreationDto {
 
     private final Tunnel tunnel;
 
+    private final IdBrokerMappingSource idBrokerMappingSource;
+
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
-            Long created, Telemetry telemetry, SecurityAccessDto securityAccess, Tunnel tunnel) {
+            Long created, Telemetry telemetry, SecurityAccessDto securityAccess, Tunnel tunnel, IdBrokerMappingSource idBrokerMappingSource) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -71,6 +74,7 @@ public class EnvironmentCreationDto {
         this.authentication = authentication;
         this.telemetry = telemetry;
         this.securityAccess = securityAccess;
+        this.idBrokerMappingSource = idBrokerMappingSource;
     }
 
     public String getName() {
@@ -133,6 +137,10 @@ public class EnvironmentCreationDto {
         return tunnel;
     }
 
+    public IdBrokerMappingSource getIdBrokerMappingSource() {
+        return idBrokerMappingSource;
+    }
+
     public static final class Builder {
         private String name;
 
@@ -163,6 +171,8 @@ public class EnvironmentCreationDto {
         private SecurityAccessDto securityAccess;
 
         private Tunnel tunnel;
+
+        private IdBrokerMappingSource idBrokerMappingSource;
 
         public Builder() {
         }
@@ -246,10 +256,15 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
+            this.idBrokerMappingSource = idBrokerMappingSource;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId,
                     location, network, credential, regions, proxyNames, createFreeIpa,
-                    authentication, created, telemetry, securityAccess, tunnel);
+                    authentication, created, telemetry, securityAccess, tunnel, idBrokerMappingSource);
         }
     }
 }

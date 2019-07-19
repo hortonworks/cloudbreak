@@ -83,7 +83,8 @@ public class EnvironmentApiConverter {
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry()))
                 .withRegions(request.getRegions())
-                .withAuthentication(authenticationRequestToDto(request.getAuthentication()));
+                .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
+                .withIdBrokerMappingSource(request.getIdBrokerMappingSource());
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
@@ -171,7 +172,8 @@ public class EnvironmentApiConverter {
                 .withCreated(environmentDto.getCreated())
                 .withTelemetry(telemetryApiConverter.convertFromJson(environmentDto.getTelemetry()))
                 .withTunnel(environmentDto.getTunnel())
-                .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
+                .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
+                .withIdBrokerMappingSource(environmentDto.getIdBrokerMappingSource());
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
         NullUtil.doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));
@@ -231,7 +233,8 @@ public class EnvironmentApiConverter {
         EnvironmentEditDto.EnvironmentEditDtoBuilder builder = EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
                 .withDescription(request.getDescription())
                 .withAccountId(threadBasedUserCrnProvider.getAccountId())
-                .withRegions(request.getRegions());
+                .withRegions(request.getRegions())
+                .withIdBrokerMappingSource(request.getIdBrokerMappingSource());
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
