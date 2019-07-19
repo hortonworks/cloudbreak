@@ -8,5 +8,9 @@ fluent:
   platform:
   providerPrefix: "stdout"
   partitionIntervalMin: 5
+  logFolderName: cluster-logs
   s3LogArchiveBucketName:
-  s3LogFolderName:
+  azureStorageAccount:
+  azureContainer:
+  azureInstanceMsi:
+  azureStorageAccessKey:

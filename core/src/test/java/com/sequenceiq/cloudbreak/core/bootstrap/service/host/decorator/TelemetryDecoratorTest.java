@@ -24,7 +24,7 @@ public class TelemetryDecoratorTest {
                 .withPlatform("AWS")
                 .withEnabled(true)
                 .withS3LogArchiveBucketName("mybucket")
-                .withS3LogFolderName("cluster-logs/distrox/cl1")
+                .withLogFolderName("cluster-logs/datahub/cl1")
                 .withProviderPrefix("s3")
                 .build();
         // WHEN
@@ -33,7 +33,7 @@ public class TelemetryDecoratorTest {
         Map<String, Object> results = createMapFromFluentPillars(result);
         assertEquals(results.get("providerPrefix"), "s3");
         assertEquals(results.get("s3LogArchiveBucketName"), "mybucket");
-        assertEquals(results.get("s3LogFolderName"), "cluster-logs/distrox/cl1");
+        assertEquals(results.get("logFolderName"), "cluster-logs/datahub/cl1");
         assertEquals(results.get("enabled"), true);
         assertEquals(results.get("platform"), CloudPlatform.AWS.name());
         assertEquals(results.get("user"), "root");
@@ -49,7 +49,7 @@ public class TelemetryDecoratorTest {
                 .withPlatform("AWS")
                 .withEnabled(true)
                 .withS3LogArchiveBucketName("mybucket")
-                .withS3LogFolderName("cluster-logs/distrox/cl1")
+                .withLogFolderName("cluster-logs/datahub/cl1")
                 .withProviderPrefix("s3")
                 .withOverrideAttributes(overrides)
                 .build();
@@ -59,7 +59,7 @@ public class TelemetryDecoratorTest {
         Map<String, Object> results = createMapFromFluentPillars(result);
         assertEquals(results.get("providerPrefix"), "s3a");
         assertEquals(results.get("s3LogArchiveBucketName"), "mybucket");
-        assertEquals(results.get("s3LogFolderName"), "cluster-logs/distrox/cl1");
+        assertEquals(results.get("logFolderName"), "cluster-logs/datahub/cl1");
         assertEquals(results.get("enabled"), true);
     }
 

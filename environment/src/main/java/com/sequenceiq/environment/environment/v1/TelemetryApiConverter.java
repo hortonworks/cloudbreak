@@ -67,7 +67,7 @@ public class TelemetryApiConverter {
         if (wasb != null) {
             wasbCloudStorageParameters = new WasbCloudStorageParameters();
             wasbCloudStorageParameters.setAccountKey(wasb.getAccountKey());
-            wasbCloudStorageParameters.setAccountName(wasb.getAccountKey());
+            wasbCloudStorageParameters.setAccountName(wasb.getAccountName());
             wasbCloudStorageParameters.setSecure(wasb.isSecure());
         }
         return wasbCloudStorageParameters;
@@ -113,7 +113,7 @@ public class TelemetryApiConverter {
         if (wasb != null) {
             s3CloudStorageV1Parameters = new WasbCloudStorageV1Parameters();
             s3CloudStorageV1Parameters.setAccountKey(wasb.getAccountKey());
-            s3CloudStorageV1Parameters.setAccountName(wasb.getAccountKey());
+            s3CloudStorageV1Parameters.setAccountName(wasb.getAccountName());
             s3CloudStorageV1Parameters.setSecure(wasb.isSecure());
         }
         return s3CloudStorageV1Parameters;
