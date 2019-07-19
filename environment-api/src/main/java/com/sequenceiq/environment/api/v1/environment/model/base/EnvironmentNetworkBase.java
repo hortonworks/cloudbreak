@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(subTypes = {EnvironmentNetworkRequest.class, EnvironmentNetworkResponse.class})
 public abstract class EnvironmentNetworkBase {
 
-    @ApiModelProperty(value = EnvironmentModelDescription.SUBNET_IDS, required = true)
+    @ApiModelProperty(value = EnvironmentModelDescription.SUBNET_IDS)
     private Set<String> subnetIds;
 
     @Size(max = 255)
