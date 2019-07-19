@@ -13,9 +13,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// AdlsGen2CloudStorageV4Parameters adls gen2 cloud storage v4 parameters
-// swagger:model AdlsGen2CloudStorageV4Parameters
-type AdlsGen2CloudStorageV4Parameters struct {
+// AdlsGen2CloudStorageV1Parameters adls gen2 cloud storage v1 parameters
+// swagger:model AdlsGen2CloudStorageV1Parameters
+type AdlsGen2CloudStorageV1Parameters struct {
 
 	// account key
 	// Required: true
@@ -29,8 +29,8 @@ type AdlsGen2CloudStorageV4Parameters struct {
 	Secure bool `json:"secure,omitempty"`
 }
 
-// Validate validates this adls gen2 cloud storage v4 parameters
-func (m *AdlsGen2CloudStorageV4Parameters) Validate(formats strfmt.Registry) error {
+// Validate validates this adls gen2 cloud storage v1 parameters
+func (m *AdlsGen2CloudStorageV1Parameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAccountKey(formats); err != nil {
@@ -47,7 +47,7 @@ func (m *AdlsGen2CloudStorageV4Parameters) Validate(formats strfmt.Registry) err
 	return nil
 }
 
-func (m *AdlsGen2CloudStorageV4Parameters) validateAccountKey(formats strfmt.Registry) error {
+func (m *AdlsGen2CloudStorageV1Parameters) validateAccountKey(formats strfmt.Registry) error {
 
 	if err := validate.Required("accountKey", "body", m.AccountKey); err != nil {
 		return err
@@ -56,7 +56,7 @@ func (m *AdlsGen2CloudStorageV4Parameters) validateAccountKey(formats strfmt.Reg
 	return nil
 }
 
-func (m *AdlsGen2CloudStorageV4Parameters) validateAccountName(formats strfmt.Registry) error {
+func (m *AdlsGen2CloudStorageV1Parameters) validateAccountName(formats strfmt.Registry) error {
 
 	if err := validate.Required("accountName", "body", m.AccountName); err != nil {
 		return err
@@ -66,7 +66,7 @@ func (m *AdlsGen2CloudStorageV4Parameters) validateAccountName(formats strfmt.Re
 }
 
 // MarshalBinary interface implementation
-func (m *AdlsGen2CloudStorageV4Parameters) MarshalBinary() ([]byte, error) {
+func (m *AdlsGen2CloudStorageV1Parameters) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -74,8 +74,8 @@ func (m *AdlsGen2CloudStorageV4Parameters) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *AdlsGen2CloudStorageV4Parameters) UnmarshalBinary(b []byte) error {
-	var res AdlsGen2CloudStorageV4Parameters
+func (m *AdlsGen2CloudStorageV1Parameters) UnmarshalBinary(b []byte) error {
+	var res AdlsGen2CloudStorageV1Parameters
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

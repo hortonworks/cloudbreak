@@ -32,6 +32,9 @@ type EnvironmentNetworkV1Request struct {
 	// Required: true
 	// Unique: true
 	SubnetIds []string `json:"subnetIds"`
+
+	// Yarn parameters
+	Yarn *EnvironmentNetworkYarnV1Params `json:"yarn,omitempty"`
 }
 
 // Validate validates this environment network v1 request
@@ -51,6 +54,10 @@ func (m *EnvironmentNetworkV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateSubnetIds(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateYarn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -121,6 +128,24 @@ func (m *EnvironmentNetworkV1Request) validateSubnetIds(formats strfmt.Registry)
 
 	if err := validate.UniqueItems("subnetIds", "body", m.SubnetIds); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentNetworkV1Request) validateYarn(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Yarn) { // not required
+		return nil
+	}
+
+	if m.Yarn != nil {
+		if err := m.Yarn.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("yarn")
+			}
+			return err
+		}
 	}
 
 	return nil

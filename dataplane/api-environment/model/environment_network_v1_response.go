@@ -42,6 +42,9 @@ type EnvironmentNetworkV1Response struct {
 
 	// Subnet metadata of the specified networks
 	SubnetMetas map[string]CloudSubnet `json:"subnetMetas,omitempty"`
+
+	// Yarn parameters
+	Yarn *EnvironmentNetworkYarnV1Params `json:"yarn,omitempty"`
 }
 
 // Validate validates this environment network v1 response
@@ -69,6 +72,10 @@ func (m *EnvironmentNetworkV1Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateSubnetMetas(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateYarn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -170,6 +177,24 @@ func (m *EnvironmentNetworkV1Response) validateSubnetMetas(formats strfmt.Regist
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *EnvironmentNetworkV1Response) validateYarn(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Yarn) { // not required
+		return nil
+	}
+
+	if m.Yarn != nil {
+		if err := m.Yarn.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("yarn")
+			}
+			return err
+		}
 	}
 
 	return nil

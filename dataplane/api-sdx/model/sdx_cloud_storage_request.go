@@ -20,10 +20,10 @@ import (
 type SdxCloudStorageRequest struct {
 
 	// adls
-	Adls *AdlsCloudStorageV4Parameters `json:"adls,omitempty"`
+	Adls *AdlsCloudStorageV1Parameters `json:"adls,omitempty"`
 
 	// adls gen2
-	AdlsGen2 *AdlsGen2CloudStorageV4Parameters `json:"adlsGen2,omitempty"`
+	AdlsGen2 *AdlsGen2CloudStorageV1Parameters `json:"adlsGen2,omitempty"`
 
 	// base location
 	BaseLocation string `json:"baseLocation,omitempty"`
@@ -33,13 +33,13 @@ type SdxCloudStorageRequest struct {
 	FileSystemType string `json:"fileSystemType,omitempty"`
 
 	// gcs
-	Gcs *GcsCloudStorageV4Parameters `json:"gcs,omitempty"`
+	Gcs *GcsCloudStorageV1Parameters `json:"gcs,omitempty"`
 
 	// s3
-	S3 *S3CloudStorageV4Parameters `json:"s3,omitempty"`
+	S3 *S3CloudStorageV1Parameters `json:"s3,omitempty"`
 
 	// wasb
-	Wasb *WasbCloudStorageV4Parameters `json:"wasb,omitempty"`
+	Wasb *WasbCloudStorageV1Parameters `json:"wasb,omitempty"`
 }
 
 // Validate validates this sdx cloud storage request
