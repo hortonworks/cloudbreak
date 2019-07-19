@@ -4,7 +4,7 @@
     "validateBlueprint": false
   },
   "customDomain": {
-    "domainName": "sdx",
+    "domainName": "cloudera.site",
     "hostgroupNameAsHostname": true
   },
   "instanceGroups": [
