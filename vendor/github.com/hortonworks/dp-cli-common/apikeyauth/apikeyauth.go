@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -73,11 +74,20 @@ func altusAPIKeyAuth(baseAPIPath, accessKeyID, privateKey string) runtime.Client
 }
 
 func resourcePath(baseAPIPath, path, query string) string {
-	base := strings.ReplaceAll(baseAPIPath+path, "//", "/")
+	base := escapePath(strings.ReplaceAll(baseAPIPath+path, "//", "/"))
 	if len(query) > 0 {
 		return fmt.Sprintf("%s?%s", base, query)
 	}
 	return base
+}
+
+func escapePath(path string) string {
+	spl := strings.Split(path, "/")
+	encoded := []string{}
+	for _, e := range spl {
+		encoded = append(encoded, url.PathEscape(e))
+	}
+	return strings.Join(encoded, "/")
 }
 
 func authHeader(accessKeyID, privateKey, method, path, date string) string {
