@@ -102,14 +102,16 @@ public class StackRequestManifester {
     }
 
     private void setupYarnDetails(DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
-        if (environment.getNetwork() == null
-                || environment.getNetwork().getYarn() == null
-                || environment.getNetwork().getYarn().getQueue() == null) {
-            throw new BadRequestException("There is no queue defined in your environment, please create a new yarn environment with queue");
-        } else {
-            YarnStackV4Parameters yarnStackV4Parameters = new YarnStackV4Parameters();
-            yarnStackV4Parameters.setYarnQueue(environment.getNetwork().getYarn().getQueue());
-            stackRequest.setYarn(yarnStackV4Parameters);
+        if (stackRequest.getYarn() == null || stackRequest.getYarn().getYarnQueue() == null) {
+            if (environment.getNetwork() == null
+                    || environment.getNetwork().getYarn() == null
+                    || environment.getNetwork().getYarn().getQueue() == null) {
+                throw new BadRequestException("There is no queue defined in your environment, please create a new yarn environment with queue");
+            } else {
+                YarnStackV4Parameters yarnStackV4Parameters = new YarnStackV4Parameters();
+                yarnStackV4Parameters.setYarnQueue(environment.getNetwork().getYarn().getQueue());
+                stackRequest.setYarn(yarnStackV4Parameters);
+            }
         }
     }
 
