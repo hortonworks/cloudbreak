@@ -3,6 +3,8 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -41,9 +43,10 @@ public class DistroXClusterToClusterConverter {
 
     public ClusterV4Request convert(DistroXClusterV1Request source) {
         ClusterV4Request response = new ClusterV4Request();
-        if (!isEmpty(source.getExposedServices())) {
-            response.setGateway(gatewayConverter.convert(source.getExposedServices()));
+        if (isEmpty(source.getExposedServices())) {
+            source.setExposedServices(List.of("ALL"));
         }
+        response.setGateway(gatewayConverter.convert(source.getExposedServices()));
         response.setAmbari(null);
         response.setName(null);
         response.setDatabases(source.getDatabases());
