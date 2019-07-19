@@ -37,9 +37,17 @@ public class FluentConfigView {
 
     private final Integer partitionIntervalMin;
 
+    private final String azureStorageAccount;
+
+    private final String azureContainer;
+
+    private final String azureInstanceMsi;
+
+    private final String azureStorageAccessKey;
+
     private final String s3LogArchiveBucketName;
 
-    private final String s3LogFolderName;
+    private final String logFolderName;
 
     private final Map<String, Object> overrideAttributes;
 
@@ -53,8 +61,12 @@ public class FluentConfigView {
         this.platform = builder.platform;
         this.providerPrefix = builder.providerPrefix;
         this.partitionIntervalMin = builder.partitionIntervalMin;
+        this.logFolderName = builder.logFolderName;
         this.s3LogArchiveBucketName = builder.s3LogArchiveBucketName;
-        this.s3LogFolderName = builder.s3LogFolderName;
+        this.azureContainer = builder.azureContainer;
+        this.azureStorageAccount = builder.azureStorageAccount;
+        this.azureInstanceMsi = builder.azureInstanceMsi;
+        this.azureStorageAccessKey = builder.azureStorageAccessKey;
         this.overrideAttributes = builder.overrideAttributes;
     }
 
@@ -90,12 +102,28 @@ public class FluentConfigView {
         return partitionIntervalMin;
     }
 
+    public String getLogFolderName() {
+        return logFolderName;
+    }
+
     public String getS3LogArchiveBucketName() {
         return s3LogArchiveBucketName;
     }
 
-    public String getS3LogFolderName() {
-        return s3LogFolderName;
+    public String getAzureStorageAccount() {
+        return azureStorageAccount;
+    }
+
+    public String getAzureContainer() {
+        return azureContainer;
+    }
+
+    public String getAzureInstanceMsi() {
+        return azureInstanceMsi;
+    }
+
+    public String getAzureStorageAccessKey() {
+        return azureStorageAccessKey;
     }
 
     public Boolean isEnabled() {
@@ -117,8 +145,12 @@ public class FluentConfigView {
         map.put("agentLogFolderPrefix", ObjectUtils.defaultIfNull(this.agentLogFolderPrefix, LOG_FOLDER_DEFAULT));
         map.put("serviceLogFolderPrefix", ObjectUtils.defaultIfNull(this.serviceLogFolderPrefix, LOG_FOLDER_DEFAULT));
         map.put("partitionIntervalMin", ObjectUtils.defaultIfNull(this.partitionIntervalMin, PARTITION_INTERVAL_DEFAULT));
+        map.put("logFolderName", ObjectUtils.defaultIfNull(this.logFolderName, EMPTY_CONFIG_DEFAULT));
         map.put("s3LogArchiveBucketName", ObjectUtils.defaultIfNull(this.s3LogArchiveBucketName, EMPTY_CONFIG_DEFAULT));
-        map.put("s3LogFolderName", ObjectUtils.defaultIfNull(this.s3LogFolderName, EMPTY_CONFIG_DEFAULT));
+        map.put("azureContainer", ObjectUtils.defaultIfNull(this.azureContainer, EMPTY_CONFIG_DEFAULT));
+        map.put("azureStorageAccount", ObjectUtils.defaultIfNull(this.azureStorageAccount, EMPTY_CONFIG_DEFAULT));
+        map.put("azureStorageAccessKey", ObjectUtils.defaultIfNull(this.azureStorageAccessKey, EMPTY_CONFIG_DEFAULT));
+        map.put("azureInstanceMsi", ObjectUtils.defaultIfNull(this.azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
         return map;
     }
 
@@ -142,9 +174,17 @@ public class FluentConfigView {
 
         private Integer partitionIntervalMin;
 
+        private String logFolderName;
+
         private String s3LogArchiveBucketName;
 
-        private String s3LogFolderName;
+        private String azureStorageAccount;
+
+        private String azureContainer;
+
+        private String azureInstanceMsi;
+
+        private String azureStorageAccessKey;
 
         private Map<String, Object> overrideAttributes;
 
@@ -197,13 +237,33 @@ public class FluentConfigView {
             return this;
         }
 
+        public Builder withLogFolderName(String logFolderName) {
+            this.logFolderName = logFolderName;
+            return this;
+        }
+
         public Builder withS3LogArchiveBucketName(String s3LogArchiveBucketName) {
             this.s3LogArchiveBucketName = s3LogArchiveBucketName;
             return this;
         }
 
-        public Builder withS3LogFolderName(String s3LogFolderName) {
-            this.s3LogFolderName = s3LogFolderName;
+        public Builder withAzureInstanceMsi(String azureInstanceMsi) {
+            this.azureInstanceMsi = azureInstanceMsi;
+            return this;
+        }
+
+        public Builder withAzureStorageAccount(String azureStorageAccount) {
+            this.azureStorageAccount = azureStorageAccount;
+            return this;
+        }
+
+        public Builder withAzureContainer(String azureContainer) {
+            this.azureContainer = azureContainer;
+            return this;
+        }
+
+        public Builder withAzureStorageAccessKey(String azureStorageAccessKey) {
+            this.azureStorageAccessKey = azureStorageAccessKey;
             return this;
         }
 

@@ -5,7 +5,7 @@
   <store ignore_error>
     @type s3
     s3_bucket {{fluent.s3LogArchiveBucketName}}
-    path "{{fluent.s3LogFolderName}}/%Y-%m-%d/%H/\${tag[1]}-#{Socket.gethostname}-%M"
+    path "{{fluent.logFolderName}}/%Y-%m-%d/%H/\${tag[1]}-#{Socket.gethostname}-%M"
     s3_object_key_format %{path}-%{index}.%{file_extension}
 
     <buffer tag,time>
@@ -25,8 +25,67 @@
   <store ignore_error>
     @type s3
     s3_bucket {{fluent.s3LogArchiveBucketName}}
-    path "{{fluent.s3LogFolderName}}/%Y-%m-%d/%H/CM_COMMAND-\${tag[6]}-\${tag[1]}-#{Socket.gethostname}-%M"
+    path "{{fluent.logFolderName}}/%Y-%m-%d/%H/CM_COMMAND-\${tag[6]}-\${tag[1]}-#{Socket.gethostname}-%M"
     s3_object_key_format %{path}-%{index}.%{file_extension}
+
+    <buffer tag,time>
+      @type file
+      path /var/log/td-agent/{{fluent.providerPrefix}}CM_COMMAND
+      timekey {{fluent.partitionIntervalMin}}m
+      timekey_wait 0s
+      chunk_limit_size 256m
+      flush_at_shutdown true
+    </buffer>
+    utc
+    format single_value
+  </store>
+</match>
+{% elif fluent.providerPrefix == "wasb" %}
+<match {{fluent.providerPrefix}}.*>
+  @type copy
+  <store ignore_error>
+    @type azurestorage
+
+    azure_storage_account    {{fluent.azureStorageAccount}}
+    azure_container          {{fluent.azureContainer}}
+{% if fluent.azureInstanceMsi is defined and fluent.azureInstanceMsi is not none and fluent.azureInstanceMsi %}
+    azure_instance_msi       {{fluent.azureInstanceMsi}}
+{% else %}
+    azure_storage_access_key {{fluent.azureStorageAccessKey}}
+{% endif %}
+    azure_storage_type       blob
+    store_as                 gzip
+    path                     "{{fluent.logFolderName}}/%Y-%m-%d/%H/\${tag[1]}-#{Socket.gethostname}-%M"
+    azure_object_key_format  %{path}-%{index}.%{file_extension}
+
+    <buffer tag,time>
+      @type file
+      path /var/log/td-agent/{{fluent.providerPrefix}}
+      timekey {{fluent.partitionIntervalMin}}m
+      timekey_wait 0s
+      chunk_limit_size 256m
+      flush_at_shutdown true
+    </buffer>
+    utc
+    format single_value
+  </store>
+</match>
+<match {{fluent.providerPrefix}}CM_COMMAND.**>
+  @type copy
+  <store ignore_error>
+    @type azurestorage
+
+    azure_storage_account    {{fluent.azureStorageAccount}}
+    azure_container          {{fluent.azureContainer}}
+{% if fluent.azureInstanceMsi is defined and fluent.azureInstanceMsi is not none and fluent.azureInstanceMsi %}
+    azure_instance_msi       {{fluent.azureInstanceMsi}}
+{% else %}
+    azure_storage_access_key {{fluent.azureStorageAccessKey}}
+{% endif %}
+    azure_storage_type       blob
+    store_as                 gzip
+    path                     "{{fluent.logFolderName}}/%Y-%m-%d/%H/CM_COMMAND-\${tag[6]}-\${tag[1]}-#{Socket.gethostname}-%M"
+    azure_object_key_format  %{path}-%{index}.%{file_extension}
 
     <buffer tag,time>
       @type file

@@ -88,6 +88,7 @@ public class EnvironmentModificationService {
     private EnvironmentDto edit(EnvironmentEditDto editDto, Environment env) {
         editDescriptionIfChanged(env, editDto);
         editLocationAndRegionsIfChanged(env, editDto);
+        editTelemetryIfChanged(env, editDto);
         editNetworkIfChanged(env, editDto);
         editAuthenticationIfChanged(editDto, env);
         editSecurityAccessIfChanged(editDto, env);
@@ -200,6 +201,12 @@ public class EnvironmentModificationService {
         SecurityAccessDto securityAccessDto = editDto.getSecurityAccess();
         if (securityAccessDto != null) {
             environmentService.setSecurityAccess(environment, securityAccessDto);
+        }
+    }
+
+    private void editTelemetryIfChanged(Environment environment, EnvironmentEditDto editDto) {
+        if (editDto.getTelemetry() != null) {
+            environment.setTelemetry(editDto.getTelemetry());
         }
     }
 }
