@@ -1259,6 +1259,13 @@ var (
 			Usage: "id for the operation",
 		},
 	}
+	FlWithExternalDatabaseOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-external-database",
+			Usage: "creates and external database server on the cloud provider",
+		},
+	}
 )
 
 type RequiredFlag struct {

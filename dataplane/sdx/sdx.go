@@ -3,6 +3,9 @@ package sdx
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/hortonworks/cb-cli/dataplane/api-sdx/client/internalsdx"
 	"github.com/hortonworks/cb-cli/dataplane/api-sdx/client/sdx"
 	sdxModel "github.com/hortonworks/cb-cli/dataplane/api-sdx/model"
@@ -13,8 +16,6 @@ import (
 	commonutils "github.com/hortonworks/dp-cli-common/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
-	"os"
-	"time"
 )
 
 var sdxClusterHeader = []string{"Name"}
@@ -70,17 +71,18 @@ func CreateSdx(c *cli.Context) {
 	clusterShape := c.String(fl.FlClusterShape.Name)
 	baseLocation := c.String(fl.FlCloudStorageBaseLocationOptional.Name)
 	instanceProfile := c.String(fl.FlCloudStorageInstanceProfileOptional.Name)
+	withExternalDatabase := c.Bool(fl.FlWithExternalDatabaseOptional.Name)
 
 	inputJson := assembleStackRequest(c)
 
 	if inputJson != nil {
-		createInternalSdx(envName, inputJson, c, name)
+		createInternalSdx(envName, inputJson, c, name, withExternalDatabase)
 	} else {
-		createSdx(clusterShape, envName, c, name, baseLocation, instanceProfile)
+		createSdx(clusterShape, envName, c, name, baseLocation, instanceProfile, withExternalDatabase)
 	}
 }
 
-func createSdx(clusterShape string, envName string, c *cli.Context, name string, cloudStorageBaseLocation string, instanceProfile string) {
+func createSdx(clusterShape string, envName string, c *cli.Context, name string, cloudStorageBaseLocation string, instanceProfile string, withExternalDatabase bool) {
 	s3CloudStorage := &sdxModel.S3CloudStorageV1Parameters{
 		InstanceProfile: &instanceProfile,
 	}
@@ -95,11 +97,16 @@ func createSdx(clusterShape string, envName string, c *cli.Context, name string,
 		Wasb:           nil,
 	}
 
+	externalDatabase := &sdxModel.SdxDatabaseRequest{
+		Create: &withExternalDatabase,
+	}
+
 	sdxRequest := &sdxModel.SdxClusterRequest{
-		ClusterShape: &clusterShape,
-		Environment:  &envName,
-		Tags:         nil,
-		CloudStorage: cloudStorage,
+		ClusterShape:     &clusterShape,
+		Environment:      &envName,
+		Tags:             nil,
+		CloudStorage:     cloudStorage,
+		ExternalDatabase: externalDatabase,
 	}
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
 	resp, err := sdxClient.Sdx.CreateSdx(sdx.NewCreateSdxParams().WithName(name).WithBody(sdxRequest))
@@ -110,12 +117,16 @@ func createSdx(clusterShape string, envName string, c *cli.Context, name string,
 	log.Infof("[createSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.Name)
 }
 
-func createInternalSdx(envName string, inputJson *sdxModel.StackV4Request, c *cli.Context, name string) {
+func createInternalSdx(envName string, inputJson *sdxModel.StackV4Request, c *cli.Context, name string, withExternalDatabase bool) {
+	externalDatabase := &sdxModel.SdxDatabaseRequest{
+		Create: &withExternalDatabase,
+	}
 	sdxInternalRequest := &sdxModel.SdxInternalClusterRequest{
-		ClusterShape:   &(&types.S{S: sdxModel.SdxClusterRequestClusterShapeCUSTOM}).S,
-		Environment:    &envName,
-		StackV4Request: inputJson,
-		Tags:           nil,
+		ClusterShape:     &(&types.S{S: sdxModel.SdxClusterRequestClusterShapeCUSTOM}).S,
+		Environment:      &envName,
+		StackV4Request:   inputJson,
+		Tags:             nil,
+		ExternalDatabase: externalDatabase,
 	}
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
 	resp, err := sdxClient.Internalsdx.CreateInternalSdx(internalsdx.NewCreateInternalSdxParams().WithName(name).WithBody(sdxInternalRequest))
