@@ -31,6 +31,7 @@ public class ClusterTemplateLoaderService {
     public boolean isDefaultClusterTemplateUpdateNecessaryForUser(Collection<ClusterTemplate> clusterTemplates) {
         Map<String, String> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplateRequests();
         List<ClusterTemplate> defaultTemplatesInDb = filterTemplatesForDefaults(clusterTemplates);
+        LOGGER.info("Merge default templates in db ({}) with cached templates {}", defaultTemplatesInDb.size(), defaultTemplates.size());
         if (defaultTemplatesInDb.size() < defaultTemplates.size()) {
             LOGGER.debug("Default templates in DB [{}] less than default templates size [{}]", defaultTemplatesInDb.size(), defaultTemplates.size());
             return true;
