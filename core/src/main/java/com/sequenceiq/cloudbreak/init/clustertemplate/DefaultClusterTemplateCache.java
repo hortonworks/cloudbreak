@@ -55,13 +55,19 @@ public class DefaultClusterTemplateCache {
     private void loadByResourceDir() {
         List<String> files;
         try {
-            files = FileReaderUtils.getFileNamesRecursivelyFromClasspathByDirPath(defaultTemplateDir, (dir, name) -> name.endsWith(".json"));
+            files = FileReaderUtils.getFileNamesRecursivelyFromClasspathByDirPath(defaultTemplateDir, (dir, name) -> {
+                boolean ret = name.endsWith(".json");
+                if (!ret) {
+                    LOGGER.info("The {} does not end with .json", name);
+                }
+                return ret;
+            });
         } catch (IOException e) {
-            LOGGER.warn(e.getMessage());
+            LOGGER.warn("Failed to load files from: {}, original msg: {}", defaultTemplateDir, e.getMessage(), e);
             return;
         }
         if (!files.isEmpty()) {
-            LOGGER.debug("Default clustertemplate to load into cache by property: {}", String.join(", ", files));
+            LOGGER.debug("Default clustertemplate to load into cache by resource dir: {}", String.join(", ", files));
             loadByNames(files);
         } else {
             LOGGER.debug("No default cluster template");
