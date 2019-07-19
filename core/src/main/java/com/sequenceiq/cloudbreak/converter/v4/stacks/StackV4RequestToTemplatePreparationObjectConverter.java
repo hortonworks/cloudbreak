@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -132,7 +133,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
             User user = userService.getOrCreate(cloudbreakUser);
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-            Credential credential = getCredential(source);
+            DetailedEnvironmentResponse environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
+            Credential credential = getCredential(source, environment);
             LdapView ldapConfig = getLdapConfig(source);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential.getAttributes());
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
@@ -175,8 +177,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     throw new CloudbreakServiceException("Cannot collect shared service resources from datalake!");
                 }
             }
-            // TODO: add feature switch here for mocked identity mapping
-            if (source.getCloudPlatform() == CloudPlatform.AWS) {
+            if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK && source.getCloudPlatform() == CloudPlatform.AWS) {
                 Map<String, String> groupMapping = awsIdentityMappingService.getIdentityGroupMapping(credential);
                 builder.withIdentityGroupMapping(groupMapping);
             }
@@ -196,8 +197,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
         }
     }
 
-    private Credential getCredential(StackV4Request source) {
-        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
+    private Credential getCredential(StackV4Request source, DetailedEnvironmentResponse environment) {
         return credentialConverter.convert(environment.getCredential());
     }
 

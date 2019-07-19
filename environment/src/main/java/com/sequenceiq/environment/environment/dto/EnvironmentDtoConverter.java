@@ -45,7 +45,8 @@ public class EnvironmentDtoConverter {
                 .withCreated(environment.getCreated())
                 .withStatusReason(environment.getStatusReason())
                 .withTunnel(environment.getTunnel())
-                .withSecurityAccess(environmentToSecurityAccessDto(environment));
+                .withSecurityAccess(environmentToSecurityAccessDto(environment))
+                .withIdBrokerMappingSource(environment.getIdBrokerMappingSource());
         if (environment.getNetwork() != null) {
             builder.withNetwork(environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()))
                     .convertToDto(environment.getNetwork()));
@@ -70,6 +71,7 @@ public class EnvironmentDtoConverter {
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
         environment.setCreateFreeIpa(creationDto.isCreateFreeIpa());
         environment.setTunnel(creationDto.getTunnel());
+        environment.setIdBrokerMappingSource(creationDto.getIdBrokerMappingSource());
         return environment;
     }
 

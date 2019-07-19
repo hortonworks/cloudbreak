@@ -8,6 +8,7 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -36,6 +37,9 @@ public class EnvironmentEditRequest {
 
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
     private @Valid SecurityAccessRequest securityAccess;
+
+    @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
+    private IdBrokerMappingSource idBrokerMappingSource;
 
     public String getDescription() {
         return description;
@@ -91,5 +95,13 @@ public class EnvironmentEditRequest {
 
     public void setSecurityAccess(SecurityAccessRequest securityAccess) {
         this.securityAccess = securityAccess;
+    }
+
+    public IdBrokerMappingSource getIdBrokerMappingSource() {
+        return idBrokerMappingSource;
+    }
+
+    public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
+        this.idBrokerMappingSource = idBrokerMappingSource;
     }
 }

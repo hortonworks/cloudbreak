@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -114,6 +115,10 @@ public class Environment implements AuthResource {
 
     @Enumerated(EnumType.STRING)
     private Tunnel tunnel;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "idbroker_mapping_source")
+    private IdBrokerMappingSource idBrokerMappingSource;
 
     public Environment() {
         regions = new Json(new HashSet<Region>());
@@ -340,5 +345,13 @@ public class Environment implements AuthResource {
 
     public void setTunnel(Tunnel tunnel) {
         this.tunnel = tunnel;
+    }
+
+    public IdBrokerMappingSource getIdBrokerMappingSource() {
+        return idBrokerMappingSource;
+    }
+
+    public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
+        this.idBrokerMappingSource = idBrokerMappingSource;
     }
 }
