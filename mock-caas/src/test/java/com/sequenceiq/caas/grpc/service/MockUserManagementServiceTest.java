@@ -50,4 +50,11 @@ public class MockUserManagementServiceTest {
         Assert.assertEquals(EMPTY_LICENSE, actual);
     }
 
+    @Test
+    public void testCreateWorkloadUsername() {
+        String username = "&*foO$_#Bar22@baz13.com";
+        String expected = "foo_bar22";
+
+        Assert.assertEquals(expected, underTest.sanitizeWorkloadUsername(username));
+    }
 }
