@@ -179,7 +179,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             }
             if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK && source.getCloudPlatform() == CloudPlatform.AWS) {
                 Map<String, String> groupMapping = awsIdentityMappingService.getIdentityGroupMapping(credential);
+                Map<String, String> userMapping = awsIdentityMappingService.getIdentityUserMapping(credential);
                 builder.withIdentityGroupMapping(groupMapping);
+                builder.withIdentityUserMapping(userMapping);
             }
 
             return builder.build();
