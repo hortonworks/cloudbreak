@@ -1,0 +1,132 @@
+{
+  "description": "CDP 1.0 Operational Database with Apache HBase",
+  "blueprint": {
+    "cdhVersion": "7.0.0",
+    "displayName": "opdb",
+    "services": [
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hdfs",
+        "serviceType": "HDFS",
+        "roleConfigGroups": [
+          {
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hbase",
+        "serviceType": "HBASE",
+        "roleConfigGroups": [
+          {
+            "refName": "hbase-MASTER-BASE",
+            "roleType": "MASTER",
+            "base": true
+          },
+          {
+            "refName": "hbase-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hbase-REGIONSERVER-BASE",
+            "roleType": "REGIONSERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "knox",
+        "serviceType": "KNOX",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "knox-KNOX-GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY",
+            "configs": [
+              {
+                "name": "gateway_dispatch_whitelist",
+                "value": "^https?:\\/\\/.+\\.cloudera\\.site:[0-9]+.*$"
+              },
+              {
+                "name": "gateway_knox_admin_groups",
+                "value": "admins"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "master",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "knox-KNOX-GATEWAY-BASE",
+          "hdfs-SECONDARYNAMENODE-BASE",
+          "zookeeper-SERVER-BASE",
+          "hbase-MASTER-BASE",
+          "hbase-GATEWAY-BASE",
+          "hdfs-GATEWAY-BASE"
+        ]
+      },
+      {
+        "refName": "namenode",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hdfs-NAMENODE-BASE",
+          "zookeeper-SERVER-BASE",
+          "hbase-GATEWAY-BASE",
+          "hdfs-GATEWAY-BASE"
+        ]
+      },
+      {
+        "refName": "hbaseleader",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "zookeeper-SERVER-BASE",
+          "hbase-MASTER-BASE",
+          "hbase-GATEWAY-BASE",
+          "hdfs-GATEWAY-BASE"
+        ]
+      },
+      {
+        "refName": "worker",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "hdfs-DATANODE-BASE",
+          "hbase-REGIONSERVER-BASE",
+          "hbase-GATEWAY-BASE",
+          "hdfs-GATEWAY-BASE"
+        ]
+      }
+    ]
+  }
+}
