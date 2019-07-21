@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.logger;
 
-import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
+import com.sequenceiq.cloudbreak.logger.format.LayoutFormat;
+import com.sequenceiq.cloudbreak.logger.format.LayoutFormatFactory;
 
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -8,6 +9,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 public class MaskingPatternLayout extends PatternLayout {
 
     private String loggerNameFilter;
+
+    private final LayoutFormat layoutFormat = LayoutFormatFactory.getLayoutFormat();
 
     public String getLoggerNameFilter() {
         return loggerNameFilter;
@@ -21,10 +24,6 @@ public class MaskingPatternLayout extends PatternLayout {
 
     @Override
     public String doLayout(ILoggingEvent event) {
-        String message = super.doLayout(event);
-        if (loggerNameFilter != null && event.getLoggerName().startsWith(loggerNameFilter)) {
-            message = anonymize(message);
-        }
-        return message;
+        return layoutFormat.format(event, super.doLayout(event), loggerNameFilter);
     }
 }

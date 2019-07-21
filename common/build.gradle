@@ -20,6 +20,7 @@ dependencies {
   compile project(':common-model')
   
   compile group: 'org.slf4j',                             name: 'slf4j-api',                      version: slf4jApiVersion
+  compile group: 'ch.qos.logback.contrib',                name: 'logback-json-classic',           version: logbackJsonClassicVersion
   compile group: 'io.micrometer',                         name: 'micrometer-core',                version: micrometerVersion
   compile group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
   compile group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
