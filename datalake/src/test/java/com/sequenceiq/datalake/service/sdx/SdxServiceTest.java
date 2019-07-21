@@ -40,8 +40,8 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.client.EnvironmentServiceClient;
-import com.sequenceiq.environment.client.EnvironmentServiceEndpoints;
+import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
+import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
@@ -60,10 +60,10 @@ public class SdxServiceTest {
     private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Mock
-    private EnvironmentServiceClient environmentServiceClient;
+    private EnvironmentServiceCrnClient environmentServiceCrnClient;
 
     @Mock
-    private EnvironmentServiceEndpoints environmentServiceEndpoints;
+    private EnvironmentServiceCrnEndpoints environmentServiceCrnEndpoints;
 
     @Mock
     private EnvironmentEndpoint environmentEndpoint;
@@ -174,8 +174,8 @@ public class SdxServiceTest {
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId(UUID.randomUUID().toString())
                 .build().toString());
-        when(environmentServiceClient.withCrn(anyString())).thenReturn(environmentServiceEndpoints);
-        when(environmentServiceEndpoints.environmentV1Endpoint()).thenReturn(environmentEndpoint);
+        when(environmentServiceCrnClient.withCrn(anyString())).thenReturn(environmentServiceCrnEndpoints);
+        when(environmentServiceCrnEndpoints.environmentV1Endpoint()).thenReturn(environmentEndpoint);
         when(environmentEndpoint.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
     }
 

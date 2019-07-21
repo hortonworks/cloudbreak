@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.client;
 
-public abstract class AbstractUserCrnServiceClientBuilder {
+public abstract class AbstractUserCrnServiceClientBuilder<T extends AbstractUserCrnServiceClient> {
     private final String serviceAddress;
 
     private boolean debug;
@@ -13,24 +13,24 @@ public abstract class AbstractUserCrnServiceClientBuilder {
         this.serviceAddress = serviceAddress;
     }
 
-    public AbstractUserCrnServiceClientBuilder withDebug(boolean debug) {
+    public AbstractUserCrnServiceClientBuilder<T> withDebug(boolean debug) {
         this.debug = debug;
         return this;
     }
 
-    public AbstractUserCrnServiceClientBuilder withCertificateValidation(boolean secure) {
+    public AbstractUserCrnServiceClientBuilder<T> withCertificateValidation(boolean secure) {
         this.secure = secure;
         return this;
     }
 
-    public AbstractUserCrnServiceClientBuilder withIgnorePreValidation(boolean ignorePreValidation) {
+    public AbstractUserCrnServiceClientBuilder<T> withIgnorePreValidation(boolean ignorePreValidation) {
         this.ignorePreValidation = ignorePreValidation;
         return this;
     }
 
-    public <T extends AbstractUserCrnServiceClient> T build() {
+    public T build() {
         return createUserCrnClient(serviceAddress, new ConfigKey(secure, debug, ignorePreValidation));
     }
 
-    protected abstract <T extends AbstractUserCrnServiceClient> T createUserCrnClient(String serviceAddress, ConfigKey configKey);
+    protected abstract T createUserCrnClient(String serviceAddress, ConfigKey configKey);
 }

@@ -22,16 +22,17 @@ public class FreeIPAServer {
 
     private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
-    private static final int FREEIPA_PORT = 8090;
-
     @Value("${integrationtest.freeipa.server}")
     private String server;
 
     @Value("${freeipa.server.contextPath:/freeipa}")
     private String freeIpaRootContextPath;
 
-    @Value("${integrationtest.user.crn:}")
-    private String userCrn;
+    @Value("${integrationtest.user.accesskey:}")
+    private String accessKey;
+
+    @Value("${integrationtest.user.secretkey:}")
+    private String secretKey;
 
     @Inject
     private TestParameter testParameter;
@@ -48,10 +49,12 @@ public class FreeIPAServer {
 
         checkNonEmpty("integrationtest.freeipa.server", server);
         checkNonEmpty("freeipa.server.contextPath", freeIpaRootContextPath);
-        checkNonEmpty("integrationtest.user.crn", userCrn);
+        checkNonEmpty("integrationtest.user.accesskey", accessKey);
+        checkNonEmpty("integrationtest.user.privatekey", secretKey);
 
         testParameter.put(FreeIPATest.FREEIPA_SERVER_ROOT, server + freeIpaRootContextPath);
-        testParameter.put(FreeIPATest.USER_CRN, userCrn);
+        testParameter.put(FreeIPATest.ACCESS_KEY, accessKey);
+        testParameter.put(FreeIPATest.SECRET_KEY, secretKey);
     }
 
     private void configureFromCliProfile() throws IOException {
@@ -63,8 +66,9 @@ public class FreeIPAServer {
             return;
         }
 
-        server = serverUtil.calculateServerAddressFromProfile(server, profiles, FREEIPA_PORT);
-        userCrn = serverUtil.calculateCrnsFromProfile(userCrn, profiles);
+        server = serverUtil.calculateServerAddressFromProfile(server, profiles);
+        accessKey = serverUtil.calculateApiKeyFromProfile(accessKey, profiles);
+        secretKey = serverUtil.calculatePrivateKeyFromProfile(secretKey, profiles);
     }
 
     private void checkNonEmpty(String name, String value) {

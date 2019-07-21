@@ -6,9 +6,9 @@ import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 
-public class SdxServiceEndpoints extends AbstractUserCrnServiceEndpoint implements SdxClient {
+public class SdxServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint implements SdxClient {
 
-    protected SdxServiceEndpoints(WebTarget webTarget, String crn) {
+    protected SdxServiceCrnEndpoints(WebTarget webTarget, String crn) {
         super(webTarget, crn);
     }
 

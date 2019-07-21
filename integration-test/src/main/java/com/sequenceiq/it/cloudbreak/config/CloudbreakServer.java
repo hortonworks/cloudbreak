@@ -22,16 +22,17 @@ public class CloudbreakServer {
 
     private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
-    private static final int CLOUDBREAK_PORT = 9091;
-
     @Value("${integrationtest.cloudbreak.server}")
     private String server;
 
     @Value("${server.contextPath:/cb}")
     private String cbRootContextPath;
 
-    @Value("${integrationtest.user.crn:}")
-    private String userCrn;
+    @Value("${integrationtest.user.accesskey:}")
+    private String accessKey;
+
+    @Value("${integrationtest.user.secretkey:}")
+    private String secretKey;
 
     @Value("${integrationtest.dp.profile:}")
     private String profile;
@@ -52,10 +53,12 @@ public class CloudbreakServer {
 
         checkNonEmpty("integrationtest.cloudbreak.server", server);
         checkNonEmpty("server.contextPath", cbRootContextPath);
-        checkNonEmpty("integrationtest.user.crn", userCrn);
+        checkNonEmpty("integrationtest.user.accesskey", accessKey);
+        checkNonEmpty("integrationtest.user.privatekey", secretKey);
 
         testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
-        testParameter.put(CloudbreakTest.USER_CRN, userCrn);
+        testParameter.put(CloudbreakTest.ACCESS_KEY, accessKey);
+        testParameter.put(CloudbreakTest.SECRET_KEY, secretKey);
     }
 
     private void configureFromCliProfile() throws IOException {
@@ -67,8 +70,9 @@ public class CloudbreakServer {
             return;
         }
 
-        server = serverUtil.calculateServerAddressFromProfile(server, profiles, CLOUDBREAK_PORT);
-        userCrn = serverUtil.calculateCrnsFromProfile(userCrn, profiles);
+        server = serverUtil.calculateServerAddressFromProfile(server, profiles);
+        accessKey = serverUtil.calculateApiKeyFromProfile(accessKey, profiles);
+        secretKey = serverUtil.calculatePrivateKeyFromProfile(secretKey, profiles);
     }
 
     private void checkNonEmpty(String name, String value) {

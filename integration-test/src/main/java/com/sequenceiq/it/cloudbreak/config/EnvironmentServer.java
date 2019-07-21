@@ -22,16 +22,17 @@ public class EnvironmentServer {
 
     private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
-    private static final int ENVIRONMENT_PORT = 8088;
-
     @Value("${integrationtest.environment.server}")
     private String server;
 
     @Value("${environment.server.contextPath:/environmentservice}")
     private String environmentRootContextPath;
 
-    @Value("${integrationtest.user.crn:}")
-    private String userCrn;
+    @Value("${integrationtest.user.accesskey:}")
+    private String accessKey;
+
+    @Value("${integrationtest.user.secretkey:}")
+    private String secretKey;
 
     @Inject
     private TestParameter testParameter;
@@ -48,10 +49,12 @@ public class EnvironmentServer {
 
         checkNonEmpty("integrationtest.environment.server", server);
         checkNonEmpty("environment.server.contextPath", environmentRootContextPath);
-        checkNonEmpty("integrationtest.user.crn", userCrn);
+        checkNonEmpty("integrationtest.user.accesskey", accessKey);
+        checkNonEmpty("integrationtest.user.privatekey", secretKey);
 
         testParameter.put(EnvironmentTest.ENVIRONMENT_SERVER_ROOT, server + environmentRootContextPath);
-        testParameter.put(EnvironmentTest.USER_CRN, userCrn);
+        testParameter.put(EnvironmentTest.ACCESS_KEY, accessKey);
+        testParameter.put(EnvironmentTest.SECRET_KEY, secretKey);
     }
 
     private void configureFromCliProfile() throws IOException {
@@ -63,8 +66,9 @@ public class EnvironmentServer {
             return;
         }
 
-        server = serverUtil.calculateServerAddressFromProfile(server, profiles, ENVIRONMENT_PORT);
-        userCrn = serverUtil.calculateCrnsFromProfile(userCrn, profiles);
+        server = serverUtil.calculateServerAddressFromProfile(server, profiles);
+        accessKey = serverUtil.calculateApiKeyFromProfile(accessKey, profiles);
+        secretKey = serverUtil.calculatePrivateKeyFromProfile(secretKey, profiles);
     }
 
     private void checkNonEmpty(String name, String value) {

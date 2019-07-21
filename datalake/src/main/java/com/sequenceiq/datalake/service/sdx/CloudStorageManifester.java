@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSyste
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -27,7 +27,7 @@ public class CloudStorageManifester {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudStorageManifester.class);
 
     @Inject
-    private CloudbreakUserCrnClient cloudbreakClient;
+    private CloudbreakServiceUserCrnClient cloudbreakClient;
 
     public CloudStorageV4Request getCloudStorageConfig(String cloudPlatform, String blueprint, SdxCluster sdxCluster, SdxClusterRequest clusterRequest) {
         SdxCloudStorageRequest cloudStorage = clusterRequest.getCloudStorage();

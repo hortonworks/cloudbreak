@@ -297,7 +297,7 @@ public class ServiceEndpointCollector {
 
     private String getHBaseUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp) {
         Gateway gateway = gt.getGateway();
-        String url = String.format("https://%s:%s/%s/%s%s?host=%s?port=%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
+        String url = String.format("https://%s:%s/%s/%s%s?host=%s&port=%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
                 ExposedService.HBASE_UI.getKnoxUrl(), nameNodePrivateIp, ExposedService.HBASE_UI.getCmPort());
         return url;
     }

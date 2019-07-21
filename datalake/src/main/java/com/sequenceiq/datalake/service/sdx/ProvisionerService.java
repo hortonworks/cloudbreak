@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
 import com.sequenceiq.cloudbreak.common.json.ExceptionResult;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -35,7 +35,7 @@ public class ProvisionerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionerService.class);
 
     @Inject
-    private CloudbreakUserCrnClient cloudbreakClient;
+    private CloudbreakServiceUserCrnClient cloudbreakClient;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
