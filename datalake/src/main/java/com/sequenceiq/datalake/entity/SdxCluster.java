@@ -76,6 +76,8 @@ public class SdxCluster implements AccountIdAwareResource {
 
     private Long deleted;
 
+    private Long created;
+
     public Long getId() {
         return id;
     }
@@ -202,5 +204,13 @@ public class SdxCluster implements AccountIdAwareResource {
 
     public void setStackCrn(String stackCrn) {
         this.stackCrn = stackCrn;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }

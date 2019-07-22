@@ -32,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -70,6 +71,9 @@ public class SdxServiceTest {
 
     @Mock
     private StackRequestManifester stackRequestManifester;
+
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private SdxService sdxService;
@@ -147,6 +151,7 @@ public class SdxServiceTest {
             sdxWithId.setId(id);
             return sdxWithId;
         });
+        when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest);
         String sdxName = "test-sdx-cluster";
         SdxCluster createdSdxCluster = sdxService.createSdx(USER_CRN, sdxName, sdxClusterRequest, null);
@@ -161,6 +166,7 @@ public class SdxServiceTest {
         Assertions.assertEquals("hortonworks", capturedSdx.getAccountId());
         Assertions.assertEquals(USER_CRN, capturedSdx.getInitiatorUserCrn());
         Assertions.assertEquals(SdxClusterStatus.REQUESTED, capturedSdx.getStatus());
+        Assertions.assertEquals(1L, capturedSdx.getCreated());
         verify(sdxReactorFlowManager).triggerSdxCreation(id);
     }
 

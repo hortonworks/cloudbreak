@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -58,6 +59,9 @@ public class SdxService {
 
     @Inject
     private CloudStorageManifester cloudStorageManifester;
+
+    @Inject
+    private Clock clock;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<SdxClusterStatus> statuses) {
         List<SdxCluster> sdxClusters = sdxClusterRepository.findByIdInAndStatusIn(resourceIds, statuses);
@@ -125,6 +129,7 @@ public class SdxService {
         sdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
+        sdxCluster.setCreated(clock.getCurrentTimeMillis());
 
         DetailedEnvironmentResponse environment = getEnvironment(userCrn, sdxClusterRequest);
         sdxCluster.setEnvName(environment.getName());

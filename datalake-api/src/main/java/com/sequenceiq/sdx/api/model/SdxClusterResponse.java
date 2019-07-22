@@ -18,6 +18,8 @@ public class SdxClusterResponse {
 
     private String stackCrn;
 
+    private Long created;
+
     public SdxClusterResponse() {
     }
 
@@ -96,5 +98,13 @@ public class SdxClusterResponse {
 
     public void setStackCrn(String stackCrn) {
         this.stackCrn = stackCrn;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }
