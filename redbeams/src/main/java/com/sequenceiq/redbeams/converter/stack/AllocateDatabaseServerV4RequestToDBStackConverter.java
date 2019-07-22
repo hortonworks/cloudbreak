@@ -86,10 +86,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         dbStack.setName(source.getName() != null ? source.getName() : generateDatabaseServerStackName());
         dbStack.setEnvironmentId(source.getEnvironmentCrn());
         setRegion(dbStack, environment);
+
+        updateCloudPlatformAndRelatedFields(source, environment, dbStack);
+
         dbStack.setNetwork(buildNetwork(source.getNetwork(), environment));
-
-        updateCloudPlatformAndRelatedFields(source, dbStack);
-
         if (source.getDatabaseServer() != null) {
             dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), source.getName(), ownerCrn));
         }
@@ -116,12 +116,12 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         dbStack.setRegion(environment.getLocation().getName());
     }
 
-    private void updateCloudPlatformAndRelatedFields(AllocateDatabaseServerV4Request source, DBStack dbStack) {
+    private void updateCloudPlatformAndRelatedFields(AllocateDatabaseServerV4Request source,
+        DetailedEnvironmentResponse environment, DBStack dbStack) {
         String cloudPlatform;
         if (source.getCloudPlatform() != null) {
             cloudPlatform = source.getCloudPlatform().name();
         } else {
-            DetailedEnvironmentResponse environment = environmentService.getByCrn(source.getEnvironmentCrn());
             cloudPlatform = environment.getCloudPlatform();
         }
         LOGGER.debug("Cloud platform is {}", cloudPlatform);
