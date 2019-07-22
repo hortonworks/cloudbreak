@@ -4,6 +4,9 @@ public class ExceptionResult {
 
     private String message;
 
+    public ExceptionResult() {
+    }
+
     public ExceptionResult(String message) {
         this.message = message;
     }
