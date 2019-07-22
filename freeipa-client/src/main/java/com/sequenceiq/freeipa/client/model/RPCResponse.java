@@ -2,6 +2,9 @@ package com.sequenceiq.freeipa.client.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RPCResponse<R> {
     private Integer count;
 
