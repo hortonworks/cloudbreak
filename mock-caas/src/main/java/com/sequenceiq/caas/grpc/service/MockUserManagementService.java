@@ -47,7 +47,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListU
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse.Builder;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.io.Resources;
@@ -150,7 +149,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 .setUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
                 .setCrn(userCrn)
                 .setEmail(userName.contains("@") ? userName : userName + "@ums.mock")
-                .setWorkloadUsername(sanitizeWorkloadUsername(userName))
+                .setWorkloadUsername(userName)
                 .build();
     }
 
@@ -239,7 +238,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                             .addMachineUser(MachineUser.newBuilder()
                                     .setMachineUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
                                     .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
-                                    .setWorkloadUsername(sanitizeWorkloadUsername(userName))
+                                    .setWorkloadUsername(userName)
                                     .build())
                             .build());
         }
@@ -457,10 +456,5 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 .setResource(resource)
                 .build()
                 .toString();
-    }
-
-    @VisibleForTesting
-    String sanitizeWorkloadUsername(String userName) {
-        return StringUtils.substringBefore(userName, "@").toLowerCase().replaceAll("[^a-z0-9_]", "");
     }
 }
