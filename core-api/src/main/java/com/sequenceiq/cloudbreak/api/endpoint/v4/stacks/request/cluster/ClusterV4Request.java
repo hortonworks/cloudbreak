@@ -48,6 +48,9 @@ public class ClusterV4Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
     private Set<String> databases = new HashSet<>();
 
+    @ApiModelProperty(ClusterModelDescription.READBEAMS_DB_SERVER_CRN)
+    private String databaseServerCrn;
+
     @ApiModelProperty(ClusterModelDescription.PROXY_CRN)
     private String proxyConfigCrn;
 
@@ -110,6 +113,14 @@ public class ClusterV4Request implements JsonEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDatabaseServerCrn() {
+        return databaseServerCrn;
+    }
+
+    public void setDatabaseServerCrn(String databaseServerCrn) {
+        this.databaseServerCrn = databaseServerCrn;
     }
 
     public Set<String> getDatabases() {

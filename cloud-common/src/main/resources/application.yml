@@ -93,6 +93,9 @@ cb:
   freeipa:
     url: http://localhost:8090
     contextPath: /freeipa
+  redbeams:
+    url: http://localhost:8087
+    contextPath: /redbeams
 
   host.discovery.custom.hostname.enabled: false
 

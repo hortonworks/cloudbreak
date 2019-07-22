@@ -35,13 +35,13 @@ public class RedbeamsApiClientConfig {
     }
 
     @Bean
-    @ConditionalOnBean(name = "redbeamsApiClientWebTarget")
+    @ConditionalOnBean(RedbeamsApiClientParams.class)
     DatabaseV4Endpoint databaseV4Endpoint(WebTarget redbeamsApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(redbeamsApiClientWebTarget, DatabaseV4Endpoint.class);
     }
 
     @Bean
-    @ConditionalOnBean(name = "redbeamsApiClientWebTarget")
+    @ConditionalOnBean(RedbeamsApiClientParams.class)
     DatabaseServerV4Endpoint databaseServerV4Endpoint(WebTarget redbeamsApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(redbeamsApiClientWebTarget, DatabaseServerV4Endpoint.class);
     }
