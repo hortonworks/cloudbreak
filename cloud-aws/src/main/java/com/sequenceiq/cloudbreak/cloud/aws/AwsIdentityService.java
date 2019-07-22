@@ -22,7 +22,7 @@ public class AwsIdentityService implements IdentityService {
     public String getAccountId(CloudCredential cloudCredential) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
         if (awsCredentialView.getKeyBased() != null) {
-            return getAccountIDUsingAccessKey(awsCredentialView.getAccessKey(), awsCredentialView.getSecretKey());
+            return getAccountIdUsingAccessKey(awsCredentialView.getAccessKey(), awsCredentialView.getSecretKey());
         }
         return Arn.of(awsCredentialView.getRoleArn()).getAccountId();
     }
@@ -37,7 +37,7 @@ public class AwsIdentityService implements IdentityService {
         return AwsConstants.AWS_VARIANT;
     }
 
-    private String getAccountIDUsingAccessKey(String accessKey, String secretKey) {
+    private String getAccountIdUsingAccessKey(String accessKey, String secretKey) {
         AWSSecurityTokenService stsService = AWSSecurityTokenServiceClientBuilder.standard().withCredentials(
                 new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))).build();
 

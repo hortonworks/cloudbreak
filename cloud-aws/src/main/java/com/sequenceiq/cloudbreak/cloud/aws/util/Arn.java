@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.util;
 
-import com.amazonaws.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Arn {
 
@@ -43,7 +43,7 @@ public class Arn {
     }
 
     public static Arn of(String arnString) {
-        if (StringUtils.isNullOrEmpty(arnString)) {
+        if (StringUtils.isBlank(arnString)) {
             throw new IllegalArgumentException("ARN must not be empty.");
         }
 

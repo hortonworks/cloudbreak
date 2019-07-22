@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
-import com.sequenceiq.cloudbreak.service.identitymapping.AwsIdentityMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockIdentityMappingService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnector;
@@ -125,7 +125,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     private CredentialConverter credentialConverter;
 
     @Inject
-    private AwsIdentityMappingService awsIdentityMappingService;
+    private AwsMockIdentityMappingService awsIdentityMappingService;
 
     @Override
     public TemplatePreparationObject convert(StackV4Request source) {
