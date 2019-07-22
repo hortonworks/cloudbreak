@@ -5,14 +5,14 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 
-import com.sequenceiq.cloudbreak.common.json.ExceptionResult;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 
 @Component
 public class HttpRequestMethodNotSupportedExceptionMapper extends BaseExceptionMapper<HttpRequestMethodNotSupportedException> {
 
     @Override
     protected Object getEntity(HttpRequestMethodNotSupportedException exception) {
-        return new ExceptionResult("The requested http method is not supported on the resource.");
+        return new ExceptionResponse("The requested http method is not supported on the resource.");
     }
 
     @Override

@@ -9,7 +9,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -164,7 +163,10 @@ public class SdxCreateActions {
                 Exception exception = payload.getException();
                 SdxClusterStatus provisioningFailedStatus = SdxClusterStatus.PROVISIONING_FAILED;
                 LOGGER.info("Update SDX status to {} for resource: {}", provisioningFailedStatus.name(), payload.getResourceId(), exception);
-                String statusReason = ExceptionUtils.getMessage(exception);
+                String statusReason = "SDX creation failed";
+                if (exception.getMessage() != null) {
+                    statusReason = exception.getMessage();
+                }
                 sdxService.updateSdxStatus(payload.getResourceId(), provisioningFailedStatus, statusReason);
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }

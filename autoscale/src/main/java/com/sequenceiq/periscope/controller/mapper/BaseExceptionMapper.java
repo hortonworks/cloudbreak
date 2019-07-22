@@ -7,7 +7,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.periscope.api.model.ExceptionResult;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 
 abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapper<E> {
 
@@ -20,7 +20,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
     }
 
     protected Object getEntity(E exception) {
-        return new ExceptionResult(exception.getMessage());
+        return new ExceptionResponse(exception.getMessage());
     }
 
     abstract Status getResponseStatus();

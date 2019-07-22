@@ -1,10 +1,13 @@
-package com.sequenceiq.periscope.api.model;
+package com.sequenceiq.cloudbreak.common.exception;
 
-public class ExceptionResult {
+public class ExceptionResponse {
 
     private String message;
 
-    public ExceptionResult(String message) {
+    public ExceptionResponse() {
+    }
+
+    public ExceptionResponse(String message) {
         this.message = message;
     }
 
@@ -15,5 +18,4 @@ public class ExceptionResult {
     public void setMessage(String message) {
         this.message = message;
     }
-
 }

@@ -13,7 +13,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.redbeams.api.model.ExceptionResponse;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 
 import ch.qos.logback.classic.Level;
 

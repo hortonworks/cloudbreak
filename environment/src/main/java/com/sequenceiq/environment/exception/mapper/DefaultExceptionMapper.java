@@ -4,7 +4,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.api.ExceptionResponse;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 
 @Component
 public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
