@@ -37,4 +37,13 @@ public abstract class StackAuthenticationBase {
     public void setLoginUserName(String loginUserName) {
         this.loginUserName = loginUserName;
     }
+
+    @Override
+    public String toString() {
+        return "StackAuthenticationBase{"
+                + "publicKey='" + publicKey + '\''
+                + ", publicKeyId='" + publicKeyId + '\''
+                + ", loginUserName='" + loginUserName + '\''
+                + '}';
+    }
 }

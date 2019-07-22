@@ -117,4 +117,18 @@ public class CreateFreeIpaRequest {
     public void setFreeIpa(FreeIpaServerRequest freeIpa) {
         this.freeIpa = freeIpa;
     }
+
+    @Override
+    public String toString() {
+        return "CreateFreeIpaRequest{"
+                + "environmentCrn='" + environmentCrn + '\''
+                + ", name='" + name + '\''
+                + ", placement=" + placement
+                + ", instanceGroups=" + instanceGroups
+                + ", authentication=" + authentication
+                + ", network=" + network
+                + ", image=" + image
+                + ", freeIpa=" + freeIpa
+                + '}';
+    }
 }

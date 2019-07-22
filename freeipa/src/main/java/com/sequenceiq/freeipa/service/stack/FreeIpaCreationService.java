@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
@@ -85,6 +87,9 @@ public class FreeIpaCreationService {
     @Inject
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
+    @Inject
+    private TransactionService transactionService;
+
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
         checkIfAlreadyExistsInEnvironment(request, accountId);
         String userCrn = crnService.getUserCrn();
@@ -101,13 +106,24 @@ public class FreeIpaCreationService {
 
         String template = templateService.waitGetTemplate(stack, getPlatformTemplateRequest);
         stack.setTemplate(template);
-        stackService.save(stack);
-        ImageSettingsRequest imageSettingsRequest = request.getImage();
-        Image image = imageService.create(stack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest(), credential);
-        FreeIpa freeIpa = freeIpaService.create(stack, request.getFreeIpa());
-        flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT, new StackEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stack.getId()));
-        InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
-        return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa);
+        try {
+            Triple<Stack, Image, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
+                Stack savedStack = stackService.save(stack);
+                ImageSettingsRequest imageSettingsRequest = request.getImage();
+                Image image = imageService.create(savedStack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest
+                        : new ImageSettingsRequest(), credential);
+                FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa());
+                return Triple.of(savedStack, image, freeIpa);
+            });
+            flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT,
+                    new StackEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stackImageFreeIpaTuple.getLeft().getId()));
+            InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
+            return stackToDescribeFreeIpaResponseConverter
+                    .convert(stackImageFreeIpaTuple.getLeft(), stackImageFreeIpaTuple.getMiddle(), stackImageFreeIpaTuple.getRight());
+        } catch (TransactionService.TransactionExecutionException e) {
+            LOGGER.error("Creation of FreeIPA failed", e);
+            throw new BadRequestException("Creation of FreeIPA failed: " +  e.getCause().getMessage(), e);
+        }
     }
 
     private void checkIfAlreadyExistsInEnvironment(CreateFreeIpaRequest request, String accountId) {

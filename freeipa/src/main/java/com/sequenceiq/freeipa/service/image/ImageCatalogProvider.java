@@ -71,11 +71,11 @@ public class ImageCatalogProvider {
             long timeOfParse = System.currentTimeMillis() - started;
             LOGGER.debug("ImageCatalog was fetched and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
         } catch (RuntimeException e) {
-            throw new RuntimeException(String.format("Failed to get image catalog: %s from %s", e.getCause(), catalogUrl), e);
+            throw new ImageCatalogException(String.format("Failed to get image catalog: %s from %s", e.getCause(), catalogUrl), e);
         } catch (JsonMappingException e) {
-            throw new RuntimeException(String.format("Invalid json format for image catalog with error: %s", e.getMessage()), e);
+            throw new ImageCatalogException(String.format("Invalid json format for image catalog with error: %s", e.getMessage()), e);
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to read image catalog from file: '%s'", catalogUrl), e);
+            throw new ImageCatalogException(String.format("Failed to read image catalog from file: '%s'", catalogUrl), e);
         }
         return catalog;
     }
@@ -119,13 +119,13 @@ public class ImageCatalogProvider {
 
     private String readResponse(WebTarget target, Response response)  {
         if (!response.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
-            throw new RuntimeException(String.format("Failed to get image catalog from '%s' due to: '%s'",
+            throw new ImageCatalogException(String.format("Failed to get image catalog from '%s' due to: '%s'",
                     target.getUri().toString(), response.getStatusInfo().getReasonPhrase()));
         }
         try {
             return response.readEntity(String.class);
         } catch (ProcessingException e) {
-            throw new RuntimeException(String.format("Failed to process image catalog from '%s' due to: '%s'",
+            throw new ImageCatalogException(String.format("Failed to process image catalog from '%s' due to: '%s'",
                     target.getUri().toString(), e.getMessage()));
         }
     }

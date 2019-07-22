@@ -15,4 +15,11 @@ public abstract class InstanceTemplateBase {
     public void setInstanceType(String instanceType) {
         this.instanceType = instanceType;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceTemplateBase{"
+                + "instanceType='" + instanceType + '\''
+                + '}';
+    }
 }
