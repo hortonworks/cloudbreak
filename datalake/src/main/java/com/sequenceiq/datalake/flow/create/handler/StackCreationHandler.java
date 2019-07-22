@@ -52,11 +52,12 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
             provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig);
             response = new StackCreationSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
-            LOGGER.info("Polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.info("Polling exited before timeout for SDX: {}. Cause: ", sdxId, userBreakException);
             response = new SdxCreateFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.info("Poller stopped for stack: {}", sdxId, pollerStoppedException);
-            response = new SdxCreateFailedEvent(sdxId, userId, pollerStoppedException);
+            LOGGER.info("Poller stopped for SDX: {}", sdxId, pollerStoppedException);
+            response = new SdxCreateFailedEvent(sdxId, userId,
+                    new PollerStoppedException("SDX cluster creation timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Polling failed for stack: {}", sdxId, exception);
             response = new SdxCreateFailedEvent(sdxId, userId, exception);

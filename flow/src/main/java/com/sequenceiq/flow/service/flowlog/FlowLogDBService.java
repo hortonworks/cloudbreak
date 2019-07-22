@@ -15,11 +15,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonWriter;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -68,15 +66,8 @@ public class FlowLogDBService implements FlowLogService {
         try {
             objectAsString = JsonWriter.objectToJson(object, writeOptions);
         } catch (Exception e) {
-            LOGGER.error("Somehow can not serialize object to string, try another method..", e);
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-                objectAsString = objectMapper.writeValueAsString(object);
-            } catch (JsonProcessingException jsonProcessingException) {
-                LOGGER.error("Another json serializing method failed, sorry we have to give up.. :(", jsonProcessingException);
-                objectAsString = "Can not serialize the object, please check logs";
-            }
+            LOGGER.debug("Somehow can not serialize object to string, try another method..", e);
+            objectAsString = JsonUtil.writeValueAsStringSilent(object);
         }
         return objectAsString;
     }

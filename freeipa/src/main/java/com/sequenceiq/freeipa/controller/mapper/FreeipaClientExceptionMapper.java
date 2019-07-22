@@ -4,7 +4,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.freeipa.api.model.ExceptionResponse;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 
 @Component
