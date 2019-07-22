@@ -22,7 +22,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -38,7 +39,7 @@ class EnvironmentResourceDeletionServiceTest {
     private SdxEndpoint sdxEndpoint;
 
     @MockBean
-    private CloudbreakUserCrnClient cloudbreakClient;
+    private CloudbreakServiceUserCrnClient cloudbreakClient;
 
     @MockBean
     private ThreadBasedUserCrnProvider userCrnProvider;
@@ -47,7 +48,7 @@ class EnvironmentResourceDeletionServiceTest {
     private EventSender eventSender;
 
     @Mock
-    private CloudbreakUserCrnClient.CloudbreakEndpoint endpoint;
+    private CloudbreakServiceCrnEndpoints endpoint;
 
     @Mock
     private DistroXV1Endpoint distroXEndpoint;
