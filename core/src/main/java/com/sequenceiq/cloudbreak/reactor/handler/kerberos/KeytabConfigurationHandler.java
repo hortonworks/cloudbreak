@@ -99,7 +99,7 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
     private KeytabModel buildKeytabModel(ServiceKeytabResponse serviceKeytabResponse) {
         String keytabInBase64 = secretService.getByResponse(serviceKeytabResponse.getKeytab());
         byte[] keytab = Base64.getDecoder().decode(keytabInBase64.getBytes(StandardCharsets.UTF_8));
-        String principal = secretService.getByResponse(serviceKeytabResponse.getServicePrincial());
+        String principal = secretService.getByResponse(serviceKeytabResponse.getServicePrincipal());
         return new KeytabModel("CM", "/etc/cloudera-scm-server", "cmf.keytab", principal, keytab);
     }
 

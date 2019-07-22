@@ -90,7 +90,7 @@ public class KerberosMgmtV1Service {
             serviceKeytab = getServiceKeytab(service.getKrbprincipalname(), ipaClient);
         }
         response.setKeytab(getSecretResponseForKeytab(accountId, serviceKeytab));
-        response.setServicePrincial(getSecretResponseForPrincipal(accountId, service.getKrbprincipalname()));
+        response.setServicePrincipal(getSecretResponseForPrincipal(accountId, service.getKrbprincipalname()));
         return response;
     }
 
@@ -104,7 +104,7 @@ public class KerberosMgmtV1Service {
         String servicePrincipal = request.getServiceName() + "/" + request.getServerHostName() + "@" + realm;
         String serviceKeytab = getExistingServiceKeytab(servicePrincipal, ipaClient);
         response.setKeytab(getSecretResponseForKeytab(accountId, serviceKeytab));
-        response.setServicePrincial(getSecretResponseForPrincipal(accountId, servicePrincipal));
+        response.setServicePrincipal(getSecretResponseForPrincipal(accountId, servicePrincipal));
         return response;
     }
 
