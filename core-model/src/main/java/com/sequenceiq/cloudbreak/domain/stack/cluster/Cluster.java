@@ -55,7 +55,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
@@ -562,8 +562,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     @Override
-    public WorkspaceResource getResource() {
-        return WorkspaceResource.STACK;
+    public AuthorizationResource getResource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     @Override

@@ -12,8 +12,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -38,8 +38,8 @@ public class ClusterApiView extends CompactView {
     private String environmentCrn;
 
     @Override
-    public WorkspaceResource getResource() {
-        return WorkspaceResource.STACK;
+    public AuthorizationResource getResource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     public String getEnvironmentCrn() {

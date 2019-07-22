@@ -12,7 +12,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByTarget;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByTargetId;
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
+import com.sequenceiq.authorization.resource.ResourceAction;
 
 @NoRepositoryBean
 @Transactional(TxType.REQUIRED)

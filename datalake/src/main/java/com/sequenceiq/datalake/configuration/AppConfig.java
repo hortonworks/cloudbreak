@@ -15,8 +15,8 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.datalake.logger.MDCContextFilter;
-import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
+import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
 
 @Configuration

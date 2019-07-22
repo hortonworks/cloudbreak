@@ -7,8 +7,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.JoinColumn;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -24,13 +24,12 @@ import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
-import com.sequenceiq.redbeams.authorization.CrnResource;
 import com.sequenceiq.redbeams.converter.CrnConverter;
 
 @Entity
 @Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "deletionTimestamp", "environment_id"}))
-public class DatabaseConfig implements ArchivableResource, CrnResource, AccountIdAwareResource {
+public class DatabaseConfig implements ArchivableResource, AccountIdAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "databaseconfig_generator")
@@ -102,7 +101,6 @@ public class DatabaseConfig implements ArchivableResource, CrnResource, AccountI
         return accountId;
     }
 
-    @Override
     public Crn getResourceCrn() {
         return resourceCrn;
     }

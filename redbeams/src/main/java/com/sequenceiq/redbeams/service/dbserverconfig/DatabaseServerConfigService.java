@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -117,7 +116,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                     .findFirst();
             if (cve.isPresent()) {
                 String message = String.format("%s already exists with name '%s' in workspace %d",
-                        resource().getShortName(), resource.getName(), resource.getWorkspaceId());
+                        DatabaseServerConfig.class.getSimpleName(), resource.getName(), resource.getWorkspaceId());
                 throw new BadRequestException(message, cve.get());
             }
             throw e;
@@ -137,7 +136,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         Optional<DatabaseServerConfig> resourceOpt = repository.findByNameAndWorkspaceIdAndEnvironmentId(name, workspaceId, environmentId);
         if (resourceOpt.isEmpty()) {
             throw new NotFoundException(String.format("No %s found with name '%s' in environment '%s'",
-                    resource().getShortName(), name, environmentId));
+                    DatabaseServerConfig.class.getSimpleName(), name, environmentId));
         }
         MDCBuilder.buildMdcContext(resourceOpt.get());
         return resourceOpt.get();
@@ -147,7 +146,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         Crn crn = Crn.safeFromString(resourceCrn);
         Optional<DatabaseServerConfig> resourceOpt = repository.findByResourceCrn(crn);
         if (resourceOpt.isEmpty()) {
-            throw new NotFoundException(String.format("No %s found with crn '%s'", resource().getShortName(), resourceCrn));
+            throw new NotFoundException(String.format("No %s found with crn '%s'", DatabaseServerConfig.class.getSimpleName(), resourceCrn));
         }
         MDCBuilder.buildMdcContext(resourceOpt.get());
         return resourceOpt.get();
@@ -189,7 +188,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                 resources.stream().map(DatabaseServerConfig::getName).collect(Collectors.toSet()));
 
         if (!notFound.isEmpty()) {
-            throw new NotFoundException(String.format("No %s(s) found with name(s) %s in environment %s", resource().getShortName(),
+            throw new NotFoundException(String.format("No %s(s) found with name(s) %s in environment %s", DatabaseServerConfig.class.getSimpleName(),
                     String.join(", ", notFound), environmentId));
         }
 
@@ -205,7 +204,8 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                 resources.stream().map(dsc -> dsc.getResourceCrn().toString()).collect(Collectors.toSet()));
 
         if (!notFound.isEmpty()) {
-            throw new NotFoundException(String.format("No %s(s) found with crn(s) %s ", resource().getShortName(), String.join(", ", notFound)));
+            throw new NotFoundException(String.format("No %s(s) found with crn(s) %s ",
+                    DatabaseServerConfig.class.getSimpleName(), String.join(", ", notFound)));
         }
 
         return resources;
@@ -264,10 +264,6 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         databaseConfigService.register(newDatabaseConfig);
 
         return "created";
-    }
-
-    public WorkspaceResource resource() {
-        return WorkspaceResource.DATABASE_SERVER;
     }
 
     @VisibleForTesting

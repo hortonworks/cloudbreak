@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
+import com.sequenceiq.cloudbreak.workspace.authorization.api.WorkspaceRole;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -221,6 +221,14 @@ public class TestUtil {
         User user = new User();
         user.setUserId(userId);
         user.setId(id);
+        return user;
+    }
+
+    public static User user(Long id, String userId, String userCrn) {
+        User user = new User();
+        user.setUserId(userId);
+        user.setId(id);
+        user.setUserCrn(userCrn);
         return user;
     }
 

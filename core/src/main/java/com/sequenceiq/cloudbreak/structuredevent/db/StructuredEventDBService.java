@@ -13,7 +13,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -104,8 +104,8 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
     }
 
     @Override
-    public WorkspaceResource resource() {
-        return WorkspaceResource.STRUCTURED_EVENT;
+    public AuthorizationResource resource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.workspace;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
@@ -37,7 +37,7 @@ public interface WorkspaceAwareResourceService<T extends WorkspaceAwareResource>
 
     Set<T> deleteMultipleByNameFromWorkspace(Set<String> names, Long workspaceId);
 
-    WorkspaceResource resource();
+    AuthorizationResource resource();
 
     Iterable<T> findAll();
 

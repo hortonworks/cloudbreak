@@ -11,11 +11,11 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
-import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @DisableHasPermission
 @EntityType(entityClass = StackApiView.class)
 @Transactional(TxType.REQUIRED)
-@WorkspaceResourceType(resource = WorkspaceResource.STACK)
+@AuthorizationResourceType(resource = AuthorizationResource.DATAHUB)
 public interface StackApiViewRepository extends WorkspaceResourceRepository<StackApiView, Long> {
 
     @CheckPermissionsByReturnValue

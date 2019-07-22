@@ -77,7 +77,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
             ConstraintViolationException cve = ThrowableUtil.getSpecificCauseRecursively(e, ConstraintViolationException.class);
             if (cve != null) {
                 String message = String.format("%s already exists with name '%s' in workspace %s",
-                        resource().getShortName(), resource.getName(), resource.getWorkspace().getName());
+                        resource.getClass().getSimpleName().toLowerCase(), resource.getName(), resource.getWorkspace().getName());
                 throw new BadRequestException(message, e);
             }
             throw e;

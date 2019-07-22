@@ -28,16 +28,14 @@ import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
-import com.sequenceiq.redbeams.authorization.CrnResource;
 import com.sequenceiq.redbeams.converter.CrnConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 
 @Entity
 @Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "deletionTimestamp", "environmentId"}))
-public class DatabaseServerConfig implements ArchivableResource, CrnResource, AccountIdAwareResource {
+public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "databaseserverconfig_generator")
@@ -124,7 +122,6 @@ public class DatabaseServerConfig implements ArchivableResource, CrnResource, Ac
         this.accountId = accountId;
     }
 
-    @Override
     public Crn getResourceCrn() {
         return resourceCrn;
     }
@@ -139,10 +136,6 @@ public class DatabaseServerConfig implements ArchivableResource, CrnResource, Ac
 
     public void setWorkspaceId(Long workspaceId) {
         this.workspaceId = workspaceId;
-    }
-
-    public WorkspaceResource getResource() {
-        return WorkspaceResource.DATABASE_SERVER;
     }
 
     public String getName() {

@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.dto.ImageCatalogAccessDto;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
@@ -56,7 +57,6 @@ import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Component
 public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> {
@@ -586,8 +586,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     @Override
-    public WorkspaceResource resource() {
-        return WorkspaceResource.IMAGECATALOG;
+    public AuthorizationResource resource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     @Override

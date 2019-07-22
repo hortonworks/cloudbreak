@@ -11,6 +11,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.authorization.repository.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -18,15 +19,14 @@ import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
-import com.sequenceiq.cloudbreak.workspace.repository.check.DisableCheckPermissions;
-import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 
 @DisableHasPermission
 @Transactional(TxType.REQUIRED)
 @EntityType(entityClass = Cluster.class)
-@WorkspaceResourceType(resource = WorkspaceResource.STACK)
+@AuthorizationResourceType(resource = AuthorizationResource.DATAHUB)
 public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, Long> {
 
     @Override

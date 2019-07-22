@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 
 @Service
 public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSConfig> {
@@ -141,8 +141,8 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
     }
 
     @Override
-    public WorkspaceResource resource() {
-        return WorkspaceResource.DATABASE;
+    public AuthorizationResource resource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     public String testRdsConnection(Long workspaceId, String existingRDSConfigName, RDSConfig existingRds) {

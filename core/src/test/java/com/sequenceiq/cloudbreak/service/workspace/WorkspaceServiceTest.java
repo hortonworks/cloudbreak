@@ -29,8 +29,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
-import com.sequenceiq.cloudbreak.authorization.UmsAuthorizationService;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
+import com.sequenceiq.cloudbreak.workspace.authorization.UmsWorkspaceAuthorizationService;
+import com.sequenceiq.cloudbreak.workspace.authorization.api.WorkspaceRole;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -64,7 +64,7 @@ public class WorkspaceServiceTest {
     private WorkspaceModificationVerifierService verifierService;
 
     @Spy
-    private UmsAuthorizationService umsAuthorizationService;
+    private UmsWorkspaceAuthorizationService umsWorkspaceAuthorizationService;
 
     @Mock
     private Clock clock;
@@ -89,13 +89,14 @@ public class WorkspaceServiceTest {
         testWorkspace.setName(WORKSPACE_NAME);
         testWorkspace.setId(1L);
         testWorkspace.setTenant(testTenant);
+        testWorkspace.setResourceCrn("crn:altus:iam:us-west-1:1:workspace:1");
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
         when(workspaceRepository.getByName(anyString(), eq(testTenant))).thenReturn(testWorkspace);
     }
 
     @Test
     public void testRemoveUsers() {
-        doNothing().when(umsAuthorizationService).removeResourceRolesOfUserInWorkspace(anySet(), any());
+        doNothing().when(umsWorkspaceAuthorizationService).removeResourceRolesOfUserInWorkspace(anySet(), any());
 
         Set<String> userIds = new HashSet<>();
         userIds.add(USER_ID_2);
@@ -113,7 +114,7 @@ public class WorkspaceServiceTest {
         assertTrue(result.contains(user2));
         assertTrue(result.contains(user3));
 
-        verify(umsAuthorizationService, times(1)).removeResourceRolesOfUserInWorkspace(anySet(), any());
+        verify(umsWorkspaceAuthorizationService, times(1)).removeResourceRolesOfUserInWorkspace(anySet(), any());
     }
 
     @Test
@@ -125,12 +126,12 @@ public class WorkspaceServiceTest {
         when(userService.getByUsersIds(anySet())).thenReturn(Sets.newHashSet(user2, user3));
         doNothing().when(verifierService).authorizeWorkspaceManipulation(any(), any(), any(), anyString());
         doNothing().when(verifierService).validateUsersAreNotInTheWorkspaceYet(any(), any(), anySet());
-        doNothing().when(umsAuthorizationService).assignResourceRoleToUserInWorkspace(any(), any(), eq(WorkspaceRole.WORKSPACEMANAGER));
+        doNothing().when(umsWorkspaceAuthorizationService).assignResourceRoleToUserInWorkspace(any(), any(), eq(WorkspaceRole.WORKSPACEMANAGER));
 
         Set<User> users = underTest.addUsers(WORKSPACE_NAME, changeWorkspaceUsersV4Requests, initiator);
 
         assertEquals(2L, users.size());
-        verify(umsAuthorizationService, times(2)).assignResourceRoleToUserInWorkspace(any(), any(), eq(WorkspaceRole.WORKSPACEMANAGER));
+        verify(umsWorkspaceAuthorizationService, times(2)).assignResourceRoleToUserInWorkspace(any(), any(), eq(WorkspaceRole.WORKSPACEMANAGER));
     }
 
     @Test
@@ -144,16 +145,16 @@ public class WorkspaceServiceTest {
         doNothing().when(verifierService).ensureWorkspaceManagementForUserUpdates(any(), any(), anySet());
         doNothing().when(verifierService).validateAllUsersAreAlreadyInTheWorkspace(any(), any(), anySet());
         doNothing().when(verifierService).verifyDefaultWorkspaceUserUpdates(any(), any(), anySet());
-        doReturn(Sets.newHashSet(initiator, user2, user3)).when(umsAuthorizationService).getUsersOfWorkspace(any(), any());
-        doReturn(Sets.newHashSet(WorkspaceRole.WORKSPACEMANAGER)).when(umsAuthorizationService).getUserRolesInWorkspace(any(), any());
+        doReturn(Sets.newHashSet(initiator, user2, user3)).when(umsWorkspaceAuthorizationService).getUserIdsOfWorkspace(any(), any());
+        doReturn(Sets.newHashSet(WorkspaceRole.WORKSPACEMANAGER)).when(umsWorkspaceAuthorizationService).getUserRolesInWorkspace(any(), any());
 
         Set<User> result = underTest.updateUsers(WORKSPACE_NAME, changeWorkspaceUsersV4Requests, initiator);
 
         assertEquals(2L, result.size());
         assertTrue(result.stream().anyMatch(u -> u.getUserId().equals(USER_ID_2)));
         assertTrue(result.stream().anyMatch(u -> u.getUserId().equals(USER_ID_3)));
-        verify(umsAuthorizationService, times(0)).assignResourceRoleToUserInWorkspace(any(), any(), any());
-        verify(umsAuthorizationService, times(0)).unassignResourceRoleFromUserInWorkspace(any(), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(0)).assignResourceRoleToUserInWorkspace(any(), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(0)).unassignResourceRoleFromUserInWorkspace(any(), any(), any());
     }
 
     @Test
@@ -167,21 +168,21 @@ public class WorkspaceServiceTest {
         doNothing().when(verifierService).ensureWorkspaceManagementForUserUpdates(any(), any(), anySet());
         doNothing().when(verifierService).validateAllUsersAreAlreadyInTheWorkspace(any(), any(), anySet());
         doNothing().when(verifierService).verifyDefaultWorkspaceUserUpdates(any(), any(), anySet());
-        doReturn(Sets.newHashSet(initiator, user2, user3)).when(umsAuthorizationService).getUsersOfWorkspace(any(), any());
-        doReturn(Sets.newHashSet(WorkspaceRole.WORKSPACEMANAGER)).when(umsAuthorizationService).getUserRolesInWorkspace(eq(user2), any());
-        doReturn(Sets.newHashSet(WorkspaceRole.WORKSPACEREADER)).when(umsAuthorizationService).getUserRolesInWorkspace(eq(user3), any());
-        doNothing().when(umsAuthorizationService).assignResourceRoleToUserInWorkspace(any(), any(), any());
-        doNothing().when(umsAuthorizationService).unassignResourceRoleFromUserInWorkspace(any(), any(), any());
+        doReturn(Sets.newHashSet(initiator, user2, user3)).when(umsWorkspaceAuthorizationService).getUserIdsOfWorkspace(any(), any());
+        doReturn(Sets.newHashSet(WorkspaceRole.WORKSPACEMANAGER)).when(umsWorkspaceAuthorizationService).getUserRolesInWorkspace(eq(user2), any());
+        doReturn(Sets.newHashSet(WorkspaceRole.WORKSPACEREADER)).when(umsWorkspaceAuthorizationService).getUserRolesInWorkspace(eq(user3), any());
+        doNothing().when(umsWorkspaceAuthorizationService).assignResourceRoleToUserInWorkspace(any(), any(), any());
+        doNothing().when(umsWorkspaceAuthorizationService).unassignResourceRoleFromUserInWorkspace(any(), any(), any());
 
         Set<User> result = underTest.updateUsers(WORKSPACE_NAME, changeWorkspaceUsersV4Requests, initiator);
 
         assertEquals(2L, result.size());
         assertTrue(result.stream().anyMatch(u -> u.getUserId().equals(USER_ID_2)));
         assertTrue(result.stream().anyMatch(u -> u.getUserId().equals(USER_ID_3)));
-        verify(umsAuthorizationService, times(0)).assignResourceRoleToUserInWorkspace(eq(user2), any(), any());
-        verify(umsAuthorizationService, times(0)).unassignResourceRoleFromUserInWorkspace(eq(user2), any(), any());
-        verify(umsAuthorizationService, times(1)).assignResourceRoleToUserInWorkspace(eq(user3), any(), any());
-        verify(umsAuthorizationService, times(1)).unassignResourceRoleFromUserInWorkspace(eq(user3), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(0)).assignResourceRoleToUserInWorkspace(eq(user2), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(0)).unassignResourceRoleFromUserInWorkspace(eq(user2), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(1)).assignResourceRoleToUserInWorkspace(eq(user3), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(1)).unassignResourceRoleFromUserInWorkspace(eq(user3), any(), any());
     }
 
     @Test
@@ -195,37 +196,39 @@ public class WorkspaceServiceTest {
         doNothing().when(verifierService).ensureWorkspaceManagementForUserUpdates(any(), any(), anySet());
         doNothing().when(verifierService).validateAllUsersAreAlreadyInTheWorkspace(any(), any(), anySet());
         doNothing().when(verifierService).verifyDefaultWorkspaceUserUpdates(any(), any(), anySet());
-        doReturn(Sets.newHashSet(initiator, user2, user3)).when(umsAuthorizationService).getUsersOfWorkspace(any(), any());
-        doReturn(Sets.newHashSet(WorkspaceRole.WORKSPACEREADER)).when(umsAuthorizationService).getUserRolesInWorkspace(any(), any());
-        doNothing().when(umsAuthorizationService).assignResourceRoleToUserInWorkspace(any(), any(), any());
-        doNothing().when(umsAuthorizationService).unassignResourceRoleFromUserInWorkspace(any(), any(), any());
+        doReturn(Sets.newHashSet(initiator, user2, user3)).when(umsWorkspaceAuthorizationService).getUserIdsOfWorkspace(any(), any());
+        doReturn(Sets.newHashSet(WorkspaceRole.WORKSPACEREADER)).when(umsWorkspaceAuthorizationService).getUserRolesInWorkspace(any(), any());
+        doNothing().when(umsWorkspaceAuthorizationService).assignResourceRoleToUserInWorkspace(any(), any(), any());
+        doNothing().when(umsWorkspaceAuthorizationService).unassignResourceRoleFromUserInWorkspace(any(), any(), any());
 
         Set<User> result = underTest.updateUsers(WORKSPACE_NAME, changeWorkspaceUsersV4Requests, initiator);
 
         assertEquals(2L, result.size());
         assertTrue(result.stream().anyMatch(u -> u.getUserId().equals(USER_ID_2)));
         assertTrue(result.stream().anyMatch(u -> u.getUserId().equals(USER_ID_3)));
-        verify(umsAuthorizationService, times(1)).assignResourceRoleToUserInWorkspace(eq(user2), any(), any());
-        verify(umsAuthorizationService, times(1)).unassignResourceRoleFromUserInWorkspace(eq(user2), any(), any());
-        verify(umsAuthorizationService, times(1)).assignResourceRoleToUserInWorkspace(eq(user3), any(), any());
-        verify(umsAuthorizationService, times(1)).unassignResourceRoleFromUserInWorkspace(eq(user3), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(1)).assignResourceRoleToUserInWorkspace(eq(user2), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(1)).unassignResourceRoleFromUserInWorkspace(eq(user2), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(1)).assignResourceRoleToUserInWorkspace(eq(user3), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(1)).unassignResourceRoleFromUserInWorkspace(eq(user3), any(), any());
     }
 
     @Test
     public void testChangeUsers() {
-        User userToBeUpdated = TestUtil.user(2L, USER_ID_2);
-        User userToBeAdded = TestUtil.user(3L, USER_ID_3);
-        User userToBeDeleted = TestUtil.user(4L, "user4");
+        User userToBeUpdated = TestUtil.user(2L, USER_ID_2, "crn:altus:iam:us-west-1:1234:user:" + USER_ID_2);
+        User userToBeAdded = TestUtil.user(3L, USER_ID_3, "crn:altus:iam:us-west-1:1234:user:" + USER_ID_3);
+        User userToBeDeleted = TestUtil.user(4L, "user4", "crn:altus:iam:us-west-1:1234:user:user4");
 
         when(userService.getByUsersIds(anySet())).thenReturn(Set.of(userToBeUpdated, userToBeAdded));
         doNothing().when(verifierService).authorizeWorkspaceManipulation(any(), any(), any(), anyString());
         doNothing().when(verifierService).ensureWorkspaceManagementForChangeUsers(anySet());
         doNothing().when(verifierService).verifyDefaultWorkspaceUserUpdates(any(), any(), anySet());
-        doReturn(Sets.newHashSet(initiator, userToBeUpdated, userToBeDeleted)).when(umsAuthorizationService).getUsersOfWorkspace(any(), any());
-        doReturn(Sets.newHashSet(WorkspaceRole.WORKSPACEMANAGER)).when(umsAuthorizationService).getUserRolesInWorkspace(any(), any());
-        doNothing().when(umsAuthorizationService).assignResourceRoleToUserInWorkspace(any(), any(), eq(WorkspaceRole.WORKSPACEMANAGER));
+        Set<String> userIds = Sets.newHashSet("1", "2", "4");
+        doReturn(userIds).when(umsWorkspaceAuthorizationService).getUserIdsOfWorkspace(any(), any());
+        doReturn(Sets.newHashSet(initiator, userToBeUpdated, userToBeDeleted)).when(userService).getByUsersIds(eq(userIds));
+        doReturn(Sets.newHashSet(WorkspaceRole.WORKSPACEMANAGER)).when(umsWorkspaceAuthorizationService).getUserRolesInWorkspace(any(), any());
+        doNothing().when(umsWorkspaceAuthorizationService).assignResourceRoleToUserInWorkspace(any(), any(), eq(WorkspaceRole.WORKSPACEMANAGER));
         ArgumentCaptor<Set<User>> removableUsersCaptor = ArgumentCaptor.forClass(Set.class);
-        doNothing().when(umsAuthorizationService).removeResourceRolesOfUserInWorkspace(removableUsersCaptor.capture(), any());
+        doNothing().when(umsWorkspaceAuthorizationService).removeResourceRolesOfUserInWorkspace(removableUsersCaptor.capture(), any());
 
         Set<ChangeWorkspaceUsersV4Request> changeWorkspaceUsersV4Requests = changeWorkspaceUsersJsons(WorkspaceRole.WORKSPACEMANAGER);
 
@@ -235,18 +238,18 @@ public class WorkspaceServiceTest {
         assertTrue(result.contains(userToBeUpdated));
         assertTrue(result.contains(userToBeAdded));
         assertTrue(removableUsersCaptor.getValue().contains(userToBeDeleted));
-        verify(umsAuthorizationService, times(1)).assignResourceRoleToUserInWorkspace(eq(userToBeAdded), any(), any());
-        verify(umsAuthorizationService, times(1)).removeResourceRolesOfUserInWorkspace(anySet(), any());
-        verify(umsAuthorizationService, times(1)).getUserRolesInWorkspace(eq(userToBeUpdated), any());
-        verify(umsAuthorizationService, times(0)).assignResourceRoleToUserInWorkspace(eq(userToBeUpdated), any(), any());
-        verify(umsAuthorizationService, times(0)).unassignResourceRoleFromUserInWorkspace(eq(userToBeUpdated), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(1)).assignResourceRoleToUserInWorkspace(eq(userToBeAdded), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(1)).removeResourceRolesOfUserInWorkspace(anySet(), any());
+        verify(umsWorkspaceAuthorizationService, times(1)).getUserRolesInWorkspace(eq(userToBeUpdated), any());
+        verify(umsWorkspaceAuthorizationService, times(0)).assignResourceRoleToUserInWorkspace(eq(userToBeUpdated), any(), any());
+        verify(umsWorkspaceAuthorizationService, times(0)).unassignResourceRoleFromUserInWorkspace(eq(userToBeUpdated), any(), any());
     }
 
     @Test
     public void testWorkspaceDeletion() {
         doNothing().when(verifierService).authorizeWorkspaceManipulation(any(), any(), any(), anyString());
         doNothing().when(verifierService).checkThatWorkspaceIsDeletable(any(), any(), any());
-        doNothing().when(umsAuthorizationService).notifyAltusAboutResourceDeletion(any(), any());
+        doNothing().when(umsWorkspaceAuthorizationService).notifyAltusAboutResourceDeletion(any(), any());
         when(workspaceRepository.save(any())).thenReturn(testWorkspace);
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
 
@@ -257,12 +260,13 @@ public class WorkspaceServiceTest {
 
     @Test
     public void testWorkspaceCreation() {
-        doNothing().when(umsAuthorizationService).assignResourceRoleToUserInWorkspace(any(), any(), eq(WorkspaceRole.WORKSPACEMANAGER));
+        doNothing().when(umsWorkspaceAuthorizationService).assignResourceRoleToUserInWorkspace(any(), any(), eq(WorkspaceRole.WORKSPACEMANAGER));
         when(workspaceRepository.save(any())).thenReturn(testWorkspace);
 
         underTest.create(initiator, testWorkspace);
 
-        verify(umsAuthorizationService, times(1)).assignResourceRoleToUserInWorkspace(eq(initiator), eq(testWorkspace), eq(WorkspaceRole.WORKSPACEMANAGER));
+        verify(umsWorkspaceAuthorizationService, times(1)).assignResourceRoleToUserInWorkspace(eq(initiator),
+                eq(testWorkspace.getResourceCrn()), eq(WorkspaceRole.WORKSPACEMANAGER));
     }
 
     private Set<ChangeWorkspaceUsersV4Request> changeWorkspaceUsersJsons(WorkspaceRole role) {

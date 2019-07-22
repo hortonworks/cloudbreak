@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspace;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
+import com.sequenceiq.authorization.resource.ResourceAction;
 
 @NoRepositoryBean
 @Transactional(TxType.REQUIRED)

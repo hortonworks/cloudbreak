@@ -27,16 +27,13 @@ configurations.all {
 }
 
 dependencies {
+  compile project(':authorization')
   compile project(':common')
   compile project(':secret-engine')
   compile project(':flow')
   compile project(':auth-connector')
-  compile (project(':environment-api')) {
-    exclude module: 'workspace-authorization'
-  }
-  compile (project(':notification-sender')) {
-    exclude module: 'workspace-authorization'
-  }
+  compile project(':environment-api')
+  compile project(':notification-sender')
   compile (project(':cloud-reactor')) {
   }
   compile (project(':cloud-reactor-api')) {

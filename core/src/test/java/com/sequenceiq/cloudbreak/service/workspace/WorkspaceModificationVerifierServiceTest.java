@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.workspace;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -23,8 +24,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.authorization.UmsAuthorizationService;
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
+import com.sequenceiq.cloudbreak.workspace.authorization.UmsWorkspaceAuthorizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
@@ -46,7 +48,10 @@ public class WorkspaceModificationVerifierServiceTest {
     private StackService stackService;
 
     @Mock
-    private UmsAuthorizationService umsAuthorizationService;
+    private UmsWorkspaceAuthorizationService umsWorkspaceAuthorizationService;
+
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private WorkspaceModificationVerifierService underTest;
@@ -68,24 +73,26 @@ public class WorkspaceModificationVerifierServiceTest {
 
     @Test
     public void testAuthorizeWorkspaceManipulationWithAccess() {
-        when(umsAuthorizationService.getUsersOfWorkspace(any(), any())).thenReturn(Sets.newHashSet(initiator));
-        doNothing().when(umsAuthorizationService).checkRightOfUserForResource(any(), any(), any(), any());
+        when(umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(any(), any())).thenReturn(Sets.newHashSet("1"));
+        when(userService.getByUsersIds(anySet())).thenReturn(Sets.newHashSet(initiator));
+        doNothing().when(umsWorkspaceAuthorizationService).checkRightOfUserForResource(any(), any(), any(), any());
 
         underTest.authorizeWorkspaceManipulation(initiator, testWorkspace, ResourceAction.MANAGE, "unauthorized");
     }
 
     @Test(expected = AccessDeniedException.class)
     public void testAuthorizeWorkspaceManipulationWithNoManagePermission() {
-        when(umsAuthorizationService.getUsersOfWorkspace(any(), any())).thenReturn(Sets.newHashSet(initiator));
-        doThrow(AccessDeniedException.class).when(umsAuthorizationService).checkRightOfUserForResource(any(), any(), any(), any(), anyString());
+        when(umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(any(), any())).thenReturn(Sets.newHashSet("1"));
+        when(userService.getByUsersIds(anySet())).thenReturn(Sets.newHashSet(initiator));
+        doThrow(AccessDeniedException.class).when(umsWorkspaceAuthorizationService).checkRightOfUserForResource(any(), any(), any(), anyString());
 
         underTest.authorizeWorkspaceManipulation(initiator, testWorkspace, ResourceAction.MANAGE, "unauthorized");
     }
 
     @Test(expected = AccessDeniedException.class)
     public void testAuthorizeWorkspaceManipulationWhenUserIsNotPartOfWs() {
-        when(umsAuthorizationService.getUsersOfWorkspace(any(), any())).thenReturn(Sets.newHashSet());
-        doNothing().when(umsAuthorizationService).checkRightOfUserForResource(any(), any(), any(), any());
+        when(umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(any(), any())).thenReturn(Sets.newHashSet());
+        doNothing().when(umsWorkspaceAuthorizationService).checkRightOfUserForResource(any(), any(), any(), any());
 
         underTest.authorizeWorkspaceManipulation(initiator, testWorkspace, ResourceAction.MANAGE, "unauthorized");
     }
@@ -97,7 +104,8 @@ public class WorkspaceModificationVerifierServiceTest {
         User user2 = TestUtil.user(2L, "user2");
         user2.setTenant(testTenant);
         Set<User> users = Set.of(user1, user2);
-        when(umsAuthorizationService.getUsersOfWorkspace(any(), any())).thenReturn(users);
+        when(umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(any(), any())).thenReturn(Sets.newHashSet("1", "2"));
+        when(userService.getByUsersIds(anySet())).thenReturn(users);
 
         underTest.validateAllUsersAreAlreadyInTheWorkspace(initiator, testWorkspace, users);
     }
@@ -109,7 +117,8 @@ public class WorkspaceModificationVerifierServiceTest {
         User user2 = TestUtil.user(2L, "user2");
         user2.setTenant(testTenant);
         Set<User> users = Set.of(user1, user2);
-        when(umsAuthorizationService.getUsersOfWorkspace(any(), any())).thenReturn(Sets.newHashSet(user1));
+        when(umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(any(), any())).thenReturn(Sets.newHashSet("1"));
+        when(userService.getByUsersIds(anySet())).thenReturn(Sets.newHashSet(user1));
 
         underTest.validateAllUsersAreAlreadyInTheWorkspace(initiator, testWorkspace, users);
     }
@@ -121,7 +130,7 @@ public class WorkspaceModificationVerifierServiceTest {
         User user2 = TestUtil.user(2L, "user2");
         user2.setTenant(testTenant);
         Set<User> users = Set.of(user1, user2);
-        when(umsAuthorizationService.getUsersOfWorkspace(any(), any())).thenReturn(Sets.newHashSet());
+        when(umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(any(), any())).thenReturn(Sets.newHashSet());
 
         underTest.validateUsersAreNotInTheWorkspaceYet(initiator, testWorkspace, users);
     }
@@ -133,7 +142,8 @@ public class WorkspaceModificationVerifierServiceTest {
         User user2 = TestUtil.user(2L, "user2");
         user2.setTenant(testTenant);
         Set<User> users = Set.of(user1, user2);
-        when(umsAuthorizationService.getUsersOfWorkspace(any(), any())).thenReturn(users);
+        when(umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(any(), any())).thenReturn(Sets.newHashSet("1", "2"));
+        when(userService.getByUsersIds(anySet())).thenReturn(users);
 
         underTest.validateUsersAreNotInTheWorkspaceYet(initiator, testWorkspace, users);
     }

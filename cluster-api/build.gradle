@@ -19,7 +19,6 @@ jar {
 dependencies {
   compile project(':core-model')
   compile project(':cloud-api')
-  compile project(':workspace-authorization')
   compile project(':template-manager-core')
 
   testCompile (group: 'junit', name: 'junit', version: junitVersion) {

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
@@ -22,7 +21,6 @@ import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
-@WorkspaceEntityType(DatabaseConfig.class)
 @Component
 public class DatabaseV4Controller implements DatabaseV4Endpoint {
 

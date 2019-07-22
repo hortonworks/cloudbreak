@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 
-import static com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource.STACK;
+import static com.sequenceiq.authorization.resource.AuthorizationResource.DATAHUB;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.Certificate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
+import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
+import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -109,7 +109,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
             Stack stack = stackService.getByCrn(crn);
             if (ResourceAction.WRITE.name().equalsIgnoreCase(permission)) {
                 User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-                permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), STACK, ResourceAction.WRITE, user);
+                permissionCheckingUtils.checkPermissionForUser(DATAHUB, ResourceAction.WRITE, user.getUserCrn());
             }
             response.setSuccess(true);
         } catch (RuntimeException ignore) {

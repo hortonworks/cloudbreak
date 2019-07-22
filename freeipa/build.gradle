@@ -76,6 +76,7 @@ dependencies {
     testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
   }
 
+  implementation project(':authorization')
   implementation project(':cloud-reactor-api')
   implementation project(':cloud-reactor')
   implementation project(':orchestrator-api')

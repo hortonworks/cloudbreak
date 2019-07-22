@@ -18,6 +18,7 @@ repositories {
 }
 
 dependencies {
+  compile project(':authorization')
   compile project(':core-api')
   compile project(':common')
   compile project(':flow')
@@ -25,9 +26,7 @@ dependencies {
   compile project(':secret-engine')
   compile project(':environment-api')
   compile project(':redbeams-api')
-  compile (project(':notification-sender')) {
-    exclude module: 'workspace-authorization'
-  }
+  compile project(':notification-sender')
 
   implementation     group: 'com.google.code.gson',      name: 'gson',                            version: '2.6.2'
   implementation     group: 'dnsjava',                   name: 'dnsjava',                         version: '2.1.7'

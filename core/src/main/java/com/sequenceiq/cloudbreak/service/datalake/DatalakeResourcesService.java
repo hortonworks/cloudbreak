@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 
 @Service
 public class DatalakeResourcesService extends AbstractWorkspaceAwareResourceService<DatalakeResources> {
@@ -51,8 +51,8 @@ public class DatalakeResourcesService extends AbstractWorkspaceAwareResourceServ
     }
 
     @Override
-    public WorkspaceResource resource() {
-        return WorkspaceResource.STACK;
+    public AuthorizationResource resource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     public Long countDatalakeResourcesInEnvironment(String environmentCrn) {

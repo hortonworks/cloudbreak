@@ -29,6 +29,10 @@ sdx:
       name: cdp-proxy
     ssotype: SSO_PROVIDER
 
+altus:
+  ums:
+    host: localhost
+
 datalake:
   cert.dir: /certs/
   client.id: datalake

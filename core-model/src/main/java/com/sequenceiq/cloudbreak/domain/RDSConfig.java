@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 
 @Entity
 @Where(clause = "archived = false")
@@ -220,8 +220,8 @@ public class RDSConfig implements ProvisionEntity, WorkspaceAwareResource, Archi
     }
 
     @Override
-    public WorkspaceResource getResource() {
-        return WorkspaceResource.DATABASE;
+    public AuthorizationResource getResource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     @Override
