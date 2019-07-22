@@ -44,10 +44,10 @@ public interface KerberosMgmtV1Endpoint {
     @Path("serviceprincipal")
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_DELETE_SERVICE_PRINCIPAL, notes = KeytabModelNotes.DELETE_SERVICE_PRINCIPAL_NOTES,
             nickname = "deleteServicePrinciapalV1")
-    void deleteServicePrincipal(@Valid ServicePrincipalRequest request);
+    void deleteServicePrincipal(@Valid ServicePrincipalRequest request) throws Exception;
 
     @DELETE
     @Path("host")
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_DELETE_HOST, notes = KeytabModelNotes.DELETE_HOST_NOTES, nickname = "deleteHostV1")
-    void deleteHost(@Valid HostRequest request);
+    void deleteHost(@Valid HostRequest request) throws Exception;
 }
