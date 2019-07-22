@@ -19,4 +19,11 @@ public class FreeIpaServerRequest extends FreeIpaServerBase {
     public void setAdminPassword(String adminPassword) {
         this.adminPassword = adminPassword;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + " FreeIpaServerRequest{"
+                + "adminPassword='***\'"
+                + '}';
+    }
 }

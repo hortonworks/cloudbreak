@@ -98,4 +98,15 @@ public class OpenStackNetworkParameters extends MappableBase {
         publicNetId = getParameterOrNull(parameters, "publicNetId");
         networkingOption = getParameterOrNull(parameters, "networkingOption");
     }
+
+    @Override
+    public String toString() {
+        return "OpenStackNetworkParameters{"
+                + "networkId='" + networkId + '\''
+                + ", routerId='" + routerId + '\''
+                + ", subnetId='" + subnetId + '\''
+                + ", publicNetId='" + publicNetId + '\''
+                + ", networkingOption='" + networkingOption + '\''
+                + '}';
+    }
 }

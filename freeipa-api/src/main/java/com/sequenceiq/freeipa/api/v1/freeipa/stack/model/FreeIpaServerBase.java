@@ -31,4 +31,12 @@ public abstract class FreeIpaServerBase {
     public void setHostname(String hostname) {
         this.hostname = hostname;
     }
+
+    @Override
+    public String toString() {
+        return "FreeIpaServerBase{"
+                + "domain='" + domain + '\''
+                + ", hostname='" + hostname + '\''
+                + '}';
+    }
 }

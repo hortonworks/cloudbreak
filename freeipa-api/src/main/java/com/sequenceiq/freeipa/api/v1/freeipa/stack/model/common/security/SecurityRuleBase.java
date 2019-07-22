@@ -58,4 +58,14 @@ public abstract class SecurityRuleBase {
     public void setModifiable(Boolean modifiable) {
         this.modifiable = modifiable;
     }
+
+    @Override
+    public String toString() {
+        return "SecurityRuleBase{"
+                + "subnet='" + subnet + '\''
+                + ", ports=" + ports
+                + ", protocol='" + protocol + '\''
+                + ", modifiable=" + modifiable
+                + '}';
+    }
 }

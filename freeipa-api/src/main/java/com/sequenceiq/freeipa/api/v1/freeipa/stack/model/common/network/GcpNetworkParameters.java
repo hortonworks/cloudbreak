@@ -98,4 +98,15 @@ public class GcpNetworkParameters extends MappableBase {
         noFirewallRules = getBoolean(parameters, "noFirewallRules");
         noPublicIp = getBoolean(parameters, "noPublicIp");
     }
+
+    @Override
+    public String toString() {
+        return "GcpNetworkParameters{"
+                + "networkId='" + networkId + '\''
+                + ", subnetId='" + subnetId + '\''
+                + ", sharedProjectId='" + sharedProjectId + '\''
+                + ", noPublicIp=" + noPublicIp
+                + ", noFirewallRules=" + noFirewallRules
+                + '}';
+    }
 }

@@ -72,4 +72,13 @@ public class MockNetworkParameters extends MappableBase {
         internetGatewayId = getParameterOrNull(parameters, "internetGatewayId");
         subnetId = getParameterOrNull(parameters, "subnetId");
     }
+
+    @Override
+    public String toString() {
+        return "MockNetworkParameters{"
+                + "vpcId='" + vpcId + '\''
+                + ", internetGatewayId='" + internetGatewayId + '\''
+                + ", subnetId='" + subnetId + '\''
+                + '}';
+    }
 }

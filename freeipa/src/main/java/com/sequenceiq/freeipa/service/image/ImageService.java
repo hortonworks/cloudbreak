@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.converter.image.ImageToImageEntityConverter;
 import com.sequenceiq.freeipa.dto.Credential;
@@ -100,7 +101,7 @@ public class ImageService {
             images = imageCatalogProvider.getImageCatalog(catalogUrl).getImages().getFreeipaImages();
             image = findImage(imageId, imageOs, images, region, platform);
             if (image.isEmpty()) {
-                throw new RuntimeException(String.format("Could not find any image with id: '%s' in region '%s' with OS '%s'.", imageId, region, imageOs));
+                throw new ImageNotFoundException(String.format("Could not find any image with id: '%s' in region '%s' with OS '%s'.", imageId, region, imageOs));
             }
         }
         return image.get();
@@ -119,17 +120,17 @@ public class ImageService {
             }
             String msg = String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
                     imgFromCatalog, platformString, region);
-            throw new RuntimeException(msg);
+            throw new ImageNotFoundException(msg);
         }
         String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
                 imgFromCatalog, platformString);
-        throw new RuntimeException(msg);
+        throw new ImageNotFoundException(msg);
     }
 
     private List<com.sequenceiq.freeipa.api.model.image.Image> filterImages(List<com.sequenceiq.freeipa.api.model.image.Image> imageList, String os,
-            String platform) {
+            String platform, String region) {
         Predicate<com.sequenceiq.freeipa.api.model.image.Image> predicate = img -> img.getOs().equalsIgnoreCase(os)
-                && img.getImageSetsByProvider().containsKey(platform);
+                && img.getImageSetsByProvider().containsKey(platform) && img.getImageSetsByProvider().get(platform).containsKey(region);
         Map<Boolean, List<com.sequenceiq.freeipa.api.model.image.Image>> partitionedImages =
                 Optional.ofNullable(imageList).orElse(Collections.emptyList()).stream()
                 .collect(Collectors.partitioningBy(predicate));
@@ -151,10 +152,11 @@ public class ImageService {
     private Optional<? extends com.sequenceiq.freeipa.api.model.image.Image> findImage(String imageId, String imageOs,
             List<com.sequenceiq.freeipa.api.model.image.Image> images, String region, String platform) {
         if (Objects.nonNull(imageOs) && !imageOs.isEmpty()) {
-            images = filterImages(images, imageOs, platform);
+            images = filterImages(images, imageOs, platform, region);
         }
         if (Objects.nonNull(imageId) && !imageId.isEmpty()) {
             return images.stream()
+                    .filter(img -> img.getImageSetsByProvider().containsKey(platform) && img.getImageSetsByProvider().get(platform).containsKey(region))
                     .filter(img -> img.getImageSetsByProvider().get(platform).get(region).equalsIgnoreCase(imageId))
                     .max(Comparator.comparing(com.sequenceiq.freeipa.api.model.image.Image::getDate));
         } else {
@@ -185,7 +187,7 @@ public class ImageService {
                     cbCert);
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parmaters", e);
-            throw new RuntimeException("Failed to get Platform parmaters", e);
+            throw new GetCloudParameterException("Failed to get Platform parmaters", e);
         }
     }
 }

@@ -58,4 +58,12 @@ public class AwsNetworkParameters extends MappableBase {
         vpcId = getParameterOrNull(parameters, "vpcId");
         subnetId = getParameterOrNull(parameters, "subnetId");
     }
+
+    @Override
+    public String toString() {
+        return "AwsNetworkParameters{"
+                + "vpcId='" + vpcId + '\''
+                + ", subnetId='" + subnetId + '\''
+                + '}';
+    }
 }
