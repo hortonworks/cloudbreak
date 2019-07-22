@@ -20,6 +20,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.Image;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbSubnetGroupView;
@@ -117,33 +118,34 @@ public class AwsStackRequestHelper {
         return image.getRootDeviceName();
     }
 
-    private Collection<Parameter> getStackParameters(AuthenticatedContext ac, DatabaseStack stack) {
+    @VisibleForTesting
+    Collection<Parameter> getStackParameters(AuthenticatedContext ac, DatabaseStack stack) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         AwsRdsInstanceView awsRdsInstanceView = new AwsRdsInstanceView(stack.getDatabaseServer());
         AwsRdsDbSubnetGroupView awsRdsDbSubnetGroupView = new AwsRdsDbSubnetGroupView(stack.getDatabaseServer());
         List<Parameter> parameters = new ArrayList<>(asList(
-                // FIXME allocated storage might be null
-                new Parameter().withParameterKey("AllocatedStorageParameter").withParameterValue(Objects.toString(awsRdsInstanceView.getAllocatedStorage())),
-                new Parameter().withParameterKey("BackupRetentionPeriodParameter")
-                    .withParameterValue(Objects.toString(awsRdsInstanceView.getBackupRetentionPeriod())),
                 new Parameter().withParameterKey("DBInstanceClassParameter").withParameterValue(awsRdsInstanceView.getDBInstanceClass()),
                 new Parameter().withParameterKey("DBInstanceIdentifierParameter").withParameterValue(awsRdsInstanceView.getDBInstanceIdentifier()),
                 new Parameter().withParameterKey("DBSubnetGroupNameParameter").withParameterValue(awsRdsDbSubnetGroupView.getDBSubnetGroupName()),
                 new Parameter().withParameterKey("DBSubnetGroupSubnetIdsParameter").withParameterValue(String.join(",", awsNetworkView.getSubnetList())),
                 new Parameter().withParameterKey("EngineParameter").withParameterValue(awsRdsInstanceView.getEngine()),
-                new Parameter().withParameterKey("EngineVersionParameter").withParameterValue(awsRdsInstanceView.getEngineVersion()),
                 new Parameter().withParameterKey("MasterUsernameParameter").withParameterValue(awsRdsInstanceView.getMasterUsername()),
                 new Parameter().withParameterKey("MasterUserPasswordParameter").withParameterValue(awsRdsInstanceView.getMasterUserPassword()),
                 new Parameter().withParameterKey("VPCSecurityGroupsParameter").withParameterValue(String.join(",", awsRdsInstanceView.getVPCSecurityGroups())),
-                new Parameter().withParameterKey("StackOwner").withParameterValue(String.valueOf(ac.getCloudContext().getUserName()))
+                new Parameter().withParameterKey("StackOwner").withParameterValue(ac.getCloudContext().getUserName())
         ));
 
-        // Add the port if it's been supplied
-        Integer port = stack.getDatabaseServer().getPort();
-        if (port != null) {
-            parameters.add(new Parameter().withParameterKey("PortParameter").withParameterValue(Objects.toString(port)));
-        }
+        addParameterIfNotNull(parameters, "AllocatedStorageParameter", awsRdsInstanceView.getAllocatedStorage());
+        addParameterIfNotNull(parameters, "BackupRetentionPeriodParameter", awsRdsInstanceView.getBackupRetentionPeriod());
+        addParameterIfNotNull(parameters, "EngineVersionParameter", awsRdsInstanceView.getEngineVersion());
+        addParameterIfNotNull(parameters, "PortParameter", stack.getDatabaseServer().getPort());
 
         return parameters;
+    }
+
+    private void addParameterIfNotNull(List<Parameter> parameters, String key, Object value) {
+        if (value != null) {
+            parameters.add(new Parameter().withParameterKey(key).withParameterValue(Objects.toString(value)));
+        }
     }
 }

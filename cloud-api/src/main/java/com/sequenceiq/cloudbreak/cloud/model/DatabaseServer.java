@@ -128,7 +128,7 @@ public class DatabaseServer extends DynamicModel {
 
         private Integer port;
 
-        private long storageSize;
+        private Long storageSize;
 
         private Security security;
 
