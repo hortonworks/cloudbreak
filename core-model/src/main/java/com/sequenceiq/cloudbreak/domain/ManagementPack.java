@@ -10,7 +10,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
@@ -115,7 +115,7 @@ public class ManagementPack implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     @Override
-    public WorkspaceResource getResource() {
-        return WorkspaceResource.MPACK;
+    public AuthorizationResource getResource() {
+        return AuthorizationResource.DATAHUB;
     }
 }

@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Topology;
@@ -55,8 +55,8 @@ public class TopologyService extends AbstractArchivistService<Topology> {
     }
 
     @Override
-    public WorkspaceResource resource() {
-        return WorkspaceResource.STACK;
+    public AuthorizationResource resource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     @Override

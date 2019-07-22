@@ -10,8 +10,8 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @EntityType(entityClass = ClusterTemplateView.class)
 @Transactional(TxType.REQUIRED)
 @DisableHasPermission
-@WorkspaceResourceType(resource = WorkspaceResource.CLUSTER_TEMPLATE)
+@AuthorizationResourceType(resource = AuthorizationResource.DATAHUB)
 public interface ClusterTemplateViewRepository extends WorkspaceResourceRepository<ClusterTemplateView, Long> {
 
     @Query("SELECT b FROM ClusterTemplateView b WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")

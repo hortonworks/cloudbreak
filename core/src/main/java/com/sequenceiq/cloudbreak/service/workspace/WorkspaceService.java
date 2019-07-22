@@ -14,15 +14,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.workspace.authorization.UmsWorkspaceAuthorizationService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceRepository;
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
+import com.sequenceiq.authorization.resource.ResourceAction;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.authorization.UmsAuthorizationService;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
+import com.sequenceiq.cloudbreak.workspace.authorization.api.WorkspaceRole;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -57,12 +57,12 @@ public class WorkspaceService {
     private Clock clock;
 
     @Inject
-    private UmsAuthorizationService umsAuthorizationService;
+    private UmsWorkspaceAuthorizationService umsWorkspaceAuthorizationService;
 
     public Workspace create(User user, Workspace workspace) {
         try {
             return transactionService.required(() -> {
-                umsAuthorizationService.assignResourceRoleToUserInWorkspace(user, workspace, WorkspaceRole.WORKSPACEMANAGER);
+                umsWorkspaceAuthorizationService.assignResourceRoleToUserInWorkspace(user, workspace.getResourceCrn(), WorkspaceRole.WORKSPACEMANAGER);
                 return workspaceRepository.save(workspace);
             });
         } catch (TransactionExecutionException e) {
@@ -87,7 +87,7 @@ public class WorkspaceService {
     }
 
     public Set<Workspace> retrieveForUser(User user) {
-        //return umsAuthorizationService.getWorkspacesOfCurrentUser(user);
+        //return umsWorkspaceAuthorizationService.getWorkspacesOfCurrentUser(user);
         return Sets.newHashSet(getByName(getAccountWorkspaceName(user), user).get());
     }
 
@@ -137,7 +137,7 @@ public class WorkspaceService {
                 Set<User> usersToBeRemoved = userService.getByUsersIds(userIds);
                 verifierService.validateAllUsersAreAlreadyInTheWorkspace(currentUser, workspace, usersToBeRemoved);
                 verifierService.verifyDefaultWorkspaceUserRemovals(currentUser, workspace, usersToBeRemoved);
-                umsAuthorizationService.removeResourceRolesOfUserInWorkspace(usersToBeRemoved, workspace);
+                umsWorkspaceAuthorizationService.removeResourceRolesOfUserInWorkspace(usersToBeRemoved, workspace.getResourceCrn());
                 return usersToBeRemoved;
             });
         } catch (TransactionExecutionException e) {
@@ -166,7 +166,8 @@ public class WorkspaceService {
 
     public Set<User> updateUsers(String workspaceName, Set<ChangeWorkspaceUsersV4Request> updateWorkspaceUsersJsons, User currentUser) {
         Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
-        Set<User> usersInWorkspace = umsAuthorizationService.getUsersOfWorkspace(currentUser, workspace);
+        Set<String> userIdsInWorkspace = umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(currentUser, workspace.getResourceCrn());
+        Set<User> usersInWorkspace = userService.getByUsersIds(userIdsInWorkspace);
         verifierService.authorizeWorkspaceManipulation(currentUser, workspace, ResourceAction.MANAGE,
                 "You cannot modify the users in this workspace.");
         verifierService.ensureWorkspaceManagementForUserUpdates(currentUser, workspace, updateWorkspaceUsersJsons);
@@ -196,7 +197,8 @@ public class WorkspaceService {
 
     public Set<User> changeUsers(String workspaceName, Set<ChangeWorkspaceUsersV4Request> changeUsersRequests, User currentUser) {
         Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
-        Set<User> usersInWorkspace = umsAuthorizationService.getUsersOfWorkspace(currentUser, workspace);
+        Set<String> userIdsInWorkspace = umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(currentUser, workspace.getResourceCrn());
+        Set<User> usersInWorkspace = userService.getByUsersIds(userIdsInWorkspace);
         verifierService.authorizeWorkspaceManipulation(currentUser, workspace, ResourceAction.MANAGE,
                 "You cannot modify the users in this workspace.");
         verifierService.ensureWorkspaceManagementForChangeUsers(changeUsersRequests);
@@ -210,7 +212,7 @@ public class WorkspaceService {
                 Set<User> removableUsers = usersInWorkspace.stream()
                         .filter(workspaceUser -> !newUserIds.contains(workspaceUser.getUserId()))
                         .collect(Collectors.toSet());
-                umsAuthorizationService.removeResourceRolesOfUserInWorkspace(removableUsers, workspace);
+                umsWorkspaceAuthorizationService.removeResourceRolesOfUserInWorkspace(removableUsers, workspace.getResourceCrn());
 
                 Set<User> newUsers = userService.getByUsersIds(newUserIds);
 
@@ -241,7 +243,7 @@ public class WorkspaceService {
                 verifierService.checkThatWorkspaceIsDeletable(currentUser, workspaceForDelete, defaultWorkspace);
                 setupDeletionDateAndFlag(workspaceForDelete);
                 workspaceRepository.save(workspaceForDelete);
-                umsAuthorizationService.notifyAltusAboutResourceDeletion(currentUser, workspaceForDelete);
+                umsWorkspaceAuthorizationService.notifyAltusAboutResourceDeletion(currentUser, workspaceForDelete.getResourceCrn());
                 LOGGER.debug("Deleted workspace: {}", workspaceName);
                 return workspaceForDelete;
             });
@@ -262,21 +264,21 @@ public class WorkspaceService {
                 .findFirst();
         if (requestForUser.isPresent() && requestForUser.get().getRoles() != null) {
             requestForUser.get().getRoles().stream()
-                    .forEach(role -> umsAuthorizationService.assignResourceRoleToUserInWorkspace(user, workspace, role));
+                    .forEach(role -> umsWorkspaceAuthorizationService.assignResourceRoleToUserInWorkspace(user, workspace.getResourceCrn(), role));
         }
     }
 
     private void updateUser(Set<ChangeWorkspaceUsersV4Request> requestWithRoles, Workspace workspace, User userToBeChange) {
-        Set<WorkspaceRole> userCurrentRoles = umsAuthorizationService.getUserRolesInWorkspace(userToBeChange, workspace);
+        Set<WorkspaceRole> userCurrentRoles = umsWorkspaceAuthorizationService.getUserRolesInWorkspace(userToBeChange, workspace.getResourceCrn());
         Optional<ChangeWorkspaceUsersV4Request> newRolesOptional = requestWithRoles.stream()
                 .filter(request -> StringUtils.equals(request.getUserId(), userToBeChange.getUserId()))
                 .findFirst();
         Set<WorkspaceRole> newRoles = newRolesOptional.isPresent() ? newRolesOptional.get().getRoles() : Sets.newHashSet();
         if (!userCurrentRoles.containsAll(newRoles) || !newRoles.containsAll(userCurrentRoles)) {
-            userCurrentRoles.stream()
-                    .forEach(currentRole -> umsAuthorizationService.unassignResourceRoleFromUserInWorkspace(userToBeChange, workspace, currentRole));
-            newRoles.stream()
-                    .forEach(currentRole -> umsAuthorizationService.assignResourceRoleToUserInWorkspace(userToBeChange, workspace, currentRole));
+            userCurrentRoles.stream().forEach(currentRole ->
+                    umsWorkspaceAuthorizationService.unassignResourceRoleFromUserInWorkspace(userToBeChange, workspace.getResourceCrn(), currentRole));
+            newRoles.stream().forEach(currentRole ->
+                    umsWorkspaceAuthorizationService.assignResourceRoleToUserInWorkspace(userToBeChange, workspace.getResourceCrn(), currentRole));
         }
     }
 

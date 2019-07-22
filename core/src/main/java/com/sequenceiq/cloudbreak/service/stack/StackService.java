@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonReader;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -39,7 +40,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
+import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -103,8 +104,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 
@@ -587,7 +587,7 @@ public class StackService {
     }
 
     public void updateNodeCount(Stack stack1, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack1.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         try {
             transactionService.required(() -> {
                 Stack stackWithLists = getByIdWithLists(stack1.getId());
@@ -708,7 +708,7 @@ public class StackService {
     }
 
     public void updateImage(Long stackId, Long workspaceId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         flowManager.triggerStackImageUpdate(stackId, imageId, imageCatalogName, imageCatalogUrl);
     }
 
@@ -737,7 +737,7 @@ public class StackService {
     }
 
     private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
                 .orElseThrow(() -> new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId)));
         downscaleValidatorService.checkInstanceIsTheAmbariServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
@@ -754,13 +754,13 @@ public class StackService {
     }
 
     private void repairFailedNodes(Stack stack, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         LOGGER.debug("Received request to replace failed nodes: " + stack.getId());
         flowManager.triggerManualRepairFlow(stack.getId());
     }
 
     private void sync(Stack stack, boolean full, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             if (full) {
                 flowManager.triggerFullSync(stack.getId());
@@ -781,7 +781,7 @@ public class StackService {
     }
 
     private void triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         if (!isStopNeeded(stack)) {
             return;
         }
@@ -827,7 +827,7 @@ public class StackService {
     }
 
     private void start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         if (stack.isAvailable()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_START_IGNORED.code());
             LOGGER.debug(statusDesc);
@@ -907,8 +907,8 @@ public class StackService {
 
     private void deleteByName(Stack stack, Boolean forced, Boolean deleteDependencies, User user) {
         LOGGER.info("Check permission for stack {} in environment {}.", stack.getName(), stack.getEnvironmentCrn());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
-        LOGGER.info("Check stack that no cluster is attached to {} in environment.", stack.getName(), stack.getEnvironmentCrn());
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
+        LOGGER.info("Check stack that no cluster is attached to {} in environment.", stack.getEnvironmentCrn());
         checkStackHasNoAttachedClusters(stack);
         MDCBuilder.buildMdcContext(stack);
         if (stack.isDeleteInProgress() && forced) {

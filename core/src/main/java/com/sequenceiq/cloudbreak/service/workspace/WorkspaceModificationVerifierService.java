@@ -13,10 +13,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
-import com.sequenceiq.cloudbreak.authorization.UmsAuthorizationService;
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
+import com.sequenceiq.cloudbreak.workspace.authorization.UmsWorkspaceAuthorizationService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.authorization.resource.ResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.cloudbreak.workspace.authorization.api.WorkspaceRole;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -32,21 +33,26 @@ public class WorkspaceModificationVerifierService {
     private StackService stackService;
 
     @Inject
-    private UmsAuthorizationService umsAuthorizationService;
+    private UmsWorkspaceAuthorizationService umsWorkspaceAuthorizationService;
+
+    @Inject
+    private UserService userService;
 
     public void authorizeWorkspaceManipulation(User currentUser, Workspace workspaceToManipulate, ResourceAction action, String unauthorizedMessage) {
-        Set<User> usersInWorkspace = umsAuthorizationService.getUsersOfWorkspace(currentUser, workspaceToManipulate);
+        Set<String> userIdsInWorkspace = umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(currentUser, workspaceToManipulate.getResourceCrn());
+        Set<User> usersInWorkspace = userService.getByUsersIds(userIdsInWorkspace);
         Optional<User> userInWorkspace = usersInWorkspace.stream().filter(user -> user.equals(currentUser)).findFirst();
         if (!userInWorkspace.isPresent()) {
             throw new AccessDeniedException("You have no access for this workspace.");
         }
-        umsAuthorizationService.checkRightOfUserForResource(currentUser, workspaceToManipulate, WorkspaceResource.WORKSPACE, action, unauthorizedMessage);
+        umsWorkspaceAuthorizationService.checkRightOfUserForResource(currentUser.getUserCrn(), AuthorizationResource.DATAHUB, action, unauthorizedMessage);
     }
 
     public void validateAllUsersAreAlreadyInTheWorkspace(User currentUser, Workspace workspace, Set<User> users) {
         validateAllUsersAreInTheTenant(workspace, users);
 
-        Set<User> usersInWorkspace = umsAuthorizationService.getUsersOfWorkspace(currentUser, workspace);
+        Set<String> userIdsInWorkspace = umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(currentUser, workspace.getResourceCrn());
+        Set<User> usersInWorkspace = userService.getByUsersIds(userIdsInWorkspace);
         if (!usersInWorkspace.containsAll(users)) {
             Set<String> usersNotPresentInWorkspace = users.stream()
                     .filter(user -> !usersInWorkspace.contains(user))
@@ -60,7 +66,8 @@ public class WorkspaceModificationVerifierService {
     public void validateUsersAreNotInTheWorkspaceYet(User currentUser, Workspace workspace, Set<User> users) {
         validateAllUsersAreInTheTenant(workspace, users);
 
-        Set<User> usersInWorkspace = umsAuthorizationService.getUsersOfWorkspace(currentUser, workspace);
+        Set<String> userIdsInWorkspace = umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(currentUser, workspace.getResourceCrn());
+        Set<User> usersInWorkspace = userService.getByUsersIds(userIdsInWorkspace);
         Set<User> usersPresentInWorkspace = usersInWorkspace.stream().filter(user -> users.contains(user)).collect(Collectors.toSet());
         if (!usersPresentInWorkspace.isEmpty()) {
             String usersCommaSeparated = String.join(", ", usersPresentInWorkspace.stream().map(user -> user.getUserName()).collect(Collectors.toSet()));
@@ -78,10 +85,11 @@ public class WorkspaceModificationVerifierService {
     }
 
     public void ensureWorkspaceManagementForUserRemainingUsers(User currentUser, Workspace workspace, Set<String> affectedUserIds) {
-        Set<User> usersInWorkspace = umsAuthorizationService.getUsersOfWorkspace(currentUser, workspace);
+        Set<String> userIdsInWorkspace = umsWorkspaceAuthorizationService.getUserIdsOfWorkspace(currentUser, workspace.getResourceCrn());
+        Set<User> usersInWorkspace = userService.getByUsersIds(userIdsInWorkspace);
         boolean remainedUserWithManagerRole = usersInWorkspace.stream()
                 .filter(user -> !affectedUserIds.contains(user.getUserId()))
-                .filter(user -> umsAuthorizationService.getUserRolesInWorkspace(user, workspace).stream()
+                .filter(user -> umsWorkspaceAuthorizationService.getUserRolesInWorkspace(user, workspace.getResourceCrn()).stream()
                     .filter(role -> WorkspaceRole.WORKSPACEMANAGER.equals(role))
                     .count() > 0)
                 .findAny()

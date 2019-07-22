@@ -5,7 +5,7 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
+import com.sequenceiq.cloudbreak.workspace.authorization.api.WorkspaceRole;
 
 import io.swagger.annotations.ApiModel;
 

@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.comparator.audit.AuditEventComparator;
@@ -23,7 +24,6 @@ import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventRepository;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Service
 public class AuditEventService extends AbstractWorkspaceAwareResourceService<StructuredEventEntity> {
@@ -80,8 +80,8 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     }
 
     @Override
-    public WorkspaceResource resource() {
-        return WorkspaceResource.STRUCTURED_EVENT;
+    public AuthorizationResource resource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     @Override

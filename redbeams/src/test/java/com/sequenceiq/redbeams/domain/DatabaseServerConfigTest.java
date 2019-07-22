@@ -13,7 +13,6 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 
@@ -83,11 +82,6 @@ public class DatabaseServerConfigTest {
 
         config.setEnvironmentId("myenvironment");
         assertEquals("myenvironment", config.getEnvironmentId());
-    }
-
-    @Test
-    public void testGetResource() {
-        assertEquals(WorkspaceResource.DATABASE_SERVER, config.getResource());
     }
 
     @Test

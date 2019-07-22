@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.ArchivableResource;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -69,8 +69,8 @@ public class AbstractArchivistServiceTest {
         }
 
         @Override
-        public WorkspaceResource resource() {
-            return WorkspaceResource.ALL;
+        public AuthorizationResource resource() {
+            return AuthorizationResource.DATAHUB;
         }
     }
 
@@ -116,7 +116,7 @@ public class AbstractArchivistServiceTest {
         }
 
         @Override
-        public WorkspaceResource getResource() {
+        public AuthorizationResource getResource() {
             return null;
         }
 

@@ -17,7 +17,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Where;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
@@ -60,8 +60,8 @@ public class Topology implements ProvisionEntity, WorkspaceAwareResource, Archiv
     }
 
     @Override
-    public WorkspaceResource getResource() {
-        return WorkspaceResource.STACK;
+    public AuthorizationResource getResource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     public Long getId() {

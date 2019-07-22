@@ -10,10 +10,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
@@ -64,7 +64,7 @@ public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResour
 
     @Override
     public String getName() {
-        return getResource() + "-" + id;
+        return "saltsecurityconfig-" + id;
     }
 
     @Override
@@ -73,8 +73,8 @@ public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResour
     }
 
     @Override
-    public WorkspaceResource getResource() {
-        return WorkspaceResource.STACK;
+    public AuthorizationResource getResource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     public void setId(Long id) {

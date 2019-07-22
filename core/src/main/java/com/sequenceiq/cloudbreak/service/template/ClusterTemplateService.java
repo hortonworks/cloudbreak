@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -38,7 +39,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackTemplateService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Service
 public class ClusterTemplateService extends AbstractWorkspaceAwareResourceService<ClusterTemplate> {
@@ -199,8 +199,8 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     }
 
     @Override
-    public WorkspaceResource resource() {
-        return WorkspaceResource.CLUSTER_TEMPLATE;
+    public AuthorizationResource resource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     public ClusterTemplate delete(String name, Long workspaceId) {

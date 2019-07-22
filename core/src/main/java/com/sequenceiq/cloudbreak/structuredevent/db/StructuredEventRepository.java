@@ -10,23 +10,23 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.authorization.repository.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspace;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
-import com.sequenceiq.cloudbreak.workspace.repository.check.DisableCheckPermissions;
-import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 
 @EntityType(entityClass = StructuredEventEntity.class)
 @Transactional(TxType.REQUIRED)
 @DisableHasPermission
-@WorkspaceResourceType(resource = WorkspaceResource.STRUCTURED_EVENT)
+@AuthorizationResourceType(resource = AuthorizationResource.DATAHUB)
 public interface StructuredEventRepository extends WorkspaceResourceRepository<StructuredEventEntity, Long> {
 
     @Override

@@ -13,13 +13,13 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Entity
@@ -65,8 +65,8 @@ public class FileSystem implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     @Override
-    public WorkspaceResource getResource() {
-        return WorkspaceResource.STACK;
+    public AuthorizationResource getResource() {
+        return AuthorizationResource.DATAHUB;
     }
 
     public Long getId() {

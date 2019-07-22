@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.sequenceiq.authorization.service.UmsAuthorizationService;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
@@ -94,6 +96,9 @@ public class EnvironmentServiceIntegrationTest {
     @MockBean
     private RequestProvider requestProvider;
 
+    @MockBean
+    private UmsAuthorizationService umsAuthorizationService;
+
     @Inject
     private ProxyConfigRepository proxyConfigRepository;
 
@@ -126,6 +131,8 @@ public class EnvironmentServiceIntegrationTest {
         credential.setGovCloud(false);
         credential.setArchived(false);
         credentialRequest = new CredentialRequest();
+
+        doNothing().when(umsAuthorizationService).checkRightOfUserForResource(any(), any(), any(), any());
     }
 
     @AfterEach

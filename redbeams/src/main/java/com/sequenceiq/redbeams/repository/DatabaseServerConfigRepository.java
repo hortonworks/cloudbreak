@@ -6,33 +6,36 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.authorization.repository.BaseJpaRepository;
+import com.sequenceiq.authorization.repository.CheckPermission;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.redbeams.authorization.CheckPermissionsByReturnValue;
-import com.sequenceiq.redbeams.authorization.ResourceAction;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 @EntityType(entityClass = DatabaseServerConfig.class)
 @Transactional(TxType.REQUIRED)
-public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseServerConfig, Long> {
+@AuthorizationResourceType(resource = AuthorizationResource.DATALAKE)
+public interface DatabaseServerConfigRepository extends BaseJpaRepository<DatabaseServerConfig, Long> {
 
-    @CheckPermissionsByReturnValue(action = ResourceAction.READ)
+    @CheckPermission(action = ResourceAction.READ)
     Set<DatabaseServerConfig> findByWorkspaceIdAndEnvironmentId(Long workspaceId, String environmentId);
 
-    @CheckPermissionsByReturnValue(action = ResourceAction.READ)
+    @CheckPermission(action = ResourceAction.READ)
     Optional<DatabaseServerConfig> findByResourceCrn(Crn crn);
 
-    @CheckPermissionsByReturnValue(action = ResourceAction.READ)
+    @CheckPermission(action = ResourceAction.READ)
     Optional<DatabaseServerConfig> findByNameAndWorkspaceIdAndEnvironmentId(String name, Long workspaceId, String environmentId);
 
-    @CheckPermissionsByReturnValue(action = ResourceAction.READ)
+    @CheckPermission(action = ResourceAction.READ)
     Set<DatabaseServerConfig> findByResourceCrnIn(Set<Crn> resourceCrns);
 
-    @CheckPermissionsByReturnValue(action = ResourceAction.READ)
+    @CheckPermission(action = ResourceAction.READ)
     @Query("SELECT s FROM DatabaseServerConfig s WHERE s.workspaceId = :workspaceId AND s.environmentId = :environmentId "
             + "AND (s.name IN :names OR s.resourceCrn IN :names)")
     Set<DatabaseServerConfig> findByNameInAndWorkspaceIdAndEnvironmentId(

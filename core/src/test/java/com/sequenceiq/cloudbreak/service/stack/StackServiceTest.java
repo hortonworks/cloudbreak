@@ -32,12 +32,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
+import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -70,8 +71,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 
@@ -83,6 +83,8 @@ public class StackServiceTest {
     private static final Long DATALAKE_RESOURCE_ID = 2L;
 
     private static final Long WORKSPACE_ID = 1L;
+
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:1234:user:1";
 
     private static final String OWNER = "1234567";
 
@@ -198,6 +200,7 @@ public class StackServiceTest {
         when(stack.getName()).thenReturn(STACK_NAME);
         when(stack.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        when(user.getUserCrn()).thenReturn(USER_CRN);
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setDatalakeStackId(STACK_ID);
         datalakeResources.setId(DATALAKE_RESOURCE_ID);
@@ -334,7 +337,7 @@ public class StackServiceTest {
     public void testDeleteByIdWhenStackIsAlreadyDeletedThenDeletionWillNotTrigger() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
-        doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        doNothing().when(permissionCheckingUtils).checkPermissionForUser(any(), any(), anyString());
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stack.isDeleteCompleted()).thenReturn(true);
 
@@ -342,32 +345,31 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
     public void testDeleteByNameAndWorkspaceIdWhenStackIsAlreadyDeletedThenDeletionWillNotTrigger() {
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
-        doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        doNothing().when(permissionCheckingUtils).checkPermissionForUser(any(), any(), anyString());
         when(stack.isDeleteCompleted()).thenReturn(true);
 
         underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
     public void testDeleteByIdWhenUserHasNoWriteRightOverStackThenExceptionShouldComeAndTerminationShouldNotBeCalled() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
-        doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID,
-                WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils).checkPermissionForUser(any(), any(), anyString());
 
         expectedException.expect(AccessDeniedException.class);
         expectedException.expectMessage(STACK_DELETE_ACCESS_DENIED);
@@ -376,16 +378,15 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
     public void testDeleteByNameAndWorkspaceIdWhenUserHasNoWriteRightOverStackThenExceptionShouldComeAndTerminationShouldNotBeCalled() {
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
-        doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils)
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils).checkPermissionForUser(any(), any(), anyString());
 
         expectedException.expect(AccessDeniedException.class);
         expectedException.expectMessage(STACK_DELETE_ACCESS_DENIED);
@@ -394,15 +395,15 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
     public void testDeleteByIdWhenUserHasWriteRightOverStackAndStackIsNotDeletedThenTerminationShouldBeCalled() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        doNothing().when(permissionCheckingUtils).checkPermissionForUser(any(), any(), anyString());
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
 
         underTest.deleteByName(STACK_ID, true, true, user);
@@ -410,14 +411,14 @@ public class StackServiceTest {
         verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(flowManager, times(1)).triggerTermination(STACK_ID, true, true);
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
     public void testDeleteByNameAndWorkspaceIdWhenUserHasWriteRightOverStackAndStackIsNotDeletedThenTerminationShouldBeCalled() {
-        doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        doNothing().when(permissionCheckingUtils).checkPermissionForUser(any(), any(), anyString());
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
 
         underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
@@ -425,9 +426,9 @@ public class StackServiceTest {
         verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(flowManager, times(1)).triggerTermination(STACK_ID, true, true);
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -447,9 +448,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -469,9 +470,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -491,9 +492,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -513,9 +514,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -533,9 +534,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -553,9 +554,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -573,9 +574,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -593,9 +594,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -616,9 +617,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -639,9 +640,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -662,9 +663,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -685,9 +686,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -706,9 +707,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -727,9 +728,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -748,9 +749,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test
@@ -769,9 +770,9 @@ public class StackServiceTest {
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
+                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
-                .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
     }
 
     @Test

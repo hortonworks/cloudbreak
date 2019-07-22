@@ -312,10 +312,9 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(proxyTestClient.create(), key(name))
-                .expect(ForbiddenException.class,
-                        expectedMessage("Access denied")
-                                .withKey(name))
+                .when(proxyTestClient.create(),
+                        key(name))
+                .expect(ForbiddenException.class, key(name))
                 .validate();
     }
 }

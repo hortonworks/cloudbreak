@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
+import com.sequenceiq.authorization.resource.ResourceAction;
 
 
 @Retention(RetentionPolicy.RUNTIME)

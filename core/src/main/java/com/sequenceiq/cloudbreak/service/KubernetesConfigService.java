@@ -6,13 +6,13 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.repository.KubernetesConfigRepository;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Service
 public class KubernetesConfigService extends AbstractWorkspaceAwareResourceService<KubernetesConfig> {
@@ -57,8 +57,8 @@ public class KubernetesConfigService extends AbstractWorkspaceAwareResourceServi
     }
 
     @Override
-    public WorkspaceResource resource() {
-        return WorkspaceResource.KUBERNETES;
+    public AuthorizationResource resource() {
+        return AuthorizationResource.DATAHUB;
     }
 
 }

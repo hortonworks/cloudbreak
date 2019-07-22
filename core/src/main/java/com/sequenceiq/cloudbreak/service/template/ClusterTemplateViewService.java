@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateViewRepository;
@@ -33,7 +33,7 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
     }
 
     @Override
-    public WorkspaceResource resource() {
-        return WorkspaceResource.CLUSTER_TEMPLATE;
+    public AuthorizationResource resource() {
+        return AuthorizationResource.DATAHUB;
     }
 }
