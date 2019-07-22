@@ -13,7 +13,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.common.json.ExceptionResult;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 
 import ch.qos.logback.classic.Level;
 
@@ -61,7 +61,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
     }
 
     protected Object getEntity(E exception) {
-        return new ExceptionResult(getErrorMessage(exception));
+        return new ExceptionResponse(getErrorMessage(exception));
     }
 
     protected boolean logException() {

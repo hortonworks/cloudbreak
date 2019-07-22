@@ -3,7 +3,7 @@ package com.sequenceiq.redbeams.controller.mapper;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
-import com.sequenceiq.redbeams.api.model.ExceptionResponse;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 
 @Provider
 public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {

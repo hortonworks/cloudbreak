@@ -206,19 +206,23 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             if (applicationFlowInformation.getRestartableFlows().contains(flowLog.getFlowType())) {
                 Optional<FlowConfiguration<?>> flowConfig = flowConfigs.stream()
                         .filter(fc -> fc.getClass().equals(flowLog.getFlowType())).findFirst();
-                Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
-                Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), payload.getResourceId());
-                runningFlows.put(flow, flowLog.getFlowChainId());
-                if (flowLog.getFlowChainId() != null) {
-                    flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
-                }
-                Map<Object, Object> variables = (Map<Object, Object>) JsonReader.jsonToJava(flowLog.getVariables());
-                flow.initialize(flowLog.getCurrentState(), variables);
-                RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
-                if (restartAction != null) {
-                    restartAction.restart(new FlowParameters(flowLog.getFlowId(), flowLog.getFlowTriggerUserCrn()), flowLog.getFlowChainId(),
-                            flowLog.getNextEvent(), payload);
-                    return;
+                try {
+                    Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
+                    Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), payload.getResourceId());
+                    runningFlows.put(flow, flowLog.getFlowChainId());
+                    if (flowLog.getFlowChainId() != null) {
+                        flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
+                    }
+                    Map<Object, Object> variables = (Map<Object, Object>) JsonReader.jsonToJava(flowLog.getVariables());
+                    flow.initialize(flowLog.getCurrentState(), variables);
+                    RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
+                    if (restartAction != null) {
+                        restartAction.restart(new FlowParameters(flowLog.getFlowId(), flowLog.getFlowTriggerUserCrn()), flowLog.getFlowChainId(),
+                                flowLog.getNextEvent(), payload);
+                        return;
+                    }
+                } catch (RuntimeException e) {
+                    LOGGER.error("Can not read payload", e);
                 }
             }
             try {

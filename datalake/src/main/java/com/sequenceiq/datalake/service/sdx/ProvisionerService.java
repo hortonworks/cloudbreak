@@ -8,7 +8,6 @@ import java.util.Collections;
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
-import com.sequenceiq.cloudbreak.common.json.ExceptionResult;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -55,11 +53,9 @@ public class ProvisionerService {
             } catch (NotFoundException e) {
                 LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
             } catch (ClientErrorException e) {
-                try (Response response = e.getResponse()) {
-                    ExceptionResult result = response.readEntity(ExceptionResult.class);
-                    LOGGER.info("Can not delete stack from cloudbreak: {}", sdxCluster.getClusterName());
-                    throw new RuntimeException(String.format("Can not delete stack, client error happened on Cloudbreak side: %s", result.getMessage()), e);
-                }
+                String errorMessage = ClientErrorExceptionHandler.getErrorMessage(e);
+                LOGGER.info("Can not delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
+                throw new RuntimeException("Can not delete stack, client error happened on Cloudbreak side: " + errorMessage);
             }
         }, () -> {
             throw notFound("SDX cluster", id).get();
@@ -112,10 +108,10 @@ public class ProvisionerService {
             } catch (ClientErrorException e) {
                 String errorMessage = ClientErrorExceptionHandler.getErrorMessage(e);
                 LOGGER.info("Can not start provisioning: {}", errorMessage, e);
-                throw new RuntimeException("Can not start provisioning, client error happened on Cloudbreak side: " + errorMessage, e);
+                throw new RuntimeException("Can not start provisioning, client error happened on Cloudbreak side: " + errorMessage);
             } catch (IOException e) {
-                LOGGER.info("Can not parse stackrequest to json");
-                throw new RuntimeException("Can not write stackrequest to json", e);
+                LOGGER.info("Can not parse stackrequest to json", e);
+                throw new RuntimeException("Can not write stackrequest to json: " + e.getMessage());
             }
         }, () -> {
             throw notFound("SDX cluster", id).get();

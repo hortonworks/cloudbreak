@@ -4,14 +4,14 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.json.ExceptionResult;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 
 @Component
 public class RuntimeExceptionMapper extends BaseExceptionMapper<RuntimeException> {
 
     @Override
     protected Object getEntity(RuntimeException exception) {
-        return new ExceptionResult("Internal server error: " + exception.getMessage());
+        return new ExceptionResponse("Internal server error: " + exception.getMessage());
     }
 
     @Override

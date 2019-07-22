@@ -5,14 +5,14 @@ import javax.ws.rs.ext.Provider;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
-import com.sequenceiq.periscope.api.model.ExceptionResult;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 
 @Provider
 public class DataIntegrityViolationExceptionMapper extends BaseExceptionMapper<DataIntegrityViolationException> {
 
     @Override
     protected Object getEntity(DataIntegrityViolationException exception) {
-        return new ExceptionResult(exception.getLocalizedMessage());
+        return new ExceptionResponse(exception.getLocalizedMessage());
     }
 
     @Override
