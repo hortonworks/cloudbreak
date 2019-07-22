@@ -19,6 +19,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.UserService;
 
 @Service
 public class FreeIpaPostInstallService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaPostInstallService.class);
 
     private static final String SET_PASSWORD_EXPIRATION_PERMISSION = "Set Password Expiration";
@@ -39,6 +40,9 @@ public class FreeIpaPostInstallService {
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
+    @Inject
+    private PasswordPolicyService passwordPolicyService;
+
     public void postInstallFreeIpa(Long stackId) throws Exception {
         LOGGER.debug("Performing post-install configuration for stack {}", stackId);
         Stack stack = stackService.getStackById(stackId);
@@ -52,6 +56,7 @@ public class FreeIpaPostInstallService {
             LOGGER.debug("Set maximum username length to {}", MAX_USERNAME_LENGTH);
             freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);
         }
+        passwordPolicyService.updatePasswordPolicy(freeIpaClient);
 
         userService.syncAllUsersForStack(threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), stack);
     }
