@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.client;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import com.sequenceiq.freeipa.client.model.DnsZoneList;
 import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Keytab;
+import com.sequenceiq.freeipa.client.model.PasswordPolicy;
 import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.Privilege;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
@@ -451,5 +453,13 @@ public class FreeIpaClient {
             LOGGER.error(message, throwable);
             throw new FreeIpaClientException(message, throwable);
         }
+    }
+
+    public PasswordPolicy getPasswordPolicy() throws FreeIpaClientException {
+        return (PasswordPolicy) invoke("pwpolicy_show", List.of(), Map.of(), PasswordPolicy.class).getResult();
+    }
+
+    public void updatePasswordPolicy(Map<String, Object> params) throws FreeIpaClientException {
+        invoke("pwpolicy_mod", Collections.emptyList(), params, Object.class);
     }
 }

@@ -57,9 +57,12 @@ public class PasswordService {
     @Inject
     private SyncOperationToSyncOperationStatus syncOperationToSyncOperationStatus;
 
+    @Inject
+    private FreeIpaPasswordValidator freeIpaPasswordValidator;
+
     public SyncOperationStatus setPassword(String accountId, String userCrn, String password, Set<String> envs) {
         LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
-
+        freeIpaPasswordValidator.validate(password);
         List<Stack> stacks;
         List<Stack> allStacks = stackService.getAllByAccountId(accountId);
         if (envs != null && !envs.isEmpty()) {

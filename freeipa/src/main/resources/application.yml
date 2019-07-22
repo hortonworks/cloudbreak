@@ -48,6 +48,15 @@ freeipa:
   intermediate.threadpool:
     core.size: 100
     capacity.size: 4000
+  passwordpolicy:
+    min-password-lenght: 4
+    max-password-lenght: 16
+    min-character-classes: 4
+    max-password-life: 1826
+    max-failures-before-lock: 10
+    failure-reset-interval: 3
+    lockout-duration: 10
+    
 
 info:
   app:
