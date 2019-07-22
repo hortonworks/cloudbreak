@@ -196,7 +196,7 @@ public class KerberosMgmtV1ServiceTest {
         request.setServerHostName(HOST);
         ServiceKeytabResponse resp = underTest.generateServiceKeytab(request, ACCOUNT_ID);
         Assert.assertNotNull(resp.getKeytab());
-        Assert.assertNotNull(resp.getServicePrincial());
+        Assert.assertNotNull(resp.getServicePrincipal());
     }
 
     @Test

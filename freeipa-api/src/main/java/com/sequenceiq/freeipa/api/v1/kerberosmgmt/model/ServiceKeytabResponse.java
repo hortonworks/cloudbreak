@@ -12,17 +12,17 @@ import io.swagger.annotations.ApiModelProperty;
 public class ServiceKeytabResponse {
 
     @ApiModelProperty (KeytabModelDescription.PRINCIPAL)
-    private SecretResponse servicePrincial;
+    private SecretResponse servicePrincipal;
 
     @ApiModelProperty (KeytabModelDescription.KEYTAB)
     private SecretResponse keytab;
 
-    public SecretResponse getServicePrincial() {
-        return servicePrincial;
+    public SecretResponse getServicePrincipal() {
+        return servicePrincipal;
     }
 
-    public void setServicePrincial(SecretResponse servicePrincial) {
-        this.servicePrincial = servicePrincial;
+    public void setServicePrincipal(SecretResponse servicePrincipal) {
+        this.servicePrincipal = servicePrincipal;
     }
 
     public SecretResponse getKeytab() {
