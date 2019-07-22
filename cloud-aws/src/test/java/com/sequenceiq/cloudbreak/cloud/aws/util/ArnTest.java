@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws.util;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class ArnTest {
 
@@ -14,6 +16,13 @@ public class ArnTest {
     private static final String ACCOUNTID = "account";
 
     private static final String RESOURCE = "resource";
+
+    private static final String ARN_MUST_NOT_BE_EMPTY = "ARN must not be empty.";
+
+    private static final String ARN_MUST_CONSIST_OF_EXACTLY_5_PARTS = "ARN must consist of exactly 5 parts.";
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void ofCreatesFully() {
@@ -33,5 +42,31 @@ public class ArnTest {
         Assert.assertEquals("", result.getRegion());
         Assert.assertEquals("", result.getAccountId());
         Assert.assertEquals("", result.getResource());
+    }
+
+    @Test
+    public void illegalThrownForNull() {
+        expectIllegalWithMessage(null, ARN_MUST_NOT_BE_EMPTY);
+    }
+
+    @Test
+    public void illegalThrownForEmpty() {
+        expectIllegalWithMessage("", ARN_MUST_NOT_BE_EMPTY);
+    }
+
+    @Test
+    public void illegalThrownForBlank() {
+        expectIllegalWithMessage("  ", ARN_MUST_NOT_BE_EMPTY);
+    }
+
+    @Test
+    public void illegalThrownForMissingParts() {
+        expectIllegalWithMessage("x", ARN_MUST_CONSIST_OF_EXACTLY_5_PARTS);
+    }
+
+    private void expectIllegalWithMessage(String arn, String message) {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage(message);
+        Arn.of(arn);
     }
 }
