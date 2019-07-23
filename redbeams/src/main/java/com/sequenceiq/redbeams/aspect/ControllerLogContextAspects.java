@@ -24,7 +24,7 @@ public class ControllerLogContextAspects {
     @Inject
     private LogContextService logContextService;
 
-    @Pointcut("execution(public * com.sequenceiq.redbeams.controller..*(..))")
+    @Pointcut("execution(public * com.sequenceiq.redbeams.controller..*Controller.*(..))")
     public void interceptControllerMethodCalls() {
     }
 
@@ -38,7 +38,7 @@ public class ControllerLogContextAspects {
             CodeSignature sig = (CodeSignature) joinPoint.getSignature();
             String[] paramNames = sig.getParameterNames();
 
-            // FIXME Once CB-1923 is done, this param name patching can be removed
+            // FIXME Once DatabaseConfigController is changed to use environmentCrn, this param name patching can be removed
             // This does not help getting the environment CRN from a request object anyway
             for (int i = 0; i < paramNames.length; i++) {
                 if (paramNames[i].equalsIgnoreCase("environmentid")) {
