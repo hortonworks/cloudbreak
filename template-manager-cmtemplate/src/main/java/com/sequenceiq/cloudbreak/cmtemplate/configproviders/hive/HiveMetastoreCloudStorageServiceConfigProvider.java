@@ -16,9 +16,9 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class HiveMetastoreCloudStorageServiceConfigProvider implements CmTemplateComponentConfigProvider {
 
-    private static final String HMS_METASTORE_DIR = "hive.metastore.warehouse.dir";
+    public static final String HMS_METASTORE_DIR = "hive.metastore.warehouse.dir";
 
-    private static final String HMS_METASTORE_EXTERNAL_DIR = "hive.metastore.warehouse.external.dir";
+    public static final String HMS_METASTORE_EXTERNAL_DIR = "hive.metastore.warehouse.external.dir";
 
     private static final String HMS_METASTORE_DIR_TEMPLATE_PARAM = "hive_warehouse_directory";
 
