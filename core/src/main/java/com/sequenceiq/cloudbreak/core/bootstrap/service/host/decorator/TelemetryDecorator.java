@@ -6,8 +6,12 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 /**
  * Decorate fluentd related salt pillar configs (in order to ship daemon logs to cloud storage)
@@ -28,17 +32,23 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 @Component
 public class TelemetryDecorator {
 
-    public Map<String, SaltPillarProperties> decoratePillar(Map<String, SaltPillarProperties> servicePillar, FluentConfigView fluentConfigView) {
+    private static final String CLUSTER_TYPE_DISTROX = "datahub";
+
+    private static final String CLUSTER_TYPE_SDX = "datalake";
+
+    private final FluentConfigService fluentConfigService;
+
+    public TelemetryDecorator(FluentConfigService fluentConfigService) {
+        this.fluentConfigService = fluentConfigService;
+    }
+
+    public Map<String, SaltPillarProperties> decoratePillar(Map<String, SaltPillarProperties> servicePillar,
+            Stack stack, Telemetry telemetry) {
+        String clusterType = StackType.DATALAKE.equals(stack.getType()) ? CLUSTER_TYPE_SDX : CLUSTER_TYPE_DISTROX;
+        FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(stack.getCluster().getName(),
+                clusterType, stack.getCloudPlatform(),  telemetry);
         if (fluentConfigView.isEnabled()) {
             Map<String, Object> fluentConfig = fluentConfigView.toMap();
-            Map<String, Object> overrideAttributes = fluentConfigView.getOverrideAttributes();
-            if (overrideAttributes != null) {
-                for (Map.Entry<String, Object> entry : overrideAttributes.entrySet()) {
-                    if (fluentConfig.containsKey(entry.getKey())) {
-                        fluentConfig.put(entry.getKey(), entry.getValue());
-                    }
-                }
-            }
             servicePillar.put("fluent",
                     new SaltPillarProperties("/fluent/init.sls", singletonMap("fluent", fluentConfig)));
         }
