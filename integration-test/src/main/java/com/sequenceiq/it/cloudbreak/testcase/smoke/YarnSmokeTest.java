@@ -62,21 +62,19 @@ public class YarnSmokeTest extends AbstractE2ETest {
         String cmcluster = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
 
-        testContext.given(cm, ClouderaManagerTestDto.class)
-                .given(cmcluster, ClusterTestDto.class)
-                .withValidateBlueprint(Boolean.FALSE)
-                .withClouderaManager(cm)
+        testContext
+                .given(cm, ClouderaManagerTestDto.class)
+                .given(cmcluster, ClusterTestDto.class).withValidateBlueprint(Boolean.FALSE).withClouderaManager(cm)
                 .given(RecipeTestDto.class)
                 .withName(postCmStartRecipeName).withContent(generateCreateCMUserRecipeContent(CREATE_CM_USER_SCRIPT_FILE))
                 .withRecipeType(POST_AMBARI_START)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                 .withHostGroup(MASTER).withNodeCount(NODE_COUNT).withRecipes(postCmStartRecipeName)
-                .given(stack, StackTestDto.class)
-                .withCluster(cmcluster)
+                .given(StackTestDto.class).withCluster(cmcluster)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4(), key(stack))
-                .await(STACK_AVAILABLE)
+                .await(STACK_AVAILABLE, key(stack))
                 .then(ClouderaManagerUtil::checkClouderaManagerUser)
                 .validate();
     }
