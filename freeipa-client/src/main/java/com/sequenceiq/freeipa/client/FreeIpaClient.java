@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.freeipa.client.model.Ca;
+import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
@@ -33,6 +34,8 @@ public class FreeIpaClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaClient.class);
 
     private static final String DEFAULT_API_VERSION = "2.230";
+
+    private static final int CESSATION_OF_OPERATION = 5;
 
     private JsonRpcHttpClient jsonRpcHttpClient;
 
@@ -236,6 +239,18 @@ public class FreeIpaClient {
         Map<String, Object> params = Map.of();
         RPCResponse<Ca> response = invoke("ca_show", flags, params, Ca.class);
         return response.getResult().getCertificate();
+    }
+
+    public Set<Cert> findAllCert() throws FreeIpaClientException {
+        ParameterizedType type = TypeUtils
+                .parameterize(Set.class, Cert.class);
+        return (Set<Cert>) invoke("cert_find", List.of(), Map.of(), type).getResult();
+    }
+
+    public void revokeCert(int serialNumber) throws FreeIpaClientException {
+        List<String> flags = List.of(String.valueOf(serialNumber));
+        Map<String, Object> params = Map.of("revocation_reason", CESSATION_OF_OPERATION);
+        invoke("cert_revoke", flags, params, Object.class);
     }
 
     public void addPasswordExpirationPermission(String permission) throws FreeIpaClientException {
