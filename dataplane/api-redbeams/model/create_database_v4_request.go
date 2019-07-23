@@ -18,11 +18,8 @@ type CreateDatabaseV4Request struct {
 	// Name of the database configuration resource
 	DatabaseName string `json:"databaseName,omitempty"`
 
-	// ID of the environment of the resource
-	EnvironmentID string `json:"environmentId,omitempty"`
-
-	// Name of the database server
-	ExistingDatabaseServerName string `json:"existingDatabaseServerName,omitempty"`
+	// Crn of the database server
+	ExistingDatabaseServerCrn string `json:"existingDatabaseServerCrn,omitempty"`
 
 	// Type of database, aka the service name that will use the database like HIVE, DRUID, SUPERSET, RANGER, etc.
 	Type string `json:"type,omitempty"`

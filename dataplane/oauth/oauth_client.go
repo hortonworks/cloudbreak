@@ -4,6 +4,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	environmentclient "github.com/hortonworks/cb-cli/dataplane/api-environment/client"
 	freeipaclient "github.com/hortonworks/cb-cli/dataplane/api-freeipa/client"
+	redbeamsclient "github.com/hortonworks/cb-cli/dataplane/api-redbeams/client"
 	sdxclient "github.com/hortonworks/cb-cli/dataplane/api-sdx/client"
 	apiclient "github.com/hortonworks/cb-cli/dataplane/api/client"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
@@ -27,6 +28,10 @@ type FreeIpa struct {
 
 type Environment struct {
 	Environment *environmentclient.Environment
+}
+
+type Redbeams struct {
+	Redbeams *redbeamsclient.Redbeams
 }
 
 func NewCloudbreakHTTPClientFromContext(c *cli.Context) *Cloudbreak {
@@ -102,6 +107,18 @@ func NewEnvironmentClient(address string, apiKeyID, privateKey string) *Environm
 	const baseAPIPath string = "/environmentservice/api"
 	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
 	return &Environment{Environment: environmentclient.New(transport, strfmt.Default)}
+}
+
+func NewRedbeamsClientFromContext(c *cli.Context) *Redbeams {
+	return NewRedbeamsClientFrom(c.String(fl.FlServerOptional.Name), c.String(fl.FlApiKeyIDOptional.Name), c.String(fl.FlPrivateKeyOptional.Name))
+}
+
+func NewRedbeamsClientFrom(address string, apiKeyID, privateKey string) *Redbeams {
+	u.CheckServerAddress(address)
+	var transport *utils.Transport
+	const baseAPIPath string = "/redbeams/api"
+	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
+	return &Redbeams{Redbeams: redbeamsclient.New(transport, strfmt.Default)}
 }
 
 func NewEnvironmentActorCrnHTTPClient(address string, actorCrn string) *Environment {

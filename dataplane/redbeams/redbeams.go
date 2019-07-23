@@ -1,0 +1,66 @@
+package redbeams
+
+import (
+	"github.com/hortonworks/cb-cli/dataplane/api-redbeams/client/v4databaseservers"
+	fl "github.com/hortonworks/cb-cli/dataplane/flags"
+	"github.com/hortonworks/cb-cli/dataplane/oauth"
+	"github.com/hortonworks/dp-cli-common/utils"
+	commonutils "github.com/hortonworks/dp-cli-common/utils"
+	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
+	"time"
+)
+
+type ClientRedbeams oauth.Redbeams
+
+var listHeader = []string{"Name", "Crn", "EnvironmentCrn", "Status"}
+
+type redbeamsDetails struct {
+	Name           string `json:"Name" yaml:"Name"`
+	CRN            string `json:"CRN" yaml:"CRN"`
+	EnvironmentCrn string `json:"EnvironmentCrn" yaml:"EnvironmentCrn"`
+	Status         string `json:"Status" yaml:"Status"`
+}
+
+func (redbeams *redbeamsDetails) DataAsStringArray() []string {
+	return []string{redbeams.Name, redbeams.CRN, redbeams.EnvironmentCrn, redbeams.Status}
+}
+
+func ListRBDMSInstances(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "List Rbdms instances in environment")
+	envCrn := c.String(fl.FlEnvironmentCrn.Name)
+	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.V4databaseservers
+
+	resp, err := redbeamsDbServerClient.ListDatabaseServers(v4databaseservers.NewListDatabaseServersParams().WithEnvironmentCrn(envCrn))
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+
+	log.Infof("[ListRBDMS] RBDMS list in environment: %s", envCrn)
+	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+
+	var tableRows []commonutils.Row
+
+	for _, response := range resp.Payload.Responses {
+		row := &redbeamsDetails{
+			Name:           *response.Name,
+			CRN:            response.Crn,
+			EnvironmentCrn: *response.EnvironmentCrn,
+			//Status:         response.Status,
+		}
+		tableRows = append(tableRows, row)
+	}
+	output.WriteList(listHeader, tableRows)
+}
+
+func DeleteRBDMSInstance(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "delete RBDMS instance")
+	crn := c.String(fl.FlCrn.Name)
+
+	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.V4databaseservers
+	result, err := redbeamsDbServerClient.DeleteDatabaseServerByCrn(v4databaseservers.NewDeleteDatabaseServerByCrnParams().WithCrn(crn))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[deleteRBDMSInstance] RBDMS instance deleted in with name: %s Details: %s", crn, result)
+}

@@ -17,6 +17,9 @@ import (
 // swagger:model DatabaseV4Request
 type DatabaseV4Request struct {
 
+	// Name of the JDBC connection driver (for example: 'org.postgresql.Driver')
+	ConnectionDriver string `json:"connectionDriver,omitempty"`
+
 	// Password to use for the JDBC connection
 	// Required: true
 	ConnectionPassword *string `json:"connectionPassword"`
@@ -39,8 +42,8 @@ type DatabaseV4Request struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// ID of the environment of the resource
-	EnvironmentID string `json:"environmentId,omitempty"`
+	// Crn of the environment of the resource
+	EnvironmentCrn string `json:"environmentCrn,omitempty"`
 
 	// Name of the database configuration resource
 	// Required: true

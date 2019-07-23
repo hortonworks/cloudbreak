@@ -16,17 +16,17 @@ import (
 	model "github.com/hortonworks/cb-cli/dataplane/api-redbeams/model"
 )
 
-// DeleteDatabaseServerReader is a Reader for the DeleteDatabaseServer structure.
-type DeleteDatabaseServerReader struct {
+// DeleteDatabaseServerByNameReader is a Reader for the DeleteDatabaseServerByName structure.
+type DeleteDatabaseServerByNameReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *DeleteDatabaseServerReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *DeleteDatabaseServerByNameReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewDeleteDatabaseServerOK()
+		result := NewDeleteDatabaseServerByNameOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *DeleteDatabaseServerReader) ReadResponse(response runtime.ClientRespons
 	}
 }
 
-// NewDeleteDatabaseServerOK creates a DeleteDatabaseServerOK with default headers values
-func NewDeleteDatabaseServerOK() *DeleteDatabaseServerOK {
-	return &DeleteDatabaseServerOK{}
+// NewDeleteDatabaseServerByNameOK creates a DeleteDatabaseServerByNameOK with default headers values
+func NewDeleteDatabaseServerByNameOK() *DeleteDatabaseServerByNameOK {
+	return &DeleteDatabaseServerByNameOK{}
 }
 
-/*DeleteDatabaseServerOK handles this case with default header values.
+/*DeleteDatabaseServerByNameOK handles this case with default header values.
 
 successful operation
 */
-type DeleteDatabaseServerOK struct {
+type DeleteDatabaseServerByNameOK struct {
 	Payload *model.DatabaseServerV4Response
 }
 
-func (o *DeleteDatabaseServerOK) Error() string {
-	return fmt.Sprintf("[DELETE /v4/databaseservers/{name}][%d] deleteDatabaseServerOK  %+v", 200, o.Payload)
+func (o *DeleteDatabaseServerByNameOK) Error() string {
+	return fmt.Sprintf("[DELETE /v4/databaseservers/name/{name}][%d] deleteDatabaseServerByNameOK  %+v", 200, o.Payload)
 }
 
-func (o *DeleteDatabaseServerOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *DeleteDatabaseServerByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.DatabaseServerV4Response)
 
