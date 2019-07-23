@@ -20,11 +20,15 @@ public class CleanupResponse {
 
     private Set<String> roleCleanupSuccess = new HashSet<>();
 
+    private Set<String> certCleanupSuccess = new HashSet<>();
+
     private Map<String, String> userCleanupFailed = new HashMap<>();
 
     private Map<String, String> hostCleanupFailed = new HashMap<>();
 
     private Map<String, String> roleCleanupFailed = new HashMap<>();
+
+    private Map<String, String> certCleanupFailed = new HashMap<>();
 
     public Set<String> getUserCleanupSuccess() {
         return userCleanupSuccess;
@@ -74,15 +78,33 @@ public class CleanupResponse {
         this.roleCleanupFailed = roleCleanupFailed;
     }
 
+    public Map<String, String> getCertCleanupFailed() {
+        return certCleanupFailed;
+    }
+
+    public void setCertCleanupFailed(Map<String, String> certCleanupFailed) {
+        this.certCleanupFailed = certCleanupFailed;
+    }
+
+    public Set<String> getCertCleanupSuccess() {
+        return certCleanupSuccess;
+    }
+
+    public void setCertCleanupSuccess(Set<String> certCleanupSuccess) {
+        this.certCleanupSuccess = certCleanupSuccess;
+    }
+
     @Override
     public String toString() {
         return "CleanupResponse{"
                 + "userCleanupSuccess=" + userCleanupSuccess
                 + ", hostCleanupSuccess=" + hostCleanupSuccess
                 + ", roleCleanupSuccess=" + roleCleanupSuccess
+                + ", certCleanupSuccess=" + certCleanupSuccess
                 + ", userCleanupFailed=" + userCleanupFailed
                 + ", hostCleanupFailed=" + hostCleanupFailed
                 + ", roleCleanupFailed=" + roleCleanupFailed
+                + ", certCleanupFailed=" + certCleanupFailed
                 + '}';
     }
 }

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZoneList;
 import com.sequenceiq.freeipa.client.model.Host;
@@ -47,6 +49,7 @@ public class CleanupService {
             FreeIpa freeIpa = freeIpaService.findByStack(stack);
             FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
             if (!CollectionUtils.isEmpty(request.getHosts())) {
+                revokeCerts(client, request, cleanupResponse);
                 removeHosts(client, request, cleanupResponse);
                 removeDnsEntries(client, request, cleanupResponse, freeIpa.getDomain());
             }
@@ -58,6 +61,22 @@ public class CleanupService {
             }
         }
         return cleanupResponse;
+    }
+
+    private void revokeCerts(FreeIpaClient client, CleanupRequest request, CleanupResponse cleanupResponse) throws FreeIpaClientException {
+        Set<Cert> certs = client.findAllCert();
+        certs.stream()
+                .filter(cert -> request.getHosts().contains(StringUtils.removeStart(cert.getSubject(), "CN=")))
+                .filter(cert -> !cert.isRevoked())
+                .forEach(cert -> {
+                    try {
+                        client.revokeCert(cert.getSerialNumber());
+                        cleanupResponse.getCertCleanupSuccess().add(cert.getSubject());
+                    } catch (FreeIpaClientException e) {
+                        LOGGER.error("Couldn't revoke certificate: {}", cert, e);
+                        cleanupResponse.getCertCleanupFailed().put(cert.getSubject(), e.getMessage());
+                    }
+                });
     }
 
     private void removeDnsEntries(FreeIpaClient client, CleanupRequest request, CleanupResponse response, String domain) throws FreeIpaClientException {
