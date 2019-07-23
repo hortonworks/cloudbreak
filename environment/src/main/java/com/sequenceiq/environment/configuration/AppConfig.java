@@ -23,7 +23,6 @@ import com.sequenceiq.environment.environment.validation.network.EnvironmentNetw
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.logger.MDCContextFilter;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
-import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
 
 @Configuration
 public class AppConfig {
@@ -105,11 +104,6 @@ public class AppConfig {
         registrationBean.setFilter(filter);
         registrationBean.setOrder(Integer.MAX_VALUE);
         return registrationBean;
-    }
-
-    @Bean
-    public RedbeamsApiClientParams redbeamsApiClientParams() {
-        return new RedbeamsApiClientParams(restDebug, certificateValidation, ignorePreValidation, redbeamsServerUrl);
     }
 
     @Bean
