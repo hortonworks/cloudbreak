@@ -16,8 +16,6 @@ import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerRepositoryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
@@ -44,6 +42,14 @@ public class YarnSmokeTest extends AbstractE2ETest {
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createEnvironmentWithNetwork(testContext);
+        initializeDefaultBlueprints(testContext);
+    }
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "a valid YARN workload with POST CLUSTER MANAGER START recipe",
@@ -55,29 +61,22 @@ public class YarnSmokeTest extends AbstractE2ETest {
         String cm = resourcePropertyProvider().getName();
         String cmcluster = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
-        String repositoryUrl = ClouderaManagerUtil.getRepositoryUrl(testContext, commonCloudProperties.getCloudProvider());
-        String repositoryVersion = ClouderaManagerUtil.getRepositoryVersion(testContext);
-        String productParcel = ClouderaManagerUtil.getProductParcel(testContext, commonCloudProperties.getCloudProvider());
-        String productVersion = ClouderaManagerUtil.getProductVersion(testContext);
-        String productName = ClouderaManagerUtil.getProductName(testContext);
 
-        testContext
-                .given(cm, ClouderaManagerTestDto.class)
-                .withClouderaManagerRepository(new ClouderaManagerRepositoryTestDto(testContext)
-                        .withVersion(repositoryVersion).withBaseUrl(repositoryUrl))
-                .withClouderaManagerProduct(new ClouderaManagerProductTestDto(testContext)
-                        .withName(productName).withParcel(productParcel).withVersion(productVersion))
-                .given(cmcluster, ClusterTestDto.class).withValidateBlueprint(Boolean.FALSE).withClouderaManager(cm)
+        testContext.given(cm, ClouderaManagerTestDto.class)
+                .given(cmcluster, ClusterTestDto.class)
+                .withValidateBlueprint(Boolean.FALSE)
+                .withClouderaManager(cm)
                 .given(RecipeTestDto.class)
                 .withName(postCmStartRecipeName).withContent(generateCreateCMUserRecipeContent(CREATE_CM_USER_SCRIPT_FILE))
                 .withRecipeType(POST_AMBARI_START)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                 .withHostGroup(MASTER).withNodeCount(NODE_COUNT).withRecipes(postCmStartRecipeName)
-                .given(StackTestDto.class).withCluster(cmcluster)
+                .given(stack, StackTestDto.class)
+                .withCluster(cmcluster)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4(), key(stack))
-                .await(STACK_AVAILABLE, key(stack))
+                .await(STACK_AVAILABLE)
                 .then(ClouderaManagerUtil::checkClouderaManagerUser)
                 .validate();
     }
@@ -91,5 +90,4 @@ public class YarnSmokeTest extends AbstractE2ETest {
         recipeContentFromFile = recipeContentFromFile.replaceAll("CM_PASSWORD", cmPassword);
         return Base64.encodeBase64String(recipeContentFromFile.getBytes());
     }
-
 }
