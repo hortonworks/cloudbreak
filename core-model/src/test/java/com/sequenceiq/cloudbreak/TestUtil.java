@@ -45,13 +45,9 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
-import com.sequenceiq.common.api.type.AdjustmentType;
-import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -76,10 +72,11 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.dto.credential.aws.AwsCredentialAttributes;
-import com.sequenceiq.cloudbreak.dto.credential.azure.AzureCredentialAttributes;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.dto.credential.aws.AwsCredentialAttributes;
+import com.sequenceiq.cloudbreak.dto.credential.azure.AzureCredentialAttributes;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
@@ -91,6 +88,9 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
+import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 public class TestUtil {
 
@@ -698,6 +698,14 @@ public class TestUtil {
         gateway.setSignKey("signkey");
         gateway.setTokenCert("tokencert");
         gateway.setSignPub("signpub");
+        return gateway;
+    }
+
+    public static Gateway gatewayEnabledWithExposedKnoxServices(String... exposedKnoxServices) {
+        Gateway gateway =  gatewayEnabled();
+        GatewayTopology gatewayTopology = new GatewayTopology();
+        gatewayTopology.setExposedServices(new Json(exposedKnoxServices));
+        gateway.setTopologies(Sets.newHashSet(gatewayTopology));
         return gateway;
     }
 
