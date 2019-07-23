@@ -96,6 +96,10 @@ public class ClusterHostServiceRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterHostServiceRunner.class);
 
+    private static final int CM_HTTP_PORT = 7180;
+
+    private static final int CM_HTTPS_PORT = 7183;
+
     @Inject
     private StackService stackService;
 
@@ -291,6 +295,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
         decoratePillarWithClouderaManagerRepo(stack.getId(), cluster.getId(), servicePillar);
         decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
+        decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar);
     }
 
     private void addAmbariConfig(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, ClusterPreCreationApi connector)
@@ -377,6 +382,16 @@ public class ClusterHostServiceRunner {
         RdsView rdsView = new RdsView(rdsConfigService.resolveVaultValues(clouderaManagerRdsConfig));
         servicePillar.put("cloudera-manager-database",
                 new SaltPillarProperties("/cloudera-manager/database.sls", singletonMap("cloudera-manager", singletonMap("database", rdsView))));
+    }
+
+    private void decoratePillarWithClouderaManagerCommunicationSettings(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+        Boolean autoTls = cluster.getAutoTlsEnabled();
+        Map<String, Object> communication = new HashMap<>();
+        communication.put("port", autoTls ? CM_HTTPS_PORT : CM_HTTP_PORT);
+        communication.put("protocol", autoTls ? "https" : "http");
+        communication.put("autotls_enabled", autoTls);
+        servicePillar.put("cloudera-manager-communication", new SaltPillarProperties("/cloudera-manager/communication.sls",
+                singletonMap("cloudera-manager", singletonMap("communication", communication))));
     }
 
     private void decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar)

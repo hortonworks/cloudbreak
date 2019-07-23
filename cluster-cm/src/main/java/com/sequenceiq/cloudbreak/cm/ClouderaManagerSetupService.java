@@ -127,6 +127,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         Cluster cluster = stack.getCluster();
         Long clusterId = cluster.getId();
         try {
+            waitForHosts(hostsInCluster);
             HostsResourceApi hostsResourceApi = new HostsResourceApi(client);
             Optional<ApiHost> optionalCmHost = hostsResourceApi.readHosts(DataView.SUMMARY.name()).getItems().stream().filter(
                     host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))

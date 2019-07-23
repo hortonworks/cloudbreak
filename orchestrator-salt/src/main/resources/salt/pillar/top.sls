@@ -50,6 +50,7 @@ base:
   'roles:manager_agent':
     - match: grain
     - cloudera-manager.repo
+    - cloudera-manager.communication
 
   'roles:manager_server':
     - match: grain
@@ -61,6 +62,7 @@ base:
 {% endif %}
     - cloudera-manager.repo
     - cloudera-manager.database
+    - cloudera-manager.communication
     - gateway.init
     - gateway.ldap
     - gateway.settings

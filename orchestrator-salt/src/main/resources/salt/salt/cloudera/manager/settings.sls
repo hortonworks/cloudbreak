@@ -1,8 +1,12 @@
 {% set cloudera_manager_database = salt['pillar.get']('cloudera-manager:database') %}
+{% set cm_communication = salt['pillar.get']('cloudera-manager:communication') %}
 {% set ldap = salt['pillar.get']('ldap') %}
+{% set cm_keytab = salt['pillar.get']('keytab:CM') %}
 
 {% set cloudera_manager = {} %}
 {% do cloudera_manager.update({
     'cloudera_manager_database': cloudera_manager_database,
-    'ldap': ldap
+    'ldap': ldap,
+    'cm_keytab': cm_keytab,
+    'communication': cm_communication
 }) %}

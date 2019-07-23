@@ -104,6 +104,9 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         convertVendorSpecificPart(source, cluster);
         extractClusterManagerAndHdpRepoConfig(cluster, source);
         cluster.setProxyConfigCrn(source.getProxyConfigCrn());
+        cluster.setAutoTlsEnabled(Optional.ofNullable(source.getCm())
+                .map(ClouderaManagerV4Request::getEnableAutoTls)
+                .orElse(Boolean.FALSE));
         return cluster;
     }
 
@@ -192,7 +195,6 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
                 .map(toJsonWrapException())
                 .map(cmRepoJson -> new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, cmRepoJson, cluster))
                 .forEach(components::add);
-
         cluster.setComponents(components);
     }
 

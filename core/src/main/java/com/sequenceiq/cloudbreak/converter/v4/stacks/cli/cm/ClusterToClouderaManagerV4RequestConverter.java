@@ -41,7 +41,8 @@ public class ClusterToClouderaManagerV4RequestConverter {
                         .map(ClusterComponent::getAttributes)
                         .map(toAttributeClass(ClouderaManagerProduct.class))
                         .map(ClouderaManagerProductToClouderaManagerProductV4Request::convert)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()))
+                .withEnableAutoTls(cluster.getAutoTlsEnabled());
     }
 
     private <T> Function<Json, T> toAttributeClass(Class<T> attributeClass) {
