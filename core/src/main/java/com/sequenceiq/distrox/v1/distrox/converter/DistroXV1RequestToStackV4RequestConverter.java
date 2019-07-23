@@ -2,11 +2,14 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
@@ -19,6 +22,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
 @Component
@@ -74,7 +78,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setNetwork(getNetwork(source.getNetwork(), environment));
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
-        request.setYarn(getIfNotNull(source.getYarn(), stackParameterConverter::convert));
+        request.setYarn(getYarnProperties(source, environment));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSharedService(sdxConverter.getSharedService(source.getSdx(), environment.getCrn()));
@@ -105,7 +109,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         }
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
-        request.setYarn(getIfNotNull(source.getYarn(), stackParameterConverter::convert));
+        request.setYarn(getYarnProperties(source, environment));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSharedService(getIfNotNull(source.getSdx(), sdxConverter::getSharedService));
@@ -149,6 +153,16 @@ public class DistroXV1RequestToStackV4RequestConverter {
             throw new BadRequestException(String.format("The given subnet id (%s) is not attached to the Environment (%s)",
                     network.getAws().getSubnetId(), environment.getName()));
         }
+    }
+
+    private YarnStackV4Parameters getYarnProperties(DistroXV1Request source, DetailedEnvironmentResponse environment) {
+        YarnStackV4Parameters yarnParameters = getIfNotNull(source.getYarn(), stackParameterConverter::convert);
+        if (yarnParameters == null && environment != null) {
+            yarnParameters = getIfNotNull(Optional.ofNullable(environment.getNetwork())
+                    .map(EnvironmentNetworkResponse::getYarn)
+                    .orElse(null), stackParameterConverter::convert);
+        }
+        return yarnParameters;
     }
 
     public DistroXV1Request convert(StackV4Request source) {

@@ -28,4 +28,11 @@ public class SecurityGroupRequest extends SecurityGroupBase {
     public void setSecurityRules(List<SecurityRuleRequest> securityRules) {
         this.securityRules = securityRules;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "SecurityGroupRequest{"
+                + "securityRules=" + securityRules
+                + '}';
+    }
 }

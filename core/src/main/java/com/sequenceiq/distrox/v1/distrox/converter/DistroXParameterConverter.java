@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Yar
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.YarnDistroXV1Parameters;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 
 @Component
 public class DistroXParameterConverter {
@@ -43,6 +44,12 @@ public class DistroXParameterConverter {
     public YarnDistroXV1Parameters convert(YarnStackV4Parameters source) {
         YarnDistroXV1Parameters response = new YarnDistroXV1Parameters();
         response.setYarnQueue(source.getYarnQueue());
+        return response;
+    }
+
+    public YarnStackV4Parameters convert(EnvironmentNetworkYarnParams environmentNetworkYarnParams) {
+        YarnStackV4Parameters response = new YarnStackV4Parameters();
+        response.setYarnQueue(environmentNetworkYarnParams.getQueue());
         return response;
     }
 }

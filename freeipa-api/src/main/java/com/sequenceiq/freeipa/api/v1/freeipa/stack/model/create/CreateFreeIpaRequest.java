@@ -133,4 +133,18 @@ public class CreateFreeIpaRequest {
     public void setGatewayPort(Integer gatewayPort) {
         this.gatewayPort = gatewayPort;
     }
+
+    @Override
+    public String toString() {
+        return "CreateFreeIpaRequest{"
+                + "environmentCrn='" + environmentCrn + '\''
+                + ", name='" + name + '\''
+                + ", placement=" + placement
+                + ", instanceGroups=" + instanceGroups
+                + ", authentication=" + authentication
+                + ", network=" + network
+                + ", image=" + image
+                + ", freeIpa=" + freeIpa
+                + '}';
+    }
 }

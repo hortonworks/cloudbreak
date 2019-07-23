@@ -17,4 +17,11 @@ public abstract class SecurityGroupBase {
     public void setSecurityGroupIds(Set<String> securityGroupIds) {
         this.securityGroupIds = securityGroupIds;
     }
+
+    @Override
+    public String toString() {
+        return "SecurityGroupBase{"
+                + "securityGroupIds=" + securityGroupIds
+                + '}';
+    }
 }

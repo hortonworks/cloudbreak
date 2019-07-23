@@ -97,4 +97,15 @@ public class AzureNetworkParameters extends MappableBase {
         networkId = getParameterOrNull(parameters, "networkId");
         subnetId = getParameterOrNull(parameters, "subnetId");
     }
+
+    @Override
+    public String toString() {
+        return "AzureNetworkParameters{"
+                + "noPublicIp=" + noPublicIp
+                + ", noFirewallRules=" + noFirewallRules
+                + ", resourceGroupName='" + resourceGroupName + '\''
+                + ", networkId='" + networkId + '\''
+                + ", subnetId='" + subnetId + '\''
+                + '}';
+    }
 }

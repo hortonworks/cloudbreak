@@ -37,4 +37,13 @@ public abstract class ImageSettingsBase {
     public void setOs(String os) {
         this.os = os;
     }
+
+    @Override
+    public String toString() {
+        return "ImageSettingsBase{"
+                + "catalog='" + catalog + '\''
+                + ", id='" + id + '\''
+                + ", os='" + os + '\''
+                + '}';
+    }
 }

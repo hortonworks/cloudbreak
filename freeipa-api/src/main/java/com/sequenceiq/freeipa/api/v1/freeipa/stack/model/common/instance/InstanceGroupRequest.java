@@ -36,4 +36,12 @@ public class InstanceGroupRequest extends InstanceGroupBase {
     public void setSecurityGroup(SecurityGroupRequest securityGroup) {
         this.securityGroup = securityGroup;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "InstanceGroupRequest{"
+                + "instanceTemplate=" + instanceTemplate
+                + ", securityGroup=" + securityGroup
+                + '}';
+    }
 }

@@ -88,4 +88,16 @@ public abstract class NetworkBase extends ProviderParametersBase {
         }
         return mock;
     }
+
+    @Override
+    public String toString() {
+        return "NetworkBase{"
+                + "aws=" + aws
+                + ", azure=" + azure
+                + ", gcp=" + gcp
+                + ", openstack=" + openstack
+                + ", mock=" + mock
+                + ", yarn=" + yarn
+                + '}';
+    }
 }
