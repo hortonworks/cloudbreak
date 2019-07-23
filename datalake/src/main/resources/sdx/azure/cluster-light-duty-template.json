@@ -27,7 +27,7 @@
           {
             "count": 1,
             "size": 100,
-            "type": "standard"
+            "type": "Standard_LRS"
           }
         ],
         "rootVolume": {
@@ -58,7 +58,7 @@
           {
             "count": 1,
             "size": 100,
-            "type": "standard"
+            "type": "Standard_LRS"
           }
         ],
         "rootVolume": {
@@ -75,6 +75,13 @@
             "subnet": "0.0.0.0/0",
             "ports": [
               "9443"
+            ],
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "8443"
             ],
             "protocol": "tcp"
           },
