@@ -17,6 +17,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -76,6 +77,7 @@ public class ClusterUpscaleActions {
                 variables.put(SINGLE_PRIMARY_GATEWAY, payload.isSinglePrimaryGateway());
                 variables.put(KERBEROS_SECURED, payload.isKerberosSecured());
                 variables.put(SINGLE_NODE_CLUSTER, payload.isSingleNodeCluster());
+                variables.put(CLUSTER_MANAGER_TYPE, payload.getClusterManagerType());
                 if (payload.isSinglePrimaryGateway()) {
                     variables.put(HOST_NAME, getMasterHostname(payload));
                 }
@@ -138,7 +140,7 @@ public class ClusterUpscaleActions {
         return new AbstractClusterUpscaleAction<>(UpscaleClusterManagerResult.class) {
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscaleClusterManagerResult payload, Map<Object, Object> variables) {
-                if (context.isSinglePrimaryGateway()) {
+                if (context.isSinglePrimaryGateway() && ClusterManagerType.AMBARI.equals(context.getClusterManagerType())) {
                     clusterUpscaleFlowService.ambariRepairSingleMasterStarted(context.getStackId());
                     AmbariRepairSingleMasterStartResult result = new AmbariRepairSingleMasterStartResult(context.getStackId(), context.getHostGroupName());
                     sendEvent(context, result.selector(), result);
@@ -399,6 +401,8 @@ public class ClusterUpscaleActions {
 
         static final String SINGLE_NODE_CLUSTER = "SINGLE_NODE_CLUSTER";
 
+        static final String CLUSTER_MANAGER_TYPE = "CLUSTER_MANAGER_TYPE";
+
         @Inject
         private StackService stackService;
 
@@ -418,7 +422,7 @@ public class ClusterUpscaleActions {
             StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
             MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), "CLUSTER");
             return new ClusterUpscaleContext(flowParameters, stack, getHostgroupName(variables), getAdjustment(variables),
-                    isSinglePrimaryGateway(variables), getPrimaryGatewayHostName(variables));
+                    isSinglePrimaryGateway(variables), getPrimaryGatewayHostName(variables), getClusterManagerType(variables));
         }
 
         private String getHostgroupName(Map<Object, Object> variables) {
@@ -447,6 +451,10 @@ public class ClusterUpscaleActions {
 
         Boolean isSingleNodeCluster(Map<Object, Object> variables) {
             return (Boolean) variables.get(SINGLE_NODE_CLUSTER);
+        }
+
+        ClusterManagerType getClusterManagerType(Map<Object, Object> variables) {
+            return (ClusterManagerType) variables.get(CLUSTER_MANAGER_TYPE);
         }
 
     }

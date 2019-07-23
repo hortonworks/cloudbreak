@@ -133,7 +133,7 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
                 .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=saltutil.sync_all").atLeast(1))
                 .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=mine.update").atLeast(1))
                 .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=state.highstate").atLeast(2))
-                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=grains.remove").exactTimes(4))
+                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=grains.remove").exactTimes(2))
                 .then(MockVerification.verify(GET,
                         new ClouderaManagerPathResolver(LIST_HOSTS)
                                 .pathVariableMapping(":clusterName", clusterName)

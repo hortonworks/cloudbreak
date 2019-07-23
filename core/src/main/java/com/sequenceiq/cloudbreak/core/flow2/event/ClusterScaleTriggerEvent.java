@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 import java.util.Collections;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
@@ -21,8 +22,10 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
 
     private final boolean singleNodeCluster;
 
+    private final ClusterManagerType clusterManagerType;
+
     public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Set<String> hostNames, boolean singlePrimaryGateway,
-            boolean kerberosSecured, boolean singleNodeCluster) {
+            boolean kerberosSecured, boolean singleNodeCluster, ClusterManagerType clusterManagerType) {
         super(selector, stackId);
         this.hostGroup = hostGroup;
         this.adjustment = adjustment;
@@ -30,10 +33,11 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
         this.singlePrimaryGateway = singlePrimaryGateway;
         this.kerberosSecured = kerberosSecured;
         this.singleNodeCluster = singleNodeCluster;
+        this.clusterManagerType = clusterManagerType;
     }
 
     public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment) {
-        this(selector, stackId, hostGroup, adjustment, Collections.emptySet(), false, false, false);
+        this(selector, stackId, hostGroup, adjustment, Collections.emptySet(), false, false, false, ClusterManagerType.CLOUDERA_MANAGER);
     }
 
     public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Promise<Boolean> accepted) {
@@ -44,6 +48,7 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
         singlePrimaryGateway = false;
         kerberosSecured = false;
         singleNodeCluster = false;
+        clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
     }
 
     @Override
@@ -69,5 +74,9 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
 
     public boolean isSingleNodeCluster() {
         return singleNodeCluster;
+    }
+
+    public ClusterManagerType getClusterManagerType() {
+        return clusterManagerType;
     }
 }

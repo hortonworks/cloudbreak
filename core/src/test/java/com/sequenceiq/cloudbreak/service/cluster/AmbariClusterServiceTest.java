@@ -121,8 +121,9 @@ public class AmbariClusterServiceTest {
 
     @Test
     public void testRecreateFailNotEmbeddedDb() throws TransactionExecutionException {
-        thrown.expect(equalTo(new BadRequestException("Ambari doesn't support resetting external DB automatically."
-                + " To reset Ambari Server schema you must first drop and then create it using DDL scripts from /var/lib/ambari-server/resources")));
+        thrown.expect(equalTo(new BadRequestException("Cluster Manager doesn't support resetting external DB automatically."
+                + " To reset Cluster Manager schema you must first drop and then create it using DDL scripts from"
+                + " /var/lib/ambari-server/resources or /opt/cloudera/cm/schema/postgresql/")));
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
         when(rdsConfigService.findByClusterIdAndType(any(Long.class), any(DatabaseType.class))).thenReturn(rdsConfig);

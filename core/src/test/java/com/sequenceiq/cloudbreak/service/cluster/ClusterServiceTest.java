@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -72,6 +73,9 @@ public class ClusterServiceTest {
     @Mock
     private CloudbreakEventService cloudbreakEventService;
 
+    @Mock
+    private BlueprintService blueprintService;
+
     @InjectMocks
     private ClusterService clusterService;
 
@@ -91,6 +95,7 @@ public class ClusterServiceTest {
         stack.setCluster(cluster);
         stack.setPlatformVariant("AWS");
         when(stackService.get(any(Long.class))).thenReturn(stack);
+        when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
 
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 
 @Component
 public class BlueprintTextProcessorFactory {

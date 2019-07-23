@@ -1,25 +1,25 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 
-import org.springframework.stereotype.Service;
-
 @Service
-public class ClouderaManagerDeleteUnusedCredentialsListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+public class ClouderaManagerRestartServicesListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
     @Override
     public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to delete unused credentials.");
+        throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to restart services.");
     }
 
     @Override
     public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        return "Successfully deleted unused credentials.";
+        return "Successfully restarted services.";
     }
 
     @Override
     protected String getCommandName() {
-        return "Delete unused credentials";
+        return "Restart services";
     }
 }

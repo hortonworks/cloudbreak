@@ -95,8 +95,8 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     @Override
-    public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
-        return null;
+    public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws InterruptedException {
+        throw new InterruptedException("Prevent volume resource deletion.");
     }
 
     @Override

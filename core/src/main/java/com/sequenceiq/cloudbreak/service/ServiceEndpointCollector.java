@@ -46,7 +46,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorUtil;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 
 @Service
 public class ServiceEndpointCollector {

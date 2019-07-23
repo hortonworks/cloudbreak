@@ -132,6 +132,8 @@ public class ClusterService {
 
     private static final List<String> REATTACH_NOT_SUPPORTED_VOLUME_TYPES = List.of("ephemeral");
 
+    private static final Long REQUIRED_CM_DATABASE_COUNT = 3L;
+
     @Inject
     private StackService stackService;
 
@@ -643,11 +645,26 @@ public class ClusterService {
     }
 
     private void checkReattachSupportForGateways(Stack inTransactionStack, boolean repairWithReattach, Cluster cluster, HostMetadata hmd) {
-        boolean ambariRdsPresent = cluster.getRdsConfigs().stream()
-                .anyMatch(rdsConfig -> "AMBARI".equals(rdsConfig.getType()) && ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus()));
+        boolean requiredDatabaseAvailable = gatewayDatabaseAvailable(cluster);
         boolean singleNodeGateway = isGateway(hmd) && !isMultipleGateway(inTransactionStack);
-        if (repairWithReattach && !ambariRdsPresent && singleNodeGateway) {
+        if (repairWithReattach && !requiredDatabaseAvailable && singleNodeGateway) {
             throw new BadRequestException("Repair with disk reattach not supported on single node gateway without external Ambari RDS.");
+        }
+    }
+
+    private boolean gatewayDatabaseAvailable(Cluster cluster) {
+        if (blueprintService.isAmbariBlueprint(cluster.getBlueprint())) {
+            return cluster.getRdsConfigs().stream()
+                    .anyMatch(rdsConfig -> DatabaseType.AMBARI.name().equals(rdsConfig.getType()) && ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus()));
+        } else {
+            long cmRdsCount = cluster.getRdsConfigs().stream()
+                    .map(RDSConfig::getType)
+                    .filter(type -> DatabaseType.CLOUDERA_MANAGER.name().equals(type)
+                            || DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_ACTIVITY_MONITOR.name().equals(type)
+                            || DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER.name().equals(type))
+                    .distinct()
+                    .count();
+            return cmRdsCount == REQUIRED_CM_DATABASE_COUNT;
         }
     }
 
@@ -696,11 +713,8 @@ public class ClusterService {
     }
 
     private void validateRepair(Stack stack, HostMetadata hostMetadata, boolean repairWithReattach) {
-//        if (!repairWithReattach && (isGateway(hostMetadata) && !isMultipleGateway(stack))) {
-//            throw new BadRequestException("Ambari server failure cannot be repaired with single gateway!");
-//        }
-        if (isGateway(hostMetadata) && withEmbeddedAmbariDB(stack.getCluster())) {
-            throw new BadRequestException("Ambari server failure with embedded database cannot be repaired!");
+        if (isGateway(hostMetadata) && withEmbeddedClusterManagerDB(stack.getCluster())) {
+            throw new BadRequestException("Cluster manager server failure with embedded database cannot be repaired!");
         }
     }
 
@@ -736,8 +750,12 @@ public class ClusterService {
         return hostMetadata.getHostGroup().getConstraint().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY;
     }
 
-    private boolean withEmbeddedAmbariDB(Cluster cluster) {
-        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), DatabaseType.AMBARI);
+    private boolean withEmbeddedClusterManagerDB(Cluster cluster) {
+        DatabaseType databaseType = DatabaseType.CLOUDERA_MANAGER;
+        if (blueprintService.isAmbariBlueprint(cluster.getBlueprint())) {
+            databaseType = DatabaseType.AMBARI;
+        }
+        RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), databaseType);
         return rdsConfig == null || DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine();
     }
 
@@ -895,9 +913,9 @@ public class ClusterService {
             Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());
             Cluster cluster = getCluster(stackWithLists);
             Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, stack.getWorkspace());
-            if (!withEmbeddedAmbariDB(cluster)) {
-                throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
-                        + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
+            if (!withEmbeddedClusterManagerDB(cluster)) {
+                throw new BadRequestException("Cluster Manager doesn't support resetting external DB automatically. To reset Cluster Manager schema you "
+                        + "must first drop and then create it using DDL scripts from /var/lib/ambari-server/resources or /opt/cloudera/cm/schema/postgresql/");
             }
             BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(blueprint);
             blueprintValidator.validate(blueprint, hostGroups, stackWithLists.getInstanceGroups(), validateBlueprint);

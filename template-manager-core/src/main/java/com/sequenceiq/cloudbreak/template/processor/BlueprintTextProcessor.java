@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 
 import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 

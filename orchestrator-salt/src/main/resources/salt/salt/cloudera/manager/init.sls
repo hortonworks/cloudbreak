@@ -112,3 +112,8 @@ run_generate_agent_tokens:
         - file: /opt/salt/scripts/cm_generate_agent_tokens.sh
         - cmd: run_autotls_setup
 {% endif %}
+
+start_rpcbind:
+  service.running:
+    - enable: True
+    - name: rpcbind

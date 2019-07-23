@@ -68,7 +68,8 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
                             Sets.newHashSet(event.getHostNames()),
                             event.isSingleMasterGateway(),
                             event.isKerberosSecured(),
-                            event.isSingleNodeCluster()
+                            event.isSingleNodeCluster(),
+                            event.getClusterManagerType()
                     )
             );
         }

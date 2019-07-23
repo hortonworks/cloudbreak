@@ -30,3 +30,14 @@ setup_autotls_token:
     - backup: False
 
 {% endif %}
+
+/opt/scripts/generate-host-id.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://cloudera/agent/scripts/generate-host-id.sh
+    - mode: 744
+
+generate_host_id:
+  cmd.run:
+    - name: /opt/scripts/generate-host-id.sh
+    - shell: /bin/bash
