@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -64,12 +65,11 @@ public class DBStackToDatabaseStackConverter {
                 throw new BadRequestException("Unsupported database vendor " + dbStackDatabaseServer.getDatabaseVendor());
         }
 
-        Security security = new Security(Collections.emptyList(), dbStackDatabaseServer.getSecurityGroup().getSecurityGroupIds());
-
         Json attributes = dbStackDatabaseServer.getAttributes();
         Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+        SecurityGroup securityGroup = dbStackDatabaseServer.getSecurityGroup();
 
-        return DatabaseServer.builder()
+        DatabaseServer.Builder builder = DatabaseServer.builder()
             .serverId(dbStackDatabaseServer.getName())
             .flavor(dbStackDatabaseServer.getInstanceType())
             .engine(engine)
@@ -78,11 +78,12 @@ public class DBStackToDatabaseStackConverter {
             .rootPassword(dbStackDatabaseServer.getRootPassword())
             .port(dbStackDatabaseServer.getPort())
             .storageSize(dbStackDatabaseServer.getStorageSize())
-            .security(security)
+            .security(securityGroup == null ? null : new Security(Collections.emptyList(), securityGroup.getSecurityGroupIds()))
             // TODO / FIXME converter caller decides this?
             .status(CREATE_REQUESTED)
-            .params(params)
-            .build();
+            .params(params);
+
+        return builder.build();
     }
 
     private Map<String, String> getUserDefinedTags(DBStack dbStack) {

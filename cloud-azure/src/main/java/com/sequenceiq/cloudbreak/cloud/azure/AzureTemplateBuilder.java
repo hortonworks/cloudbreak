@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureSecurityView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
@@ -38,6 +40,9 @@ public class AzureTemplateBuilder {
 
     @Value("${cb.arm.template.path:}")
     private String armTemplatePath;
+
+    @Value("${cb.arm.database.template.path:}")
+    private String armDatabaseTemplatePath;
 
     @Value("${cb.arm.parameter.path:}")
     private String armTemplateParametersPath;
@@ -103,6 +108,36 @@ public class AzureTemplateBuilder {
         }
     }
 
+    public String build(String stackName, CloudContext cloudContext, DatabaseStack databaseStack) {
+        try {
+            String location = cloudContext.getLocation().getRegion().getRegionName();
+            AzureDatabaseServerView azureDatabaseServerView = new AzureDatabaseServerView(databaseStack.getDatabaseServer());
+            Map<String, Object> model = new HashMap<>();
+
+            model.put("adminLoginName", azureDatabaseServerView.getAdminLoginName());
+            model.put("adminPassword", azureDatabaseServerView.getAdminPassword());
+            model.put("backupRetentionDays", azureDatabaseServerView.getBackupRetentionDays());
+            model.put("dbServerName", azureDatabaseServerView.getDbServerName());
+            model.put("dbVersion", azureDatabaseServerView.getDbVersion());
+            model.put("geoRedundantBackup", azureDatabaseServerView.getGeoRedundantBackup());
+            model.put("location", location);
+            model.put("serverTags", databaseStack.getTags());
+            model.put("skuCapacity", azureDatabaseServerView.getSkuCapacity().toString());
+            model.put("skuFamily", azureDatabaseServerView.getSkuFamily());
+            model.put("skuName", azureDatabaseServerView.getSkuName());
+            model.put("skuSizeMB", azureDatabaseServerView.getAllocatedStorageInMb().toString());
+            model.put("skuTier", azureDatabaseServerView.getSkuTier());
+            model.put("storageAutoGrow", azureDatabaseServerView.getStorageAutoGrow());
+            model.put("vnets", databaseStack.getNetwork().getStringParameter("virtualNetwork"));
+            model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
+            String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(databaseStack), model);
+            LOGGER.debug("Generated Arm database template: {}", generatedTemplate);
+            return generatedTemplate;
+        } catch (IOException | TemplateException e) {
+            throw new CloudConnectorException("Failed to process the ARM TemplateBuilder", e);
+        }
+    }
+
     public String buildParameters(CloudCredential credential, Network network, Image image) {
         try {
             return freeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplateParametersPath, "UTF-8"), new HashMap<>());
@@ -115,9 +150,21 @@ public class AzureTemplateBuilder {
         return getTemplate().toString();
     }
 
+    public String getDBTemplateString() {
+        return getDBTemplate().toString();
+    }
+
     public Template getTemplate(CloudStack stack) {
         try {
             return new Template(armTemplatePath, stack.getTemplate(), freemarkerConfiguration);
+        } catch (IOException e) {
+            throw new CloudConnectorException("Couldn't create template object", e);
+        }
+    }
+
+    public Template getTemplate(DatabaseStack stack) {
+        try {
+            return new Template(armDatabaseTemplatePath, stack.getTemplate(), freemarkerConfiguration);
         } catch (IOException e) {
             throw new CloudConnectorException("Couldn't create template object", e);
         }
@@ -130,6 +177,14 @@ public class AzureTemplateBuilder {
     private Template getTemplate() {
         try {
             return freemarkerConfiguration.getTemplate(armTemplatePath, "UTF-8");
+        } catch (IOException e) {
+            throw new CloudConnectorException("Couldn't get ARM template", e);
+        }
+    }
+
+    private Template getDBTemplate() {
+        try {
+            return freemarkerConfiguration.getTemplate(armDatabaseTemplatePath, "UTF-8");
         } catch (IOException e) {
             throw new CloudConnectorException("Couldn't get ARM template", e);
         }

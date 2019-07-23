@@ -8,9 +8,10 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.AwsDBStackV4Parameters;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDBStackV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDBStackV4Parameters;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DBStack;
@@ -42,6 +43,9 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
     @ApiModelProperty(DBStack.AWS_PARAMETERS)
     private AwsDBStackV4Parameters aws;
+
+    @ApiModelProperty(DBStack.AZURE_PARAMETERS)
+    private AzureDBStackV4Parameters azure;
 
     public String getName() {
         return name;
@@ -94,7 +98,14 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
     @Override
     public Mappable createAzure() {
-        return null;
+        if (azure == null) {
+            azure = new AzureDBStackV4Parameters();
+        }
+        return azure;
+    }
+
+    public void setAzure(AzureDBStackV4Parameters azure) {
+        this.azure = azure;
     }
 
     @Override

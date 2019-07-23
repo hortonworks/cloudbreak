@@ -4,12 +4,14 @@
     "parameters": {
         "dbServerName": {
             "type": "string",
+            "defaultValue" : "${dbServerName}",
             "metadata": {
                 "description": "Name of the database server resource."
             }
         },
         "skuTier": {
             "type": "string",
+            "defaultValue" : "${skuTier}",
             "allowedValues": [
                 "Basic",
                 "GeneralPurpose",
@@ -21,25 +23,28 @@
         },
         "skuFamily": {
             "type": "string",
+            "defaultValue" : "${skuFamily}",
             "metadata": {
                 "description": "The family of hardware."
             }
         },
         "skuCapacity": {
             "type": "int",
+            "defaultValue" : ${skuCapacity},
             "metadata": {
                 "description": "The scale up/out capacity, representing server's compute units."
             }
         },
         "skuSizeMB": {
             "type": "int",
+            "defaultValue" : ${skuSizeMB},
             "metadata": {
                 "description": "The size code, to be interpreted by resource as appropriate."
             }
         },
         "skuName": {
             "type": "string",
-            "defaultValue": "GP_Gen5_2",
+            "defaultValue": "${skuName!GP_Gen5_2}",
             "allowedValues": [
                 "GP_Gen5_2",
                 "GP_Gen5_4",
@@ -58,12 +63,14 @@
         },
         "dbVersion": {
             "type": "string",
+            "defaultValue": "${dbVersion}",
             "metadata": {
                 "description": "Server version."
             }
         },
         "adminLoginName": {
             "type": "securestring",
+            "defaultValue" : "${adminLoginName}",
             "minLength": 1,
             "metadata": {
                 "description": "The administrator login name for the database server."
@@ -71,6 +78,7 @@
         },
         "adminPassword": {
             "type": "securestring",
+            "defaultValue" : "${adminPassword}",
             "minLength": 8,
             "maxLength": 128,
             "metadata": {
@@ -79,14 +87,14 @@
         },
         "sslEnforcement": {
             "type": "bool",
-            "defaultValue": true,
+            "defaultValue": ${(sslEnforcement!true)?c},
             "metadata": {
                 "description": "Enable ssl enforcement or not when connect to server."
             }
         },
         "backupRetentionDays": {
             "type": "int",
-            "defaultValue": 7,
+            "defaultValue": ${backupRetentionDays!7},
             "minValue": 7,
             "maxValue": 35,
             "metadata": {
@@ -95,23 +103,14 @@
         },
         "geoRedundantBackup": {
             "type": "bool",
-            "defaultValue": false,
+            "defaultValue": ${(geoRedundantBackup!false)?c},
             "metadata": {
                 "description": "Enable Geo-redundant or not for server backup."
             }
         },
-        "storageMb": {
-            "type": "int",
-            "defaultValue": 5120,
-            "minValue": 5120,
-            "maxValue": 4194304,
-            "metadata": {
-                "description": "Max storage allowed for a server."
-            }
-        },
-        "storageAutogrow": {
+        "storageAutoGrow": {
             "type": "bool",
-            "defaultValue": false,
+            "defaultValue": ${(storageAutoGrow!false)?c},
             "metadata": {
                 "description": "Enable Storage Auto Grow."
             }
@@ -125,12 +124,21 @@
         },
         "vnets": {
             "type": "string",
+            "defaultValue": "${vnets}",
             "metadata": {
                 "description": "The virtual networks to connect through service endpoints."
             }
         },
         "serverTags": {
             "type":"object",
+            "defaultValue": {
+                <#if serverTags?? && serverTags?has_content>
+                    <#list serverTags?keys as key>
+                      "${key}": "${serverTags[key]}",
+                      </#list>
+                </#if>
+                    "cb-resource-type": "database"
+            },
             "metadata": {
                 "description": "User defined tags to be attached to the resource."
             }
@@ -142,7 +150,7 @@
         "apiVersion":"2017-12-01",
         "sslEnforcementString":"[if(parameters('sslEnforcement'), 'Enabled', 'Disabled')]",
         "geoRedundantBackupString":"[if(parameters('geoRedundantBackup'), 'Enabled', 'Disabled')]",
-        "storageAutogrowString":"[if(parameters('storageAutogrow'), 'Enabled', 'Disabled')]"
+        "storageAutoGrowString":"[if(parameters('storageAutoGrow'), 'Enabled', 'Disabled')]"
 
     },
     "resources": [
@@ -167,7 +175,7 @@
                     "backupRetentionDays": "[parameters('backupRetentionDays')]",
                     "geoRedundantBackup": "[variables('geoRedundantBackupString')]",
                     "storageMB": "[parameters('skuSizeMB')]",
-                    "storageAutogrow": "[variables('storageAutogrowString')]"
+                    "storageAutoGrow": "[variables('storageAutoGrowString')]"
                 },
                 "createMode": "Default"
             },
@@ -190,5 +198,11 @@
                 "count": "[length(variables('subnets'))]"
             }
         }
-    ]
+    ],
+    "outputs": {
+        "databaseServerFQDN": {
+            "type": "string",
+            "value": "[reference(parameters('dbServerName')).fullyQualifiedDomainName]"
+        }
+    }
 }

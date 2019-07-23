@@ -24,7 +24,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4En
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.AwsDatabaseServerV4Parameters;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.model.common.Status;
 

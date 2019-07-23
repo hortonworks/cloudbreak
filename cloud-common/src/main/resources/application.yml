@@ -189,6 +189,7 @@ cb:
     template.path: templates/arm-v2.ftl
     network.template.path: templates/arm-network.ftl
     parameter.path: templates/parameters.ftl
+    database.template.path: templates/arm-database.ftl
     app.creation.template:
       command.path: templates/app-creation-command.ftl
       json.path: templates/app-creation.json
