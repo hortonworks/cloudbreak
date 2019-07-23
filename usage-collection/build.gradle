@@ -46,6 +46,14 @@ task downloadFile(type: Download) {
   overwrite true
 }
 
+sourceSets {
+  main {
+    proto {
+      'src/main/proto'
+    }
+  }
+}
+
 protobuf {
   protoc {
     // The version of protoc must match protobuf-java. If you don't depend on
