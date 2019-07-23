@@ -37,6 +37,7 @@ import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDatabaseResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -44,7 +45,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
@@ -105,6 +105,9 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Inject
     private AzureComputeResourceService azureComputeResourceService;
 
+    @Inject
+    private AzureDatabaseResourceService azureDatabaseResourceService;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
@@ -162,7 +165,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
         PersistenceNotifier persistenceNotifier) {
-        throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
+        return azureDatabaseResourceService.buildDatabaseResourcesForLaunch(authenticatedContext, stack);
     }
 
     @Override
@@ -454,8 +457,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     }
 
     @Override
-    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
-        throw new TemplatingDoesNotSupportedException();
+    public String getDBStackTemplate() {
+        return azureTemplateBuilder.getDBTemplateString();
     }
 
     private AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack,

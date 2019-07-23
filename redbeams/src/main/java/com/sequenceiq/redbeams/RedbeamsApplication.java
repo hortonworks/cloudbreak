@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.sequenceiq.cloudbreak.security",
         "com.sequenceiq.cloudbreak.api.util",
         "com.sequenceiq.cloudbreak.cloud.aws",
+        "com.sequenceiq.cloudbreak.cloud.azure",
         "com.sequenceiq.cloudbreak.cloud.configuration",
         "com.sequenceiq.cloudbreak.cloud.credential",
         "com.sequenceiq.cloudbreak.cloud.handler",

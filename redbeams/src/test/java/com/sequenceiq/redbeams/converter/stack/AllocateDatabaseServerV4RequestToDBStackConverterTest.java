@@ -45,7 +45,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.AwsNetworkV4Parameters;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4Request;

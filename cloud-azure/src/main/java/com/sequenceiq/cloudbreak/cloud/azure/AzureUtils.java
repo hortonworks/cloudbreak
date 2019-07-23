@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -138,6 +139,11 @@ public class AzureUtils {
 
     public String getResourceGroupName(CloudContext cloudContext, CloudStack cloudStack) {
         return cloudStack.getParameters().getOrDefault(RESOURCE_GROUP_NAME, getDefaultResourceGroupName(cloudContext));
+    }
+
+    public String getResourceGroupName(CloudContext cloudContext, DatabaseStack databaseStack) {
+        return databaseStack.getDatabaseServer().getParameters()
+                .getOrDefault(RESOURCE_GROUP_NAME, getDefaultResourceGroupName(cloudContext)).toString();
     }
 
     public String getResourceGroupName(CloudContext cloudContext, DynamicModel dynamicModel) {

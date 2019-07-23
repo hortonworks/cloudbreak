@@ -49,6 +49,7 @@ public enum ResourceType {
     AZURE_VOLUMESET,
     AZURE_DISK,
     AZURE_RESOURCE_GROUP,
+    AZURE_DATABASE,
 
     // ARM
     ARM_TEMPLATE(CommonResourceType.TEMPLATE),

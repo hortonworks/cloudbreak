@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.api.endpoint.v4.stacks;
+package com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 
