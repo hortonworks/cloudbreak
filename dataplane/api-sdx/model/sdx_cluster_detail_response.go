@@ -23,6 +23,9 @@ type SdxClusterDetailResponse struct {
 	// Enum: [CUSTOM LIGHT_DUTY MEDIUM_DUTY_HA]
 	ClusterShape string `json:"clusterShape,omitempty"`
 
+	// created
+	Created int64 `json:"created,omitempty"`
+
 	// crn
 	Crn string `json:"crn,omitempty"`
 
@@ -34,6 +37,9 @@ type SdxClusterDetailResponse struct {
 
 	// name
 	Name string `json:"name,omitempty"`
+
+	// stack crn
+	StackCrn string `json:"stackCrn,omitempty"`
 
 	// stack v4 response
 	StackV4Response *StackV4Response `json:"stackV4Response,omitempty"`

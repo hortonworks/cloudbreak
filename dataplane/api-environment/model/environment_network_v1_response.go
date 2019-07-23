@@ -36,7 +36,6 @@ type EnvironmentNetworkV1Response struct {
 	NetworkCidr *string `json:"networkCidr,omitempty"`
 
 	// Subnet ids of the specified networks
-	// Required: true
 	// Unique: true
 	SubnetIds []string `json:"subnetIds"`
 
@@ -149,8 +148,8 @@ func (m *EnvironmentNetworkV1Response) validateNetworkCidr(formats strfmt.Regist
 
 func (m *EnvironmentNetworkV1Response) validateSubnetIds(formats strfmt.Registry) error {
 
-	if err := validate.Required("subnetIds", "body", m.SubnetIds); err != nil {
-		return err
+	if swag.IsZero(m.SubnetIds) { // not required
+		return nil
 	}
 
 	if err := validate.UniqueItems("subnetIds", "body", m.SubnetIds); err != nil {

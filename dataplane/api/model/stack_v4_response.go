@@ -70,6 +70,9 @@ type StackV4Response struct {
 	// Unique: true
 	HardwareInfoGroups []*HardwareInfoGroupV4Response `json:"hardwareInfoGroups"`
 
+	// id
+	ID int64 `json:"id,omitempty"`
+
 	// image of the stack
 	Image *StackImageV4Response `json:"image,omitempty"`
 
@@ -110,7 +113,7 @@ type StackV4Response struct {
 	Tags *TagsV4Response `json:"tags,omitempty"`
 
 	// stack related telemetry settings
-	Telemetry *TelemetryV4Response `json:"telemetry,omitempty"`
+	Telemetry *TelemetryResponse `json:"telemetry,omitempty"`
 
 	// termination completion time of stack in long
 	Terminated int64 `json:"terminated,omitempty"`

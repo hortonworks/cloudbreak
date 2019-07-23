@@ -34,9 +34,9 @@ type RecipeViewV4Response struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
-	// type of recipe [PRE_AMBARI_START,PRE_TERMINATION,POST_AMBARI_START,POST_CLUSTER_INSTALL]. The default is PRE_AMBARI_START
+	// type of recipe [PRE_CLOUDERA_MANAGER_START,PRE_TERMINATION,POST_CLOUDERA_MANAGER_START,POST_CLUSTER_INSTALL]. The default is PRE_CLOUDERA_MANAGER_START
 	// Required: true
-	// Enum: [PRE_AMBARI_START PRE_TERMINATION POST_AMBARI_START POST_CLUSTER_INSTALL]
+	// Enum: [PRE_CLOUDERA_MANAGER_START PRE_TERMINATION POST_CLOUDERA_MANAGER_START POST_CLUSTER_INSTALL]
 	Type *string `json:"type"`
 }
 
@@ -104,7 +104,7 @@ var recipeViewV4ResponseTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["PRE_AMBARI_START","PRE_TERMINATION","POST_AMBARI_START","POST_CLUSTER_INSTALL"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["PRE_CLOUDERA_MANAGER_START","PRE_TERMINATION","POST_CLOUDERA_MANAGER_START","POST_CLUSTER_INSTALL"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -114,14 +114,14 @@ func init() {
 
 const (
 
-	// RecipeViewV4ResponseTypePREAMBARISTART captures enum value "PRE_AMBARI_START"
-	RecipeViewV4ResponseTypePREAMBARISTART string = "PRE_AMBARI_START"
+	// RecipeViewV4ResponseTypePRECLOUDERAMANAGERSTART captures enum value "PRE_CLOUDERA_MANAGER_START"
+	RecipeViewV4ResponseTypePRECLOUDERAMANAGERSTART string = "PRE_CLOUDERA_MANAGER_START"
 
 	// RecipeViewV4ResponseTypePRETERMINATION captures enum value "PRE_TERMINATION"
 	RecipeViewV4ResponseTypePRETERMINATION string = "PRE_TERMINATION"
 
-	// RecipeViewV4ResponseTypePOSTAMBARISTART captures enum value "POST_AMBARI_START"
-	RecipeViewV4ResponseTypePOSTAMBARISTART string = "POST_AMBARI_START"
+	// RecipeViewV4ResponseTypePOSTCLOUDERAMANAGERSTART captures enum value "POST_CLOUDERA_MANAGER_START"
+	RecipeViewV4ResponseTypePOSTCLOUDERAMANAGERSTART string = "POST_CLOUDERA_MANAGER_START"
 
 	// RecipeViewV4ResponseTypePOSTCLUSTERINSTALL captures enum value "POST_CLUSTER_INSTALL"
 	RecipeViewV4ResponseTypePOSTCLUSTERINSTALL string = "POST_CLUSTER_INSTALL"

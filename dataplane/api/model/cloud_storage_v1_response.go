@@ -15,18 +15,18 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// CloudStorageV4Response cloud storage v4 response
-// swagger:model CloudStorageV4Response
-type CloudStorageV4Response struct {
+// CloudStorageV1Response cloud storage v1 response
+// swagger:model CloudStorageV1Response
+type CloudStorageV1Response struct {
 
 	// adls
-	Adls *AdlsCloudStorageV4Parameters `json:"adls,omitempty"`
+	Adls *AdlsCloudStorageV1Parameters `json:"adls,omitempty"`
 
 	// adls gen2
-	AdlsGen2 *AdlsGen2CloudStorageV4Parameters `json:"adlsGen2,omitempty"`
+	AdlsGen2 *AdlsGen2CloudStorageV1Parameters `json:"adlsGen2,omitempty"`
 
 	// gcs
-	Gcs *GcsCloudStorageV4Parameters `json:"gcs,omitempty"`
+	Gcs *GcsCloudStorageV1Parameters `json:"gcs,omitempty"`
 
 	// id of the resource
 	// Required: true
@@ -41,18 +41,18 @@ type CloudStorageV4Response struct {
 	Name *string `json:"name"`
 
 	// s3
-	S3 *S3CloudStorageV4Parameters `json:"s3,omitempty"`
+	S3 *S3CloudStorageV1Parameters `json:"s3,omitempty"`
 
 	// type of the filesystem
 	// Required: true
 	Type *string `json:"type"`
 
 	// wasb
-	Wasb *WasbCloudStorageV4Parameters `json:"wasb,omitempty"`
+	Wasb *WasbCloudStorageV1Parameters `json:"wasb,omitempty"`
 }
 
-// Validate validates this cloud storage v4 response
-func (m *CloudStorageV4Response) Validate(formats strfmt.Registry) error {
+// Validate validates this cloud storage v1 response
+func (m *CloudStorageV1Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdls(formats); err != nil {
@@ -97,7 +97,7 @@ func (m *CloudStorageV4Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageV4Response) validateAdls(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateAdls(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Adls) { // not required
 		return nil
@@ -115,7 +115,7 @@ func (m *CloudStorageV4Response) validateAdls(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageV4Response) validateAdlsGen2(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateAdlsGen2(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.AdlsGen2) { // not required
 		return nil
@@ -133,7 +133,7 @@ func (m *CloudStorageV4Response) validateAdlsGen2(formats strfmt.Registry) error
 	return nil
 }
 
-func (m *CloudStorageV4Response) validateGcs(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateGcs(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Gcs) { // not required
 		return nil
@@ -151,7 +151,7 @@ func (m *CloudStorageV4Response) validateGcs(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageV4Response) validateID(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("id", "body", m.ID); err != nil {
 		return err
@@ -160,7 +160,7 @@ func (m *CloudStorageV4Response) validateID(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageV4Response) validateLocations(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateLocations(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Locations) { // not required
 		return nil
@@ -189,7 +189,7 @@ func (m *CloudStorageV4Response) validateLocations(formats strfmt.Registry) erro
 	return nil
 }
 
-func (m *CloudStorageV4Response) validateName(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
@@ -198,7 +198,7 @@ func (m *CloudStorageV4Response) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageV4Response) validateS3(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateS3(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.S3) { // not required
 		return nil
@@ -216,7 +216,7 @@ func (m *CloudStorageV4Response) validateS3(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageV4Response) validateType(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateType(formats strfmt.Registry) error {
 
 	if err := validate.Required("type", "body", m.Type); err != nil {
 		return err
@@ -225,7 +225,7 @@ func (m *CloudStorageV4Response) validateType(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageV4Response) validateWasb(formats strfmt.Registry) error {
+func (m *CloudStorageV1Response) validateWasb(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Wasb) { // not required
 		return nil
@@ -244,7 +244,7 @@ func (m *CloudStorageV4Response) validateWasb(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *CloudStorageV4Response) MarshalBinary() ([]byte, error) {
+func (m *CloudStorageV1Response) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -252,8 +252,8 @@ func (m *CloudStorageV4Response) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *CloudStorageV4Response) UnmarshalBinary(b []byte) error {
-	var res CloudStorageV4Response
+func (m *CloudStorageV1Response) UnmarshalBinary(b []byte) error {
+	var res CloudStorageV1Response
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

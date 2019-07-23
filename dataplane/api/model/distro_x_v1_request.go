@@ -62,9 +62,6 @@ type DistroXV1Request struct {
 	// tags
 	Tags *TagsV1Request `json:"tags,omitempty"`
 
-	// telemetry
-	Telemetry *TelemetryV1Request `json:"telemetry,omitempty"`
-
 	// time to live
 	TimeToLive int64 `json:"timeToLive,omitempty"`
 
@@ -109,10 +106,6 @@ func (m *DistroXV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateTags(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateTelemetry(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -334,24 +327,6 @@ func (m *DistroXV1Request) validateTags(formats strfmt.Registry) error {
 		if err := m.Tags.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tags")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *DistroXV1Request) validateTelemetry(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Telemetry) { // not required
-		return nil
-	}
-
-	if m.Telemetry != nil {
-		if err := m.Telemetry.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("telemetry")
 			}
 			return err
 		}

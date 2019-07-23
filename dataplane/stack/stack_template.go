@@ -127,8 +127,6 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 
 	template := model.StackV4Request{
 		Cluster: &model.ClusterV4Request{
-			UserName:          &(&types.S{S: "____"}).S,
-			Password:          &(&types.S{S: ""}).S,
 			BlueprintName:     "____",
 			ValidateBlueprint: false,
 		},
@@ -179,7 +177,6 @@ func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder f
 		attachedClusterTemplate.Placement.AvailabilityZone = datalake.Placement.AvailabilityZone
 		attachedClusterTemplate.EnvironmentCrn = &datalake.EnvironmentCrn
 		attachedClusterTemplate.Network = cloud.GetProvider().GenerateNetworkRequestFromNetworkResponse(datalake.Network)
-		attachedClusterTemplate.Cluster.CloudStorage = generateCloudStorage(datalake.Cluster.CloudStorage)
 		for _, rds := range datalake.Cluster.Databases {
 			if *rds.Type == "RANGER" || *rds.Type == "HIVE" {
 				attachedClusterTemplate.Cluster.Databases = append(attachedClusterTemplate.Cluster.Databases, *rds.Name)
@@ -193,32 +190,6 @@ func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder f
 		return printTemplate(*attachedClusterTemplate)
 	}
 	return nil
-}
-
-func generateCloudStorage(fileSystem *model.CloudStorageV4Response) *model.CloudStorageV4Request {
-	if fileSystem != nil {
-		return &model.CloudStorageV4Request{
-			S3:        fileSystem.S3,
-			Adls:      fileSystem.Adls,
-			Gcs:       fileSystem.Gcs,
-			Wasb:      fileSystem.Wasb,
-			AdlsGen2:  fileSystem.AdlsGen2,
-			Locations: generateLocations(fileSystem.Locations),
-		}
-	}
-	return nil
-}
-
-func generateLocations(datalake []*model.StorageLocationV4Response) []*model.StorageLocationV4Request {
-	result := make([]*model.StorageLocationV4Request, len(datalake))
-	for i, loc := range datalake {
-		result[i] = &model.StorageLocationV4Request{
-			PropertyFile: loc.PropertyFile,
-			PropertyName: loc.PropertyName,
-			Value:        loc.Value,
-		}
-	}
-	return result
 }
 
 func printTemplate(template model.StackV4Request) error {
@@ -357,7 +328,7 @@ func extendTemplateWithEncryptionType(template *model.StackV4Request, boolFinder
 func extendTemplateWithStorageType(template *model.StackV4Request, storageType cloud.CloudStorageType) {
 	if storageType == cloud.WASB {
 		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
-			Wasb: &model.WasbCloudStorageV4Parameters{
+			Wasb: &model.WasbCloudStorageV1Parameters{
 				AccountKey:  &(&types.S{S: "____"}).S,
 				AccountName: &(&types.S{S: "____"}).S,
 				Secure:      false,
@@ -366,7 +337,7 @@ func extendTemplateWithStorageType(template *model.StackV4Request, storageType c
 		}
 	} else if storageType == cloud.ADLS_GEN1 {
 		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
-			Adls: &model.AdlsCloudStorageV4Parameters{
+			Adls: &model.AdlsCloudStorageV1Parameters{
 				AccountName: &(&types.S{S: "____"}).S,
 				ClientID:    &(&types.S{S: "____"}).S,
 				Credential:  &(&types.S{S: "____"}).S,
@@ -375,21 +346,21 @@ func extendTemplateWithStorageType(template *model.StackV4Request, storageType c
 		}
 	} else if storageType == cloud.S3 {
 		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
-			S3: &model.S3CloudStorageV4Parameters{
+			S3: &model.S3CloudStorageV1Parameters{
 				InstanceProfile: &(&types.S{S: "____"}).S,
 			},
 			Locations: []*model.StorageLocationV4Request{},
 		}
 	} else if storageType == cloud.GCS {
 		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
-			Gcs: &model.GcsCloudStorageV4Parameters{
+			Gcs: &model.GcsCloudStorageV1Parameters{
 				ServiceAccountEmail: &(&types.S{S: "____"}).S,
 			},
 			Locations: []*model.StorageLocationV4Request{},
 		}
 	} else if storageType == cloud.ADLS_GEN2 {
 		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
-			AdlsGen2: &model.AdlsGen2CloudStorageV4Parameters{
+			AdlsGen2: &model.AdlsGen2CloudStorageV1Parameters{
 				AccountKey:  &(&types.S{S: "____"}).S,
 				AccountName: &(&types.S{S: "____"}).S,
 			},

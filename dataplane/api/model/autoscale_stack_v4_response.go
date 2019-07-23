@@ -22,6 +22,9 @@ type AutoscaleStackV4Response struct {
 	// public ambari ip of the stack
 	AmbariServerIP string `json:"ambariServerIp,omitempty"`
 
+	// Cluster manager variant
+	ClusterManagerVariant string `json:"clusterManagerVariant,omitempty"`
+
 	// status of the cluster
 	// Enum: [REQUESTED CREATE_IN_PROGRESS AVAILABLE UPDATE_IN_PROGRESS UPDATE_REQUESTED UPDATE_FAILED CREATE_FAILED ENABLE_SECURITY_FAILED PRE_DELETE_IN_PROGRESS DELETE_IN_PROGRESS DELETE_FAILED DELETE_COMPLETED STOPPED STOP_REQUESTED START_REQUESTED STOP_IN_PROGRESS START_IN_PROGRESS START_FAILED STOP_FAILED WAIT_FOR_SYNC MAINTENANCE_MODE_ENABLED]
 	ClusterStatus string `json:"clusterStatus,omitempty"`
