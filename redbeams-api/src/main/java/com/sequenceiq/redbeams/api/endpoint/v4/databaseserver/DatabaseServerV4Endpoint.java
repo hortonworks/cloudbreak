@@ -79,7 +79,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "getDatabaseServerStatusByName")
     DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByName(
-            @NotNull @PathParam("environmentCrn") String environmentCrn,
+            @NotNull @QueryParam("environmentCrn") String environmentCrn,
             @NotNull @PathParam("name") String name
     );
 
