@@ -686,15 +686,15 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void preAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
-        LOGGER.debug("Executing pre-ambari-start recipes.");
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_AMBARI_START);
+        LOGGER.debug("Executing pre-cloudera-manager-start recipes.");
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START);
     }
 
     @Override
     public void postAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
-        LOGGER.debug("Executing post-ambari-start recipes.");
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_AMBARI_START);
+        LOGGER.debug("Executing post-cloudera-manager-start recipes.");
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLOUDERA_MANAGER_START);
     }
 
     @Override

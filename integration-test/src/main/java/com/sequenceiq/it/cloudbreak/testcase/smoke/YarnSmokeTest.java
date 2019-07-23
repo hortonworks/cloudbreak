@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.smoke;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -70,7 +70,7 @@ public class YarnSmokeTest extends AbstractE2ETest {
                 .given(cmcluster, ClusterTestDto.class).withValidateBlueprint(Boolean.FALSE).withClouderaManager(cm)
                 .given(RecipeTestDto.class)
                 .withName(postCmStartRecipeName).withContent(generateCreateCMUserRecipeContent(CREATE_CM_USER_SCRIPT_FILE))
-                .withRecipeType(POST_AMBARI_START)
+                .withRecipeType(POST_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                 .withHostGroup(MASTER).withNodeCount(NODE_COUNT).withRecipes(postCmStartRecipeName)

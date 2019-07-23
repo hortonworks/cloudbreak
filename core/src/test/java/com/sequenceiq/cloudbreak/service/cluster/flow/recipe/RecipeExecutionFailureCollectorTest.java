@@ -14,10 +14,10 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 
 public class RecipeExecutionFailureCollectorTest {
 
-    private static final String EXCEPTION_MESSAGE = "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
-            + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\""
-            + "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2\" run\n"
-            + "Stdout: /opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2 : Timed out after 10 seconds\""
+    private static final String EXCEPTION_MESSAGE = "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1\" run\n"
+            + "Stdout: /opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1 : Timed out after 10 seconds\""
+            + "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-cloudera-manager-start failingRecipe2\" run\n"
+            + "Stdout: /opt/scripts/recipe-runner.sh pre-cloudera-manager-start failingRecipe2 : Timed out after 10 seconds\""
             + "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address"
             + "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address";
 
@@ -39,14 +39,14 @@ public class RecipeExecutionFailureCollectorTest {
 
     @Test
     public void testRecipePhaseExtract() {
-        String example = "Name: /opt/scripts/recipe-runner.sh pre-ambari-start failing-recipe";
+        String example = "Name: /opt/scripts/recipe-runner.sh pre-cloudera-manager-start failing-recipe";
         String result = recipeExecutionFailureHandler.getRecipePhase(example);
-        assertEquals("pre-ambari-start", result);
+        assertEquals("pre-cloudera-manager-start", result);
     }
 
     @Test
     public void testRecipeNameExtract() {
-        String example = "Name: /opt/scripts/recipe-runner.sh pre-ambari-start failing-recipe";
+        String example = "Name: /opt/scripts/recipe-runner.sh pre-cloudera-manager-start failing-recipe";
         String result = recipeExecutionFailureHandler.getFailedRecipeName(example);
         assertEquals("failing-recipe", result);
     }
@@ -55,7 +55,7 @@ public class RecipeExecutionFailureCollectorTest {
     public void testRecipePhaseMultiline() {
         String example = getSingleLineError();
         String result = recipeExecutionFailureHandler.getRecipePhase(example);
-        assertEquals("post-ambari-start", result);
+        assertEquals("post-cloudera-manager-start", result);
     }
 
     @Test
@@ -65,10 +65,10 @@ public class RecipeExecutionFailureCollectorTest {
         List<RecipeExecutionFailureCollector.RecipeFailure> failure = recipeExecutionFailureHandler.collectErrors(exception);
         assertEquals(3, failure.size());
         assertEquals("failingRecipe1", failure.get(0).getRecipeName());
-        assertEquals("post-ambari-start", failure.get(0).getPhase());
+        assertEquals("post-cloudera-manager-start", failure.get(0).getPhase());
 
         assertEquals("failingRecipe2", failure.get(1).getRecipeName());
-        assertEquals("pre-ambari-start", failure.get(1).getPhase());
+        assertEquals("pre-cloudera-manager-start", failure.get(1).getPhase());
     }
 
     @Test
@@ -111,17 +111,17 @@ public class RecipeExecutionFailureCollectorTest {
 
     private List<String> getMultiLineError() {
         return Arrays.asList(
-                "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
-                        + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\"",
-                "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2\" run\n"
-                        + "Stdout: /opt/scripts/recipe-runner.sh pre-ambari-start failingRecipe2 : Timed out after 10 seconds\"",
+                "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1\" run\n"
+                        + "Stdout: /opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1 : Timed out after 10 seconds\"",
+                "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-cloudera-manager-start failingRecipe2\" run\n"
+                        + "Stdout: /opt/scripts/recipe-runner.sh pre-cloudera-manager-start failingRecipe2 : Timed out after 10 seconds\"",
                 "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address",
                 "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address"
         );
     }
 
     private String getSingleLineError() {
-        return "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1\" run\n"
-                + "Stdout: /opt/scripts/recipe-runner.sh post-ambari-start failingRecipe1 : Timed out after 10 seconds\"";
+        return "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1\" run\n"
+                + "Stdout: /opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1 : Timed out after 10 seconds\"";
     }
 }

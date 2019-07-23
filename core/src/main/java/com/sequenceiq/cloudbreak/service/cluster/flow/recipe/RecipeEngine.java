@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
-import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_AMBARI_START;
-import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_AMBARI_START;
+import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_TERMINATION;
 
 import java.util.Collections;
@@ -62,7 +62,7 @@ public class RecipeEngine {
 
     public void executePreClusterManagerRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (shouldExecuteRecipeOnStack(hostGroups, orchestrator, PRE_AMBARI_START)) {
+        if (shouldExecuteRecipeOnStack(hostGroups, orchestrator, PRE_CLOUDERA_MANAGER_START)) {
             orchestratorRecipeExecutor.preClusterManagerStartRecipes(stack);
         }
     }
@@ -71,7 +71,7 @@ public class RecipeEngine {
     public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if ((stack.getCluster() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn()))
-                || recipesFound(hostGroups, POST_AMBARI_START) && recipesSupportedOnOrchestrator(orchestrator)) {
+                || recipesFound(hostGroups, POST_CLOUDERA_MANAGER_START) && recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.postClusterManagerStartRecipes(stack);
         }
     }

@@ -13,10 +13,10 @@ public class FileSystemScriptConfigTest {
 
     @Test
     public void testFileSystemScriptConfigWhenNoPropertiesPopulatedThenPropertiesShouldBeEmpty() {
-        FileSystemScriptConfig fileSystemScriptConfig = new FileSystemScriptConfig("test", RecipeType.POST_AMBARI_START, ExecutionType.ALL_NODES);
+        FileSystemScriptConfig fileSystemScriptConfig = new FileSystemScriptConfig("test", RecipeType.POST_CLOUDERA_MANAGER_START, ExecutionType.ALL_NODES);
         Assert.assertEquals(fileSystemScriptConfig.getProperties(), Maps.newHashMap());
         Assert.assertEquals(fileSystemScriptConfig.getExecutionType(), ExecutionType.ALL_NODES);
-        Assert.assertEquals(fileSystemScriptConfig.getRecipeType(), RecipeType.POST_AMBARI_START);
+        Assert.assertEquals(fileSystemScriptConfig.getRecipeType(), RecipeType.POST_CLOUDERA_MANAGER_START);
         Assert.assertEquals(fileSystemScriptConfig.getScriptLocation(), "test");
     }
 
@@ -26,10 +26,10 @@ public class FileSystemScriptConfigTest {
         map.put("test1", "testvalue1");
 
         FileSystemScriptConfig fileSystemScriptConfig =
-                new FileSystemScriptConfig("test", RecipeType.POST_AMBARI_START, ExecutionType.ALL_NODES, map);
+                new FileSystemScriptConfig("test", RecipeType.POST_CLOUDERA_MANAGER_START, ExecutionType.ALL_NODES, map);
         Assert.assertEquals(fileSystemScriptConfig.getProperties(), map);
         Assert.assertEquals(fileSystemScriptConfig.getExecutionType(), ExecutionType.ALL_NODES);
-        Assert.assertEquals(fileSystemScriptConfig.getRecipeType(), RecipeType.POST_AMBARI_START);
+        Assert.assertEquals(fileSystemScriptConfig.getRecipeType(), RecipeType.POST_CLOUDERA_MANAGER_START);
         Assert.assertEquals(fileSystemScriptConfig.getScriptLocation(), "test");
     }
 

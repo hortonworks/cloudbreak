@@ -6,9 +6,9 @@ public enum RecipeExecutionPhase {
 
     PRE("pre"),
     POST("post"),
-    PRE_AMBARI_START("pre-ambari-start"),
+    PRE_CLOUDERA_MANAGER_START("pre-cloudera-manager-start"),
     PRE_TERMINATION("pre-termination"),
-    POST_AMBARI_START("post-ambari-start"),
+    POST_CLOUDERA_MANAGER_START("post-cloudera-manager-start"),
     POST_CLUSTER_INSTALL("post-cluster-install");
 
     private final String value;
@@ -19,12 +19,12 @@ public enum RecipeExecutionPhase {
 
     public static RecipeExecutionPhase convert(RecipeType recipeType) {
         switch (recipeType) {
-            case PRE_AMBARI_START:
-                return PRE_AMBARI_START;
+            case PRE_CLOUDERA_MANAGER_START:
+                return PRE_CLOUDERA_MANAGER_START;
             case PRE_TERMINATION:
                 return PRE_TERMINATION;
-            case POST_AMBARI_START:
-                return POST_AMBARI_START;
+            case POST_CLOUDERA_MANAGER_START:
+                return POST_CLOUDERA_MANAGER_START;
             case POST_CLUSTER_INSTALL:
                 return POST_CLUSTER_INSTALL;
             default:

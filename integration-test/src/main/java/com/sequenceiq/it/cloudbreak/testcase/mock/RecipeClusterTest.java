@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 
 import javax.inject.Inject;
@@ -90,7 +90,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             when = "starting cluster with deleted recipe",
             then = "badrequest exception is received")
     public void testDeletedRecipeCannotBeAssignedToCluster(TestContext testContext) {
-        LOGGER.info("testing recipe execution for type: {}", PRE_AMBARI_START.name());
+        LOGGER.info("testing recipe execution for type: {}", PRE_CLOUDERA_MANAGER_START.name());
         String recipeName = resourcePropertyProvider().getName();
         String stackName = resourcePropertyProvider().getName();
         String instanceGroupName = resourcePropertyProvider().getName();
@@ -99,7 +99,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .given(recipeName, RecipeTestDto.class)
                 .withName(recipeName)
                 .withContent(RECIPE_CONTENT)
-                .withRecipeType(PRE_AMBARI_START)
+                .withRecipeType(PRE_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4(), RunningParameter.key(recipeName))
                 .when(recipeTestClient.deleteV4(), RunningParameter.key(recipeName))
                 .given(instanceGroupName, InstanceGroupTestDto.class)
@@ -202,7 +202,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
                 .withContent(RECIPE_CONTENT)
-                .withRecipeType(POST_AMBARI_START)
+                .withRecipeType(POST_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                 .withHostGroup(HostGroupType.COMPUTE)
@@ -228,7 +228,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
         String key = resourcePropertyProvider().getName();
 
         testContext
-                .given(RecipeTestDto.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(POST_AMBARI_START)
+                .given(RecipeTestDto.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(POST_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class).withRecipes(recipeName)
                 .given(StackTestDto.class).replaceInstanceGroups(INSTANCE_GROUP_ID)
@@ -247,7 +247,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
         return new Object[][]{
                 {
                         getBean(MockedTestContext.class),
-                        PRE_AMBARI_START,
+                        PRE_CLOUDERA_MANAGER_START,
                         3,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("pre ambari start recipes")
@@ -256,7 +256,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 },
                 {
                         getBean(MockedTestContext.class),
-                        POST_AMBARI_START,
+                        POST_CLOUDERA_MANAGER_START,
                         3,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("post ambari start recipes")
