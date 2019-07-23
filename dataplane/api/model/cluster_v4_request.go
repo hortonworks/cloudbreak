@@ -37,9 +37,6 @@ type ClusterV4Request struct {
 	// custom queue for yarn orchestrator
 	CustomQueue string `json:"customQueue,omitempty"`
 
-	// Contains valid Crn for a readbeams database server
-	DatabaseServerCrn string `json:"databaseServerCrn,omitempty"`
-
 	// RDS configuration names for the cluster
 	// Unique: true
 	Databases []string `json:"databases"`
@@ -52,18 +49,20 @@ type ClusterV4Request struct {
 	Gateway *GatewayV4Request `json:"gateway,omitempty"`
 
 	// ambari password
+	// Required: true
 	// Max Length: 100
 	// Min Length: 8
-	Password string `json:"password,omitempty"`
+	Password *string `json:"password"`
 
 	// proxy CRN for the cluster
 	ProxyConfigCrn string `json:"proxyConfigCrn,omitempty"`
 
 	// ambari username
+	// Required: true
 	// Max Length: 15
 	// Min Length: 5
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
-	UserName string `json:"userName,omitempty"`
+	UserName *string `json:"userName"`
 
 	// blueprint validation
 	ValidateBlueprint bool `json:"validateBlueprint,omitempty"`
@@ -263,15 +262,15 @@ func (m *ClusterV4Request) validateGateway(formats strfmt.Registry) error {
 
 func (m *ClusterV4Request) validatePassword(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Password) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("password", "body", string(m.Password), 8); err != nil {
+	if err := validate.Required("password", "body", m.Password); err != nil {
 		return err
 	}
 
-	if err := validate.MaxLength("password", "body", string(m.Password), 100); err != nil {
+	if err := validate.MinLength("password", "body", string(*m.Password), 8); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("password", "body", string(*m.Password), 100); err != nil {
 		return err
 	}
 
@@ -280,19 +279,19 @@ func (m *ClusterV4Request) validatePassword(formats strfmt.Registry) error {
 
 func (m *ClusterV4Request) validateUserName(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.UserName) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("userName", "body", string(m.UserName), 5); err != nil {
+	if err := validate.Required("userName", "body", m.UserName); err != nil {
 		return err
 	}
 
-	if err := validate.MaxLength("userName", "body", string(m.UserName), 15); err != nil {
+	if err := validate.MinLength("userName", "body", string(*m.UserName), 5); err != nil {
 		return err
 	}
 
-	if err := validate.Pattern("userName", "body", string(m.UserName), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
+	if err := validate.MaxLength("userName", "body", string(*m.UserName), 15); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("userName", "body", string(*m.UserName), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 

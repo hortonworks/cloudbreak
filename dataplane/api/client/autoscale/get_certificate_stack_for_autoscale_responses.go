@@ -51,7 +51,7 @@ type GetCertificateStackForAutoscaleOK struct {
 }
 
 func (o *GetCertificateStackForAutoscaleOK) Error() string {
-	return fmt.Sprintf("[GET /autoscale/stack/crn/{crn}/certificate][%d] getCertificateStackForAutoscaleOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /autoscale/stack/{crn}/certificate][%d] getCertificateStackForAutoscaleOK  %+v", 200, o.Payload)
 }
 
 func (o *GetCertificateStackForAutoscaleOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

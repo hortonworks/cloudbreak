@@ -34,9 +34,6 @@ type ClusterTemplateViewV4Response struct {
 	// environment crn
 	EnvironmentCrn string `json:"environmentCrn,omitempty"`
 
-	// environment name
-	EnvironmentName string `json:"environmentName,omitempty"`
-
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 

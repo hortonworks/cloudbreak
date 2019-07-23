@@ -25,9 +25,6 @@ type CloudStorageV1Request struct {
 	// adls gen2
 	AdlsGen2 *AdlsGen2CloudStorageV1Parameters `json:"adlsGen2,omitempty"`
 
-	// gcs
-	Gcs *GcsCloudStorageV1Parameters `json:"gcs,omitempty"`
-
 	// cloud storage locations
 	// Unique: true
 	Locations []*StorageLocationV1Request `json:"locations"`
@@ -48,10 +45,6 @@ func (m *CloudStorageV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateAdlsGen2(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateGcs(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -101,24 +94,6 @@ func (m *CloudStorageV1Request) validateAdlsGen2(formats strfmt.Registry) error 
 		if err := m.AdlsGen2.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("adlsGen2")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *CloudStorageV1Request) validateGcs(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Gcs) { // not required
-		return nil
-	}
-
-	if m.Gcs != nil {
-		if err := m.Gcs.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("gcs")
 			}
 			return err
 		}

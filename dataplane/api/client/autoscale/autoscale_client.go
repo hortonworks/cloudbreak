@@ -36,7 +36,7 @@ func (a *Client) AuthorizeForAutoscale(params *AuthorizeForAutoscaleParams) (*Au
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "authorizeForAutoscale",
 		Method:             "GET",
-		PathPattern:        "/autoscale/stack/crn/{crn}/authorize/{userId}/{tenant}/{permission}",
+		PathPattern:        "/autoscale/stack/{crn}/authorize/{userId}/{tenant}/{permission}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -66,7 +66,7 @@ func (a *Client) FailureReportClusterForAutoscale(params *FailureReportClusterFo
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "failureReportClusterForAutoscale",
 		Method:             "POST",
-		PathPattern:        "/autoscale/stack/crn/{crn}/cluster/failurereport",
+		PathPattern:        "/autoscale/stack/{crn}/cluster/failurereport",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -126,7 +126,7 @@ func (a *Client) GetCertificateStackForAutoscale(params *GetCertificateStackForA
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getCertificateStackForAutoscale",
 		Method:             "GET",
-		PathPattern:        "/autoscale/stack/crn/{crn}/certificate",
+		PathPattern:        "/autoscale/stack/{crn}/certificate",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -186,7 +186,7 @@ func (a *Client) GetStackForAutoscale(params *GetStackForAutoscaleParams) (*GetS
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getStackForAutoscale",
 		Method:             "GET",
-		PathPattern:        "/autoscale/stack/crn/{crn}",
+		PathPattern:        "/autoscale/stack/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -216,7 +216,7 @@ func (a *Client) PutClusterForAutoscale(params *PutClusterForAutoscaleParams) er
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "putClusterForAutoscale",
 		Method:             "PUT",
-		PathPattern:        "/autoscale/stack/crn/{crn}/{userId}/cluster",
+		PathPattern:        "/autoscale/stack/{crn}/{userId}/cluster",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -246,7 +246,7 @@ func (a *Client) PutStackForAutoscale(params *PutStackForAutoscaleParams) error 
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "putStackForAutoscale",
 		Method:             "PUT",
-		PathPattern:        "/autoscale/stack/crn/{crn}/{userId}",
+		PathPattern:        "/autoscale/stack/{crn}/{userId}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

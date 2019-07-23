@@ -68,8 +68,8 @@ type CloudbreakEventV4Response struct {
 	// region of the stack
 	Region string `json:"region,omitempty"`
 
-	// the unique crn of the resource
-	StackCrn string `json:"stackCrn,omitempty"`
+	// id of the stack
+	StackID int64 `json:"stackId,omitempty"`
 
 	// name of the stack
 	StackName string `json:"stackName,omitempty"`

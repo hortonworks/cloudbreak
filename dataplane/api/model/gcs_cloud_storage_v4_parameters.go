@@ -13,17 +13,17 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// GcsCloudStorageV1Parameters gcs cloud storage v1 parameters
-// swagger:model GcsCloudStorageV1Parameters
-type GcsCloudStorageV1Parameters struct {
+// GcsCloudStorageV4Parameters gcs cloud storage v4 parameters
+// swagger:model GcsCloudStorageV4Parameters
+type GcsCloudStorageV4Parameters struct {
 
 	// service account email
 	// Required: true
 	ServiceAccountEmail *string `json:"serviceAccountEmail"`
 }
 
-// Validate validates this gcs cloud storage v1 parameters
-func (m *GcsCloudStorageV1Parameters) Validate(formats strfmt.Registry) error {
+// Validate validates this gcs cloud storage v4 parameters
+func (m *GcsCloudStorageV4Parameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateServiceAccountEmail(formats); err != nil {
@@ -36,7 +36,7 @@ func (m *GcsCloudStorageV1Parameters) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *GcsCloudStorageV1Parameters) validateServiceAccountEmail(formats strfmt.Registry) error {
+func (m *GcsCloudStorageV4Parameters) validateServiceAccountEmail(formats strfmt.Registry) error {
 
 	if err := validate.Required("serviceAccountEmail", "body", m.ServiceAccountEmail); err != nil {
 		return err
@@ -46,7 +46,7 @@ func (m *GcsCloudStorageV1Parameters) validateServiceAccountEmail(formats strfmt
 }
 
 // MarshalBinary interface implementation
-func (m *GcsCloudStorageV1Parameters) MarshalBinary() ([]byte, error) {
+func (m *GcsCloudStorageV4Parameters) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -54,8 +54,8 @@ func (m *GcsCloudStorageV1Parameters) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *GcsCloudStorageV1Parameters) UnmarshalBinary(b []byte) error {
-	var res GcsCloudStorageV1Parameters
+func (m *GcsCloudStorageV4Parameters) UnmarshalBinary(b []byte) error {
+	var res GcsCloudStorageV4Parameters
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

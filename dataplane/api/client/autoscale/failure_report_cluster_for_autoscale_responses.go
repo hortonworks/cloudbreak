@@ -53,7 +53,7 @@ func (o *FailureReportClusterForAutoscaleDefault) Code() int {
 }
 
 func (o *FailureReportClusterForAutoscaleDefault) Error() string {
-	return fmt.Sprintf("[POST /autoscale/stack/crn/{crn}/cluster/failurereport][%d] failureReportClusterForAutoscale default ", o._statusCode)
+	return fmt.Sprintf("[POST /autoscale/stack/{crn}/cluster/failurereport][%d] failureReportClusterForAutoscale default ", o._statusCode)
 }
 
 func (o *FailureReportClusterForAutoscaleDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

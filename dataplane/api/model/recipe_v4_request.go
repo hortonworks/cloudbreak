@@ -33,9 +33,9 @@ type RecipeV4Request struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name string `json:"name,omitempty"`
 
-	// type of recipe [PRE_CLOUDERA_MANAGER_START,PRE_TERMINATION,POST_CLOUDERA_MANAGER_START,POST_CLUSTER_INSTALL]. The default is PRE_CLOUDERA_MANAGER_START
+	// type of recipe [PRE_AMBARI_START,PRE_TERMINATION,POST_AMBARI_START,POST_CLUSTER_INSTALL]. The default is PRE_AMBARI_START
 	// Required: true
-	// Enum: [PRE_CLOUDERA_MANAGER_START PRE_TERMINATION POST_CLOUDERA_MANAGER_START POST_CLUSTER_INSTALL]
+	// Enum: [PRE_AMBARI_START PRE_TERMINATION POST_AMBARI_START POST_CLUSTER_INSTALL]
 	Type *string `json:"type"`
 }
 
@@ -103,7 +103,7 @@ var recipeV4RequestTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["PRE_CLOUDERA_MANAGER_START","PRE_TERMINATION","POST_CLOUDERA_MANAGER_START","POST_CLUSTER_INSTALL"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["PRE_AMBARI_START","PRE_TERMINATION","POST_AMBARI_START","POST_CLUSTER_INSTALL"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -113,14 +113,14 @@ func init() {
 
 const (
 
-	// RecipeV4RequestTypePRECLOUDERAMANAGERSTART captures enum value "PRE_CLOUDERA_MANAGER_START"
-	RecipeV4RequestTypePRECLOUDERAMANAGERSTART string = "PRE_CLOUDERA_MANAGER_START"
+	// RecipeV4RequestTypePREAMBARISTART captures enum value "PRE_AMBARI_START"
+	RecipeV4RequestTypePREAMBARISTART string = "PRE_AMBARI_START"
 
 	// RecipeV4RequestTypePRETERMINATION captures enum value "PRE_TERMINATION"
 	RecipeV4RequestTypePRETERMINATION string = "PRE_TERMINATION"
 
-	// RecipeV4RequestTypePOSTCLOUDERAMANAGERSTART captures enum value "POST_CLOUDERA_MANAGER_START"
-	RecipeV4RequestTypePOSTCLOUDERAMANAGERSTART string = "POST_CLOUDERA_MANAGER_START"
+	// RecipeV4RequestTypePOSTAMBARISTART captures enum value "POST_AMBARI_START"
+	RecipeV4RequestTypePOSTAMBARISTART string = "POST_AMBARI_START"
 
 	// RecipeV4RequestTypePOSTCLUSTERINSTALL captures enum value "POST_CLUSTER_INSTALL"
 	RecipeV4RequestTypePOSTCLUSTERINSTALL string = "POST_CLUSTER_INSTALL"

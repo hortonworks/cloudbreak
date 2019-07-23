@@ -48,9 +48,6 @@ type DistroXClusterV1Request struct {
 	// Min Length: 5
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	UserName *string `json:"userName"`
-
-	// blueprint validation
-	ValidateBlueprint bool `json:"validateBlueprint,omitempty"`
 }
 
 // Validate validates this distro x cluster v1 request
