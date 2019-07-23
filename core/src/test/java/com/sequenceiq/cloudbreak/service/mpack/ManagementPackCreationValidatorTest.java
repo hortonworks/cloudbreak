@@ -52,16 +52,22 @@ public class ManagementPackCreationValidatorTest {
 
     @Test
     public void testWithValidMediaType() {
+        runValidMediaTypeTest("application/x-gzip");
+        runValidMediaTypeTest("application/x-tar");
+        runValidMediaTypeTest("application/octet-stream");
+    }
+
+    private void runValidMediaTypeTest(String subType) {
         WebTarget webTarget = Mockito.mock(WebTarget.class);
         Builder webTargetRequest = Mockito.mock(Builder.class);
         when(webTarget.request()).thenReturn(webTargetRequest);
         when(client.target(anyString())).thenReturn(webTarget);
-        try (Response response = Response.ok().header("Content-Type", "application/octet-stream").build()) {
+        try (Response response = Response.ok().header("Content-Type", subType).build()) {
             when(webTargetRequest.head()).thenReturn(response);
             ManagementPack managementPack = new ManagementPack();
             managementPack.setMpackUrl("url");
             ValidationResult validationResult = underTest.validate(managementPack);
-            assertFalse(validationResult.hasError());
+            assertFalse(subType, validationResult.hasError());
         }
     }
 
