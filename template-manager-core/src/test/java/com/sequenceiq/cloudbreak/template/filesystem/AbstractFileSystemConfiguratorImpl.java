@@ -16,17 +16,17 @@ public class AbstractFileSystemConfiguratorImpl extends AbstractFileSystemConfig
 
         if ("crn1".equals(credential.getCrn())) {
             return Collections.singletonList(new FileSystemScriptConfig("file-system-config.script",
-                    RecipeType.POST_AMBARI_START,
+                    RecipeType.POST_CLOUDERA_MANAGER_START,
                     ExecutionType.ALL_NODES,
                     Collections.emptyMap()));
         } else if ("crn2".equals(credential.getCrn())) {
             return Collections.singletonList(new FileSystemScriptConfig("file-system-config-not-found",
-                    RecipeType.POST_AMBARI_START,
+                    RecipeType.POST_CLOUDERA_MANAGER_START,
                     ExecutionType.ALL_NODES,
                     Collections.emptyMap()));
         } else {
             return Collections.singletonList(new FileSystemScriptConfig("file-system-config.script",
-                    RecipeType.POST_AMBARI_START,
+                    RecipeType.POST_CLOUDERA_MANAGER_START,
                     ExecutionType.ALL_NODES,
                     Collections.singletonMap("replace", "newContent")));
         }

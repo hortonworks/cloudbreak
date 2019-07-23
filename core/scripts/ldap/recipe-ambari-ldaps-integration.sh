@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# To enable Ambari-LDAPS integration as a post-ambari-start recipe
+# To enable Ambari-LDAPS integration as a post-cloudera-manager-start recipe
 PATH_TO_YOUR_LDAPS_CERT=/tmp/cert
 AMBARI_USER=admin
 AMBARI_PASS=Admin123

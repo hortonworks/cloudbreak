@@ -80,9 +80,9 @@ base:
     - match: grain
     - smartsense
 
-  'recipes:pre-ambari-start':
+  'recipes:pre-cloudera-manager-start':
     - match: grain
-    - recipes.pre-ambari-start
+    - recipes.pre-cloudera-manager-start
 
   'roles:ambari_server':
     - match: grain
@@ -108,11 +108,11 @@ base:
     - match: grain
     - ambari.agent-start
 
-  'recipes:post-ambari-start':
+  'recipes:post-cloudera-manager-start':
     - match: grain
-    - recipes.post-ambari-start
+    - recipes.post-cloudera-manager-start
 
-  'G@roles:ambari_server and G@recipes:post-ambari-start':
+  'G@roles:ambari_server and G@recipes:post-cloudera-manager-start':
     - match: compound
     - ambari.sync-ldap
 
