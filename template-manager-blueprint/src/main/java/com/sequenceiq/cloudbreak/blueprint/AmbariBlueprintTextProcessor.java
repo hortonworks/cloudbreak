@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.processor.configuration.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfiguration;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;

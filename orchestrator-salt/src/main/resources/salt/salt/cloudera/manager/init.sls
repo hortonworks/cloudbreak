@@ -99,3 +99,8 @@ run_autotls_setup:
     - unless: test -f /var/autotls_setup_success
 
 {% endif %}
+
+start_rpcbind:
+  service.running:
+    - enable: True
+    - name: rpcbind

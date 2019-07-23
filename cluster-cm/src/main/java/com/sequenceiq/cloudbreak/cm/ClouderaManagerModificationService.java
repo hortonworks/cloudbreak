@@ -20,15 +20,16 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
+import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
 @Scope("prototype")
@@ -105,11 +107,37 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 activateParcel(clustersResourceApi);
                 applyHostGroupRolesOnUpscaledHosts(body, hostGroup.getName());
             }
+            MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerClientFactory.getMgmtServiceResourceApi(client);
+            restartStaleServices(mgmtServiceResourceApi, clustersResourceApi);
         } catch (ApiException e) {
             LOGGER.warn("Failed to upscale: {}", e.getResponseBody(), e);
             throw new CloudbreakException("Failed to upscale", e);
         }
 
+    }
+
+    private void restartStaleServices(MgmtServiceResourceApi mgmtServiceResourceApi, ClustersResourceApi clustersResourceApi)
+            throws ApiException, CloudbreakException {
+        LOGGER.debug("Restarting Cloudera Management Services in Cloudera Manager.");
+        ApiCommand restartCommand = mgmtServiceResourceApi.restartCommand();
+        pollRestart(restartCommand);
+        LOGGER.debug("Restarted Coudera Management Services in Cloudera Manager.");
+
+        LOGGER.debug("Restarting stale services and redeploying client configurations in Cloudera Manager.");
+        ApiCommand restartServicesCommand = clustersResourceApi.restartCommand(stack.getName(),
+                new ApiRestartClusterArgs().redeployClientConfiguration(Boolean.TRUE).restartOnlyStaleServices(Boolean.TRUE));
+        pollRestart(restartServicesCommand);
+        LOGGER.debug("Restarted stale services in Cloudera Manager.");
+    }
+
+    private void pollRestart(ApiCommand restartCommand) throws CloudbreakException {
+        PollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.restartServicesPollingService(
+                stack, client, restartCommand.getId());
+        if (isExited(hostTemplatePollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for service restart");
+        } else if (isTimeout(hostTemplatePollingResult)) {
+            throw new CloudbreakException("Timeout while Cloudera Manager was restarting services.");
+        }
     }
 
     private void applyHostGroupRolesOnUpscaledHosts(ApiHostRefList body, String hostGroupName) throws ApiException, CloudbreakException {

@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
+import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
@@ -32,6 +33,7 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
@@ -78,6 +80,9 @@ class ClouderaManagerModificationServiceTest {
     @Mock
     private HostTemplatesResourceApi hostTemplatesResourceApi;
 
+    @Mock
+    private MgmtServiceResourceApi mgmtServiceResourceApi;
+
     private Cluster cluster;
 
     private HostGroup hostGroup;
@@ -117,6 +122,7 @@ class ClouderaManagerModificationServiceTest {
         originalHm.setHostName("original");
 
         setUpListClusterHosts();
+        setUpRestartServices();
 
         underTest.upscaleCluster(hostGroup, List.of(originalHm), instaneMetadata);
         verify(clouderaManagerClientFactory, never()).getHostsResourceApi(any());
@@ -187,6 +193,8 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.applyHostTemplatePollingService(eq(stack), eq(apiClientMock), eq(applyHostTemplateCommandId)))
                 .thenReturn(applyTemplatePollingResult);
 
+        ArgumentCaptor<ApiRestartClusterArgs> apiRestartClusterArgs = setUpRestartServices();
+
         underTest.upscaleCluster(hostGroup, hostMetadataList, instaneMetadata);
 
         ArgumentCaptor<ApiHostRefList> bodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
@@ -195,12 +203,33 @@ class ClouderaManagerModificationServiceTest {
         assertEquals(1, bodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", bodyCatcher.getValue().getItems().get(0).getHostname());
 
+        ApiRestartClusterArgs restartClusterArgs = apiRestartClusterArgs.getValue();
+        assertEquals(Boolean.TRUE, restartClusterArgs.getRestartOnlyStaleServices());
+        assertEquals(Boolean.TRUE, restartClusterArgs.getRedeployClientConfiguration());
+
         ArgumentCaptor<ApiHostRefList> applyTemplateBodyCatcher = ArgumentCaptor.forClass(ApiHostRefList.class);
         verify(hostTemplatesResourceApi, times(1))
                 .applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), applyTemplateBodyCatcher.capture());
 
         assertEquals(1, applyTemplateBodyCatcher.getValue().getItems().size());
         assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
+    }
+
+    private ArgumentCaptor<ApiRestartClusterArgs> setUpRestartServices() throws ApiException {
+        when(clouderaManagerClientFactory.getMgmtServiceResourceApi(eq(apiClientMock))).thenReturn(mgmtServiceResourceApi);
+        BigDecimal restartMgmtCommandId = new BigDecimal(300);
+        when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(restartMgmtCommandId));
+        PollingResult restartMgmtCommandResult = PollingResult.SUCCESS;
+        when(clouderaManagerPollingServiceProvider.restartServicesPollingService(eq(stack), eq(apiClientMock), eq(restartMgmtCommandId)))
+                .thenReturn(restartMgmtCommandResult);
+
+        ArgumentCaptor<ApiRestartClusterArgs> apiRestartClusterArgs = ArgumentCaptor.forClass(ApiRestartClusterArgs.class);
+        BigDecimal restartClusterCommandId = new BigDecimal(400);
+        when(clustersResourceApi.restartCommand(eq(STACK_NAME), apiRestartClusterArgs.capture())).thenReturn(new ApiCommand().id(restartClusterCommandId));
+        PollingResult restartClusterCommandResult = PollingResult.SUCCESS;
+        when(clouderaManagerPollingServiceProvider.restartServicesPollingService(eq(stack), eq(apiClientMock), eq(restartClusterCommandId)))
+                .thenReturn(restartClusterCommandResult);
+        return apiRestartClusterArgs;
     }
 
     private void setUpReadHosts() throws ApiException {

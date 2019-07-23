@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.template.processor;
+package com.sequenceiq.cloudbreak.common.type;
 
 public enum ClusterManagerType {
     AMBARI,

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -20,7 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.Constraint;
@@ -31,10 +31,12 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class ClusterRepairFlowEventChainFactoryTest {
 
@@ -65,6 +67,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
     private ClusterService clusterService;
 
     @Mock
+    private BlueprintService blueprintService;
+
+    @Mock
     private KerberosConfigService kerberosConfigService;
 
     @InjectMocks
@@ -73,6 +78,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
     }
 
     @Test

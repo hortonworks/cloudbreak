@@ -105,7 +105,8 @@ public class ClusterServiceRunner {
     public void updateAmbariClientConfig(Stack stack, Cluster cluster) {
         String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
         HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, gatewayIp);
-        clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
+        Cluster updatedCluster = clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
+        stack.setCluster(updatedCluster);
     }
 
     public void updateSaltState(Long stackId) throws CloudbreakException {

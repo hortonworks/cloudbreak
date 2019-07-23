@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -61,6 +63,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Inject
     private KerberosConfigService kerberosConfigService;
+
+    @Inject
+    private BlueprintService blueprintService;
 
     @Override
     public String initEvent() {
@@ -105,8 +110,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
         addStackDownscale(event, flowChainTriggers, instanceGroup, stack, new HashSet<>(hostNames));
         if (!event.isRemoveOnly()) {
-            addFullUpscale(event, flowChainTriggers, hostGroup.getName(), hostNames, true, isKerberosSecured(stack),
-                    clusterService.isSingleNode(stack));
+            addFullUpscale(event, flowChainTriggers, hostGroup.getName(), hostNames, true, isKerberosSecured(stack), stack);
             // we need to update all ephemeral clusters that are connected to a datalake
             if (!stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getResourceId()).isEmpty()) {
                 upgradeEphemeralClusters(event, flowChainTriggers);
@@ -125,8 +129,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         }
         addFullDownscale(event, stack, flowChainTriggers, hostGroup.getName(), failedHostNames);
         if (!event.isRemoveOnly()) {
-            addFullUpscale(event, flowChainTriggers, hostGroup.getName(), failedHostNames, false, false,
-                    clusterService.isSingleNode(stack));
+            addFullUpscale(event, flowChainTriggers, hostGroup.getName(), failedHostNames, false, false, stack);
             // we need to update all ephemeral clusters that are connected to a datalake
             if (gatewayInstanceGroup
                     && !stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getResourceId()).isEmpty() && primaryGatewayInstance) {
@@ -160,10 +163,13 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private void addFullUpscale(ClusterRepairTriggerEvent event, Queue<Selectable> flowChainTriggers, String hostGroupName, List<String> hostNames,
-            boolean singlePrimaryGateway, boolean kerberosSecured, boolean singleNodeCluster) {
+            boolean singlePrimaryGateway, boolean kerberosSecured, Stack stack) {
+        boolean singleNodeCluster = clusterService.isSingleNode(stack);
+        boolean ambariBlueprint = blueprintService.isAmbariBlueprint(stack.getCluster().getBlueprint());
+        ClusterManagerType cmType = ambariBlueprint ? ClusterManagerType.AMBARI : ClusterManagerType.CLOUDERA_MANAGER;
         flowChainTriggers.add(new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(), hostGroupName,
                 hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames), singlePrimaryGateway,
-                kerberosSecured, event.accepted(), singleNodeCluster));
+                kerberosSecured, event.accepted(), singleNodeCluster, cmType));
     }
 
     private boolean isKerberosSecured(Stack stack) {
