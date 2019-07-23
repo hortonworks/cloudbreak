@@ -58,8 +58,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.fluent.FluentConfigService;
-import com.sequenceiq.cloudbreak.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
@@ -169,9 +167,6 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
-    private FluentConfigService fluentConfigService;
 
     @Inject
     private TelemetryDecorator telemetryDecorator;
@@ -291,8 +286,7 @@ public class ClusterHostServiceRunner {
     private void addClouderaManagerConfig(Stack stack, Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
-        FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(stack, telemetry);
-        telemetryDecorator.decoratePillar(servicePillar, fluentConfigView);
+        telemetryDecorator.decoratePillar(servicePillar, stack, telemetry);
         decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
         decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
         decoratePillarWithClouderaManagerRepo(stack.getId(), cluster.getId(), servicePillar);

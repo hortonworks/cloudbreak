@@ -151,6 +151,13 @@ public class FluentConfigView {
         map.put("azureStorageAccount", ObjectUtils.defaultIfNull(this.azureStorageAccount, EMPTY_CONFIG_DEFAULT));
         map.put("azureStorageAccessKey", ObjectUtils.defaultIfNull(this.azureStorageAccessKey, EMPTY_CONFIG_DEFAULT));
         map.put("azureInstanceMsi", ObjectUtils.defaultIfNull(this.azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
+        if (this.overrideAttributes != null) {
+            for (Map.Entry<String, Object> entry : this.overrideAttributes.entrySet()) {
+                if (map.containsKey(entry.getKey())) {
+                    map.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
         return map;
     }
 
