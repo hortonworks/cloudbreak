@@ -28,6 +28,9 @@ public class ClouderaManagerV1Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.CM_PRODUCT_DETAILS)
     private List<ClouderaManagerProductV1Request> products;
 
+    @ApiModelProperty(ClusterModelDescription.CM_ENABLE_AUTOTLS)
+    private Boolean enableAutoTls = Boolean.FALSE;
+
     public ClouderaManagerRepositoryV1Request getRepository() {
         return repository;
     }
@@ -44,6 +47,14 @@ public class ClouderaManagerV1Request implements JsonEntity {
         this.products = products;
     }
 
+    public Boolean getEnableAutoTls() {
+        return enableAutoTls;
+    }
+
+    public void setEnableAutoTls(Boolean enableAutoTls) {
+        this.enableAutoTls = enableAutoTls;
+    }
+
     public ClouderaManagerV1Request withRepository(ClouderaManagerRepositoryV1Request repository) {
         setRepository(repository);
         return this;
@@ -51,6 +62,11 @@ public class ClouderaManagerV1Request implements JsonEntity {
 
     public ClouderaManagerV1Request withProducts(List<ClouderaManagerProductV1Request> products) {
         setProducts(products);
+        return this;
+    }
+
+    public ClouderaManagerV1Request withEnableAutoTls(Boolean enableAutoTls) {
+        setEnableAutoTls(enableAutoTls);
         return this;
     }
 }

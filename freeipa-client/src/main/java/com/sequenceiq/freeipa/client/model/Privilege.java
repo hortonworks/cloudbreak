@@ -14,7 +14,7 @@ public class Privilege {
     private String cn;
 
     @JsonProperty(value = "member_role")
-    private List<String> member;
+    private List<String> member = List.of();
 
     public String getCn() {
         return cn;

@@ -176,6 +176,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     private String databaseServerCrn;
 
+    @Column(nullable = false)
+    private Boolean autoTlsEnabled = Boolean.FALSE;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -538,6 +541,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setDatabaseServerCrn(String databaseServerCrn) {
         this.databaseServerCrn = databaseServerCrn;
+    }
+
+    public Boolean getAutoTlsEnabled() {
+        return autoTlsEnabled;
+    }
+
+    public void setAutoTlsEnabled(Boolean autoTlsEnabled) {
+        this.autoTlsEnabled = autoTlsEnabled;
     }
 
     @Override

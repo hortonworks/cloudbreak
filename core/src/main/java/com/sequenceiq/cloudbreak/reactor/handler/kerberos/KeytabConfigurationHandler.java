@@ -112,7 +112,7 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
         request.setDoNotRecreateKeytab(Boolean.TRUE);
         RoleRequest roleRequest = new RoleRequest();
         roleRequest.setRoleName("hadoopadminrole-" + stack.getName());
-        roleRequest.setPrivileges(Set.of("Service Administrators"));
+        roleRequest.setPrivileges(Set.of("Service Administrators", "Certificate Administrators"));
         request.setRoleRequest(roleRequest);
         return kerberosMgmtV1Endpoint.generateServiceKeytab(request);
     }

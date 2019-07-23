@@ -35,6 +35,7 @@
 {% endif %}
 
 {% if "manager_server" in grains.get('roles', []) %}
+{%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 
 update_nginx_conf:
   file.replace:
@@ -47,14 +48,16 @@ update_nginx_conf_manager_port:
   file.replace:
     - name: /etc/nginx/nginx.conf
     - pattern: "127.0.0.1:8080"
-    - repl: "127.0.0.1:7180"
-    - unless: cat /etc/nginx/nginx.conf | grep 127.0.0.1:7180
+    - repl: "127.0.0.1:{{ cloudera_manager.communication.port }}"
+    - unless: grep 127.0.0.1:{{ cloudera_manager.communication.port }} /etc/nginx/nginx.conf
 
 /etc/nginx/sites-enabled/ssl-locations.d/clouderamanager.conf:
   file.managed:
     - makedirs: True
     - source: salt://nginx/conf/ssl-locations.d/clouderamanager.conf
-
+    - template: jinja
+    - context:
+      protocol: {{ cloudera_manager.communication.protocol }}
 {% endif %}
 
 # when gateway is defined, we do NOT config user facing cert and ssl for port 443, because services are available through knox on 8443
@@ -94,7 +97,11 @@ generate_user_facing_cert:
   {% if "ambari_server" in grains.get('roles', []) %}
     - source: salt://nginx/conf/ambari-ssl-user-facing.conf
   {% elif "manager_server" in grains.get('roles', []) %}
+    {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
     - source: salt://nginx/conf/clouderamanager-ssl-user-facing.conf
+    - template: jinja
+    - context:
+      protocol: {{ cloudera_manager.communication.protocol }}
   {% endif %}
 
 restart_nginx_after_ssl_reconfig_with_user_facing:

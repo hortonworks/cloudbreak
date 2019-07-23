@@ -22,6 +22,7 @@ public class ClouderaManagerV1ToClouderaManagerV4Converter {
         ClouderaManagerV4Request response = new ClouderaManagerV4Request();
         response.setProducts(getIfNotNull(source.getProducts(), clouderaManagerProductConverter::convertTo));
         response.setRepository(getIfNotNull(source.getRepository(), repositoryConverter::convert));
+        response.setEnableAutoTls(source.getEnableAutoTls());
         return response;
     }
 
@@ -29,6 +30,7 @@ public class ClouderaManagerV1ToClouderaManagerV4Converter {
         ClouderaManagerV1Request response = new ClouderaManagerV1Request();
         response.setProducts(getIfNotNull(source.getProducts(), clouderaManagerProductConverter::convertFrom));
         response.setRepository(getIfNotNull(source.getRepository(), repositoryConverter::convert));
+        response.setEnableAutoTls(source.getEnableAutoTls());
         return response;
     }
 }

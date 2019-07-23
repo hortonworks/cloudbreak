@@ -1,4 +1,5 @@
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
+{%- from 'metadata/settings.sls' import metadata with context %}
 
 install-cloudera-manager-server:
   pkg.installed:
@@ -54,3 +55,24 @@ cloudera_manager_set_parcel_validation:
     - pattern: "CMF_OPTS -server"
     - repl: "CMF_OPTS -server\"\nCMF_OPTS=\"$CMF_OPTS -Dcom.cloudera.parcel.VALIDATE_PARCELS_HASH=false"
     - unless: grep "VALIDATE_PARCELS_HASH=false" /opt/cloudera/cm/bin/cm-server
+
+{% if cloudera_manager.communication.autotls_enabled == True %}
+
+/opt/cm-setup-autotls.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://cloudera/manager/scripts/setup-autotls.sh
+    - template: jinja
+    - mode: 744
+    - context:
+        cm_keytab: {{ cloudera_manager.cm_keytab }}
+        server_address: {{ metadata.server_address }}
+
+run_autotls_setup:
+  cmd.run:
+    - name: /opt/cm-setup-autotls.sh
+    - require:
+      - file: /opt/cm-setup-autotls.sh
+    - unless: test -f /var/autotls_setup_success
+
+{% endif %}

@@ -19,7 +19,7 @@ public class RoleRequest {
     private String roleName;
 
     @ApiModelProperty(value = KeytabModelDescription.PRIVILEGES)
-    private Set<String> privileges;
+    private Set<String> privileges = Set.of();
 
     public String getRoleName() {
         return roleName;
