@@ -155,7 +155,7 @@ func ScaleDistroX(c *cli.Context) {
 	}
 	name := c.String(fl.FlName.Name)
 	log.Infof("[ScaleDistroX] scaling DistroX, name: %s", name)
-	err = dxClient.Cloudbreak.V1distrox.PutScalingDistroXV1(v1distrox.NewPutScalingDistroXV1Params().WithName(name).WithBody(req))
+	err = dxClient.Cloudbreak.V1distrox.PutScalingDistroXV1ByName(v1distrox.NewPutScalingDistroXV1ByNameParams().WithName(name).WithBody(req))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -172,7 +172,7 @@ func StartDistroX(c *cli.Context) {
 	dxClient := DistroX(*oauth.NewCloudbreakHTTPClientFromContext(c))
 	name := c.String(fl.FlName.Name)
 	log.Infof("[StartDistroX] starting DistroX, name: %s", name)
-	err := dxClient.Cloudbreak.V1distrox.StartDistroXV1(v1distrox.NewStartDistroXV1Params().WithName(name))
+	err := dxClient.Cloudbreak.V1distrox.StartDistroXV1ByName(v1distrox.NewStartDistroXV1ByNameParams().WithName(name))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -189,7 +189,7 @@ func StopDistroX(c *cli.Context) {
 	dxClient := DistroX(*oauth.NewCloudbreakHTTPClientFromContext(c))
 	name := c.String(fl.FlName.Name)
 	log.Infof("[StopDistroX] stopping DistroX, name: %s", name)
-	err := dxClient.Cloudbreak.V1distrox.StopDistroXV1(v1distrox.NewStopDistroXV1Params().WithName(name))
+	err := dxClient.Cloudbreak.V1distrox.StopDistroXV1ByName(v1distrox.NewStopDistroXV1ByNameParams().WithName(name))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -230,7 +230,7 @@ func DescribeDistroX(c *cli.Context) {
 
 	dxClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	resp, err := dxClient.Cloudbreak.V1distrox.GetDistroXV1(v1distrox.NewGetDistroXV1Params().WithName(c.String(fl.FlName.Name)))
+	resp, err := dxClient.Cloudbreak.V1distrox.GetDistroXV1ByName(v1distrox.NewGetDistroXV1ByNameParams().WithName(c.String(fl.FlName.Name)))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -298,7 +298,7 @@ func repairDistroX(c *cli.Context, request model.DistroXRepairV1Request) {
 	name := c.String(fl.FlName.Name)
 	log.Infof("[RepairDistroX] repairing DistroX, id: %s, removeOnly: %t", name, removeOnly)
 
-	err := dxClient.Cloudbreak.V1distrox.RepairDistroXV1(v1distrox.NewRepairDistroXV1Params().WithName(name).WithBody(&request))
+	err := dxClient.Cloudbreak.V1distrox.RepairDistroXV1ByName(v1distrox.NewRepairDistroXV1ByNameParams().WithName(name).WithBody(&request))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -315,7 +315,7 @@ func RetryDistroX(c *cli.Context) {
 	dxClient := DistroX(*oauth.NewCloudbreakHTTPClientFromContext(c))
 	name := c.String(fl.FlName.Name)
 	log.Infof("[RetryDistroX retrying DistroX creation, name: %s", name)
-	err := dxClient.Cloudbreak.V1distrox.RetryDistroXV1(v1distrox.NewRetryDistroXV1Params().WithName(name))
+	err := dxClient.Cloudbreak.V1distrox.RetryDistroXV1ByName(v1distrox.NewRetryDistroXV1ByNameParams().WithName(name))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -332,7 +332,7 @@ func SyncDistroX(c *cli.Context) {
 	dxClient := DistroX(*oauth.NewCloudbreakHTTPClientFromContext(c))
 	name := c.String(fl.FlName.Name)
 	log.Infof("[SyncDistroX] syncing DistroX, name: %s", name)
-	err := dxClient.Cloudbreak.V1distrox.SyncDistroXV1(v1distrox.NewSyncDistroXV1Params().WithName(name))
+	err := dxClient.Cloudbreak.V1distrox.SyncDistroXV1ByName(v1distrox.NewSyncDistroXV1ByNameParams().WithName(name))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}

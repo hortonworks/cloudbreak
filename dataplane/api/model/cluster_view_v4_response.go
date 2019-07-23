@@ -23,6 +23,9 @@ type ClusterViewV4Response struct {
 	// blueprint for the cluster
 	Blueprint *BlueprintV4ViewResponse `json:"blueprint,omitempty"`
 
+	// the unique crn of the resource
+	Crn string `json:"crn,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0

@@ -22,6 +22,9 @@ type ClusterTemplateViewV4Response struct {
 	// cloudplatform which this template is compatible with
 	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
+	// the unique crn of the resource
+	Crn string `json:"crn,omitempty"`
+
 	// datalake required which this template is compatible with
 	// Enum: [NONE OPTIONAL REQUIRED]
 	DatalakeRequired string `json:"datalakeRequired,omitempty"`

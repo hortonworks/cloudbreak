@@ -473,7 +473,7 @@ func (a *Client) RetryStackInWorkspaceV4(params *RetryStackInWorkspaceV4Params) 
 }
 
 /*
-SetClusterMaintenanceMode sets maintenance mode for the cluster
+SetClusterMaintenanceMode sets maintenance mode for the cluster by name
 
 Setting maintenance mode for the cluster in order to be able to update Ambari and/or the Hadoop stack.
 */

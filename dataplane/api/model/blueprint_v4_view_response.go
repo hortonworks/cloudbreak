@@ -19,6 +19,9 @@ import (
 // swagger:model BlueprintV4ViewResponse
 type BlueprintV4ViewResponse struct {
 
+	// the unique crn of the resource
+	Crn string `json:"crn,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0

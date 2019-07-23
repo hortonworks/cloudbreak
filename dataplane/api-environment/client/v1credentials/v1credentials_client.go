@@ -265,6 +265,36 @@ func (a *Client) GetCredentialByEnvironmentCrnV1(params *GetCredentialByEnvironm
 }
 
 /*
+GetCredentialByEnvironmentNameV1 gets credential by environment name
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) GetCredentialByEnvironmentNameV1(params *GetCredentialByEnvironmentNameV1Params) (*GetCredentialByEnvironmentNameV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetCredentialByEnvironmentNameV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getCredentialByEnvironmentNameV1",
+		Method:             "GET",
+		PathPattern:        "/v1/credentials/environment/name/{environmentName}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetCredentialByEnvironmentNameV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetCredentialByEnvironmentNameV1OK), nil
+
+}
+
+/*
 GetCredentialByNameV1 gets credential by name
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.

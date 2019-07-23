@@ -61,8 +61,10 @@ for the list distro x v1 operation typically these are written to a http.Request
 */
 type ListDistroXV1Params struct {
 
-	/*Environment*/
-	Environment *string
+	/*EnvironmentCrn*/
+	EnvironmentCrn *string
+	/*EnvironmentName*/
+	EnvironmentName *string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -102,15 +104,26 @@ func (o *ListDistroXV1Params) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithEnvironment adds the environment to the list distro x v1 params
-func (o *ListDistroXV1Params) WithEnvironment(environment *string) *ListDistroXV1Params {
-	o.SetEnvironment(environment)
+// WithEnvironmentCrn adds the environmentCrn to the list distro x v1 params
+func (o *ListDistroXV1Params) WithEnvironmentCrn(environmentCrn *string) *ListDistroXV1Params {
+	o.SetEnvironmentCrn(environmentCrn)
 	return o
 }
 
-// SetEnvironment adds the environment to the list distro x v1 params
-func (o *ListDistroXV1Params) SetEnvironment(environment *string) {
-	o.Environment = environment
+// SetEnvironmentCrn adds the environmentCrn to the list distro x v1 params
+func (o *ListDistroXV1Params) SetEnvironmentCrn(environmentCrn *string) {
+	o.EnvironmentCrn = environmentCrn
+}
+
+// WithEnvironmentName adds the environmentName to the list distro x v1 params
+func (o *ListDistroXV1Params) WithEnvironmentName(environmentName *string) *ListDistroXV1Params {
+	o.SetEnvironmentName(environmentName)
+	return o
+}
+
+// SetEnvironmentName adds the environmentName to the list distro x v1 params
+func (o *ListDistroXV1Params) SetEnvironmentName(environmentName *string) {
+	o.EnvironmentName = environmentName
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -121,16 +134,32 @@ func (o *ListDistroXV1Params) WriteToRequest(r runtime.ClientRequest, reg strfmt
 	}
 	var res []error
 
-	if o.Environment != nil {
+	if o.EnvironmentCrn != nil {
 
-		// query param environment
-		var qrEnvironment string
-		if o.Environment != nil {
-			qrEnvironment = *o.Environment
+		// query param environmentCrn
+		var qrEnvironmentCrn string
+		if o.EnvironmentCrn != nil {
+			qrEnvironmentCrn = *o.EnvironmentCrn
 		}
-		qEnvironment := qrEnvironment
-		if qEnvironment != "" {
-			if err := r.SetQueryParam("environment", qEnvironment); err != nil {
+		qEnvironmentCrn := qrEnvironmentCrn
+		if qEnvironmentCrn != "" {
+			if err := r.SetQueryParam("environmentCrn", qEnvironmentCrn); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.EnvironmentName != nil {
+
+		// query param environmentName
+		var qrEnvironmentName string
+		if o.EnvironmentName != nil {
+			qrEnvironmentName = *o.EnvironmentName
+		}
+		qEnvironmentName := qrEnvironmentName
+		if qEnvironmentName != "" {
+			if err := r.SetQueryParam("environmentName", qEnvironmentName); err != nil {
 				return err
 			}
 		}

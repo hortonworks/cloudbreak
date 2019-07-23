@@ -19,6 +19,9 @@ import (
 // swagger:model RecipeViewV4Response
 type RecipeViewV4Response struct {
 
+	// the unique crn of the resource
+	Crn string `json:"crn,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0

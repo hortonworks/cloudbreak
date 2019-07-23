@@ -35,12 +35,12 @@ func (c *DistroX) WaitForDistroXOperationToFinish(name string, stackStatus, clus
 }
 
 type getDistroXClient interface {
-	GetDistroXV1(params *v1distrox.GetDistroXV1Params) (*v1distrox.GetDistroXV1OK, error)
+	GetDistroXV1ByName(params *v1distrox.GetDistroXV1ByNameParams) (*v1distrox.GetDistroXV1ByNameOK, error)
 }
 
 func waitForDistroXOperationToFinishImpl(name string, desiredStackStatus status, desiredClusterStatus status, client getDistroXClient) {
 	for {
-		resp, err := client.GetDistroXV1(v1distrox.NewGetDistroXV1Params().WithName(name))
+		resp, err := client.GetDistroXV1ByName(v1distrox.NewGetDistroXV1ByNameParams().WithName(name))
 		var stackStatus string
 		var dxStatus string
 		if err != nil {
@@ -83,7 +83,7 @@ func (c *DistroX) deleteDistroX(name string, forced bool) {
 	defer utils.TimeTrack(time.Now(), "delete DistroX by name")
 
 	log.Infof("[deleteDistroX] deleting DistroX, name: %s", name)
-	err := c.Cloudbreak.V1distrox.DeleteDistroXV1(v1distrox.NewDeleteDistroXV1Params().WithName(name).WithForced(&forced))
+	err := c.Cloudbreak.V1distrox.DeleteDistroXV1ByName(v1distrox.NewDeleteDistroXV1ByNameParams().WithName(name).WithForced(&forced))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
