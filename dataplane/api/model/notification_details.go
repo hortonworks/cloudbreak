@@ -51,6 +51,9 @@ type NotificationDetails struct {
 	// region
 	Region string `json:"region,omitempty"`
 
+	// stack crn
+	StackCrn string `json:"stackCrn,omitempty"`
+
 	// stack Id
 	StackID int64 `json:"stackId,omitempty"`
 
