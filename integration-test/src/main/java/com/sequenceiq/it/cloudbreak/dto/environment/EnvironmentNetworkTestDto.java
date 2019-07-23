@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -37,6 +38,11 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
 
     public EnvironmentNetworkTestDto withAws(EnvironmentNetworkAwsParams aws) {
         getRequest().setAws(aws);
+        return this;
+    }
+
+    public EnvironmentNetworkTestDto withYarn(EnvironmentNetworkYarnParams yarn) {
+        getRequest().setYarn(yarn);
         return this;
     }
 
