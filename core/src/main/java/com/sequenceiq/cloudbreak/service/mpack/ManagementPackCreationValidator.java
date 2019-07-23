@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.mpack;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -25,6 +27,10 @@ public class ManagementPackCreationValidator implements Validator<ManagementPack
 
     private static final String MEDIA_SUB_TYPE_OCTET_STREAM = "octet-stream";
 
+    private static final String MEDIA_SUB_TYPE_X_GZIP = "x-gzip";
+
+    private static final List<String> SUPPORTED_MEDIA_SUB_TYPES = List.of(MEDIA_SUB_TYPE_X_TAR, MEDIA_SUB_TYPE_OCTET_STREAM, MEDIA_SUB_TYPE_X_GZIP);
+
     private Client client;
 
     @PostConstruct
@@ -44,8 +50,9 @@ public class ManagementPackCreationValidator implements Validator<ManagementPack
             }
             if (response.getMediaType() != null) {
                 if (!isMediaTypeValid(response.getMediaType())) {
-                    resultBuilder.error(String.format("Media type ['%s'] is invalid. It should be ['%s' or '%s'].", response.getMediaType(),
-                            MEDIA_TYPE_APPLICATION + '/' + MEDIA_SUB_TYPE_X_TAR, MEDIA_TYPE_APPLICATION + '/' + MEDIA_SUB_TYPE_OCTET_STREAM));
+                    resultBuilder.error(String.format("Media type ['%s'] is invalid. It should be ['%s', '%s' or '%s'].", response.getMediaType(),
+                            MEDIA_TYPE_APPLICATION + '/' + MEDIA_SUB_TYPE_X_TAR, MEDIA_TYPE_APPLICATION + '/' + MEDIA_SUB_TYPE_OCTET_STREAM,
+                            MEDIA_TYPE_APPLICATION + '/' + MEDIA_SUB_TYPE_X_GZIP));
                 }
             }
         }
@@ -54,6 +61,6 @@ public class ManagementPackCreationValidator implements Validator<ManagementPack
 
     private boolean isMediaTypeValid(MediaType mediaType) {
         return MEDIA_TYPE_APPLICATION.equalsIgnoreCase(mediaType.getType())
-                && (MEDIA_SUB_TYPE_X_TAR.equalsIgnoreCase(mediaType.getSubtype()) || MEDIA_SUB_TYPE_OCTET_STREAM.equalsIgnoreCase(mediaType.getSubtype()));
+                && (SUPPORTED_MEDIA_SUB_TYPES.stream().anyMatch(mediaType.getSubtype()::equals));
     }
 }
