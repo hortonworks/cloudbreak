@@ -16,7 +16,7 @@
           {
             "count": 1,
             "size": 100,
-            "type": "standard"
+            "type": "StandardSSD_LRS"
           }
         ],
         "rootVolume": {
@@ -47,7 +47,7 @@
           {
             "count": 1,
             "size": 100,
-            "type": "standard"
+            "type": "StandardSSD_LRS"
           }
         ],
         "rootVolume": {
@@ -78,7 +78,7 @@
           {
             "count": 1,
             "size": 100,
-            "type": "standard"
+            "type": "StandardSSD_LRS"
           }
         ],
         "rootVolume": {
@@ -130,7 +130,7 @@
           {
             "count": 1,
             "size": 100,
-            "type": "standard"
+            "type": "StandardSSD_LRS"
           }
         ],
         "rootVolume": {
