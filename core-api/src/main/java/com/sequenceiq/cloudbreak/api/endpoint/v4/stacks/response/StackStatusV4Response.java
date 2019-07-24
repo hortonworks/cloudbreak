@@ -21,6 +21,9 @@ public class StackStatusV4Response {
     @ApiModelProperty
     private String clusterStatusReason;
 
+    @ApiModelProperty
+    private String crn;
+
     public Long getId() {
         return id;
     }
@@ -59,5 +62,13 @@ public class StackStatusV4Response {
 
     public void setClusterStatusReason(String clusterStatusReason) {
         this.clusterStatusReason = clusterStatusReason;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 }

@@ -44,6 +44,7 @@ public class EnvironmentServiceDecorator {
             DetailedEnvironmentResponse byCrn = environmentClientService.getByCrn(stackResponse.getEnvironmentCrn());
             stackResponse.setEnvironmentName(byCrn.getName());
             stackResponse.setCredentialName(byCrn.getCredential().getName());
+            stackResponse.setCredentialCrn(byCrn.getCredential().getCrn());
         } catch (Exception e) {
             LOGGER.warn("Environment deleted which had crn: {}.", stackResponse.getEnvironmentCrn());
         }

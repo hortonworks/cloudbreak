@@ -120,6 +120,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
         credentialResponse = new CredentialResponse();
         credentialResponse.setName("cred-name");
+        credentialResponse.setCrn("crn");
     }
 
     @Test
@@ -137,12 +138,16 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
         given(conversionService.convert(any(), eq(TelemetryResponse.class))).willReturn(new TelemetryResponse());
+        given(environmentClientService.getByCrn(anyString())).willReturn(builder()
+                .withCredential(credentialResponse)
+                .withName("env-name")
+                .build());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "environmentName", "credentialName", "telemetry"));
+                "environmentName", "credentialName", "credentialCrn", "telemetry"));
     }
 
     @Test
@@ -168,7 +173,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName", "telemetry"));
+                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry"));
 
         assertNull(result.getCluster());
     }
@@ -196,7 +201,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("network", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName", "telemetry"));
+                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry"));
 
         assertNull(result.getNetwork());
     }

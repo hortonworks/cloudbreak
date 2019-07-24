@@ -17,6 +17,7 @@ public class StackToStatusConverter extends AbstractConversionServiceAwareConver
         response.setStatusReason(source.getStatusReason());
         response.setClusterStatus(source.getCluster().getStatus());
         response.setClusterStatusReason(source.getCluster().getStatusReason());
+        response.setCrn(source.getResourceCrn());
         return response;
     }
 }
