@@ -1,11 +1,10 @@
-package com.sequenceiq.freeipa.service.polling;
+package com.sequenceiq.cloudbreak.polling.nginx;
 
 import javax.ws.rs.client.Client;
 
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
-import com.sequenceiq.freeipa.entity.Stack;
 
-public class NginxPollerObject {
+public class NginxPollerObject  {
 
     private final Client client;
 
@@ -15,10 +14,7 @@ public class NginxPollerObject {
 
     private final SavingX509TrustManager trustManager;
 
-    private final Stack stack;
-
-    public NginxPollerObject(Stack stack, Client client, String ip, int gatewayPort, SavingX509TrustManager trustManager) {
-        this.stack = stack;
+    public NginxPollerObject(Client client, String ip, int gatewayPort, SavingX509TrustManager trustManager) {
         this.client = client;
         this.ip = ip;
         this.gatewayPort = gatewayPort;

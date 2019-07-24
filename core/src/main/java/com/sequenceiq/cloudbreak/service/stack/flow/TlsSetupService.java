@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.cloudbreak.polling.nginx.NginxCertListenerTask;
+import com.sequenceiq.cloudbreak.polling.nginx.NginxPollerObject;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -34,7 +36,9 @@ public class TlsSetupService {
 
     private static final int POLLING_INTERVAL = 5000;
 
-    private static final int MAX_ATTEMPTS_FOR_HOSTS = 100;
+    private static final long FIVE_MIN = 5 * 60;
+
+    private static final int MAX_FAILURE = 1;
 
     @Inject
     private PollingService<NginxPollerObject> nginxPollerService;
@@ -58,9 +62,9 @@ public class TlsSetupService {
             Integer gatewayPort = stack.getGatewayPort();
             String ip = gatewayConfigService.getGatewayIp(stack, gwInstance);
             LOGGER.debug("Trying to fetch the server's certificate: {}:{}", ip, gatewayPort);
-            nginxPollerService.pollWithTimeoutSingleFailure(
-                nginxCertListenerTask, new NginxPollerObject(stack, client, ip, gatewayPort, x509TrustManager),
-                POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
+            nginxPollerService.pollWithAbsolutTimeout(
+                    nginxCertListenerTask, new NginxPollerObject(client, ip, gatewayPort, x509TrustManager),
+                    POLLING_INTERVAL, FIVE_MIN, MAX_FAILURE);
             WebTarget nginxTarget = client.target(String.format("https://%s:%d", ip, gatewayPort));
             nginxTarget.path("/").request().get().close();
             X509Certificate[] chain = x509TrustManager.getChain();
@@ -69,7 +73,8 @@ public class TlsSetupService {
             metaData.setServerCert(BaseEncoding.base64().encode(serverCert.getBytes()));
             instanceMetaDataService.save(metaData);
         } catch (Exception e) {
-            throw new CloudbreakException("Failed to retrieve the server's certificate", e);
+            throw new CloudbreakException("Failed to retrieve the server's certificate from Nginx."
+                    + " Please check your security group is open enough and Cloudbreak can access your VPC and subnet", e);
         }
     }
 
