@@ -25,6 +25,9 @@ public class ServiceKeytabRequest {
     @NotNull
     private String serverHostName;
 
+    @ApiModelProperty(value = ModelDescriptions.CLUSTER_CRN)
+    private String clusterCrn;
+
     @ApiModelProperty(value = KeytabModelDescription.DO_NOT_RECREATE_KEYTAB)
     private Boolean doNotRecreateKeytab = Boolean.FALSE;
 
@@ -69,5 +72,13 @@ public class ServiceKeytabRequest {
 
     public void setRoleRequest(RoleRequest roleRequest) {
         this.roleRequest = roleRequest;
+    }
+
+    public String getClusterCrn() {
+        return clusterCrn;
+    }
+
+    public void setClusterCrn(String clusterCrn) {
+        this.clusterCrn = clusterCrn;
     }
 }

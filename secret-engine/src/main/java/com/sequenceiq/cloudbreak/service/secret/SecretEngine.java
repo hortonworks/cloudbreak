@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.secret;
 
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 public interface SecretEngine {
@@ -16,4 +18,8 @@ public interface SecretEngine {
     SecretResponse convertToExternal(String secret);
 
     String scarifySecret(String secret);
+
+    List<String> listEntries(String secretPathPrefix);
+
+    void cleanup(String path);
 }

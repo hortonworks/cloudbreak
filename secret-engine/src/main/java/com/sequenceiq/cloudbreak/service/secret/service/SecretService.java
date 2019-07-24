@@ -140,6 +140,19 @@ public class SecretService {
         LOGGER.trace("Secret delete took {} ms", duration);
     }
 
+    public List<String> listEntries(String secretPathPrefix) {
+        return persistentEngine.listEntries(secretPathPrefix);
+    }
+
+    public void cleanup(String pathPrefix) {
+        metricService.incrementMetricCounter(() -> "secret.cleanup." + pathPrefix);
+        long start = System.currentTimeMillis();
+        persistentEngine.cleanup(pathPrefix);
+        long duration = System.currentTimeMillis() - start;
+        metricService.submit(MetricType.VAULT_WRITE, duration);
+        LOGGER.trace("Secret cleanup took {} ms", duration);
+    }
+
     /**
      * Determines the secret is a secret location or not
      *

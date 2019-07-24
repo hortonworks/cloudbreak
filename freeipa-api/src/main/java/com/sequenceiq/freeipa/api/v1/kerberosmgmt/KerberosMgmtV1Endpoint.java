@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabModelNotes;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabOperationsDescription;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.VaultCleanupRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServicePrincipalRequest;
@@ -50,4 +51,9 @@ public interface KerberosMgmtV1Endpoint {
     @Path("host")
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_DELETE_HOST, notes = KeytabModelNotes.DELETE_HOST_NOTES, nickname = "deleteHostV1")
     void deleteHost(@Valid HostRequest request) throws Exception;
+
+    @DELETE
+    @Path("cleanupClusterSecrets")
+    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_CLEANUP, notes = KeytabModelNotes.CLEANUP_NOTES, nickname = "cleanupClusterSecretsV1")
+    void cleanupClusterSecrets(@Valid VaultCleanupRequest request) throws Exception;
 }

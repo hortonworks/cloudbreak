@@ -21,6 +21,9 @@ public class HostRequest {
     @NotNull
     private String serverHostName;
 
+    @ApiModelProperty(value = ModelDescriptions.CLUSTER_CRN)
+    private String clusterCrn;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -35,5 +38,13 @@ public class HostRequest {
 
     public void setServerHostName(String serverHostName) {
         this.serverHostName = serverHostName;
+    }
+
+    public String getClusterCrn() {
+        return clusterCrn;
+    }
+
+    public void setClusterCrn(String clusterCrn) {
+        this.clusterCrn = clusterCrn;
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.secret.vault;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -74,5 +75,13 @@ public class VaultKvV1Engine extends AbstractVaultEngine<VaultKvV1Engine> {
     @Override
     protected Class<VaultKvV1Engine> clazz() {
         return VaultKvV1Engine.class;
+    }
+
+    public List<String> listEntries(String path) {
+        return Collections.EMPTY_LIST;
+    }
+
+    public void cleanup(String path) {
+        // Do Nothing.
     }
 }
