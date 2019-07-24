@@ -337,7 +337,7 @@
                                     <#if disablePasswordAuthentication == true>
                                        {
                                            "path": "[variables('sshKeyPath')]",
-                                           "keyData": "[parameters('sshKeyData')]"
+                                           "keyData": "[trim(parameters('sshKeyData'))]"
                                        }
                                     </#if>
                                    ]

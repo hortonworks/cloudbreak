@@ -11,7 +11,7 @@ public class AzureInstanceCredentialView {
     }
 
     public String getPublicKey() {
-        return cloudStack.getInstanceAuthentication().getPublicKey();
+        return cloudStack.getInstanceAuthentication().getPublicKey().trim();
     }
 
     public boolean passwordAuthenticationRequired() {
