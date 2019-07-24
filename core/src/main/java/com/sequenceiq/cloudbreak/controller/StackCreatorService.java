@@ -20,14 +20,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
@@ -292,8 +290,7 @@ public class StackCreatorService {
     }
 
     boolean shouldUseBaseCMImage(ClusterV4Request clusterRequest) {
-        ClouderaManagerV4Request cmRequest = clusterRequest.getCm();
-        return (cmRequest != null && !CollectionUtils.isEmpty(cmRequest.getProducts())) || (cmRequest != null && cmRequest.getRepository() != null);
+        return true;
     }
 
     private Stack prepareSharedServiceIfNeed(Stack stack) {
