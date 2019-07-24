@@ -718,10 +718,6 @@ public class StackService {
         }
     }
 
-    public void decorateWithCrn(Stack stack) {
-        stack.setResourceCrn(createCRN(threadBasedUserCrnProvider.getAccountId()));
-    }
-
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
         return stackType == null
                 ? stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId, config.isActive(), config.showAfterMillisecs())

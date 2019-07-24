@@ -15,6 +15,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Service
 public class ClusterTemplateService extends AbstractWorkspaceAwareResourceService<ClusterTemplate> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateService.class);
 
     @Inject
@@ -78,6 +80,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
@@ -119,7 +124,8 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             clusterService.saveWithRef(cluster);
         }
 
-        stackService.decorateWithCrn(stackTemplate);
+        stackTemplate.setResourceCrn(createCRN(threadBasedUserCrnProvider.getAccountId()));
+
         stackTemplate = stackTemplateService.pureSave(stackTemplate);
 
         componentConfigProviderService.store(new ArrayList<>(stackTemplate.getComponents()));
@@ -217,4 +223,5 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
                 .build()
                 .toString();
     }
+
 }
