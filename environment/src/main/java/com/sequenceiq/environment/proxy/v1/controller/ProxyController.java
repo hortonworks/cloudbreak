@@ -22,7 +22,7 @@ import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyRequestCo
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyRequestToProxyConfigConverter;
 import com.sequenceiq.notification.NotificationController;
-import com.sequenceiq.notification.ResourceEvent;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Controller
 @Transactional(TxType.NEVER)

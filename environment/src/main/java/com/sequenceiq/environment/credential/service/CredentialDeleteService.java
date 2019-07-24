@@ -20,7 +20,7 @@ import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.notification.NotificationSender;
-import com.sequenceiq.notification.ResourceEvent;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Service
 public class CredentialDeleteService extends AbstractCredentialService {

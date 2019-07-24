@@ -5,6 +5,8 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+
 public abstract class NotificationController {
 
     @Inject

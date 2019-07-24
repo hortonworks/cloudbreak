@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakNotification;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.notification.Notification;
 import com.sequenceiq.notification.NotificationSender;
-import com.sequenceiq.notification.ResourceEvent;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 public abstract class AbstractCredentialService {
 

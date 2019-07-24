@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class HttpNotificationSender implements NotificationSender {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpNotificationSender.class);
+public class HttpNotificationSenderService implements NotificationSender {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpNotificationSenderService.class);
 
     @Override
     public <T> void send(Notification<T> notification, List<String> endpoints, Client restClient) {

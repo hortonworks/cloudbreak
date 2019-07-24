@@ -30,7 +30,7 @@ import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.notification.NotificationService;
-import com.sequenceiq.notification.ResourceEvent;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Configuration
 public class EnvCreationActions {
