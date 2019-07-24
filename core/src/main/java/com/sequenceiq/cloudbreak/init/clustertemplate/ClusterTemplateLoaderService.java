@@ -111,10 +111,15 @@ public class ClusterTemplateLoaderService {
     public Collection<ClusterTemplate> collectOutdatedTemplatesInDb(Map<String, String> defaultTemplates,
             Collection<ClusterTemplate> defaultTemplatesInDb) {
         Collection<ClusterTemplate> outdatedTemplates = new HashSet<>();
-        for (ClusterTemplate template : defaultTemplatesInDb) {
-            Optional.ofNullable(defaultTemplates.get(template.getName()))
-                    .filter(defaultTmplBase64 -> isTemplatesContentDifferent(template, defaultTmplBase64))
-                    .ifPresent(defaultTmplBase64 -> outdatedTemplates.add(template));
+        for (ClusterTemplate templateInDB : defaultTemplatesInDb) {
+            Optional<String> defaultTemplate = Optional.ofNullable(defaultTemplates.get(templateInDB.getName()));
+            if (defaultTemplate.isPresent()) {
+                defaultTemplate
+                        .filter(defaultTmplBase64 -> isTemplatesContentDifferent(templateInDB, defaultTmplBase64))
+                        .ifPresent(defaultTmplBase64 -> outdatedTemplates.add(templateInDB));
+            } else {
+                outdatedTemplates.add(templateInDB);
+            }
         }
         return outdatedTemplates;
     }
