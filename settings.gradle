@@ -49,6 +49,7 @@ include 'notification-sender'
 include 'freeipa-api'
 include 'client-cm'
 include 'freeipa-client'
+include 'usage-collection'
 
 rootProject.name = 'cloudbreak'
 
