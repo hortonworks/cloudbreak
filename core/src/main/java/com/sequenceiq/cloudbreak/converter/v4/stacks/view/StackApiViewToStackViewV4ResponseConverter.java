@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.view;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -12,16 +10,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.UserViewV4Response
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class StackApiViewToStackViewV4ResponseConverter extends AbstractConversionServiceAwareConverter<StackApiView, StackViewV4Response> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackApiViewToStackViewV4ResponseConverter.class);
-
-    @Inject
-    private EnvironmentClientService environmentClientService;
 
     @Override
     public StackViewV4Response convert(StackApiView source) {
@@ -38,15 +31,6 @@ public class StackApiViewToStackViewV4ResponseConverter extends AbstractConversi
         addUser(source, stackViewResponse);
         stackViewResponse.setCloudPlatform(source.getCloudPlatform());
         stackViewResponse.setEnvironmentCrn(source.getEnvironmentCrn());
-        if (source.getEnvironmentCrn() != null) {
-            try {
-                DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(source.getEnvironmentCrn());
-                stackViewResponse.setEnvironmentName(environmentResponse.getName());
-                stackViewResponse.setCredentialName(environmentResponse.getCredential().getName());
-            } catch (Exception ex) {
-                LOGGER.warn("Environment deleted which had crn: {}.", source.getEnvironmentCrn());
-            }
-        }
         return stackViewResponse;
     }
 
