@@ -117,6 +117,8 @@ public class StackService {
 
     private static final String STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE = "Stack not found by name '%s'";
 
+    private static final String STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE = "Stack not found by crn '%s'";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
     private static final String SSH_USER_CB = "cloudbreak";
@@ -451,7 +453,7 @@ public class StackService {
 
     public Stack getByCrnInWorkspace(String crn, Long workspaceId) {
         return stackRepository.findByCrnAndWorkspaceId(crn, workspaceId)
-                .orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, crn)));
+                .orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
     }
 
     public Optional<Stack> getByNameInWorkspaceWithLists(String name, Long workspaceId) {
