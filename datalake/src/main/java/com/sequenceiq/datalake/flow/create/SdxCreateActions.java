@@ -32,7 +32,7 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.notification.NotificationService;
-import com.sequenceiq.notification.ResourceEvent;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Configuration
 public class SdxCreateActions {

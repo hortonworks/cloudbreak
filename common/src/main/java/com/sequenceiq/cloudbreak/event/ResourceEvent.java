@@ -1,4 +1,4 @@
-package com.sequenceiq.notification;
+package com.sequenceiq.cloudbreak.event;
 
 public enum ResourceEvent {
     SDX_CLUSTER_CREATED("resource.sdx.created"),

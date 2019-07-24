@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixServi
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Controller
 public class UtilV4Controller extends NotificationController implements UtilV4Endpoint {
@@ -100,8 +101,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
-    public void postNotificationTest() {
+    public ResourceEvent postNotificationTest() {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         notificationSender.sendTestNotification(cloudbreakUser.getUserId());
+        return ResourceEvent.CREDENTIAL_CREATED;
     }
 }

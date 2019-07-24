@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.credential.reactor.handler;
 
-import static com.sequenceiq.notification.ResourceEvent.CREDENTIAL_AZURE_INTERACTIVE_CREATED;
-import static com.sequenceiq.notification.ResourceEvent.CREDENTIAL_AZURE_INTERACTIVE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CREDENTIAL_AZURE_INTERACTIVE_CREATED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CREDENTIAL_AZURE_INTERACTIVE_FAILED;
 
 import java.util.Date;
 
@@ -22,7 +22,7 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCredential
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.notification.NotificationService;
-import com.sequenceiq.notification.ResourceEvent;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 import reactor.bus.Event;
 

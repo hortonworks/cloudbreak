@@ -36,7 +36,7 @@ import com.sequenceiq.environment.credential.exception.CredentialOperationExcept
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.notification.NotificationSender;
-import com.sequenceiq.notification.ResourceEvent;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Service
 public class CredentialService extends AbstractCredentialService {

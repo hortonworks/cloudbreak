@@ -11,4 +11,5 @@ import org.springframework.data.repository.CrudRepository;
 public interface UserPreferencesRepository extends CrudRepository<UserPreferences, Long> {
 
     Optional<UserPreferences> findByUserCrn(String userCrn);
+
 }
