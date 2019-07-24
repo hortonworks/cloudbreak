@@ -20,7 +20,7 @@ type ServiceKeytabV1Response struct {
 	Keytab *SecretResponse `json:"keytab,omitempty"`
 
 	// Kerberos Service Principal Name
-	ServicePrincial *SecretResponse `json:"servicePrincial,omitempty"`
+	ServicePrincipal *SecretResponse `json:"servicePrincipal,omitempty"`
 }
 
 // Validate validates this service keytab v1 response
@@ -31,7 +31,7 @@ func (m *ServiceKeytabV1Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateServicePrincial(formats); err != nil {
+	if err := m.validateServicePrincipal(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -59,16 +59,16 @@ func (m *ServiceKeytabV1Response) validateKeytab(formats strfmt.Registry) error 
 	return nil
 }
 
-func (m *ServiceKeytabV1Response) validateServicePrincial(formats strfmt.Registry) error {
+func (m *ServiceKeytabV1Response) validateServicePrincipal(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.ServicePrincial) { // not required
+	if swag.IsZero(m.ServicePrincipal) { // not required
 		return nil
 	}
 
-	if m.ServicePrincial != nil {
-		if err := m.ServicePrincial.Validate(formats); err != nil {
+	if m.ServicePrincipal != nil {
+		if err := m.ServicePrincipal.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("servicePrincial")
+				return ve.ValidateName("servicePrincipal")
 			}
 			return err
 		}
