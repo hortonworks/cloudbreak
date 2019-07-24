@@ -275,7 +275,12 @@ public class AwsPlatformResources implements PlatformResources {
             for (Subnet subnet : awsSubnets) {
                 Optional<String> subnetName = getName(subnet.getTags());
                 subnets.add(
-                        new CloudSubnet(subnet.getSubnetId(), subnetName.orElse(subnet.getSubnetId()), subnet.getAvailabilityZone(), subnet.getCidrBlock()));
+                        new CloudSubnet(
+                                subnet.getSubnetId(),
+                                subnetName.orElse(subnet.getSubnetId()),
+                                subnet.getAvailabilityZone(),
+                                subnet.getCidrBlock(),
+                                !subnet.isMapPublicIpOnLaunch()));
             }
 
             Optional<String> name = getName(vpc.getTags());
