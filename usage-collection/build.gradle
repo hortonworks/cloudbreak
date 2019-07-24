@@ -7,7 +7,7 @@ buildscript {
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.9'
   }
 }
 
@@ -46,14 +46,6 @@ task downloadFile(type: Download) {
   overwrite true
 }
 
-sourceSets {
-  main {
-    proto {
-      'src/main/proto'
-    }
-  }
-}
-
 protobuf {
   protoc {
     // The version of protoc must match protobuf-java. If you don't depend on
@@ -74,7 +66,13 @@ protobuf {
   generatedFilesBaseDir = "$projectDir/src/generated"
 }
 
+clean {
+  delete protobuf.generatedFilesBaseDir
+  delete downloadFile.dest
+}
+
 afterEvaluate {
   extractIncludeProto.dependsOn downloadFile
+  generateProto.dependsOn extractIncludeProto
   downloadFile.dependsOn ensureDirectory
 }
