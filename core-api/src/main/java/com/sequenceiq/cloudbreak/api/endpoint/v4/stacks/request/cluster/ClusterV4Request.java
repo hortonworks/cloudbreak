@@ -48,7 +48,7 @@ public class ClusterV4Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
     private Set<String> databases = new HashSet<>();
 
-    @ApiModelProperty(ClusterModelDescription.READBEAMS_DB_SERVER_CRN)
+    @ApiModelProperty(ClusterModelDescription.REDBEAMS_DB_SERVER_CRN)
     private String databaseServerCrn;
 
     @ApiModelProperty(ClusterModelDescription.PROXY_CRN)

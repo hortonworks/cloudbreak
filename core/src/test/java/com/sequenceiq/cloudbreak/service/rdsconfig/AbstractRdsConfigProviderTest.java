@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +20,7 @@ import org.powermock.reflect.Whitebox;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -33,6 +35,9 @@ public class AbstractRdsConfigProviderTest {
 
     @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private DatabaseCommon dbCommon;
 
     @Mock
     private RedbeamsDbServerConfigurer dbServerConfigurer;
@@ -68,8 +73,8 @@ public class AbstractRdsConfigProviderTest {
         RDSConfig config = TestUtil.rdsConfig(DatabaseType.CLOUDERA_MANAGER);
         when(dbServerConfigurer.getRdsConfig(any(), any(), any(), any())).thenReturn(config);
         when(dbServerConfigurer.isRemoteDatabaseNeeded(any())).thenReturn(true);
-        when(dbServerConfigurer.getHostFromJdbcUrl(any())).thenReturn(dbHost);
-        when(dbServerConfigurer.getPortFromJdbcUrl(any())).thenReturn("1234");
+        DatabaseCommon.JdbcConnectionUrlFields fields = new DatabaseCommon.JdbcConnectionUrlFields("postgres", dbHost, 1234, Optional.empty());
+        when(dbCommon.parseJdbcConnectionUrl(any())).thenReturn(fields);
         Stack testStack = TestUtil.stack();
         InstanceMetaData metaData = testStack.getGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
@@ -80,7 +85,7 @@ public class AbstractRdsConfigProviderTest {
         Map<String, Object> postgresData = (Map<String, Object>) result.get("clouderamanager");
         assertEquals("clouderamanager", postgresData.get("database"));
         assertEquals(dbHost, postgresData.get("remote_db_url"));
-        assertEquals("1234", postgresData.get("remote_db_port"));
+        assertEquals(1234, postgresData.get("remote_db_port"));
         assertNotNull(postgresData.get("database"));
     }
 }

@@ -20,6 +20,8 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon.JdbcConnectionUrlFields;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -41,6 +43,9 @@ public abstract class AbstractRdsConfigProvider {
     private RedbeamsDbServerConfigurer dbServerConfigurer;
 
     @Inject
+    private DatabaseCommon dbCommon;
+
+    @Inject
     private RedbeamsClientService redbeamsClientService;
 
     public Map<String, Object> createServicePillarConfigMapIfNeeded(Stack stack, Cluster cluster) {
@@ -51,8 +56,9 @@ public abstract class AbstractRdsConfigProvider {
                 Map<String, Object> postgres = new HashMap<>();
                 String db = getDb();
                 if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster)) {
-                    postgres.put("remote_db_url", dbServerConfigurer.getHostFromJdbcUrl(rdsConfig.getConnectionURL()));
-                    postgres.put("remote_db_port", dbServerConfigurer.getPortFromJdbcUrl(rdsConfig.getConnectionURL()));
+                    JdbcConnectionUrlFields parsedUrl = dbCommon.parseJdbcConnectionUrl(rdsConfig.getConnectionURL());
+                    postgres.put("remote_db_url", parsedUrl.getHost());
+                    postgres.put("remote_db_port", parsedUrl.getPort());
                     postgres.put("remote_admin", rdsConfig.getConnectionUserName());
                     postgres.put("remote_admin_pw", rdsConfig.getConnectionPassword());
                 }

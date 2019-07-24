@@ -1,11 +1,8 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.POSTGRES;
-
 import java.util.Collections;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -14,8 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -34,6 +33,9 @@ public class RedbeamsDbServerConfigurer {
     private RedbeamsClientService redbeamsClientService;
 
     @Inject
+    private DatabaseCommon dbCommon;
+
+    @Inject
     private SecretService secretService;
 
     public RDSConfig getRdsConfig(Stack stack, Cluster cluster, String db, DatabaseType type) {
@@ -45,30 +47,16 @@ public class RedbeamsDbServerConfigurer {
         return convertToRds(resp, stack, cluster, db, type);
     }
 
-    public String getHostFromJdbcUrl(String jdbcUrl) {
-        Pattern compile = Pattern.compile(JDBC_PATTERN);
-        Matcher matcher = compile.matcher(jdbcUrl);
-        matcher.find();
-        return matcher.group(1);
-    }
-
-    public String getPortFromJdbcUrl(String jdbcUrl) {
-        Pattern compile = Pattern.compile(JDBC_PATTERN);
-        Matcher matcher = compile.matcher(jdbcUrl);
-        matcher.find();
-        return matcher.group(2);
-    }
-
     private RDSConfig convertToRds(DatabaseServerV4Response source,
             Stack stack,
             Cluster cluster,
             String db,
             DatabaseType type) {
         RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setConnectionURL(String.format("jdbc:postgresql://%s:%s/%s", source.getHost(), source.getPort(), db));
+        rdsConfig.setConnectionURL(dbCommon.getJdbcConnectionUrl(source.getDatabaseVendor(), source.getHost(), source.getPort(), Optional.of(db)));
         rdsConfig.setConnectionUserName(secretService.getByResponse(source.getConnectionUserName()));
         rdsConfig.setConnectionPassword(secretService.getByResponse(source.getConnectionPassword()));
-        rdsConfig.setDatabaseEngine(POSTGRES);
+        rdsConfig.setDatabaseEngine(DatabaseVendor.fromValue(source.getDatabaseVendor()));
         rdsConfig.setStatus(ResourceStatus.DEFAULT);
         rdsConfig.setName(type.name() + '_' + stack.getName() + stack.getId());
         rdsConfig.setType(type.name());
