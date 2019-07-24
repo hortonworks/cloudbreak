@@ -21,13 +21,13 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.cloudbreak.polling.nginx.NginxCertListenerTask;
+import com.sequenceiq.cloudbreak.polling.nginx.NginxPollerObject;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.repository.StackRepository;
-import com.sequenceiq.freeipa.service.polling.NginxCertListenerTask;
-import com.sequenceiq.freeipa.service.polling.NginxPollerObject;
 
 @Component
 public class TlsSetupService {
@@ -36,7 +36,9 @@ public class TlsSetupService {
 
     private static final int POLLING_INTERVAL = 5000;
 
-    private static final int MAX_ATTEMPTS_FOR_HOSTS = 100;
+    private static final long FIVE_MIN = 5 * 60;
+
+    private static final int MAX_FAILURE = 1;
 
     @Inject
     private PollingService<NginxPollerObject> nginxPollerService;
@@ -63,9 +65,9 @@ public class TlsSetupService {
             Stack stack = stackRepository.findById(stackId).get();
             Integer gatewayPort = stack.getGatewayport();
             LOGGER.debug("Trying to fetch the server's certificate: {}:{}", ip, gatewayPort);
-            nginxPollerService.pollWithTimeoutSingleFailure(
-                nginxCertListenerTask, new NginxPollerObject(stack, client, ip, gatewayPort, x509TrustManager),
-                POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
+            nginxPollerService.pollWithAbsolutTimeout(
+                nginxCertListenerTask, new NginxPollerObject(client, ip, gatewayPort, x509TrustManager),
+                POLLING_INTERVAL, FIVE_MIN, MAX_FAILURE);
             WebTarget nginxTarget = client.target(String.format("https://%s:%d", ip, gatewayPort));
             nginxTarget.path("/").request().get().close();
             X509Certificate[] chain = x509TrustManager.getChain();
@@ -73,7 +75,8 @@ public class TlsSetupService {
             instanceMetaData.setServerCert(BaseEncoding.base64().encode(serverCert.getBytes()));
             instanceMetaDataRepository.save(instanceMetaData);
         } catch (Exception e) {
-            throw new CloudbreakException("Failed to retrieve the server's certificate", e);
+            throw new CloudbreakException("Failed to retrieve the server's certificate from Nginx."
+                    + " Please check your security group is open enough and Cloudbreak can access your VPC and subnet", e);
         }
     }
 }

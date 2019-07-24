@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.polling;
+package com.sequenceiq.cloudbreak.polling.nginx;
 
 import java.security.cert.X509Certificate;
 
@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.polling.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.polling.StatusCheckerTask;
 
 @Component
 public class NginxCertListenerTask implements StatusCheckerTask<NginxPollerObject> {
