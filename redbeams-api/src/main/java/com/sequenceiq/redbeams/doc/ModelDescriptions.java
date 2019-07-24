@@ -2,59 +2,80 @@ package com.sequenceiq.redbeams.doc;
 
 public final class ModelDescriptions {
 
-    public static final String ID = "ID of the resource";
-    public static final String CRN = "CRN of the resource";
-    public static final String DESCRIPTION = "Description of the resource";
-    public static final String CREATION_DATE = "Creation date / time of the resource, in epoch milliseconds";
-    public static final String ENVIRONMENT_CRN = "Crn of the environment of the resource";
-    public static final String RESOURCE_STATUS = "Owner of the resource.";
+    public static final String ALLOCATE_DATABASE_SERVER_REQUEST = "Request for allocating a new database server in a provider";
+    public static final String CREATE_DATABASE_REQUEST = "Request for creating a new database on a registered database server";
+    public static final String CREATE_DATABASE_RESPONSE = "Response for creating a new database on a registered database server";
+    public static final String DATABASE_IDENTIFIERS = "Identifiers that together identify a database in an environment";
+    public static final String DATABASE_REQUEST = "Request containing information about a database to be registered";
+    public static final String DATABASE_RESPONSE = "Response containing information about a database that was acted upon, e.g., retrieved, deleted, listed";
+    public static final String DATABASE_RESPONSES = "A set of multiple database responses";
+    public static final String DATABASE_SERVER_REQUEST = "Request containing information about a database server to be registered";
+    public static final String DATABASE_SERVER_RESPONSE = "Response containing information about a database server that was acted upon, e.g., retrieved, "
+        + "deleted, listed";
+    public static final String DATABASE_SERVER_RESPONSES = "A set of multiple database server responses";
+    public static final String DATABASE_SERVER_STATUS_RESPONSE = "Response containing status information about a database server";
+    public static final String DATABASE_SERVER_TEST_REQUEST = "Request for testing connectivity to a database server";
+    public static final String DATABASE_SERVER_TEST_RESPONSE = "Response for testing connectivity to a database server";
+    public static final String DATABASE_TEST_REQUEST = "Request for testing connectivity to a database";
+    public static final String DATABASE_TEST_RESPONSE = "Response for testing connectivity to a database";
+    public static final String TERMINATE_DATABASE_SERVER_REQUEST = "Request for terminating an existing database server in a provider";
 
     public static class Database {
-        public static final String CONNECTION_URL = "JDBC connection URL in the form of JDBC:<db-type>://<address>:<port>/<db>";
+        public static final String CRN = "CRN of the database";
+        public static final String DESCRIPTION = "Description of the database";
+        public static final String CONNECTION_URL = "JDBC connection URL in the form of jdbc:<db-type>:<driver-specific-part>";
         public static final String CONNECTION_DRIVER = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
-        public static final String DB_ENGINE = "Name of the external database engine (MYSQL, POSTGRES...)";
-        public static final String DB_ENGINE_DISPLAYNAME = "Display name of the external database engine (Mysql, PostgreSQL...)";
+        public static final String CONNECTOR_JAR_URL = "URL that points to the JAR of the connection driver";
+        public static final String DB_ENGINE = "Name of the database vendor (MYSQL, POSTGRES...)";
+        public static final String DB_ENGINE_DISPLAYNAME = "Display name of the database vendor (MySQL, PostgreSQL, ...)";
         public static final String VERSION = "Version of the Database";
-        public static final String USERNAME = "Username to use for the JDBC connection";
-        public static final String PASSWORD = "Password to use for the JDBC connection";
-        public static final String NAME = "Name of the database configuration resource";
-        public static final String TYPE = "Type of database, aka the service name that will use the database like HIVE, DRUID, SUPERSET, RANGER, etc.";
-        public static final String CONNECTOR_JAR_URL = "URL that points to the jar of the connection driver(connector)";
-        public static final String DATABASE_CONNECTION_TEST_RESULT = "Result of database connection test";
-        public static final String DATABASE_TEST_EXISTING_REQUEST = "Identifiers of saved database config to be tested for connectivity";
-        public static final String DATABASE_TEST_NEW_REQUEST = "Unsaved database config to be tested for connectivity";
-        public static final String DATABASE_CREATE_RESULT = "Result of database creation";
+        public static final String USERNAME = "Username to use for authentication";
+        public static final String PASSWORD = "Password to use for authentication";
+        public static final String NAME = "Name of the database";
+        public static final String TYPE = "Type of database, i.e., the service name that will use the database (HIVE, DRUID, SUPERSET, RANGER, ...)";
+        public static final String CREATE_RESULT = "Result of database creation";
+        public static final String ENVIRONMENT_CRN = "CRN of the environment of the database";
+        public static final String CREATION_DATE = "Creation date / time of the database, in epoch milliseconds";
+    }
+
+    public static class DatabaseTest {
+        public static final String EXISTING_REQUEST = "Identifiers of registered database to be tested for connectivity";
+        public static final String NEW_REQUEST = "Information about a unregistered database to be tested for connectivity";
+        public static final String RESULT = "Result of database connection test";
     }
 
     public static class DatabaseServer {
+        public static final String ID = "Internal ID of the database server";
         public static final String NAME = "Name of the database server";
-        public static final String CRN = "Crn of the database server";
+        public static final String CRN = "CRN of the database server";
+        public static final String DESCRIPTION = "Description of the database server";
         public static final String HOST = "Host of the database server";
         public static final String PORT = "Port of the database server";
+        public static final String CONNECTION_DRIVER = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
+        public static final String CONNECTOR_JAR_URL = "URL that points to the JAR of the connection driver";
         public static final String DATABASE_VENDOR = "Name of the database vendor (MYSQL, POSTGRES, ...)";
         public static final String DATABASE_VENDOR_DISPLAY_NAME = "Display name of the database vendor (MySQL, PostgreSQL, ...)";
-        public static final String CONNECTION_DRIVER = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
-        public static final String CONNECTOR_JAR_URL = "URL that points to the JAR of the connection driver (JDBC connector)";
-        public static final String CONNECTION_USER_NAME = "User name of the administrative user of the database server";
-        public static final String CONNECTION_PASSWORD = "Password of the administrative user of the database server";
-        public static final String DATABASE_SERVER_TEST_EXISTING_CRN = "Crn of saved database server config to be tested for connectivity";
-        public static final String DATABASE_SERVER_TEST_NEW_REQUEST = "Unsaved database server config to be tested for connectivity";
-        public static final String DATABASE_SERVER_CONNECTION_TEST_RESULT = "Result of database server connection test";
+        public static final String USERNAME = "Username of the administrative user of the database server";
+        public static final String PASSWORD = "Password of the administrative user of the database server";
+        public static final String ENVIRONMENT_CRN = "CRN of the environment of the database server";
+        public static final String CREATION_DATE = "Creation date / time of the database server, in epoch milliseconds";
+        public static final String RESOURCE_STATUS = "Ownership status of the database server";
+        public static final String STATUS = "Status of the database server stack";
+        public static final String STATUS_REASON = "Additional status information about the database server stack";
     }
 
-    public static class RedbeamsManagedDatabaseServer {
-        public static final String NAME = "Name of the external database server";
-        public static final String DATABASE_SERVER = "The external database server configuration";
-        public static final String STATUS = "Status of the database stack";
-        public static final String STATUS_REASON = "Status message of the database stack";
+    public static class DatabaseServerTest {
+        public static final String EXISTING_CRN = "CRN of registered database server to be tested for connectivity";
+        public static final String NEW_REQUEST = "Information about an unregistered database server to be tested for connectivity";
+        public static final String RESULT = "Result of database server connection test";
     }
 
     public static class DBStack {
         public static final String STACK_NAME = "Name of the database stack";
-        public static final String REGION = "Region of the database stack";
-        public static final String NETWORK = "Network of the database stack";
-        public static final String DATABASE_SERVER = "Database server of the database stack";
-        public static final String AWS_PARAMETERS = "AWS-specific parameters of the database stack";
+        public static final String REGION = "Region for the database stack";
+        public static final String NETWORK = "Network information for the database stack";
+        public static final String DATABASE_SERVER = "Database server information for the database stack";
+        public static final String AWS_PARAMETERS = "AWS-specific parameters for the database stack";
     }
 
     public static class NetworkModelDescription {

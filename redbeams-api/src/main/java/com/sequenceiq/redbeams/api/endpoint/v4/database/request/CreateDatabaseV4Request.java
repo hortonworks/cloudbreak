@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
@@ -12,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * A request for creating a database on a database server.
  */
-@ApiModel
+@ApiModel(description = ModelDescriptions.CREATE_DATABASE_REQUEST)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateDatabaseV4Request implements Serializable {
 

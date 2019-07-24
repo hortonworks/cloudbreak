@@ -1,18 +1,18 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 
-import static com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
-
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.base.DatabaseV4Base;
+import com.sequenceiq.redbeams.doc.ModelDescriptions;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 import com.sequenceiq.redbeams.validation.ValidConnectorJarUrlForDatabaseVendor;
 import com.sequenceiq.redbeams.validation.ValidDatabaseVendorAndService;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
+@ApiModel(description = ModelDescriptions.DATABASE_REQUEST)
 @ValidDatabaseVendorAndService
 @ValidConnectorJarUrlForDatabaseVendor
 @JsonIgnoreProperties(ignoreUnknown = true)

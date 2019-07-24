@@ -10,8 +10,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel(description = ModelDescriptions.DATABASE_IDENTIFIERS)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseV4Identifiers implements Serializable {
 
@@ -23,7 +25,7 @@ public class DatabaseV4Identifiers implements Serializable {
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @ApiModelProperty(value = Database.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     public String getName() {
