@@ -6,6 +6,8 @@ public class KeytabOperationsDescription {
     public static final String DESCRIBE_SERVICE_KEYTAB = "Get the keytab for the provided service on a specific host";
     public static final String DESCRIBE_DELETE_SERVICE_PRINCIPAL = "Delete the service principal";
     public static final String DESCRIBE_DELETE_HOST = "Delete the host";
+    public static final String DESCRIBE_CLEANUP = "Cleanup the secrets associated with the cluster";
+
 
     private KeytabOperationsDescription() {
     }
