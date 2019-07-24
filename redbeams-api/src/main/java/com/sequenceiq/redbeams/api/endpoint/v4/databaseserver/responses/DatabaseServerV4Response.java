@@ -10,21 +10,18 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServe
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
-import com.sequenceiq.redbeams.doc.ModelDescriptions.RedbeamsManagedDatabaseServer;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-// import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
-
-@ApiModel
+@ApiModel(description = ModelDescriptions.DATABASE_SERVER_RESPONSE)
 @JsonInclude(Include.NON_NULL)
 public class DatabaseServerV4Response extends DatabaseServerV4Base {
 
-    @ApiModelProperty(ModelDescriptions.ID)
+    @ApiModelProperty(DatabaseServer.ID)
     private Long id;
 
-    @ApiModelProperty(ModelDescriptions.CRN)
+    @ApiModelProperty(DatabaseServer.CRN)
     private String crn;
 
     @ApiModelProperty(value = DatabaseServer.DATABASE_VENDOR_DISPLAY_NAME, required = true)
@@ -33,22 +30,22 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
     @ApiModelProperty(value = DatabaseServer.CONNECTION_DRIVER, required = true)
     private String connectionDriver;
 
-    @ApiModelProperty(DatabaseServer.CONNECTION_USER_NAME)
+    @ApiModelProperty(DatabaseServer.USERNAME)
     private SecretResponse connectionUserName;
 
-    @ApiModelProperty(DatabaseServer.CONNECTION_PASSWORD)
+    @ApiModelProperty(DatabaseServer.PASSWORD)
     private SecretResponse connectionPassword;
 
-    @ApiModelProperty(ModelDescriptions.CREATION_DATE)
+    @ApiModelProperty(DatabaseServer.CREATION_DATE)
     private Long creationDate;
 
-    @ApiModelProperty(ModelDescriptions.RESOURCE_STATUS)
+    @ApiModelProperty(DatabaseServer.RESOURCE_STATUS)
     private ResourceStatus resourceStatus;
 
-    @ApiModelProperty(RedbeamsManagedDatabaseServer.STATUS)
+    @ApiModelProperty(DatabaseServer.STATUS)
     private Status status;
 
-    @ApiModelProperty(RedbeamsManagedDatabaseServer.STATUS_REASON)
+    @ApiModelProperty(DatabaseServer.STATUS_REASON)
     private String statusReason;
 
     public Long getId() {

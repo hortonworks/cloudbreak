@@ -2,28 +2,28 @@ package com.sequenceiq.redbeams.api.endpoint.v4.database.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
+@ApiModel(description = ModelDescriptions.DATABASE_RESPONSE)
 @JsonInclude(Include.NON_NULL)
 public class DatabaseV4Response extends DatabaseV4Base {
 
-    @ApiModelProperty(ModelDescriptions.CRN)
+    @ApiModelProperty(Database.CRN)
     private String crn;
 
-    @ApiModelProperty(ModelDescriptions.CREATION_DATE)
+    @ApiModelProperty(Database.CREATION_DATE)
     private Long creationDate;
 
     @ApiModelProperty(value = Database.DB_ENGINE, required = true)
     private String databaseEngine;
 
-    @ApiModelProperty(value = Database.CONNECTION_DRIVER_NAME, required = true)
+    @ApiModelProperty(value = Database.CONNECTION_DRIVER, required = true)
     private String connectionDriver;
 
     @ApiModelProperty(value = Database.DB_ENGINE_DISPLAYNAME, required = true)

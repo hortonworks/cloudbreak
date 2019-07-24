@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base;
 
-import static com.sequenceiq.redbeams.doc.ModelDescriptions.ENVIRONMENT_CRN;
-
 import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
@@ -11,7 +9,6 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.validation.ValidDatabaseVendor;
 import com.sequenceiq.cloudbreak.validation.ValidUrl;
-import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -27,7 +24,7 @@ public abstract class DatabaseServerV4Base implements Serializable {
     private String name;
 
     @Size(max = 1000000)
-    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
+    @ApiModelProperty(DatabaseServer.DESCRIPTION)
     private String description;
 
     @NotNull
@@ -52,7 +49,7 @@ public abstract class DatabaseServerV4Base implements Serializable {
     private String connectorJarUrl;
 
     @NotNull
-    @ApiModelProperty(value = ENVIRONMENT_CRN, required = true)
+    @ApiModelProperty(value = DatabaseServer.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     public String getName() {

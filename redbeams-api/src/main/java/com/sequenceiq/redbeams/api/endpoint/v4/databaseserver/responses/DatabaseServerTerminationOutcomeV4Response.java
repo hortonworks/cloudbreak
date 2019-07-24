@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,19 +16,19 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DatabaseServerTerminationOutcomeV4Response {
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @ApiModelProperty(value = DatabaseServer.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RedbeamsManagedDatabaseServer.NAME, required = true)
+    @ApiModelProperty(value = DatabaseServer.NAME, required = true)
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.CRN, required = true)
+    @ApiModelProperty(value = DatabaseServer.CRN, required = true)
     private String resourceCrn;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RedbeamsManagedDatabaseServer.DATABASE_SERVER, required = true)
+    @ApiModelProperty(value = ModelDescriptions.DATABASE_SERVER_RESPONSE, required = true)
     private DatabaseServerV4Response databaseServerConfig;
 
     private Status status;

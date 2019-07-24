@@ -6,34 +6,31 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("ExternalDatabaseServerStatusV4Response")
+@ApiModel(description = ModelDescriptions.DATABASE_SERVER_STATUS_RESPONSE)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DatabaseServerStatusV4Response {
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @ApiModelProperty(value = DatabaseServer.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RedbeamsManagedDatabaseServer.NAME, required = true)
+    @ApiModelProperty(value = DatabaseServer.NAME, required = true)
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.CRN, required = true)
+    @ApiModelProperty(value = DatabaseServer.CRN, required = true)
     private String resourceCrn;
 
-    // @NotNull
-    // @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.DATABASE_SERVER, required = true)
-    // private DatabaseServerV4Response databaseServerConfig;
-
-    @ApiModelProperty(value = ModelDescriptions.RedbeamsManagedDatabaseServer.STATUS, required = true)
+    @ApiModelProperty(value = DatabaseServer.STATUS, required = true)
     private Status status;
 
-    @ApiModelProperty(value = ModelDescriptions.RedbeamsManagedDatabaseServer.STATUS_REASON, required = true)
+    @ApiModelProperty(value = DatabaseServer.STATUS_REASON, required = true)
     private String statusReason;
 
     public String getEnvironmentCrn() {

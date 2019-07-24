@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database.responses;
 
-import static com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
+import com.sequenceiq.redbeams.doc.ModelDescriptions;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseTest;
 
 import java.io.Serializable;
 
@@ -9,11 +10,11 @@ import javax.validation.constraints.NotNull;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
+@ApiModel(description = ModelDescriptions.DATABASE_TEST_RESPONSE)
 @NotNull
 public class DatabaseTestV4Response implements Serializable {
 
-    @ApiModelProperty(value = Database.DATABASE_CONNECTION_TEST_RESULT, required = true)
+    @ApiModelProperty(value = DatabaseTest.RESULT, required = true)
     private String result;
 
     public DatabaseTestV4Response() {

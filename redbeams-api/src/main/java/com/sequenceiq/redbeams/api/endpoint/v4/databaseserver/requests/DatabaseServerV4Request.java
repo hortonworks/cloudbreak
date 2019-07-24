@@ -4,23 +4,24 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServerV4Base;
+import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 import com.sequenceiq.redbeams.validation.ValidConnectorJarUrlForDatabaseVendor;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
+@ApiModel(description = ModelDescriptions.DATABASE_SERVER_REQUEST)
 @ValidConnectorJarUrlForDatabaseVendor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseServerV4Request extends DatabaseServerV4Base {
 
     @NotNull
-    @ApiModelProperty(value = DatabaseServer.CONNECTION_USER_NAME, required = true)
+    @ApiModelProperty(value = DatabaseServer.USERNAME, required = true)
     private String connectionUserName;
 
     @NotNull
-    @ApiModelProperty(value = DatabaseServer.CONNECTION_PASSWORD, required = true)
+    @ApiModelProperty(value = DatabaseServer.PASSWORD, required = true)
     private String connectionPassword;
 
     // @ApiModelProperty(Database.ORACLE)

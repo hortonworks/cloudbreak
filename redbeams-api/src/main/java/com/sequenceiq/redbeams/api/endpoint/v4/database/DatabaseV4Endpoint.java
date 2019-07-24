@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database;
 
-import static com.sequenceiq.redbeams.doc.OperationDescriptions.DatabaseOpDescription;
-
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -22,74 +20,77 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Reques
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Responses;
-import com.sequenceiq.redbeams.doc.ControllerDescriptions;
-import com.sequenceiq.redbeams.doc.Notes;
+import com.sequenceiq.redbeams.doc.Notes.DatabaseNotes;
+import com.sequenceiq.redbeams.doc.OperationDescriptions.DatabaseOpDescription;
+import com.sequenceiq.redbeams.doc.ParamDescriptions.DatabaseParamDescriptions;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 
 @Path("/v4/databases")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/databases",
-    description = ControllerDescriptions.DATABASE_V4_DESCRIPTION,
+@Api(tags = { "databases" },
     protocols = "http,https",
+    produces = MediaType.APPLICATION_JSON,
     authorizations = { @Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY) })
 public interface DatabaseV4Endpoint {
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
+    @ApiOperation(value = DatabaseOpDescription.LIST, notes = DatabaseNotes.LIST,
             nickname = "listDatabases")
-    DatabaseV4Responses list(@NotNull @QueryParam("environmentId") String environmentId);
-
-    @POST
-    @Path("")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
-            nickname = "createDatabase")
-    DatabaseV4Response create(@Valid DatabaseV4Request request);
+    DatabaseV4Responses list(
+        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentId") String environmentId
+    );
 
     @POST
     @Path("/register")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.REGISTER, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
+    @ApiOperation(value = DatabaseOpDescription.REGISTER, notes = DatabaseNotes.REGISTER,
             nickname = "registerDatabase")
-    DatabaseV4Response register(@Valid DatabaseV4Request request);
+    DatabaseV4Response register(
+        @Valid @ApiParam(DatabaseParamDescriptions.DATABASE_REQUEST) DatabaseV4Request request
+    );
 
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
+    @ApiOperation(value = DatabaseOpDescription.GET_BY_NAME, notes = DatabaseNotes.GET_BY_NAME,
             nickname = "getDatabase")
-    DatabaseV4Response get(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
+    DatabaseV4Response get(
+        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentId") String environmentId,
+        @ApiParam(DatabaseParamDescriptions.NAME) @PathParam("name") String name
+    );
 
     @DELETE
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
+    @ApiOperation(value = DatabaseOpDescription.DELETE_BY_NAME, notes = DatabaseNotes.DELETE_BY_NAME,
             nickname = "deleteDatabase")
-    DatabaseV4Response delete(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
+    DatabaseV4Response delete(
+        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentId") String environmentId,
+        @ApiParam(DatabaseParamDescriptions.NAME) @PathParam("name") String name
+    );
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
+    @ApiOperation(value = DatabaseOpDescription.DELETE_MULTIPLE_BY_NAME, notes = DatabaseNotes.DELETE_MULTIPLE_BY_NAME,
             nickname = "deleteMultipleDatabases")
-    DatabaseV4Responses deleteMultiple(@NotNull @QueryParam("environmentId") String environmentId, Set<String> names);
-
-    // @GET
-    // @Path("/{name}/request")
-    // @Produces(MediaType.APPLICATION_JSON)
-    // @ApiOperation(value = DatabaseOpDescription.GET_REQUEST, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
-    //         nickname = "getDatabaseRequestFromName")
-    // DatabaseV4Request getRequest(@PathParam("name") String name);
+    DatabaseV4Responses deleteMultiple(
+        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentId") String environmentId,
+        @ApiParam(DatabaseParamDescriptions.NAMES) Set<String> names
+    );
 
     @POST
     @Path("/test")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.POST_CONNECTION_TEST, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
+    @ApiOperation(value = DatabaseOpDescription.TEST_CONNECTION, notes = DatabaseNotes.TEST_CONNECTION,
             nickname = "testDatabaseConnection")
-    DatabaseTestV4Response test(@Valid DatabaseTestV4Request databaseTestV4Request);
+    DatabaseTestV4Response test(
+        @Valid @ApiParam(DatabaseParamDescriptions.DATABASE_TEST_REQUEST) DatabaseTestV4Request databaseTestV4Request
+    );
 }
