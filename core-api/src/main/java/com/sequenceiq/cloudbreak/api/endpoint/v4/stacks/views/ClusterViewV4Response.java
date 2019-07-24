@@ -19,17 +19,11 @@ public class ClusterViewV4Response extends CompactViewV4Response {
     @ApiModelProperty(ClusterModelDescription.STATUS)
     private Status status;
 
-    @ApiModelProperty(ClusterModelDescription.SECURE)
-    private boolean secure;
-
     @ApiModelProperty(ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupViewV4Response> hostGroups = new HashSet<>();
 
     @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE)
     private SharedServiceV4Response sharedServiceResponse;
-
-    @ApiModelProperty(ClusterModelDescription.KERBEROSCONFIG_NAME)
-    private String kerberosName;
 
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
     private BlueprintV4ViewResponse blueprint;
@@ -43,14 +37,6 @@ public class ClusterViewV4Response extends CompactViewV4Response {
 
     public void setStatus(Status status) {
         this.status = status;
-    }
-
-    public boolean isSecure() {
-        return secure;
-    }
-
-    public void setSecure(boolean secure) {
-        this.secure = secure;
     }
 
     public Set<HostGroupViewV4Response> getHostGroups() {
@@ -67,14 +53,6 @@ public class ClusterViewV4Response extends CompactViewV4Response {
 
     public void setSharedServiceResponse(SharedServiceV4Response sharedServiceResponse) {
         this.sharedServiceResponse = sharedServiceResponse;
-    }
-
-    public String getKerberosName() {
-        return kerberosName;
-    }
-
-    public void setKerberosName(String kerberosName) {
-        this.kerberosName = kerberosName;
     }
 
     public BlueprintV4ViewResponse getBlueprint() {
