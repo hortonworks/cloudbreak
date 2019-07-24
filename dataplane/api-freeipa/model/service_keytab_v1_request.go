@@ -17,9 +17,15 @@ import (
 // swagger:model ServiceKeytabV1Request
 type ServiceKeytabV1Request struct {
 
+	// If true existing keytab won't be overriden for service in normal scenario. Preserving the keytab is best effort, it may invalidate prior keytabs.
+	DoNotRecreateKeytab bool `json:"doNotRecreateKeytab,omitempty"`
+
 	// CRN of the environment
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
+
+	// Role request for adding roles and privileges to service
+	RoleRequest *RoleV1Request `json:"roleRequest,omitempty"`
 
 	// Hostname where the service is running
 	// Required: true
@@ -35,6 +41,10 @@ func (m *ServiceKeytabV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEnvironmentCrn(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateRoleRequest(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -56,6 +66,24 @@ func (m *ServiceKeytabV1Request) validateEnvironmentCrn(formats strfmt.Registry)
 
 	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ServiceKeytabV1Request) validateRoleRequest(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RoleRequest) { // not required
+		return nil
+	}
+
+	if m.RoleRequest != nil {
+		if err := m.RoleRequest.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("roleRequest")
+			}
+			return err
+		}
 	}
 
 	return nil
