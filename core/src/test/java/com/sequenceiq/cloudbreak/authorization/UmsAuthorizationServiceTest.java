@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.authorization;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -65,7 +66,7 @@ public class UmsAuthorizationServiceTest {
 
     @Test
     public void testCheckRight() {
-        when(umsClient.checkRight(anyString(), anyString(), anyString(), anyString())).thenReturn(false);
+        when(umsClient.checkRight(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(false);
 
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage("You have no right to perform distrox/writeDatabase on database config. This requires PowerUser role. "
@@ -77,7 +78,7 @@ public class UmsAuthorizationServiceTest {
     @Test
     public void testGetUserRoles() {
         User user = createUser();
-        when(umsClient.listResourceRoleAssigments(eq(user.getUserCrn()), anyString())).thenReturn(Lists.newArrayList(
+        when(umsClient.listResourceRoleAssigments(eq(user.getUserCrn()), eq(user.getUserCrn()), any())).thenReturn(Lists.newArrayList(
                 createResourceRoleAssigment(WORKSPACE_READER_ROLE_CRN, WORKSPACE_CRN),
                 createResourceRoleAssigment(WORKSPACE_READER_ROLE_CRN, "crn:altus:iam:us-west-1:1234:other:1234"),
                 createResourceRoleAssigment(WORKSAPCE_WRITER_ROLE_CRN, WORKSPACE_CRN)
@@ -92,21 +93,21 @@ public class UmsAuthorizationServiceTest {
 
     @Test
     public void testRemoveResourceRolesOfUser() {
-        doNothing().when(umsClient).unassignResourceRole(anyString(), anyString(), anyString(), anyString());
-        when(umsClient.listResourceRoleAssigments(anyString(), anyString())).thenReturn(Lists.newArrayList(
+        doNothing().when(umsClient).unassignResourceRole(anyString(), anyString(), anyString(), any());
+        when(umsClient.listResourceRoleAssigments(anyString(), anyString(), any())).thenReturn(Lists.newArrayList(
                 createResourceRoleAssigment(WORKSPACE_READER_ROLE_CRN, WORKSPACE_CRN),
                 createResourceRoleAssigment(WORKSAPCE_WRITER_ROLE_CRN, WORKSPACE_CRN)
         ));
 
         underTest.removeResourceRolesOfUserInWorkspace(Sets.newHashSet(createUser()), createWorkspace());
 
-        verify(umsClient, times(1)).unassignResourceRole(eq(USER_CRN), eq(WORKSPACE_CRN), eq(WORKSPACE_READER_ROLE_CRN), anyString());
-        verify(umsClient, times(1)).unassignResourceRole(eq(USER_CRN), eq(WORKSPACE_CRN), eq(WORKSAPCE_WRITER_ROLE_CRN), anyString());
+        verify(umsClient, times(1)).unassignResourceRole(eq(USER_CRN), eq(WORKSPACE_CRN), eq(WORKSPACE_READER_ROLE_CRN), any());
+        verify(umsClient, times(1)).unassignResourceRole(eq(USER_CRN), eq(WORKSPACE_CRN), eq(WORKSAPCE_WRITER_ROLE_CRN), any());
     }
 
     @Test
     public void testGetWorkspacesForUser() {
-        when(umsClient.listResourceRoleAssigments(anyString(), anyString())).thenReturn(Lists.newArrayList(
+        when(umsClient.listResourceRoleAssigments(anyString(), anyString(), any())).thenReturn(Lists.newArrayList(
                 createResourceRoleAssigment(WORKSPACE_READER_ROLE_CRN, WORKSPACE_CRN),
                 createResourceRoleAssigment(WORKSAPCE_WRITER_ROLE_CRN, WORKSPACE_CRN)
         ));
@@ -123,7 +124,8 @@ public class UmsAuthorizationServiceTest {
     @Test
     public void testGetUsersOfWorkspace() {
         User user = createUser();
-        when(umsClient.listAssigneesOfResource(eq(USER_CRN), eq(WORKSPACE_CRN), anyString())).thenReturn(Lists.newArrayList(createResourceAssignee(USER_CRN)));
+        when(umsClient.listAssigneesOfResource(eq(USER_CRN), eq(USER_CRN), eq(WORKSPACE_CRN), any()))
+                .thenReturn(Lists.newArrayList(createResourceAssignee(USER_CRN)));
         ArgumentCaptor<Set<String>> findCaptor = ArgumentCaptor.forClass(Set.class);
         doReturn(Sets.newHashSet(user)).when(userService).getByUsersIds(findCaptor.capture());
 
