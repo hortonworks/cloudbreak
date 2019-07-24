@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.CmTemplateGeneratorConfigurationResolver;
@@ -44,6 +45,10 @@ public class DeclaredVersionService {
 
         Set<CdhService> cdhServices = cmTemplateGeneratorConfigurationResolver.cdhConfigurations().get(stackVersion);
 
+        if (cdhServices == null) {
+            cdhServices = fallbackForDefault();
+        }
+
         for (ApiClusterTemplateService service : cmTemplateProcessor.getTemplate().getServices()) {
             SupportedService supportedService = new SupportedService();
             supportedService.setName(service.getServiceType());
@@ -60,11 +65,21 @@ public class DeclaredVersionService {
                 }
             }
 
-            services.add(supportedService);
+            if (!Strings.isNullOrEmpty(supportedService.getDisplayName())
+                && !Strings.isNullOrEmpty(supportedService.getVersion())) {
+                services.add(supportedService);
+            }
         }
 
         supportedServices.setServices(services);
         return supportedServices;
+    }
+
+    public Set<CdhService> fallbackForDefault() {
+        StackVersion stackVersion = new StackVersion();
+        stackVersion.setVersion("default");
+        stackVersion.setStackType("CDH");
+        return cmTemplateGeneratorConfigurationResolver.cdhConfigurations().get(stackVersion);
     }
 
 }
