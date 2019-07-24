@@ -22,6 +22,15 @@ public class PollingService<T> {
      * @param maxAttempts signals how many times will the status check be executed before timeout
      */
     public Pair<PollingResult, Exception> pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval, int maxAttempts, int maxFailure) {
+        return pollWithTimeout(statusCheckerTask, t, interval, new AttemptBasedTimeoutChecker(maxAttempts), maxFailure);
+    }
+
+    public Pair<PollingResult, Exception> pollWithAbsolutTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval, long waitSec, int maxFailure) {
+        return pollWithTimeout(statusCheckerTask, t, interval, new AbsolutTimeBasedTimeoutChecker(waitSec), maxFailure);
+    }
+
+    public Pair<PollingResult, Exception> pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval, TimeoutChecker timeoutChecker,
+            int maxFailure) {
         boolean success = false;
         boolean timeout = false;
         int attempts = 0;
@@ -47,9 +56,7 @@ public class PollingService<T> {
             }
             sleep(interval);
             attempts++;
-            if (maxAttempts > 0) {
-                timeout = attempts >= maxAttempts;
-            }
+            timeout = timeoutChecker.checkTimeout();
             exit = statusCheckerTask.exitPolling(t);
         }
         if (timeout) {
