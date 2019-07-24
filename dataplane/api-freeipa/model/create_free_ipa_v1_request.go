@@ -31,6 +31,11 @@ type CreateFreeIpaV1Request struct {
 	// Required: true
 	FreeIpa *FreeIpaServerV1Request `json:"freeIpa"`
 
+	// port of the gateway secured proxy
+	// Maximum: 65535
+	// Minimum: 1025
+	GatewayPort int32 `json:"gatewayPort,omitempty"`
+
 	// settings for custom images
 	Image *ImageSettingsV1Request `json:"image,omitempty"`
 
@@ -63,6 +68,10 @@ func (m *CreateFreeIpaV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateFreeIpa(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateGatewayPort(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -132,6 +141,23 @@ func (m *CreateFreeIpaV1Request) validateFreeIpa(formats strfmt.Registry) error 
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *CreateFreeIpaV1Request) validateGatewayPort(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.GatewayPort) { // not required
+		return nil
+	}
+
+	if err := validate.MinimumInt("gatewayPort", "body", int64(m.GatewayPort), 1025, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("gatewayPort", "body", int64(m.GatewayPort), 65535, false); err != nil {
+		return err
 	}
 
 	return nil

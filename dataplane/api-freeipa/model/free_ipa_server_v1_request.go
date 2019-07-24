@@ -23,10 +23,12 @@ type FreeIpaServerV1Request struct {
 
 	// Domain name associated to the FreeIPA
 	// Required: true
+	// Pattern: (?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]
 	Domain *string `json:"domain"`
 
 	// Base hostname for FreeIPA servers
 	// Required: true
+	// Pattern: ^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$
 	Hostname *string `json:"hostname"`
 }
 
@@ -67,12 +69,20 @@ func (m *FreeIpaServerV1Request) validateDomain(formats strfmt.Registry) error {
 		return err
 	}
 
+	if err := validate.Pattern("domain", "body", string(*m.Domain), `(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]`); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (m *FreeIpaServerV1Request) validateHostname(formats strfmt.Registry) error {
 
 	if err := validate.Required("hostname", "body", m.Hostname); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("hostname", "body", string(*m.Hostname), `^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$`); err != nil {
 		return err
 	}
 

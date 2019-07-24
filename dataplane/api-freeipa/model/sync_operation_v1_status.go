@@ -37,7 +37,7 @@ type SyncOperationV1Status struct {
 	StartTime int64 `json:"startTime,omitempty"`
 
 	// User synchronization operation status
-	// Enum: [RUNNING COMPLETED FAILED]
+	// Enum: [REQUESTED RUNNING COMPLETED FAILED REJECTED TIMEDOUT]
 	Status string `json:"status,omitempty"`
 
 	// environment names where operation succeeded
@@ -117,7 +117,7 @@ var syncOperationV1StatusTypeStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["RUNNING","COMPLETED","FAILED"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["REQUESTED","RUNNING","COMPLETED","FAILED","REJECTED","TIMEDOUT"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -127,6 +127,9 @@ func init() {
 
 const (
 
+	// SyncOperationV1StatusStatusREQUESTED captures enum value "REQUESTED"
+	SyncOperationV1StatusStatusREQUESTED string = "REQUESTED"
+
 	// SyncOperationV1StatusStatusRUNNING captures enum value "RUNNING"
 	SyncOperationV1StatusStatusRUNNING string = "RUNNING"
 
@@ -135,6 +138,12 @@ const (
 
 	// SyncOperationV1StatusStatusFAILED captures enum value "FAILED"
 	SyncOperationV1StatusStatusFAILED string = "FAILED"
+
+	// SyncOperationV1StatusStatusREJECTED captures enum value "REJECTED"
+	SyncOperationV1StatusStatusREJECTED string = "REJECTED"
+
+	// SyncOperationV1StatusStatusTIMEDOUT captures enum value "TIMEDOUT"
+	SyncOperationV1StatusStatusTIMEDOUT string = "TIMEDOUT"
 )
 
 // prop value enum

@@ -17,6 +17,13 @@ import (
 // swagger:model CleanupV1Response
 type CleanupV1Response struct {
 
+	// cert cleanup failed
+	CertCleanupFailed map[string]string `json:"certCleanupFailed,omitempty"`
+
+	// cert cleanup success
+	// Unique: true
+	CertCleanupSuccess []string `json:"certCleanupSuccess"`
+
 	// host cleanup failed
 	HostCleanupFailed map[string]string `json:"hostCleanupFailed,omitempty"`
 
@@ -43,6 +50,10 @@ type CleanupV1Response struct {
 func (m *CleanupV1Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCertCleanupSuccess(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateHostCleanupSuccess(formats); err != nil {
 		res = append(res, err)
 	}
@@ -58,6 +69,19 @@ func (m *CleanupV1Response) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *CleanupV1Response) validateCertCleanupSuccess(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CertCleanupSuccess) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("certCleanupSuccess", "body", m.CertCleanupSuccess); err != nil {
+		return err
+	}
+
 	return nil
 }
 

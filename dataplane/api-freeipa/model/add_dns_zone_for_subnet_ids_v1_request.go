@@ -17,24 +17,24 @@ import (
 // swagger:model AddDnsZoneForSubnetIdsV1Request
 type AddDNSZoneForSubnetIdsV1Request struct {
 
+	// add Dns zone network
+	// Required: true
+	AddDNSZoneNetwork *AddDNSZoneNetworkV1 `json:"addDnsZoneNetwork"`
+
 	// CRN of the environment
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
-
-	// subnet ids
-	// Unique: true
-	SubnetIds []string `json:"subnetIds"`
 }
 
 // Validate validates this add Dns zone for subnet ids v1 request
 func (m *AddDNSZoneForSubnetIdsV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateEnvironmentCrn(formats); err != nil {
+	if err := m.validateAddDNSZoneNetwork(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateSubnetIds(formats); err != nil {
+	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -44,22 +44,27 @@ func (m *AddDNSZoneForSubnetIdsV1Request) Validate(formats strfmt.Registry) erro
 	return nil
 }
 
-func (m *AddDNSZoneForSubnetIdsV1Request) validateEnvironmentCrn(formats strfmt.Registry) error {
+func (m *AddDNSZoneForSubnetIdsV1Request) validateAddDNSZoneNetwork(formats strfmt.Registry) error {
 
-	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
+	if err := validate.Required("addDnsZoneNetwork", "body", m.AddDNSZoneNetwork); err != nil {
 		return err
+	}
+
+	if m.AddDNSZoneNetwork != nil {
+		if err := m.AddDNSZoneNetwork.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("addDnsZoneNetwork")
+			}
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (m *AddDNSZoneForSubnetIdsV1Request) validateSubnetIds(formats strfmt.Registry) error {
+func (m *AddDNSZoneForSubnetIdsV1Request) validateEnvironmentCrn(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.SubnetIds) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("subnetIds", "body", m.SubnetIds); err != nil {
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
 	}
 

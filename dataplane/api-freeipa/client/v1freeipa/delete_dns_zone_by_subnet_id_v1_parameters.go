@@ -64,6 +64,8 @@ type DeleteDNSZoneBySubnetIDV1Params struct {
 
 	/*Environment*/
 	Environment *string
+	/*NetworkID*/
+	NetworkID *string
 	/*SubnetID*/
 	SubnetID *string
 
@@ -116,6 +118,17 @@ func (o *DeleteDNSZoneBySubnetIDV1Params) SetEnvironment(environment *string) {
 	o.Environment = environment
 }
 
+// WithNetworkID adds the networkID to the delete Dns zone by subnet Id v1 params
+func (o *DeleteDNSZoneBySubnetIDV1Params) WithNetworkID(networkID *string) *DeleteDNSZoneBySubnetIDV1Params {
+	o.SetNetworkID(networkID)
+	return o
+}
+
+// SetNetworkID adds the networkId to the delete Dns zone by subnet Id v1 params
+func (o *DeleteDNSZoneBySubnetIDV1Params) SetNetworkID(networkID *string) {
+	o.NetworkID = networkID
+}
+
 // WithSubnetID adds the subnetID to the delete Dns zone by subnet Id v1 params
 func (o *DeleteDNSZoneBySubnetIDV1Params) WithSubnetID(subnetID *string) *DeleteDNSZoneBySubnetIDV1Params {
 	o.SetSubnetID(subnetID)
@@ -145,6 +158,22 @@ func (o *DeleteDNSZoneBySubnetIDV1Params) WriteToRequest(r runtime.ClientRequest
 		qEnvironment := qrEnvironment
 		if qEnvironment != "" {
 			if err := r.SetQueryParam("environment", qEnvironment); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.NetworkID != nil {
+
+		// query param networkId
+		var qrNetworkID string
+		if o.NetworkID != nil {
+			qrNetworkID = *o.NetworkID
+		}
+		qNetworkID := qrNetworkID
+		if qNetworkID != "" {
+			if err := r.SetQueryParam("networkId", qNetworkID); err != nil {
 				return err
 			}
 		}
