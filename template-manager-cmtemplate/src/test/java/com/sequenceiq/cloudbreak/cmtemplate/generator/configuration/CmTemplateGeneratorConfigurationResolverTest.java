@@ -33,7 +33,7 @@ public class CmTemplateGeneratorConfigurationResolverTest {
         Map<StackVersion, Set<CdhService>> stackVersionSetMap = underTest.cdhConfigurations();
         Set<ServiceConfig> serviceConfigs = underTest.serviceConfigs();
 
-        Assert.assertEquals(3L, stackVersionSetMap.size());
+        Assert.assertEquals(4L, stackVersionSetMap.size());
         Assert.assertEquals(21L, serviceConfigs.size());
     }
 }

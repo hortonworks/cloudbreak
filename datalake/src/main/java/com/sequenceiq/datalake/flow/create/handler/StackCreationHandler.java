@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.dyngr.exception.PollerException;
@@ -21,11 +22,13 @@ import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 @Component
 public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCreationWaitRequest> {
 
-    public static final int SLEEP_TIME_IN_SEC = 10;
-
-    public static final int DURATION_IN_MINUTES = 60;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationHandler.class);
+
+    @Value("${sdx.provision.sleeptime_sec:10}")
+    private int sleepTimeInSec;
+
+    @Value("${sdx.provision.duration_min:120}")
+    private int durationInMinutes;
 
     @Inject
     private ProvisionerService provisionerService;
@@ -37,7 +40,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new SdxCreateFailedEvent(resourceId, null,  e);
+        return new SdxCreateFailedEvent(resourceId, null, e);
     }
 
     @Override
@@ -48,7 +51,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
         Selectable response;
         try {
             LOGGER.debug("start polling stack creation process for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig);
             response = new StackCreationSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
@@ -57,7 +60,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Poller stopped for SDX: {}", sdxId, pollerStoppedException);
             response = new SdxCreateFailedEvent(sdxId, userId,
-                    new PollerStoppedException("SDX cluster creation timed out after " + DURATION_IN_MINUTES + " minutes"));
+                    new PollerStoppedException("SDX cluster creation timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Polling failed for stack: {}", sdxId, exception);
             response = new SdxCreateFailedEvent(sdxId, userId, exception);

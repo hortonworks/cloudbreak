@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
+import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -133,18 +135,15 @@ public class ProvisionerService {
                                     .get(0L, sdxCluster.getClusterName(), Collections.emptySet());
                             LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
                             ClusterV4Response cluster = stackV4Response.getCluster();
-                            if (stackV4Response.getStatus().isAvailable()
-                                    && cluster != null
-                                    && cluster.getStatus() != null
-                                    && cluster.getStatus().isAvailable()) {
+                            if (stackAndClusterAvailable(stackV4Response, cluster)) {
                                 return AttemptResults.finishWith(stackV4Response);
                             } else {
                                 if (Status.CREATE_FAILED.equals(stackV4Response.getStatus())) {
-                                    LOGGER.info("Stack creation failed {}, status reason is: {}",
-                                            sdxCluster.getClusterName(), stackV4Response.getStatusReason());
-                                    return AttemptResults.breakFor(
-                                            "Stack creation failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
-                                    );
+                                    LOGGER.info("Stack creation failed {}", stackV4Response.getName());
+                                    return sdxCreationFailed(sdxCluster, stackV4Response.getStatusReason());
+                                } else if (Status.CREATE_FAILED.equals(stackV4Response.getCluster().getStatus())) {
+                                    LOGGER.info("Cluster creation failed {}", stackV4Response.getCluster().getName());
+                                    return sdxCreationFailed(sdxCluster, stackV4Response.getCluster().getStatusReason());
                                 } else {
                                     return AttemptResults.justContinue();
                                 }
@@ -159,5 +158,17 @@ public class ProvisionerService {
         }, () -> {
             throw notFound("SDX cluster", id).get();
         });
+    }
+
+    private AttemptResult<StackV4Response> sdxCreationFailed(SdxCluster sdxCluster, String statusReason) {
+        LOGGER.info("SDX creation failed, statusReason: " + statusReason);
+        return AttemptResults.breakFor("SDX creation failed '" + sdxCluster.getClusterName() + "', " + statusReason);
+    }
+
+    private boolean stackAndClusterAvailable(StackV4Response stackV4Response, ClusterV4Response cluster) {
+        return stackV4Response.getStatus().isAvailable()
+                && cluster != null
+                && cluster.getStatus() != null
+                && cluster.getStatus().isAvailable();
     }
 }
