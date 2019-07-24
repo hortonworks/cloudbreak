@@ -80,6 +80,13 @@ var (
 			Usage: "name of resource",
 		},
 	}
+	FlCrn = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "crn",
+			Usage: "crn of the resource",
+		},
+	}
 	FlNames = StringSliceFlag{
 		RequiredFlag: REQUIRED,
 		StringSliceFlag: cli.StringSliceFlag{
@@ -969,6 +976,13 @@ var (
 		StringFlag: cli.StringFlag{
 			Name:  "env-name",
 			Usage: "name of an environment",
+		},
+	}
+	FlEnvironmentCrn = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "env-crn",
+			Usage: "crn of an environment",
 		},
 	}
 	FlEnvironmentNameOptional = StringFlag{

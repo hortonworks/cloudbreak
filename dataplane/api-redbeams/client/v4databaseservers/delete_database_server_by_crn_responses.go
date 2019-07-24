@@ -16,17 +16,17 @@ import (
 	model "github.com/hortonworks/cb-cli/dataplane/api-redbeams/model"
 )
 
-// GetDatabaseServerReader is a Reader for the GetDatabaseServer structure.
-type GetDatabaseServerReader struct {
+// DeleteDatabaseServerByCrnReader is a Reader for the DeleteDatabaseServerByCrn structure.
+type DeleteDatabaseServerByCrnReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetDatabaseServerReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *DeleteDatabaseServerByCrnReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewGetDatabaseServerOK()
+		result := NewDeleteDatabaseServerByCrnOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *GetDatabaseServerReader) ReadResponse(response runtime.ClientResponse, 
 	}
 }
 
-// NewGetDatabaseServerOK creates a GetDatabaseServerOK with default headers values
-func NewGetDatabaseServerOK() *GetDatabaseServerOK {
-	return &GetDatabaseServerOK{}
+// NewDeleteDatabaseServerByCrnOK creates a DeleteDatabaseServerByCrnOK with default headers values
+func NewDeleteDatabaseServerByCrnOK() *DeleteDatabaseServerByCrnOK {
+	return &DeleteDatabaseServerByCrnOK{}
 }
 
-/*GetDatabaseServerOK handles this case with default header values.
+/*DeleteDatabaseServerByCrnOK handles this case with default header values.
 
 successful operation
 */
-type GetDatabaseServerOK struct {
+type DeleteDatabaseServerByCrnOK struct {
 	Payload *model.DatabaseServerV4Response
 }
 
-func (o *GetDatabaseServerOK) Error() string {
-	return fmt.Sprintf("[GET /v4/databaseservers/{name}][%d] getDatabaseServerOK  %+v", 200, o.Payload)
+func (o *DeleteDatabaseServerByCrnOK) Error() string {
+	return fmt.Sprintf("[DELETE /v4/databaseservers/{crn}][%d] deleteDatabaseServerByCrnOK  %+v", 200, o.Payload)
 }
 
-func (o *GetDatabaseServerOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *DeleteDatabaseServerByCrnOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.DatabaseServerV4Response)
 

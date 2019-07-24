@@ -55,8 +55,8 @@ type DatabaseV4Response struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// ID of the environment of the resource
-	EnvironmentID string `json:"environmentId,omitempty"`
+	// Crn of the environment of the resource
+	EnvironmentCrn string `json:"environmentCrn,omitempty"`
 
 	// Name of the database configuration resource
 	// Required: true

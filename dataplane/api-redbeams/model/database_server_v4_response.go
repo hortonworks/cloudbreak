@@ -21,10 +21,10 @@ type DatabaseServerV4Response struct {
 	// Required: true
 	ConnectionDriver *string `json:"connectionDriver"`
 
-	// Password for the administrative user of the database server
+	// Password of the administrative user of the database server
 	ConnectionPassword *SecretResponse `json:"connectionPassword,omitempty"`
 
-	// User name for the administrative user of the database server
+	// User name of the administrative user of the database server
 	ConnectionUserName *SecretResponse `json:"connectionUserName,omitempty"`
 
 	// URL that points to the JAR of the connection driver (JDBC connector)
@@ -51,9 +51,9 @@ type DatabaseServerV4Response struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// ID of the environment of the resource
+	// Crn of the environment of the resource
 	// Required: true
-	EnvironmentID *string `json:"environmentId"`
+	EnvironmentCrn *string `json:"environmentCrn"`
 
 	// Host of the database server
 	// Required: true
@@ -106,7 +106,7 @@ func (m *DatabaseServerV4Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateEnvironmentID(formats); err != nil {
+	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -225,9 +225,9 @@ func (m *DatabaseServerV4Response) validateDescription(formats strfmt.Registry) 
 	return nil
 }
 
-func (m *DatabaseServerV4Response) validateEnvironmentID(formats strfmt.Registry) error {
+func (m *DatabaseServerV4Response) validateEnvironmentCrn(formats strfmt.Registry) error {
 
-	if err := validate.Required("environmentId", "body", m.EnvironmentID); err != nil {
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
 	}
 

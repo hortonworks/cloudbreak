@@ -55,92 +55,242 @@ func (a *Client) CreateDatabaseOnServer(params *CreateDatabaseOnServerParams) (*
 }
 
 /*
-DeleteDatabaseServer deregisters or terminate a database server by name
+CreateDatabaseServer creates and registers a database server in a cloud provider
 
 A database server describes an external relational database server that can be used to host databases.
 */
-func (a *Client) DeleteDatabaseServer(params *DeleteDatabaseServerParams) (*DeleteDatabaseServerOK, error) {
+func (a *Client) CreateDatabaseServer(params *CreateDatabaseServerParams) (*CreateDatabaseServerOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteDatabaseServerParams()
+		params = NewCreateDatabaseServerParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "deleteDatabaseServer",
-		Method:             "DELETE",
-		PathPattern:        "/v4/databaseservers/{name}",
+		ID:                 "createDatabaseServer",
+		Method:             "POST",
+		PathPattern:        "/v4/databaseservers/managed",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteDatabaseServerReader{formats: a.formats},
+		Reader:             &CreateDatabaseServerReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteDatabaseServerOK), nil
+	return result.(*CreateDatabaseServerOK), nil
 
 }
 
 /*
-DeleteMultipleDatabaseServers deregisters or terminate multiple database servers by name
+DeleteDatabaseServerByCrn deregisters a database server by crn
 
 A database server describes an external relational database server that can be used to host databases.
 */
-func (a *Client) DeleteMultipleDatabaseServers(params *DeleteMultipleDatabaseServersParams) (*DeleteMultipleDatabaseServersOK, error) {
+func (a *Client) DeleteDatabaseServerByCrn(params *DeleteDatabaseServerByCrnParams) (*DeleteDatabaseServerByCrnOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteMultipleDatabaseServersParams()
+		params = NewDeleteDatabaseServerByCrnParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "deleteMultipleDatabaseServers",
+		ID:                 "deleteDatabaseServerByCrn",
+		Method:             "DELETE",
+		PathPattern:        "/v4/databaseservers/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteDatabaseServerByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteDatabaseServerByCrnOK), nil
+
+}
+
+/*
+DeleteDatabaseServerByName deregisters a database server by name
+
+A database server describes an external relational database server that can be used to host databases.
+*/
+func (a *Client) DeleteDatabaseServerByName(params *DeleteDatabaseServerByNameParams) (*DeleteDatabaseServerByNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteDatabaseServerByNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteDatabaseServerByName",
+		Method:             "DELETE",
+		PathPattern:        "/v4/databaseservers/name/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteDatabaseServerByNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteDatabaseServerByNameOK), nil
+
+}
+
+/*
+DeleteMultipleDatabaseServersByCrn deregisters or terminate multiple database servers by name
+
+A database server describes an external relational database server that can be used to host databases.
+*/
+func (a *Client) DeleteMultipleDatabaseServersByCrn(params *DeleteMultipleDatabaseServersByCrnParams) (*DeleteMultipleDatabaseServersByCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteMultipleDatabaseServersByCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteMultipleDatabaseServersByCrn",
 		Method:             "DELETE",
 		PathPattern:        "/v4/databaseservers",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteMultipleDatabaseServersReader{formats: a.formats},
+		Reader:             &DeleteMultipleDatabaseServersByCrnReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteMultipleDatabaseServersOK), nil
+	return result.(*DeleteMultipleDatabaseServersByCrnOK), nil
 
 }
 
 /*
-GetDatabaseServer gets a database server by name
+GetDatabaseServerByCrn gets a database server by crn
 
 A database server describes an external relational database server that can be used to host databases.
 */
-func (a *Client) GetDatabaseServer(params *GetDatabaseServerParams) (*GetDatabaseServerOK, error) {
+func (a *Client) GetDatabaseServerByCrn(params *GetDatabaseServerByCrnParams) (*GetDatabaseServerByCrnOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetDatabaseServerParams()
+		params = NewGetDatabaseServerByCrnParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getDatabaseServer",
+		ID:                 "getDatabaseServerByCrn",
 		Method:             "GET",
-		PathPattern:        "/v4/databaseservers/{name}",
+		PathPattern:        "/v4/databaseservers/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetDatabaseServerReader{formats: a.formats},
+		Reader:             &GetDatabaseServerByCrnReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetDatabaseServerOK), nil
+	return result.(*GetDatabaseServerByCrnOK), nil
+
+}
+
+/*
+GetDatabaseServerByName gets a database server by name
+
+A database server describes an external relational database server that can be used to host databases.
+*/
+func (a *Client) GetDatabaseServerByName(params *GetDatabaseServerByNameParams) (*GetDatabaseServerByNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetDatabaseServerByNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getDatabaseServerByName",
+		Method:             "GET",
+		PathPattern:        "/v4/databaseservers/name/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetDatabaseServerByNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetDatabaseServerByNameOK), nil
+
+}
+
+/*
+GetDatabaseServerStatusByCrn gets the status of an allocated database server by crn
+
+A database server describes an external relational database server that can be used to host databases.
+*/
+func (a *Client) GetDatabaseServerStatusByCrn(params *GetDatabaseServerStatusByCrnParams) (*GetDatabaseServerStatusByCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetDatabaseServerStatusByCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getDatabaseServerStatusByCrn",
+		Method:             "GET",
+		PathPattern:        "/v4/databaseservers/managed/status/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetDatabaseServerStatusByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetDatabaseServerStatusByCrnOK), nil
+
+}
+
+/*
+GetDatabaseServerStatusByName gets the status of an allocated database server by name
+
+A database server describes an external relational database server that can be used to host databases.
+*/
+func (a *Client) GetDatabaseServerStatusByName(params *GetDatabaseServerStatusByNameParams) (*GetDatabaseServerStatusByNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetDatabaseServerStatusByNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getDatabaseServerStatusByName",
+		Method:             "GET",
+		PathPattern:        "/v4/databaseservers/managed/status/name/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetDatabaseServerStatusByNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetDatabaseServerStatusByNameOK), nil
 
 }
 
@@ -201,6 +351,36 @@ func (a *Client) RegisterDatabaseServer(params *RegisterDatabaseServerParams) (*
 		return nil, err
 	}
 	return result.(*RegisterDatabaseServerOK), nil
+
+}
+
+/*
+TerminateManagedDatabaseServer terminates a database server in a cloud provider and deregisters it
+
+A database server describes an external relational database server that can be used to host databases.
+*/
+func (a *Client) TerminateManagedDatabaseServer(params *TerminateManagedDatabaseServerParams) (*TerminateManagedDatabaseServerOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewTerminateManagedDatabaseServerParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "terminateManagedDatabaseServer",
+		Method:             "DELETE",
+		PathPattern:        "/v4/databaseservers/managed/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &TerminateManagedDatabaseServerReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*TerminateManagedDatabaseServerOK), nil
 
 }
 

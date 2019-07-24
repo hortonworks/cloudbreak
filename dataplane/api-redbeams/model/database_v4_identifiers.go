@@ -17,9 +17,9 @@ import (
 // swagger:model DatabaseV4Identifiers
 type DatabaseV4Identifiers struct {
 
-	// ID of the environment of the resource
+	// Crn of the environment of the resource
 	// Required: true
-	EnvironmentID *string `json:"environmentId"`
+	EnvironmentCrn *string `json:"environmentCrn"`
 
 	// Name of the database configuration resource
 	// Required: true
@@ -33,7 +33,7 @@ type DatabaseV4Identifiers struct {
 func (m *DatabaseV4Identifiers) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateEnvironmentID(formats); err != nil {
+	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -47,9 +47,9 @@ func (m *DatabaseV4Identifiers) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DatabaseV4Identifiers) validateEnvironmentID(formats strfmt.Registry) error {
+func (m *DatabaseV4Identifiers) validateEnvironmentCrn(formats strfmt.Registry) error {
 
-	if err := validate.Required("environmentId", "body", m.EnvironmentID); err != nil {
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
 	}
 

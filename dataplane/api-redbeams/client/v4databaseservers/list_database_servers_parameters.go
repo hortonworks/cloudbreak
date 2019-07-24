@@ -13,7 +13,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -21,11 +20,8 @@ import (
 // NewListDatabaseServersParams creates a new ListDatabaseServersParams object
 // with the default values initialized.
 func NewListDatabaseServersParams() *ListDatabaseServersParams {
-	var (
-		attachGlobalDefault = bool(false)
-	)
+	var ()
 	return &ListDatabaseServersParams{
-		AttachGlobal: &attachGlobalDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -34,11 +30,8 @@ func NewListDatabaseServersParams() *ListDatabaseServersParams {
 // NewListDatabaseServersParamsWithTimeout creates a new ListDatabaseServersParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewListDatabaseServersParamsWithTimeout(timeout time.Duration) *ListDatabaseServersParams {
-	var (
-		attachGlobalDefault = bool(false)
-	)
+	var ()
 	return &ListDatabaseServersParams{
-		AttachGlobal: &attachGlobalDefault,
 
 		timeout: timeout,
 	}
@@ -47,11 +40,8 @@ func NewListDatabaseServersParamsWithTimeout(timeout time.Duration) *ListDatabas
 // NewListDatabaseServersParamsWithContext creates a new ListDatabaseServersParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewListDatabaseServersParamsWithContext(ctx context.Context) *ListDatabaseServersParams {
-	var (
-		attachGlobalDefault = bool(false)
-	)
+	var ()
 	return &ListDatabaseServersParams{
-		AttachGlobal: &attachGlobalDefault,
 
 		Context: ctx,
 	}
@@ -60,12 +50,9 @@ func NewListDatabaseServersParamsWithContext(ctx context.Context) *ListDatabaseS
 // NewListDatabaseServersParamsWithHTTPClient creates a new ListDatabaseServersParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewListDatabaseServersParamsWithHTTPClient(client *http.Client) *ListDatabaseServersParams {
-	var (
-		attachGlobalDefault = bool(false)
-	)
+	var ()
 	return &ListDatabaseServersParams{
-		AttachGlobal: &attachGlobalDefault,
-		HTTPClient:   client,
+		HTTPClient: client,
 	}
 }
 
@@ -74,10 +61,8 @@ for the list database servers operation typically these are written to a http.Re
 */
 type ListDatabaseServersParams struct {
 
-	/*AttachGlobal*/
-	AttachGlobal *bool
-	/*EnvironmentID*/
-	EnvironmentID string
+	/*EnvironmentCrn*/
+	EnvironmentCrn string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -117,26 +102,15 @@ func (o *ListDatabaseServersParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithAttachGlobal adds the attachGlobal to the list database servers params
-func (o *ListDatabaseServersParams) WithAttachGlobal(attachGlobal *bool) *ListDatabaseServersParams {
-	o.SetAttachGlobal(attachGlobal)
+// WithEnvironmentCrn adds the environmentCrn to the list database servers params
+func (o *ListDatabaseServersParams) WithEnvironmentCrn(environmentCrn string) *ListDatabaseServersParams {
+	o.SetEnvironmentCrn(environmentCrn)
 	return o
 }
 
-// SetAttachGlobal adds the attachGlobal to the list database servers params
-func (o *ListDatabaseServersParams) SetAttachGlobal(attachGlobal *bool) {
-	o.AttachGlobal = attachGlobal
-}
-
-// WithEnvironmentID adds the environmentID to the list database servers params
-func (o *ListDatabaseServersParams) WithEnvironmentID(environmentID string) *ListDatabaseServersParams {
-	o.SetEnvironmentID(environmentID)
-	return o
-}
-
-// SetEnvironmentID adds the environmentId to the list database servers params
-func (o *ListDatabaseServersParams) SetEnvironmentID(environmentID string) {
-	o.EnvironmentID = environmentID
+// SetEnvironmentCrn adds the environmentCrn to the list database servers params
+func (o *ListDatabaseServersParams) SetEnvironmentCrn(environmentCrn string) {
+	o.EnvironmentCrn = environmentCrn
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -147,27 +121,11 @@ func (o *ListDatabaseServersParams) WriteToRequest(r runtime.ClientRequest, reg 
 	}
 	var res []error
 
-	if o.AttachGlobal != nil {
-
-		// query param attachGlobal
-		var qrAttachGlobal bool
-		if o.AttachGlobal != nil {
-			qrAttachGlobal = *o.AttachGlobal
-		}
-		qAttachGlobal := swag.FormatBool(qrAttachGlobal)
-		if qAttachGlobal != "" {
-			if err := r.SetQueryParam("attachGlobal", qAttachGlobal); err != nil {
-				return err
-			}
-		}
-
-	}
-
-	// query param environmentId
-	qrEnvironmentID := o.EnvironmentID
-	qEnvironmentID := qrEnvironmentID
-	if qEnvironmentID != "" {
-		if err := r.SetQueryParam("environmentId", qEnvironmentID); err != nil {
+	// query param environmentCrn
+	qrEnvironmentCrn := o.EnvironmentCrn
+	qEnvironmentCrn := qrEnvironmentCrn
+	if qEnvironmentCrn != "" {
+		if err := r.SetQueryParam("environmentCrn", qEnvironmentCrn); err != nil {
 			return err
 		}
 	}
