@@ -164,7 +164,7 @@ public class StackCommonService {
     public void putStopInWorkspaceByCrn(String crn, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
-        Stack stack = stackService.getByNameInWorkspace(crn, workspaceId);
+        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
             throw new BadRequestException(String.format("Stop is not supported on %s cloudplatform", stack.cloudPlatform()));
@@ -259,7 +259,7 @@ public class StackCommonService {
     public void repairClusterByCrn(Long workspaceId, String crn, ClusterRepairV4Request clusterRepairRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
-        Stack stack = stackService.getByNameInWorkspace(crn, workspaceId);
+        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
         if (clusterRepairRequest.getHostGroups() != null) {
             clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
         } else {

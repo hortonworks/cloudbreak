@@ -20,10 +20,15 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POS
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RETRY_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RETRY_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SCALE_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SCALE_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.START_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.START_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.STOP_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.STOP_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SYNC_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SYNC_BY_NAME;
 
 import java.util.Set;
@@ -107,7 +112,7 @@ public interface DistroXV1Endpoint {
 
     @PUT
     @Path("crn/{crn}/sync")
-    @ApiOperation(value = SYNC_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = SYNC_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "syncDistroXV1ByCrn")
     void putSyncByCrn(@PathParam("crn") String crn);
 
@@ -119,7 +124,7 @@ public interface DistroXV1Endpoint {
 
     @PUT
     @Path("crn/{crn}/retry")
-    @ApiOperation(value = RETRY_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
+    @ApiOperation(value = RETRY_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
             nickname = "retryDistroXV1ByCrn")
     void putRetryByCrn(@PathParam("crn") String crn);
 
@@ -131,7 +136,7 @@ public interface DistroXV1Endpoint {
 
     @PUT
     @Path("crn/{crn}/stop")
-    @ApiOperation(value = STOP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = STOP_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "stopDistroXV1ByCrn")
     void putStopByCrn(@PathParam("crn") String crn);
 
@@ -143,7 +148,7 @@ public interface DistroXV1Endpoint {
 
     @PUT
     @Path("crn/{crn}/start")
-    @ApiOperation(value = START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "startDistroXV1ByCrn")
     void putStartByCrn(@PathParam("crn") String crn);
 
@@ -155,7 +160,7 @@ public interface DistroXV1Endpoint {
 
     @PUT
     @Path("crn/{crn}/scaling")
-    @ApiOperation(value = SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+    @ApiOperation(value = SCALE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "putScalingDistroXV1ByCrn")
     void putScalingByCrn(@PathParam("crn") String crn, @Valid DistroXScaleV1Request updateRequest);
 
