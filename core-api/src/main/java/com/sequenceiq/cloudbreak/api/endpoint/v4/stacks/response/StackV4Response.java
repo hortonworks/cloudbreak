@@ -50,6 +50,8 @@ public class StackV4Response extends StackV4Base {
 
     private String credentialName;
 
+    private String credentialCrn;
+
     @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status status;
 
@@ -322,5 +324,13 @@ public class StackV4Response extends StackV4Base {
 
     public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
+    }
+
+    public String getCredentialCrn() {
+        return credentialCrn;
+    }
+
+    public void setCredentialCrn(String credentialCrn) {
+        this.credentialCrn = credentialCrn;
     }
 }
