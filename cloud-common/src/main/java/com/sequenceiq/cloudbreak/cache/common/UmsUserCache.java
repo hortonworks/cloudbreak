@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cache.common;
 
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -7,7 +10,8 @@ public class UmsUserCache extends AbstractCacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
 
-    private static final long TTL_IN_SECONDS = 5L;
+    @Value("${altus.ums.user.cache.ttl:1}")
+    private long ttlMinutes;
 
     @Override
     protected String getName() {
@@ -21,6 +25,6 @@ public class UmsUserCache extends AbstractCacheDefinition {
 
     @Override
     protected long getTimeToLiveSeconds() {
-        return TTL_IN_SECONDS;
+        return ttlMinutes == 0L ? 1 : TimeUnit.MINUTES.toSeconds(ttlMinutes);
     }
 }

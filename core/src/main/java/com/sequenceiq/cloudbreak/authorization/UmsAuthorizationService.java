@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.authorization;
 
 import static java.lang.String.format;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -50,14 +51,16 @@ public class UmsAuthorizationService {
     }
 
     public void checkRightOfUserForResource(User user, Workspace workspace, WorkspaceResource resource, ResourceAction action, String unauthorizedMessage) {
-        if (!umsClient.checkRight(user.getUserCrn(), WorkspaceRightUtils.getRight(resource, action), workspace.getResourceCrn(), getRequestId())) {
+        if (!umsClient.checkRight(user.getUserCrn(), user.getUserCrn(), WorkspaceRightUtils.getRight(resource, action),
+                workspace.getResourceCrn(), getRequestId())) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
     }
 
     public boolean hasRightOfUserForResource(User user, Workspace workspace, WorkspaceResource resource, ResourceAction action) {
-        return umsClient.checkRight(user.getUserCrn(), WorkspaceRightUtils.getRight(resource, action), workspace.getResourceCrn(), getRequestId());
+        return umsClient.checkRight(user.getUserCrn(), user.getUserCrn(),
+                WorkspaceRightUtils.getRight(resource, action), workspace.getResourceCrn(), getRequestId());
     }
 
     public void checkRightOfUserForResource(User user, Workspace workspace, WorkspaceResource resource, ResourceAction action) {
@@ -68,7 +71,7 @@ public class UmsAuthorizationService {
     }
 
     public Set<WorkspaceRole> getUserRolesInWorkspace(User user, Workspace workspace) {
-        return umsClient.listResourceRoleAssigments(user.getUserCrn(), getRequestId()).stream()
+        return umsClient.listResourceRoleAssigments(user.getUserCrn(), user.getUserCrn(), getRequestId()).stream()
                 .filter(resourceAssignment -> StringUtils.equals(workspace.getResourceCrn(), resourceAssignment.getResourceCrn()))
                 .map(resourceAssignment -> WorkspaceRole.getByUmsName(Crn.fromString(resourceAssignment.getResourceRoleCrn()).getResource()))
                 .collect(Collectors.toSet());
@@ -84,22 +87,25 @@ public class UmsAuthorizationService {
     }
 
     public Set<User> getUsersOfWorkspace(User currentUser, Workspace workspace) {
-        Set<String> userIds = umsClient.listAssigneesOfResource(currentUser.getUserCrn(), workspace.getResourceCrn(), getRequestId()).stream()
-                .map(resourceAssignee -> Crn.fromString(resourceAssignee.getAssigneeCrn()).getResource())
+        Set<String> userIds = umsClient.listAssigneesOfResource(currentUser.getUserCrn(), currentUser.getUserCrn(),
+                workspace.getResourceCrn(), getRequestId()).stream().map(resourceAssignee -> Crn.fromString(resourceAssignee.getAssigneeCrn()).getResource())
                 .collect(Collectors.toSet());
         return userService.getByUsersIds(userIds);
     }
 
     public Set<Workspace> getWorkspacesOfCurrentUser(User currentUser) {
-        Set<String> workspaceCrns = umsClient.listResourceRoleAssigments(currentUser.getUserCrn(), getRequestId()).stream()
+        Set<String> workspaceCrns = umsClient.listResourceRoleAssigments(currentUser.getUserCrn(), currentUser.getUserCrn(), getRequestId()).stream()
                 .filter(resourceAssignment -> Crn.ResourceType.WORKSPACE.equals(Crn.fromString(resourceAssignment.getResourceCrn()).getResourceType()))
                 .map(resourceAssignment -> resourceAssignment.getResourceCrn())
                 .collect(Collectors.toSet());
         return Sets.newHashSet(workspaceRepository.findAllByCrn(workspaceCrns));
     }
 
-    private String getRequestId() {
+    private Optional<String> getRequestId() {
         String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
-        return requestId != null ? requestId : UUID.randomUUID().toString();
+        if (requestId == null) {
+            requestId = UUID.randomUUID().toString();
+        }
+        return Optional.of(requestId);
     }
 }
