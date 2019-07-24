@@ -17,6 +17,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -24,6 +25,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEve
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -39,9 +41,12 @@ public class EnvCreationActions {
 
     private final NotificationService notificationService;
 
-    public EnvCreationActions(EnvironmentService environmentService, NotificationService notificationService) {
+    private final EnvironmentApiConverter environmentApiConverter;
+
+    public EnvCreationActions(EnvironmentService environmentService, NotificationService notificationService, EnvironmentApiConverter environmentApiConverter) {
         this.environmentService = environmentService;
         this.notificationService = notificationService;
+        this.environmentApiConverter = environmentApiConverter;
     }
 
     @Bean(name = "NETWORK_CREATION_STARTED_STATE")
@@ -52,7 +57,8 @@ public class EnvCreationActions {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("NETWORK_CREATION_STARTED_STATE");
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    notificationService.send(ResourceEvent.ENVIRONMENT_NETWORK_CREATION_STARTED, environmentDto, context.getFlowTriggerUserCrn());
+                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                    notificationService.send(ResourceEvent.ENVIRONMENT_NETWORK_CREATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
                     sendEvent(context, CREATE_NETWORK_EVENT.selector(), environmentDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
@@ -76,7 +82,8 @@ public class EnvCreationActions {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("FREEIPA_CREATION_STARTED_STATE");
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    notificationService.send(ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_STARTED, environmentDto, context.getFlowTriggerUserCrn());
+                    SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                    notificationService.send(ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
                     sendEvent(context, CREATE_FREEIPA_EVENT.selector(), environmentDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
@@ -103,7 +110,9 @@ public class EnvCreationActions {
                             environment.setStatusReason(null);
                             environment.setStatus(EnvironmentStatus.AVAILABLE);
                             Environment result = environmentService.save(environment);
-                            notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FINISHED, result, context.getFlowTriggerUserCrn());
+                            EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
+                            SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                            notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FINISHED, simpleResponse, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_CREATION_FINISHED_STATE");
@@ -160,4 +169,5 @@ public class EnvCreationActions {
             }
         }
     }
+
 }
