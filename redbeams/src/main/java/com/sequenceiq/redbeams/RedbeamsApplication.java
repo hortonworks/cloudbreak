@@ -5,9 +5,6 @@ import org.springframework.boot.actuate.autoconfigure.metrics.web.servlet.WebMvc
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-@EnableSwagger2
 @EnableJpaRepositories(basePackages = { "com.sequenceiq.redbeams", "com.sequenceiq.flow", "com.sequenceiq.cloudbreak.ha.repository" })
 @SpringBootApplication(scanBasePackages = {"com.sequenceiq.redbeams",
         "com.sequenceiq.cloudbreak.auth",
