@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Res
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExternalDatabaseServiceEntryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
@@ -100,8 +101,10 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
-    public void postNotificationTest() {
+    public ResourceEvent postNotificationTest() {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         notificationSender.sendTestNotification(cloudbreakUser.getUserId());
+        return ResourceEvent.WORKSPACE_CREATED;
     }
+
 }
