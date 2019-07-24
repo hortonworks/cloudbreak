@@ -101,7 +101,7 @@ public class SecurityConfig {
                     .antMatchers(V4_API)
                     .authenticated()
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
-                    .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()
+                    // .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/**").denyAll();
 
             http.csrf().disable();

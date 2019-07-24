@@ -16,6 +16,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseTestV4Response;
@@ -26,10 +27,14 @@ import com.sequenceiq.redbeams.doc.Notes;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 
 @Path("/v4/databases")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/databases", description = ControllerDescriptions.DATABASE_V4_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v4/databases",
+    description = ControllerDescriptions.DATABASE_V4_DESCRIPTION,
+    protocols = "http,https",
+    authorizations = { @Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY) })
 public interface DatabaseV4Endpoint {
 
     @GET
