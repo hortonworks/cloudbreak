@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.rdsconfig;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -14,6 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -24,7 +27,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 @RunWith(MockitoJUnitRunner.class)
 public class RedbeamsDbServerConfigurerTest {
 
-    private String exampleJdbcUrl = "jdbc:postgresql://dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/hive";
+    private String exampleJdbcUrl = "jdbc:postgresql://dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/clouderamanager";
 
     private String dbServerCrn = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
 
@@ -36,6 +39,9 @@ public class RedbeamsDbServerConfigurerTest {
     @Mock
     private SecretService secretService;
 
+    @Mock
+    private DatabaseCommon dbCommon;
+
     @InjectMocks
     private RedbeamsDbServerConfigurer underTest;
 
@@ -44,7 +50,9 @@ public class RedbeamsDbServerConfigurerTest {
         DatabaseServerV4Response resp = new DatabaseServerV4Response();
         resp.setPort(1234);
         resp.setHost(dbHost);
+        resp.setDatabaseVendor("postgres");
         when(redbeamsClientService.getByCrn(dbServerCrn)).thenReturn(resp);
+        when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn(exampleJdbcUrl);
         Stack testStack = TestUtil.stack();
         InstanceMetaData metaData = testStack.getGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
@@ -54,20 +62,8 @@ public class RedbeamsDbServerConfigurerTest {
         testStack.setCluster(testCluster);
         RDSConfig config = underTest.getRdsConfig(testStack, testCluster, "clouderamanager", DatabaseType.CLOUDERA_MANAGER);
         assertEquals("CLOUDERA_MANAGER_simplestack1", config.getName());
-        assertEquals("jdbc:postgresql://dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:1234/clouderamanager",
+        assertEquals(exampleJdbcUrl,
                 config.getConnectionURL());
-    }
-
-    @Test
-    public void getRemoteDbUrl() {
-        String result = underTest.getHostFromJdbcUrl(exampleJdbcUrl);
-        assertEquals(result, "dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com");
-    }
-
-    @Test
-    public void getRemoteDbPort() {
-        String result = underTest.getPortFromJdbcUrl(exampleJdbcUrl);
-        assertEquals("5432", result);
     }
 
     @Test

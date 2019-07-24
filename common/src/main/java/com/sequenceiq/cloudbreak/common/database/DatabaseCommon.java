@@ -81,6 +81,7 @@ public class DatabaseCommon {
     public String getJdbcConnectionUrl(JdbcConnectionUrlFields fields) {
         String url;
         switch (fields.getVendorDriverId()) {
+            case "postgres":
             case "postgresql":
                 url = String.format("jdbc:postgresql://%s:%d/", fields.getHost(), fields.getPort());
                 if (fields.getDatabase().isPresent()) {
@@ -114,10 +115,10 @@ public class DatabaseCommon {
      * Executes several SQL statements. If there is a failure, and a transaction
      * is in use, the transaction is rolled back.
      *
-     * @param  conn            JDBC connection; expected to have auto-commit on
-     * @param  sqlStrings      list of SQL statements to execute
-     * @param  useTransaction  true to wrap execution of statements in a
-     *                         transaction
+     * @param conn           JDBC connection; expected to have auto-commit on
+     * @param sqlStrings     list of SQL statements to execute
+     * @param useTransaction true to wrap execution of statements in a
+     *                       transaction
      * @return corresponding list of update counts
      * @throws SQLException if any statement fails
      */
