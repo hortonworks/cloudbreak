@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.instance;
 
+import java.util.StringJoiner;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -13,9 +15,9 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
 public class InstanceMetaData implements ProvisionEntity {
@@ -273,5 +275,18 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setImage(Json image) {
         this.image = image;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", InstanceMetaData.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("privateId=" + privateId)
+                .add("privateIp='" + privateIp + "'")
+                .add("publicIp='" + publicIp + "'")
+                .add("instanceId='" + instanceId + "'")
+                .add("discoveryFQDN='" + discoveryFQDN + "'")
+                .add("instanceName='" + instanceName + "'")
+                .toString();
     }
 }
