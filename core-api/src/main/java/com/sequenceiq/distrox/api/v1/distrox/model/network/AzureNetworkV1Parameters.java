@@ -15,51 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class AzureNetworkV1Parameters implements Serializable {
 
     @ApiModelProperty
-    private Boolean noPublicIp;
-
-    @ApiModelProperty
-    private Boolean noFirewallRules;
-
-    @ApiModelProperty
-    private String resourceGroupName;
-
-    @ApiModelProperty
-    private String networkId;
-
-    @ApiModelProperty
     private String subnetId;
-
-    public Boolean getNoPublicIp() {
-        return noPublicIp;
-    }
-
-    public void setNoPublicIp(Boolean noPublicIp) {
-        this.noPublicIp = noPublicIp;
-    }
-
-    public Boolean getNoFirewallRules() {
-        return noFirewallRules;
-    }
-
-    public void setNoFirewallRules(Boolean noFirewallRules) {
-        this.noFirewallRules = noFirewallRules;
-    }
-
-    public String getResourceGroupName() {
-        return resourceGroupName;
-    }
-
-    public void setResourceGroupName(String resourceGroupName) {
-        this.resourceGroupName = resourceGroupName;
-    }
-
-    public String getNetworkId() {
-        return networkId;
-    }
-
-    public void setNetworkId(String networkId) {
-        this.networkId = networkId;
-    }
 
     public String getSubnetId() {
         return subnetId;

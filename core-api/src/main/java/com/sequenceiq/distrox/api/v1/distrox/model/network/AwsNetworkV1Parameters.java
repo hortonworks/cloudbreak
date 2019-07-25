@@ -15,29 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class AwsNetworkV1Parameters implements Serializable {
 
     @ApiModelProperty
-    private String vpcId;
-
-    @ApiModelProperty
-    private String internetGatewayId;
-
-    @ApiModelProperty
     private String subnetId;
-
-    public String getVpcId() {
-        return vpcId;
-    }
-
-    public void setVpcId(String vpcId) {
-        this.vpcId = vpcId;
-    }
-
-    public String getInternetGatewayId() {
-        return internetGatewayId;
-    }
-
-    public void setInternetGatewayId(String internetGatewayId) {
-        this.internetGatewayId = internetGatewayId;
-    }
 
     public String getSubnetId() {
         return subnetId;

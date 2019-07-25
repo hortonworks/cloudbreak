@@ -46,7 +46,7 @@ public class SdxConverterTest {
         when(stackService.getByEnvironmentCrnAndStackType(environmenName, StackType.DATALAKE)).thenReturn(List.of(new Stack(), new Stack()));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.getSharedService(null, environmenName));
-        Assertions.assertEquals(exception.getMessage(), "More than one SDX attached to the environment. Please specify one.");
+        Assertions.assertEquals(exception.getMessage(), "More than one Datalake attached to the environment. Please specify one.");
     }
 
     @Test
@@ -74,7 +74,7 @@ public class SdxConverterTest {
         sdxRequest.setName("other-sdx-name");
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.getSharedService(sdxRequest, environmenName));
-        Assertions.assertEquals(exception.getMessage(), "The given SDX not attached to the environment");
+        Assertions.assertEquals(exception.getMessage(), "The given Datalake not attached to the environment");
     }
 
     @Test
@@ -89,7 +89,7 @@ public class SdxConverterTest {
         sdxRequest.setName("some-sdx");
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.getSharedService(sdxRequest, environmenName));
-        Assertions.assertEquals(exception.getMessage(), "SDX status is invalid. Current state is DELETE_FAILED instead of AVAILABLE");
+        Assertions.assertEquals(exception.getMessage(), "Datalake status is invalid. Current state is DELETE_FAILED instead of AVAILABLE");
     }
 
     private StackStatus getStatus(Status status) {

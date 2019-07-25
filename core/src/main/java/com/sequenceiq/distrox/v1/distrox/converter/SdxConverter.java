@@ -33,10 +33,10 @@ public class SdxConverter {
         StringBuilder name = new StringBuilder();
         if (sdx == null) {
             if (datalakes.isEmpty()) {
-                LOGGER.info("We don't attach the cluster to any SDX, because the environemnt has not SDX. So we continue the creation as simple WORKLOAD.");
+                LOGGER.info("We don't attach the cluster to any Datalake, because the environemnt has not SDX. So we continue the creation as simple WORKLOAD.");
                 return null;
             } else if (datalakes.size() > 1) {
-                throw new BadRequestException("More than one SDX attached to the environment. Please specify one.");
+                throw new BadRequestException("More than one Datalake attached to the environment. Please specify one.");
             }
             name.append(datalakes.get(0).getName());
         } else {
@@ -45,9 +45,9 @@ public class SdxConverter {
         Stack datalake = datalakes.stream()
                 .filter(sr -> sr.getName().equals(name.toString()))
                 .findFirst()
-                .orElseThrow(() -> new BadRequestException("The given SDX not attached to the environment"));
+                .orElseThrow(() -> new BadRequestException("The given Datalake not attached to the environment"));
         if (datalake.getStatus() != Status.AVAILABLE) {
-            throw new BadRequestException(String.format("SDX status is invalid. Current state is %s instead of %s", datalake.getStatus().name(),
+            throw new BadRequestException(String.format("Datalake status is invalid. Current state is %s instead of %s", datalake.getStatus().name(),
                     Status.AVAILABLE));
         }
         return getSharedServiceV4Request(name.toString());
