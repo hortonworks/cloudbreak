@@ -2,10 +2,13 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
@@ -21,82 +24,79 @@ public class NetworkV1ToNetworkV4Converter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackOperation.class);
 
-    public NetworkV4Request convert(NetworkV1Request network) {
-        NetworkV4Request response = new NetworkV4Request();
-        response.setAws(getIfNotNull(network.getAws(), this::convert));
-        response.setAzure(getIfNotNull(network.getAzure(), this::convert));
-        return response;
-    }
+    public NetworkV4Request convertToNetworkV4Request(Pair<NetworkV1Request, EnvironmentNetworkResponse> network) {
+        EnvironmentNetworkResponse value = network.getValue();
+        NetworkV1Request key = network.getKey();
 
-    public NetworkV4Request convert(EnvironmentNetworkResponse network) {
         NetworkV4Request response = new NetworkV4Request();
-        if (!network.getSubnetIds().isEmpty()) {
-            LOGGER.info("Subnets are available in the environment network conversion started");
-            response.setAws(getIfNotNull(network.getAws(), aws -> convertToAwsNetwork(network)));
-            response.setAzure(getIfNotNull(network.getAzure(), azure -> convertToAzureNetwork(network)));
-        } else {
-            LOGGER.info("No subnet are available in the environment skipping network conversion");
+        if (key != null) {
+            response.setAws(getIfNotNull(new ImmutablePair<>(key.getAws(), value), this::convertToAwsStackRequest));
+            response.setAzure(getIfNotNull(new ImmutablePair<>(key.getAzure(), value), this::convertToAzureStackRequest));
         }
         return response;
     }
 
-    private AzureNetworkV4Parameters convertToAzureNetwork(EnvironmentNetworkResponse source) {
+    private AzureNetworkV4Parameters convertToAzureStackRequest(Pair<AzureNetworkV1Parameters, EnvironmentNetworkResponse> source) {
+        EnvironmentNetworkResponse value = source.getValue();
+        AzureNetworkV1Parameters key = source.getKey();
+
         AzureNetworkV4Parameters response = new AzureNetworkV4Parameters();
-        response.setNetworkId(source.getAzure().getNetworkId());
-        response.setNoFirewallRules(source.getAzure().getNoFirewallRules());
-        response.setNoPublicIp(source.getAzure().getNoPublicIp());
-        response.setResourceGroupName(source.getAzure().getResourceGroupName());
-        response.setSubnetId(source.getSubnetIds().stream().findFirst().orElseThrow(() -> new BadRequestException("No subnet id for this environment")));
+
+        if (key != null) {
+            response.setNetworkId(value.getAzure().getNetworkId());
+            response.setNoFirewallRules(value.getAzure().getNoFirewallRules());
+            response.setNoPublicIp(value.getAzure().getNoPublicIp());
+            response.setResourceGroupName(value.getAzure().getResourceGroupName());
+
+            String subnetId = key.getSubnetId();
+            if (!Strings.isNullOrEmpty(subnetId)) {
+                response.setSubnetId(subnetId);
+            } else {
+                response.setSubnetId(source.getValue().getSubnetIds().stream().findFirst()
+                        .orElseThrow(() -> new BadRequestException("No subnet id for this environment")));
+            }
+        }
+
         return response;
     }
 
-    private AwsNetworkV4Parameters convertToAwsNetwork(EnvironmentNetworkResponse source) {
+    private AwsNetworkV4Parameters convertToAwsStackRequest(Pair<AwsNetworkV1Parameters, EnvironmentNetworkResponse> source) {
+        EnvironmentNetworkResponse value = source.getValue();
+        AwsNetworkV1Parameters key = source.getKey();
+
         AwsNetworkV4Parameters response = new AwsNetworkV4Parameters();
-        response.setSubnetId(source.getSubnetIds().stream().findFirst().orElseThrow(() -> new BadRequestException("No subnet id for this environment")));
-        response.setVpcId(source.getAws().getVpcId());
+
+        if (key != null) {
+            response.setVpcId(value.getAws().getVpcId());
+
+            String subnetId = key.getSubnetId();
+            if (!Strings.isNullOrEmpty(subnetId)) {
+                response.setSubnetId(key.getSubnetId());
+            } else {
+                response.setSubnetId(value.getSubnetIds().stream().findFirst()
+                        .orElseThrow(() -> new BadRequestException("No subnet id for this environment")));
+            }
+        }
+
         return response;
     }
 
-    private AzureNetworkV4Parameters convert(AzureNetworkV1Parameters source) {
-        AzureNetworkV4Parameters response = new AzureNetworkV4Parameters();
-        response.setNetworkId(source.getNetworkId());
-        response.setNoFirewallRules(source.getNoFirewallRules());
-        response.setNoPublicIp(source.getNoPublicIp());
-        response.setResourceGroupName(source.getResourceGroupName());
-        response.setSubnetId(source.getSubnetId());
-        return response;
-    }
-
-    private AwsNetworkV4Parameters convert(AwsNetworkV1Parameters source) {
-        AwsNetworkV4Parameters response = new AwsNetworkV4Parameters();
-        response.setSubnetId(source.getSubnetId());
-        response.setVpcId(source.getVpcId());
-        response.setInternetGatewayId(source.getInternetGatewayId());
-        return response;
-    }
-
-    public NetworkV1Request convert(NetworkV4Request network) {
+    public NetworkV1Request convertToNetworkV1Request(NetworkV4Request network) {
         NetworkV1Request response = new NetworkV1Request();
-        response.setAws(getIfNotNull(network.getAws(), this::convert));
-        response.setAzure(getIfNotNull(network.getAzure(), this::convert));
+        response.setAws(getIfNotNull(network.getAws(), this::convertToDistroXRequest));
+        response.setAzure(getIfNotNull(network.getAzure(), this::convertToDistroXRequest));
         return response;
     }
 
-    private AzureNetworkV1Parameters convert(AzureNetworkV4Parameters source) {
+    private AzureNetworkV1Parameters convertToDistroXRequest(AzureNetworkV4Parameters source) {
         AzureNetworkV1Parameters response = new AzureNetworkV1Parameters();
-        response.setNetworkId(source.getNetworkId());
-        response.setNoFirewallRules(source.getNoFirewallRules());
-        response.setNoPublicIp(source.getNoPublicIp());
-        response.setResourceGroupName(source.getResourceGroupName());
         response.setSubnetId(source.getSubnetId());
         return response;
     }
 
-    private AwsNetworkV1Parameters convert(AwsNetworkV4Parameters source) {
+    private AwsNetworkV1Parameters convertToDistroXRequest(AwsNetworkV4Parameters source) {
         AwsNetworkV1Parameters response = new AwsNetworkV1Parameters();
         response.setSubnetId(source.getSubnetId());
-        response.setVpcId(source.getVpcId());
-        response.setInternetGatewayId(source.getInternetGatewayId());
         return response;
     }
 }

@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -118,10 +119,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
     }
 
     private NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment) {
-        NetworkV4Request network = getIfNotNull(networkRequest, networkConverter::convert);
-        if (defaultNetworkRequiredService.shouldAddNetwork(environment.getCloudPlatform(), network)) {
-            network = getIfNotNull(environment.getNetwork(), networkConverter::convert);
-        }
+        NetworkV4Request network = getIfNotNull(new ImmutablePair<>(networkRequest, environment.getNetwork()), networkConverter::convertToNetworkV4Request);
         validateSubnetIds(network, environment);
         return network;
     }
@@ -130,22 +128,13 @@ public class DistroXV1RequestToStackV4RequestConverter {
         switch (environment.getCloudPlatform()) {
             case "AWS":
                 validateSubnet(network, environment, network.getAws().getSubnetId());
-                validateVpc(environment, environment.getNetwork().getAws().getVpcId(), network.getAws().getVpcId());
                 break;
             case "AZURE":
                 validateSubnet(network, environment, network.getAzure().getSubnetId());
-                validateVpc(environment, environment.getNetwork().getAzure().getNetworkId(), network.getAzure().getNetworkId());
                 break;
             default:
         }
 
-    }
-
-    private void validateVpc(DetailedEnvironmentResponse environment, String environmentVpcId, String vpcId) {
-        if (!vpcId.equals(environmentVpcId)) {
-            throw new BadRequestException(String.format("The given vpc id (%s) is not match with the Environment vpc id (%s)",
-                    vpcId, environmentVpcId));
-        }
     }
 
     private void validateSubnet(NetworkV4Request network, DetailedEnvironmentResponse environment, String subnetId) {
@@ -172,7 +161,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
         request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertFrom));
-        request.setNetwork(getIfNotNull(source.getNetwork(), networkConverter::convert));
+        request.setNetwork(getIfNotNull(source.getNetwork(), networkConverter::convertToNetworkV1Request));
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setYarn(getIfNotNull(source.getYarn(), stackParameterConverter::convert));

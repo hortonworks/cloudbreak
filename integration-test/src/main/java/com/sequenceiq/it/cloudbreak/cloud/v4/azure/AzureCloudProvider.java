@@ -132,8 +132,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
         AzureNetworkV1Parameters parameters = new AzureNetworkV1Parameters();
-        parameters.setNoPublicIp(false);
-        parameters.setNoFirewallRules(false);
         return network.withAzure(parameters);
     }
 
