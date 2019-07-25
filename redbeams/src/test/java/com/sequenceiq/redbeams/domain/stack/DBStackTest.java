@@ -85,9 +85,8 @@ public class DBStackTest {
         assertEquals(ownerCrn, dbStack.getOwnerCrn());
 
         dbStack.setDBStackStatus(STATUS);
-        assertEquals(STATUS, dbStack.getDBStackStatus());
+        assertEquals(STATUS, dbStack.getDbStackStatus());
         assertEquals(STATUS.getStatus(), dbStack.getStatus());
         assertEquals(STATUS.getStatusReason(), dbStack.getStatusReason());
     }
-
 }

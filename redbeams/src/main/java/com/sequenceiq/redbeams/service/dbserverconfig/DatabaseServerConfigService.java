@@ -129,6 +129,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             databaseConfigService.archive(dbConfig);
         }
         resource.setArchived(true);
+        resource.setDbStack(null);
         repository.save(resource);
     }
 

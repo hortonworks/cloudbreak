@@ -19,7 +19,7 @@ public class DatabaseServerTerminationOutcomeV4Response {
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.NAME, required = true)
+    @ApiModelProperty(value = ModelDescriptions.RedbeamsManagedDatabaseServer.NAME, required = true)
     private String name;
 
     @NotNull
@@ -27,7 +27,7 @@ public class DatabaseServerTerminationOutcomeV4Response {
     private String resourceCrn;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.DATABASE_SERVER, required = true)
+    @ApiModelProperty(value = ModelDescriptions.RedbeamsManagedDatabaseServer.DATABASE_SERVER, required = true)
     private DatabaseServerV4Response databaseServerConfig;
 
     private Status status;

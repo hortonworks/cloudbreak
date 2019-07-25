@@ -19,7 +19,7 @@ public class DatabaseServerStatusV4Response {
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.NAME, required = true)
+    @ApiModelProperty(value = ModelDescriptions.RedbeamsManagedDatabaseServer.NAME, required = true)
     private String name;
 
     @NotNull
@@ -30,10 +30,10 @@ public class DatabaseServerStatusV4Response {
     // @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.DATABASE_SERVER, required = true)
     // private DatabaseServerV4Response databaseServerConfig;
 
-    @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.STATUS, required = true)
+    @ApiModelProperty(value = ModelDescriptions.RedbeamsManagedDatabaseServer.STATUS, required = true)
     private Status status;
 
-    @ApiModelProperty(value = ModelDescriptions.ExternalDatabaseServer.STATUS_REASON, required = true)
+    @ApiModelProperty(value = ModelDescriptions.RedbeamsManagedDatabaseServer.STATUS_REASON, required = true)
     private String statusReason;
 
     public String getEnvironmentCrn() {

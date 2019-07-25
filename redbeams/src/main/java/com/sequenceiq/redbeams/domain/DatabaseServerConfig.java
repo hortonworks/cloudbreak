@@ -13,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.authorization.CrnResource;
 import com.sequenceiq.redbeams.converter.CrnConverter;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 
 @Entity
 @Where(clause = "archived = false")
@@ -86,6 +88,9 @@ public class DatabaseServerConfig implements ArchivableResource, CrnResource, Ac
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus resourceStatus;
+
+    @OneToOne
+    private DBStack dbStack;
 
     @Column
     private String connectorJarUrl;
@@ -268,6 +273,14 @@ public class DatabaseServerConfig implements ArchivableResource, CrnResource, Ac
 
     public Set<DatabaseConfig> getDatabases() {
         return databases;
+    }
+
+    public Optional<DBStack> getDbStack() {
+        return Optional.ofNullable(dbStack);
+    }
+
+    public void setDbStack(DBStack dbStack) {
+        this.dbStack = dbStack;
     }
 
     /**
