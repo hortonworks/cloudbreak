@@ -223,6 +223,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void createDefaultEnvironment(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
+                .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe());
@@ -282,6 +283,16 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     protected void createEnvironmentWithNetwork(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
                 .withNetwork()
+                .withCreateFreeIpa(Boolean.FALSE)
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.describe());
+    }
+
+    protected void createEnvironmentWithNetworkAndFreeIPA(TestContext testContext) {
+        testContext.given(EnvironmentTestDto.class)
+                .withNetwork()
+                .withCreateFreeIpa(Boolean.TRUE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe());

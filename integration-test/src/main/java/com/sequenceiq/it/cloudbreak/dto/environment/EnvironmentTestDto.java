@@ -73,13 +73,12 @@ public class EnvironmentTestDto
     public EnvironmentTestDto valid() {
         return getCloudProvider()
                 .environment(withName(resourceProperyProvider().getName())
-                        .withCreateFreeIpa(Boolean.FALSE)
                         .withDescription(resourceProperyProvider().getDescription("environment")))
                         .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
                         .withAuthentication(DUMMY_SSH_KEY);
     }
 
-    private EnvironmentTestDto withCreateFreeIpa(Boolean create) {
+    public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
         AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
         attachedFreeIpaRequest.setCreate(create);
         getRequest().setFreeIpa(attachedFreeIpaRequest);

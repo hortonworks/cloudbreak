@@ -29,6 +29,8 @@ public class AwsProperties {
 
     private final Baseimage baseimage = new Baseimage();
 
+    private final Cloudstorage cloudstorage = new Cloudstorage();
+
     public String getAvailabilityZone() {
         return availabilityZone;
     }
@@ -95,6 +97,10 @@ public class AwsProperties {
 
     public Baseimage getBaseimage() {
         return baseimage;
+    }
+
+    public Cloudstorage getCloudstorage() {
+        return cloudstorage;
     }
 
     public static class Instance {
@@ -264,6 +270,47 @@ public class AwsProperties {
 
             public void setBlueprints(List<String> blueprints) {
                 this.blueprints = blueprints;
+            }
+        }
+    }
+
+    public static class Cloudstorage {
+
+        private final S3 s3 = new S3();
+
+        private String baseLocation;
+
+        private String fileSystemType;
+
+        public S3 getS3() {
+            return s3;
+        }
+
+        public String getBaseLocation() {
+            return baseLocation;
+        }
+
+        public void setBaseLocation(String baseLocation) {
+            this.baseLocation = baseLocation;
+        }
+
+        public String getFileSystemType() {
+            return fileSystemType;
+        }
+
+        public void setFileSystemType(String fileSystemType) {
+            this.fileSystemType = fileSystemType;
+        }
+
+        public static class S3 {
+            private String instanceProfile;
+
+            public String getInstanceProfile() {
+                return instanceProfile;
+            }
+
+            public void setInstanceProfile(String instanceProfile) {
+                this.instanceProfile = instanceProfile;
             }
         }
     }
