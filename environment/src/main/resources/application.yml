@@ -136,3 +136,6 @@ spring:
     prefer-file-system-access: false
   datasource:
     maxActive: 30
+
+notification:
+  urls: http://localhost:3000/notifications

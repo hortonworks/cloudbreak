@@ -3,6 +3,7 @@ package com.sequenceiq.notification;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -60,8 +61,19 @@ public class NotificationService {
     private List<String> getNotificationUrls() {
         return Lists.newArrayList(notificationUrls.trim().split(","))
                 .stream()
+                .filter(Objects::nonNull)
                 .filter(e -> !e.isEmpty())
+                .map(url -> {
+                    if (isUrlMissProtocol(url)) {
+                        return "http://" + url;
+                    }
+                    return url;
+                })
                 .collect(Collectors.toList());
+    }
+
+    private boolean isUrlMissProtocol(String url) {
+        return !(url.startsWith("http://") ^ url.startsWith("https://"));
     }
 
 }
