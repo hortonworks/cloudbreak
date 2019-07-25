@@ -31,6 +31,9 @@ type SdxClusterRequest struct {
 	// Required: true
 	Environment *string `json:"environment"`
 
+	// external database
+	ExternalDatabase *SdxDatabaseRequest `json:"externalDatabase,omitempty"`
+
 	// tags
 	Tags map[string]string `json:"tags,omitempty"`
 }
@@ -48,6 +51,10 @@ func (m *SdxClusterRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateEnvironment(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateExternalDatabase(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -125,6 +132,24 @@ func (m *SdxClusterRequest) validateEnvironment(formats strfmt.Registry) error {
 
 	if err := validate.Required("environment", "body", m.Environment); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *SdxClusterRequest) validateExternalDatabase(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ExternalDatabase) { // not required
+		return nil
+	}
+
+	if m.ExternalDatabase != nil {
+		if err := m.ExternalDatabase.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("externalDatabase")
+			}
+			return err
+		}
 	}
 
 	return nil
