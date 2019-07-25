@@ -130,7 +130,8 @@ public class FreeIpaProvisionActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISION_FAILED);
+                String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
+                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
                 sendEvent(context);
             }
 

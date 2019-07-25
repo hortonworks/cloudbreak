@@ -130,6 +130,7 @@ public class SdxService {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
         sdxCluster.setCreated(clock.getCurrentTimeMillis());
+        sdxCluster.setCreateDatabase(sdxClusterRequest.getExternalDatabase() != null && sdxClusterRequest.getExternalDatabase().getCreate());
 
         DetailedEnvironmentResponse environment = getEnvironment(userCrn, sdxClusterRequest);
         sdxCluster.setEnvName(environment.getName());

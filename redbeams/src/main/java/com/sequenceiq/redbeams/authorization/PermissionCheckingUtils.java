@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.authorization;
 
-import com.sequenceiq.redbeams.service.ThreadBasedRequestIdProvider;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
@@ -17,6 +15,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.redbeams.service.ThreadBasedRequestIdProvider;
 
 @Component
 public class PermissionCheckingUtils {
@@ -56,7 +55,7 @@ public class PermissionCheckingUtils {
             LOGGER.info("Checking permissions on " + resourceCrn + " for user " + userCrn);
             String requestId = threadBasedRequestIdProvider.getRequestId();
             LOGGER.debug("- tracking with request ID {}", requestId);
-            if (!grpcUmsClient.checkRight(userCrn, action.name(), resourceCrn, requestId)) {
+            if (!grpcUmsClient.checkRight(userCrn, userCrn, action.name(), resourceCrn, Optional.of(requestId))) {
                 deniedResourceCrns.add(resourceCrn);
             }
         }

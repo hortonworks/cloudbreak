@@ -184,32 +184,14 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         CdpResourceApi cdpResourceApi = new CdpResourceApi(rootClient);
         try {
             ApiRemoteDataContext apiRemoteDataContext = JsonUtil.readValue(sdxContext, ApiRemoteDataContext.class);
-            if (remoteContextExists(cdpResourceApi, apiRemoteDataContext.getEndPointId())) {
-                return apiRemoteDataContext.getEndPointId();
-            }
             LOGGER.debug("Posting remote context to workload. EndpointId: {}", apiRemoteDataContext.getEndPointId());
             return cdpResourceApi.postRemoteContext(apiRemoteDataContext).getEndPointId();
         } catch (ApiException e) {
             LOGGER.info("Error while creating data context using: {}", sdxContext, e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+            throw new ClouderaManagerOperationFailedException(String.format("Error while creating data context: %s", e.getMessage()), e);
         } catch (IOException e) {
             LOGGER.info("Failed to parse SDX context to CM API object.", e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-        }
-    }
-
-    private Boolean remoteContextExists(CdpResourceApi cdpResourceApi, String dataContextName) {
-        try {
-            cdpResourceApi.getRemoteContext(dataContextName);
-            LOGGER.debug("Remote context [{}] already exists.", dataContextName);
-            return Boolean.TRUE;
-        } catch (ApiException e) {
-            if (org.springframework.http.HttpStatus.NOT_FOUND.value() == e.getCode()) {
-                LOGGER.debug("Remote context [{}] does not exist.", dataContextName);
-                return Boolean.FALSE;
-            }
-            LOGGER.info("Failed to check if remote context [{}] already exists.", dataContextName, e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+            throw new ClouderaManagerOperationFailedException(String.format("Failed to parse SDX context to CM API object: %s", e.getMessage()), e);
         }
     }
 

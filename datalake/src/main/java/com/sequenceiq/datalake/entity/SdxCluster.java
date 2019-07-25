@@ -78,6 +78,11 @@ public class SdxCluster implements AccountIdAwareResource {
 
     private Long created;
 
+    @Column(nullable = false)
+    private Boolean createDatabase = Boolean.FALSE;
+
+    private String databaseCrn;
+
     public Long getId() {
         return id;
     }
@@ -212,5 +217,21 @@ public class SdxCluster implements AccountIdAwareResource {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public Boolean getCreateDatabase() {
+        return createDatabase;
+    }
+
+    public void setCreateDatabase(Boolean createDatabase) {
+        this.createDatabase = createDatabase;
+    }
+
+    public String getDatabaseCrn() {
+        return databaseCrn;
+    }
+
+    public void setDatabaseCrn(String databaseCrn) {
+        this.databaseCrn = databaseCrn;
     }
 }
