@@ -214,7 +214,7 @@ public class DBStack {
         return ownerCrn != null ? ownerCrn.getAccountId() : null;
     }
 
-    public DBStackStatus getDBStackStatus() {
+    public DBStackStatus getDbStackStatus() {
         return dbStackStatus;
     }
 

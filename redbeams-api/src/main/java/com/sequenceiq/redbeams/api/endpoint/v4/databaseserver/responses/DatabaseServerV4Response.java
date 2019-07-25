@@ -5,13 +5,17 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
-// import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServerV4Base;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.RedbeamsManagedDatabaseServer;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+// import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 
 @ApiModel
 @JsonInclude(Include.NON_NULL)
@@ -37,6 +41,15 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
 
     @ApiModelProperty(ModelDescriptions.CREATION_DATE)
     private Long creationDate;
+
+    @ApiModelProperty(ModelDescriptions.RESOURCE_STATUS)
+    private ResourceStatus resourceStatus;
+
+    @ApiModelProperty(RedbeamsManagedDatabaseServer.STATUS)
+    private Status status;
+
+    @ApiModelProperty(RedbeamsManagedDatabaseServer.STATUS_REASON)
+    private String statusReason;
 
     public Long getId() {
         return id;
@@ -92,5 +105,29 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
 
     public void setCreationDate(Long creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public ResourceStatus getResourceStatus() {
+        return resourceStatus;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setResourceStatus(ResourceStatus resourceStatus) {
+        this.resourceStatus = resourceStatus;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 }

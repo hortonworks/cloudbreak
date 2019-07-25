@@ -151,8 +151,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(VERSION, defaultTags.get(CB_VERSION.key()));
 
         assertEquals(Status.REQUESTED, dbStack.getStatus());
-        assertEquals(DetailedDBStackStatus.PROVISION_REQUESTED, dbStack.getDBStackStatus().getDetailedDBStackStatus());
-        assertEquals(NOW.toEpochMilli(), dbStack.getDBStackStatus().getCreated().longValue());
+        assertEquals(DetailedDBStackStatus.PROVISION_REQUESTED, dbStack.getDbStackStatus().getDetailedDBStackStatus());
+        assertEquals(NOW.toEpochMilli(), dbStack.getDbStackStatus().getCreated().longValue());
 
         assertNotNull(dbStack.getNetwork().getName());
         assertEquals(1, dbStack.getNetwork().getAttributes().getMap().size());

@@ -7,6 +7,7 @@ public final class ModelDescriptions {
     public static final String DESCRIPTION = "Description of the resource";
     public static final String CREATION_DATE = "Creation date / time of the resource, in epoch milliseconds";
     public static final String ENVIRONMENT_CRN = "Crn of the environment of the resource";
+    public static final String RESOURCE_STATUS = "Owner of the resource.";
 
     public static class Database {
         public static final String CONNECTION_URL = "JDBC connection URL in the form of JDBC:<db-type>://<address>:<port>/<db>";
@@ -41,7 +42,7 @@ public final class ModelDescriptions {
         public static final String DATABASE_SERVER_CONNECTION_TEST_RESULT = "Result of database server connection test";
     }
 
-    public static class ExternalDatabaseServer {
+    public static class RedbeamsManagedDatabaseServer {
         public static final String NAME = "Name of the external database server";
         public static final String DATABASE_SERVER = "The external database server configuration";
         public static final String STATUS = "Status of the database stack";

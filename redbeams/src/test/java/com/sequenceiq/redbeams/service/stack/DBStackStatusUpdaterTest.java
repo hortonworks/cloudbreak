@@ -6,15 +6,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
-import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 
 public class DBStackStatusUpdaterTest {
 
@@ -53,7 +53,7 @@ public class DBStackStatusUpdaterTest {
 
         verify(dbStackService).save(dbStack);
 
-        DBStackStatus dbStackStatus = savedStack.getDBStackStatus();
+        DBStackStatus dbStackStatus = savedStack.getDbStackStatus();
         assertEquals(dbStack, dbStackStatus.getDBStack());
         assertEquals(DetailedDBStackStatus.PROVISIONED.getStatus(), dbStackStatus.getStatus());
         assertEquals("because", dbStackStatus.getStatusReason());

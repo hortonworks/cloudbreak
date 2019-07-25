@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -39,6 +40,9 @@ public class RegisterDatabaseServerHandler implements EventHandler<RegisterDatab
     @Inject
     private DatabaseServerConfigRepository databaseServerConfigRepository;
 
+    @Inject
+    private CloudResourceHelper cloudResourceHelper;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(RegisterDatabaseServerRequest.class);
@@ -66,13 +70,14 @@ public class RegisterDatabaseServerHandler implements EventHandler<RegisterDatab
         dbServerConfig.setConnectionPassword(dbStack.getDatabaseServer().getRootPassword());
         dbServerConfig.setDatabaseVendor(dbStack.getDatabaseServer().getDatabaseVendor());
         dbServerConfig.setPort(databaseServer.getPort());
+        dbServerConfig.setDbStack(dbStack);
 
-        Optional<CloudResource> dbHostname = CloudResource.getResourceTypeFromList(ResourceType.RDS_HOSTNAME, dbResources);
+        Optional<CloudResource> dbHostname = cloudResourceHelper.getResourceTypeFromList(ResourceType.RDS_HOSTNAME, dbResources);
         if (dbHostname.isEmpty()) {
             throw new IllegalStateException("DB hostname not found for allocated database.");
         }
 
-        Optional<CloudResource> dbPort = CloudResource.getResourceTypeFromList(ResourceType.RDS_PORT, dbResources);
+        Optional<CloudResource> dbPort = cloudResourceHelper.getResourceTypeFromList(ResourceType.RDS_PORT, dbResources);
         if (dbPort.isEmpty()) {
             throw new IllegalStateException("DB port not found for allocated database.");
         }
