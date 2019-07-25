@@ -22,10 +22,6 @@ public class StackUpdater {
     @Inject
     private SecurityConfigService securityConfigService;
 
-    public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus) {
-        return doUpdateStackStatus(stackId, detailedStatus, "");
-    }
-
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
         return doUpdateStackStatus(stackId, detailedStatus, statusReason);
     }

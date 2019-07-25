@@ -77,7 +77,7 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setName(source.getName());
         stack.setCreated(System.currentTimeMillis());
         stack.setGatewayport(nginxPort);
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
+        stack.setStackStatus(new StackStatus(stack, "Stack provision requested.", DetailedStackStatus.PROVISION_REQUESTED));
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
         updateCloudPlatformAndRelatedFields(source, stack, cloudPlatform);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
@@ -96,7 +96,9 @@ public class CreateFreeIpaRequestToStackConverter {
             User user = userFuture.get(userGetTimeout, TimeUnit.SECONDS);
             owner = user.getEmail();
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.error("Couldn't fetch user from UMS", e);
+            String errorMessage = "Couldn't fetch user from UMS: ";
+            LOGGER.error(errorMessage, e);
+            stack.getStackStatus().setStatusReason(errorMessage + e.getMessage());
         }
         stack.setTags(getTags(owner, cloudPlatform));
         stack.setOwner(owner);
