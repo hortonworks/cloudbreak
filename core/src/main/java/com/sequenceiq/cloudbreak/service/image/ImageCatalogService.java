@@ -115,7 +115,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public ImageCatalog createForLoggedInUser(ImageCatalog imageCatalog, Long workspaceId, String accountId, String creator) {
-        imageCatalog.setCrn(createCRN(accountId));
+        imageCatalog.setResourceCrn(createCRN(accountId));
         imageCatalog.setCreator(creator);
         return super.createForLoggedInUser(imageCatalog, workspaceId);
     }
@@ -128,7 +128,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public ImageCatalog findByResourceCrn(String resourceCrn) {
-        return imageCatalogRepository.findByCrnAndArchivedFalse(resourceCrn).orElseThrow(NotFoundException.notFound("ImageCatalog", resourceCrn));
+        return imageCatalogRepository.findByResourceCrnAndArchivedFalse(resourceCrn).orElseThrow(NotFoundException.notFound("ImageCatalog", resourceCrn));
     }
 
     public Images getImagesByCatalogName(Long workspaceId, String catalogName, String stackName, String platform) throws CloudbreakImageCatalogException {

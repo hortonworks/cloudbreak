@@ -21,7 +21,7 @@ public class UpdateImageCatalogRequestToImageCatalogConverter extends AbstractCo
         imageCatalog.setImageCatalogUrl(source.getUrl());
         imageCatalog.setName(source.getName());
         imageCatalog.setId(original.getId());
-        imageCatalog.setCrn(source.getCrn());
+        imageCatalog.setResourceCrn(source.getCrn());
         imageCatalog.setCreator(original.getCreator());
         return imageCatalog;
     }

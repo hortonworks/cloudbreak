@@ -29,6 +29,11 @@ public class V4WorkspaceNameRestUrlParser extends RestUrlParser {
     }
 
     @Override
+    protected String getResourceCrn(Matcher matcher) {
+        return null;
+    }
+
+    @Override
     protected String getResourceId(Matcher matcher) {
         return null;
     }

@@ -41,6 +41,9 @@ public interface StructuredEventRepository extends WorkspaceResourceRepository<S
     List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(Workspace workspace, String resourceType, Long resourceId);
 
     @CheckPermissionsByWorkspace(workspaceIndex = 0)
+    List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceCrn(Workspace workspace, String resourceType, String resourceCrn);
+
+    @CheckPermissionsByWorkspace(workspaceIndex = 0)
     List<StructuredEventEntity> findByWorkspaceAndEventType(Workspace workspace, StructuredEventType eventType);
 
     @CheckPermissionsByWorkspaceId

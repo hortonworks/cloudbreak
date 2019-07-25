@@ -41,6 +41,9 @@ public class StructuredEventEntity implements WorkspaceAwareResource {
     private Long resourceId;
 
     @Column(nullable = false)
+    private String resourceCrn;
+
+    @Column(nullable = false)
     private Long timestamp;
 
     @Convert(converter = JsonToString.class)
@@ -128,5 +131,13 @@ public class StructuredEventEntity implements WorkspaceAwareResource {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 }

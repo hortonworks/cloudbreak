@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "crn"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
 public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
@@ -39,16 +39,16 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
     private Workspace workspace;
 
     @Column(nullable = false)
-    private String crn;
+    private String resourceCrn;
 
     private String creator;
 
-    public String getCrn() {
-        return crn;
+    public String getResourceCrn() {
+        return resourceCrn;
     }
 
-    public void setCrn(String crn) {
-        this.crn = crn;
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 
     public String getCreator() {

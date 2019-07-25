@@ -35,7 +35,7 @@ public class ImageCatalogToImageCatalogV4ResponseConverter extends AbstractConve
         imageCatalogResponse.setName(imageCatalogName);
         imageCatalogResponse.setDescription(source.getDescription());
         imageCatalogResponse.setCreator(source.getCreator());
-        imageCatalogResponse.setCrn(source.getCrn());
+        imageCatalogResponse.setCrn(source.getResourceCrn());
 
         return imageCatalogResponse;
     }

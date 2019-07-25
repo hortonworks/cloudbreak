@@ -57,7 +57,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
         validateDto(recipeAccessDto);
         return isNotEmpty(recipeAccessDto.getName())
                 ? super.getByNameForWorkspaceId(recipeAccessDto.getName(), workspaceId)
-                : recipeRepository.findByCrnAndWorkspaceId(recipeAccessDto.getCrn(), workspaceId)
+                : recipeRepository.findByResourceCrnAndWorkspaceId(recipeAccessDto.getCrn(), workspaceId)
                         .orElseThrow(() -> new NotFoundException("No recipe found with crn: \"" + recipeAccessDto.getCrn() + "\""));
     }
 
@@ -73,7 +73,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
     }
 
     public Recipe createForLoggedInUser(Recipe recipe, @Nonnull Long workspaceId, String accountId, String creator) {
-        recipe.setCrn(createCRN(accountId));
+        recipe.setResourceCrn(createCRN(accountId));
         recipe.setCreator(creator);
         return super.createForLoggedInUser(recipe, workspaceId);
     }

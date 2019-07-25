@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "crn"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
 public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
@@ -58,7 +58,7 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
-    private String crn;
+    private String resourceCrn;
 
     private String creator;
 
@@ -66,12 +66,12 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     private String stackVersion;
 
-    public String getCrn() {
-        return crn;
+    public String getResourceCrn() {
+        return resourceCrn;
     }
 
-    public void setCrn(String crn) {
-        this.crn = crn;
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 
     public String getCreator() {

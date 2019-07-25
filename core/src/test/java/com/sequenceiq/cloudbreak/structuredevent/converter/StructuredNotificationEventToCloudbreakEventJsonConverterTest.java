@@ -44,7 +44,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
     @Parameters(name = "Current StructuredNotificationEvent {0}, and the following fields should be skipped on null check: {1}")
     public static Object[][] data() {
         OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), NOTIFICATION, "stacks", 1L,
-                "usagestack", "cbId", "cbVersion", 1L, "horton@hortonworks.com", "Alma Ur", "tenant");
+                "usagestack", "cbId", "cbVersion", 1L, "horton@hortonworks.com", "Alma Ur", "tenant", "crn");
         return new Object[][]{
                 {new StructuredNotificationEvent(operation, TestUtil.notificationDetails(MESSAGE, TYPE)), List.of("ldapDetails", "rdsDetails")},
                 {new StructuredNotificationEvent(operation, TestUtil.ldapNotificationDetails(MESSAGE, TYPE)), getFieldNamesExcept(List.of("ldapDetails"))},

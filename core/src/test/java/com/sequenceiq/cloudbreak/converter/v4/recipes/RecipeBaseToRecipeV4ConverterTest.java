@@ -24,7 +24,7 @@ public class RecipeBaseToRecipeV4ConverterTest extends AbstractJsonConverterTest
         // WHEN
         Recipe result = underTest.convert(getRequest("recipe.json"));
         // THEN
-        assertAllFieldsNotNull(result, List.of("creator", "crn"));
+        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn"));
     }
 
     @Override

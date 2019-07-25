@@ -56,7 +56,9 @@ public class EnvironmentNetworkService {
     public void deleteNetwork(EnvironmentDto environment) {
         NetworkConnector networkConnector = getNetworkConnector(environment.getCloudPlatform());
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(environment);
-        networkConnector.deleteNetworkWithSubnets(networkDeletionRequest);
+        if (networkConnector != null) {
+            networkConnector.deleteNetworkWithSubnets(networkDeletionRequest);
+        }
     }
 
     private NetworkDeletionRequest createNetworkDeletionRequest(EnvironmentDto environment) {

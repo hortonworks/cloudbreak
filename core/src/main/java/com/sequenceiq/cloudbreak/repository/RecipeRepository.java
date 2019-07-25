@@ -20,6 +20,6 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 public interface RecipeRepository extends WorkspaceResourceRepository<Recipe, Long> {
 
     @CheckPermissionsByReturnValue
-    Optional<Recipe> findByCrnAndWorkspaceId(String crn, Long workspaceId);
+    Optional<Recipe> findByResourceCrnAndWorkspaceId(String crn, Long workspaceId);
 
 }

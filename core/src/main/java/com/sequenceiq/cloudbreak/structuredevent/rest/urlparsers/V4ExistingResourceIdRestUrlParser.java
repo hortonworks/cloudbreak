@@ -39,6 +39,11 @@ public class V4ExistingResourceIdRestUrlParser extends RestUrlParser {
     }
 
     @Override
+    protected String getResourceCrn(Matcher matcher) {
+        return null;
+    }
+
+    @Override
     protected String getResourceId(Matcher matcher) {
         return matcher.group(RESOURCE_ID_GROUP_NUMBER);
     }

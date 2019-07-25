@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest;
 
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.REST;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_CRN;
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_ID;
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_NAME;
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_TYPE;
@@ -280,15 +281,17 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         String resourceType = null;
         String resourceId = null;
         String resourceName = null;
+        String resourceCrn = null;
         if (restParams != null) {
             resourceType = restParams.get(RESOURCE_TYPE);
             resourceId = restParams.get(RESOURCE_ID);
             resourceName = restParams.get(RESOURCE_NAME);
+            resourceCrn = restParams.get(RESOURCE_CRN);
         }
         return new OperationDetails(requestTime, REST, resourceType, StringUtils.isNotEmpty(resourceId) ? Long.valueOf(resourceId) : null, resourceName,
                 nodeConfig.getId(), cbVersion, workspaceId,
                 cloudbreakUser != null ? cloudbreakUser.getUserId() : "", cloudbreakUser != null ? cloudbreakUser.getUsername() : "",
-                cloudbreakUser.getTenant());
+                cloudbreakUser.getTenant(), resourceCrn);
     }
 
     private RestRequestDetails createRequestDetails(ContainerRequestContext requestContext, String body) {

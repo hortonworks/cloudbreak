@@ -72,13 +72,13 @@ public class RecipeServiceTest {
     @Test
     public void testDeleteWhenDtoCrnFilledThenDeleteCalled() {
         Recipe recipe = getRecipe();
-        when(recipeRepository.findByCrnAndWorkspaceId(recipe.getCrn(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
+        when(recipeRepository.findByResourceCrnAndWorkspaceId(recipe.getResourceCrn(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
 
-        Recipe result = underTest.delete(aRecipeAccessDtoBuilder().withCrn(recipe.getCrn()).build(), recipe.getWorkspace().getId());
+        Recipe result = underTest.delete(aRecipeAccessDtoBuilder().withCrn(recipe.getResourceCrn()).build(), recipe.getWorkspace().getId());
 
         assertEquals(recipe, result);
-        verify(recipeRepository, times(1)).findByCrnAndWorkspaceId(anyString(), anyLong());
-        verify(recipeRepository, times(1)).findByCrnAndWorkspaceId(recipe.getCrn(), recipe.getWorkspace().getId());
+        verify(recipeRepository, times(1)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
+        verify(recipeRepository, times(1)).findByResourceCrnAndWorkspaceId(recipe.getResourceCrn(), recipe.getWorkspace().getId());
         verify(recipeRepository, times(1)).save(any(Recipe.class));
         verify(recipeRepository, times(1)).save(recipe);
     }
@@ -90,7 +90,7 @@ public class RecipeServiceTest {
 
         underTest.delete(aRecipeAccessDtoBuilder().build(), 1L);
 
-        verify(recipeRepository, times(0)).findByCrnAndWorkspaceId(anyString(), anyLong());
+        verify(recipeRepository, times(0)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
         verify(recipeRepository, times(0)).save(any());
     }
 
@@ -117,13 +117,13 @@ public class RecipeServiceTest {
     @Test
     public void testGetWhenDtoCrnFilledThenProperGetCalled() {
         Recipe recipe = getRecipe();
-        when(recipeRepository.findByCrnAndWorkspaceId(recipe.getCrn(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
+        when(recipeRepository.findByResourceCrnAndWorkspaceId(recipe.getResourceCrn(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
 
-        Recipe result = underTest.get(aRecipeAccessDtoBuilder().withCrn(recipe.getCrn()).build(), recipe.getWorkspace().getId());
+        Recipe result = underTest.get(aRecipeAccessDtoBuilder().withCrn(recipe.getResourceCrn()).build(), recipe.getWorkspace().getId());
 
         assertEquals(recipe, result);
-        verify(recipeRepository, times(1)).findByCrnAndWorkspaceId(anyString(), anyLong());
-        verify(recipeRepository, times(1)).findByCrnAndWorkspaceId(recipe.getCrn(), recipe.getWorkspace().getId());
+        verify(recipeRepository, times(1)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
+        verify(recipeRepository, times(1)).findByResourceCrnAndWorkspaceId(recipe.getResourceCrn(), recipe.getWorkspace().getId());
     }
 
     @Test
@@ -133,7 +133,7 @@ public class RecipeServiceTest {
 
         underTest.get(aRecipeAccessDtoBuilder().build(), 1L);
 
-        verify(recipeRepository, times(0)).findByCrnAndWorkspaceId(anyString(), anyLong());
+        verify(recipeRepository, times(0)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
         verify(recipeRepository, times(0)).save(any());
     }
 
@@ -152,7 +152,7 @@ public class RecipeServiceTest {
         recipe.setContent("bnllaGVoZSwgbmEgZXogZWd5IGZhc3phIGJhc2U2NCBjdWNj");
         recipe.setId(1L);
         recipe.setArchived(false);
-        recipe.setCrn("somecrn");
+        recipe.setResourceCrn("somecrn");
         recipe.setWorkspace(getWorkspace());
         return recipe;
     }

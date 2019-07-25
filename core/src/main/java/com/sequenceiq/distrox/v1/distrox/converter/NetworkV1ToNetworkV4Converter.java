@@ -2,6 +2,8 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
@@ -11,10 +13,13 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
+import com.sequenceiq.distrox.v1.distrox.StackOperation;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @Component
 public class NetworkV1ToNetworkV4Converter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackOperation.class);
 
     public NetworkV4Request convert(NetworkV1Request network) {
         NetworkV4Request response = new NetworkV4Request();
@@ -25,8 +30,13 @@ public class NetworkV1ToNetworkV4Converter {
 
     public NetworkV4Request convert(EnvironmentNetworkResponse network) {
         NetworkV4Request response = new NetworkV4Request();
-        response.setAws(getIfNotNull(network.getAws(), aws -> convertToAwsNetwork(network)));
-        response.setAzure(getIfNotNull(network.getAzure(), azure -> convertToAzureNetwork(network)));
+        if (!network.getSubnetIds().isEmpty()) {
+            LOGGER.info("Subnets are available in the environment network conversion started");
+            response.setAws(getIfNotNull(network.getAws(), aws -> convertToAwsNetwork(network)));
+            response.setAzure(getIfNotNull(network.getAzure(), azure -> convertToAzureNetwork(network)));
+        } else {
+            LOGGER.info("No subnet are available in the environment skipping network conversion");
+        }
         return response;
     }
 
