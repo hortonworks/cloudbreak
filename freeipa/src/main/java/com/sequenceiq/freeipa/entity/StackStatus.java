@@ -42,8 +42,8 @@ public class StackStatus {
     public StackStatus() {
     }
 
-    public StackStatus(Stack stack, DetailedStackStatus detailedStackStatus) {
-        this(stack, detailedStackStatus.getStatus(), "", detailedStackStatus);
+    public StackStatus(Stack stack, String statusReason, DetailedStackStatus detailedStackStatus) {
+        this(stack, detailedStackStatus.getStatus(), statusReason, detailedStackStatus);
     }
 
     public StackStatus(Stack stack, Status status, String statusReason, DetailedStackStatus detailedStackStatus) {
