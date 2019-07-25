@@ -28,6 +28,22 @@ cloudera_manager_setup_ldap:
 
 {% endif %}
 
+
+add_hdfs_settings_to_cm:
+  file.append:
+    - name: /etc/cloudera-scm-server/cm.settings
+    - makedirs: True
+    - template: jinja
+    - source: salt://cloudera/manager/hdfs/hdfs-dir-create-fix.settings.j2
+    - unless: grep "ENABLE_FAST_DIR_CREATE" /etc/cloudera-scm-server/cm.settings
+
+cloudera_manager_setup_hdfs:
+  file.replace:
+    - name: /etc/default/cloudera-scm-server
+    - pattern: "CMF_SERVER_ARGS=.*"
+    - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings"
+    - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings\"" /etc/default/cloudera-scm-server
+
 {% if salt['pillar.get']('cloudera-manager:license', None) != None %}
 
 /etc/cloudera-scm-server/license.txt:
