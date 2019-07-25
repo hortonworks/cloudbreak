@@ -94,7 +94,7 @@ public class BlueprintToBlueprintV4ResponseConverterTest extends AbstractEntityC
         BlueprintV4Response result = underTest.convert(source);
 
         Assert.assertNotNull(result);
-        Assert.assertEquals(source.getCrn(), result.getCrn());
+        Assert.assertEquals(source.getResourceCrn(), result.getCrn());
         Assert.assertEquals(source.getName(), result.getName());
         Assert.assertNotNull(result.getDescription());
         Assert.assertTrue(result.getDescription().isEmpty());
@@ -114,7 +114,7 @@ public class BlueprintToBlueprintV4ResponseConverterTest extends AbstractEntityC
         BlueprintV4Response result = underTest.convert(source);
 
         Assert.assertNotNull(result);
-        Assert.assertEquals(source.getCrn(), result.getCrn());
+        Assert.assertEquals(source.getResourceCrn(), result.getCrn());
         Assert.assertEquals(source.getName(), result.getName());
         Assert.assertEquals(source.getDescription(), result.getDescription());
         Assert.assertEquals(Integer.valueOf(source.getHostGroupCount()), result.getHostGroupCount());

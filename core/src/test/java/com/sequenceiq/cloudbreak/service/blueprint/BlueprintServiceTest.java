@@ -79,26 +79,34 @@ public class BlueprintServiceTest {
 
     @Test
     public void testDeleteByWorkspaceWhenDtoNameFilledThenDeleteCalled() {
-        when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(), blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
+        when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
+                blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder().withName(blueprint.getName()).build(), blueprint.getWorkspace().getId());
+        Blueprint result = underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder()
+                .withName(blueprint.getName()).build(), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
-        verify(blueprintRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
-        verify(blueprintRepository, times(1)).findByNameAndWorkspaceId(blueprint.getName(), blueprint.getWorkspace().getId());
+        verify(blueprintRepository, times(1))
+                .findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(1))
+                .findByNameAndWorkspaceId(blueprint.getName(), blueprint.getWorkspace().getId());
         verify(blueprintRepository, times(1)).delete(any(Blueprint.class));
         verify(blueprintRepository, times(1)).delete(blueprint);
     }
 
     @Test
     public void testDeleteByWorkspaceWhenDtoCrnFilledThenDeleteCalled() {
-        when(blueprintRepository.findByCrnAndWorkspaceId(blueprint.getCrn(), blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
+        when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
+                blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder().withCrn(blueprint.getCrn()).build(), blueprint.getWorkspace().getId());
+        Blueprint result = underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder()
+                .withCrn(blueprint.getResourceCrn()).build(), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
-        verify(blueprintRepository, times(1)).findByCrnAndWorkspaceId(anyString(), anyLong());
-        verify(blueprintRepository, times(1)).findByCrnAndWorkspaceId(blueprint.getCrn(), blueprint.getWorkspace().getId());
+        verify(blueprintRepository, times(1))
+                .findByResourceCrnAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(1))
+                .findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(), blueprint.getWorkspace().getId());
         verify(blueprintRepository, times(1)).delete(any(Blueprint.class));
         verify(blueprintRepository, times(1)).delete(blueprint);
     }
@@ -110,7 +118,7 @@ public class BlueprintServiceTest {
 
         underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
 
-        verify(blueprintRepository, times(0)).findByCrnAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(0)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
         verify(blueprintRepository, times(0)).delete(any());
     }
 
@@ -124,24 +132,32 @@ public class BlueprintServiceTest {
 
     @Test
     public void testGetByWorkspaceWhenDtoNameFilledThenProperGetCalled() {
-        when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(), blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
+        when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
+                blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.getByWorkspace(aBlueprintAccessDtoBuilder().withName(blueprint.getName()).build(), blueprint.getWorkspace().getId());
+        Blueprint result = underTest.getByWorkspace(aBlueprintAccessDtoBuilder()
+                .withName(blueprint.getName()).build(), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
-        verify(blueprintRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
-        verify(blueprintRepository, times(1)).findByNameAndWorkspaceId(blueprint.getName(), blueprint.getWorkspace().getId());
+        verify(blueprintRepository, times(1))
+                .findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(1))
+                .findByNameAndWorkspaceId(blueprint.getName(), blueprint.getWorkspace().getId());
     }
 
     @Test
     public void testGetByWorkspaceWhenDtoCrnFilledThenProperGetCalled() {
-        when(blueprintRepository.findByCrnAndWorkspaceId(blueprint.getCrn(), blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
+        when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
+                blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.getByWorkspace(aBlueprintAccessDtoBuilder().withCrn(blueprint.getCrn()).build(), blueprint.getWorkspace().getId());
+        Blueprint result = underTest.getByWorkspace(aBlueprintAccessDtoBuilder()
+                .withCrn(blueprint.getResourceCrn()).build(), blueprint.getWorkspace().getId());
 
         assertEquals(blueprint, result);
-        verify(blueprintRepository, times(1)).findByCrnAndWorkspaceId(anyString(), anyLong());
-        verify(blueprintRepository, times(1)).findByCrnAndWorkspaceId(blueprint.getCrn(), blueprint.getWorkspace().getId());
+        verify(blueprintRepository, times(1))
+                .findByResourceCrnAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(1))
+                .findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(), blueprint.getWorkspace().getId());
     }
 
     @Test
@@ -151,7 +167,7 @@ public class BlueprintServiceTest {
 
         underTest.getByWorkspace(aBlueprintAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
 
-        verify(blueprintRepository, times(0)).findByCrnAndWorkspaceId(anyString(), anyLong());
+        verify(blueprintRepository, times(0)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
         verify(blueprintRepository, times(0)).save(any());
     }
 
@@ -289,7 +305,7 @@ public class BlueprintServiceTest {
         blueprint.setWorkspace(getWorkspace());
         blueprint.setStatus(status);
         blueprint.setCreator("someone");
-        blueprint.setCrn("someCrn");
+        blueprint.setResourceCrn("someCrn");
         return blueprint;
     }
 

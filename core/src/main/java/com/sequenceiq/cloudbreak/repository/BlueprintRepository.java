@@ -40,6 +40,6 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
     <S extends Blueprint> Iterable<S> saveAll(Iterable<S> entities);
 
     @CheckPermissionsByReturnValue
-    Optional<Blueprint> findByCrnAndWorkspaceId(String crn, Long workspaceId);
+    Optional<Blueprint> findByResourceCrnAndWorkspaceId(String resourceCrn, Long workspaceId);
 
 }

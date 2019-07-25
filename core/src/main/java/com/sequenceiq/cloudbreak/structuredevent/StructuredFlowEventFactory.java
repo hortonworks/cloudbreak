@@ -62,7 +62,7 @@ public class StructuredFlowEventFactory {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), FLOW, "stacks", stackId, stack.getName(),
                 nodeConfig.getId(), cbVersion, stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(),
-                stack.getTenant().getName());
+                stack.getTenant().getName(), stack.getResourceCrn());
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
@@ -115,7 +115,8 @@ public class StructuredFlowEventFactory {
         }
 
         OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), NOTIFICATION, "stacks", stackId, stackName,
-                nodeConfig.getInstanceUUID(), cbVersion, stack.getWorkspace().getId(), userId, userName, stack.getTenant().getName());
+                nodeConfig.getInstanceUUID(), cbVersion, stack.getWorkspace().getId(), userId, userName,
+                stack.getTenant().getName(), stack.getResourceCrn());
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 
@@ -137,7 +138,8 @@ public class StructuredFlowEventFactory {
                 null,
                 ldapDetails.getUserId(),
                 null,
-                null
+                null,
+                ldapDetails.getId().toString()
         );
         if (notifyWorkspace) {
             operationDetails.setWorkspaceId(ldapDetails.getWorkspaceId());
@@ -165,7 +167,8 @@ public class StructuredFlowEventFactory {
                 null,
                 rdsDetails.getUserId(),
                 null,
-                null
+                null,
+                rdsDetails.getId().toString()
         );
         if (notifyWorkspace) {
             operationDetails.setWorkspaceId(rdsDetails.getWorkspaceId());

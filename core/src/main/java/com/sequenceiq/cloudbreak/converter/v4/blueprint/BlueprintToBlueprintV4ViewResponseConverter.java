@@ -14,7 +14,7 @@ public class BlueprintToBlueprintV4ViewResponseConverter extends AbstractConvers
         BlueprintV4ViewResponse blueprintV4ViewResponse = new BlueprintV4ViewResponse();
         blueprintV4ViewResponse.setName(source.getName());
         blueprintV4ViewResponse.setDescription(source.getDescription());
-        blueprintV4ViewResponse.setCrn(source.getCrn());
+        blueprintV4ViewResponse.setCrn(source.getResourceCrn());
         blueprintV4ViewResponse.setId(source.getId());
         blueprintV4ViewResponse.setStackType(source.getStackType());
         blueprintV4ViewResponse.setStackVersion(source.getStackVersion());

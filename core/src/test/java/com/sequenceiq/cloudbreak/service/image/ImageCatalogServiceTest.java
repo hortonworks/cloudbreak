@@ -548,13 +548,13 @@ public class ImageCatalogServiceTest {
         when(userProfileService.getOrCreate(user)).thenReturn(mock(UserProfile.class));
 
         ImageCatalog catalog = getImageCatalog();
-        when(imageCatalogRepository.findByCrnAndArchivedFalse(catalog.getCrn())).thenReturn(Optional.of(catalog));
+        when(imageCatalogRepository.findByResourceCrnAndArchivedFalse(catalog.getResourceCrn())).thenReturn(Optional.of(catalog));
         when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.delete(aImageCatalogAccessDtoBuilder().withCrn(catalog.getCrn()).build(), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.delete(aImageCatalogAccessDtoBuilder().withCrn(catalog.getResourceCrn()).build(), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
-        verify(imageCatalogRepository, times(1)).findByCrnAndArchivedFalse(anyString());
+        verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalse(anyString());
         verify(imageCatalogRepository, times(1)).save(any(ImageCatalog.class));
         verify(imageCatalogRepository, times(1)).save(catalog);
     }
@@ -567,7 +567,7 @@ public class ImageCatalogServiceTest {
 
         underTest.delete(aImageCatalogAccessDtoBuilder().build(), catalog.getWorkspace().getId());
 
-        verify(imageCatalogRepository, times(0)).findByCrnAndArchivedFalse(anyString());
+        verify(imageCatalogRepository, times(0)).findByResourceCrnAndArchivedFalse(anyString());
         verify(imageCatalogRepository, times(0)).delete(any());
     }
 
@@ -594,13 +594,13 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetByWorkspaceWhenDtoCrnFilledThenProperGetCalled() {
         ImageCatalog catalog = getImageCatalog();
-        when(imageCatalogRepository.findByCrnAndArchivedFalse(catalog.getCrn())).thenReturn(Optional.of(catalog));
+        when(imageCatalogRepository.findByResourceCrnAndArchivedFalse(catalog.getResourceCrn())).thenReturn(Optional.of(catalog));
 
-        ImageCatalog result = underTest.get(aImageCatalogAccessDtoBuilder().withCrn(catalog.getCrn()).build(), catalog.getWorkspace().getId());
+        ImageCatalog result = underTest.get(aImageCatalogAccessDtoBuilder().withCrn(catalog.getResourceCrn()).build(), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
-        verify(imageCatalogRepository, times(1)).findByCrnAndArchivedFalse(anyString());
-        verify(imageCatalogRepository, times(1)).findByCrnAndArchivedFalse(catalog.getCrn());
+        verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalse(anyString());
+        verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalse(catalog.getResourceCrn());
     }
 
     @Test
@@ -610,7 +610,7 @@ public class ImageCatalogServiceTest {
 
         underTest.get(aImageCatalogAccessDtoBuilder().build(), 1L);
 
-        verify(imageCatalogRepository, times(0)).findByCrnAndArchivedFalse(anyString());
+        verify(imageCatalogRepository, times(0)).findByResourceCrnAndArchivedFalse(anyString());
         verify(imageCatalogRepository, times(0)).save(any());
     }
 
@@ -641,7 +641,7 @@ public class ImageCatalogServiceTest {
         ws.setId(ORG_ID);
         imageCatalog.setWorkspace(ws);
         imageCatalog.setCreator("someone");
-        imageCatalog.setCrn("someCrn");
+        imageCatalog.setResourceCrn("someCrn");
         return imageCatalog;
     }
 

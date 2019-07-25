@@ -17,7 +17,7 @@ public class V4ExistingResourceByCrnOrNameRestUrlParser extends RestUrlParser {
 
     // v4/{workspaceId}/blueprints/name/{name}
     // v4/{workspaceId}/blueprints/crn/{name}
-    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/(blueprints|image_catalogs|recipes|stack|distrox)/(?:name|crn)/([^/]+)");
+    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/(blueprints|image_catalogs|recipes|stack|distrox|cluster_templates)/(?:name|crn)/([^/]+)");
 
     @Override
     protected List<String> parsedMethods() {
@@ -36,6 +36,11 @@ public class V4ExistingResourceByCrnOrNameRestUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceName(Matcher matcher) {
+        return matcher.group(RESOURCE_NAME_GROUP_NUMBER);
+    }
+
+    @Override
+    protected String getResourceCrn(Matcher matcher) {
         return matcher.group(RESOURCE_NAME_GROUP_NUMBER);
     }
 

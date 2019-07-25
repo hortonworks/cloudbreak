@@ -23,7 +23,7 @@ public class BlueprintToBlueprintV4ResponseConverter
         blueprintJson.setStatus(entity.getStatus());
         blueprintJson.setTags(entity.getTags().getMap());
         blueprintJson.setBlueprint(entity.getBlueprintText());
-        blueprintJson.setCrn(entity.getCrn());
+        blueprintJson.setCrn(entity.getResourceCrn());
         return blueprintJson;
     }
 

@@ -19,7 +19,7 @@ public class AuditListZipAction implements Action<AuditTestDto, CloudbreakClient
     public AuditTestDto action(TestContext testContext, AuditTestDto testDto, CloudbreakClient client) throws Exception {
         Response auditEventsZip = client.getCloudbreakClient()
                 .auditV4Endpoint()
-                .getAuditEventsZip(client.getWorkspaceId(), testDto.getResourceType(), testDto.getResourceId());
+                .getAuditEventsZip(client.getWorkspaceId(), testDto.getResourceType(), testDto.getResourceId(), null);
         testDto.setZipResponse(auditEventsZip);
         Log.logJSON(LOGGER, " Audit listed successfully:\n", testDto.getZipResponse());
         return testDto;

@@ -15,6 +15,8 @@ public abstract class RestUrlParser {
 
     public static final String RESOURCE_NAME = "RESOURCE_NAME";
 
+    public static final String RESOURCE_CRN = "RESOURCE_CRN";
+
     public static final String RESOURCE_EVENT = "RESOURCE_EVENT";
 
     public static final String WORKSPACE_ID = "WORKSPACE";
@@ -41,6 +43,7 @@ public abstract class RestUrlParser {
         if (matcher.matches()) {
             params.put(WORKSPACE_ID, getWorkspaceId(matcher));
             params.put(RESOURCE_NAME, getResourceName(matcher));
+            params.put(RESOURCE_CRN, getResourceCrn(matcher));
             params.put(RESOURCE_ID, getResourceId(matcher));
             params.put(RESOURCE_TYPE, getResourceType(matcher));
             params.put(RESOURCE_EVENT, getResourceEvent(matcher));
@@ -72,6 +75,8 @@ public abstract class RestUrlParser {
     protected abstract String getWorkspaceId(Matcher matcher);
 
     protected abstract String getResourceName(Matcher matcher);
+
+    protected abstract String getResourceCrn(Matcher matcher);
 
     protected abstract String getResourceId(Matcher matcher);
 

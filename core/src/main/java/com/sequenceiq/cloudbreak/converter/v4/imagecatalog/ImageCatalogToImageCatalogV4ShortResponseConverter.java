@@ -29,7 +29,7 @@ public class ImageCatalogToImageCatalogV4ShortResponseConverter extends Abstract
     public ImageCatalogV4ShortResponse convert(ImageCatalog source) {
         ImageCatalogV4ShortResponse imageCatalogResponse = new ImageCatalogV4ShortResponse();
         imageCatalogResponse.setCreator(source.getCreator());
-        imageCatalogResponse.setCrn(source.getCrn());
+        imageCatalogResponse.setCrn(source.getResourceCrn());
         imageCatalogResponse.setUrl(source.getImageCatalogUrl());
 
         String imageCatalogName = source.getName();

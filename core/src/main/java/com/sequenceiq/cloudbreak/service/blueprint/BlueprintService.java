@@ -115,7 +115,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         validateDto(blueprintAccessDto);
         return isNotEmpty(blueprintAccessDto.getName())
                 ? super.deleteByNameFromWorkspace(blueprintAccessDto.getName(), workspaceId)
-                : delete(blueprintRepository.findByCrnAndWorkspaceId(blueprintAccessDto.getCrn(), workspaceId)
+                : delete(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprintAccessDto.getCrn(), workspaceId)
                 .orElseThrow(() -> NotFoundException.notFound("blueprint", blueprintAccessDto.getCrn()).get()));
     }
 
@@ -127,7 +127,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public void decorateWithCrn(Blueprint bp, String accountId, String creator) {
-        bp.setCrn(createCRN(accountId));
+        bp.setResourceCrn(createCRN(accountId));
         bp.setCreator(creator);
     }
 
@@ -366,7 +366,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     private Blueprint getByCrnAndWorkspaceIdAndAddToMdc(String crn, Long workspaceId) {
-        Blueprint bp = blueprintRepository.findByCrnAndWorkspaceId(crn, workspaceId)
+        Blueprint bp = blueprintRepository.findByResourceCrnAndWorkspaceId(crn, workspaceId)
                 .orElseThrow(() -> NotFoundException.notFound("blueprint", crn).get());
         MDCBuilder.buildMdcContext(bp);
         return bp;

@@ -30,7 +30,7 @@ public interface AuditEventV4Endpoint {
     @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsInWorkspace")
     AuditEventV4Responses getAuditEvents(@PathParam("workspaceId") Long workspaceId, @QueryParam("resourceType") String resourceType,
-            @QueryParam("resourceId") Long resourceId);
+            @QueryParam("resourceId") Long resourceId, @QueryParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("zip")
@@ -38,7 +38,7 @@ public interface AuditEventV4Endpoint {
     @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE_ZIP, produces = ContentType.FILE_STREAM, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsZipInWorkspace")
     Response getAuditEventsZip(@PathParam("workspaceId") Long workspaceId, @QueryParam("resourceType") String resourceType,
-            @QueryParam("resourceId") Long resourceId);
+            @QueryParam("resourceId") Long resourceId, @QueryParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("{auditId}")

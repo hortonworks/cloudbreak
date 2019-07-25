@@ -21,7 +21,7 @@ public class AuditListAction implements Action<AuditTestDto, CloudbreakClient> {
     public AuditTestDto action(TestContext testContext, AuditTestDto testDto, CloudbreakClient client) throws Exception {
         Collection<AuditEventV4Response> responses = client.getCloudbreakClient()
                 .auditV4Endpoint()
-                .getAuditEvents(client.getWorkspaceId(), testDto.getResourceType(), testDto.getResourceId())
+                .getAuditEvents(client.getWorkspaceId(), testDto.getResourceType(), testDto.getResourceId(), null)
                 .getResponses();
         testDto.setResponses(responses.stream().collect(Collectors.toSet()));
         Log.logJSON(LOGGER, " Audit listed successfully:\n", testDto.getResponses());

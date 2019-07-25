@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 @Where(clause = "archived = false")
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "crn"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
 public class Recipe implements ProvisionEntity, WorkspaceAwareResource, ArchivableResource {
 
     @Id
@@ -36,7 +36,7 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
     @Column(nullable = false)
     private String name;
 
-    private String crn;
+    private String resourceCrn;
 
     private String description;
 
@@ -69,12 +69,12 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
         this.creator = creator;
     }
 
-    public String getCrn() {
-        return crn;
+    public String getResourceCrn() {
+        return resourceCrn;
     }
 
-    public void setCrn(String crn) {
-        this.crn = crn;
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 
     public void setId(Long id) {

@@ -14,8 +14,8 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
-import com.sequenceiq.cloudbreak.service.audit.AuditEventService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.service.audit.AuditEventService;
 
 @Controller
 public class AuditEventV4Controller implements AuditEventV4Endpoint {
@@ -29,19 +29,19 @@ public class AuditEventV4Controller implements AuditEventV4Endpoint {
     }
 
     @Override
-    public AuditEventV4Responses getAuditEvents(Long workspaceId, String resourceType, Long resourceId) {
-        List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(workspaceId, resourceType, resourceId);
+    public AuditEventV4Responses getAuditEvents(Long workspaceId, String resourceType, Long resourceId, String resourceCrn) {
+        List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(workspaceId, resourceType, resourceId, resourceCrn);
         return new AuditEventV4Responses(auditEventsByWorkspaceId);
 
     }
 
     @Override
-    public Response getAuditEventsZip(Long workspaceId, String resourceType, Long resourceId) {
-        Collection<AuditEventV4Response> auditEvents = getAuditEvents(workspaceId, resourceType, resourceId).getResponses();
-        return getAuditEventsZipResponse(auditEvents, resourceType, resourceId);
+    public Response getAuditEventsZip(Long workspaceId, String resourceType, Long resourceId, String resourceCrn) {
+        Collection<AuditEventV4Response> auditEvents = getAuditEvents(workspaceId, resourceType, resourceId, resourceCrn).getResponses();
+        return getAuditEventsZipResponse(auditEvents, resourceType);
     }
 
-    private Response getAuditEventsZipResponse(Collection<AuditEventV4Response> auditEventV4Responses, String resourceType, Long resourceId) {
+    private Response getAuditEventsZipResponse(Collection<AuditEventV4Response> auditEventV4Responses, String resourceType) {
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
                 zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
@@ -49,7 +49,7 @@ public class AuditEventV4Controller implements AuditEventV4Endpoint {
                 zipOutputStream.closeEntry();
             }
         };
-        String fileName = String.format("audit-%s-%d.zip", resourceType, resourceId);
+        String fileName = String.format("audit-%s.zip", resourceType);
         return Response.ok(streamingOutput).header("content-disposition", String.format("attachment; filename = %s", fileName)).build();
     }
 }
