@@ -52,7 +52,19 @@ public class SdxController extends NotificationController implements SdxEndpoint
     }
 
     @Override
+    public void deleteByCrn(String clusterCrn) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        sdxService.deleteSdxByClusterCrn(userCrn, clusterCrn);
+        notify(ResourceEvent.SDX_CLUSTER_DELETED);
+    }
+
+    @Override
     public void redeploy(String envName, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest) {
+
+    }
+
+    @Override
+    public void redeployByCrn(String clusterCrn, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest) {
 
     }
 
@@ -77,6 +89,15 @@ public class SdxController extends NotificationController implements SdxEndpoint
         return sdxClusters.stream()
                 .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public SdxClusterDetailResponse getDetailByCrn(String clusterCrn, Set<String> entries) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
+        StackV4Response stackV4Response = sdxService.getDetail(userCrn, sdxCluster.getClusterName(), entries);
+        SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
+        return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
     }
 
     @Override
