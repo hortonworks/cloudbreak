@@ -67,7 +67,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     private Tunnel tunnel;
 
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
-    private IdBrokerMappingSource idBrokerMappingSource = IdBrokerMappingSource.NONE;
+    private IdBrokerMappingSource idBrokerMappingSource = IdBrokerMappingSource.MOCK;
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;

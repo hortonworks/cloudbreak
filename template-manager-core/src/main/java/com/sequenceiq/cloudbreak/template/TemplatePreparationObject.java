@@ -142,6 +142,14 @@ public class TemplatePreparationObject {
         return fixInputs;
     }
 
+    public Map<String, String> getIdentityGroupMapping() {
+        return identityGroupMapping;
+    }
+
+    public Map<String, String> getIdentityUserMapping() {
+        return identityUserMapping;
+    }
+
     public static class Builder {
 
         private Set<RDSConfig> rdsConfigs = new HashSet<>();
