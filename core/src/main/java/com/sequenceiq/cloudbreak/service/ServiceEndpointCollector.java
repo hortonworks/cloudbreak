@@ -179,8 +179,7 @@ public class ServiceEndpointCollector {
     }
 
     private List<ExposedService> excludedServicesForHdp26() {
-        return Lists.newArrayList(ExposedService.LIVY2_SERVER, ExposedService.RESOURCEMANAGER_WEB_V2,
-                ExposedService.LOGSEARCH);
+        return Lists.newArrayList(ExposedService.LIVY2_SERVER, ExposedService.LOGSEARCH);
     }
 
     private Collection<ExposedService> getExposedServices(Blueprint blueprint) {

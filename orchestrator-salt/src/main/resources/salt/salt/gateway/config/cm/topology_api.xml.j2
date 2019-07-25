@@ -77,9 +77,9 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'YARNUI' in exposed and 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
+            {% if 'YARNUIV2' in exposed and 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
             <param>
-                <name>RESOURCEMANAGER</name>
+                <name>YARNUIV2</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
@@ -173,11 +173,11 @@
     {%- endif %}
 
     {% if 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
-    {% if 'YARNUI' in exposed -%}
+    {% if 'YARNUIV2' in exposed -%}
     <service>
-        <role>RESOURCEMANAGER</role>
+        <role>YARNUIV2</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
-        <url>http://{{ hostloc }}:{{ ports['YARNUI'] }}</url>
+        <url>http://{{ hostloc }}:{{ ports['YARNUIV2'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
