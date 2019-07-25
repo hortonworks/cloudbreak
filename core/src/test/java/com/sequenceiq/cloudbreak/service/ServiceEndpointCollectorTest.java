@@ -251,16 +251,15 @@ public class ServiceEndpointCollectorTest {
 
         exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
 
-        assertEquals(6L, exposedServiceResponses.size());
+        assertEquals(5L, exposedServiceResponses.size());
         assertTrue(createExposedServiceFilteredStream(exposedServiceResponses)
-                .count() == 2);
+                .count() == 1);
     }
 
     private Stream<ExposedServiceV4Response> createExposedServiceFilteredStream(Collection<ExposedServiceV4Response> exposedServiceV4Respons) {
         return exposedServiceV4Respons
                 .stream()
-                .filter(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "YARNUIV2")
-                        || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER")
+                .filter(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER")
                         || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LOGSEARCH_SERVER"));
     }
 
