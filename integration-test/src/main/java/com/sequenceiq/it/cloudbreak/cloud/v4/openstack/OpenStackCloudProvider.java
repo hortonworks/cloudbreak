@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.OpenStackStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.KeystoneV2Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.OpenstackParameters;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
@@ -22,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 @Component
@@ -148,5 +150,20 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
     @Override
     public String getBlueprintName() {
         return openStackProperties.getDefaultBlueprintName();
+    }
+
+    @Override
+    public SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage) {
+        return cloudStorage;
+    }
+
+    @Override
+    public FileSystemType getFileSystemType() {
+        return null;
+    }
+
+    @Override
+    public String getBaseLocation() {
+        return null;
     }
 }

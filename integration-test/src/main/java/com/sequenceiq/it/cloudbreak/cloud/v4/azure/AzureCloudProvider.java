@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.azure;
 
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -9,6 +10,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AppBasedRequest;
@@ -27,10 +32,13 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 @Component
 public class AzureCloudProvider extends AbstractCloudProvider {
+
+    private static final String DEFAULT_STORAGE_NAME = "testsdx" + UUID.randomUUID().toString().replaceAll("-", "");
 
     @Inject
     private AzureProperties azureProperties;
@@ -189,5 +197,42 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getBlueprintName() {
         return azureProperties.getDefaultBlueprintName();
+    }
+
+    @Override
+    public SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage) {
+        return cloudStorage
+                .withFileSystemType(getFileSystemType())
+                .withBaseLocation(getBaseLocation());
+    }
+
+    @Override
+    public FileSystemType getFileSystemType() {
+        AdlsCloudStorageV1Parameters adlsCloudStorageV1Parameters = new AdlsCloudStorageV1Parameters();
+        AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = new AdlsGen2CloudStorageV1Parameters();
+        WasbCloudStorageV1Parameters wasbCloudStorageV1Parameters = new WasbCloudStorageV1Parameters();
+        FileSystemType fileSystemType;
+
+        switch (azureProperties.getCloudstorage().getFileSystemType()) {
+            case "WASB":
+                fileSystemType = wasbCloudStorageV1Parameters.getType();
+                break;
+            case "ADLS":
+                fileSystemType = adlsCloudStorageV1Parameters.getType();
+                break;
+            case "ADLS_GEN_2":
+                fileSystemType = adlsGen2CloudStorageV1Parameters.getType();
+                break;
+            default:
+                fileSystemType = wasbCloudStorageV1Parameters.getType();
+                break;
+        }
+
+        return fileSystemType;
+    }
+
+    @Override
+    public String getBaseLocation() {
+        return String.join("/", azureProperties.getCloudstorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 }

@@ -164,6 +164,10 @@ public class AzureProperties {
 
         private String locationName;
 
+        private String baseLocation;
+
+        private String fileSystemType;
+
         public String getAccountKey() {
             return accountKey;
         }
@@ -186,6 +190,22 @@ public class AzureProperties {
 
         public void setLocationName(String locationName) {
             this.locationName = locationName;
+        }
+
+        public String getBaseLocation() {
+            return baseLocation;
+        }
+
+        public void setBaseLocation(String baseLocation) {
+            this.baseLocation = baseLocation;
+        }
+
+        public String getFileSystemType() {
+            return fileSystemType;
+        }
+
+        public void setFileSystemType(String fileSystemType) {
+            this.fileSystemType = fileSystemType;
         }
     }
 
