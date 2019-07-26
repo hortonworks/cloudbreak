@@ -1,6 +1,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {% set os = salt['grains.get']('os') %}
 {% set osmajorrelease = salt['grains.get']('osmajorrelease') %}
+{% set dbus_lock_exists = salt['file.file_exists' ]('/etc/td-agent/databus_bundle.lock') %}
 
 {% if fluent.enabled %}
 
@@ -83,9 +84,81 @@ install_fluentd_plugins:
       - group
       - mode
 
-/etc/td-agent/td-agent.conf:
+{%- if fluent.is_systemd %}
+fluent_systemd_stop:
+  service.dead:
+    - enable: False
+    - name: td-agent
+    - onlyif: "test -f /etc/td-agent/td-agent.conf && ! grep -q 'CONFIGURED BY SALT' /etc/td-agent/td-agent.conf"
+{% else %}
+fluent_stop:
+  cmd.run:
+    - name: "/etc/init.d/td-agent stop"
+    - onlyif: "test -f /etc/td-agent/td-agent.conf && ! grep -q 'CONFIGURED BY SALT' /etc/td-agent/td-agent.conf"
+{% endif %}
+
+/etc/td-agent/td-agent_bundle_profile.conf:
   file.managed:
     - source: salt://fluent/template/td-agent.conf.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - file_mode: 640
+    - context:
+        databusClusterBundleLogs: "true"
+
+/etc/td-agent/td-agent_simple_profile.conf:
+  file.managed:
+    - source: salt://fluent/template/td-agent.conf.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - file_mode: 640
+    - context:
+        databusClusterBundleLogs: "false"
+
+copy_td_agent_conf:
+  cmd.run:
+{%- if not fluent.dbusReportBundleEnabled or (dbus_lock_exists and (not fluent.dbusReportBundleDisableStop)) %}
+    - name: "cp /etc/td-agent/td-agent_simple_profile.conf /etc/td-agent/td-agent.conf"
+    - onlyif: "! diff /etc/td-agent/td-agent_simple_profile.conf /etc/td-agent/td-agent.conf"
+{% else %}
+    - name: "cp /etc/td-agent/td-agent_bundle_profile.conf /etc/td-agent/td-agent.conf"
+    - onlyif: "! diff /etc/td-agent/td-agent_bundle_profile.conf /etc/td-agent/td-agent.conf"
+{% endif %}
+
+
+/etc/td-agent/input.conf:
+  file.managed:
+    - source: salt://fluent/template/input.conf.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - file_mode: 640
+    - context:
+        providerPrefix: {{ fluent.providerPrefix }}
+
+/etc/td-agent/databus_metering.conf:
+   file.managed:
+    - source: salt://fluent/template/databus_metering.conf.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - file_mode: 640
+
+/etc/td-agent/input_databus.conf:
+  file.managed:
+    - source: salt://fluent/template/input.conf.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - file_mode: 640
+    - context:
+        providerPrefix: "databus"
+
+/etc/td-agent/output_databus.conf:
+  file.managed:
+    - source: salt://fluent/template/output_databus.conf.j2
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
@@ -93,11 +166,29 @@ install_fluentd_plugins:
 
 /etc/td-agent/output.conf:
   file.managed:
+    - name: /etc/td-agent/output.conf
     - source: salt://fluent/template/output.conf.j2
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
     - file_mode: 640
+
+/etc/td-agent/databus_credential:
+   file.managed:
+    - source: salt://fluent/template/databus_credential.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - file_mode: '0600'
+
+{%- if (not dbus_lock_exists) and fluent.dbusReportBundleEnabled %}
+/etc/td-agent/databus_bundle.lock:
+   file.managed:
+     - user: "{{ fluent.user }}"
+     - group: "{{ fluent.group }}"
+     - file_mode: '0640'
+{% endif %}
+
 {%- if fluent.is_systemd %}
 fluentd_start_with_update_systemd_units:
   file.copy:
@@ -125,4 +216,23 @@ fluent_start:
       - TD_AGENT_USER: "{{ fluent.user }}"
       - TD_AGENT_GROUP: "{{ fluent.group }}"
 {% endif %}
+
+{%- if not fluent.dbusReportBundleDisableStop %}
+/etc/td-agent/delayed_restart.sh:
+   file.managed:
+    - source: salt://fluent/template/delayed_restart.sh.j2
+    - template: jinja
+    - user: "{{ fluent.user }}"
+    - group: "{{ fluent.group }}"
+    - file_mode: 750
+    - onlyif: "test -f /etc/td-agent/td-agent.conf && grep -q 'CLUSTER BUNDLE LOGS ENABLED' /etc/td-agent/td-agent.conf"
+
+fluentd_delalyed_restart:
+   cmd.run:
+    - names:
+       - "nohup sh /etc/td-agent/delayed_restart.sh > /etc/td-agent/delayed_restart.out 2>&1 &"
+       - "cp /etc/td-agent/td-agent_simple_profile.conf /etc/td-agent/td-agent.conf"
+    - onlyif: "test -f /etc/td-agent/td-agent.conf && grep -q 'CLUSTER BUNDLE LOGS ENABLED' /etc/td-agent/td-agent.conf"
+{% endif %}
+
 {% endif %}

@@ -1,0 +1,40 @@
+{%- from 'fluent/settings.sls' import fluent with context %}
+{%- if fluent.dbusValid and fluent.dbusMeteringEnabled %}
+<source>
+  @type tail
+  format none
+  path /var/log/cdp-metering/metering.json*
+  pos_file /var/log/td-agent/pos/metering.json.pos
+  tag metering_databus.metering-json
+  read_from_head true
+</source>
+
+<match metering_databus.*>
+  @type copy
+  <store ignore_error>
+    @type                            databus
+    credential_file                  /etc/td-agent/databus_credential
+    credential_profile_name          dbus
+    credential_file_reload_interval  60
+    debug                            false
+    endpoint                         "{{ fluent.dbusEndpoint }}"
+    event_message_field              message
+    headers                          app:distrox
+    stream_name                      LogCollection
+    partition_key                    "#{Socket.gethostname}"
+
+    <buffer tag,time>
+      @type file
+      path /var/log/td-agent/metering_databus
+      timekey 1m
+      timekey_wait 0s
+      chunk_limit_size 600k
+      flush_at_shutdown true
+    </buffer>
+  </store>
+</match>
+{% elif fluent.dbusMeteringEnabled %}
+# DBUS settings are not valid - check dbus credentials file
+{% else %}
+# DBUS metering is disabled
+{% endif %}
