@@ -13,6 +13,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateConfigInjector;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveRoles;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -25,6 +26,8 @@ public class ProcessAutoRestartInjector implements CmTemplateConfigInjector {
             "HBASE",
             HdfsRoles.HDFS,
             HiveRoles.HIVE,
+            "KAFKA",
+            KnoxRoles.KNOX,
             "LIVY",
             RangerRoles.RANGER,
             "SOLR",
