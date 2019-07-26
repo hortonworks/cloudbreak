@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -215,6 +216,9 @@ public class ClusterService {
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
+    @Inject
+    private UsageLoggingUtil usageLoggingUtil;
+
     @Measure(ClusterService.class)
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
         LOGGER.debug("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
@@ -256,6 +260,7 @@ public class ClusterService {
             LOGGER.debug("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             Cluster savedCluster = saveClusterAndComponent(cluster, components, stackName);
+            usageLoggingUtil.logClusterRequestedUsageEvent(cluster);
             if (stack.isAvailable()) {
                 flowManager.triggerClusterInstall(stack.getId());
                 InMemoryStateStore.putCluster(savedCluster.getId(), statusToPollGroupConverter.convert(savedCluster.getStatus()));
@@ -835,9 +840,13 @@ public class ClusterService {
         StackStatus stackStatus = stackService.getCurrentStatusByStackId(stackId);
         Optional<Cluster> cluster = retrieveClusterByStackIdWithoutAuth(stackId);
         if (cluster.isPresent()) {
+            Status clusterOldStatus = cluster.get().getStatus();
             cluster.get().setStatus(status);
             cluster.get().setStatusReason(statusReason);
             cluster = Optional.ofNullable(repository.save(cluster.get()));
+            if (cluster.isPresent()) {
+                usageLoggingUtil.logClusterStatusChangeUsageEvent(clusterOldStatus, cluster.get());
+            }
             if (status.isRemovableStatus()) {
                 InMemoryStateStore.deleteCluster(cluster.get().getId());
                 if (stackStatus.getStatus().isRemovableStatus()) {
