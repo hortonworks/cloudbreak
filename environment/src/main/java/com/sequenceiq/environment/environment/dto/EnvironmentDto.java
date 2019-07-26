@@ -12,6 +12,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.aws.AwsEnvironmentParamsDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
@@ -65,6 +66,8 @@ public class EnvironmentDto implements Payload {
     private Tunnel tunnel;
 
     private IdBrokerMappingSource idBrokerMappingSource;
+
+    private AwsEnvironmentParamsDto aws;
 
     @Override
     public Long getResourceId() {
@@ -260,6 +263,14 @@ public class EnvironmentDto implements Payload {
         this.idBrokerMappingSource = idBrokerMappingSource;
     }
 
+    public AwsEnvironmentParamsDto getAws() {
+        return aws;
+    }
+
+    public void setAws(AwsEnvironmentParamsDto aws) {
+        this.aws = aws;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -310,6 +321,8 @@ public class EnvironmentDto implements Payload {
         private Tunnel tunnel;
 
         private IdBrokerMappingSource idBrokerMappingSource;
+
+        private AwsEnvironmentParamsDto aws;
 
         private Builder() {
         }
@@ -429,6 +442,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withAws(AwsEnvironmentParamsDto aws) {
+            this.aws = aws;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -454,6 +472,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setSecurityAccess(securityAccess);
             environmentDto.setTunnel(tunnel);
             environmentDto.setIdBrokerMappingSource(idBrokerMappingSource);
+            environmentDto.setAws(aws);
             return environmentDto;
         }
     }

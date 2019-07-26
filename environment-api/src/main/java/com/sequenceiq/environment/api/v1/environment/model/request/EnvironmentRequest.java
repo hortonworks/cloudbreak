@@ -13,6 +13,7 @@ import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -66,6 +67,8 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource = IdBrokerMappingSource.MOCK;
+
+    private AwsEnvironmentParameters aws;
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
@@ -171,5 +174,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         this.idBrokerMappingSource = idBrokerMappingSource;
+    }
+
+    public AwsEnvironmentParameters getAws() {
+        return aws;
+    }
+
+    public void setAws(AwsEnvironmentParameters aws) {
+        this.aws = aws;
     }
 }

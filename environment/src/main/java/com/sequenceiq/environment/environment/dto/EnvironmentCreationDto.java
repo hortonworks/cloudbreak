@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
+import com.sequenceiq.environment.environment.dto.aws.AwsEnvironmentParamsDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -45,11 +46,14 @@ public class EnvironmentCreationDto {
 
     private final IdBrokerMappingSource idBrokerMappingSource;
 
+    private final AwsEnvironmentParamsDto aws;
+
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
-            Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, Tunnel tunnel, IdBrokerMappingSource idBrokerMappingSource) {
+            Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, Tunnel tunnel, IdBrokerMappingSource idBrokerMappingSource,
+            AwsEnvironmentParamsDto aws) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -61,6 +65,7 @@ public class EnvironmentCreationDto {
         this.createFreeIpa = createFreeIpa;
         this.created = created;
         this.tunnel = tunnel;
+        this.aws = aws;
         if (CollectionUtils.isEmpty(regions)) {
             this.regions = new HashSet<>();
         } else {
@@ -141,6 +146,10 @@ public class EnvironmentCreationDto {
         return idBrokerMappingSource;
     }
 
+    public AwsEnvironmentParamsDto getAws() {
+        return aws;
+    }
+
     public static final class Builder {
         private String name;
 
@@ -173,6 +182,8 @@ public class EnvironmentCreationDto {
         private Tunnel tunnel;
 
         private IdBrokerMappingSource idBrokerMappingSource;
+
+        private AwsEnvironmentParamsDto aws;
 
         public Builder() {
         }
@@ -261,10 +272,15 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withAws(AwsEnvironmentParamsDto aws) {
+            this.aws = aws;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId,
                     location, network, credential, regions, proxyNames, createFreeIpa,
-                    authentication, created, telemetry, securityAccess, tunnel, idBrokerMappingSource);
+                    authentication, created, telemetry, securityAccess, tunnel, idBrokerMappingSource, aws);
         }
     }
 }

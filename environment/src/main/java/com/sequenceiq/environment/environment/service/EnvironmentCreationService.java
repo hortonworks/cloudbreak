@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -77,6 +78,7 @@ public class EnvironmentCreationService {
         environment.setCloudPlatform(credential.getCloudPlatform());
         environment.setTunnel(creationDto.getTunnel());
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
+        environment.setParameters(new Json(creationDto.getAws()));
         return environment;
     }
 

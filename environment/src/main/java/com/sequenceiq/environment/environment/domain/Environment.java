@@ -60,6 +60,10 @@ public class Environment implements AuthResource {
     @Column(columnDefinition = "TEXT")
     private Json telemetry;
 
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json parameters;
+
     @Column(nullable = false)
     private String location;
 
@@ -356,5 +360,13 @@ public class Environment implements AuthResource {
 
     public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         this.idBrokerMappingSource = idBrokerMappingSource;
+    }
+
+    public Json getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Json parameters) {
+        this.parameters = parameters;
     }
 }
