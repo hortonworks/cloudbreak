@@ -241,14 +241,14 @@ public class ServiceEndpointCollector {
     private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp) {
         Gateway gateway = gt.getGateway();
         String url = String.format("https://%s:%s/%s/%s%s?host=http://%s:%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
-                ExposedService.NAMENODE.getKnoxUrl(), nameNodePrivateIp, ExposedService.NAMENODE.getCmPort());
+                ExposedService.NAMENODE.getKnoxUrl(), nameNodePrivateIp, ExposedService.NAMENODE.getPort());
         return url;
     }
 
     private String getHBaseUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp) {
         Gateway gateway = gt.getGateway();
         String url = String.format("https://%s:%s/%s/%s%s?host=%s&port=%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
-                ExposedService.HBASE_UI.getKnoxUrl(), nameNodePrivateIp, ExposedService.HBASE_UI.getCmPort());
+                ExposedService.HBASE_UI.getKnoxUrl(), nameNodePrivateIp, ExposedService.HBASE_UI.getPort());
         return url;
     }
 }
