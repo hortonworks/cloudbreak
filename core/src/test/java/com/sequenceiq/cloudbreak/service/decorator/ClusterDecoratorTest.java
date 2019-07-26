@@ -5,8 +5,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +20,6 @@ import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidato
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -65,9 +62,6 @@ public class ClusterDecoratorTest {
     private Stack stack;
 
     @Mock
-    private AmbariHaComponentFilter ambariHaComponentFilter;
-
-    @Mock
     private User user;
 
     @Before
@@ -84,7 +78,6 @@ public class ClusterDecoratorTest {
         blueprint.setBlueprintText(blueprintText);
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
                 .thenReturn(expectedClusterInstance);
-        when(ambariHaComponentFilter.getHaComponents(any())).thenReturn(Collections.emptySet());
         Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack);
 
         Assert.assertEquals(expectedClusterInstance, result);

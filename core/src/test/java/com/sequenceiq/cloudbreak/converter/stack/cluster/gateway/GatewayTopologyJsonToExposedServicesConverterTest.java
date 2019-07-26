@@ -24,7 +24,7 @@ public class GatewayTopologyJsonToExposedServicesConverterTest {
 
     private static final String TOPOLOGY_NAME = "topologyName";
 
-    private static final String AMBARI = "AMBARI";
+    private static final String CLOUDERA_MANAGER_UI = "CM-UI";
 
     private static final String INVALID = "INVALID";
 
@@ -63,11 +63,11 @@ public class GatewayTopologyJsonToExposedServicesConverterTest {
     public void testWithSingleExposedService() {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(TOPOLOGY_NAME);
-        gatewayTopologyJson.setExposedServices(Collections.singletonList(AMBARI));
+        gatewayTopologyJson.setExposedServices(Collections.singletonList(CLOUDERA_MANAGER_UI));
 
         ExposedServices exposedServices = underTest.convert(gatewayTopologyJson);
 
         assertEquals(1L, exposedServices.getServices().size());
-        assertEquals(AMBARI, exposedServices.getServices().get(0));
+        assertEquals(CLOUDERA_MANAGER_UI, exposedServices.getServices().get(0));
     }
 }

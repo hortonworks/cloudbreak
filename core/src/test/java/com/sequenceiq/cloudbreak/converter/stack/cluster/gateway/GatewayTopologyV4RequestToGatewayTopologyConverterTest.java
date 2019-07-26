@@ -23,13 +23,13 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayTopologyV4RequestValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToExposedServicesConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToGatewayTopologyConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GatewayTopologyV4RequestToGatewayTopologyConverterTest {
@@ -58,7 +58,7 @@ public class GatewayTopologyV4RequestToGatewayTopologyConverterTest {
     @Test
     public void testConvertWithNoTopologyName() {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
-        gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.AMBARI.getKnoxService()));
+        gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.CLOUDERA_MANAGER_UI.getKnoxService()));
         thrown.expect(BadRequestException.class);
 
         underTest.convert(gatewayTopologyJson);
@@ -79,7 +79,7 @@ public class GatewayTopologyV4RequestToGatewayTopologyConverterTest {
     public void testConvertWithAllKnoxServices() throws IOException {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(TOPOLOGY_NAME);
-        gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.ALL.getAmbariServiceName()));
+        gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.ALL.getServiceName()));
         ExposedServices expectedExposedServices = gatewayTopologyJsonToExposedServicesConverter.convert(gatewayTopologyJson);
         when(conversionService.convert(any(GatewayTopologyV4Request.class), eq(ExposedServices.class))).thenReturn(expectedExposedServices);
 
@@ -94,7 +94,7 @@ public class GatewayTopologyV4RequestToGatewayTopologyConverterTest {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(TOPOLOGY_NAME);
         String invalidService = "INVALID_SERVICE";
-        gatewayTopologyJson.setExposedServices(Arrays.asList(ExposedService.AMBARI.getKnoxService(), invalidService));
+        gatewayTopologyJson.setExposedServices(Arrays.asList(ExposedService.CLOUDERA_MANAGER_UI.getKnoxService(), invalidService));
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(invalidService);
 

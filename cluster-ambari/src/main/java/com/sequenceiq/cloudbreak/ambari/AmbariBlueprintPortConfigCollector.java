@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.ambari;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +11,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
 @ConfigurationProperties
@@ -25,7 +24,6 @@ public class AmbariBlueprintPortConfigCollector {
     public Map<String, Integer> getServicePorts(Blueprint blueprint) {
         Map<String, Integer> collectedPorts = new HashMap<>();
         collectConfiguredPorts(blueprint, collectedPorts);
-        addDefaultPorts(collectedPorts);
         return collectedPorts;
     }
 
@@ -67,16 +65,6 @@ public class AmbariBlueprintPortConfigCollector {
             throw new IllegalArgumentException(String.format("In the blueprint '%s' service has invalid host config. "
                     + "Host value is: '%s'.", service, host), e);
         }
-    }
-
-    private void addDefaultPorts(Map<String, Integer> collectedPorts) {
-        Arrays.stream(ExposedService.values()).forEach(exposedService -> {
-            if (StringUtils.isNotEmpty(exposedService.getKnoxService())) {
-                if (!collectedPorts.containsKey(exposedService.getKnoxService())) {
-                    collectedPorts.put(exposedService.getKnoxService(), exposedService.getAmbariPort());
-                }
-            }
-        });
     }
 
     public void setBlueprintServicePorts(List<PortConfig> blueprintServicePorts) {

@@ -42,7 +42,7 @@ public class GatewayTopologyV4RequestValidatorTest {
     @Test
     public void testWithKnoxServiceButNoTopologyName() {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
-        gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.AMBARI.getKnoxService()));
+        gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.CLOUDERA_MANAGER_UI.getKnoxService()));
 
         ValidationResult result = underTest.validate(gatewayTopologyJson);
 
@@ -54,7 +54,7 @@ public class GatewayTopologyV4RequestValidatorTest {
     public void testWithKnoxServiceAndTopologyName() {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName("topology");
-        gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.AMBARI.getKnoxService()));
+        gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.CLOUDERA_MANAGER_UI.getKnoxService()));
 
         ValidationResult result = underTest.validate(gatewayTopologyJson);
 
