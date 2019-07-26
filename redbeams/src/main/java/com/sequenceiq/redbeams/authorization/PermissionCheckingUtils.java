@@ -55,7 +55,8 @@ public class PermissionCheckingUtils {
             LOGGER.info("Checking permissions on " + resourceCrn + " for user " + userCrn);
             String requestId = threadBasedRequestIdProvider.getRequestId();
             LOGGER.debug("- tracking with request ID {}", requestId);
-            if (!grpcUmsClient.checkRight(userCrn, userCrn, action.name(), resourceCrn, Optional.of(requestId))) {
+            // temporarily static right with read or write, will be deleted
+            if (!grpcUmsClient.checkRight(userCrn, userCrn, "distrox/" + action.name().toLowerCase() + "Database", resourceCrn, Optional.of(requestId))) {
                 deniedResourceCrns.add(resourceCrn);
             }
         }
