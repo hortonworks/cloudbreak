@@ -27,12 +27,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
@@ -46,7 +46,7 @@ import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
-import com.sequenceiq.redbeams.service.network.NetworkParameterFactoryService;
+import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 
 @Component
@@ -75,7 +75,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private UserGeneratorService userGeneratorService;
 
     @Inject
-    private NetworkParameterFactoryService networkParameterFactoryService;
+    private NetworkParameterAdder networkParameterAdder;
 
     public DBStack convert(AllocateDatabaseServerV4Request source, String ownerCrnString) {
         Crn ownerCrn = Crn.safeFromString(ownerCrnString);
@@ -136,16 +136,16 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         dbStack.setPlatformVariant(cloudPlatform);
     }
 
-    private MappableBase getNetworkFromEnvironment(DetailedEnvironmentResponse environmentResponse) {
-        if (environmentResponse.getNetwork() == null || environmentResponse.getNetwork().getSubnetMetas() == null) {
+    private Map<String, Object> getNetworkFromEnvironment(EnvironmentNetworkResponse environmentNetworkResponse) {
+        if (environmentNetworkResponse == null || environmentNetworkResponse.getSubnetMetas() == null) {
             throw new RedbeamsException("Environment does not contain metadata for subnets");
         }
-        List<CloudSubnet> subnetMetas = new ArrayList<>(environmentResponse.getNetwork().getSubnetMetas().values());
+        List<CloudSubnet> subnetMetas = new ArrayList<>(environmentNetworkResponse.getSubnetMetas().values());
         List<String> chosenSubnetIds = subnetChooserService.chooseSubnetsFromDifferentAzs(subnetMetas).stream()
                 .map(CloudSubnet::getId)
                 .collect(Collectors.toList());
 
-        return networkParameterFactoryService.createNetworkParameters(chosenSubnetIds, environmentResponse.getCloudPlatform());
+        return networkParameterAdder.addNetworkParameters(new HashMap<>(), chosenSubnetIds);
     }
 
     private Network buildNetwork(NetworkV4Request source, DetailedEnvironmentResponse environmentResponse) {
@@ -154,7 +154,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
         Map<String, Object> parameters = source != null
                 ? providerParameterCalculator.get(source).asMap()
-                : getNetworkFromEnvironment(environmentResponse).asMap();
+                : getNetworkFromEnvironment(environmentResponse.getNetwork());
+
+        networkParameterAdder.addVpcParameters(parameters, environmentResponse.getNetwork());
 
         if (parameters != null) {
             try {
@@ -196,9 +198,11 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     private SecurityGroup buildSecurityGroup(SecurityGroupV4Request source) {
         SecurityGroup securityGroup = new SecurityGroup();
+        if (source == null) {
+            return securityGroup;
+        }
 
         securityGroup.setSecurityGroupIds(source.getSecurityGroupIds());
-
         return securityGroup;
     }
 

@@ -156,9 +156,9 @@ public class AwsSetup implements Setup {
             } else {
                 for (Subnet subnet : describeSubnetsResult.getSubnets()) {
                     String vpcId = subnet.getVpcId();
-                    if (vpcId != null && !vpcId.equals(awsNetworkView.getExistingVPC())) {
+                    if (vpcId != null && !vpcId.equals(awsNetworkView.getExistingVpc())) {
                         throw new CloudConnectorException(String.format(SUBNETVPC_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingSubnet(),
-                                awsNetworkView.getExistingVPC()));
+                                awsNetworkView.getExistingVpc()));
                     }
                 }
             }
@@ -168,16 +168,16 @@ public class AwsSetup implements Setup {
     private void validateExistingIGW(AwsNetworkView awsNetworkView, AmazonEC2 amazonEC2Client) {
         if (awsNetworkView.isExistingIGW()) {
             DescribeInternetGatewaysRequest describeInternetGatewaysRequest = new DescribeInternetGatewaysRequest();
-            describeInternetGatewaysRequest.withInternetGatewayIds(awsNetworkView.getExistingIGW());
+            describeInternetGatewaysRequest.withInternetGatewayIds(awsNetworkView.getExistingIgw());
             DescribeInternetGatewaysResult describeInternetGatewaysResult = amazonEC2Client.describeInternetGateways(describeInternetGatewaysRequest);
             if (describeInternetGatewaysResult.getInternetGateways().size() < 1) {
-                throw new CloudConnectorException(String.format(IGW_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingIGW()));
+                throw new CloudConnectorException(String.format(IGW_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingIgw()));
             } else {
                 InternetGateway internetGateway = describeInternetGatewaysResult.getInternetGateways().get(0);
                 InternetGatewayAttachment attachment = internetGateway.getAttachments().get(0);
-                if (attachment != null && !attachment.getVpcId().equals(awsNetworkView.getExistingVPC())) {
-                    throw new CloudConnectorException(String.format(IGWVPC_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingIGW(),
-                            awsNetworkView.getExistingVPC()));
+                if (attachment != null && !attachment.getVpcId().equals(awsNetworkView.getExistingVpc())) {
+                    throw new CloudConnectorException(String.format(IGWVPC_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingIgw(),
+                            awsNetworkView.getExistingVpc()));
                 }
             }
         }

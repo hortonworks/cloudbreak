@@ -73,11 +73,25 @@
         "MaxValue": 65355
     },
     </#if>
+    <#if hasSecurityGroup>
     "VPCSecurityGroupsParameter": {
         "Type": "List<AWS::EC2::SecurityGroup::Id>",
         "Description": "VPC security groups"
     },
-
+    <#else>
+    "DBSecurityGroupNameParameter": {
+        "Type": "String",
+        "Description": "DB security group name"
+    },
+    "VPCIdParameter": {
+        "Type":"AWS::EC2::VPC::Id",
+        "Description":"VPC ID"
+    },
+    "VPCCidrParameter": {
+        "Type":"String",
+        "Description":"VPC Cidr"
+    },
+    </#if>
     "StackOwner" : {
       "Description" : "The instances will have this parameter as an Owner tag.",
       "Type" : "String",
@@ -87,7 +101,40 @@
   },
 
   "Resources" : {
-
+        <#if !hasSecurityGroup>
+        "VPCSecurityGroup": {
+          "Type" : "AWS::EC2::SecurityGroup",
+          "Properties" : {
+              "GroupDescription" : "Security group attached to the database server",
+              "GroupName" : { "Ref":"DBSecurityGroupNameParameter"},
+              "SecurityGroupEgress" : [
+                    {
+                      "CidrIp": "0.0.0.0/0",
+                      "IpProtocol": "-1"
+                    }
+              ],
+              "SecurityGroupIngress" : [
+                    {
+                      "IpProtocol" : "tcp",
+                      <#if !hasPort>
+                      "FromPort": 5432,
+                      "ToPort" : 5432,
+                      <#else>
+                      "FromPort": { "Ref": "PortParameter" },
+                      "ToPort" : { "Ref": "PortParameter" },
+                      </#if>
+                      "CidrIp" : {"Ref":"VPCCidrParameter"}
+                    }
+              ],
+              "Tags" : [
+                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
+                    { "Key" : "cb-resource-type", "Value" : "${database_resource}" },
+                    { "Key" : "owner", "Value" : { "Ref" : "StackOwner" } }
+              ],
+              "VpcId" : { "Ref": "VPCIdParameter" }
+            }
+        },
+        </#if>
         "DBSubnetGroup": {
             "Type": "AWS::RDS::DBSubnetGroup",
             "Properties": {
@@ -123,7 +170,11 @@
                     { "Key" : "cb-resource-type", "Value" : "${database_resource}" },
                     { "Key" : "owner", "Value" : { "Ref" : "StackOwner" } }
                 ],
+                <#if hasSecurityGroup>
                 "VPCSecurityGroups": { "Ref": "VPCSecurityGroupsParameter" }
+                <#else>
+                "VPCSecurityGroups": [{ "Ref": "VPCSecurityGroup" }]
+                </#if>
             }
         }
   },

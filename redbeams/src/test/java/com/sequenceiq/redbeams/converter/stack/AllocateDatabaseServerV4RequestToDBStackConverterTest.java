@@ -10,7 +10,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -53,7 +52,7 @@ import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
-import com.sequenceiq.redbeams.service.network.NetworkParameterFactoryService;
+import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 
 public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
@@ -90,7 +89,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private UserGeneratorService userGeneratorService;
 
     @Mock
-    private NetworkParameterFactoryService networkParameterFactoryService;
+    private NetworkParameterAdder networkParameterAdder;
 
     @InjectMocks
     private AllocateDatabaseServerV4RequestToDBStackConverter underTest;
@@ -174,7 +173,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator).get(networkRequest);
         verify(subnetChooserService, never()).chooseSubnetsFromDifferentAzs(anyList());
-        verify(networkParameterFactoryService, never()).createNetworkParameters(anyList(), anyString());
+        verify(networkParameterAdder, never()).addNetworkParameters(any(), any());
         verify(userGeneratorService, never()).generatePassword();
         verify(userGeneratorService, never()).generateUserName();
     }
@@ -200,9 +199,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .build();
         when(environmentService.getByCrn("myenv")).thenReturn(environment);
         when(subnetChooserService.chooseSubnetsFromDifferentAzs(any())).thenReturn(cloudSubnets);
-        AwsNetworkV4Parameters awsNetworkV4Parameters = mock(AwsNetworkV4Parameters.class);
-        when(awsNetworkV4Parameters.asMap()).thenReturn(NETWORK_REQUEST_PARAMETERS);
-        when(networkParameterFactoryService.createNetworkParameters(any(), anyString())).thenReturn(awsNetworkV4Parameters);
+        when(networkParameterAdder.addNetworkParameters(any(), any())).thenReturn(NETWORK_REQUEST_PARAMETERS);
         when(userGeneratorService.generatePassword()).thenReturn(PASSWORD);
         when(userGeneratorService.generateUserName()).thenReturn(USERNAME);
 
@@ -217,7 +214,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator, never()).get(networkRequest);
         verify(subnetChooserService).chooseSubnetsFromDifferentAzs(anyList());
-        verify(networkParameterFactoryService).createNetworkParameters(anyList(), anyString());
+        verify(networkParameterAdder).addNetworkParameters(any(), any());
         verify(userGeneratorService).generatePassword();
         verify(userGeneratorService).generateUserName();
     }

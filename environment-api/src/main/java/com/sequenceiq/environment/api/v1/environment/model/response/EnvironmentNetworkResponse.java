@@ -57,6 +57,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         private Set<String> subnetIds;
 
+        private String networkCidr;
+
         private Map<String, CloudSubnet> subnetMetas;
 
         private EnvironmentNetworkAwsParams aws;
@@ -107,11 +109,17 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return this;
         }
 
+        public EnvironmentNetworkResponseBuilder withNetworkCidr(String networkCidr) {
+            this.networkCidr = networkCidr;
+            return this;
+        }
+
         public EnvironmentNetworkResponse build() {
             EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
             environmentNetworkResponse.setCrn(crn);
             environmentNetworkResponse.setName(name);
             environmentNetworkResponse.setSubnetIds(subnetIds);
+            environmentNetworkResponse.setNetworkCidr(networkCidr);
             environmentNetworkResponse.setAws(aws);
             environmentNetworkResponse.setAzure(azure);
             environmentNetworkResponse.setYarn(yarn);
