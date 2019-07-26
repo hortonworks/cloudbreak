@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.view;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.IGW;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.SUBNET;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC;
+import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_CIDR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -10,13 +11,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.sequenceiq.cloudbreak.cloud.model.Network;
-
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 public class AwsNetworkViewTest {
 
@@ -36,28 +37,40 @@ public class AwsNetworkViewTest {
     public void testVpc() {
         when(network.getStringParameter(VPC)).thenReturn("vpc-123");
         assertTrue(underTest.isExistingVPC());
-        assertEquals("vpc-123", underTest.getExistingVPC());
+        assertEquals("vpc-123", underTest.getExistingVpc());
     }
 
     @Test
     public void testNoVpc() {
         when(network.getStringParameter(VPC)).thenReturn(null);
         assertFalse(underTest.isExistingVPC());
-        assertNull(underTest.getExistingVPC());
+        assertNull(underTest.getExistingVpc());
+    }
+
+    @Test
+    public void testVpcCidr() {
+        when(network.getStringParameter(VPC_CIDR)).thenReturn("0.1.2.3/24");
+        assertEquals("0.1.2.3/24", underTest.getExistingVpcCidr());
+    }
+
+    @Test
+    public void testNoVpcCidr() {
+        when(network.getStringParameter(VPC)).thenReturn(null);
+        assertNull(underTest.getExistingVpcCidr());
     }
 
     @Test
     public void testIgw() {
         when(network.getStringParameter(IGW)).thenReturn("igw-123");
         assertTrue(underTest.isExistingIGW());
-        assertEquals("igw-123", underTest.getExistingIGW());
+        assertEquals("igw-123", underTest.getExistingIgw());
     }
 
     @Test
     public void testNoIgw() {
         when(network.getStringParameter(IGW)).thenReturn(null);
         assertFalse(underTest.isExistingIGW());
-        assertNull(underTest.getExistingIGW());
+        assertNull(underTest.getExistingIgw());
     }
 
     @Test

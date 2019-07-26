@@ -148,5 +148,4 @@ public class DatabaseService {
     private DatabaseServerStatusV4Response getDatabaseStatus(String databaseCrn) {
         return databaseServerV4Endpoint.getStatusOfManagedDatabaseServerByCrn(databaseCrn);
     }
-
 }

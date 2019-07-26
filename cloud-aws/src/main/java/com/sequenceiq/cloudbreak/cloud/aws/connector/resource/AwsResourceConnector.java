@@ -92,7 +92,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     private boolean deployingToSameVPC(AwsNetworkView awsNetworkView, boolean existingVPC) {
-        return StringUtils.isNotEmpty(cloudbreakVpc) && existingVPC && awsNetworkView.getExistingVPC().equals(cloudbreakVpc);
+        return StringUtils.isNotEmpty(cloudbreakVpc) && existingVPC && awsNetworkView.getExistingVpc().equals(cloudbreakVpc);
     }
 
     @Override

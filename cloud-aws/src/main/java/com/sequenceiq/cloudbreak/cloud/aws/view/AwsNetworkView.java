@@ -13,6 +13,9 @@ public class AwsNetworkView {
     static final String VPC = "vpcId";
 
     @VisibleForTesting
+    static final String VPC_CIDR = "vpcCidr";
+
+    @VisibleForTesting
     static final String IGW = "internetGatewayId";
 
     @VisibleForTesting
@@ -48,11 +51,15 @@ public class AwsNetworkView {
         return isSubnetList() ? List.of(getExistingSubnet().split(",")) : (isExistingSubnet() ? List.of(getExistingSubnet()) : List.of());
     }
 
-    public String getExistingIGW() {
+    public String getExistingIgw() {
         return network.getStringParameter(IGW);
     }
 
-    public String getExistingVPC() {
+    public String getExistingVpc() {
         return network.getStringParameter(VPC);
+    }
+
+    public String getExistingVpcCidr() {
+        return network.getStringParameter(VPC_CIDR);
     }
 }

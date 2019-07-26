@@ -23,9 +23,10 @@ import com.amazonaws.services.ec2.model.Image;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbSubnetGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsVpcSecurityGroupView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -91,9 +92,9 @@ public class AwsStackRequestHelper {
                     .withParameterValue(ac.getCloudContext().getLocation().getAvailabilityZone().value()));
         }
         if (awsNetworkView.isExistingVPC()) {
-            parameters.add(new Parameter().withParameterKey("VPCId").withParameterValue(awsNetworkView.getExistingVPC()));
+            parameters.add(new Parameter().withParameterKey("VPCId").withParameterValue(awsNetworkView.getExistingVpc()));
             if (awsNetworkView.isExistingIGW()) {
-                parameters.add(new Parameter().withParameterKey("InternetGatewayId").withParameterValue(awsNetworkView.getExistingIGW()));
+                parameters.add(new Parameter().withParameterKey("InternetGatewayId").withParameterValue(awsNetworkView.getExistingIgw()));
             }
             if (awsNetworkView.isExistingSubnet()) {
                 parameters.add(new Parameter().withParameterKey("SubnetId").withParameterValue(awsNetworkView.getExistingSubnet()));
@@ -123,6 +124,7 @@ public class AwsStackRequestHelper {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         AwsRdsInstanceView awsRdsInstanceView = new AwsRdsInstanceView(stack.getDatabaseServer());
         AwsRdsDbSubnetGroupView awsRdsDbSubnetGroupView = new AwsRdsDbSubnetGroupView(stack.getDatabaseServer());
+        AwsRdsVpcSecurityGroupView awsRdsVpcSecurityGroupView = new AwsRdsVpcSecurityGroupView(stack.getDatabaseServer());
         List<Parameter> parameters = new ArrayList<>(asList(
                 new Parameter().withParameterKey("DBInstanceClassParameter").withParameterValue(awsRdsInstanceView.getDBInstanceClass()),
                 new Parameter().withParameterKey("DBInstanceIdentifierParameter").withParameterValue(awsRdsInstanceView.getDBInstanceIdentifier()),
@@ -131,14 +133,30 @@ public class AwsStackRequestHelper {
                 new Parameter().withParameterKey("EngineParameter").withParameterValue(awsRdsInstanceView.getEngine()),
                 new Parameter().withParameterKey("MasterUsernameParameter").withParameterValue(awsRdsInstanceView.getMasterUsername()),
                 new Parameter().withParameterKey("MasterUserPasswordParameter").withParameterValue(awsRdsInstanceView.getMasterUserPassword()),
-                new Parameter().withParameterKey("VPCSecurityGroupsParameter").withParameterValue(String.join(",", awsRdsInstanceView.getVPCSecurityGroups())),
-                new Parameter().withParameterKey("StackOwner").withParameterValue(ac.getCloudContext().getUserName())
-        ));
+                new Parameter().withParameterKey("StackOwner").withParameterValue(ac.getCloudContext().getUserName()))
+        );
 
         addParameterIfNotNull(parameters, "AllocatedStorageParameter", awsRdsInstanceView.getAllocatedStorage());
         addParameterIfNotNull(parameters, "BackupRetentionPeriodParameter", awsRdsInstanceView.getBackupRetentionPeriod());
         addParameterIfNotNull(parameters, "EngineVersionParameter", awsRdsInstanceView.getEngineVersion());
         addParameterIfNotNull(parameters, "PortParameter", stack.getDatabaseServer().getPort());
+
+        if (awsRdsInstanceView.getVPCSecurityGroups().isEmpty()) {
+            // VPC-id and VPC cidr should be filled in
+            parameters.addAll(
+                    asList(
+                            new Parameter().withParameterKey("VPCIdParameter").withParameterValue(String.valueOf(awsNetworkView.getExistingVpc())),
+                            new Parameter().withParameterKey("VPCCidrParameter").withParameterValue(String.valueOf(awsNetworkView.getExistingVpcCidr())),
+                            new Parameter().withParameterKey("DBSecurityGroupNameParameter")
+                                    .withParameterValue(awsRdsVpcSecurityGroupView.getDBSecurityGroupName())
+                    )
+            );
+        } else {
+            parameters.add(
+                    new Parameter().withParameterKey("VPCSecurityGroupsParameter")
+                            .withParameterValue(String.join(",", awsRdsInstanceView.getVPCSecurityGroups()))
+            );
+        }
 
         return parameters;
     }
