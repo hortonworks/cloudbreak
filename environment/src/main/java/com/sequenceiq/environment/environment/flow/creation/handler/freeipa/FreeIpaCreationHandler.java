@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
-import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -106,8 +105,6 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             if (environmentOptional.isPresent() && environmentOptional.get().isCreateFreeIpa()) {
                 Environment environment = environmentOptional.get();
                 if (supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())) {
-                    environment.setStatus(EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS);
-                    environmentService.save(environment);
                     createFreeIpa(environmentDtoEvent, environmentDto, environment);
                 }
             }
