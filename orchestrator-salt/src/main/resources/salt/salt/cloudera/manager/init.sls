@@ -81,21 +81,34 @@ cloudera_manager_set_parcel_validation:
 
 {% if cloudera_manager.communication.autotls_enabled == True %}
 
-/opt/cm-setup-autotls.sh:
+/opt/salt/scripts/cm-setup-autotls.sh:
   file.managed:
     - makedirs: True
     - source: salt://cloudera/manager/scripts/setup-autotls.sh
     - template: jinja
-    - mode: 744
+    - mode: 700
     - context:
         cm_keytab: {{ cloudera_manager.cm_keytab }}
         server_address: {{ metadata.server_address }}
 
 run_autotls_setup:
   cmd.run:
-    - name: /opt/cm-setup-autotls.sh
+    - name: /opt/salt/scripts/cm-setup-autotls.sh
     - require:
-      - file: /opt/cm-setup-autotls.sh
+      - file: /opt/salt/scripts/cm-setup-autotls.sh
     - unless: test -f /var/autotls_setup_success
 
+/opt/salt/scripts/cm_generate_agent_tokens.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://cloudera/manager/scripts/generate_agent_tokens.sh
+    - template: jinja
+    - mode: 700
+
+run_generate_agent_tokens:
+  cmd.run:
+    - name: /opt/salt/scripts/cm_generate_agent_tokens.sh
+    - require:
+        - file: /opt/salt/scripts/cm_generate_agent_tokens.sh
+        - cmd: run_autotls_setup
 {% endif %}
