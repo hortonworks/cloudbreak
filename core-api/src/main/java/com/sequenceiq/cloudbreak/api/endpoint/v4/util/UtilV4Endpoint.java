@@ -10,7 +10,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
@@ -80,5 +82,12 @@ public interface UtilV4Endpoint {
     @ApiOperation(value = UtilityOpDescription.NOTIFICATION_TEST, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "postNotificationTest")
     void postNotificationTest();
+
+    @POST
+    @Path("check_right")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UtilityOpDescription.CHECK_RIGHT, produces = ContentType.JSON, notes = Notes.CHECK_RIGHT_NOTES,
+            nickname = "checkRight")
+    CheckRightV4Response checkRight(CheckRightV4Request checkRightV4Request);
 
 }

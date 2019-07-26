@@ -83,6 +83,7 @@ public class Notes {
             + "create clusters in given regions in a given cloud provider.";
     public static final String KERBEROS_CONFIG_NOTES = "Kerberos config operations";
     public static final String INFO_CONFIG_NOTES = "Info config operations";
+    public static final String CHECK_RIGHT_NOTES = "Check right from UI";
 
     private Notes() {
     }

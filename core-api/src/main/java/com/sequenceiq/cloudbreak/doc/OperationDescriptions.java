@@ -149,6 +149,7 @@ public class OperationDescriptions {
         public static final String DATALAKE_PREREQUISITES = "returns datalake prerequisites";
         public static final String CHECK_CLIENT_VERSION = "checks the client version";
         public static final String NOTIFICATION_TEST = "Trigger a new notification to the notification system could be validated from the begins";
+        public static final String CHECK_RIGHT = "Checking rights from UI";
     }
 
     public static class DatabaseOpDescription {
