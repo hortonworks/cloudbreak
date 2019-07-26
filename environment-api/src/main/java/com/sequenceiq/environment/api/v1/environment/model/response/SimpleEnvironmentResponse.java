@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
 
@@ -41,6 +42,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
         private Long created;
 
         private Tunnel tunnel;
+
+        private AwsEnvironmentParameters aws;
 
         private Builder() {
         }
@@ -115,6 +118,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withAws(AwsEnvironmentParameters aws) {
+            this.aws = aws;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -131,6 +139,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setCreated(created);
             simpleEnvironmentResponse.setTelemetry(telemetry);
             simpleEnvironmentResponse.setTunnel(tunnel);
+            simpleEnvironmentResponse.setAws(aws);
             return simpleEnvironmentResponse;
         }
     }

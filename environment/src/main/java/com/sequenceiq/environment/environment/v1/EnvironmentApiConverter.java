@@ -18,6 +18,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNe
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -33,6 +35,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
+import com.sequenceiq.environment.environment.dto.aws.AwsEnvironmentParamsDto;
+import com.sequenceiq.environment.environment.dto.aws.S3GuardParamsDto;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -82,7 +86,8 @@ public class EnvironmentApiConverter {
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry()))
                 .withRegions(request.getRegions())
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
-                .withIdBrokerMappingSource(request.getIdBrokerMappingSource());
+                .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
+                .withAws(getIfNotNull(request.getAws(), this::awsParamsToDto));
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
@@ -95,6 +100,18 @@ public class EnvironmentApiConverter {
             builder.withSecurityAccess(securityAccess);
         }
         return builder.build();
+    }
+
+    private AwsEnvironmentParamsDto awsParamsToDto(AwsEnvironmentParameters aws) {
+        return AwsEnvironmentParamsDto.aAwsEnvironmentParamsBuilder()
+                .withS3guard(s3Guard(aws.getS3guard()))
+                .build();
+    }
+
+    private S3GuardParamsDto s3Guard(S3GuardRequestParameters s3Guard) {
+        return S3GuardParamsDto.aS3GuardParamsBuilder()
+                .withDynamoDbTableName(s3Guard.getDynamoDbTableName())
+                .build();
     }
 
     public LocationDto locationRequestToDto(LocationRequest location) {
@@ -171,7 +188,8 @@ public class EnvironmentApiConverter {
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withTunnel(environmentDto.getTunnel())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
-                .withIdBrokerMappingSource(environmentDto.getIdBrokerMappingSource());
+                .withIdBrokerMappingSource(environmentDto.getIdBrokerMappingSource())
+                .withAws(getIfNotNull(environmentDto.getAws(), this::awsEnvParamsToAwsEnvironmentParams));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
         NullUtil.doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));
@@ -192,10 +210,23 @@ public class EnvironmentApiConverter {
                 .withCreated(environmentDto.getCreated())
                 .withTunnel(environmentDto.getTunnel())
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
-                .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
+                .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
+                .withAws(getIfNotNull(environmentDto.getAws(), this::awsEnvParamsToAwsEnvironmentParams));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
         return builder.build();
+    }
+
+    private AwsEnvironmentParameters awsEnvParamsToAwsEnvironmentParams(AwsEnvironmentParamsDto aws) {
+        return AwsEnvironmentParameters.awsEnvironmentParameters()
+                .withS3guard(s3guardDtoToS3guardParam(aws.getS3guard()))
+                .build();
+    }
+
+    private S3GuardRequestParameters s3guardDtoToS3guardParam(S3GuardParamsDto s3Guard) {
+        return S3GuardRequestParameters.s3GuardRequestParameters()
+                .withDynamoDbTableName(s3Guard.getDynamoDbTableName())
+                .build();
     }
 
     public EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network) {

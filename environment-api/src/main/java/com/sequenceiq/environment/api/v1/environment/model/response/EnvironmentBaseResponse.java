@@ -6,6 +6,7 @@ import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescriptio
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -63,6 +64,8 @@ public abstract class EnvironmentBaseResponse {
 
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource;
+
+    private AwsEnvironmentParameters aws;
 
     public String getCrn() {
         return crn;
@@ -206,5 +209,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         this.idBrokerMappingSource = idBrokerMappingSource;
+    }
+
+    public AwsEnvironmentParameters getAws() {
+        return aws;
+    }
+
+    public void setAws(AwsEnvironmentParameters aws) {
+        this.aws = aws;
     }
 }
