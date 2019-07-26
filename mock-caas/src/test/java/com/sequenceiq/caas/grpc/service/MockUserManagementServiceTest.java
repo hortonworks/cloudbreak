@@ -31,7 +31,7 @@ public class MockUserManagementServiceTest {
     public void testSetLicenseShouldReturnACloudbreakLicense() throws IOException {
         Path licenseFilePath = Files.createTempFile("license", "txt");
         Files.writeString(licenseFilePath, VALID_LICENSE);
-        ReflectionTestUtils.setField(underTest, "cbLicenseFilePath", licenseFilePath.toString());
+        ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", licenseFilePath.toString());
         underTest.init();
 
         String actual = ReflectionTestUtils.getField(underTest, "cbLicense").toString();
@@ -42,7 +42,7 @@ public class MockUserManagementServiceTest {
 
     @Test
     public void testSetLicenseShouldEmptyStringWhenTheFileIsNotExists() {
-        ReflectionTestUtils.setField(underTest, "cbLicenseFilePath", "/etc/license");
+        ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", "/etc/license");
         underTest.init();
 
         String actual = ReflectionTestUtils.getField(underTest, "cbLicense").toString();
