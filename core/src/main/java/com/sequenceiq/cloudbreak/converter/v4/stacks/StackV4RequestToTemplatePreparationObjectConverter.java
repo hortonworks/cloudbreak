@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -177,9 +178,12 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     throw new CloudbreakServiceException("Cannot collect shared service resources from datalake!");
                 }
             }
-            if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK && source.getCloudPlatform() == CloudPlatform.AWS) {
-                Map<String, String> groupMapping = awsIdentityMappingService.getIdentityGroupMapping(credential);
-                Map<String, String> userMapping = awsIdentityMappingService.getIdentityUserMapping(credential);
+            if (source.getType() == StackType.DATALAKE
+                    && environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK
+                    && source.getCloudPlatform() == CloudPlatform.AWS) {
+
+                Map<String, String> groupMapping = awsIdentityMappingService.getIdentityGroupMapping(source.getPlacement().getRegion(), credential);
+                Map<String, String> userMapping = awsIdentityMappingService.getIdentityUserMapping(source.getPlacement().getRegion(), credential);
                 builder.withIdentityGroupMapping(groupMapping);
                 builder.withIdentityUserMapping(userMapping);
             }

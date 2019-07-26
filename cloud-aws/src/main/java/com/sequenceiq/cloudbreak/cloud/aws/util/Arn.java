@@ -1,8 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.aws.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class Arn {
+
+    private static final Pattern ARN_PATTERN = Pattern.compile("^arn:(.+?):(.+?):(.*?):(.*?):(.+)$");
+
+    private final String prefix;
 
     private final String partition;
 
@@ -14,12 +21,17 @@ public class Arn {
 
     private final String resource;
 
-    private Arn(String partition, String service, String region, String accountId, String resource) {
+    private Arn(String prefix, String partition, String service, String region, String accountId, String resource) {
+        this.prefix = prefix;
         this.partition = partition;
         this.service = service;
         this.region = region;
         this.accountId = accountId;
         this.resource = resource;
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 
     public String getPartition() {
@@ -46,15 +58,12 @@ public class Arn {
         if (StringUtils.isBlank(arnString)) {
             throw new IllegalArgumentException("ARN must not be empty.");
         }
-
-        String[] parts = arnString.split(":", -1);
-
-        //CHECKSTYLE:OFF: checkstyle:magicnumber
-        if (parts.length != 5) {
-            throw new IllegalArgumentException("ARN must consist of exactly 5 parts.");
+        Matcher matcher = ARN_PATTERN.matcher(arnString);
+        if (matcher.find()) {
+            //CHECKSTYLE:OFF: checkstyle:magicnumber
+            return new Arn("arn", matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
+            //CHECKSTYLE:ON: checkstyle:magicnumber
         }
-
-        return new Arn(parts[0], parts[1], parts[2], parts[3], parts[4]);
-        //CHECKSTYLE:ON: checkstyle:magicnumber
+        throw new IllegalArgumentException("ARN has invalid format.");
     }
 }

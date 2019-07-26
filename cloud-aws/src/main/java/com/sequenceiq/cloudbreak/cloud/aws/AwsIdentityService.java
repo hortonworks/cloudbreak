@@ -19,10 +19,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 public class AwsIdentityService implements IdentityService {
 
     @Override
-    public String getAccountId(CloudCredential cloudCredential) {
+    public String getAccountId(String region, CloudCredential cloudCredential) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
         if (awsCredentialView.getKeyBased() != null) {
-            return getAccountIdUsingAccessKey(awsCredentialView.getAccessKey(), awsCredentialView.getSecretKey());
+            return getAccountIdUsingAccessKey(region, awsCredentialView.getAccessKey(), awsCredentialView.getSecretKey());
         }
         return Arn.of(awsCredentialView.getRoleArn()).getAccountId();
     }
@@ -37,9 +37,11 @@ public class AwsIdentityService implements IdentityService {
         return AwsConstants.AWS_VARIANT;
     }
 
-    private String getAccountIdUsingAccessKey(String accessKey, String secretKey) {
-        AWSSecurityTokenService stsService = AWSSecurityTokenServiceClientBuilder.standard().withCredentials(
-                new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))).build();
+    private String getAccountIdUsingAccessKey(String region, String accessKey, String secretKey) {
+        AWSSecurityTokenService stsService = AWSSecurityTokenServiceClientBuilder.standard()
+                .withRegion(region)
+                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
+                .build();
 
         GetCallerIdentityResult callerIdentity = stsService.getCallerIdentity(new GetCallerIdentityRequest());
         return callerIdentity.getAccount();
