@@ -45,7 +45,7 @@ type SdxClusterDetailResponse struct {
 	StackV4Response *StackV4Response `json:"stackV4Response,omitempty"`
 
 	// status
-	// Enum: [REQUESTED REQUESTED_FROM_CLOUDBREAK RUNNING PROVISIONING_FAILED DELETE_REQUESTED DELETED DELETE_FAILED]
+	// Enum: [REQUESTED STACK_CREATION_IN_PROGRESS STACK_DELETED STACK_DELETION_IN_PROGRESS EXTERNAL_DATABASE_CREATION_IN_PROGRESS EXTERNAL_DATABASE_DELETION_IN_PROGRESS RUNNING PROVISIONING_FAILED DELETE_REQUESTED DELETED DELETE_FAILED]
 	Status string `json:"status,omitempty"`
 
 	// status reason
@@ -142,7 +142,7 @@ var sdxClusterDetailResponseTypeStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["REQUESTED","REQUESTED_FROM_CLOUDBREAK","RUNNING","PROVISIONING_FAILED","DELETE_REQUESTED","DELETED","DELETE_FAILED"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["REQUESTED","STACK_CREATION_IN_PROGRESS","STACK_DELETED","STACK_DELETION_IN_PROGRESS","EXTERNAL_DATABASE_CREATION_IN_PROGRESS","EXTERNAL_DATABASE_DELETION_IN_PROGRESS","RUNNING","PROVISIONING_FAILED","DELETE_REQUESTED","DELETED","DELETE_FAILED"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -155,8 +155,20 @@ const (
 	// SdxClusterDetailResponseStatusREQUESTED captures enum value "REQUESTED"
 	SdxClusterDetailResponseStatusREQUESTED string = "REQUESTED"
 
-	// SdxClusterDetailResponseStatusREQUESTEDFROMCLOUDBREAK captures enum value "REQUESTED_FROM_CLOUDBREAK"
-	SdxClusterDetailResponseStatusREQUESTEDFROMCLOUDBREAK string = "REQUESTED_FROM_CLOUDBREAK"
+	// SdxClusterDetailResponseStatusSTACKCREATIONINPROGRESS captures enum value "STACK_CREATION_IN_PROGRESS"
+	SdxClusterDetailResponseStatusSTACKCREATIONINPROGRESS string = "STACK_CREATION_IN_PROGRESS"
+
+	// SdxClusterDetailResponseStatusSTACKDELETED captures enum value "STACK_DELETED"
+	SdxClusterDetailResponseStatusSTACKDELETED string = "STACK_DELETED"
+
+	// SdxClusterDetailResponseStatusSTACKDELETIONINPROGRESS captures enum value "STACK_DELETION_IN_PROGRESS"
+	SdxClusterDetailResponseStatusSTACKDELETIONINPROGRESS string = "STACK_DELETION_IN_PROGRESS"
+
+	// SdxClusterDetailResponseStatusEXTERNALDATABASECREATIONINPROGRESS captures enum value "EXTERNAL_DATABASE_CREATION_IN_PROGRESS"
+	SdxClusterDetailResponseStatusEXTERNALDATABASECREATIONINPROGRESS string = "EXTERNAL_DATABASE_CREATION_IN_PROGRESS"
+
+	// SdxClusterDetailResponseStatusEXTERNALDATABASEDELETIONINPROGRESS captures enum value "EXTERNAL_DATABASE_DELETION_IN_PROGRESS"
+	SdxClusterDetailResponseStatusEXTERNALDATABASEDELETIONINPROGRESS string = "EXTERNAL_DATABASE_DELETION_IN_PROGRESS"
 
 	// SdxClusterDetailResponseStatusRUNNING captures enum value "RUNNING"
 	SdxClusterDetailResponseStatusRUNNING string = "RUNNING"
