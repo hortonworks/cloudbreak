@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.AMBARI;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.ATLAS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.BEACON_SERVER;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.CLOUDERA_MANAGER_UI;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.HIVE_SERVER;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.NAMENODE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.WEBHDFS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -25,13 +23,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -45,12 +41,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToExposedServicesConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -63,12 +57,13 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceEndpointCollectorTest {
 
-    private static final String AMBARI_IP = "127.0.0.1";
+    private static final String CLOUDERA_MANAGER_IP = "127.0.0.1";
 
     private static final String GATEWAY_PATH = "gateway-path";
 
@@ -82,13 +77,7 @@ public class ServiceEndpointCollectorTest {
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Mock
-    private AmbariBlueprintValidator mockBpValidator;
-
-    @Mock
     private StackServiceComponentDescriptors mockStackDescriptors;
-
-    @Spy
-    private AmbariHaComponentFilter ambariHaComponentFilter;
 
     @Mock
     private ComponentLocatorService componentLocatorService;
@@ -112,54 +101,54 @@ public class ServiceEndpointCollectorTest {
     }
 
     @Test
-    public void testGetAmbariServerUrlWithYarnOrchestrator() {
+    public void testGetCmServerUrlWithYarnOrchestrator() {
         Cluster cluster = clusterkWithOrchestrator("YARN");
-        String ambariIp = AMBARI_IP;
+        String ambariIp = CLOUDERA_MANAGER_IP;
 
         String result = underTest.getManagerServerUrl(cluster, ambariIp);
         assertEquals("http://127.0.0.1:8080", result);
     }
 
     @Test
-    public void testGetAmbariServerUrlWithNullGateway() {
+    public void testGetCmServerUrlWithNullGateway() {
         Cluster cluster = clusterkWithOrchestrator("ANY");
         cluster.setGateway(null);
 
-        String result = underTest.getManagerServerUrl(cluster, AMBARI_IP);
+        String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1/", result);
     }
 
     @Test
-    public void testGetAmbariServerUrlWithNoAmbariInTopologies() {
+    public void testGetCmServerUrlWithNoAmbariInTopologies() {
         Cluster cluster = createClusterWithComponents(new ExposedService[]{ATLAS, ATLAS},
-                new ExposedService[]{BEACON_SERVER, HIVE_SERVER}, GatewayType.INDIVIDUAL);
+                new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
 
-        String result = underTest.getManagerServerUrl(cluster, AMBARI_IP);
+        String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1/", result);
     }
 
     @Test
-    public void testGetAmbariServerUrlWithAmbariPresentInTopologiesWithCentralGateway() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, ATLAS},
-                new ExposedService[]{BEACON_SERVER, HIVE_SERVER}, GatewayType.CENTRAL);
+    public void testGetCmServerUrlWithAmbariPresentInTopologiesWithCentralGateway() {
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{CLOUDERA_MANAGER_UI, ATLAS},
+                new ExposedService[]{HIVE_SERVER}, GatewayType.CENTRAL);
 
-        String result = underTest.getManagerServerUrl(cluster, AMBARI_IP);
-        assertEquals("/gateway-path/topology1/ambari/", result);
+        String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
+        assertEquals("/gateway-path/topology1/cmf/home", result);
     }
 
     @Test
-    public void testGetAmbariServerUrlWithAmbariPresentInTopologiesWithIndividualGateway() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, ATLAS},
-                new ExposedService[]{BEACON_SERVER, HIVE_SERVER}, GatewayType.INDIVIDUAL);
+    public void testGetCmServerUrlWithAmbariPresentInTopologiesWithIndividualGateway() {
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{CLOUDERA_MANAGER_UI, ATLAS},
+                new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
 
-        String result = underTest.getManagerServerUrl(cluster, AMBARI_IP);
-        assertEquals("https://127.0.0.1:8443/gateway-path/topology1/ambari/", result);
+        String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
+        assertEquals("https://127.0.0.1:8443/gateway-path/topology1/cmf/home", result);
     }
 
     @Test
     public void testPrepareClusterExposedServices() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, ATLAS},
-                new ExposedService[]{BEACON_SERVER, HIVE_SERVER, WEBHDFS}, GatewayType.INDIVIDUAL);
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{ATLAS},
+                new ExposedService[]{HIVE_SERVER, WEBHDFS}, GatewayType.INDIVIDUAL);
 
         mockBlueprintTextProcessor(Sets.newHashSet("NAMENODE", "SPARK_JOBHISTORYSERVER", "HIVE_SERVER"), "HDP", "2.6");
         mockComponentLocator(Lists.newArrayList("10.0.0.1"));
@@ -189,8 +178,6 @@ public class ServiceEndpointCollectorTest {
             assertEquals("Spark 1.x History Server", sparkHistoryUI.get().getDisplayName());
             assertEquals("SPARK_YARN_HISTORY_SERVER", sparkHistoryUI.get().getServiceName());
             assertFalse(sparkHistoryUI.get().isOpen());
-        } else {
-            Assert.fail("no SPARKHISTORYUI in returned exposed services for topology2");
         }
 
         Optional<ClusterExposedServiceV4Response> hiveServer =
@@ -210,17 +197,17 @@ public class ServiceEndpointCollectorTest {
         mockBlueprintTextProcessor(Sets.newHashSet("HIVE", "PIG"), "HDF", "3.1");
 
         Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
-        assertEquals(0L, exposedServiceResponses.size());
+        assertEquals(2L, exposedServiceResponses.size());
 
         mockBlueprintTextProcessor(Sets.newHashSet("HIVE", "PIG"), "HDF", "3.2");
 
         exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
-        assertEquals(1L, exposedServiceResponses.size());
+        assertEquals(2L, exposedServiceResponses.size());
 
         mockBlueprintTextProcessor(Sets.newHashSet("HIVE", "PIG"), "HDP", "2.6");
 
         exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
-        assertEquals(1L, exposedServiceResponses.size());
+        assertEquals(2L, exposedServiceResponses.size());
     }
 
     @Test
@@ -233,27 +220,7 @@ public class ServiceEndpointCollectorTest {
         mockBlueprintTextProcessor(Sets.newHashSet("LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER"), "HDP", "3.0");
 
         exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
-        assertEquals(3L, exposedServiceResponses.size());
-    }
-
-    @Test
-    public void testGetKnoxServicesWithLivyServerAndResourceManagerV2() {
-        mockBlueprintTextProcessor(Sets.newHashSet("RESOURCEMANAGER", "LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER", "LOGSEARCH_SERVER"), "HDP", "2.6");
-
-        Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
-
-        assertEquals(3L, exposedServiceResponses.size());
-        assertFalse(createExposedServiceFilteredStream(exposedServiceResponses)
-                .findFirst()
-                .isPresent());
-
-        mockBlueprintTextProcessor(Sets.newHashSet("RESOURCEMANAGER", "LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER", "LOGSEARCH_SERVER"), "HDP", "3.0");
-
-        exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
-
-        assertEquals(5L, exposedServiceResponses.size());
-        assertTrue(createExposedServiceFilteredStream(exposedServiceResponses)
-                .count() == 1);
+        assertEquals(2L, exposedServiceResponses.size());
     }
 
     private Stream<ExposedServiceV4Response> createExposedServiceFilteredStream(Collection<ExposedServiceV4Response> exposedServiceV4Respons) {
@@ -261,36 +228,6 @@ public class ServiceEndpointCollectorTest {
                 .stream()
                 .filter(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER")
                         || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LOGSEARCH_SERVER"));
-    }
-
-    @Test
-    public void testGetHdfsUIUrlInHDP26() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, NAMENODE}, new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
-        mockBlueprintTextProcessor(Sets.newHashSet("NAMENODE"), "HDP", "2.6");
-        mockComponentLocator(Lists.newArrayList("10.0.0.1"));
-
-        Map<String, Collection<ClusterExposedServiceV4Response>> exposedServiceResponses = underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
-        assertEquals(2L, exposedServiceResponses.get("topology1").size());
-        assertTrue(exposedServiceResponses.values()
-                .stream()
-                .anyMatch(exposedServiceResponse -> exposedServiceResponse.stream()
-                        .anyMatch(clusterExposedService -> StringUtils.equals(clusterExposedService.getKnoxService(), "HDFSUI")
-                                && !clusterExposedService.getServiceUrl().contains("?host=http://10.0.0.1:50070"))));
-    }
-
-    @Test
-    public void testGetHdfsUIUrlInHDP30() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, NAMENODE}, new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
-        mockBlueprintTextProcessor(Sets.newHashSet("NAMENODE"), "HDP", "3.0");
-        mockComponentLocator(Lists.newArrayList("ip-10-0-0-1"));
-
-        Map<String, Collection<ClusterExposedServiceV4Response>> exposedServiceResponses = underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
-        assertEquals(2L, exposedServiceResponses.get("topology1").size());
-        assertTrue(exposedServiceResponses.values()
-                .stream()
-                .anyMatch(exposedServiceResponse -> exposedServiceResponse.stream()
-                        .anyMatch(clusterExposedService -> StringUtils.equals(clusterExposedService.getKnoxService(), "HDFSUI")
-                                && clusterExposedService.getServiceUrl().contains("?host=http://ip-10-0-0-1:"))));
     }
 
     private void mockBlueprintTextProcessor(Set<String> components, String stackName, String stackVersion) {

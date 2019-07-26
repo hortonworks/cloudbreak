@@ -11,6 +11,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 public class ClouderaManagerBlueprintPortConfigCollector {
 
     public Map<String, Integer> getServicePorts(Blueprint blueprint) {
-        return ExposedService.getAllServicePortsForCM();
+        return ExposedService.getAllServicePorts();
     }
 }
