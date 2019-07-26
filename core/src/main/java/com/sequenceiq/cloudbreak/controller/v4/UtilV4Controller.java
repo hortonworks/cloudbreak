@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -8,7 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4SingleResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
@@ -103,5 +107,12 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     public void postNotificationTest() {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         notificationSender.sendTestNotification(cloudbreakUser.getUserId());
+    }
+
+    @Override
+    public CheckRightV4Response checkRight(CheckRightV4Request checkRightV4Request) {
+        return new CheckRightV4Response(checkRightV4Request.getRights().stream()
+                .map(rightReq -> new CheckRightV4SingleResponse(rightReq, Boolean.TRUE))
+                .collect(Collectors.toList()));
     }
 }
