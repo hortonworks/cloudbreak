@@ -37,7 +37,7 @@
         "cardinality": 1,
         "refName": "idbroker",
         "roleConfigGroupsRefNames": [
-          "hdfs-GATEWAY-BASE"
+          "knox-IDBROKER-BASE"
         ]
       }
     ],
@@ -258,6 +258,11 @@
             "base": true,
             "refName": "knox-KNOX_GATEWAY-BASE",
             "roleType": "KNOX_GATEWAY"
+          },
+          {
+            "base": true,
+            "refName": "knox-IDBROKER-BASE",
+            "roleType": "IDBROKER"
           }
         ]
       },

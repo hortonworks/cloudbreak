@@ -259,12 +259,12 @@ cb:
             baseurl: https://archive.cloudera.com/cm6/6.2.0/redhat7/yum/
             gpgkey: https://archive.cloudera.com/cm6/6.2.0/redhat7/yum/RPM-GPG-KEY-cloudera
       7.0:
-        version: 7.x.0-1288299
+        version: 7.x.0-1302257
         repo:
           redhat7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1288299/cm7/7.x.0/redhat7/yum/
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1302257/cm7/7.x.0/redhat7/yum/
           centos7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1288299/cm7/7.x.0/redhat7/yum/
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1302257/cm7/7.x.0/redhat7/yum/
 
   cdh:
     entries:
@@ -290,13 +290,13 @@ cb:
             repoid: CDH-6.2.0
             redhat7: https://archive.cloudera.com/cdh6/6.2.0/parcels/
       "[7.0.0]":
-        version: 7.0.0-1.cdh7.0.0.p0.1287733
+        version: 7.0.0-1.cdh7.0.0.p0.1302073
         minCM: 7.0
         repo:
           stack:
             repoid: CDH-7.0.0
-            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1287733/cdh/7.x/parcels/
-            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1287733/cdh/7.x/parcels/
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1302073/cdh/7.x/parcels/
+            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1302073/cdh/7.x/parcels/
 
 
   ambari:
