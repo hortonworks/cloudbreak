@@ -64,6 +64,7 @@ public enum ResourceEvent {
     ENVIRONMENT_DELETION_FAILED("environment.deletion.failed"),
 
     CREDENTIAL_AZURE_INTERACTIVE_CREATED("credential.azure.interactive.created"),
+    CREDENTIAL_AZURE_INTERACTIVE_STATUS("credential.azure.interactive.status"),
     CREDENTIAL_AZURE_INTERACTIVE_FAILED("credential.azure.interactive.failed");
 
     private final String message;
