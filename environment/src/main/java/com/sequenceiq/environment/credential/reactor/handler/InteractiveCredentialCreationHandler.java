@@ -3,8 +3,6 @@ package com.sequenceiq.environment.credential.reactor.handler;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CREDENTIAL_AZURE_INTERACTIVE_CREATED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CREDENTIAL_AZURE_INTERACTIVE_FAILED;
 
-import java.util.Date;
-
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
@@ -14,15 +12,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
-import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
-import com.sequenceiq.environment.credential.reactor.handler.InteractiveCredentialCreationStatusHandler.InteractiveCredentialNotification;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.notification.NotificationService;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 import reactor.bus.Event;
 
@@ -52,20 +48,13 @@ public class InteractiveCredentialCreationHandler implements EventHandler<Intera
         Credential credential = extendedCloudCredentialToCredentialConverter.convert(extendedCloudCredential);
         try {
             credentialService.initCodeGrantFlow(credential.getAccountId(), credential, credential.getCreator());
-            sendNotification(credential, extendedCloudCredential.getName(), CREDENTIAL_AZURE_INTERACTIVE_CREATED);
+            CredentialResponse payload = extendedCloudCredentialToCredentialConverter.convert(credential);
+            notificationService.send(CREDENTIAL_AZURE_INTERACTIVE_CREATED, payload, credential.getCreator());
+            LOGGER.info("Azure interactive credential ({}) succesfully created", credential.getName());
         } catch (BadRequestException e) {
-            sendNotification(credential, e.getMessage(), CREDENTIAL_AZURE_INTERACTIVE_FAILED);
+            notificationService.send(CREDENTIAL_AZURE_INTERACTIVE_FAILED, credential.getCreator());
+            LOGGER.info("Failed to create Azure interactive credential with name \"{}\"", credential.getName());
         }
     }
 
-    private void sendNotification(Credential credential, String message, ResourceEvent eventType) {
-        InteractiveCredentialNotification notification = new InteractiveCredentialNotification()
-                .withEventTimestamp(new Date().getTime())
-                .withUserId(credential.getCreator())
-                .withCloud(credential.getCloudPlatform())
-                .withEventMessage(message)
-                .withEventType(eventType.name());
-        notificationService.send(eventType, notification, credential.getCreator());
-        LOGGER.info("Interactive credential creation init code grant flow notification: {}", new Json(notification).getValue());
-    }
 }
