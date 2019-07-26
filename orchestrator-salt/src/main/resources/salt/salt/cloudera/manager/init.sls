@@ -8,6 +8,13 @@ install-cloudera-manager-server:
       - cloudera-manager-agent
       - cloudera-manager-server
 
+/etc/cloudera-scm-server/cm.settings:
+  file.managed:
+    - contents: # Created by CB Saltstack
+    - user: cloudera-scm
+    - group: cloudera-scm
+    - mode: 600
+
 {% if salt['pillar.get']('ldap', None) != None and salt['pillar.get']('ldap:local', None) == None %}
 
 add_ldap_settings_to_cm:
