@@ -10,6 +10,8 @@ public class HiveRoles {
 
     public static final String HIVESERVER2 = "HIVESERVER2";
 
+    public static final String HIVE_ON_TEZ = "HIVE_ON_TEZ";
+
     public static final String WEBHCAT = "WEBHCAT";
 
     public static final String GATEWAY = "GATEWAY";
