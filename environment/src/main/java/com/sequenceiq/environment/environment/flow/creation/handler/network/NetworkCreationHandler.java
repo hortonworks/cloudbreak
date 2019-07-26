@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
@@ -83,7 +82,6 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private void createNetwork(EnvironmentDto environmentDto) {
         environmentService.findEnvironmentById(environmentDto.getId())
                 .ifPresent(environment -> {
-                    environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
                     setNetworkIfNeeded(environmentDto, environment);
                     environmentService.save(environment);
                 });

@@ -56,6 +56,8 @@ public class EnvCreationActions {
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("NETWORK_CREATION_STARTED_STATE");
+                    environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
+                    environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                     SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
                     notificationService.send(ResourceEvent.ENVIRONMENT_NETWORK_CREATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
@@ -81,6 +83,8 @@ public class EnvCreationActions {
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("FREEIPA_CREATION_STARTED_STATE");
+                    environment.setStatus(EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS);
+                    environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                     SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
                     notificationService.send(ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
