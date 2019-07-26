@@ -5,7 +5,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.usage.LoggingUsageReporter;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UsageLoggingUtil {
 
     private UsageReporter usageReporter = new LoggingUsageReporter();
