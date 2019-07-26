@@ -48,14 +48,6 @@ public class EnvironmentAuthentication {
         this.publicKeyId = publicKeyId;
     }
 
-    public boolean isPasswordAuthenticationRequired() {
-        return publicKey != null && publicKey.startsWith("Basic:");
-    }
-
-    public String getLoginPassword() {
-        return publicKey.replaceAll("Basic:", "").trim();
-    }
-
     public String getLoginUserName() {
         return loginUserName;
     }
