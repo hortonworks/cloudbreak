@@ -5,7 +5,7 @@
   <store ignore_error>
     @type s3
     s3_bucket {{fluent.s3LogArchiveBucketName}}
-    path "{{fluent.logFolderName}}/%Y-%m-%d/%H/\${tag[1]}-#{Socket.gethostname}-%M"
+    path "{{fluent.logFolderName}}/{{fluent.serviceLogPathSuffix}}"
     s3_object_key_format %{path}-%{index}.%{file_extension}
 
     <buffer tag,time>
@@ -20,17 +20,17 @@
     format single_value
   </store>
 </match>
-<match {{fluent.providerPrefix}}CM_COMMAND.**>
+<match {{fluent.providerPrefix}}_CM_COMMAND.**>
   @type copy
   <store ignore_error>
     @type s3
     s3_bucket {{fluent.s3LogArchiveBucketName}}
-    path "{{fluent.logFolderName}}/%Y-%m-%d/%H/CM_COMMAND-\${tag[6]}-\${tag[1]}-#{Socket.gethostname}-%M"
+    path "{{fluent.logFolderName}}/{{fluent.cmCommandLogPathSuffix}}"
     s3_object_key_format %{path}-%{index}.%{file_extension}
 
     <buffer tag,time>
       @type file
-      path /var/log/td-agent/{{fluent.providerPrefix}}CM_COMMAND
+      path /var/log/td-agent/{{fluent.providerPrefix}}_CM_COMMAND
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
       chunk_limit_size 256m
@@ -55,7 +55,7 @@
 {% endif %}
     azure_storage_type       blob
     store_as                 gzip
-    path                     "{{fluent.logFolderName}}/%Y-%m-%d/%H/\${tag[1]}-#{Socket.gethostname}-%M"
+    path                     "{{fluent.logFolderName}}/{{fluent.serviceLogPathSuffix}}"
     azure_object_key_format  %{path}-%{index}.%{file_extension}
 
     <buffer tag,time>
@@ -70,7 +70,7 @@
     format single_value
   </store>
 </match>
-<match {{fluent.providerPrefix}}CM_COMMAND.**>
+<match {{fluent.providerPrefix}}_CM_COMMAND.**>
   @type copy
   <store ignore_error>
     @type azurestorage
@@ -84,12 +84,12 @@
 {% endif %}
     azure_storage_type       blob
     store_as                 gzip
-    path                     "{{fluent.logFolderName}}/%Y-%m-%d/%H/CM_COMMAND-\${tag[6]}-\${tag[1]}-#{Socket.gethostname}-%M"
+    path                     "{{fluent.logFolderName}}/{{fluent.cmCommandLogPathSuffix}}"
     azure_object_key_format  %{path}-%{index}.%{file_extension}
 
     <buffer tag,time>
       @type file
-      path /var/log/td-agent/{{fluent.providerPrefix}}CM_COMMAND
+      path /var/log/td-agent/{{fluent.providerPrefix}}_CM_COMMAND
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
       chunk_limit_size 256m

@@ -14,3 +14,11 @@ fluent:
   azureContainer:
   azureInstanceMsi:
   azureStorageAccessKey:
+  dbusEndpoint:
+  dbusAccesKeyId:
+  dbusAccessKeySecret:
+  dbusAccessKeySecretAlgorithm: Ed25519
+  dbusReportBundleEnabled: true
+  dbusReportBundleDisableStop: false
+  dbusMeteringEnabled: true
+
