@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -62,6 +63,8 @@ public class EnvironmentDto implements Payload {
     private SecurityAccessDto securityAccess;
 
     private Tunnel tunnel;
+
+    private IdBrokerMappingSource idBrokerMappingSource;
 
     @Override
     public Long getResourceId() {
@@ -249,6 +252,14 @@ public class EnvironmentDto implements Payload {
         this.tunnel = tunnel;
     }
 
+    public IdBrokerMappingSource getIdBrokerMappingSource() {
+        return idBrokerMappingSource;
+    }
+
+    public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
+        this.idBrokerMappingSource = idBrokerMappingSource;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -297,6 +308,8 @@ public class EnvironmentDto implements Payload {
         private SecurityAccessDto securityAccess;
 
         private Tunnel tunnel;
+
+        private IdBrokerMappingSource idBrokerMappingSource;
 
         private Builder() {
         }
@@ -411,6 +424,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
+            this.idBrokerMappingSource = idBrokerMappingSource;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -435,6 +453,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setCreated(created);
             environmentDto.setSecurityAccess(securityAccess);
             environmentDto.setTunnel(tunnel);
+            environmentDto.setIdBrokerMappingSource(idBrokerMappingSource);
             return environmentDto;
         }
     }

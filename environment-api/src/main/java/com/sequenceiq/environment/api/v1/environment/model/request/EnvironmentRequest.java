@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 
 import io.swagger.annotations.ApiModel;
@@ -62,6 +63,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     @ApiModelProperty(EnvironmentModelDescription.TUNNEL)
     private Tunnel tunnel;
+
+    @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
+    private IdBrokerMappingSource idBrokerMappingSource = IdBrokerMappingSource.MOCK;
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
@@ -159,5 +163,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setTunnel(Tunnel tunnel) {
         this.tunnel = tunnel;
+    }
+
+    public IdBrokerMappingSource getIdBrokerMappingSource() {
+        return idBrokerMappingSource;
+    }
+
+    public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
+        this.idBrokerMappingSource = idBrokerMappingSource;
     }
 }

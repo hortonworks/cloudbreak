@@ -31,14 +31,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
-import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -54,28 +56,39 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockIdentityMappingService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
-import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse.Builder;
 
 public class StackToTemplatePreparationObjectConverterTest {
 
     private static final Long TEST_CLUSTER_ID = 1L;
 
     private static final String TEST_BLUEPRINT_TEXT = "{}";
+
+    private static final String TEST_CLOUD_PLATFORM = "AWS";
+
+    private static final Map<String, String> GROUP_MAPPING = Map.of("group", "groupRole");
+
+    private static final Map<String, String> USER_MAPPING = Map.of("user", "userRole");
+
+    private static final String REGION = "region-1";
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -93,9 +106,6 @@ public class StackToTemplatePreparationObjectConverterTest {
     private InstanceGroupMetadataCollector instanceGroupMetadataCollector;
 
     @Mock
-    private StackInfoService stackInfoService;
-
-    @Mock
     private HdfConfigProvider hdfConfigProvider;
 
     @Mock
@@ -103,9 +113,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private ClusterService clusterService;
@@ -141,16 +148,10 @@ public class StackToTemplatePreparationObjectConverterTest {
     private Json stackInputs;
 
     @Mock
-    private BlueprintStackInfo blueprintStackInfo;
-
-    @Mock
     private BlueprintViewProvider blueprintViewProvider;
 
     @Mock
     private DatalakeResourcesService datalakeResourcesService;
-
-    @Mock
-    private CredentialClientService credentialClientService;
 
     @Mock
     private LdapConfigService ldapConfigService;
@@ -158,12 +159,25 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private KerberosConfigService kerberosConfigService;
 
+    @Mock
+    private EnvironmentClientService environmentClientService;
+
+    @Mock
+    private CredentialConverter credentialConverter;
+
+    @Mock
+    private AwsMockIdentityMappingService awsIdentityMappingService;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
         when(clusterService.getById(any(Long.class))).thenReturn(cluster);
         when(stackMock.getCluster()).thenReturn(sourceCluster);
         when(stackMock.getEnvironmentCrn()).thenReturn("env");
+        when(stackMock.getCloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
+        when(stackMock.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
+        when(stackMock.getType()).thenReturn(StackType.DATALAKE);
+        when(stackMock.getRegion()).thenReturn(REGION);
         when(sourceCluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(cluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(stackRepoDetails);
@@ -172,15 +186,18 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(stackMock.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
-        when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))
                 .build();
-        when(credentialClientService.getByCrn(anyString())).thenReturn(credential);
-        when(credentialClientService.getByEnvironmentCrn(anyString())).thenReturn(credential);
-        when(credentialClientService.getByName(anyString())).thenReturn(credential);
-
+        DetailedEnvironmentResponse environmentResponse = Builder.builder()
+                .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
+                .withCredential(new CredentialResponse())
+                .build();
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+        when(credentialConverter.convert(any(CredentialResponse.class))).thenReturn(credential);
+        when(awsIdentityMappingService.getIdentityGroupMapping(REGION, credential)).thenReturn(GROUP_MAPPING);
+        when(awsIdentityMappingService.getIdentityUserMapping(REGION, credential)).thenReturn(USER_MAPPING);
         when(ldapConfigService.get(anyString())).thenReturn(Optional.empty());
     }
 
@@ -312,12 +329,8 @@ public class StackToTemplatePreparationObjectConverterTest {
     }
 
     @Test
-    public void testConvertWhenProvidingStackAndBlueprintStackInfoThenExpectedBlueprintViewShouldBeStored() {
-        String type = "HDF";
-        String version = "2.6";
+    public void testConvertBlueprintViewShouldMatch() {
         BlueprintView expected = mock(BlueprintView.class);
-        when(blueprintStackInfo.getType()).thenReturn(type);
-        when(blueprintStackInfo.getVersion()).thenReturn(version);
         when(blueprintViewProvider.getBlueprintView(blueprint)).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
@@ -386,4 +399,16 @@ public class StackToTemplatePreparationObjectConverterTest {
         underTest.convert(stackMock);
     }
 
+    @Test
+    public void testConvertCloudPlatformMatches() {
+        TemplatePreparationObject result = underTest.convert(stackMock);
+        assertEquals(CloudPlatform.AWS, result.getCloudPlatform());
+    }
+
+    @Test
+    public void testIdBrokerMappings() {
+        TemplatePreparationObject result = underTest.convert(stackMock);
+        assertEquals(GROUP_MAPPING, result.getIdentityGroupMapping());
+        assertEquals(USER_MAPPING, result.getIdentityUserMapping());
+    }
 }

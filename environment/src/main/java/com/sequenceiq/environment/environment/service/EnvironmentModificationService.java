@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -92,6 +93,7 @@ public class EnvironmentModificationService {
         editNetworkIfChanged(env, editDto);
         editAuthenticationIfChanged(editDto, env);
         editSecurityAccessIfChanged(editDto, env);
+        editIdBrokerMappingSource(editDto, env);
         Environment saved = environmentRepository.save(env);
         return environmentDtoConverter.environmentToDto(saved);
     }
@@ -207,6 +209,13 @@ public class EnvironmentModificationService {
     private void editTelemetryIfChanged(Environment environment, EnvironmentEditDto editDto) {
         if (editDto.getTelemetry() != null) {
             environment.setTelemetry(editDto.getTelemetry());
+        }
+    }
+
+    private void editIdBrokerMappingSource(EnvironmentEditDto editDto, Environment environment) {
+        IdBrokerMappingSource idBrokerMappingSource = editDto.getIdBrokerMappingSource();
+        if (idBrokerMappingSource != null) {
+            environment.setIdBrokerMappingSource(idBrokerMappingSource);
         }
     }
 }

@@ -83,26 +83,22 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
 
     private void validForDatabaseCreation(Long sdxId, DetailedEnvironmentResponse env) {
         String message = "";
-        if (env.getNetwork().getAws() == null) {
-            message = "Cannot create external database for sdx: {}, for now only AWS is supported";
-            LOGGER.debug(message, sdxId);
-            throw new BadRequestException(message);
-        }
         if (env.getNetwork().getSubnetMetas().size() < 2) {
-            message = "Cannot create external database for sdx: {}, not enough subnets in the vpc";
-            LOGGER.debug(message, sdxId);
+            message = String.format("Cannot create external database for sdx: %s, not enough subnets in the vpc", sdxId);
+            LOGGER.debug(message);
             throw new BadRequestException(message);
         }
         Map<String, Long> zones = env.getNetwork().getSubnetMetas().values().stream()
                 .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
         if (zones.size() < 2) {
-            message = "Cannot create external database for sdx: {}, the subnets in the vpc should be at least in two different availabilityzones";
-            LOGGER.debug(message, sdxId);
+            message = String.format("Cannot create external database for sdx: %s, the subnets in the vpc should be at least in two different availabilityzones",
+                    sdxId);
+            LOGGER.debug(message);
             throw new BadRequestException(message);
         }
         if (!Optional.of(env.getSecurityAccess()).map(SecurityAccessResponse::getDefaultSecurityGroupId).isPresent()) {
-            message = "Cannot create external database for sdx: {}, there's no default securitygroup in the environment";
-            LOGGER.debug(message, sdxId);
+            message = String.format("Cannot create external database for sdx: %s, there's no default securitygroup in the environment", sdxId);
+            LOGGER.debug(message);
             throw new BadRequestException(message);
         }
     }

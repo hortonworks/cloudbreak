@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -18,7 +19,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
@@ -34,13 +37,13 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockIdentityMappingService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnector;
@@ -59,6 +62,7 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -121,13 +125,17 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     @Inject
     private CredentialConverter credentialConverter;
 
+    @Inject
+    private AwsMockIdentityMappingService awsIdentityMappingService;
+
     @Override
     public TemplatePreparationObject convert(StackV4Request source) {
         try {
             CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
             User user = userService.getOrCreate(cloudbreakUser);
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-            Credential credential = getCredential(source);
+            DetailedEnvironmentResponse environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
+            Credential credential = getCredential(source, environment);
             LdapView ldapConfig = getLdapConfig(source);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential.getAttributes());
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
@@ -144,6 +152,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                 gatewaySignKey = gateway.getSignKey();
             }
             Builder builder = Builder.builder()
+                    .withCloudPlatform(source.getCloudPlatform())
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
                     .withGateway(gateway, gatewaySignKey)
@@ -170,6 +179,16 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     throw new CloudbreakServiceException("Cannot collect shared service resources from datalake!");
                 }
             }
+            if (source.getType() == StackType.DATALAKE
+                    && environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK
+                    && source.getCloudPlatform() == CloudPlatform.AWS) {
+
+                Map<String, String> groupMapping = awsIdentityMappingService.getIdentityGroupMapping(source.getPlacement().getRegion(), credential);
+                Map<String, String> userMapping = awsIdentityMappingService.getIdentityUserMapping(source.getPlacement().getRegion(), credential);
+                builder.withIdentityGroupMapping(groupMapping);
+                builder.withIdentityUserMapping(userMapping);
+            }
+
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
@@ -185,8 +204,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
         }
     }
 
-    private Credential getCredential(StackV4Request source) {
-        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
+    private Credential getCredential(StackV4Request source, DetailedEnvironmentResponse environment) {
         return credentialConverter.convert(environment.getCredential());
     }
 

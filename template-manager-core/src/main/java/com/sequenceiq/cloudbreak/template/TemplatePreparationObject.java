@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -27,6 +28,8 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 public class TemplatePreparationObject {
+
+    private final CloudPlatform cloudPlatform;
 
     private final GatewayView gatewayView;
 
@@ -54,7 +57,12 @@ public class TemplatePreparationObject {
 
     private final Map<String, Object> fixInputs;
 
+    private final Map<String, String> identityGroupMapping;
+
+    private final Map<String, String> identityUserMapping;
+
     private TemplatePreparationObject(Builder builder) {
+        cloudPlatform = builder.cloudPlatform;
         rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
                 rdsConfig -> rdsConfig.getType().toLowerCase(),
                 Function.identity()
@@ -71,6 +79,8 @@ public class TemplatePreparationObject {
         sharedServiceConfigs = builder.sharedServiceConfigs;
         customInputs = builder.customInputs;
         fixInputs = builder.fixInputs;
+        identityGroupMapping = builder.identityGroupMapping;
+        identityUserMapping = builder.identityUserMapping;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -78,6 +88,10 @@ public class TemplatePreparationObject {
                 .getHostGroupsWithComponent(component);
         return getHostgroupViews().stream()
                 .filter(hostGroup -> groups.contains(hostGroup.getName()));
+    }
+
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
     }
 
     public Set<RDSConfig> getRdsConfigs() {
@@ -136,7 +150,17 @@ public class TemplatePreparationObject {
         return fixInputs;
     }
 
+    public Map<String, String> getIdentityGroupMapping() {
+        return identityGroupMapping;
+    }
+
+    public Map<String, String> getIdentityUserMapping() {
+        return identityUserMapping;
+    }
+
     public static class Builder {
+
+        private CloudPlatform cloudPlatform;
 
         private Set<RDSConfig> rdsConfigs = new HashSet<>();
 
@@ -164,8 +188,17 @@ public class TemplatePreparationObject {
 
         private Map<String, Object> fixInputs = new HashMap<>();
 
+        private Map<String, String> identityGroupMapping = new HashMap<>();
+
+        private Map<String, String> identityUserMapping = new HashMap<>();
+
         public static Builder builder() {
             return new Builder();
+        }
+
+        public Builder withCloudPlatform(CloudPlatform cloudPlatform) {
+            this.cloudPlatform = cloudPlatform;
+            return this;
         }
 
         public Builder withRdsConfigs(Set<RDSConfig> rdsConfigs) {
@@ -254,8 +287,19 @@ public class TemplatePreparationObject {
             return this;
         }
 
+        public Builder withIdentityGroupMapping(Map<String, String> groupMapping) {
+            identityGroupMapping = groupMapping == null ? new HashMap<>() : groupMapping;
+            return this;
+        }
+
+        public Builder withIdentityUserMapping(Map<String, String> userMapping) {
+            identityUserMapping = userMapping == null ? new HashMap<>() : userMapping;
+            return this;
+        }
+
         public TemplatePreparationObject build() {
             return new TemplatePreparationObject(this);
         }
     }
+
 }

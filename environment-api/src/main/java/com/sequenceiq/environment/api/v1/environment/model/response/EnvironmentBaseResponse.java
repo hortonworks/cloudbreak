@@ -4,6 +4,7 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 
 import io.swagger.annotations.ApiModel;
@@ -59,6 +60,9 @@ public abstract class EnvironmentBaseResponse {
 
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
     private SecurityAccessResponse securityAccess;
+
+    @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
+    private IdBrokerMappingSource idBrokerMappingSource;
 
     public String getCrn() {
         return crn;
@@ -194,5 +198,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setTunnel(Tunnel tunnel) {
         this.tunnel = tunnel;
+    }
+
+    public IdBrokerMappingSource getIdBrokerMappingSource() {
+        return idBrokerMappingSource;
+    }
+
+    public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
+        this.idBrokerMappingSource = idBrokerMappingSource;
     }
 }

@@ -46,14 +46,6 @@ public class StackAuthentication {
         this.publicKeyId = publicKeyId;
     }
 
-    public boolean passwordAuthenticationRequired() {
-        return publicKey != null && publicKey.startsWith("Basic:");
-    }
-
-    public String getLoginPassword() {
-        return publicKey.replaceAll("Basic:", "").trim();
-    }
-
     public String getLoginUserName() {
         return loginUserName;
     }
