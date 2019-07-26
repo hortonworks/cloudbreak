@@ -94,7 +94,8 @@ public class AwsRdsLaunchService {
 
             RDSModelContext rdsModelContext = new RDSModelContext()
                     .withTemplate(stack.getTemplate())
-                    .withHasPort(stack.getDatabaseServer().getPort() != null);
+                    .withHasPort(stack.getDatabaseServer().getPort() != null)
+                    .withHasSecurityGroup(!stack.getDatabaseServer().getSecurity().getCloudSecurityIds().isEmpty());
             String cfTemplate = cloudFormationTemplateBuilder.build(rdsModelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
             cfRetryClient.createStack(awsStackRequestHelper.createCreateStackRequest(ac, stack, cFStackName, cfTemplate));

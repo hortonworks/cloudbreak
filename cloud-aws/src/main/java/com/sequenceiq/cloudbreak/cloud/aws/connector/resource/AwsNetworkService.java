@@ -88,12 +88,12 @@ public class AwsNetworkService {
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
 
-        DescribeVpcsRequest vpcRequest = new DescribeVpcsRequest().withVpcIds(awsNetworkView.getExistingVPC());
+        DescribeVpcsRequest vpcRequest = new DescribeVpcsRequest().withVpcIds(awsNetworkView.getExistingVpc());
         Vpc vpc = ec2Client.describeVpcs(vpcRequest).getVpcs().get(0);
         String vpcCidr = vpc.getCidrBlock();
         LOGGER.debug("Subnet cidr is empty, find a non-overlapping subnet for VPC cidr: {}", vpcCidr);
 
-        DescribeSubnetsRequest request = new DescribeSubnetsRequest().withFilters(new Filter("vpc-id", singletonList(awsNetworkView.getExistingVPC())));
+        DescribeSubnetsRequest request = new DescribeSubnetsRequest().withFilters(new Filter("vpc-id", singletonList(awsNetworkView.getExistingVpc())));
         List<Subnet> awsSubnets = ec2Client.describeSubnets(request).getSubnets();
         List<String> subnetCidrs = awsSubnets.stream().map(Subnet::getCidrBlock).collect(Collectors.toList());
         LOGGER.debug("The selected VPCs: {}, has the following subnets: {}", vpc.getVpcId(), String.join(",", subnetCidrs));
@@ -107,7 +107,7 @@ public class AwsNetworkService {
             String region = ac.getCloudContext().getLocation().getRegion().value();
             AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
 
-            DescribeVpcsRequest vpcRequest = new DescribeVpcsRequest().withVpcIds(awsNetworkView.getExistingVPC());
+            DescribeVpcsRequest vpcRequest = new DescribeVpcsRequest().withVpcIds(awsNetworkView.getExistingVpc());
             Vpc vpc = ec2Client.describeVpcs(vpcRequest).getVpcs().get(0);
             List<String> cidrBlockAssociationSet = vpc.getCidrBlockAssociationSet().stream()
                     .map(VpcCidrBlockAssociation::getCidrBlock)

@@ -218,7 +218,7 @@ public class AwsLaunchService {
         List<CloudResource> resources = new ArrayList<>();
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         if (awsNetworkView.isExistingVPC()) {
-            String vpcId = awsNetworkView.getExistingVPC();
+            String vpcId = awsNetworkView.getExistingVpc();
             CloudResource vpc = new Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
             resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
             resources.add(vpc);
