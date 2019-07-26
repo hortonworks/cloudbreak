@@ -445,7 +445,7 @@ func (a *Client) PostDistroXV1(params *PostDistroXV1Params) (*PostDistroXV1OK, e
 }
 
 /*
-PutScalingDistroXV1ByCrn scales the stack by name
+PutScalingDistroXV1ByCrn scales the stack by crn
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -565,7 +565,7 @@ func (a *Client) RepairDistroXV1ByName(params *RepairDistroXV1ByNameParams) erro
 }
 
 /*
-RetryDistroXV1ByCrn retries the stack by name
+RetryDistroXV1ByCrn retries the stack by crn
 
 Failed or interrupted stack and cluster operations can be retried, after the cause of the failure was eliminated. The operations will continue at the state, where the previous process failed.
 */
@@ -685,7 +685,7 @@ func (a *Client) SetDistroXMaintenanceModeByName(params *SetDistroXMaintenanceMo
 }
 
 /*
-StartDistroXV1ByCrn starts the stack by name
+StartDistroXV1ByCrn starts the stack by crn
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -805,7 +805,7 @@ func (a *Client) StatusDistroXV1ByName(params *StatusDistroXV1ByNameParams) (*St
 }
 
 /*
-StopDistroXV1ByCrn stops the stack by name
+StopDistroXV1ByCrn stops the stack by crn
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -865,7 +865,7 @@ func (a *Client) StopDistroXV1ByName(params *StopDistroXV1ByNameParams) error {
 }
 
 /*
-SyncDistroXV1ByCrn syncs the stack by name
+SyncDistroXV1ByCrn syncs the stack by crn
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */

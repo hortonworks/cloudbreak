@@ -26,6 +26,9 @@ type StackStatusV4Response struct {
 	// cluster status reason
 	ClusterStatusReason string `json:"clusterStatusReason,omitempty"`
 
+	// crn
+	Crn string `json:"crn,omitempty"`
+
 	// id
 	ID int64 `json:"id,omitempty"`
 

@@ -38,18 +38,12 @@ type ClusterViewV4Response struct {
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
-	// Kerberos config name for the cluster
-	KerberosName string `json:"kerberosName,omitempty"`
-
 	// name of the resource
 	// Required: true
 	// Max Length: 100
 	// Min Length: 5
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
-
-	// tells whether the cluster is secured or not
-	Secure bool `json:"secure,omitempty"`
 
 	// public ambari ip of the stack
 	ServerIP string `json:"serverIp,omitempty"`

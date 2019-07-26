@@ -45,6 +45,9 @@ type StackV4Response struct {
 	// creation time of the stack in long
 	Created int64 `json:"created,omitempty"`
 
+	// credential crn
+	CredentialCrn string `json:"credentialCrn,omitempty"`
+
 	// credential name
 	CredentialName string `json:"credentialName,omitempty"`
 
