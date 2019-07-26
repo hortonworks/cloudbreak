@@ -168,6 +168,23 @@
       ]
     },
     {
+      "refName": "tez",
+      "serviceType": "TEZ",
+      "serviceConfigs": [
+        {
+          "name": "yarn_service",
+          "ref": "yarn"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "tez-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        }
+      ]
+    },
+    {
       "refName": "impala",
       "serviceType": "IMPALA",
       "roleConfigGroups": [
@@ -205,6 +222,7 @@
         "kafka-KAFKA_BROKER-BASE",
         "spark_on_yarn-GATEWAY-BASE",
         "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+        "tez-GATEWAY-BASE",
         "yarn-JOBHISTORY-BASE",
         "yarn-RESOURCEMANAGER-BASE",
         "zookeeper-SERVER-BASE",
