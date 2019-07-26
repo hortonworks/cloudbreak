@@ -68,7 +68,7 @@ import io.grpc.stub.StreamObserver;
 @Service
 public class MockUserManagementService extends UserManagementGrpc.UserManagementImplBase {
 
-    public static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
+    private static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
 
     private static final Logger LOG = LoggerFactory.getLogger(MockUserManagementService.class);
 
@@ -87,7 +87,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     private IniUtil iniUtil;
 
     @Value("#{'${auth.config.dir:}/${auth.license.file:}'}")
-    private String cbLicenseFilePath;
+    private String cmLicenseFilePath;
 
     @Value("#{'${auth.config.dir:}/${auth.altus.credential.file:}'}")
     private String altusCredentialFile;
@@ -447,11 +447,13 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     private String getLicense() {
         String license = "";
         try {
-            if (Files.exists(Paths.get(cbLicenseFilePath))) {
+            if (Files.exists(Paths.get(cmLicenseFilePath))) {
                 LOG.info("Cloudbreak license file successfully loaded.");
-                license = Files.readString(Path.of(cbLicenseFilePath));
+                license = Files.readString(Path.of(cmLicenseFilePath));
             } else {
-                LOG.warn("The license file is not exists in path: {}", cbLicenseFilePath);
+                LOG.warn("The license file could not be found on path: '{}'. "
+                        + "Please place your CM license file in your '<cbd_path>/etc' folder. "
+                        + "By default the name of the file should be 'license.txt'.", cmLicenseFilePath);
             }
         } catch (IOException e) {
             LOG.warn("Error during reading license.", e);
@@ -471,7 +473,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                     return new AltusCredential(accessKey, privateKey.toCharArray());
                 }
             } catch (IOException e) {
-                LOG.warn("Error during reading altus credential.", e);
+                LOG.warn("Error occurred during reading altus credential.", e);
             }
         }
         return null;
