@@ -50,10 +50,6 @@ public class StackAuthentication implements ProvisionEntity {
         return publicKey != null && publicKey.startsWith("Basic:");
     }
 
-    public String getLoginPassword() {
-        return publicKey.replaceAll("Basic:", "").trim();
-    }
-
     public String getLoginUserName() {
         return loginUserName;
     }
