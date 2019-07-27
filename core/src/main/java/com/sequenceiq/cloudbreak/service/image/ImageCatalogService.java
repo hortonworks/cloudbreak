@@ -563,6 +563,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private Optional<Image> getLatestImageDefaultPreferred(List<Image> images) {
         List<Image> defaultImages = images.stream().filter(Image::isDefaultImage).collect(Collectors.toList());
+        // If images were created on the same date we would like to pick the latest one in the catalog
+        Collections.reverse(defaultImages);
         return defaultImages.isEmpty() ? images.stream().max(Comparator.comparing(Image::getDate))
                 : defaultImages.stream().max(Comparator.comparing(Image::getDate));
     }
