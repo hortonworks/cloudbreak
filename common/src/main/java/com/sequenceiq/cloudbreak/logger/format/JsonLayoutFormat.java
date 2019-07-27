@@ -6,13 +6,16 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 
 public class JsonLayoutFormat extends SimpleLayoutFormat {
 
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+
     private final CustomJsonLayout jsonLayout;
 
-    JsonLayoutFormat(String prefix) {
-        this.jsonLayout = new CustomJsonLayout(prefix);
+    JsonLayoutFormat(String contextName) {
+        this.jsonLayout = new CustomJsonLayout(contextName);
         jsonLayout.setIncludeMessage(true);
         jsonLayout.setAppendLineSeparator(true);
         jsonLayout.setJsonFormatter(m -> new ObjectMapper().writeValueAsString(m));
+        jsonLayout.setTimestampFormat(DATE_FORMAT);
     }
 
     @Override

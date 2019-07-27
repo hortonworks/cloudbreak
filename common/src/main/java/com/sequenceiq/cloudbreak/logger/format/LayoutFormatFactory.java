@@ -10,8 +10,9 @@ public class LayoutFormatFactory {
     public static LayoutFormat getLayoutFormat() {
         final String property = getProperty("logger.format.json.enabled", null);
         if (Boolean.parseBoolean(property)) {
-            final String cbPrefix = getProperty("logger.format.json.prefix", "cloudbreak.");
-            return new JsonLayoutFormat(cbPrefix);
+            final String mdcContextName = getProperty(
+                    "logger.format.json.mdc.name", "context");
+            return new JsonLayoutFormat(mdcContextName);
         }
         return new SimpleLayoutFormat();
     }

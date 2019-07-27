@@ -11,10 +11,10 @@ import ch.qos.logback.core.CoreConstants;
 
 public class CustomJsonLayout extends JsonLayout {
 
-    private final String prefix;
+    private final String contextName;
 
-    CustomJsonLayout(String prefix) {
-        this.prefix = prefix;
+    CustomJsonLayout(String contextName) {
+        this.contextName = contextName;
     }
 
     public String doLayout(ILoggingEvent event, String fullLogMessage, String loggerNameFilter) {
@@ -27,23 +27,17 @@ public class CustomJsonLayout extends JsonLayout {
 
     private Map toJsonMap(ILoggingEvent event, String fullLogMessage, String loggerNameFilter) {
         Map<String, Object> map = new LinkedHashMap<>();
-        addTimestamp("@" + TIMESTAMP_ATTR_NAME, this.includeTimestamp, event.getTimeStamp(), map);
+        addTimestamp(TIMESTAMP_ATTR_NAME, this.includeTimestamp, event.getTimeStamp(), map);
         add(LEVEL_ATTR_NAME, this.includeLevel, String.valueOf(event.getLevel()), map);
         add(THREAD_ATTR_NAME, this.includeThreadName, event.getThreadName(), map);
         add(LOGGER_ATTR_NAME, this.includeLoggerName, event.getLoggerName(), map);
-        addMdcMapWithPrefix(event.getMDCPropertyMap(), map, this.prefix);
-        String exceptionKey = this.prefix + EXCEPTION_ATTR_NAME;
-        addThrowableInfo(exceptionKey, this.includeException, event, map);
-        String message = event.getFormattedMessage();
-        if (map.containsKey(exceptionKey)) {
-            message = String.format("%s%n%s", message, map.get(exceptionKey));
-            map.remove(exceptionKey);
+        if (event.getMDCPropertyMap() != null && !event.getMDCPropertyMap().isEmpty()) {
+            map.put(contextName, event.getMDCPropertyMap());
         }
         if (loggerNameFilter != null && event.getLoggerName().startsWith(loggerNameFilter)) {
-            message = anonymize(message);
+            fullLogMessage = anonymize(fullLogMessage);
         }
-        add(this.prefix + "log_message", true, message, map);
-        add("@" + FORMATTED_MESSAGE_ATTR_NAME, this.includeFormattedMessage, fullLogMessage, map);
+        add(FORMATTED_MESSAGE_ATTR_NAME, true, fullLogMessage, map);
         return map;
     }
 
@@ -53,14 +47,6 @@ public class CustomJsonLayout extends JsonLayout {
         } catch (Exception e) {
             addError("JsonFormatter failed.  Defaulting to map.toString().  Message: " + e.getMessage(), e);
             return map.toString();
-        }
-    }
-
-    private void addMdcMapWithPrefix(Map<String, ?> mdcPropertMap, Map<String, Object> map, String prefix) {
-        if (!mdcPropertMap.isEmpty()) {
-            for (Map.Entry<String, ?> mdcEntry : mdcPropertMap.entrySet()) {
-                map.put(prefix + mdcEntry.getKey(), mdcEntry.getValue());
-            }
         }
     }
 }
