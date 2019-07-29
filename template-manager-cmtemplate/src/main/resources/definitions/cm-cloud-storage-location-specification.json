@@ -7,7 +7,7 @@
       "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/zeppelin",
       "propertyDisplayName": "Zeppelin Notebooks Root Directory",
       "relatedServices": ["ZEPPELIN_SERVER"],
-      "requiredForAttachedCluster": false,
+      "requiredForAttachedCluster": true,
       "supportedStorages": ["S3"]
     },
     {
@@ -17,7 +17,7 @@
       "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/zeppelin/notebook",
       "propertyDisplayName": "Zeppelin Notebooks Root Directory",
       "relatedServices": ["ZEPPELIN_SERVER"],
-      "requiredForAttachedCluster": false,
+      "requiredForAttachedCluster": true,
       "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2"]
     },
     {
@@ -27,7 +27,7 @@
       "defaultPath": "{{{ defaultPath }}}{{{#if-false datalakeCluster}}}{{{#if-false attachedCluster}}}/{{{ clusterName }}}{{{/if-false}}}{{{/if-false}}}/oplogs/yarn-app-logs",
       "propertyDisplayName": "YARN Application Logs",
       "relatedServices": ["RESOURCEMANAGER"],
-      "requiredForAttachedCluster": false,
+      "requiredForAttachedCluster": true,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
@@ -57,7 +57,7 @@
       "defaultPath": "{{{ defaultPath }}}/ranger/audit",
       "propertyDisplayName": "Ranger Audit Logs",
       "relatedServices": ["RANGER_ADMIN"],
-      "requiredForAttachedCluster": false,
+      "requiredForAttachedCluster": true,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     }
   ]
