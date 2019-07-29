@@ -14,8 +14,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Where;
-
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
@@ -27,7 +25,6 @@ import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 
 @Entity
 @Table(name = "Environment")
-@Where(clause = "archived = false")
 public class EnvironmentView extends CompactView implements AuthResource {
 
     @Column(nullable = false)
