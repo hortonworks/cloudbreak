@@ -44,6 +44,41 @@
         }
       },
       {
+        "name": "compute",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.xlarge",
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "securityGroup": {
+          "securityRules": [
+            {
+              "subnet": "0.0.0.0/0",
+              "ports": [
+                "22"
+              ],
+              "protocol": "tcp"
+            }
+          ]
+        }
+      },
+      {
         "name": "master",
         "template": {
           "attachedVolumes": [

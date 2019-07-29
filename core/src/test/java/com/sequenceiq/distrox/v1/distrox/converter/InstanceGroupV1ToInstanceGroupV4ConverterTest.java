@@ -88,7 +88,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     static Object[][] securityAccessDataProvider() {
         return new Object[][] {
                 // Testcase name                       InstanceGroupType          EnvironmentSet   SecurityAccessSet   CIDR         defaultSecurityGroupId  securityGroupIdKnox   securityGroupExpected  cidrExpected,  expectedSGs
-                { "No Environment set",                InstanceGroupType.CORE,    false,           false,              null,        null,                   null,                 false,                 false,         null },
+                { "No Environment set",                InstanceGroupType.CORE,    false,           false,              null,        null,                   null,                 true,                  false,         Set.of() },
                 { "No SecurityAccess set",             InstanceGroupType.CORE,    true,            false,              null,        null,                   null,                 false,                 false,         null },
                 { "SecurityAccess w/ null props",      InstanceGroupType.CORE,    true,            true,               null,        null,                   null,                 false,                 false,         null },
                 { "SecurityAccess w/ empty cidr",      InstanceGroupType.CORE,    true,            true,               "",          null,                   null,                 true,                  false,         Set.of() },
@@ -124,10 +124,12 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         assertThat(securityGroup != null).isEqualTo(securityGroupExpected);
 
         if (securityGroupExpected) {
-            assertThat(securityGroup.getSecurityGroupIds()).hasSameElementsAs(expectedSecurityGroups);
-            assertThat(securityGroup.getSecurityRules()).usingFieldByFieldElementComparator().hasSameElementsAs(cidrExpected
-                    ? List.of(generateRule(instanceGroupType, cidr))
-                    : List.of());
+            if (securityGroup.getSecurityGroupIds() != null) {
+                assertThat(securityGroup.getSecurityGroupIds()).hasSameElementsAs(expectedSecurityGroups);
+                assertThat(securityGroup.getSecurityRules()).usingFieldByFieldElementComparator().hasSameElementsAs(cidrExpected
+                        ? List.of(generateRule(instanceGroupType, cidr))
+                        : List.of());
+            }
         }
     }
 

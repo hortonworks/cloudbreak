@@ -1,6 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static org.apache.commons.lang3.ObjectUtils.anyNotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,7 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -69,21 +69,29 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
     }
 
     private SecurityGroupV4Request createSecurityGroupFromEnvironment(InstanceGroupType type, DetailedEnvironmentResponse environment) {
-        return getIfNotNull(Optional.ofNullable(environment).map(DetailedEnvironmentResponse::getSecurityAccess).orElse(null), securityAccess -> {
-            if (ObjectUtils.anyNotNull(securityAccess.getSecurityGroupIdForKnox(),
-                    securityAccess.getDefaultSecurityGroupId(),
-                    securityAccess.getCidr())) {
-
+        if (environment == null) {
+            SecurityGroupV4Request response = new SecurityGroupV4Request();
+            SecurityRuleV4Request securityRule = new SecurityRuleV4Request();
+            securityRule.setProtocol("tcp");
+            securityRule.setSubnet("0.0.0.0/0");
+            securityRule.setPorts(getPorts(type));
+            response.setSecurityRules(List.of(securityRule));
+            return response;
+        } else {
+            Optional<SecurityAccessResponse> securityAccess = Optional.of(environment).map(DetailedEnvironmentResponse::getSecurityAccess);
+            if (securityAccess.isPresent() && anyNotNull(securityAccess.get().getSecurityGroupIdForKnox(),
+                    securityAccess.get().getDefaultSecurityGroupId(),
+                    securityAccess.get().getCidr())) {
                 SecurityGroupV4Request securityGroup = new SecurityGroupV4Request();
                 SecurityRuleV4Request securityRule = new SecurityRuleV4Request();
                 securityRule.setProtocol("tcp");
                 securityRule.setPorts(getPorts(type));
                 securityGroup.setSecurityRules(List.of(securityRule));
-                setupSecurityAccess(type, securityAccess, securityGroup);
+                setupSecurityAccess(type, securityAccess.get(), securityGroup);
                 return securityGroup;
             }
-            return null;
-        });
+        }
+        return null;
     }
 
     private List<String> getPorts(InstanceGroupType type) {
