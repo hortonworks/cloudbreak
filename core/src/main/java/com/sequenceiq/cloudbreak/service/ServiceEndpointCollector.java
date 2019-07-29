@@ -168,14 +168,19 @@ public class ServiceEndpointCollector {
     private Optional<String> getServiceUrlForService(ExposedService exposedService, String managerIp, Gateway gateway,
             String topologyName, Map<String, List<String>> privateIps, boolean api) {
         if (hasKnoxUrl(exposedService) && managerIp != null) {
-            if (ExposedService.HIVE_SERVER.equals(exposedService) || ExposedService.HIVE_SERVER_INTERACTIVE.equals(exposedService)) {
-                return getHiveJdbcUrl(gateway, managerIp);
-            } else if (ExposedService.NAMENODE.equals(exposedService)) {
-                return getHdfsUIUrl(gateway, managerIp, privateIps.get(ExposedService.NAMENODE.getServiceName()).iterator().next());
-            } else if (ExposedService.HBASE_UI.equals(exposedService)) {
-                return getHBaseServiceUrl(gateway, managerIp, privateIps.get(ExposedService.HBASE_UI.getServiceName()).iterator().next());
-            } else {
-                return Optional.of(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService, api));
+            switch (exposedService) {
+                case HIVE_SERVER:
+                case HIVE_SERVER_INTERACTIVE:
+                    return getHiveJdbcUrl(gateway, managerIp);
+                case NAMENODE:
+                    return getHdfsUIUrl(gateway, managerIp, privateIps.get(ExposedService.NAMENODE.getServiceName()).iterator().next());
+                case HBASE_UI:
+                    return getHBaseServiceUrl(gateway, managerIp, privateIps.get(ExposedService.HBASE_UI.getServiceName()).iterator().next());
+                case RESOURCEMANAGER_WEB:
+                    String knoxUrl = api ? "/resourcemanager" : exposedService.getKnoxUrl();
+                    return Optional.of(getExposedServiceUrl(managerIp, gateway, topologyName, knoxUrl, api));
+                default:
+                    return Optional.of(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService, api));
             }
         }
         return Optional.empty();
@@ -211,10 +216,14 @@ public class ServiceEndpointCollector {
     }
 
     private String getExposedServiceUrl(String managerIp, Gateway gateway, String topologyName, ExposedService exposedService, boolean api) {
+        return getExposedServiceUrl(managerIp, gateway, topologyName, exposedService.getKnoxUrl(), api);
+    }
+
+    private String getExposedServiceUrl(String managerIp, Gateway gateway, String topologyName, String knoxUrl, boolean api) {
         String topology = api ? topologyName + API_TOPOLOGY_POSTFIX : topologyName;
         return GatewayType.CENTRAL == gateway.getGatewayType()
-                ? String.format("/%s/%s%s", gateway.getPath(), topology, exposedService.getKnoxUrl())
-                : String.format("https://%s:%s/%s/%s%s", managerIp, knoxPort, gateway.getPath(), topology, exposedService.getKnoxUrl());
+                ? String.format("/%s/%s%s", gateway.getPath(), topology, knoxUrl)
+                : String.format("https://%s:%s/%s/%s%s", managerIp, knoxPort, gateway.getPath(), topology, knoxUrl);
     }
 
     private Optional<String> getHdfsUIUrl(Gateway gateway, String managerIp, String nameNodePrivateIp) {
