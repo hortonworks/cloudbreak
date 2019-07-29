@@ -29,14 +29,14 @@ public class ClouderaManagerHostStatusChecker extends ClusterBasedStatusCheckerT
         try {
             String viewType = "SUMMARY";
             ApiHostList hostList = hostsResourceApi.readHosts(viewType);
-            List<String> hostNamesFromManager = hostList.getItems().stream()
-                    .map(ApiHost::getHostname)
+            List<String> hostIpsFromManager = hostList.getItems().stream()
+                    .map(ApiHost::getIpAddress)
                     .collect(Collectors.toList());
-            LOGGER.debug("Hosts in the list from manager: " + hostNamesFromManager);
+            LOGGER.debug("Hosts in the list from manager: " + hostIpsFromManager);
 
             List<InstanceMetaData> notKnownInstancesByManager = clouderaManagerPollerObject.getStack().getInstanceMetaDataAsList().stream()
                     .filter(metaData -> !metaData.isTerminated() && !metaData.isDeletedOnProvider())
-                    .filter(instanceMetaData -> !hostNamesFromManager.contains(instanceMetaData.getDiscoveryFQDN()))
+                    .filter(metaData -> !hostIpsFromManager.contains(metaData.getPrivateIp()))
                     .collect(Collectors.toList());
 
             if (!notKnownInstancesByManager.isEmpty()) {

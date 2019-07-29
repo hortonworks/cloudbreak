@@ -30,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.mock.SetupCmScalingMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
@@ -168,8 +169,10 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             given = "a created cluster with post ambari install recipe",
             when = "upscaling cluster",
             then = "the post recipe should run on the new nodes as well")
-    public void testWhenClusterGetUpScaledThenPostClusterInstallRecipeShouldBeExecuted(TestContext testContext) {
+    public void testWhenClusterGetUpScaledThenPostClusterInstallRecipeShouldBeExecuted(MockedTestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
+        SetupCmScalingMock mock = new SetupCmScalingMock();
+        mock.configure(testContext, 1, 2, 2);
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
@@ -184,9 +187,9 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .when(StackScalePostAction.valid().withDesiredCount(2))
+                .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
                 .validate();
     }
 
@@ -196,8 +199,10 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             when = "upscaling cluster on hostgroup which has no post install recipe",
             then = "the post recipe should not run on the new nodes because those recipe not configured on the upscaled hostgroup")
     public void testWhenRecipeProvidedToHostGroupAndAnotherHostGroupGetUpScaledThenThereIsNoFurtherRecipeExecutionOnTheNewNodeBesideTheDefaultOnes(
-            TestContext testContext) {
+            MockedTestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
+        SetupCmScalingMock mock = new SetupCmScalingMock();
+        mock.configure(testContext, 1, 2, 2);
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
@@ -212,9 +217,9 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .when(StackScalePostAction.valid().withDesiredCount(2))
+                .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
+                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(5))
                 .validate();
     }
 

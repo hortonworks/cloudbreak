@@ -641,6 +641,8 @@ public class ClusterService {
                 }
                 if (repairMode == ManualClusterRepairMode.NODE_ID) {
                     updateNodeVolumeSetsDeleteVolumesFlag(inTransactionStack, nodeIds, deleteVolumes);
+                } else {
+                    updateIgNodeVolumeSetsDeleteVolumesFlag(inTransactionStack, repairedHostGroups, deleteVolumes);
                 }
                 return inTransactionStack;
             });
@@ -728,6 +730,13 @@ public class ClusterService {
     private void updateNodeVolumeSetsDeleteVolumesFlag(Stack stack, List<String> nodeIds, boolean deleteVolumes) {
         resourceService.saveAll(stack.getDiskResources().stream()
                 .filter(resource -> nodeIds.contains(resource.getInstanceId()))
+                .map(volumeSet -> updateDeleteVolumesFlag(deleteVolumes, volumeSet))
+                .collect(Collectors.toList()));
+    }
+
+    private void updateIgNodeVolumeSetsDeleteVolumesFlag(Stack stack, List<String> instanceGroups, boolean deleteVolumes) {
+        resourceService.saveAll(stack.getDiskResources().stream()
+                .filter(resource -> instanceGroups.contains(resource.getInstanceGroup()))
                 .map(volumeSet -> updateDeleteVolumesFlag(deleteVolumes, volumeSet))
                 .collect(Collectors.toList()));
     }

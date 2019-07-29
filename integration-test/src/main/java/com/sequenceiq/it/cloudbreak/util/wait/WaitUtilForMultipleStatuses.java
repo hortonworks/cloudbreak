@@ -163,7 +163,8 @@ public class WaitUtilForMultipleStatuses {
     }
 
     private boolean hasNoExpectedFailure(Map<String, Status> currentStatuses, Map<String, Status> desiredStatuses) {
-        return hasNoExpectedStatus(Status.CREATE_FAILED, currentStatuses, desiredStatuses);
+        return hasNoExpectedStatus(Status.CREATE_FAILED, currentStatuses, desiredStatuses) ||
+                hasNoExpectedStatus(Status.UPDATE_FAILED, currentStatuses, desiredStatuses);
     }
 
     private boolean checkNotExpectedDelete(Map<String, Status> currentStatuses, Map<String, Status> desiredStatuses) {

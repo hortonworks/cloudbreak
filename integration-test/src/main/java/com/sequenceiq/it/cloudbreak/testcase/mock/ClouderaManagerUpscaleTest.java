@@ -5,6 +5,7 @@ import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -20,10 +21,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiHostTemplateList;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -70,6 +73,14 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
                     + "/clusters/:clusterName/hostTemplates/:hostTemplateName/commands/applyHostTemplate";
 
     private static final String READ_COMMAND = ClouderaManagerMock.API_ROOT + "/commands/:commandId";
+
+    private static final String LIST_CLUSTER_COMMANDS = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands";
+
+    private static final String RESTART_MGMTSERVCIES_COMMAND = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands/restart";
+
+    private static final String RESTART_CLUSTER_COMMAND = ClouderaManagerMock.API_ROOT + "/cm/service/commands/restart";
+
+    private static final String READ_HOSTTEMPLATES = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/hostTemplates";
 
     @Inject
     private BlueprintTestClient blueprintTestClient;
@@ -133,7 +144,7 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
                 .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=saltutil.sync_all").atLeast(1))
                 .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=mine.update").atLeast(1))
                 .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=state.highstate").atLeast(2))
-                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=grains.remove").exactTimes(2))
+                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=grains.remove").exactTimes(4))
                 .then(MockVerification.verify(GET,
                         new ClouderaManagerPathResolver(LIST_HOSTS)
                                 .pathVariableMapping(":clusterName", clusterName)
@@ -178,6 +189,10 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
                 (request, response) -> new ApiParcel().stage(parcelStageResponses.pop()));
         dynamicRouteStack.post(APPLY_HOST_TEMPLATE,
                 (request, response) -> new ApiCommand().id(APPLY_HOST_TEMPLATE_COMMAND_ID));
+        dynamicRouteStack.post(RESTART_MGMTSERVCIES_COMMAND, (request, response) -> new ApiCommand().id(new BigDecimal(1)));
+        dynamicRouteStack.get(LIST_CLUSTER_COMMANDS, (request, response) -> new ApiCommandList().items(List.of()));
+        dynamicRouteStack.post(RESTART_CLUSTER_COMMAND, (request, response) -> new ApiCommand().id(new BigDecimal(1)));
+        dynamicRouteStack.get(READ_HOSTTEMPLATES, (request, response) -> new ApiHostTemplateList().items(List.of()));
     }
 
     private List<ApiHostRef> generateHostsRefs(Collection<CloudVmMetaDataStatus> cloudVmMetadataStatusList) {
@@ -191,13 +206,15 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
     }
 
     private List<ApiHost> generateHosts(Collection<CloudVmMetaDataStatus> cloudVmMetadataStatusList) {
-        return cloudVmMetadataStatusList.stream()
-                .filter(status -> InstanceStatus.STARTED.equals(status.getCloudVmInstanceStatus().getStatus()))
-                .map(CloudVmMetaDataStatus::getMetaData)
-                .map(CloudInstanceMetaData::getPrivateIp)
-                .map(HostNameUtil::generateHostNameByIp)
-                .map(hostname -> new ApiHost().hostname(hostname).hostId(hostname))
-                .collect(Collectors.toList());
+        List<ApiHost> apiHosts = new ArrayList<>();
+        for (CloudVmMetaDataStatus vmStatus : cloudVmMetadataStatusList) {
+            if (InstanceStatus.STARTED.equals(vmStatus.getCloudVmInstanceStatus().getStatus())) {
+                String ip = vmStatus.getMetaData().getPrivateIp();
+                String hostname = HostNameUtil.generateHostNameByIp(ip);
+                apiHosts.add(new ApiHost().hostname(hostname).hostId(hostname).ipAddress(ip));
+            }
+        }
+        return apiHosts;
     }
 
     @Override
