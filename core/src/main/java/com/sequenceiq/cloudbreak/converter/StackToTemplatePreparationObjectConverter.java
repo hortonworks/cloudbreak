@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsVie
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -98,6 +99,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private AwsMockIdentityMappingService awsIdentityMappingService;
 
+    @Inject
+    private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -163,7 +167,8 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private BaseFileSystemConfigurationsView getFileSystemConfigurationView(Credential credential, Stack source, FileSystem fileSystem) throws IOException {
         BaseFileSystemConfigurationsView fileSystemConfigurationView = null;
         if (source.getCluster().getFileSystem() != null) {
-            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential.getAttributes());
+            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential.getAttributes(),
+                    cmCloudStorageConfigProvider.getConfigQueryEntries());
         }
         return fileSystemConfigurationView;
     }

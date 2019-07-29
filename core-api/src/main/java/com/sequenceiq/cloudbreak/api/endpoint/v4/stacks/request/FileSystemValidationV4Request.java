@@ -7,11 +7,11 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.common.api.cloudstorage.AdlsCloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.AdlsGen2CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.GcsCloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
 

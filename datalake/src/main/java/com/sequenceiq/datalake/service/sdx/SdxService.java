@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
@@ -30,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -167,10 +167,10 @@ public class SdxService {
             SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         stackV4Request = getStackRequest(stackV4Request, sdxClusterRequest.getClusterShape(), environment.getCloudPlatform());
         if (isCloudStorageConfigured(sdxClusterRequest)) {
-            CloudStorageV4Request cloudStorageConfig =
-                    cloudStorageManifester.getCloudStorageConfig(environment.getCloudPlatform(),
+            CloudStorageRequest cloudStorageRequest =
+                    cloudStorageManifester.initCloudStorageRequest(environment.getCloudPlatform(),
                             stackV4Request.getCluster().getBlueprintName(), sdxCluster, sdxClusterRequest);
-            stackV4Request.getCluster().setCloudStorage(cloudStorageConfig);
+            stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
         }
         return stackV4Request;
     }

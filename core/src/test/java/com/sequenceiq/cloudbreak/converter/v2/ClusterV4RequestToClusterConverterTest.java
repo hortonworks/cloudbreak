@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
@@ -48,6 +47,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -61,6 +61,8 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageBase;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterV4RequestToClusterConverterTest {
@@ -88,6 +90,9 @@ public class ClusterV4RequestToClusterConverterTest {
     @Mock
     private ConversionService conversionService;
 
+    @Mock
+    private CloudStorageConverter cloudStorageConverter;
+
     private Workspace workspace;
 
     private Blueprint blueprint;
@@ -105,12 +110,12 @@ public class ClusterV4RequestToClusterConverterTest {
 
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
 
-        when(cloudStorageValidationUtil.isCloudStorageConfigured(nullable(CloudStorageV4Request.class))).thenReturn(false);
+        when(cloudStorageValidationUtil.isCloudStorageConfigured(nullable(CloudStorageBase.class))).thenReturn(false);
     }
 
     @Test
     public void testConvertWhenCloudStorageConfiguredAndRdsAndLdapAndProxyExistsAnd() {
-        CloudStorageV4Request cloudStorageRequest = mock(CloudStorageV4Request.class);
+        CloudStorageRequest cloudStorageRequest = mock(CloudStorageRequest.class);
 
         String rdsConfigName = "rds-name";
         String proxyConfigCrn = "proxy-config-resource-crn";
@@ -130,7 +135,7 @@ public class ClusterV4RequestToClusterConverterTest {
         when(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq(BLUEPRINT), any())).thenReturn(blueprint);
 
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
-        when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
+        when(cloudStorageConverter.requestToFileSystem(cloudStorageRequest)).thenReturn(fileSystem);
         when(rdsConfigService.findByNamesInWorkspace(singleton(rdsConfigName), workspace.getId())).thenReturn(singleton(rdsConfig));
 
         Cluster actual = underTest.convert(source);
@@ -142,7 +147,7 @@ public class ClusterV4RequestToClusterConverterTest {
         assertThat(actual.getProxyConfigCrn(), is(proxyConfigCrn));
 
         verify(cloudStorageValidationUtil, times(1)).isCloudStorageConfigured(cloudStorageRequest);
-        verify(conversionService, times(1)).convert(cloudStorageRequest, FileSystem.class);
+        verify(cloudStorageConverter, times(1)).requestToFileSystem(cloudStorageRequest);
         verify(rdsConfigService, times(1)).findByNamesInWorkspace(singleton(rdsConfigName), workspace.getId());
     }
 

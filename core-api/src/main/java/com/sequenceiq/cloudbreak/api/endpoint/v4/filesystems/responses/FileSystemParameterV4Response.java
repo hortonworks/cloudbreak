@@ -12,6 +12,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 @JsonInclude(Include.NON_NULL)
 public class FileSystemParameterV4Response implements JsonEntity {
 
+    private String type;
+
     private String propertyName;
 
     private String description;
@@ -27,6 +29,14 @@ public class FileSystemParameterV4Response implements JsonEntity {
     private String propertyDisplayName;
 
     private boolean secure;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getPropertyName() {
         return propertyName;

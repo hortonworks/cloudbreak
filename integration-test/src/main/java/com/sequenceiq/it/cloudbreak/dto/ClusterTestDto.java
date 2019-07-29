@@ -5,8 +5,8 @@ import static com.google.common.collect.Sets.newHashSet;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
@@ -93,7 +93,7 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
         return this;
     }
 
-    public ClusterTestDto withCloudStorage(CloudStorageV4Request cloudStorage) {
+    public ClusterTestDto withCloudStorage(CloudStorageRequest cloudStorage) {
         getRequest().setCloudStorage(cloudStorage);
         return this;
     }

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.common.api.cloudstorage.GcsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 
 public class GcsFileSystemToGcsCloudStorageParametersConverterTest {

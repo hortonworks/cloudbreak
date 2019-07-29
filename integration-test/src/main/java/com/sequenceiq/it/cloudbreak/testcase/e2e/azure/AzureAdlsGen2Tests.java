@@ -2,19 +2,20 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.azure;
 
 import static com.sequenceiq.it.cloudbreak.assertion.storage.azure.AdlsGen2TestAssertion.stackContainsAdlsGen2Properties;
 import static com.sequenceiq.it.cloudbreak.assertion.storage.azure.AdlsGen2TestAssertion.stackContainsStorageLocations;
-import static com.sequenceiq.it.cloudbreak.util.storagelocation.StorageComponent.HIVE;
-import static com.sequenceiq.it.cloudbreak.util.storagelocation.StorageComponent.RANGER;
-import static com.sequenceiq.it.cloudbreak.util.storagelocation.StorageComponent.SPARK2;
-import static com.sequenceiq.it.cloudbreak.util.storagelocation.StorageComponent.TEZ;
-import static com.sequenceiq.it.cloudbreak.util.storagelocation.StorageComponent.YARN;
-import static com.sequenceiq.it.cloudbreak.util.storagelocation.StorageComponent.ZEPPELIN;
+import static com.sequenceiq.it.cloudbreak.util.storagelocation.StorageComponent.HIVE_METASTORE_EXTERNAL_WAREHOUSE;
+import static com.sequenceiq.it.cloudbreak.util.storagelocation.StorageComponent.HIVE_METASTORE_WAREHOUSE;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.common.api.cloudstorage.AdlsGen2CloudStorageV1Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
+import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -27,7 +28,7 @@ import com.sequenceiq.it.cloudbreak.util.storagelocation.StorageComponent;
 
 public class AzureAdlsGen2Tests extends AbstractE2ETest {
 
-    private static final StorageComponent[] LOCATION_STORAGE_COMPONENTS = {HIVE, SPARK2, TEZ, RANGER, YARN, ZEPPELIN};
+    private static final StorageComponent[] LOCATION_STORAGE_COMPONENTS = {HIVE_METASTORE_WAREHOUSE, HIVE_METASTORE_EXTERNAL_WAREHOUSE};
 
     @Inject
     private StackTestClient stackTestClient;
@@ -35,7 +36,8 @@ public class AzureAdlsGen2Tests extends AbstractE2ETest {
     @Inject
     private AzureProperties azureProperties;
 
-    @Test(dataProvider = TEST_CONTEXT)
+    // I disabled the test because with this commit only S3 and WASB cloud storages are supported.
+    @Test(dataProvider = TEST_CONTEXT, enabled = false)
     @Description(
             given = "there is a running cloudbreak",
             when = "a valid azure stack create request with attached ADLS Gen2 cloud storage is sent",
@@ -66,11 +68,11 @@ public class AzureAdlsGen2Tests extends AbstractE2ETest {
             then = "the stack should be available AND deletable")
     public void testCreateStopAndStartClusterWithAdlsGen2AndCloudStorage(TestContext testContext) {
         String name = resourcePropertyProvider().getName();
-        CloudStorageV4Request cloudStorageV4Request = adlsGen2CloudStorageV4RequestWithStorageLocations(name);
+        CloudStorageRequest cloudStorageRequest = adlsGen2CloudStorageV4RequestWithStorageLocations(name);
 
         testContext
                 .given("clusterWithAdlsGen2", ClusterTestDto.class)
-                .withCloudStorage(cloudStorageV4Request)
+                .withCloudStorage(cloudStorageRequest)
                 .withName(name)
 
                 .given(StackTestDto.class)
@@ -87,8 +89,8 @@ public class AzureAdlsGen2Tests extends AbstractE2ETest {
                 .validate();
     }
 
-    private CloudStorageV4Request adlsGen2CloudStorageV4RequestWithStorageLocations(String clusterName) {
-        CloudStorageV4Request request = adlsGen2CloudStorageV4RequestWithoutStorageLocations();
+    private CloudStorageRequest adlsGen2CloudStorageV4RequestWithStorageLocations(String clusterName) {
+        CloudStorageRequest request = adlsGen2CloudStorageV4RequestWithoutStorageLocations();
         String accountName = azureProperties.getCloudstorage().getAccountName();
         String storageLocation = azureProperties.getCloudstorage().getLocationName();
         AzureTestStorageLocation azureStorageLocation = new AzureTestStorageLocation(accountName, clusterName, storageLocation);
@@ -96,14 +98,20 @@ public class AzureAdlsGen2Tests extends AbstractE2ETest {
         return request;
     }
 
-    private CloudStorageV4Request adlsGen2CloudStorageV4RequestWithoutStorageLocations() {
-        CloudStorageV4Request request = new CloudStorageV4Request();
+    private CloudStorageRequest adlsGen2CloudStorageV4RequestWithoutStorageLocations() {
+        CloudStorageRequest request = new CloudStorageRequest();
         AdlsGen2CloudStorageV1Parameters adlsGen2 = new AdlsGen2CloudStorageV1Parameters();
         String accountName = azureProperties.getCloudstorage().getAccountName();
         String accountKey = azureProperties.getCloudstorage().getAccountKey();
         adlsGen2.setAccountKey(accountKey);
         adlsGen2.setAccountName(accountName);
-        request.setAdlsGen2(adlsGen2);
+        StorageLocationBase storageLocationBase = new StorageLocationBase();
+        storageLocationBase.setType(CloudStorageCdpService.RANGER_ADMIN.name());
+        storageLocationBase.setValue("somePath");
+        request.setLocations(List.of(storageLocationBase));
+        StorageIdentityBase storageIdentityBase = new StorageIdentityBase();
+        storageIdentityBase.setAdlsGen2(adlsGen2);
+        request.setIdentities(List.of(storageIdentityBase));
         return request;
     }
 

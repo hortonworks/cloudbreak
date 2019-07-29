@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.common.api.cloudstorage.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 
 public class AdlsGen2FileSystemToAdlsGen2CloudStorageParametersConverterTest {

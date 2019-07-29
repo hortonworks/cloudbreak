@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StructuredParameterQueryV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
+import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 
 @Component
 public class ConfigQueryEntryToStructuredParameterQueryV4ResponseConverter
@@ -13,6 +13,7 @@ public class ConfigQueryEntryToStructuredParameterQueryV4ResponseConverter
     @Override
     public StructuredParameterQueryV4Response convert(ConfigQueryEntry source) {
         StructuredParameterQueryV4Response structuredParameterQueryV4Response = new StructuredParameterQueryV4Response();
+        structuredParameterQueryV4Response.setType(source.getType().name());
         structuredParameterQueryV4Response.setDefaultPath(source.getDefaultPath());
         structuredParameterQueryV4Response.setDescription(source.getDescription());
         structuredParameterQueryV4Response.setPropertyName(source.getPropertyName());

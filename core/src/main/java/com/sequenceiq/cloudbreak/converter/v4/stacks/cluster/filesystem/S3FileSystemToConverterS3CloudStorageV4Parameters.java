@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.common.api.cloudstorage.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 
 @Component

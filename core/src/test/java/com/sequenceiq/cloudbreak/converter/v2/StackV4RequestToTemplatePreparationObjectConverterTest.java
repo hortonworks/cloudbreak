@@ -35,15 +35,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
+import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -70,6 +71,8 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -172,6 +175,12 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     @Mock
     private CredentialResponse credentialResponse;
+
+    @Mock
+    private CloudStorageConverter cloudStorageConverter;
+
+    @Mock
+    private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     @Before
     public void setUp() {
@@ -310,12 +319,15 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenClusterHasCloudStorageThenConvertedFileSystemShouldBeStoredComingFromFileSystemConfigurationProvider() throws IOException {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
-        CloudStorageV4Request cloudStorageRequest = new CloudStorageV4Request();
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
         FileSystem fileSystem = new FileSystem();
+        ConfigQueryEntries configQueryEntries = new ConfigQueryEntries();
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
         when(cluster.getCloudStorage()).thenReturn(cloudStorageRequest);
-        when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential.getAttributes())).thenReturn(expected);
+        when(cloudStorageConverter.requestToFileSystem(cloudStorageRequest)).thenReturn(fileSystem);
+        when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential.getAttributes(),
+                configQueryEntries)).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 

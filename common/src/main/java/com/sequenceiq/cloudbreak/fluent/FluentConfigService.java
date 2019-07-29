@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.cloudbreak.fluent.cloud.WasbConfig;
 import com.sequenceiq.cloudbreak.fluent.cloud.WasbConfigGenerator;
-import com.sequenceiq.common.api.cloudstorage.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 

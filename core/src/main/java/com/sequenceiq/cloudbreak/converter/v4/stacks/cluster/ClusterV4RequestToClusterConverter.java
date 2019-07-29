@@ -74,6 +74,9 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     @Inject
     private RdsConfigService rdsConfigService;
 
+    @Inject
+    private CloudStorageConverter cloudStorageConverter;
+
     @Override
     public Cluster convert(ClusterV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
@@ -91,7 +94,8 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setBlueprint(getBlueprint(source.getBlueprintName(), workspace));
         convertGateway(source, cluster);
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {
-            cluster.setFileSystem(getConversionService().convert(source.getCloudStorage(), FileSystem.class));
+            FileSystem fileSystem = cloudStorageConverter.requestToFileSystem(source.getCloudStorage());
+            cluster.setFileSystem(fileSystem);
         }
         convertAttributes(source, cluster);
         try {
