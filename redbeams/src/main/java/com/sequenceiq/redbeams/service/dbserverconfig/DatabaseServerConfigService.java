@@ -77,12 +77,12 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     @Inject
     private UserGeneratorService userGeneratorService;
 
-    public Set<DatabaseServerConfig> findAll(Long workspaceId, String environmentId) {
-        if (environmentId == null) {
-            throw new IllegalArgumentException("No environmentId supplied.");
+    public Set<DatabaseServerConfig> findAll(Long workspaceId, String environmentCrn) {
+        if (environmentCrn == null) {
+            throw new IllegalArgumentException("No environment CRN supplied.");
         }
 
-        return repository.findByWorkspaceIdAndEnvironmentId(workspaceId, environmentId);
+        return repository.findByWorkspaceIdAndEnvironmentId(workspaceId, environmentCrn);
     }
 
     public DatabaseServerConfig create(DatabaseServerConfig resource, Long workspaceId) {
@@ -132,11 +132,11 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         repository.save(resource);
     }
 
-    public DatabaseServerConfig getByName(Long workspaceId, String environmentId, String name) {
-        Optional<DatabaseServerConfig> resourceOpt = repository.findByNameAndWorkspaceIdAndEnvironmentId(name, workspaceId, environmentId);
+    public DatabaseServerConfig getByName(Long workspaceId, String environmentCrn, String name) {
+        Optional<DatabaseServerConfig> resourceOpt = repository.findByNameAndWorkspaceIdAndEnvironmentId(name, workspaceId, environmentCrn);
         if (resourceOpt.isEmpty()) {
             throw new NotFoundException(String.format("No %s found with name '%s' in environment '%s'",
-                    DatabaseServerConfig.class.getSimpleName(), name, environmentId));
+                    DatabaseServerConfig.class.getSimpleName(), name, environmentCrn));
         }
         MDCBuilder.buildMdcContext(resourceOpt.get());
         return resourceOpt.get();
@@ -183,22 +183,22 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                 .collect(Collectors.toSet());
     }
 
-    //    public Set<DatabaseServerConfig> deleteMultipleByName(Long workspaceId, String environmentId, Set<String> names) {
-//        Set<DatabaseServerConfig> resources = getByNames(workspaceId, environmentId, names);
+    //    public Set<DatabaseServerConfig> deleteMultipleByName(Long workspaceId, String environmentCrn, Set<String> names) {
+//        Set<DatabaseServerConfig> resources = getByNames(workspaceId, environmentCrn, names);
 //        return resources.stream()
 //                .map(this::delete)
 //                .collect(Collectors.toSet());
 //    }
 
-    private Set<DatabaseServerConfig> getByNames(Long workspaceId, String environmentId, Set<String> names) {
+    private Set<DatabaseServerConfig> getByNames(Long workspaceId, String environmentCrn, Set<String> names) {
         Set<DatabaseServerConfig> resources =
-                repository.findByNameInAndWorkspaceIdAndEnvironmentId(names, workspaceId, environmentId);
+                repository.findByNameInAndWorkspaceIdAndEnvironmentId(names, workspaceId, environmentCrn);
         Set<String> notFound = Sets.difference(names,
                 resources.stream().map(DatabaseServerConfig::getName).collect(Collectors.toSet()));
 
         if (!notFound.isEmpty()) {
-            throw new NotFoundException(String.format("No %s(s) found with name(s) %s in environment %s", DatabaseServerConfig.class.getSimpleName(),
-                    String.join(", ", notFound), environmentId));
+            throw new NotFoundException(String.format("No %s(s) found with name(s) %s in environment '%s'", DatabaseServerConfig.class.getSimpleName(),
+                    String.join(", ", notFound), environmentCrn));
         }
 
         return resources;

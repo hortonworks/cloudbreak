@@ -9,13 +9,8 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
@@ -42,18 +37,6 @@ public class SwaggerConfig {
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);
         SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, swaggerConfig);
-    }
-
-    // FIXME: This configures documentation at /v2/api-docs, but it currently
-    // doesn't work, probably because the controllers use JAX-RS and not
-    // Spring MVC
-    @Bean
-    public Docket apiDocket() {
-        return new Docket(DocumentationType.SWAGGER_2)
-            .select()
-            .apis(RequestHandlerSelectors.basePackage("com.sequenceiq.redbeams"))
-            .paths(PathSelectors.any())
-            .build();
     }
 
 }

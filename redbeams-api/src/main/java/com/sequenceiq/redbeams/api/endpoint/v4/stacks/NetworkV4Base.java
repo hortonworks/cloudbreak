@@ -2,22 +2,22 @@ package com.sequenceiq.redbeams.api.endpoint.v4.stacks;
 
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
-import com.sequenceiq.redbeams.doc.ModelDescriptions.NetworkModelDescription;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.NetworkModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public class NetworkV4Base extends ProviderParametersBase {
 
-    @ApiModelProperty(NetworkModelDescription.AWS_PARAMETERS)
+    @ApiModelProperty(NetworkModelDescriptions.AWS_PARAMETERS)
     private AwsNetworkV4Parameters aws;
 
-    // @ApiModelProperty(NetworkModelDescription.GCP_PARAMETERS)
+    // @ApiModelProperty(NetworkModelDescriptions.GCP_PARAMETERS)
     // private GcpNetworkV4Parameters gcp;
 
-    // @ApiModelProperty(NetworkModelDescription.AZURE_PARAMETERS)
+    // @ApiModelProperty(NetworkModelDescriptions.AZURE_PARAMETERS)
     // private AzureNetworkV4Parameters azure;
 
-    // @ApiModelProperty(NetworkModelDescription.OPEN_STACK_PARAMETERS)
+    // @ApiModelProperty(NetworkModelDescriptions.OPEN_STACK_PARAMETERS)
     // private OpenStackNetworkV4Parameters openstack;
 
     // @ApiModelProperty(hidden = true)

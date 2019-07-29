@@ -67,8 +67,8 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     @Inject
     private DatabaseConnectionValidator connectionValidator;
 
-    public Set<DatabaseConfig> findAll(String environmentId) {
-        return repository.findByEnvironmentId(environmentId);
+    public Set<DatabaseConfig> findAll(String environmentCrn) {
+        return repository.findByEnvironmentId(environmentCrn);
     }
 
     public DatabaseConfig register(DatabaseConfig configToSave) {
@@ -114,38 +114,38 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         repository.save(databaseConfig);
     }
 
-    public DatabaseConfig get(String name, String environmentId) {
+    public DatabaseConfig get(String name, String environmentCrn) {
         Optional<DatabaseConfig> resourceOpt =
-                repository.findByEnvironmentIdAndName(environmentId, name);
+                repository.findByEnvironmentIdAndName(environmentCrn, name);
         if (resourceOpt.isEmpty()) {
             throw new NotFoundException(String.format("No database found with name '%s' in environment '%s'",
-                    name, environmentId));
+                    name, environmentCrn));
         }
         MDCBuilder.buildMdcContext(resourceOpt.get());
         return resourceOpt.get();
     }
 
-    public Set<DatabaseConfig> delete(Set<String> names, String environmentId) {
+    public Set<DatabaseConfig> delete(Set<String> names, String environmentCrn) {
         // TODO return a MUTLI-STATUS if some of the deletes won't succeed.
         // TODO crn validation, maybe as a validator
-        Set<DatabaseConfig> foundDatabaseConfigs = repository.findAllByEnvironmentIdAndNameIn(environmentId, names);
+        Set<DatabaseConfig> foundDatabaseConfigs = repository.findAllByEnvironmentIdAndNameIn(environmentCrn, names);
         if (names.size() != foundDatabaseConfigs.size()) {
             Set<String> notFoundDatabaseConfigs = Sets.difference(names, foundDatabaseConfigs.stream().map(DatabaseConfig::getName).collect(Collectors.toSet()));
             throw new NotFoundException(
-                    String.format("Database(s) for %s not found in environment %s", String.join(", ", notFoundDatabaseConfigs), environmentId));
+                    String.format("Database(s) for %s not found in environment '%s'", String.join(", ", notFoundDatabaseConfigs), environmentCrn));
         }
         return foundDatabaseConfigs.stream()
                 .map(this::deleteOne)
                 .collect(Collectors.toSet());
     }
 
-    public DatabaseConfig delete(String name, String environmentId) {
-        DatabaseConfig resource = get(name, environmentId);
+    public DatabaseConfig delete(String name, String environmentCrn) {
+        DatabaseConfig resource = get(name, environmentCrn);
         return deleteOne(resource);
     }
 
-    public String testConnection(String databaseConfigName, String environmentId) {
-        DatabaseConfig databaseConfig = get(databaseConfigName, environmentId);
+    public String testConnection(String databaseConfigName, String environmentCrn) {
+        DatabaseConfig databaseConfig = get(databaseConfigName, environmentCrn);
         return testConnection(databaseConfig);
     }
 

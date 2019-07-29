@@ -3,7 +3,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.stacks;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescription;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class DatabaseServerV4Request extends DatabaseServerV4Base {
 
-    @ApiModelProperty(DatabaseServerModelDescription.SECURITY_GROUP)
+    @ApiModelProperty(DatabaseServerModelDescriptions.SECURITY_GROUP)
     private SecurityGroupV4Request securityGroup;
 
     public SecurityGroupV4Request getSecurityGroup() {

@@ -3,44 +3,44 @@ package com.sequenceiq.redbeams.api.endpoint.v4.stacks;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.validation.ValidDatabaseVendor;
-import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescription;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public class DatabaseServerV4Base extends ProviderParametersBase {
 
-    @ApiModelProperty(DatabaseServerModelDescription.INSTANCE_TYPE)
+    @ApiModelProperty(DatabaseServerModelDescriptions.INSTANCE_TYPE)
     private String instanceType;
 
     @ValidDatabaseVendor
-    @ApiModelProperty(DatabaseServerModelDescription.DATABASE_VENDOR)
+    @ApiModelProperty(DatabaseServerModelDescriptions.DATABASE_VENDOR)
     private String databaseVendor;
 
-    @ApiModelProperty(DatabaseServerModelDescription.CONNECTION_DRIVER)
+    @ApiModelProperty(DatabaseServerModelDescriptions.CONNECTION_DRIVER)
     private String connectionDriver;
 
-    @ApiModelProperty(DatabaseServerModelDescription.STORAGE_SIZE)
+    @ApiModelProperty(DatabaseServerModelDescriptions.STORAGE_SIZE)
     private Long storageSize;
 
-    @ApiModelProperty(DatabaseServerModelDescription.ROOT_USER_NAME)
+    @ApiModelProperty(DatabaseServerModelDescriptions.ROOT_USER_NAME)
     private String rootUserName;
 
-    @ApiModelProperty(DatabaseServerModelDescription.ROOT_USER_PASSWORD)
+    @ApiModelProperty(DatabaseServerModelDescriptions.ROOT_USER_PASSWORD)
     private String rootUserPassword;
 
-    @ApiModelProperty(DatabaseServerModelDescription.PORT)
+    @ApiModelProperty(DatabaseServerModelDescriptions.PORT)
     private Integer port;
 
-    @ApiModelProperty(DatabaseServerModelDescription.AWS_PARAMETERS)
+    @ApiModelProperty(DatabaseServerModelDescriptions.AWS_PARAMETERS)
     private AwsDatabaseServerV4Parameters aws;
 
-    // @ApiModelProperty(DatabaseServerModelDescription.GCP_PARAMETERS)
+    // @ApiModelProperty(DatabaseServerModelDescriptions.GCP_PARAMETERS)
     // private GcpDatabaseServerV4Parameters gcp;
 
-    // @ApiModelProperty(DatabaseServerModelDescription.AZURE_PARAMETERS)
+    // @ApiModelProperty(DatabaseServerModelDescriptions.AZURE_PARAMETERS)
     // private AzureDatabaseServerV4Parameters azure;
 
-    // @ApiModelProperty(DatabaseServerModelDescription.OPEN_STACK_PARAMETERS)
+    // @ApiModelProperty(DatabaseServerModelDescriptions.OPEN_STACK_PARAMETERS)
     // private OpenStackDatabaseServerV4Parameters openstack;
 
     // @ApiModelProperty(hidden = true)

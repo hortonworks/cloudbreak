@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
-import com.sequenceiq.redbeams.doc.ModelDescriptions.AwsNetworkModelDescription;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.AwsNetworkModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class AwsNetworkV4Parameters extends MappableBase {
 
-    @ApiModelProperty(AwsNetworkModelDescription.SUBNET_ID)
+    @ApiModelProperty(AwsNetworkModelDescriptions.SUBNET_ID)
     private String subnetId;
 
     public String getSubnetId() {

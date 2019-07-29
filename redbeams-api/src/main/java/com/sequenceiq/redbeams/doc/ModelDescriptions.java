@@ -18,7 +18,6 @@ public final class ModelDescriptions {
     public static final String DATABASE_SERVER_TEST_RESPONSE = "Response for testing connectivity to a database server";
     public static final String DATABASE_TEST_REQUEST = "Request for testing connectivity to a database";
     public static final String DATABASE_TEST_RESPONSE = "Response for testing connectivity to a database";
-    public static final String TERMINATE_DATABASE_SERVER_REQUEST = "Request for terminating an existing database server in a provider";
 
     public static class Database {
         public static final String CRN = "CRN of the database";
@@ -70,39 +69,43 @@ public final class ModelDescriptions {
 
     public static class DBStack {
         public static final String STACK_NAME = "Name of the database stack";
-        public static final String REGION = "Region for the database stack";
         public static final String NETWORK = "Network information for the database stack";
         public static final String DATABASE_SERVER = "Database server information for the database stack";
         public static final String AWS_PARAMETERS = "AWS-specific parameters for the database stack";
     }
 
-    public static class NetworkModelDescription {
-        public static final String AWS_PARAMETERS = "AWS-specific parameters of the specified network";
-        public static final String GCP_PARAMETERS = "GCP-specific parameters of the specified network";
-        public static final String AZURE_PARAMETERS = "Azure-specific parameters of the specified network";
-        public static final String OPEN_STACK_PARAMETERS = "OpenStack-specific parameters of the specified network";
+    public static class NetworkModelDescriptions {
+        public static final String AWS_PARAMETERS = "AWS-specific parameters for the network";
+        public static final String GCP_PARAMETERS = "GCP-specific parameters for the network";
+        public static final String AZURE_PARAMETERS = "Azure-specific parameters for the network";
+        public static final String OPEN_STACK_PARAMETERS = "OpenStack-specific parameters for the network";
     }
 
-    public static class AwsNetworkModelDescription {
+    public static class AwsNetworkModelDescriptions {
         public static final String SUBNET_ID = "Subnet ID(s) of the specified AWS network";
     }
 
-    public static class DatabaseServerModelDescription {
+    public static class DatabaseServerModelDescriptions {
         public static final String INSTANCE_TYPE = "Instance type of the database server";
-        public static final String DATABASE_VENDOR = "Database vendor of the database server";
-        public static final String CONNECTION_DRIVER = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
+        public static final String DATABASE_VENDOR = DatabaseServer.DATABASE_VENDOR;
+        public static final String CONNECTION_DRIVER = DatabaseServer.CONNECTION_DRIVER;
         public static final String STORAGE_SIZE = "Storage size of the database server, in GB";
-        public static final String ROOT_USER_NAME = "Root user name of the database server";
-        public static final String ROOT_USER_PASSWORD = "Root user password of the database server";
-        public static final String PORT = "Port for the database";
-        public static final String AWS_PARAMETERS = "AWS-specific parameters of the specified database server";
-        public static final String GCP_PARAMETERS = "GCP-specific parameters of the specified database server";
-        public static final String AZURE_PARAMETERS = "Azure-specific parameters of the specified database server";
-        public static final String OPEN_STACK_PARAMETERS = "OpenStack-specific parameters of the specified database server";
+        public static final String ROOT_USER_NAME = DatabaseServer.USERNAME;
+        public static final String ROOT_USER_PASSWORD = DatabaseServer.PASSWORD;
+        public static final String PORT = DatabaseServer.PORT;
+        public static final String AWS_PARAMETERS = "AWS-specific parameters for the database server";
+        public static final String GCP_PARAMETERS = "GCP-specific parameters for the database server";
+        public static final String AZURE_PARAMETERS = "Azure-specific parameters for the database server";
+        public static final String OPEN_STACK_PARAMETERS = "OpenStack-specific parameters for the database server";
         public static final String SECURITY_GROUP = "Security group of the database server";
     }
 
-    public static class SecurityGroupModelDescription {
+    public static class AwsDatabaseServerModelDescriptions {
+        public static final String BACKUP_RETENTION_PERIOD = "Time to retain backups, in days";
+        public static final String ENGINE_VERSION = "Version of the database engine (vendor)";
+    }
+
+    public static class SecurityGroupModelDescriptions {
         public static final String SECURITY_GROUP_IDS = "Exisiting security group ID(s) for the database server";
     }
 

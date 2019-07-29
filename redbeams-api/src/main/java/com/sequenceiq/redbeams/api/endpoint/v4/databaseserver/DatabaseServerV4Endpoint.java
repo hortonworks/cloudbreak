@@ -37,16 +37,14 @@ import io.swagger.annotations.Authorization;
 //import java.util.Set;
 
 @Path("/v4/databaseservers")
-@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 @Api(tags = { "database servers" },
     protocols = "http,https",
-    produces = MediaType.APPLICATION_JSON,
     authorizations = { @Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY) })
 public interface DatabaseServerV4Endpoint {
 
     @GET
     @Path("")
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.LIST, notes = DatabaseServerNotes.LIST,
         nickname = "listDatabaseServers")
     DatabaseServerV4Responses list(
@@ -55,7 +53,6 @@ public interface DatabaseServerV4Endpoint {
 
     @GET
     @Path("{crn}")
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.GET_BY_CRN, notes = DatabaseServerNotes.GET_BY_CRN,
             nickname = "getDatabaseServerByCrn")
     DatabaseServerV4Response getByCrn(
@@ -64,7 +61,6 @@ public interface DatabaseServerV4Endpoint {
 
     @GET
     @Path("name/{name}")
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.GET_BY_NAME, notes = DatabaseServerNotes.GET_BY_NAME,
             nickname = "getDatabaseServerByName")
     DatabaseServerV4Response getByName(
@@ -74,7 +70,7 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("managed")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.CREATE, notes = DatabaseServerNotes.CREATE,
             nickname = "createDatabaseServer")
     DatabaseServerStatusV4Response create(
@@ -83,7 +79,6 @@ public interface DatabaseServerV4Endpoint {
 
     @GET
     @Path("managed/status/{crn}")
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_CRN, notes = DatabaseServerNotes.GET_STATUS_BY_CRN,
             nickname = "getDatabaseServerStatusByCrn")
     DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByCrn(
@@ -92,7 +87,6 @@ public interface DatabaseServerV4Endpoint {
 
     @GET
     @Path("managed/status/name/{name}")
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_NAME, notes = DatabaseServerNotes.GET_STATUS_BY_NAME,
             nickname = "getDatabaseServerStatusByName")
     DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByName(
@@ -102,7 +96,6 @@ public interface DatabaseServerV4Endpoint {
 
     @DELETE
     @Path("managed/{crn}")
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.TERMINATE, notes = DatabaseServerNotes.TERMINATE,
             nickname = "terminateManagedDatabaseServer")
     DatabaseServerTerminationOutcomeV4Response terminate(
@@ -111,7 +104,7 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("register")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.REGISTER, notes = DatabaseServerNotes.REGISTER,
         nickname = "registerDatabaseServer")
     DatabaseServerV4Response register(
@@ -120,7 +113,6 @@ public interface DatabaseServerV4Endpoint {
 
     @DELETE
     @Path("{crn}")
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_CRN, notes = DatabaseServerNotes.DELETE_BY_CRN,
         nickname = "deleteDatabaseServerByCrn")
     DatabaseServerV4Response deleteByCrn(
@@ -129,7 +121,6 @@ public interface DatabaseServerV4Endpoint {
 
     @DELETE
     @Path("/name/{name}")
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_NAME, notes = DatabaseServerNotes.DELETE_BY_NAME,
             nickname = "deleteDatabaseServerByName")
     DatabaseServerV4Response deleteByName(
@@ -139,7 +130,7 @@ public interface DatabaseServerV4Endpoint {
 
     @DELETE
     @Path("")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_MULTIPLE_BY_CRN, notes = DatabaseServerNotes.DELETE_MULTIPLE_BY_CRN,
             nickname = "deleteMultipleDatabaseServersByCrn")
     DatabaseServerV4Responses deleteMultiple(
@@ -148,7 +139,7 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("test")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.TEST_CONNECTION, notes = DatabaseServerNotes.TEST_CONNECTION,
             nickname = "testDatabaseServerConnection")
     DatabaseServerTestV4Response test(
@@ -157,7 +148,7 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("createDatabase")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.CREATE_DATABASE, notes = DatabaseServerNotes.CREATE_DATABASE,
             nickname = "createDatabaseOnServer")
     CreateDatabaseV4Response createDatabase(
