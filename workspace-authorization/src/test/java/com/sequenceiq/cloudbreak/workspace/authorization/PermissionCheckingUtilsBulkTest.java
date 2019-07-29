@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -91,14 +92,16 @@ public class PermissionCheckingUtilsBulkTest {
 
     @Test
     public void testCheckPermissionsByTargetWhenRoleCheckWentRightThenNoExceptionComes() {
-        doReturn(true).when(umsWorkspaceAuthorizationService).hasRightOfUserForResource(any(), any(), any());
+        doReturn(true).when(umsWorkspaceAuthorizationService).hasRightOfUserForResource(anyString(),
+                any(AuthorizationResource.class), any(ResourceAction.class));
 
         underTest.checkPermissionsByTarget(workspaceAwareResource, USER_CRN, resource, action);
     }
 
     @Test
     public void testCheckPermissionsByTargetWhenRightCheckFailsThenAccessDeniedExceptionComes() {
-        doReturn(false).when(umsWorkspaceAuthorizationService).hasRightOfUserForResource(any(), any(), any());
+        doReturn(false).when(umsWorkspaceAuthorizationService).hasRightOfUserForResource(anyString(),
+                any(AuthorizationResource.class), any(ResourceAction.class));
 
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage(format("You have no [%s] permission to these workspaces: %s", action.name(), 0));

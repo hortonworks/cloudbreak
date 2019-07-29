@@ -1,5 +1,10 @@
 package com.sequenceiq.authorization.resource;
 
+import java.util.Arrays;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+
 public enum AuthorizationResource {
     DATALAKE("Datalake cluster", "datalake"),
     ENVIRONMENT("Environment", "environment"),
@@ -24,5 +29,11 @@ public enum AuthorizationResource {
 
     public String getAuthorizationName() {
         return authorizationName;
+    }
+
+    public static Optional<AuthorizationResource> getByName(String name) {
+        return Arrays.stream(AuthorizationResource.values())
+                .filter(resource -> StringUtils.equals(resource.getAuthorizationName(), name))
+                .findAny();
     }
 }
