@@ -3,7 +3,6 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -27,7 +26,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4Request;
 import com.sequenceiq.redbeams.api.model.common.Status;
 
 @Service
@@ -91,14 +89,7 @@ public class DatabaseService {
         req.setDatabaseVendor("postgres");
         req.setStorageSize(STORAGE_SIZE);
         req.setAws(getAwsDatabaseServerParameters());
-        req.setSecurityGroup(getSecurityGroupRequest(env));
         return req;
-    }
-
-    private SecurityGroupV4Request getSecurityGroupRequest(DetailedEnvironmentResponse env) {
-        SecurityGroupV4Request sec = new SecurityGroupV4Request();
-        sec.setSecurityGroupIds(Set.of(env.getSecurityAccess().getDefaultSecurityGroupId()));
-        return sec;
     }
 
     private AwsDatabaseServerV4Parameters getAwsDatabaseServerParameters() {
