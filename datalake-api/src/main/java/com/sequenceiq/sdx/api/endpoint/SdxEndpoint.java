@@ -43,11 +43,23 @@ public interface SdxEndpoint {
     @ApiOperation(value = "delete SDX cluster", produces = "application/json", nickname = "deleteSdx")
     void delete(@PathParam("name") String name);
 
+    @DELETE
+    @Path("/crn/{clusterCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "delete SDX cluster by crn", produces = "application/json", nickname = "deleteSdxByCrn")
+    void deleteByCrn(@PathParam("clusterCrn") String clusterCrn);
+
     @POST
     @Path("{name}/redeploy")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "redeploy SDX cluster", produces = "application/json", nickname = "redeploySdx")
     void redeploy(@PathParam("name") String name, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
+
+    @POST
+    @Path("/crn/{clusterCrn}/redeploy")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "redeploy SDX cluster by crn", produces = "application/json", nickname = "redeploySdxByCrn")
+    void redeployByCrn(@PathParam("clusterCrn") String clusterCrn, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
 
     @GET
     @Path("{name}")
@@ -72,6 +84,11 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "get SDX cluster detail", produces = "application/json", nickname = "getSdxDetail")
     SdxClusterDetailResponse getDetail(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
+
+    @GET
+    @Path("/crn/{clusterCrn}/detail")
+    @ApiOperation(value = "get SDX cluster detail by crn", produces = "application/json", nickname = "getSdxDetailByCrn")
+    SdxClusterDetailResponse getDetailByCrn(@PathParam("clusterCrn") String clusterCrn, @QueryParam("entries") Set<String> entries);
 
     @GET
     @Path("list")

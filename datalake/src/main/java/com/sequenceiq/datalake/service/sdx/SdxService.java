@@ -247,20 +247,30 @@ public class SdxService {
         }
     }
 
+    public void deleteSdxByClusterCrn(String userCrn, String clusterCrn) {
+        LOGGER.info("Delete sdx");
+        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
+        sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn).ifPresentOrElse(this::deleteSdxCluster, () -> {
+            throw notFound("SDX cluster", clusterCrn).get();
+        });
+    }
+
     public void deleteSdx(String userCrn, String name) {
         LOGGER.info("Delete sdx");
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name).ifPresentOrElse(sdxCluster -> {
-            sdxCluster.setStatus(SdxClusterStatus.DELETE_REQUESTED);
-            sdxClusterRepository.save(sdxCluster);
-            sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
-            LOGGER.info("sdx delete triggered: {}", sdxCluster.getClusterName());
-        }, () -> {
+        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name).ifPresentOrElse(this::deleteSdxCluster, () -> {
             throw notFound("SDX cluster", name).get();
         });
     }
 
-    public String createCrn(@Nonnull String accountId) {
+    private void deleteSdxCluster(SdxCluster sdxCluster) {
+        sdxCluster.setStatus(SdxClusterStatus.DELETE_REQUESTED);
+        sdxClusterRepository.save(sdxCluster);
+        sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
+        LOGGER.info("sdx delete triggered: {}", sdxCluster.getClusterName());
+    }
+
+    private String createCrn(@Nonnull String accountId) {
         return Crn.builder()
                 .setService(Crn.Service.SDX)
                 .setAccountId(accountId)
