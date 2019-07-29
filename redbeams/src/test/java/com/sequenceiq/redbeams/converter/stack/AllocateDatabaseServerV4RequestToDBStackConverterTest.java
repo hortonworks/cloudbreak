@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_VER
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.AwsNetworkV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
@@ -72,6 +74,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private static final String PASSWORD = "password";
 
     private static final String USERNAME = "username";
+
+    private static final String DEFAULT_SECURITY_GROUP_ID = "defaultSecurityGroupId";
 
     @Mock
     private EnvironmentService environmentService;
@@ -188,6 +192,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
                 .withCloudPlatform(CloudPlatform.AWS.name())
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName("myRegion").build())
+                .withSecurityAccess(SecurityAccessResponse.builder().withDefaultSecurityGroupId(DEFAULT_SECURITY_GROUP_ID).build())
                 .withNetwork(EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
                         .withSubnetMetas(
                                 Map.of(
@@ -211,6 +216,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertNotNull(dbStack.getNetwork().getName());
         assertEquals(1, dbStack.getNetwork().getAttributes().getMap().size());
         assertEquals("netvalue", dbStack.getNetwork().getAttributes().getMap().get("netkey"));
+        assertThat(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds(), hasSize(1));
+        assertEquals(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds().iterator().next(), DEFAULT_SECURITY_GROUP_ID);
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator, never()).get(networkRequest);
         verify(subnetChooserService).chooseSubnetsFromDifferentAzs(anyList());
@@ -232,6 +239,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
             setupProviderCalculatorResponse(networkRequest, NETWORK_REQUEST_PARAMETERS);
         } else {
             allocateRequest.setNetwork(null);
+            allocateRequest.getDatabaseServer().setSecurityGroup(null);
         }
 
         databaseServerRequest.setInstanceType("db.m3.medium");
