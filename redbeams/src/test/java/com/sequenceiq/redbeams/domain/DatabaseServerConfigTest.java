@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 
 public class DatabaseServerConfigTest {
 
@@ -83,6 +84,12 @@ public class DatabaseServerConfigTest {
 
         config.setEnvironmentId("myenvironment");
         assertEquals("myenvironment", config.getEnvironmentId());
+
+        config.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
+        assertEquals(ResourceStatus.SERVICE_MANAGED, config.getResourceStatus());
+
+        config.setDbStack(new DBStack());
+        assertTrue(config.getDbStack().isPresent());
     }
 
     @Test
