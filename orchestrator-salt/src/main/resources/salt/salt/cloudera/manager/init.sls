@@ -96,7 +96,16 @@ run_autotls_setup:
     - name: /opt/salt/scripts/cm-setup-autotls.sh
     - require:
       - file: /opt/salt/scripts/cm-setup-autotls.sh
-    - unless: test -f /var/autotls_setup_success
+    - unless: test -f /hadoopfs/fs1/cloudera-scm-server/certs/autotls_setup_success
+
+copy_autotls_setup_to_cm_settings:
+  cmd.run:
+    - name: >
+        echo "# Auto-tls related configurations" >> /etc/cloudera-scm-server/cm.settings;
+        cat /hadoopfs/fs1/cloudera-scm-server/certs/auto-tls.init.txt >> /etc/cloudera-scm-server/cm.settings
+    - require:
+      - cmd: run_autotls_setup
+    - unless: grep "# Auto-tls related configurations" /etc/cloudera-scm-server/cm.settings
 
 /opt/salt/scripts/cm_generate_agent_tokens.sh:
   file.managed:

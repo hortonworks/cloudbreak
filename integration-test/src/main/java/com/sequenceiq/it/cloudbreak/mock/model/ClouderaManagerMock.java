@@ -95,6 +95,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
         cmConfig();
         startManagementService();
         listCommands();
+        listActiveCommands();
         readAuthRoles();
     }
 
@@ -180,7 +181,8 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     private void listActiveCommands() {
         dynamicRouteStack.get(ACTIVE_COMMANDS,
-                (request, response) -> new ApiCommand().id(new BigDecimal(request.params("commandId"))).active(Boolean.FALSE).success(Boolean.TRUE));
+                (request, response) -> new ApiCommandList().items(
+                        List.of(new ApiCommand().id(new BigDecimal(1)).active(Boolean.FALSE).success(Boolean.TRUE))));
     }
 
     private void listCommands() {

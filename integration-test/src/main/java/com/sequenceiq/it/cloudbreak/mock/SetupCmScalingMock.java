@@ -1,16 +1,19 @@
 package com.sequenceiq.it.cloudbreak.mock;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiHostTemplateList;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
@@ -31,7 +34,11 @@ public class SetupCmScalingMock {
 
     private static final String READ_HOSTS = ClouderaManagerMock.API_ROOT + "/hosts";
 
+    private static final String READ_HOSTTEMPLATES = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/hostTemplates";
+
     private static final String ADD_HOSTS = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/hosts";
+
+    private static final String LIST_CLUSTER_COMMANDS = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands";
 
     private static final String DEPLOY_CLIENT_CONFIG = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands/deployClientConfig";
 
@@ -49,6 +56,10 @@ public class SetupCmScalingMock {
     private static final String DELETE_HOST = ClouderaManagerMock.API_ROOT + "/hosts/:hostId";
 
     private static final String DELETE_CREDENTIALS = ClouderaManagerMock.API_ROOT + "/cm/commands/deleteCredentials";
+
+    private static final String RESTART_MGMTSERVCIES_COMMAND = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands/restart";
+
+    private static final String RESTART_CLUSTER_COMMAND = ClouderaManagerMock.API_ROOT + "/cm/service/commands/restart";
 
     private static final BigDecimal DEPLOY_CLIENT_CONFIG_COMMAND_ID = new BigDecimal(100);
 
@@ -121,6 +132,10 @@ public class SetupCmScalingMock {
         dynamicRouteStack.delete(REMOVE_HOST, (request, response) -> new ApiHost());
         dynamicRouteStack.delete(DELETE_HOST, (request, response) -> new ApiHost());
         dynamicRouteStack.post(DELETE_CREDENTIALS, (request, response) -> new ApiCommand().id(new BigDecimal(1)));
+        dynamicRouteStack.post(RESTART_MGMTSERVCIES_COMMAND, (request, response) -> new ApiCommand().id(new BigDecimal(1)));
+        dynamicRouteStack.get(LIST_CLUSTER_COMMANDS, (request, response) -> new ApiCommandList().items(List.of()));
+        dynamicRouteStack.post(RESTART_CLUSTER_COMMAND, (request, response) -> new ApiCommand().id(new BigDecimal(1)));
+        dynamicRouteStack.get(READ_HOSTTEMPLATES, (request, response) -> new ApiHostTemplateList().items(List.of()));
     }
 
     private List<ApiHostRef> generateHostsRefs(Collection<CloudVmMetaDataStatus> cloudVmMetadataStatusList) {
@@ -134,13 +149,15 @@ public class SetupCmScalingMock {
     }
 
     private List<ApiHost> generateHosts(Collection<CloudVmMetaDataStatus> cloudVmMetadataStatusList) {
-        return cloudVmMetadataStatusList.stream()
-                .filter(status -> InstanceStatus.STARTED.equals(status.getCloudVmInstanceStatus().getStatus()))
-                .map(CloudVmMetaDataStatus::getMetaData)
-                .map(CloudInstanceMetaData::getPrivateIp)
-                .map(HostNameUtil::generateHostNameByIp)
-                .map(hostname -> new ApiHost().hostname(hostname).hostId(hostname))
-                .collect(Collectors.toList());
+        List<ApiHost> apiHosts = new ArrayList<>();
+        for (CloudVmMetaDataStatus vmStatus : cloudVmMetadataStatusList) {
+            if (InstanceStatus.STARTED.equals(vmStatus.getCloudVmInstanceStatus().getStatus())) {
+                String ip = vmStatus.getMetaData().getPrivateIp();
+                String hostname = HostNameUtil.generateHostNameByIp(ip);
+                apiHosts.add(new ApiHost().hostname(hostname).hostId(hostname).ipAddress(ip));
+            }
+        }
+        return apiHosts;
     }
 
     private void prepareReadParcelStageStack() {
