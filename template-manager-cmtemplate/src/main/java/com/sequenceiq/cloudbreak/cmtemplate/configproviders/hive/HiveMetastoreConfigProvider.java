@@ -44,6 +44,15 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     @Override
+    public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        return super.isConfigurationNeeded(cmTemplateProcessor, source) && isDatalakeOrIndependentCluster(source);
+    }
+
+    public boolean isDatalakeOrIndependentCluster(TemplatePreparationObject source) {
+        return !source.getSharedServiceConfigs().isPresent() || source.getSharedServiceConfigs().get().isDatalakeCluster();
+    }
+
+    @Override
     public String getServiceType() {
         return HiveRoles.HIVE;
     }
