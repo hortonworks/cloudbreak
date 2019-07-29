@@ -21,11 +21,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
-import com.sequenceiq.common.api.cloudstorage.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
+import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -55,7 +56,7 @@ public class CloudStorageManifesterTest {
         SdxCluster sdxCluster = new SdxCluster();
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setCloudStorage(new SdxCloudStorageRequest());
-        underTest.getCloudStorageConfig("AWS", exampleBlueprintName, sdxCluster, sdxClusterRequest);
+        underTest.initCloudStorageRequest("AWS", exampleBlueprintName, sdxCluster, sdxClusterRequest);
     }
 
     @Test
@@ -72,11 +73,11 @@ public class CloudStorageManifesterTest {
         s3Params.setInstanceProfile("instance:profile");
         cloudStorageRequest.setS3(s3Params);
         sdxClusterRequest.setCloudStorage(cloudStorageRequest);
-        CloudStorageV4Request cloudStorageConfigReq = underTest.getCloudStorageConfig("AWS", exampleBlueprintName, sdxCluster, sdxClusterRequest);
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest("AWS", exampleBlueprintName, sdxCluster, sdxClusterRequest);
         assertEquals(1, cloudStorageConfigReq.getLocations().size());
-        StorageLocationV4Request singleRequest = cloudStorageConfigReq.getLocations().iterator().next();
-        assertEquals("dummyFile", singleRequest.getPropertyFile());
-        assertEquals("dummyPropertyName", singleRequest.getPropertyName());
+        StorageLocationBase singleRequest = cloudStorageConfigReq.getLocations().iterator().next();
+        assertEquals(CloudStorageCdpService.RANGER_ADMIN.name(), singleRequest.getType());
+        assertEquals("ranger/example-path", singleRequest.getValue());
 
     }
 
@@ -88,6 +89,7 @@ public class CloudStorageManifesterTest {
         FileSystemParameterV4Responses dummyResponses = new FileSystemParameterV4Responses();
         List<FileSystemParameterV4Response> responses = new ArrayList<>();
         FileSystemParameterV4Response resp = new FileSystemParameterV4Response();
+        resp.setType(CloudStorageCdpService.RANGER_ADMIN.name());
         resp.setDefaultPath("ranger/example-path");
         resp.setDescription("Rangerpath");
         resp.setPropertyFile("dummyFile");

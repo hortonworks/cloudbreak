@@ -16,8 +16,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.template.filesystem.CloudStorageConfigDetails;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
-import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntries;
-import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
+import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
+import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 
 @Service
 public class AmbariCloudStorageConfigDetails {

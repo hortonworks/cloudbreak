@@ -75,6 +75,9 @@ public class StackToCloudStackConverter {
     @Inject
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
 
+    @Inject
+    private FileSystemConverter fileSystemConverter;
+
     @Autowired
     private ConverterUtil converterUtil;
 
@@ -263,7 +266,7 @@ public class StackToCloudStackConverter {
         if (stack.getCluster() != null) {
             FileSystem fileSystem = stack.getCluster().getFileSystem();
             if (fileSystem != null) {
-                cloudFileSystem = converterUtil.convert(fileSystem, SpiFileSystem.class);
+                cloudFileSystem = fileSystemConverter.fileSystemToSpi(fileSystem);
             }
         }
         return cloudFileSystem;

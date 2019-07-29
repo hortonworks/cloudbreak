@@ -1,12 +1,12 @@
 package com.sequenceiq.it.cloudbreak.util.storagelocation;
 
 import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
+import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 
 public class AzureTestStorageLocation extends TestStorageLocation {
 
@@ -17,10 +17,8 @@ public class AzureTestStorageLocation extends TestStorageLocation {
         this.storageAccountName = storageAccountName;
     }
 
-    public Set<StorageLocationV4Request> getAdlsGen2(@Nonnull StorageComponent... components) {
-        Set<StorageLocationV4Request> locations = new LinkedHashSet<>();
-        Arrays.asList(components).forEach(storageComponent -> locations.addAll(storageComponent.getLocations(this)));
-        return locations;
+    public List<StorageLocationBase> getAdlsGen2(@Nonnull StorageComponent... components) {
+        return Arrays.stream(components).flatMap(storageComponent -> storageComponent.getLocations(this).stream()).collect(Collectors.toList());
     }
 
     @Override

@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
@@ -98,6 +99,9 @@ public class ClusterCreationSetupService {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private CloudStorageConverter cloudStorageConverter;
+
     public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace, DetailedEnvironmentResponse environment) {
         validate(request, null, stack, user, workspace, environment);
     }
@@ -129,8 +133,8 @@ public class ClusterCreationSetupService {
         decorateHostGroupWithConstraint(stack, clusterStub);
 
         if (request.getCloudStorage() != null) {
-            FileSystem fs = measure(() -> fileSystemConfigService.createWithMdcContextRestore(
-                    converterUtil.convert(request.getCloudStorage(), FileSystem.class), stack.getWorkspace(), stack.getCreator()),
+            FileSystem fileSystem = cloudStorageConverter.requestToFileSystem(request.getCloudStorage());
+            measure(() -> fileSystemConfigService.createWithMdcContextRestore(fileSystem, stack.getWorkspace(), stack.getCreator()),
                     LOGGER, "File system saving took {} ms for stack {}", stackName);
         }
 

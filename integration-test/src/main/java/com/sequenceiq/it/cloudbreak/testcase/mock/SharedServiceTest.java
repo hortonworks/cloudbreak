@@ -19,9 +19,11 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.common.api.cloudstorage.AdlsCloudStorageV1Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
+import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
+import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -288,23 +290,21 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private CloudStorageV4Request cloudStorage() {
-        AdlsCloudStorageV1Parameters adls = new AdlsCloudStorageV1Parameters();
-        CloudStorageV4Request csr = new CloudStorageV4Request();
-        csr.setLocations(Set.of(storageLocation()));
-        adls.setCredential("value");
-        adls.setAccountName("some");
-        adls.setClientId("other");
-        adls.setTenantId("here");
-        csr.setAdls(adls);
-        return csr;
+    private CloudStorageRequest cloudStorage() {
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
+        cloudStorageRequest.setLocations(List.of(storageLocation()));
+        StorageIdentityBase storageIdentityBase = new StorageIdentityBase();
+        S3CloudStorageV1Parameters s3Parameters = new S3CloudStorageV1Parameters();
+        storageIdentityBase.setS3(s3Parameters);
+        cloudStorageRequest.setIdentities(List.of(storageIdentityBase));
+        s3Parameters.setInstanceProfile("instanceProfile");
+        return cloudStorageRequest;
     }
 
-    private StorageLocationV4Request storageLocation() {
-        StorageLocationV4Request storageLocation = new StorageLocationV4Request();
+    private StorageLocationBase storageLocation() {
+        StorageLocationBase storageLocation = new StorageLocationBase();
         storageLocation.setValue("TheValueOfGivePropertyForStorageLocation");
-        storageLocation.setPropertyName("NameOfThisProperty");
-        storageLocation.setPropertyFile("SomePropertyHere");
+        storageLocation.setType(CloudStorageCdpService.RANGER_ADMIN.name());
         return storageLocation;
     }
 
@@ -330,9 +330,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
 
     private List<Assertion<StackTestDto, CloudbreakClient>> cloudStorageParametersHasPassedToAmbariBlueprint() {
         List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
-        verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getAccountName()));
-        verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getClientId()));
-        verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getCredential()));
+        verifications.add(blueprintPostToAmbariContains(cloudStorage().getIdentities().get(0).getS3().getInstanceProfile()));
         return verifications;
     }
 

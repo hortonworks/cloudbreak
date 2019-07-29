@@ -15,6 +15,8 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
@@ -46,6 +48,10 @@ public class FileSystem implements ProvisionEntity, WorkspaceAwareResource {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json locations;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json cloudStorage;
 
     @ManyToOne
     private Workspace workspace;
@@ -109,5 +115,18 @@ public class FileSystem implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setConfigurations(Json configurations) {
         this.configurations = configurations;
+    }
+
+    public CloudStorage getCloudStorage() {
+        if (cloudStorage != null && cloudStorage.getValue() != null) {
+            return JsonUtil.readValueOpt(cloudStorage.getValue(), CloudStorage.class).orElse(null);
+        }
+        return null;
+    }
+
+    public void setCloudStorage(CloudStorage cloudStorage) {
+        if (cloudStorage != null) {
+            this.cloudStorage = new Json(cloudStorage);
+        }
     }
 }

@@ -20,8 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Constraint;
@@ -31,24 +33,24 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
 import com.sequenceiq.cloudbreak.service.constraint.ConstraintService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
-import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
+import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
+import com.sequenceiq.common.model.FileSystemType;
 
 @Component
 public class ClusterTerminationService {
@@ -89,6 +91,9 @@ public class ClusterTerminationService {
 
     @Inject
     private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
+
+    @Inject
+    private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     public Boolean deleteClusterComponents(Long clusterId) {
         Optional<Cluster> clusterOpt = clusterService.findById(clusterId);
@@ -180,7 +185,9 @@ public class ClusterTerminationService {
     private void deleteFileSystemResources(Long stackId, FileSystem fileSystem) {
         try {
             FileSystemConfigurator<BaseFileSystemConfigurationsView> fsConfigurator = fileSystemConfigurators.get(fileSystem.getType());
-            BaseFileSystemConfigurationsView fsConfiguration = fileSystemConfigurationsViewProvider.propagateConfigurationsView(fileSystem);
+            ConfigQueryEntries configQueryEntries = cmCloudStorageConfigProvider.getConfigQueryEntries();
+            BaseFileSystemConfigurationsView fsConfiguration
+                    = fileSystemConfigurationsViewProvider.propagateConfigurationsView(fileSystem, configQueryEntries);
             fsConfiguration.setStorageContainer("cloudbreak" + stackId);
             fsConfigurator.deleteResources(fsConfiguration);
         } catch (IOException e) {

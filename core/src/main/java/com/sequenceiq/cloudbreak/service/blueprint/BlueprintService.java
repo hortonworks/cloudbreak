@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService
 import com.sequenceiq.cloudbreak.blueprint.filesystem.AmbariCloudStorageConfigDetails;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
-import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigDetails;
+import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -53,12 +53,12 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
-import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 
 @Service
 public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> {
@@ -94,7 +94,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     private AmbariCloudStorageConfigDetails ambariCloudStorageConfigDetails;
 
     @Inject
-    private CmCloudStorageConfigDetails cmCloudStorageConfigDetails;
+    private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     @Inject
     private BlueprintLoaderService blueprintLoaderService;
@@ -350,7 +350,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         Set<ConfigQueryEntry> result;
 
         if (blueprintUtils.isClouderaManagerClusterTemplate(blueprintText)) {
-            result = cmCloudStorageConfigDetails.queryParameters(fileSystemConfigQueryObject);
+            result = cmCloudStorageConfigProvider.queryParameters(fileSystemConfigQueryObject);
         } else {
             result = ambariCloudStorageConfigDetails.queryParameters(fileSystemConfigQueryObject);
         }

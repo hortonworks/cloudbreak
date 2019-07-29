@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouder
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
@@ -27,6 +26,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -63,7 +63,7 @@ public class ClusterV4Response implements JsonEntity {
     private String proxyConfigName;
 
     @ApiModelProperty(ClusterModelDescription.FILESYSTEM)
-    private CloudStorageV1Response cloudStorage;
+    private CloudStorageResponse cloudStorage;
 
     private AmbariV4Response ambari;
 
@@ -168,11 +168,11 @@ public class ClusterV4Response implements JsonEntity {
         this.statusReason = statusReason;
     }
 
-    public CloudStorageV1Response getCloudStorage() {
+    public CloudStorageResponse getCloudStorage() {
         return cloudStorage;
     }
 
-    public void setCloudStorage(CloudStorageV1Response cloudStorage) {
+    public void setCloudStorage(CloudStorageResponse cloudStorage) {
         this.cloudStorage = cloudStorage;
     }
 

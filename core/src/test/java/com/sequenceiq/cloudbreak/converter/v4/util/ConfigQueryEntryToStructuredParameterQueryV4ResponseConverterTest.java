@@ -10,7 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StructuredParameterQueryV4Response;
-import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
+import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 
 public class ConfigQueryEntryToStructuredParameterQueryV4ResponseConverterTest {
 
@@ -42,6 +43,7 @@ public class ConfigQueryEntryToStructuredParameterQueryV4ResponseConverterTest {
     @Test
     public void testConvertCheckAllPropertyPassedProperly() {
         StructuredParameterQueryV4Response expected = new StructuredParameterQueryV4Response();
+        expected.setType(CloudStorageCdpService.RANGER_ADMIN.name());
         expected.setDefaultPath(TEST_PATH_VALUE);
         expected.setProtocol(TEST_PROTOCOL);
         expected.setDescription(TEST_DESCRIPTION);
@@ -57,6 +59,7 @@ public class ConfigQueryEntryToStructuredParameterQueryV4ResponseConverterTest {
 
     private ConfigQueryEntry createConfigQueryEntry() {
         ConfigQueryEntry entry = new ConfigQueryEntry();
+        entry.setType(CloudStorageCdpService.RANGER_ADMIN);
         entry.setDefaultPath(TEST_PATH_VALUE);
         entry.setProtocol(TEST_PROTOCOL);
         entry.setDescription(TEST_DESCRIPTION);

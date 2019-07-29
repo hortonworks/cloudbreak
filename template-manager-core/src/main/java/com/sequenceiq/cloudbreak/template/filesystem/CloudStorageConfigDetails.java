@@ -18,9 +18,9 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.sequenceiq.cloudbreak.template.HandlebarTemplate;
 import com.sequenceiq.cloudbreak.template.HandlebarUtils;
-import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntries;
-import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
+import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Service

@@ -2,12 +2,12 @@ package com.sequenceiq.cloudbreak.controller.validation.filesystem;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.FileSystemValidationV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -15,9 +15,11 @@ import com.sequenceiq.cloudbreak.cloud.event.validation.FileSystemValidationRequ
 import com.sequenceiq.cloudbreak.cloud.event.validation.FileSystemValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageBase;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
 
@@ -35,14 +37,23 @@ public class FileSystemValidator {
     @Inject
     private ConverterUtil converterUtil;
 
-    public void validateCloudStorage(String platform, CloudCredential cloudCredential, CloudStorageV4Request cloudStorageV4Request,
+    @Inject
+    private CloudStorageConverter cloudStorageConverter;
+
+    public void validateCloudStorage(String platform, CloudCredential cloudCredential, CloudStorageBase cloudStorageRequest,
             String userId, Long workspaceId) {
-        if (cloudStorageV4Request == null) {
+        if (cloudStorageRequest == null) {
             return;
+        }
+        if (CollectionUtils.isEmpty(cloudStorageRequest.getLocations()) && CollectionUtils.isNotEmpty(cloudStorageRequest.getIdentities())) {
+            throw new BadRequestException("In cloudStorage request only identities were filled. Please specify the locations too.");
+        }
+        if (CollectionUtils.isNotEmpty(cloudStorageRequest.getLocations()) && CollectionUtils.isEmpty(cloudStorageRequest.getIdentities())) {
+            throw new BadRequestException("In cloudStorage request only locations were filled. Please specify the identities too.");
         }
         LOGGER.info("Sending fileSystemRequest to {} to validate the file system", platform);
         CloudContext cloudContext = new CloudContext(null, null, platform, userId, workspaceId);
-        SpiFileSystem spiFileSystem = converterUtil.convert(cloudStorageV4Request, SpiFileSystem.class);
+        SpiFileSystem spiFileSystem = cloudStorageConverter.requestToSpiFileSystem(cloudStorageRequest);
         FileSystemValidationRequest request = new FileSystemValidationRequest(spiFileSystem, cloudCredential, cloudContext);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {

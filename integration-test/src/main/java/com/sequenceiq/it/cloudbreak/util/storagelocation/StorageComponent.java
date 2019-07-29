@@ -1,99 +1,92 @@
 package com.sequenceiq.it.cloudbreak.util.storagelocation;
 
-import java.util.Set;
+import java.util.List;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
+import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 
 public enum StorageComponent {
 
-    HIVE {
+    HIVE_METASTORE_WAREHOUSE {
         @Override
-        public Set<StorageLocationV4Request> getLocations(TestStorageLocation tsl) {
-            return Set.of(
-                    createStorageLocationRequest(
-                            String.format("%s//%s/warehouse/tablespace/managed/hive", tsl.getStorageTypePrefix(), tsl.getPathInfix()),
-                            "hive-site",
-                            "hive.metastore.warehouse.dir"),
-                    createStorageLocationRequest(
-                            String.format("%s//%s/warehouse/tablespace/external/hive", tsl.getStorageTypePrefix(), tsl.getPathInfix()),
-                            "hive-site",
-                            "hive.metastore.warehouse.external.dir"));
+        public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
+            return List.of(
+                    createStorageLocationRequest(name(),
+                            String.format("%s//%s/warehouse/tablespace/managed/hive", tsl.getStorageTypePrefix(), tsl.getPathInfix())
+                    )
+            );
+        }
+    },
+
+    HIVE_METASTORE_EXTERNAL_WAREHOUSE {
+        @Override
+        public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
+            return List.of(
+                    createStorageLocationRequest(name(),
+                            String.format("%s//%s/warehouse/tablespace/external/hive", tsl.getStorageTypePrefix(), tsl.getPathInfix())
+                    )
+            );
         }
     },
 
     SPARK2 {
         @Override
-        public Set<StorageLocationV4Request> getLocations(TestStorageLocation tsl) {
-            return Set.of(
-                    createStorageLocationRequest(
-                            String.format("%s//%s/%s/oplogs/spark2-history", tsl.getStorageTypePrefix(), tsl.getPathInfix(), tsl.getClusterName()),
-                            "spark2-defaults",
-                            "spark.eventLog.dir"),
-                    createStorageLocationRequest(
-                            String.format("%s//%s/%s/oplogs/spark2-history", tsl.getStorageTypePrefix(), tsl.getPathInfix(), tsl.getClusterName()),
-                            "spark2-defaults",
-                            "spark.history.fs.logDirectory"),
-                    createStorageLocationRequest(
-                            String.format("%s//%s/warehouse/spark", tsl.getStorageTypePrefix(), tsl.getPathInfix()),
-                            "spark2-defaults",
-                            "spark.sql.warehouse.dir")
+        public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
+            return List.of(
+                    createStorageLocationRequest(name(),
+                            String.format("%s//%s/%s/oplogs/spark2-history", tsl.getStorageTypePrefix(), tsl.getPathInfix(), tsl.getClusterName())),
+                    createStorageLocationRequest(name(),
+                            String.format("%s//%s/%s/oplogs/spark2-history", tsl.getStorageTypePrefix(), tsl.getPathInfix(), tsl.getClusterName())),
+                    createStorageLocationRequest(name(),
+                            String.format("%s//%s/warehouse/spark", tsl.getStorageTypePrefix(), tsl.getPathInfix()))
             );
         }
     },
 
     TEZ {
         @Override
-        public Set<StorageLocationV4Request> getLocations(TestStorageLocation tsl) {
-            return Set.of(
-                    createStorageLocationRequest(
-                            String.format("%s//%s/warehouse/tablespace/external/hive/sys.db/query_data", tsl.getStorageTypePrefix(), tsl.getPathInfix()),
-                            "tez-site",
-                            "tez.history.logging.proto-base-dir")
+        public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
+            return List.of(
+                    createStorageLocationRequest(name(),
+                            String.format("%s//%s/warehouse/tablespace/external/hive/sys.db/query_data",
+                                    tsl.getStorageTypePrefix(), tsl.getPathInfix()))
             );
         }
     },
 
     RANGER {
         @Override
-        public Set<StorageLocationV4Request> getLocations(TestStorageLocation tsl) {
-            return Set.of(
-                    createStorageLocationRequest(
-                            String.format("%s//%s/ranger/audit", tsl.getStorageTypePrefix(), tsl.getPathInfix()),
-                            "ranger-hive-audit",
-                            "xasecure.audit.destination.hdfs.dir")
+        public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
+            return List.of(
+                    createStorageLocationRequest(name(),
+                            String.format("%s//%s/ranger/audit", tsl.getStorageTypePrefix(), tsl.getPathInfix()))
             );
         }
     },
 
     YARN {
         @Override
-        public Set<StorageLocationV4Request> getLocations(TestStorageLocation tsl) {
-            return Set.of(
-                    createStorageLocationRequest(
-                            String.format("%s//%s/%s/oplogs/yarn-app-logs", tsl.getStorageTypePrefix(), tsl.getPathInfix(), tsl.getClusterName()),
-                            "yarn-site",
-                            "yarn.nodemanager.remote-app-log-dir")
+        public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
+            return List.of(
+                    createStorageLocationRequest(name(),
+                            String.format("%s//%s/%s/oplogs/yarn-app-logs", tsl.getStorageTypePrefix(), tsl.getPathInfix(), tsl.getClusterName()))
             );
         }
     },
 
     ZEPPELIN {
         @Override
-        public Set<StorageLocationV4Request> getLocations(TestStorageLocation tsl) {
-            return Set.of(createStorageLocationRequest(
-                    String.format("%s//%s/zeppelin/notebook", tsl.getStorageTypePrefix(), tsl.getPathInfix()),
-                    "zeppelin-site",
-                    "zeppelin.notebook.dir"));
+        public List<StorageLocationBase> getLocations(TestStorageLocation tsl) {
+            return List.of(createStorageLocationRequest(name(),
+                    String.format("%s//%s/zeppelin/notebook", tsl.getStorageTypePrefix(), tsl.getPathInfix())));
         }
     };
 
-    public abstract Set<StorageLocationV4Request> getLocations(TestStorageLocation tsl);
+    public abstract List<StorageLocationBase> getLocations(TestStorageLocation tsl);
 
-    private static StorageLocationV4Request createStorageLocationRequest(String value, String propertyFile, String propertyName) {
-        StorageLocationV4Request request = new StorageLocationV4Request();
+    private static StorageLocationBase createStorageLocationRequest(String type, String value) {
+        StorageLocationBase request = new StorageLocationBase();
+        request.setType(type);
         request.setValue(value);
-        request.setPropertyFile(propertyFile);
-        request.setPropertyName(propertyName);
         return request;
     }
 

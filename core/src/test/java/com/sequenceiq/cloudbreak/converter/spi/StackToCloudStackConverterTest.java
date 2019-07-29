@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -46,7 +47,6 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -112,6 +112,9 @@ public class StackToCloudStackConverterTest {
     @Mock
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
 
+    @Mock
+    private FileSystemConverter fileSystemConverter;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -135,13 +138,13 @@ public class StackToCloudStackConverterTest {
         FileSystem fileSystem = new FileSystem();
         SpiFileSystem expected = mock(SpiFileSystem.class);
         when(cluster.getFileSystem()).thenReturn(fileSystem);
-        when(converterUtil.convert(fileSystem, SpiFileSystem.class)).thenReturn(expected);
+        when(fileSystemConverter.fileSystemToSpi(fileSystem)).thenReturn(expected);
 
         CloudStack result = underTest.convert(stack);
 
         assertTrue(result.getFileSystem().isPresent());
         assertEquals(expected, result.getFileSystem().get());
-        verify(converterUtil, times(1)).convert(fileSystem, SpiFileSystem.class);
+        verify(fileSystemConverter, times(1)).fileSystemToSpi(fileSystem);
     }
 
     @Test

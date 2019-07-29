@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.common.api.cloudstorage.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 public class WasbFileSystemToWasbCloudStorageParametersConverterTest {

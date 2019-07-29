@@ -19,12 +19,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
+import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -127,6 +129,12 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
 
     @Inject
     private AwsMockIdentityMappingService awsIdentityMappingService;
+
+    @Inject
+    private CloudStorageConverter cloudStorageConverter;
+
+    @Inject
+    private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     @Override
     public TemplatePreparationObject convert(StackV4Request source) {
@@ -235,8 +243,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             throws IOException {
         BaseFileSystemConfigurationsView fileSystemConfigurationView = null;
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCluster().getCloudStorage())) {
-            FileSystem fileSystem = getConversionService().convert(source.getCluster().getCloudStorage(), FileSystem.class);
-            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credentialAttributes);
+            FileSystem fileSystem = cloudStorageConverter.requestToFileSystem(source.getCluster().getCloudStorage());
+            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credentialAttributes,
+                    cmCloudStorageConfigProvider.getConfigQueryEntries());
         }
         return fileSystemConfigurationView;
     }

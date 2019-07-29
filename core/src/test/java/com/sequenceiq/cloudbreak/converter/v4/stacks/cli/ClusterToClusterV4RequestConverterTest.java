@@ -31,11 +31,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClusterToClouderaManagerV4RequestConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterToClusterV4RequestConverterTest {
@@ -54,6 +56,9 @@ public class ClusterToClusterV4RequestConverterTest {
 
     @Mock
     private ClusterToClouderaManagerV4RequestConverter clouderaManagerV4RequestConverter;
+
+    @Mock
+    private CloudStorageConverter cloudStorageConverter;
 
     private Blueprint blueprint;
 
@@ -102,14 +107,14 @@ public class ClusterToClusterV4RequestConverterTest {
     @Test
     public void testConvertWhenFileSystemNotNullThenExpectedCloudStorageRequestShouldBePlaced() {
         FileSystem fileSystem = new FileSystem();
-        CloudStorageV4Request expected = new CloudStorageV4Request();
+        CloudStorageRequest expected = new CloudStorageRequest();
         when(cluster.getFileSystem()).thenReturn(fileSystem);
-        when(conversionService.convert(fileSystem, CloudStorageV4Request.class)).thenReturn(expected);
+        when(cloudStorageConverter.fileSystemToRequest(fileSystem)).thenReturn(expected);
 
         ClusterV4Request result = underTest.convert(cluster);
 
         assertEquals(expected, result.getCloudStorage());
-        verify(conversionService, times(1)).convert(fileSystem, CloudStorageV4Request.class);
+        verify(cloudStorageConverter, times(1)).fileSystemToRequest(fileSystem);
     }
 
     @Test

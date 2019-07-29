@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsVie
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -71,6 +72,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
+import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -168,6 +170,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private AwsMockIdentityMappingService awsIdentityMappingService;
 
+    @Mock
+    private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
@@ -223,17 +228,21 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenClusterProvidesFileSystemThenBaseFileSystemConfigurationsViewShouldBeExists() throws IOException {
         FileSystem sourceFileSystem = new FileSystem();
         FileSystem clusterServiceFileSystem = new FileSystem();
+        ConfigQueryEntries configQueryEntries = new ConfigQueryEntries();
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
         when(stackMock.getEnvironmentCrn()).thenReturn("envCredentialCRN");
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""))).thenReturn(expected);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""),
+                configQueryEntries)).thenReturn(expected);
+        when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertTrue(result.getFileSystemConfigurationView().isPresent());
         assertEquals(expected, result.getFileSystemConfigurationView().get());
-        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""));
+        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(clusterServiceFileSystem, stackMock,
+                new Json(""), configQueryEntries);
     }
 
     @Test
@@ -242,12 +251,14 @@ public class StackToTemplatePreparationObjectConverterTest {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(null);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""))).thenReturn(expected);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""),
+                new ConfigQueryEntries())).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertFalse(result.getFileSystemConfigurationView().isPresent());
-        verify(fileSystemConfigurationProvider, times(0)).fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""));
+        verify(fileSystemConfigurationProvider, times(0)).fileSystemConfiguration(clusterServiceFileSystem, stackMock,
+                new Json(""), new ConfigQueryEntries());
     }
 
     @Test
@@ -257,10 +268,13 @@ public class StackToTemplatePreparationObjectConverterTest {
         IOException invokedException = new IOException(iOExceptionMessage);
         FileSystem sourceFileSystem = new FileSystem();
         FileSystem clusterServiceFileSystem = new FileSystem();
+        ConfigQueryEntries configQueryEntries = new ConfigQueryEntries();
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
         when(stackMock.getEnvironmentCrn()).thenReturn("envCredentialCRN");
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""))).thenThrow(invokedException);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""),
+                configQueryEntries)).thenThrow(invokedException);
+        when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
 
         expectedException.expect(CloudbreakServiceException.class);
         expectedException.expectMessage(iOExceptionMessage);

@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -24,25 +25,28 @@ public class FileSystemConfigurationProvider {
     @Inject
     private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
 
-    public BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fs, Stack stack, Json credentialAttributes) throws IOException {
+    public BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fileSystem, Stack stack,
+            Json credentialAttributes, ConfigQueryEntries configQueryEntries) throws IOException {
         Optional<Resource> resource = Optional.empty();
         if (CloudConstants.AZURE.equals(stack.getPlatformVariant())) {
             resource = Optional.of(stack.getResourceByType(ResourceType.ARM_TEMPLATE));
         }
-        return fileSystemConfiguration(fs, stack.getId(), stack.getUuid(), credentialAttributes, stack.getPlatformVariant(), resource);
+        return fileSystemConfiguration(fileSystem, stack.getId(), stack.getUuid(), credentialAttributes,
+                stack.getPlatformVariant(), resource, configQueryEntries);
     }
 
-    public BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fs, StackV4Request request, Json credentialAttributes)
-            throws IOException {
+    public BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fileSystem, StackV4Request request,
+            Json credentialAttributes, ConfigQueryEntries configQueryEntries) throws IOException {
         Resource resource = new Resource(ResourceType.ARM_TEMPLATE, request.getName(), null);
-        return fileSystemConfiguration(fs, 0L, "fake-uuid", credentialAttributes, request.getCloudPlatform().name(), Optional.of(resource));
+        return fileSystemConfiguration(fileSystem, 0L, "fake-uuid", credentialAttributes,
+                request.getCloudPlatform().name(), Optional.of(resource), configQueryEntries);
     }
 
-    private BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fs, Long stackId, String uuid, Json credentialAttributes,
-            String platformVariant, Optional<Resource> resource) throws IOException {
+    private BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fileSystem, Long stackId, String uuid, Json credentialAttributes,
+            String platformVariant, Optional<Resource> resource, ConfigQueryEntries configQueryEntries) throws IOException {
         BaseFileSystemConfigurationsView fileSystemConfiguration = null;
-        if (fs != null) {
-            fileSystemConfiguration = fileSystemConfigurationsViewProvider.propagateConfigurationsView(fs);
+        if (fileSystem != null) {
+            fileSystemConfiguration = fileSystemConfigurationsViewProvider.propagateConfigurationsView(fileSystem, configQueryEntries);
             fileSystemConfiguration.setStorageContainer("cloudbreak" + stackId);
             if (CloudConstants.AZURE.equals(platformVariant) && credentialAttributes != null) {
                 fileSystemConfiguration = azureFileSystemConfigProvider.decorateFileSystemConfiguration(uuid, credentialAttributes,

@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -40,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 
 @Component
 public class ClusterToClusterV4ResponseConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterV4Response> {
@@ -64,6 +64,9 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
 
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
+
+    @Inject
+    private CloudStorageConverter cloudStorageConverter;
 
     @Value("${cb.disable.show.blueprint:false}")
     private boolean disableShowBlueprint;
@@ -130,9 +133,9 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         return null;
     }
 
-    private CloudStorageV1Response getCloudStorage(Cluster source) {
+    private CloudStorageResponse getCloudStorage(Cluster source) {
         if (source.getFileSystem() != null) {
-            return getConversionService().convert(source.getFileSystem(), CloudStorageV1Response.class);
+            return cloudStorageConverter.fileSystemToResponse(source.getFileSystem());
         }
         return null;
     }

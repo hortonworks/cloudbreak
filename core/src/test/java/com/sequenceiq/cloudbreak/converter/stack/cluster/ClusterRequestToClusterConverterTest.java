@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -51,6 +52,9 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @Mock
     private Workspace workspace;
 
+    @Mock
+    private CloudStorageConverter cloudStorageConverter;
+
     @Before
     public void setUp() {
         Whitebox.setInternalState(underTest, "ambariUserName", "cloudbreak");
@@ -80,7 +84,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         ClusterV4Request request = getRequest("cluster-with-cloud-storage.json");
 
         given(conversionService.convert(request.getGateway(), Gateway.class)).willReturn(new Gateway());
-        given(conversionService.convert(request.getCloudStorage(), FileSystem.class)).willReturn(new FileSystem());
+        given(cloudStorageConverter.requestToFileSystem(request.getCloudStorage())).willReturn(new FileSystem());
         given(cloudStorageValidationUtil.isCloudStorageConfigured(request.getCloudStorage())).willReturn(true);
         Blueprint blueprint = new Blueprint();
         blueprint.setStackType(StackType.HDP.name());

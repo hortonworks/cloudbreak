@@ -9,8 +9,8 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.cloudbreak.fluent.cloud.WasbConfigGenerator;
-import com.sequenceiq.common.api.cloudstorage.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 

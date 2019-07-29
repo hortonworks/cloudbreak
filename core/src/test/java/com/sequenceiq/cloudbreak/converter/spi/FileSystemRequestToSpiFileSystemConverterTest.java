@@ -20,10 +20,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageParameters;
-import com.sequenceiq.common.api.cloudstorage.AdlsCloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.GcsCloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;

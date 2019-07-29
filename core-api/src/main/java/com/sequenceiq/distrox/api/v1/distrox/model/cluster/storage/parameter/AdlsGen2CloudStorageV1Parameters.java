@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.common.api.cloudstorage.validation.ValidAdlsGen2CloudStorageParameters;
+import com.sequenceiq.common.api.cloudstorage.old.validation.ValidAdlsGen2CloudStorageParameters;
 import com.sequenceiq.common.model.FileSystemType;
 
 import io.swagger.annotations.ApiModel;
