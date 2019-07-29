@@ -18,8 +18,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Where;
-
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
@@ -34,7 +32,6 @@ import com.sequenceiq.environment.store.EnvironmentStatusUpdater;
 
 @Entity
 @Table
-@Where(clause = "archived = false")
 public class Environment implements AuthResource {
 
     @Id

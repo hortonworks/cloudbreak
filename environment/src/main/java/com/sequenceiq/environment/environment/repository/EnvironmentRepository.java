@@ -24,31 +24,60 @@ import com.sequenceiq.environment.environment.domain.Environment;
 public interface EnvironmentRepository extends BaseJpaRepository<Environment, Long> {
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT e FROM Environment e LEFT JOIN FETCH e.network n LEFT JOIN FETCH n.environment ev LEFT JOIN FETCH e.credential c "
-            + "LEFT JOIN FETCH e.authentication a WHERE e.accountId = :accountId")
+    @Query("SELECT e FROM Environment e "
+            + "LEFT JOIN FETCH e.network n "
+            + "LEFT JOIN FETCH n.environment ev "
+            + "LEFT JOIN FETCH e.credential c "
+            + "LEFT JOIN FETCH e.authentication a "
+            + "WHERE e.accountId = :accountId "
+            + "AND e.archived = false")
     Set<Environment> findByAccountId(@Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT e FROM Environment e "
+            + "WHERE e.accountId = :accountId "
+            + "AND e.name IN (:names) "
+            + "AND e.archived = false")
     Set<Environment> findByNameInAndAccountId(Set<String> names, String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT e FROM Environment e "
+            + "WHERE e.accountId = :accountId "
+            + "AND e.resourceCrn IN (:resourceCrns) "
+            + "AND e.archived = false")
     Set<Environment> findByResourceCrnInAndAccountId(Set<String> resourceCrns, String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT e FROM Environment e WHERE e.accountId = :accountId AND e.name = :name")
+    @Query("SELECT e FROM Environment e "
+            + "WHERE e.accountId = :accountId "
+            + "AND e.name = :name "
+            + "AND e.archived = false")
     Optional<Environment> findByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT e FROM Environment e WHERE e.accountId = :accountId AND e.resourceCrn = :resourceCrn")
+    @Query("SELECT e FROM Environment e "
+            + "WHERE e.accountId = :accountId "
+            + "AND e.resourceCrn = :resourceCrn "
+            + "AND e.archived = false")
     Optional<Environment> findByResourceCrnAndAccountId(@Param("resourceCrn") String resourceCrn, @Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT COUNT(e)>0 FROM Environment e WHERE e.name = :name AND e.accountId = :accountId")
+    @Query("SELECT COUNT(e)>0 FROM Environment e "
+            + "WHERE e.accountId = :accountId "
+            + "AND e.name = :name "
+            + "AND e.archived = false")
     boolean existsWithNameInAccount(@Param("name") String name, @Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT e FROM Environment e "
+            + "WHERE e.id IN (:ids) "
+            + "AND e.status IN (:statuses) "
+            + "AND e.archived = false")
     List<Environment> findAllByIdInAndStatusIn(Collection<Long> ids, Collection<EnvironmentStatus> statuses);
 
     @CheckPermission(action = ResourceAction.READ)
-    List<Environment> findAllByStatusIn(Collection<EnvironmentStatus> environmentStatuses);
+    @Query("SELECT e FROM Environment e "
+            + "WHERE e.status IN (:statuses) "
+            + "AND e.archived = false")
+    List<Environment> findAllByStatusIn(Collection<EnvironmentStatus> statuses);
 }
