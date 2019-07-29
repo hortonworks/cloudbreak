@@ -1,8 +1,13 @@
 package com.sequenceiq.authorization.service;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+
+import javax.ws.rs.BadRequestException;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +47,37 @@ public class UmsAuthorizationServiceTest {
                 + "You can request access through IAM service from an administrator.");
 
         underTest.checkRightOfUserForResource(USER_CRN, AuthorizationResource.DATALAKE, ResourceAction.WRITE);
+    }
+
+    @Test
+    public void testHasRightOfUserForResourceWithValidResourceAndAction() {
+        when(umsClient.checkRight(anyString(), anyString(), anyString(), any())).thenReturn(true);
+
+        assertTrue(underTest.hasRightOfUserForResource(USER_CRN, "datalake", "write"));
+
+        when(umsClient.checkRight(anyString(), anyString(), anyString(), any())).thenReturn(false);
+
+        assertFalse(underTest.hasRightOfUserForResource(USER_CRN, "datalake", "write"));
+    }
+
+    @Test
+    public void testHasRightOfUserForResourceWithInvalidResource() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Resource or action cannot be found by request!");
+
+        underTest.hasRightOfUserForResource(USER_CRN, "invalid", "write");
+
+        verifyZeroInteractions(umsClient);
+    }
+
+    @Test
+    public void testHasRightOfUserForResourceWithInvalidAction() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Resource or action cannot be found by request!");
+
+        underTest.hasRightOfUserForResource(USER_CRN, "datalake", "invalid");
+
+        verifyZeroInteractions(umsClient);
     }
 
 }

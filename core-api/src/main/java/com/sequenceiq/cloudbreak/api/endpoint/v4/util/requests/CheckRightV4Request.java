@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.base.RightV4;
 
 import io.swagger.annotations.ApiModel;
 
@@ -13,13 +14,13 @@ import io.swagger.annotations.ApiModel;
 @NotNull
 public class CheckRightV4Request {
 
-    private List<String> rights;
+    private List<RightV4> rights;
 
-    public List<String> getRights() {
+    public List<RightV4> getRights() {
         return rights;
     }
 
-    public void setRights(List<String> rights) {
+    public void setRights(List<RightV4> rights) {
         this.rights = rights;
     }
 }

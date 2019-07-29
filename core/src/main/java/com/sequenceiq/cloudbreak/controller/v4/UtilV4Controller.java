@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExterna
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
@@ -31,7 +32,7 @@ import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixServi
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.workspace.authorization.UmsWorkspaceAuthorizationService;
 
 @Controller
 public class UtilV4Controller extends NotificationController implements UtilV4Endpoint {
@@ -59,6 +60,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Inject
     private NotificationSender notificationSender;
+
+    @Inject
+    private UmsWorkspaceAuthorizationService umsAuthorizationService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -113,8 +117,10 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Override
     public CheckRightV4Response checkRight(CheckRightV4Request checkRightV4Request) {
+        String userCrn = restRequestThreadLocalService.getCloudbreakUser().getUserCrn();
         return new CheckRightV4Response(checkRightV4Request.getRights().stream()
-                .map(rightReq -> new CheckRightV4SingleResponse(rightReq, Boolean.TRUE))
+                .map(rightReq -> new CheckRightV4SingleResponse(rightReq,
+                        umsAuthorizationService.hasRightOfUserForResource(userCrn, rightReq.getResource(), rightReq.getAction())))
                 .collect(Collectors.toList()));
     }
 }

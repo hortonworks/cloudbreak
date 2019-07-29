@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,18 @@ public class UmsAuthorizationService {
                         + "You can request access through IAM service from an administrator.",
                 RightUtils.getRight(resource, action), resource.name());
         checkRightOfUserForResource(userCrn, resource, action, unauthorizedMessage);
+    }
+
+    public Boolean hasRightOfUserForResource(String userCrn, String resource, String action) {
+        Optional<AuthorizationResource> resourceEnum = AuthorizationResource.getByName(resource);
+        Optional<ResourceAction> actionEnum = ResourceAction.getByName(action);
+        if (!resourceEnum.isPresent() || !actionEnum.isPresent()) {
+            throw new BadRequestException("Resource or action cannot be found by request!");
+        }
+        if (!hasRightOfUserForResource(userCrn, resourceEnum.get(), actionEnum.get())) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
     }
 
     protected Optional<String> getRequestId() {
