@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -79,11 +81,16 @@ public class SharedServiceConfigProviderTest {
     private DatalakeConfigApiConnector datalakeConfigApiConnector;
 
     @Mock
+    private RemoteDataContextWorkaroundService remoteDataContextWorkaroundService;
+
+    @Mock
     private DatalakeConfigApi datalakeConfigApi;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(remoteDataContextWorkaroundService.prepareRdsConfigs(any(Cluster.class), any(DatalakeResources.class))).thenReturn(new HashSet<>());
+        when(remoteDataContextWorkaroundService.prepareFilesytem(any(Cluster.class), any(DatalakeResources.class))).thenReturn(new FileSystem());
         when(datalakeConfigApiConnector.getConnector(any(Stack.class))).thenReturn(datalakeConfigApi);
         when(datalakeConfigApiConnector.getConnector(any(URL.class), anyString(), anyString())).thenReturn(datalakeConfigApi);
     }
@@ -131,7 +138,7 @@ public class SharedServiceConfigProviderTest {
 
         Cluster result = underTest.configureCluster(requestedCluster, user, workspace);
 
-        Assert.assertEquals(1L, result.getRdsConfigs().size());
+        Assert.assertEquals(0L, result.getRdsConfigs().size());
         result.getRdsConfigs().forEach(rdsConfig -> Assert.assertNotEquals(DEFAULT, rdsConfig.getStatus()));
     }
 
