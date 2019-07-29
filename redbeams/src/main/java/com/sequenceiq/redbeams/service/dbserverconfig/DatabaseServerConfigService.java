@@ -91,7 +91,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         if (resource.getConnectionDriver() == null) {
             resource.setConnectionDriver(resource.getDatabaseVendor().connectionDriver());
             LOGGER.info("Database server configuration lacked a connection driver; defaulting to {}",
-                resource.getConnectionDriver());
+                    resource.getConnectionDriver());
         }
 
         // FIXME? Currently no checks if logged-in user has access to workspace
@@ -154,12 +154,21 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     public DatabaseServerConfig deleteByName(String environmentCrn, String name) {
         DatabaseServerConfig resource = getByName(DEFAULT_WORKSPACE, environmentCrn, name);
+        checkResourceCanBeDeleted(resource);
         return delete(resource);
     }
 
     public DatabaseServerConfig deleteByCrn(String crn) {
         DatabaseServerConfig resource = getByCrn(crn);
+        checkResourceCanBeDeleted(resource);
         return delete(resource);
+    }
+
+    private void checkResourceCanBeDeleted(DatabaseServerConfig resource) {
+        if (resource.getResourceStatus().equals(ResourceStatus.SERVICE_MANAGED)) {
+            throw new BadRequestException("Cannot delete service managed configuration. "
+                    + "Please use termination to stop the database-server and delete the configuration.");
+        }
     }
 
     @Override
