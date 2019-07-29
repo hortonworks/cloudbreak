@@ -63,3 +63,4 @@ core/cloudbreak-log/
 freeipa-log/
 sdx-log/
 .deps/
+/usage-collection/src/generated/main/java/com/cloudera/thunderhead/service/common/usage/UsageProto.java
