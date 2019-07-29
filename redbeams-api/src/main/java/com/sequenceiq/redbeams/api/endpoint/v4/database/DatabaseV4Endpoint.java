@@ -30,25 +30,23 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 
 @Path("/v4/databases")
-@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 @Api(tags = { "databases" },
     protocols = "http,https",
-    produces = MediaType.APPLICATION_JSON,
     authorizations = { @Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY) })
 public interface DatabaseV4Endpoint {
 
     @GET
     @Path("")
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.LIST, notes = DatabaseNotes.LIST,
             nickname = "listDatabases")
     DatabaseV4Responses list(
-        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentId") String environmentId
+        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentCrn") String environmentCrn
     );
 
     @POST
     @Path("/register")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.REGISTER, notes = DatabaseNotes.REGISTER,
             nickname = "registerDatabase")
     DatabaseV4Response register(
@@ -57,37 +55,35 @@ public interface DatabaseV4Endpoint {
 
     @GET
     @Path("/{name}")
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.GET_BY_NAME, notes = DatabaseNotes.GET_BY_NAME,
             nickname = "getDatabase")
     DatabaseV4Response get(
-        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentId") String environmentId,
+        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentCrn") String environmentCrn,
         @ApiParam(DatabaseParamDescriptions.NAME) @PathParam("name") String name
     );
 
     @DELETE
     @Path("/{name}")
-    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.DELETE_BY_NAME, notes = DatabaseNotes.DELETE_BY_NAME,
             nickname = "deleteDatabase")
     DatabaseV4Response delete(
-        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentId") String environmentId,
+        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentCrn") String environmentCrn,
         @ApiParam(DatabaseParamDescriptions.NAME) @PathParam("name") String name
     );
 
     @DELETE
     @Path("")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.DELETE_MULTIPLE_BY_NAME, notes = DatabaseNotes.DELETE_MULTIPLE_BY_NAME,
             nickname = "deleteMultipleDatabases")
     DatabaseV4Responses deleteMultiple(
-        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentId") String environmentId,
+        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentCrn") String environmentCrn,
         @ApiParam(DatabaseParamDescriptions.NAMES) Set<String> names
     );
 
     @POST
     @Path("/test")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.TEST_CONNECTION, notes = DatabaseNotes.TEST_CONNECTION,
             nickname = "testDatabaseConnection")
     DatabaseTestV4Response test(

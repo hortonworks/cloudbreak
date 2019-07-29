@@ -28,7 +28,7 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
 
     private static final String NAME = "name";
 
-    private static final String ENVIRONMENT_ID = "environmentId";
+    private static final String ENVIRONMENT_CRN = "environmentCrn";
 
     private static final String DESCRIPTION = "description";
 
@@ -62,7 +62,7 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
         DatabaseV4Request request = new DatabaseV4Request();
         request.setType(TYPE);
         request.setName(NAME);
-        request.setEnvironmentCrn(ENVIRONMENT_ID);
+        request.setEnvironmentCrn(ENVIRONMENT_CRN);
         request.setDescription(DESCRIPTION);
         request.setConnectionURL(CONNECTION_URL);
         request.setConnectionPassword(CONNECTION_PASSWORD);
@@ -74,7 +74,7 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
 
         assertEquals(NAME, databaseConfig.getName());
         assertEquals(TYPE, databaseConfig.getType());
-        assertEquals(ENVIRONMENT_ID, databaseConfig.getEnvironmentId());
+        assertEquals(ENVIRONMENT_CRN, databaseConfig.getEnvironmentId());
         assertEquals(DESCRIPTION, databaseConfig.getDescription());
         assertEquals(CONNECTION_URL, databaseConfig.getConnectionURL());
         assertEquals(CONNECTION_PASSWORD, databaseConfig.getConnectionPassword().getRaw());

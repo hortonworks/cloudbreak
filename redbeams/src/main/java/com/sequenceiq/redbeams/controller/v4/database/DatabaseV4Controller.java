@@ -31,8 +31,8 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
     private DatabaseConfigService databaseConfigService;
 
     @Override
-    public DatabaseV4Responses list(String environmentId) {
-        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.findAll(environmentId),
+    public DatabaseV4Responses list(String environmentCrn) {
+        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.findAll(environmentCrn),
                 DatabaseV4Response.class));
     }
 
@@ -43,25 +43,20 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
     }
 
     @Override
-    public DatabaseV4Response get(String environmentId, String name) {
-        DatabaseConfig databaseConfig = databaseConfigService.get(name, environmentId);
+    public DatabaseV4Response get(String environmentCrn, String name) {
+        DatabaseConfig databaseConfig = databaseConfigService.get(name, environmentCrn);
         return redbeamsConverterUtil.convert(databaseConfig, DatabaseV4Response.class);
     }
 
     @Override
-    public DatabaseV4Response delete(String environmentId, String name) {
-        return redbeamsConverterUtil.convert(databaseConfigService.delete(name, environmentId), DatabaseV4Response.class);
+    public DatabaseV4Response delete(String environmentCrn, String name) {
+        return redbeamsConverterUtil.convert(databaseConfigService.delete(name, environmentCrn), DatabaseV4Response.class);
     }
 
     @Override
-    public DatabaseV4Responses deleteMultiple(String environmentId, Set<String> names) {
-        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.delete(names, environmentId), DatabaseV4Response.class));
+    public DatabaseV4Responses deleteMultiple(String environmentCrn, Set<String> names) {
+        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.delete(names, environmentCrn), DatabaseV4Response.class));
     }
-
-    // @Override
-    // public DatabaseV4Request getRequest(String name) {
-    //     return new DatabaseV4Request();
-    // }
 
     @Override
     public DatabaseTestV4Response test(@Valid DatabaseTestV4Request databaseTestV4Request) {

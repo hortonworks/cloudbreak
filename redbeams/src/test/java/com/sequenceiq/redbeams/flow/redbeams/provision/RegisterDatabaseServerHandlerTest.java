@@ -43,7 +43,7 @@ public class RegisterDatabaseServerHandlerTest {
 
     private static final String DB_STACK_NAME = "dbStackName";
 
-    private static final String ENVIRONMENT_ID = "environmentId";
+    private static final String ENVIRONMENT_CRN = "environmentCrn";
 
     private static final String CONNECTION_DRIVER = "connectionDriver";
 
@@ -79,7 +79,7 @@ public class RegisterDatabaseServerHandlerTest {
         Event event = mock(Event.class);
         DBStack dbStack = new DBStack();
         dbStack.setName(DB_STACK_NAME);
-        dbStack.setEnvironmentId(ENVIRONMENT_ID);
+        dbStack.setEnvironmentId(ENVIRONMENT_CRN);
         dbStack.setResourceCrn(CRN);
         DatabaseServer databaseServer = new DatabaseServer();
         dbStack.setDatabaseServer(databaseServer);
@@ -104,7 +104,7 @@ public class RegisterDatabaseServerHandlerTest {
         assertEquals(ACCOUNT_ID, databaseServerConfig.getAccountId());
         assertEquals(DB_STACK_NAME, databaseServerConfig.getName());
         assertEquals(DB_STACK_NAME, databaseServerConfig.getName());
-        assertEquals(ENVIRONMENT_ID, databaseServerConfig.getEnvironmentId());
+        assertEquals(ENVIRONMENT_CRN, databaseServerConfig.getEnvironmentId());
         assertEquals(CONNECTION_DRIVER, databaseServerConfig.getConnectionDriver());
         assertEquals(ROOT_USER_NAME, databaseServerConfig.getConnectionUserName());
         assertEquals(ROOT_PASSWORD, databaseServerConfig.getConnectionPassword());
