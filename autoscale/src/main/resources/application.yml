@@ -78,3 +78,7 @@ vault:
       service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
       mount.path: "dps-dev"
       login.role: "autoscale.default"
+
+altus:
+  ums:
+    host: localhost
