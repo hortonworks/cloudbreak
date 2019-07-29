@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.core.Every.everyItem;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.redbeams.TestData;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
@@ -119,6 +121,7 @@ public class DatabaseServerConfigServiceTest {
         server.setId(1L);
         server.setResourceCrn(SERVER_CRN);
         server.setName(SERVER_NAME);
+        server.setResourceStatus(ResourceStatus.USER_MANAGED);
 
         server2 = new DatabaseServerConfig();
         server2.setId(2L);
@@ -262,6 +265,23 @@ public class DatabaseServerConfigServiceTest {
     }
 
     @Test
+    public void testDeleteByCrnServiceManaged() {
+        server.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
+        when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.of(server));
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot delete service managed configuration. "
+                + "Please use termination to stop the database-server and delete the configuration.");
+
+        try {
+            underTest.deleteByCrn(server.getResourceCrn().toString());
+
+        } catch (BadRequestException e) {
+            assertFalse(server.isArchived());
+            throw e;
+        }
+    }
+
+    @Test
     public void testDeleteByCrnNotFound() {
         thrown.expect(NotFoundException.class);
 
@@ -279,6 +299,23 @@ public class DatabaseServerConfigServiceTest {
         assertEquals(server, deletedServer);
         assertTrue(deletedServer.isArchived());
         verify(repository, never()).delete(server);
+    }
+
+    @Test
+    public void testDeleteByNameServiceManaged() {
+        server.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(SERVER_NAME, WORKSPACE_ID, ENVIRONMENT_CRN)).thenReturn(Optional.of(server));
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot delete service managed configuration. "
+                + "Please use termination to stop the database-server and delete the configuration.");
+
+        try {
+            underTest.deleteByName(ENVIRONMENT_CRN, SERVER_NAME);
+
+        } catch (BadRequestException e) {
+            assertFalse(server.isArchived());
+            throw e;
+        }
     }
 
     @Test
