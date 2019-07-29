@@ -23,7 +23,6 @@ import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.DatabaseService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 
 @Component
@@ -93,11 +92,6 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
         if (zones.size() < 2) {
             message = String.format("Cannot create external database for sdx: %s, the subnets in the vpc should be at least in two different availabilityzones",
                     sdxId);
-            LOGGER.debug(message);
-            throw new BadRequestException(message);
-        }
-        if (!Optional.of(env.getSecurityAccess()).map(SecurityAccessResponse::getDefaultSecurityGroupId).isPresent()) {
-            message = String.format("Cannot create external database for sdx: %s, there's no default securitygroup in the environment", sdxId);
             LOGGER.debug(message);
             throw new BadRequestException(message);
         }
