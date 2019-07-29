@@ -42,12 +42,6 @@ cloudera_manager_setup_knox:
     - template: jinja
     - mode: 777
 
-{{ gateway.knox_data_root }}/topologies/sandbox.xml:
-  file.managed:
-    - source: salt://gateway/config/cm/sandbox.xml.j2
-    - template: jinja
-    - mode: 777
-
 {% if salt['pillar.get']('gateway:tokencert') != None %}
 {{ gateway.knox_data_root }}/topologies/cdp-token.xml:
   file.managed:
@@ -66,6 +60,7 @@ cloudera_manager_setup_knox:
       exposed: {{ topology.exposed }}
       ports: {{ salt['pillar.get']('gateway:ports') }}
       topology_name: {{ topology.name }}
+      protocol: {{ salt['pillar.get']('gateway:protocol') }}
     - mode: 777
 
 {{ gateway.knox_data_root }}/topologies/{{ topology.name }}-api.xml:
@@ -76,6 +71,7 @@ cloudera_manager_setup_knox:
       exposed: {{ topology.exposed }}
       ports: {{ salt['pillar.get']('gateway:ports') }}
       topology_name: {{ topology.name }}
+      protocol: {{ salt['pillar.get']('gateway:protocol') }}
     - mode: 777
 
 {% endfor %}

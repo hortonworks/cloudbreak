@@ -79,7 +79,7 @@ public class ClouderaManagerPreCreationService implements ClusterPreCreationApi 
     }
 
     @Override
-    public Map<String, Integer> getServicePorts(Blueprint blueprint) {
-        return clouderaManagerBlueprintPortConfigCollector.getServicePorts(blueprint);
+    public Map<String, Integer> getServicePorts(Blueprint blueprint, boolean tls) {
+        return clouderaManagerBlueprintPortConfigCollector.getServicePorts(blueprint, tls);
     }
 }

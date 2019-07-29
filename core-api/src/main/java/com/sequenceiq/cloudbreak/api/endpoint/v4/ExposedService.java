@@ -85,11 +85,11 @@ public enum ExposedService {
         return ImmutableList.copyOf(allServiceName);
     }
 
-    public static Map<String, Integer> getAllServicePorts() {
+    public static Map<String, Integer> getAllServicePorts(boolean tls) {
         return Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.serviceName))
                 .filter(x -> !Strings.isNullOrEmpty(x.knoxService))
-                .filter(x -> Objects.nonNull(x.port))
-                .collect(Collectors.toMap(k -> k.knoxService, v -> v.port));
+                .filter(x -> Objects.nonNull(tls ? x.tlsPort : x.port))
+                .collect(Collectors.toMap(k -> k.knoxService, v -> tls ? v.tlsPort : v.port));
     }
 
     public String getServiceName() {
