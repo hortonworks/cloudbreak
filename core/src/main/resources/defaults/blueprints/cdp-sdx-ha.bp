@@ -306,6 +306,10 @@
                     {
                         "name": "zookeeper_service",
                         "ref": "zookeeper"
+                    },
+                    {
+                      "name": "enable_ranger_authorization",
+                      "value": "true"
                     }
                 ],
                 "serviceType": "SOLR"
