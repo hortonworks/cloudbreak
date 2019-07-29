@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 @Component
 public class ClouderaManagerBlueprintPortConfigCollector {
 
-    public Map<String, Integer> getServicePorts(Blueprint blueprint) {
-        return ExposedService.getAllServicePorts();
+    public Map<String, Integer> getServicePorts(Blueprint blueprint, boolean tls) {
+        return ExposedService.getAllServicePorts(tls);
     }
 }

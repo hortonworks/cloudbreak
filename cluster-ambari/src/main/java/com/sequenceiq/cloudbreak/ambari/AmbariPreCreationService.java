@@ -84,7 +84,7 @@ public class AmbariPreCreationService implements ClusterPreCreationApi {
     }
 
     @Override
-    public Map<String, Integer> getServicePorts(Blueprint blueprint) {
+    public Map<String, Integer> getServicePorts(Blueprint blueprint, boolean tls) {
         return ambariBlueprintPortConfigCollector.getServicePorts(blueprint);
     }
 }

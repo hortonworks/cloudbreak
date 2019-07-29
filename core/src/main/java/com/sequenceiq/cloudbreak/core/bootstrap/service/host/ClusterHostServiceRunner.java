@@ -495,8 +495,10 @@ public class ClusterHostServiceRunner {
             List<Map<String, Object>> topologies = getTopologies(clusterGateway);
             gateway.put("topologies", topologies);
             if (cluster.getBlueprint() != null) {
-                Map<String, Integer> servicePorts = connector.getServicePorts(cluster.getBlueprint());
+                Boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
+                Map<String, Integer> servicePorts = connector.getServicePorts(cluster.getBlueprint(), autoTlsEnabled);
                 gateway.put("ports", servicePorts);
+                gateway.put("protocol", autoTlsEnabled ? "https" : "http");
             }
             if (SSOType.SSO_PROVIDER_FROM_UMS.equals(clusterGateway.getSsoType())) {
                 String accountId = threadBasedUserCrnProvider.getAccountId();
