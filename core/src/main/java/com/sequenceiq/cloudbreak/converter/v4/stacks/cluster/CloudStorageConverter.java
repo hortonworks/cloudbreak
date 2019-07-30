@@ -152,7 +152,7 @@ public class CloudStorageConverter {
 
             List<StorageLocationBase> storageLocations = cloudStorage.getLocations().stream().map(storageLocation -> {
                 StorageLocationBase storageLocationBase = new StorageLocationBase();
-                storageLocationBase.setType(storageLocation.getType().name());
+                storageLocationBase.setType(storageLocation.getType());
                 storageLocationBase.setValue(storageLocation.getValue());
                 return storageLocationBase;
             }).collect(Collectors.toList());
@@ -189,7 +189,7 @@ public class CloudStorageConverter {
 
     private StorageLocationBase storageLocationToRequest(StorageLocation storageLocation) {
         StorageLocationBase storageLocationRequest = new StorageLocationBase();
-        storageLocationRequest.setType(storageLocation.getType().name());
+        storageLocationRequest.setType(storageLocation.getType());
         storageLocationRequest.setValue(storageLocation.getValue());
         return storageLocationRequest;
     }
@@ -225,7 +225,7 @@ public class CloudStorageConverter {
     private StorageLocation storageLocationRequestToStorageLocation(StorageLocationBase storageLocationRequest) {
         StorageLocation storageLocation = new StorageLocation();
         try {
-            storageLocation.setType(CloudStorageCdpService.valueOf(storageLocationRequest.getType()));
+            storageLocation.setType(storageLocationRequest.getType());
         } catch (IllegalArgumentException e) {
             throw new BadRequestException(String.format("StorageLocation type '%s' is not supported. Supported types: [%s].",
                     storageLocationRequest.getType(), CloudStorageCdpService.typeListing()), e);

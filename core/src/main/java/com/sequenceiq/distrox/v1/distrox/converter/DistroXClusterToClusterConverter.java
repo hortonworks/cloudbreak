@@ -3,10 +3,13 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
@@ -15,7 +18,9 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class DistroXClusterToClusterConverter {
@@ -30,7 +35,7 @@ public class DistroXClusterToClusterConverter {
     private ClouderaManagerV1ToClouderaManagerV4Converter cmConverter;
 
     @Inject
-    private CloudStorageV1ToCloudStorageV4Converter cloudStorageConverter;
+    private CloudStorageLocationsToCloudStorageConverter cloudStorageConverter;
 
     @Inject
     private GatewayV1ToGatewayV4Converter gatewayConverter;
@@ -41,7 +46,7 @@ public class DistroXClusterToClusterConverter {
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
-    public ClusterV4Request convert(DistroXClusterV1Request source) {
+    public ClusterV4Request convert(DistroXClusterV1Request source, DetailedEnvironmentResponse environment) {
         ClusterV4Request response = new ClusterV4Request();
         if (isEmpty(source.getExposedServices())) {
             source.setExposedServices(List.of("ALL"));
@@ -55,7 +60,7 @@ public class DistroXClusterToClusterConverter {
         response.setPassword(source.getPassword());
         response.setProxyConfigCrn(getIfNotNull(source.getProxy(), this::getProxyCrnByName));
         response.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
-        response.setCloudStorage(source.getCloudStorage());
+        response.setCloudStorage(cloudStorageConverter.convert(source.getCloudStorageLocations(), environment));
         response.setValidateBlueprint(source.getValidateBlueprint());
         response.setExecutorType(ExecutorType.DEFAULT);
         response.setCustomContainer(null);
@@ -71,7 +76,9 @@ public class DistroXClusterToClusterConverter {
         response.setUserName(source.getUserName());
         response.setPassword(source.getPassword());
         response.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
-        response.setCloudStorage(source.getCloudStorage());
+        Set<StorageLocationBase> storageLocations = getIfNotNull(source.getCloudStorage(),
+                cloudStorage -> CollectionUtils.isNotEmpty(cloudStorage.getLocations()) ? new HashSet<>(cloudStorage.getLocations()) : null);
+        response.setCloudStorageLocations(storageLocations);
         response.setProxy(source.getProxyConfigCrn());
         return response;
     }

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
-import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.ClouderaManagerV1Request;
 
 import io.swagger.annotations.ApiModel;
@@ -48,9 +48,8 @@ public class DistroXClusterV1Request implements Serializable {
     @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
     private String proxy;
 
-    @Valid
-    @ApiModelProperty(StackModelDescription.CLOUD_STORAGE)
-    private CloudStorageRequest cloudStorage;
+    @ApiModelProperty(ClusterModelDescription.CLOUD_STORAGE_LOCATIONS)
+    private Set<StorageLocationBase> cloudStorageLocations = new HashSet<>();
 
     @Valid
     @ApiModelProperty(ClusterModelDescription.CM_REQUEST)
@@ -88,12 +87,12 @@ public class DistroXClusterV1Request implements Serializable {
         this.databases = databases;
     }
 
-    public CloudStorageRequest getCloudStorage() {
-        return cloudStorage;
+    public Set<StorageLocationBase> getCloudStorageLocations() {
+        return cloudStorageLocations;
     }
 
-    public void setCloudStorage(CloudStorageRequest cloudStorage) {
-        this.cloudStorage = cloudStorage;
+    public void setCloudStorageLocations(Set<StorageLocationBase> cloudStorageLocations) {
+        this.cloudStorageLocations = cloudStorageLocations;
     }
 
     public ClouderaManagerV1Request getCm() {

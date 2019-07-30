@@ -21,6 +21,7 @@ import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.model.CloudIdentityType;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -59,7 +60,7 @@ public class CloudStorageManifester {
         List<StorageLocationBase> storageLocations = fileSystemRecommendations.getResponses().stream().map(response -> {
             StorageLocationBase storageLocation = new StorageLocationBase();
             storageLocation.setValue(response.getDefaultPath());
-            storageLocation.setType(response.getType());
+            storageLocation.setType(CloudStorageCdpService.valueOf(response.getType()));
             return storageLocation;
         }).collect(Collectors.toList());
         cloudStorageRequest.setLocations(storageLocations);

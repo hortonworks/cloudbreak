@@ -295,6 +295,7 @@ public class ModelDescriptions {
         public static final String GCP_PARAMETERS = "gcp specific parameters for cloud storage";
         public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for cloud storage";
         public static final String VARIANT = "Cluster manager variant";
+        public static final String CLOUD_STORAGE_LOCATIONS = "storage locations by CDP services";
     }
 
     public static class GatewayModelDescription {

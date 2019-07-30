@@ -1,24 +1,27 @@
 package com.sequenceiq.common.api.cloudstorage;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StorageLocationBase {
+public class StorageLocationBase implements Serializable {
 
-    private String type;
+    private CloudStorageCdpService type;
 
     private String value;
 
-    public String getType() {
+    public CloudStorageCdpService getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(CloudStorageCdpService type) {
         this.type = type;
     }
 
