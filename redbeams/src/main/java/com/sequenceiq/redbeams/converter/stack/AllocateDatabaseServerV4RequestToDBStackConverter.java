@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -57,6 +56,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(AllocateDatabaseServerV4RequestToDBStackConverter.class);
 
     private static final DBStackStatus NEW_STATUS = new DBStackStatus();
+
+    private static final List<CloudPlatform> SUPPORTED_CLOUD_PLATFORMS = List.of(CloudPlatform.AWS, CloudPlatform.AZURE);
 
     @Value("${info.app.version:}")
     private String version;
@@ -85,12 +86,12 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         DetailedEnvironmentResponse environment = environmentService.getByCrn(source.getEnvironmentCrn());
 
         DBStack dbStack = new DBStack();
+        CloudPlatform cloudPlatform = updateCloudPlatformAndRelatedFields(source, dbStack, environment.getCloudPlatform());
         dbStack.setName(source.getName() != null ? source.getName() : generateDatabaseServerStackName());
         dbStack.setEnvironmentId(source.getEnvironmentCrn());
         setRegion(dbStack, environment);
-        dbStack.setNetwork(buildNetwork(source.getNetwork(), environment));
+        dbStack.setNetwork(buildNetwork(source.getNetwork(), environment, cloudPlatform));
 
-        updateCloudPlatformAndRelatedFields(source, dbStack);
 
         if (source.getDatabaseServer() != null) {
             dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), source.getName(), ownerCrn, environment.getSecurityAccess()));
@@ -105,7 +106,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
         Instant now = clock.getCurrentInstant();
         dbStack.setOwnerCrn(ownerCrn);
-        dbStack.setTags(getTags(ownerCrn, dbStack.getCloudPlatform(), now.getEpochSecond()));
+        dbStack.setTags(getTags(ownerCrn, cloudPlatform, now.getEpochSecond()));
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
 
         return dbStack;
@@ -118,24 +119,43 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         dbStack.setRegion(environment.getLocation().getName());
     }
 
-    private void updateCloudPlatformAndRelatedFields(AllocateDatabaseServerV4Request source, DBStack dbStack) {
-        String cloudPlatform;
-        if (source.getCloudPlatform() != null) {
-            cloudPlatform = source.getCloudPlatform().name();
+    private CloudPlatform updateCloudPlatformAndRelatedFields(AllocateDatabaseServerV4Request request, DBStack dbStack, String cloudPlatformEnvironment) {
+        String cloudPlatformRequest;
+        if (request.getCloudPlatform() != null) {
+            cloudPlatformRequest = request.getCloudPlatform().name();
+            checkCloudPlatformsMatch(cloudPlatformEnvironment, cloudPlatformRequest);
         } else {
-            DetailedEnvironmentResponse environment = environmentService.getByCrn(source.getEnvironmentCrn());
-            cloudPlatform = environment.getCloudPlatform();
+            cloudPlatformRequest = cloudPlatformEnvironment;
         }
-        LOGGER.debug("Cloud platform is {}", cloudPlatform);
-        source.setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
-        if (source.getNetwork() != null) {
-            source.getNetwork().setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
+
+        LOGGER.debug("Cloud platform is {}", cloudPlatformRequest);
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(cloudPlatformRequest);
+        checkCloudPlatformIsSupported(cloudPlatform);
+
+        request.setCloudPlatform(cloudPlatform);
+        if (request.getNetwork() != null) {
+            request.getNetwork().setCloudPlatform(cloudPlatform);
         }
-        if (source.getDatabaseServer() != null) {
-            source.getDatabaseServer().setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
+        if (request.getDatabaseServer() != null) {
+            request.getDatabaseServer().setCloudPlatform(cloudPlatform);
         }
-        dbStack.setCloudPlatform(cloudPlatform);
-        dbStack.setPlatformVariant(cloudPlatform);
+        dbStack.setCloudPlatform(cloudPlatformRequest);
+        dbStack.setPlatformVariant(cloudPlatformRequest);
+
+        return cloudPlatform;
+    }
+
+    private void checkCloudPlatformIsSupported(CloudPlatform cloudPlatform) {
+        if (!SUPPORTED_CLOUD_PLATFORMS.contains(cloudPlatform)) {
+            throw new BadRequestException(String.format("Cloud platform %s not supported yet.", cloudPlatform));
+        }
+    }
+
+    private void checkCloudPlatformsMatch(String cloudPlatformEnvironment, String cloudPlatformRequest) {
+        if (!cloudPlatformEnvironment.equals(cloudPlatformRequest)) {
+            throw new BadRequestException(String.format(
+                    "Cloud platform of the request %s and the environment %s do not match.", cloudPlatformRequest, cloudPlatformEnvironment));
+        }
     }
 
     private Map<String, Object> getNetworkFromEnvironment(EnvironmentNetworkResponse environmentNetworkResponse) {
@@ -150,7 +170,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return networkParameterAdder.addNetworkParameters(new HashMap<>(), chosenSubnetIds);
     }
 
-    private Network buildNetwork(NetworkV4Request source, DetailedEnvironmentResponse environmentResponse) {
+    private Network buildNetwork(NetworkV4Request source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
         Network network = new Network();
         network.setName(generateNetworkName());
 
@@ -158,7 +178,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
                 ? providerParameterCalculator.get(source).asMap()
                 : getNetworkFromEnvironment(environmentResponse.getNetwork());
 
-        networkParameterAdder.addVpcParameters(parameters, environmentResponse.getNetwork());
+        networkParameterAdder.addVpcParameters(parameters, environmentResponse, cloudPlatform);
 
         if (parameters != null) {
             try {
@@ -184,7 +204,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         server.setRootPassword(source.getRootUserPassword() != null ? source.getRootUserPassword() : userGeneratorService.generatePassword()
         );
         server.setPort(source.getPort());
-        server.setSecurityGroup(buildSecurityGroup(source.getSecurityGroup(), securityAccessResponse));
+        server.setSecurityGroup(buildExistingSecurityGroup(source.getSecurityGroup(), securityAccessResponse));
 
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
         if (parameters != null) {
@@ -198,7 +218,15 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return server;
     }
 
-    private SecurityGroup buildSecurityGroup(SecurityGroupV4Request source, SecurityAccessResponse securityAccessResponse) {
+    /**
+     * Redbeams saves security group id if it is provided in the request or if the environment provides a default security group.
+     * If none of them are filled in, then a custom security group is created later in spi.
+     *
+     * @param source                 - the request
+     * @param securityAccessResponse - environment data
+     * @return returns the saved security groups. If none is specified, then an empty security gorup is returned.
+     */
+    private SecurityGroup buildExistingSecurityGroup(SecurityGroupV4Request source, SecurityAccessResponse securityAccessResponse) {
         SecurityGroup securityGroup = new SecurityGroup();
         if (source != null) {
             securityGroup.setSecurityGroupIds(source.getSecurityGroupIds());
@@ -211,7 +239,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     // compare to freeipa CostTaggingService
 
-    private Json getTags(Crn ownerCrn, String cloudPlatform, long now) {
+    private Json getTags(Crn ownerCrn, CloudPlatform cloudPlatform, long now) {
         // freeipa currently uses account ID for username / owner
         String user = ownerCrn.getResource().toString();
 
@@ -225,9 +253,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return new Json(new StackTags(new HashMap<>(), new HashMap<>(), defaultTags));
     }
 
-    private static String safeTagString(String value, String platform) {
+    private static String safeTagString(String value, CloudPlatform platform) {
         String valueAfterCheck = Strings.isNullOrEmpty(value) ? "unknown" : value;
-        return CloudConstants.GCP.equals(platform)
+        return CloudPlatform.GCP.equals(platform)
                 ? valueAfterCheck.split("@")[0].toLowerCase().replaceAll("[^\\w]", "-") : valueAfterCheck;
     }
 
