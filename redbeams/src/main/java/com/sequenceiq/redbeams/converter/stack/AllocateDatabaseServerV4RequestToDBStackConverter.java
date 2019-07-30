@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
@@ -91,7 +93,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
         dbStack.setNetwork(buildNetwork(source.getNetwork(), environment));
         if (source.getDatabaseServer() != null) {
-            dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), source.getName(), ownerCrn));
+            dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), source.getName(), ownerCrn, environment.getSecurityAccess()));
         }
 
         Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
@@ -168,7 +170,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return network;
     }
 
-    private DatabaseServer buildDatabaseServer(DatabaseServerV4Request source, String name, Crn ownerCrn) {
+    private DatabaseServer buildDatabaseServer(DatabaseServerV4Request source, String name, Crn ownerCrn, SecurityAccessResponse securityAccessResponse) {
         DatabaseServer server = new DatabaseServer();
         server.setAccountId(ownerCrn.getAccountId());
         server.setName(generateDatabaseServerName());
@@ -182,7 +184,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         server.setRootPassword(source.getRootUserPassword() != null ? source.getRootUserPassword() : userGeneratorService.generatePassword()
         );
         server.setPort(source.getPort());
-        server.setSecurityGroup(buildSecurityGroup(source.getSecurityGroup()));
+        server.setSecurityGroup(buildSecurityGroup(source.getSecurityGroup(), securityAccessResponse));
 
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
         if (parameters != null) {
@@ -196,13 +198,14 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return server;
     }
 
-    private SecurityGroup buildSecurityGroup(SecurityGroupV4Request source) {
+    private SecurityGroup buildSecurityGroup(SecurityGroupV4Request source, SecurityAccessResponse securityAccessResponse) {
         SecurityGroup securityGroup = new SecurityGroup();
-        if (source == null) {
-            return securityGroup;
+        if (source != null) {
+            securityGroup.setSecurityGroupIds(source.getSecurityGroupIds());
+        } else if (securityAccessResponse.getDefaultSecurityGroupId() != null) {
+            securityGroup.setSecurityGroupIds(Set.of(securityAccessResponse.getDefaultSecurityGroupId()));
         }
 
-        securityGroup.setSecurityGroupIds(source.getSecurityGroupIds());
         return securityGroup;
     }
 
