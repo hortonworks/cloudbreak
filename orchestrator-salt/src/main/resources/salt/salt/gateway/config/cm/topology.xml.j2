@@ -167,6 +167,12 @@
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
              </param>
              {%- endif %}
+             {% if 'NIFI' in exposed and 'NIFI_NODE' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>NIFI</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+             </param>
+             {%- endif %}
          </provider>
 
     </gateway>
@@ -386,6 +392,17 @@
         <role>WEBHBASE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HBASERESTSERVER'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['WEBHBASE'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'NIFI_NODE' in salt['pillar.get']('gateway:location') -%}
+    {% if 'NIFI' in exposed -%}
+    <service>
+        <role>NIFI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['NIFI_NODE'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['NIFI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
