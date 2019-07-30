@@ -40,7 +40,11 @@ public class UsageLoggingUtil {
         UsageProto.CDPEnvironmentsEnvironmentType.Value cloudPlatformEnum =
                 UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET;
         if (cloudPlatform != null) {
-            cloudPlatformEnum = UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(cloudPlatform);
+            try {
+                cloudPlatformEnum = UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(cloudPlatform.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Do not set the cloud platform.
+            }
         }
         if (stack.getDatalakeResourceId() != null) {
             UsageProto.CDPDatahubClusterRequested.Builder protoBuilder =
@@ -71,8 +75,16 @@ public class UsageLoggingUtil {
         if (stack == null) {
             return;
         }
-        UsageProto.CDPCloudbreakClusterStatus.Value oldStatusEnum = UsageProto.CDPCloudbreakClusterStatus.Value.valueOf(oldClusterStatus.name());
-        UsageProto.CDPCloudbreakClusterStatus.Value newStatusEnum = UsageProto.CDPCloudbreakClusterStatus.Value.valueOf(cluster.getStatus().name());
+        UsageProto.CDPCloudbreakClusterStatus.Value oldStatusEnum = null;
+        UsageProto.CDPCloudbreakClusterStatus.Value newStatusEnum = null;
+        try {
+            oldStatusEnum = UsageProto.CDPCloudbreakClusterStatus.Value.valueOf(
+                    oldClusterStatus.name().toUpperCase());
+            newStatusEnum = UsageProto.CDPCloudbreakClusterStatus.Value.valueOf(
+                    cluster.getStatus().name().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return;
+        }
         if (oldStatusEnum == UNSET || newStatusEnum == UNSET) {
             return;
         }

@@ -36,6 +36,7 @@ public class UsageLoggingUtilTest {
 
         stack = new Stack();
         stack.setCluster(cluster);
+        stack.setCloudPlatform("mock");
 
         cluster.setStack(stack);
         cluster.setId(1L);
