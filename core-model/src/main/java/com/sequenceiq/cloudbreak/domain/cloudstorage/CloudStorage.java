@@ -11,6 +11,8 @@ public class CloudStorage {
 
     private List<CloudIdentity> cloudIdentities = new ArrayList<>();
 
+    private AccountMapping accountMapping;
+
     public String getS3GuardDynamoTableName() {
         return s3GuardDynamoTableName;
     }
@@ -40,4 +42,13 @@ public class CloudStorage {
         }
         this.cloudIdentities = cloudIdentities;
     }
+
+    public AccountMapping getAccountMapping() {
+        return accountMapping;
+    }
+
+    public void setAccountMapping(AccountMapping accountMapping) {
+        this.accountMapping = accountMapping;
+    }
+
 }

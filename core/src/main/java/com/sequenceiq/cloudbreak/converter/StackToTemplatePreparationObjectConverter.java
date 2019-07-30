@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
@@ -38,13 +39,14 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockIdentityMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
+import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -97,7 +99,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private EnvironmentClientService environmentClientService;
 
     @Inject
-    private AwsMockIdentityMappingService awsIdentityMappingService;
+    private AwsMockAccountMappingService awsMockAccountMappingService;
 
     @Inject
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
@@ -141,15 +143,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withKerberosConfig(kerberosConfigService.get(source.getEnvironmentCrn()).orElse(null))
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource));
 
-            if (source.getType() == StackType.DATALAKE
-                    && environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK
-                    && source.getCloudPlatform().equals(CloudPlatform.AWS.name())) {
-
-                Map<String, String> groupMapping = awsIdentityMappingService.getIdentityGroupMapping(source.getRegion(), credential);
-                Map<String, String> userMapping = awsIdentityMappingService.getIdentityUserMapping(source.getRegion(), credential);
-                builder.withIdentityGroupMapping(groupMapping);
-                builder.withIdentityUserMapping(userMapping);
-            }
+            decorateBuilderWithAccountMapping(source, environment, credential, builder);
 
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
@@ -179,6 +173,24 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             stackInputs = new StackInputs(new HashMap<>(), new HashMap<>(), new HashMap<>());
         }
         return stackInputs;
+    }
+
+    private void decorateBuilderWithAccountMapping(Stack source, DetailedEnvironmentResponse environment, Credential credential, Builder builder) {
+        if (source.getType() == StackType.DATALAKE) {
+            AccountMapping accountMapping = isCloudStorageConfigured(source) ? source.getCluster().getFileSystem().getCloudStorage().getAccountMapping() : null;
+            if (accountMapping != null) {
+                builder.withAccountMappingView(new AccountMappingView(accountMapping.getGroupMappings(), accountMapping.getUserMappings()));
+            } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK
+                    && source.getCloudPlatform().equals(CloudPlatform.AWS.name())) {
+                Map<String, String> groupMappings = awsMockAccountMappingService.getGroupMappings(source.getRegion(), credential);
+                Map<String, String> userMappings = awsMockAccountMappingService.getUserMappings(source.getRegion(), credential);
+                builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings));
+            }
+        }
+    }
+
+    private boolean isCloudStorageConfigured(Stack source) {
+        return source.getCluster().getFileSystem() != null && source.getCluster().getFileSystem().getCloudStorage() != null;
     }
 
 }

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,11 +31,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
@@ -60,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -68,13 +72,16 @@ import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfiguration
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public class StackV4RequestToTemplatePreparationObjectConverterTest {
@@ -90,6 +97,16 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private static final String TEST_VERSION = "2.6";
 
     private static final String TEST_ENVIRONMENT_CRN = "envCrn";
+
+    private static final Map<String, String> MOCK_GROUP_MAPPINGS = Map.of("mockGroup", "mockGroupRole");
+
+    private static final Map<String, String> MOCK_USER_MAPPINGS = Map.of("mockUser", "mockUserRole");
+
+    private static final Map<String, String> GROUP_MAPPINGS = Map.of("group", "groupRole");
+
+    private static final Map<String, String> USER_MAPPINGS = Map.of("user", "userRole");
+
+    private static final String REGION = "region-1";
 
     @InjectMocks
     private StackV4RequestToTemplatePreparationObjectConverter underTest;
@@ -144,6 +161,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private Credential credential;
 
     @Mock
+    private PlacementSettingsV4Request placementSettings;
+
+    @Mock
     private ClusterV4Request cluster;
 
     @Mock
@@ -177,6 +197,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private CredentialResponse credentialResponse;
 
     @Mock
+    private AwsMockAccountMappingService awsMockAccountMappingService;
+
+    @Mock
     private CloudStorageConverter cloudStorageConverter;
 
     @Mock
@@ -189,6 +212,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(source.getEnvironmentCrn()).thenReturn(TEST_ENVIRONMENT_CRN);
         when(source.getCluster()).thenReturn(cluster);
         when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
+        when(source.getType()).thenReturn(StackType.DATALAKE);
+        when(source.getPlacement()).thenReturn(placementSettings);
         when(cluster.getAmbari()).thenReturn(ambari);
         when(cluster.getBlueprintName()).thenReturn(TEST_BLUEPRINT_NAME);
         when(blueprintService.getByNameForWorkspace(TEST_BLUEPRINT_NAME, workspace)).thenReturn(blueprint);
@@ -200,11 +225,15 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
         when(credentialConverter.convert(credentialResponse)).thenReturn(credential);
         when(environmentResponse.getCredential()).thenReturn(credentialResponse);
+        when(environmentResponse.getIdBrokerMappingSource()).thenReturn(IdBrokerMappingSource.MOCK);
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(credentialClientService.getByName(TEST_CREDENTIAL_NAME)).thenReturn(credential);
         when(credentialClientService.getByCrn(TEST_CREDENTIAL_NAME)).thenReturn(credential);
         when(credential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
+        when(placementSettings.getRegion()).thenReturn(REGION);
+        when(awsMockAccountMappingService.getGroupMappings(REGION, credential)).thenReturn(MOCK_GROUP_MAPPINGS);
+        when(awsMockAccountMappingService.getUserMappings(REGION, credential)).thenReturn(MOCK_USER_MAPPINGS);
     }
 
     @Test
@@ -369,6 +398,34 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     public void testConvertCloudPlatformMatches() {
         TemplatePreparationObject result = underTest.convert(source);
         assertEquals(CloudPlatform.AWS, result.getCloudPlatform());
+    }
+
+    @Test
+    public void testMockAccountMappings() {
+        TemplatePreparationObject result = underTest.convert(source);
+
+        AccountMappingView accountMappingView = result.getAccountMappingView();
+        assertNotNull(accountMappingView);
+        assertEquals(MOCK_GROUP_MAPPINGS, accountMappingView.getGroupMappings());
+        assertEquals(MOCK_USER_MAPPINGS, accountMappingView.getUserMappings());
+    }
+
+    @Test
+    public void testStackInputAccountMappings() {
+        when(cloudStorageValidationUtil.isCloudStorageConfigured(any(CloudStorageRequest.class))).thenReturn(true);
+        CloudStorageRequest cloudStorage = mock(CloudStorageRequest.class);
+        when(cluster.getCloudStorage()).thenReturn(cloudStorage);
+        AccountMappingBase accountMapping = new AccountMappingBase();
+        accountMapping.setGroupMappings(GROUP_MAPPINGS);
+        accountMapping.setUserMappings(USER_MAPPINGS);
+        when(cloudStorage.getAccountMapping()).thenReturn(accountMapping);
+
+        TemplatePreparationObject result = underTest.convert(source);
+
+        AccountMappingView accountMappingView = result.getAccountMappingView();
+        assertNotNull(accountMappingView);
+        assertEquals(GROUP_MAPPINGS, accountMappingView.getGroupMappings());
+        assertEquals(USER_MAPPINGS, accountMappingView.getUserMappings());
     }
 
     private Set<String> createRdsConfigNames() {

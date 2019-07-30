@@ -14,6 +14,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Component
@@ -33,20 +34,22 @@ public class KnoxIdBrokerConfigProvider extends AbstractRoleConfigProvider {
         switch (roleType) {
             case IDBROKER:
                 List<ApiClusterTemplateConfig> config;
-                String userMapping = getIdentityMapping(source.getIdentityUserMapping());
-                String groupMapping = getIdentityMapping(source.getIdentityGroupMapping());
+                AccountMappingView accountMappingView = source.getAccountMappingView() == null
+                        ? AccountMappingView.EMPTY_MAPPING : source.getAccountMappingView();
+                String userMappings = getAccountMappingSetting(accountMappingView.getUserMappings());
+                String groupMappings = getAccountMappingSetting(accountMappingView.getGroupMappings());
                 switch (getCloudPlatform(source)) {
                     case AWS:
-                        config = List.of(config("idbroker_aws_user_mapping", userMapping),
-                                config("idbroker_aws_group_mapping", groupMapping));
+                        config = List.of(config("idbroker_aws_user_mapping", userMappings),
+                                config("idbroker_aws_group_mapping", groupMappings));
                         break;
                     case AZURE:
-                        config = List.of(config("idbroker_azure_user_mapping", userMapping),
-                                config("idbroker_azure_group_mapping", groupMapping));
+                        config = List.of(config("idbroker_azure_user_mapping", userMappings),
+                                config("idbroker_azure_group_mapping", groupMappings));
                         break;
                     case GCP:
-                        config = List.of(config("idbroker_gcp_user_mapping", userMapping),
-                                config("idbroker_gcp_group_mapping", groupMapping));
+                        config = List.of(config("idbroker_gcp_user_mapping", userMappings),
+                                config("idbroker_gcp_group_mapping", groupMappings));
                         break;
                     default:
                         config = List.of();
@@ -58,8 +61,8 @@ public class KnoxIdBrokerConfigProvider extends AbstractRoleConfigProvider {
         }
     }
 
-    private String getIdentityMapping(Map<String, String> identityMapping) {
-        return identityMapping.entrySet().stream()
+    private String getAccountMappingSetting(Map<String, String> accountMappings) {
+        return accountMappings.entrySet().stream()
                 .map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
                 .collect(Collectors.joining(";"));
     }
