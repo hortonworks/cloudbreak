@@ -7,27 +7,25 @@ import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 
 public class UsersState {
-    private Set<Group> groups;
+    private Set<FmsGroup> groups;
 
-    private Set<User> users;
+    private Set<FmsUser> users;
 
     private Multimap<String, String> groupMembership;
 
-    public UsersState(Set<Group> groups, Set<User> users, Multimap<String, String> groupMembership) {
+    public UsersState(Set<FmsGroup> groups, Set<FmsUser> users, Multimap<String, String> groupMembership) {
         this.groups = requireNonNull(groups);
         this.users = requireNonNull(users);
         this.groupMembership = requireNonNull(groupMembership);
     }
 
-    public Set<Group> getGroups() {
+    public Set<FmsGroup> getGroups() {
         return groups;
     }
 
-    public Set<User> getUsers() {
+    public Set<FmsUser> getUsers() {
         return users;
     }
 
@@ -45,18 +43,18 @@ public class UsersState {
     }
 
     public static class Builder {
-        private Set<Group> groups = new HashSet<>();
+        private Set<FmsGroup> fmsGroups = new HashSet<>();
 
-        private Set<User> users = new HashSet<>();
+        private Set<FmsUser> fmsUsers = new HashSet<>();
 
         private Multimap<String, String> groupMembership = HashMultimap.create();
 
-        public void addGroup(Group group) {
-            groups.add(group);
+        public void addGroup(FmsGroup fmsGroup) {
+            fmsGroups.add(fmsGroup);
         }
 
-        public void addUser(User user) {
-            users.add(user);
+        public void addUser(FmsUser fmsUser) {
+            fmsUsers.add(fmsUser);
         }
 
         public void addMemberToGroup(String group, String user) {
@@ -64,7 +62,7 @@ public class UsersState {
         }
 
         public UsersState build() {
-            return new UsersState(groups, users, groupMembership);
+            return new UsersState(fmsGroups, fmsUsers, groupMembership);
         }
     }
 }

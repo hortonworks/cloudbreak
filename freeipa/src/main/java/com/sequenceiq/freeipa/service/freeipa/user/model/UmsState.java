@@ -2,10 +2,12 @@ package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
@@ -35,51 +37,51 @@ public class UmsState {
     public UsersState getUsersState(String environmentCrn) {
         UsersState.Builder builder = new UsersState.Builder();
 
-        Map<String, com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group> crnToGroup = new HashMap<>(groupMap.size());
+        Map<String, FmsGroup> crnToGroup = new HashMap<>(groupMap.size());
         groupMap.entrySet()
                 .forEach(e -> {
-                    com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group group = umsGroupToGroup(e.getValue());
-                    crnToGroup.put(e.getKey(), group);
-                    builder.addGroup(group);
+                    FmsGroup fmsGroup = umsGroupToGroup(e.getValue());
+                    crnToGroup.put(e.getKey(), fmsGroup);
+                    builder.addGroup(fmsGroup);
                 });
 
         // TODO filter users by environment rights
         userMap.entrySet()
                 .forEach(e -> {
-                    com.sequenceiq.freeipa.api.v1.freeipa.user.model.User user = umsUserToUser(e.getValue());
-                    builder.addUser(user);
+                    FmsUser fmsUser = umsUserToUser(e.getValue());
+                    builder.addUser(fmsUser);
                     // TODO remove `admins` membership once the group mapping is figured out (CB-2003, DISTX-95)
-                    builder.addMemberToGroup("admins", user.getName());
+                    builder.addMemberToGroup("admins", fmsUser.getName());
                     userRightsMap.get(e.getKey()).getGroupCrnList()
                             .forEach(crn -> {
-                                builder.addMemberToGroup(crnToGroup.get(crn).getName(), user.getName());
+                                builder.addMemberToGroup(crnToGroup.get(crn).getName(), fmsUser.getName());
                             });
                 });
 
         // TODO filter machine users by environment rights
         machineUserMap.entrySet()
                 .forEach(e -> {
-                    com.sequenceiq.freeipa.api.v1.freeipa.user.model.User user = umsMachineUserToUser(e.getValue());
-                    builder.addUser(user);
+                    FmsUser fmsUser = umsMachineUserToUser(e.getValue());
+                    builder.addUser(fmsUser);
                     machineUserRightsMap.get(e.getKey()).getGroupCrnList()
-                            .forEach(crn -> builder.addMemberToGroup(crnToGroup.get(crn).getName(), user.getName()));
+                            .forEach(crn -> builder.addMemberToGroup(crnToGroup.get(crn).getName(), fmsUser.getName()));
                 });
 
         return builder.build();
     }
 
-    public Set<String> getUsernamesFromCrns(Set<String> userCrns) {
-        return userCrns.stream()
-                .map(crn -> getWorkloadUsername(userMap.get(crn)))
+    public Set<String> getUsernamesFromCrns(Collection<String> userCrns, Collection<String> machineUserCrns) {
+        return Stream.concat(userCrns.stream().map(crn -> getWorkloadUsername(userMap.get(crn))),
+                machineUserCrns.stream().map(crn -> getWorkloadUsername(machineUserMap.get(crn))))
                 .collect(Collectors.toSet());
     }
 
-    private com.sequenceiq.freeipa.api.v1.freeipa.user.model.User umsUserToUser(User umsUser) {
-        com.sequenceiq.freeipa.api.v1.freeipa.user.model.User user = new com.sequenceiq.freeipa.api.v1.freeipa.user.model.User();
-        user.setName(getWorkloadUsername(umsUser));
-        user.setFirstName(getOrDefault(umsUser.getFirstName(), "None"));
-        user.setLastName(getOrDefault(umsUser.getLastName(), "None"));
-        return user;
+    private FmsUser umsUserToUser(User umsUser) {
+        FmsUser fmsUser = new FmsUser();
+        fmsUser.setName(getWorkloadUsername(umsUser));
+        fmsUser.setFirstName(getOrDefault(umsUser.getFirstName(), "None"));
+        fmsUser.setLastName(getOrDefault(umsUser.getLastName(), "None"));
+        return fmsUser;
     }
 
     private String getOrDefault(String value, String other) {
@@ -90,19 +92,34 @@ public class UmsState {
         return umsUser.getWorkloadUsername();
     }
 
-    private com.sequenceiq.freeipa.api.v1.freeipa.user.model.User umsMachineUserToUser(MachineUser umsMachineUser) {
-        com.sequenceiq.freeipa.api.v1.freeipa.user.model.User user = new com.sequenceiq.freeipa.api.v1.freeipa.user.model.User();
-        user.setName(umsMachineUser.getWorkloadUsername());
-        // TODO what should the appropriate first and last name be for machine users?
-        user.setFirstName("Machine");
-        user.setLastName("User");
-        return user;
+    private String getWorkloadUsername(MachineUser umsMachineUser) {
+        return umsMachineUser.getWorkloadUsername();
     }
 
-    private com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group umsGroupToGroup(Group umsGroup) {
-        com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group group = new com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group();
-        group.setName(umsGroup.getGroupName());
-        return group;
+    private FmsUser umsMachineUserToUser(MachineUser umsMachineUser) {
+        FmsUser fmsUser = new FmsUser();
+        fmsUser.setName(umsMachineUser.getWorkloadUsername());
+        // TODO what should the appropriate first and last name be for machine users?
+        fmsUser.setFirstName("Machine");
+        fmsUser.setLastName("User");
+        return fmsUser;
+    }
+
+    private FmsGroup umsGroupToGroup(Group umsGroup) {
+        FmsGroup fmsGroup = new FmsGroup();
+        fmsGroup.setName(umsGroup.getGroupName());
+        return fmsGroup;
+    }
+
+    @Override
+    public String toString() {
+        return "UmsState{"
+                + "groupMap=" + groupMap
+                + ", userMap=" + userMap
+                + ", userRightsMap=" + userRightsMap
+                + ", machineUserMap=" + machineUserMap
+                + ", machineUserRightsMap=" + machineUserRightsMap
+                + '}';
     }
 
     public static class Builder {

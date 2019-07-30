@@ -17,11 +17,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,15 +74,15 @@ class FreeIpaUsersStateProviderTest {
                 .filter(group -> !FreeIpaUsersStateProvider.IPA_ONLY_GROUPS.contains(group))
                 .collect(Collectors.toSet());
 
-        for (User user : ipaState.getUsers()) {
-            assertTrue(expectedUsers.contains(user.getName()));
-            expectedUsers.remove(user.getName());
+        for (FmsUser fmsUser : ipaState.getUsers()) {
+            assertTrue(expectedUsers.contains(fmsUser.getName()));
+            expectedUsers.remove(fmsUser.getName());
         }
         assertTrue(expectedUsers.isEmpty());
 
-        for (Group group : ipaState.getGroups()) {
-            assertTrue(expectedGroups.contains(group.getName()));
-            expectedGroups.remove(group.getName());
+        for (FmsGroup fmsGroup : ipaState.getGroups()) {
+            assertTrue(expectedGroups.contains(fmsGroup.getName()));
+            expectedGroups.remove(fmsGroup.getName());
         }
         assertTrue(expectedGroups.isEmpty());
     }
@@ -91,20 +91,20 @@ class FreeIpaUsersStateProviderTest {
     void testFromIpaUser() {
         com.sequenceiq.freeipa.client.model.User ipaUser = createIpaUser("uid", List.of("group1", "group2"));
 
-        User user = underTest.fromIpaUser(ipaUser);
+        FmsUser fmsUser = underTest.fromIpaUser(ipaUser);
 
-        assertEquals(user.getName(), ipaUser.getUid());
-        assertEquals(user.getLastName(), ipaUser.getSn());
-        assertEquals(user.getFirstName(), ipaUser.getGivenname());
+        assertEquals(fmsUser.getName(), ipaUser.getUid());
+        assertEquals(fmsUser.getLastName(), ipaUser.getSn());
+        assertEquals(fmsUser.getFirstName(), ipaUser.getGivenname());
     }
 
     @Test
     void testFromIpaGroup() {
         com.sequenceiq.freeipa.client.model.Group ipaGroup = createIpaGroup("cn");
 
-        Group group = underTest.fromIpaGroup(ipaGroup);
+        FmsGroup fmsGroup = underTest.fromIpaGroup(ipaGroup);
 
-        assertEquals(group.getName(), ipaGroup.getCn());
+        assertEquals(fmsGroup.getName(), ipaGroup.getCn());
     }
 
     private com.sequenceiq.freeipa.client.model.User createIpaUser(String uid, List<String> memberOfGroup) {

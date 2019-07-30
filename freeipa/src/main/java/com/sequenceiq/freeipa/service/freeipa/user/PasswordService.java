@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,8 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
@@ -60,39 +61,30 @@ public class PasswordService {
     @Inject
     private FreeIpaPasswordValidator freeIpaPasswordValidator;
 
-    public SyncOperationStatus setPassword(String accountId, String userCrn, String password, Set<String> envs) {
+    public SyncOperationStatus setPassword(String accountId, String actorCrn, String userCrn, String password, Set<String> environmentCrnFilter) {
         LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
         freeIpaPasswordValidator.validate(password);
-        List<Stack> stacks;
-        List<Stack> allStacks = stackService.getAllByAccountId(accountId);
-        if (envs != null && !envs.isEmpty()) {
-            LOGGER.debug("Environment filter provided for environments :{}", envs);
-            stacks = allStacks.stream()
-                    .filter(stack -> envs.contains(stack.getEnvironmentCrn()))
-                    .peek(stack -> LOGGER.debug("Found matching stack for environment {}", stack.getEnvironmentCrn()))
-                    .collect(Collectors.toList());
-        } else {
-            stacks = allStacks;
-        }
 
+        List<Stack> stacks = getStacks(accountId, environmentCrnFilter);
         if (stacks.isEmpty()) {
             LOGGER.warn("No stacks found for accountId {}", accountId);
-            throw new NotFoundException("No stacks found for accountId " + accountId);
+            throw new NotFoundException("No matching FreeIPA stacks found for accountId " + accountId);
         }
+        LOGGER.debug("Found {} matching stacks for accountId {}", stacks.size(), accountId);
 
         SyncOperation syncOperation = syncOperationStatusService.startOperation(accountId, SyncOperationType.SET_PASSWORD,
-                envs == null ? List.of() : List.copyOf(envs),
-                List.of(userCrn));
+                environmentCrnFilter, List.of(userCrn));
         if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
-            asyncTaskExecutor.submit(() -> asyncSetPasswords(syncOperation.getOperationId(), accountId, userCrn, password, stacks));
+            MDCBuilder.addFlowIdToMdcContext(syncOperation.getOperationId());
+            asyncTaskExecutor.submit(() -> asyncSetPasswords(syncOperation.getOperationId(), accountId, actorCrn, userCrn, password, stacks));
         }
 
         return syncOperationToSyncOperationStatus.convert(syncOperation);
     }
 
-    private void asyncSetPasswords(String operationId, String accountId, String userCrn, String password, List<Stack> stacks) {
+    private void asyncSetPasswords(String operationId, String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {
         try {
-            String userId = getUserIdFromUserCrn(userCrn);
+            String userId = getUserIdFromUserCrn(actorCrn, userCrn);
 
             List<SetPasswordRequest> requests = new ArrayList<>();
             for (Stack stack : stacks) {
@@ -123,9 +115,16 @@ public class PasswordService {
         }
     }
 
-    private String getUserIdFromUserCrn(String userCrn) {
-        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User user = umsClient.getUserDetails(userCrn, userCrn, Optional.empty());
-        return user.getWorkloadUsername();
+    private String getUserIdFromUserCrn(String actorCrn, String userCrn) {
+        Crn crn = Crn.safeFromString(userCrn);
+        switch (crn.getResourceType()) {
+            case USER:
+                return umsClient.getUserDetails(actorCrn, userCrn, Optional.empty()).getWorkloadUsername();
+            case MACHINE_USER:
+                return umsClient.getMachineUserDetails(actorCrn, userCrn, Optional.empty()).getWorkloadUsername();
+            default:
+                throw new IllegalArgumentException(String.format("UserCrn %s is not of resource type USER or MACHINE_USER", userCrn));
+        }
     }
 
     private SetPasswordRequest triggerSetPassword(Stack stack, String environment, String username, String password) {
@@ -138,6 +137,16 @@ public class PasswordService {
         SetPasswordResult result = request.await();
         if (result.getStatus().equals(EventStatus.FAILED)) {
             throw new OperationException(result.getErrorDetails());
+        }
+    }
+
+    private List<Stack> getStacks(String accountId, Set<String> environmentCrnFilter) {
+        if (environmentCrnFilter.isEmpty()) {
+            LOGGER.debug("Retrieving all stacks for account {}", accountId);
+            return stackService.getAllByAccountId(accountId);
+        } else {
+            LOGGER.debug("Retrieving stacks for account {} that match environment crns {}", accountId, environmentCrnFilter);
+            return stackService.getMultipleByEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
         }
     }
 }

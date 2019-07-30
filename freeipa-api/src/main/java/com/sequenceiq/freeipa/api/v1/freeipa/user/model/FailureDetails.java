@@ -56,4 +56,12 @@ public class FailureDetails {
     public int hashCode() {
         return Objects.hash(environment, message);
     }
+
+    @Override
+    public String toString() {
+        return "FailureDetails{"
+                + "environment='" + environment + '\''
+                + ", message='" + message + '\''
+                + '}';
+    }
 }

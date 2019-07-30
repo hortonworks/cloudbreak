@@ -50,7 +50,7 @@ public class FreeIpaClientFactory {
     }
 
     public FreeIpaClient getFreeIpaClientForStack(Stack stack) throws FreeIpaClientException {
-        LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getId());
+        LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getResourceCrn());
 
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(
