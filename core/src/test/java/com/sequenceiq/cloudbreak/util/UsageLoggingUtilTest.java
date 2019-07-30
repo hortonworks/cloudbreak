@@ -6,8 +6,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
+// This test makes sure that we do not blow-up on null values during usage logging.
 public class UsageLoggingUtilTest {
 
     UsageLoggingUtil util;
