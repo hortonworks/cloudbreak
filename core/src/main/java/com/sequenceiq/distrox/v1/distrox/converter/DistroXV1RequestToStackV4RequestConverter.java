@@ -119,7 +119,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
     }
 
     private NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment) {
-        NetworkV4Request network = getIfNotNull(new ImmutablePair<>(networkRequest, environment.getNetwork()), networkConverter::convertToNetworkV4Request);
+        NetworkV4Request network = getIfNotNull(new ImmutablePair<>(networkRequest, environment), networkConverter::convertToNetworkV4Request);
         validateSubnetIds(network, environment);
         return network;
     }
