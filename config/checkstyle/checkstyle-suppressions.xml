@@ -20,7 +20,7 @@
     <suppress checks="RegexpMultilineCheck" files="ShellConfiguration.java"/>
     <suppress checks="RegexpMultilineCheck" files="IntegrationTestApp.java"/>
     <suppress checks="IllegalTypeCheck" files="AbstractFlowConfiguration.java|AbstractFlowConfigurationTest.java"/>
-    <suppress checks="ParameterNumber" files="UserDataBuilder.java"/>
+    <suppress checks="ParameterNumber" files="UserDataBuilder.java|ServiceEndpointCollector.java"/>
     <suppress checks="EmptyLineSeparator" files=".*Description.java|.*Descriptions.java|Notes.java"/>
     <suppress checks=".*" files="PrometheusResponse.java"/>
     <suppress checks="CyclomaticComplexity" files="PrometheusEvaluator.java|MetadataSetupService.java|AzureRoleManager.java"/>
