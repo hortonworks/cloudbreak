@@ -65,6 +65,7 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource;
 
+    @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
 
     public String getCrn() {

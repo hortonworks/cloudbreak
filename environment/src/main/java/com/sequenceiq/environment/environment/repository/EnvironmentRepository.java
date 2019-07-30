@@ -29,6 +29,7 @@ public interface EnvironmentRepository extends BaseJpaRepository<Environment, Lo
             + "LEFT JOIN FETCH n.environment ev "
             + "LEFT JOIN FETCH e.credential c "
             + "LEFT JOIN FETCH e.authentication a "
+            + "LEFT JOIN FETCH e.parameters p "
             + "WHERE e.accountId = :accountId "
             + "AND e.archived = false")
     Set<Environment> findByAccountId(@Param("accountId") String accountId);

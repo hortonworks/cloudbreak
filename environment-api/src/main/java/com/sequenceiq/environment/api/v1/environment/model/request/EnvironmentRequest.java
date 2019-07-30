@@ -68,6 +68,8 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource = IdBrokerMappingSource.MOCK;
 
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
 
     public AttachedFreeIpaRequest getFreeIpa() {

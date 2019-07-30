@@ -35,6 +35,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @ExtendWith(SpringExtension.class)
 class EnvironmentCreationServiceTest {
@@ -56,6 +57,9 @@ class EnvironmentCreationServiceTest {
 
     @MockBean
     private AuthenticationDtoConverter authenticationDtoConverter;
+
+    @MockBean
+    private ParametersService parametersService;
 
     @Inject
     private EnvironmentCreationService environmentCreationServiceUnderTest;

@@ -45,6 +45,7 @@ import com.sequenceiq.environment.environment.validation.EnvironmentValidatorSer
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @ExtendWith(SpringExtension.class)
 class EnvironmentModificationServiceTest {
@@ -69,6 +70,9 @@ class EnvironmentModificationServiceTest {
 
     @MockBean
     private AuthenticationDtoConverter authenticationDtoConverter;
+
+    @MockBean
+    private ParametersService parametersService;
 
     @Mock
     private EnvironmentValidatorService validatorService;

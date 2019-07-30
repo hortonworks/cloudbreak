@@ -33,6 +33,9 @@ import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @Service
 public class EnvironmentModificationService {
@@ -51,15 +54,18 @@ public class EnvironmentModificationService {
 
     private final AuthenticationDtoConverter authenticationDtoConverter;
 
+    private final ParametersService parametersService;
+
     public EnvironmentModificationService(EnvironmentDtoConverter environmentDtoConverter, EnvironmentRepository environmentRepository,
             EnvironmentService environmentService, CredentialService credentialService, NetworkService networkService,
-            AuthenticationDtoConverter authenticationDtoConverter) {
+            AuthenticationDtoConverter authenticationDtoConverter, ParametersService parametersService) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentRepository = environmentRepository;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
         this.networkService = networkService;
         this.authenticationDtoConverter = authenticationDtoConverter;
+        this.parametersService = parametersService;
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
@@ -98,6 +104,7 @@ public class EnvironmentModificationService {
         editAuthenticationIfChanged(editDto, env);
         editSecurityAccessIfChanged(editDto, env);
         editIdBrokerMappingSource(editDto, env);
+        editEnvironmentParameters(editDto, env);
         Environment saved = environmentRepository.save(env);
         return environmentDtoConverter.environmentToDto(saved);
     }
@@ -220,6 +227,18 @@ public class EnvironmentModificationService {
         IdBrokerMappingSource idBrokerMappingSource = editDto.getIdBrokerMappingSource();
         if (idBrokerMappingSource != null) {
             environment.setIdBrokerMappingSource(idBrokerMappingSource);
+        }
+    }
+
+    private void editEnvironmentParameters(EnvironmentEditDto editDto, Environment environment) {
+        ParametersDto parametersDto = editDto.getParameters();
+        if (parametersDto != null) {
+            Optional<BaseParameters> original = parametersService.findByEnvironment(environment.getId());
+            original.ifPresent(parameters -> editDto.getParameters().setId(parameters.getId()));
+            BaseParameters parameters = parametersService.saveParameters(environment, parametersDto, editDto.getAccountId());
+            if (parameters != null) {
+                environment.setParameters(parameters);
+            }
         }
     }
 }

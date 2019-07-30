@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -19,6 +18,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @Service
 public class EnvironmentCreationService {
@@ -35,19 +36,23 @@ public class EnvironmentCreationService {
 
     private final AuthenticationDtoConverter authenticationDtoConverter;
 
+    private final ParametersService parametersService;
+
     public EnvironmentCreationService(
             EnvironmentService environmentService,
             EnvironmentValidatorService validatorService,
             EnvironmentResourceService environmentResourceService,
             EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentReactorFlowManager reactorFlowManager,
-            AuthenticationDtoConverter authenticationDtoConverter) {
+            AuthenticationDtoConverter authenticationDtoConverter,
+            ParametersService parametersService) {
         this.environmentService = environmentService;
         this.validatorService = validatorService;
         this.environmentResourceService = environmentResourceService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.reactorFlowManager = reactorFlowManager;
         this.authenticationDtoConverter = authenticationDtoConverter;
+        this.parametersService = parametersService;
     }
 
     //TODO: accountId is kind of duplicated - creationDto also has accountId. should be removed?
@@ -62,6 +67,7 @@ public class EnvironmentCreationService {
         validateCreation(creationDto, environment, cloudRegions);
         environment = environmentService.save(environment);
         environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), accountId);
+        createAndSetParameters(environment, creationDto.getParameters(), accountId);
         environmentService.save(environment);
         reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creator, environment.getResourceCrn());
         return environmentDtoConverter.environmentToDto(environment);
@@ -78,7 +84,6 @@ public class EnvironmentCreationService {
         environment.setCloudPlatform(credential.getCloudPlatform());
         environment.setTunnel(creationDto.getTunnel());
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
-        environment.setParameters(new Json(creationDto.getAws()));
         return environment;
     }
 
@@ -96,6 +101,10 @@ public class EnvironmentCreationService {
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+    }
+
+    private void createAndSetParameters(Environment environment, ParametersDto parameters, String accountId) {
+        environment.setParameters(parametersService.saveParameters(environment, parameters, accountId));
     }
 
     private String createCrn(@Nonnull String accountId) {

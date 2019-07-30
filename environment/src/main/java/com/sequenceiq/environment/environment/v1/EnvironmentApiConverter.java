@@ -35,12 +35,12 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
-import com.sequenceiq.environment.environment.dto.aws.AwsEnvironmentParamsDto;
-import com.sequenceiq.environment.environment.dto.aws.S3GuardParamsDto;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
+import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
 @Component
 public class EnvironmentApiConverter {
@@ -87,7 +87,7 @@ public class EnvironmentApiConverter {
                 .withRegions(request.getRegions())
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
                 .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
-                .withAws(getIfNotNull(request.getAws(), this::awsParamsToDto));
+                .withParameters(getIfNotNull(request.getAws(), this::awsParamsToParametersDto));
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
@@ -102,15 +102,15 @@ public class EnvironmentApiConverter {
         return builder.build();
     }
 
-    private AwsEnvironmentParamsDto awsParamsToDto(AwsEnvironmentParameters aws) {
-        return AwsEnvironmentParamsDto.aAwsEnvironmentParamsBuilder()
-                .withS3guard(s3Guard(aws.getS3guard()))
+    private ParametersDto awsParamsToParametersDto(AwsEnvironmentParameters aws) {
+        return ParametersDto.builder()
+                .withAwsParameters(awsParamsToAwsParameters(aws))
                 .build();
     }
 
-    private S3GuardParamsDto s3Guard(S3GuardRequestParameters s3Guard) {
-        return S3GuardParamsDto.aS3GuardParamsBuilder()
-                .withDynamoDbTableName(s3Guard.getDynamoDbTableName())
+    private AwsParametersDto awsParamsToAwsParameters(AwsEnvironmentParameters aws) {
+        return AwsParametersDto.builder()
+                .withDynamoDbTableName(getIfNotNull(aws.getS3guard(), S3GuardRequestParameters::getDynamoDbTableName))
                 .build();
     }
 
@@ -189,7 +189,7 @@ public class EnvironmentApiConverter {
                 .withTunnel(environmentDto.getTunnel())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
                 .withIdBrokerMappingSource(environmentDto.getIdBrokerMappingSource())
-                .withAws(getIfNotNull(environmentDto.getAws(), this::awsEnvParamsToAwsEnvironmentParams));
+                .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
         NullUtil.doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));
@@ -211,21 +211,21 @@ public class EnvironmentApiConverter {
                 .withTunnel(environmentDto.getTunnel())
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
-                .withAws(getIfNotNull(environmentDto.getAws(), this::awsEnvParamsToAwsEnvironmentParams));
+                .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
         return builder.build();
     }
 
-    private AwsEnvironmentParameters awsEnvParamsToAwsEnvironmentParams(AwsEnvironmentParamsDto aws) {
-        return AwsEnvironmentParameters.awsEnvironmentParameters()
-                .withS3guard(s3guardDtoToS3guardParam(aws.getS3guard()))
+    private AwsEnvironmentParameters awsEnvParamsToAwsEnvironmentParams(ParametersDto parameters) {
+        return AwsEnvironmentParameters.builder()
+                .withS3guard(getIfNotNull(parameters.getAwsParametersDto(), this::awsParametersToS3guardParam))
                 .build();
     }
 
-    private S3GuardRequestParameters s3guardDtoToS3guardParam(S3GuardParamsDto s3Guard) {
-        return S3GuardRequestParameters.s3GuardRequestParameters()
-                .withDynamoDbTableName(s3Guard.getDynamoDbTableName())
+    private S3GuardRequestParameters awsParametersToS3guardParam(AwsParametersDto awsParametersDto) {
+        return S3GuardRequestParameters.builder()
+                .withDynamoDbTableName(awsParametersDto.getS3GuardTableName())
                 .build();
     }
 
@@ -270,6 +270,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
+        NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams)));
         return builder.build();
     }
 

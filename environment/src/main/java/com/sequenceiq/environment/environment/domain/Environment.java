@@ -28,6 +28,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.store.EnvironmentStatusUpdater;
 
 @Entity
@@ -59,10 +60,6 @@ public class Environment implements AuthResource {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json telemetry;
-
-    @Convert(converter = JsonToString.class)
-    @Column(columnDefinition = "TEXT")
-    private Json parameters;
 
     @Column(nullable = false)
     private String location;
@@ -121,6 +118,9 @@ public class Environment implements AuthResource {
     @Enumerated(EnumType.STRING)
     @Column(name = "idbroker_mapping_source")
     private IdBrokerMappingSource idBrokerMappingSource;
+
+    @OneToOne(mappedBy = "environment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private BaseParameters parameters;
 
     public Environment() {
         regions = new Json(new HashSet<Region>());
@@ -362,11 +362,11 @@ public class Environment implements AuthResource {
         this.idBrokerMappingSource = idBrokerMappingSource;
     }
 
-    public Json getParameters() {
+    public BaseParameters getParameters() {
         return parameters;
     }
 
-    public void setParameters(Json parameters) {
+    public void setParameters(BaseParameters parameters) {
         this.parameters = parameters;
     }
 }
