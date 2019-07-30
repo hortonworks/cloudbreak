@@ -29,36 +29,17 @@ public interface EnvironmentViewRepository extends BaseJpaRepository<Environment
     Set<EnvironmentView> findAllByAccountId(@Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT ev FROM EnvironmentView ev "
-            + "WHERE ev.accountId= :accountId "
-            + "AND ev.name IN (:names) "
-            + "AND ev.archived = false")
-    Set<EnvironmentView> findAllByNameInAndAccountId(Collection<String> names, String accountId);
+    Set<EnvironmentView> findAllByNameInAndAccountIdAndArchivedIsFalse(Collection<String> names, String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT ev FROM EnvironmentView ev "
-            + "WHERE ev.accountId= :accountId "
-            + "AND ev.resourceCrn IN (:resourceCrns) "
-            + "AND ev.archived = false")
-    Set<EnvironmentView> findAllByResourceCrnInAndAccountId(Collection<String> resourceCrns, String accountId);
+    Set<EnvironmentView> findAllByResourceCrnInAndAccountIdAndArchivedIsFalse(Collection<String> resourceCrns, String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT ev FROM EnvironmentView ev "
-            + "WHERE ev.credential.id= :credentialId "
-            + "AND ev.archived = false")
-    Set<EnvironmentView> findAllByCredentialId(Long credentialId);
+    Set<EnvironmentView> findAllByCredentialIdAndArchivedIsFalse(Long credentialId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT ev.id AS id FROM EnvironmentView ev "
-            + "WHERE ev.accountId= :accountId "
-            + "AND ev.name= :name "
-            + "AND ev.archived = false")
-    Long getIdByNameAndAccountId(String name, String accountId);
+    Long getIdByNameAndAccountIdAndArchivedIsFalse(String name, String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT ev.id AS id FROM EnvironmentView ev "
-            + "WHERE ev.accountId= :accountId "
-            + "AND ev.resourceCrn= :resourceCrn "
-            + "AND ev.archived = false")
-    Long getIdByResourceCrnAndAccountId(String resourceCrn, String accountId);
+    Long getIdByResourceCrnAndAccountIdAndArchivedIsFalse(String resourceCrn, String accountId);
 }

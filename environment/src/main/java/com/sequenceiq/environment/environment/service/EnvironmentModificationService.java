@@ -63,25 +63,29 @@ public class EnvironmentModificationService {
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
-        Environment env = environmentRepository.findByNameAndAccountId(environmentName, editDto.getAccountId())
+        Environment env = environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, editDto.getAccountId())
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
         return edit(editDto, env);
     }
 
     public EnvironmentDto editByCrn(String crn, EnvironmentEditDto editDto) {
-        Environment env = environmentRepository.findByResourceCrnAndAccountId(crn, editDto.getAccountId())
+        Environment env = environmentRepository
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, editDto.getAccountId())
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with crn '%s'", crn)));
         return edit(editDto, env);
     }
 
     public EnvironmentDto changeCredentialByEnvironmentName(String accountId, String environmentName, EnvironmentChangeCredentialDto dto) {
-        Environment environment = environmentRepository.findByNameAndAccountId(environmentName, accountId)
+        Environment environment = environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
         return changeCredential(accountId, environmentName, dto, environment);
     }
 
     public EnvironmentDto changeCredentialByEnvironmentCrn(String accountId, String crn, EnvironmentChangeCredentialDto dto) {
-        Environment environment = environmentRepository.findByResourceCrnAndAccountId(crn, accountId)
+        Environment environment = environmentRepository
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
         return changeCredential(accountId, crn, dto, environment);
     }

@@ -75,7 +75,8 @@ class EnvironmentServiceTest {
 
     @Test
     public void getByNameAndAccountIdNotFound() {
-        when(environmentRepository.findByNameAndAccountId(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
                 .thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> environmentServiceUnderTest
                 .getByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, EnvironmentTestData.ACCOUNT_ID));
@@ -83,7 +84,8 @@ class EnvironmentServiceTest {
 
     @Test
     public void getByNameAndAccountIdFound() {
-        when(environmentRepository.findByNameAndAccountId(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
         when(environmentDtoConverter.environmentToDto(any())).thenReturn(environmentDto);
         assertEquals(environmentDto, environmentServiceUnderTest
@@ -92,7 +94,8 @@ class EnvironmentServiceTest {
 
     @Test
     public void getByCrnAndAccountIdNotFound() {
-        when(environmentRepository.findByResourceCrnAndAccountId(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
+        when(environmentRepository
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
                 .thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> environmentServiceUnderTest
                 .getByCrnAndAccountId(EnvironmentTestData.CRN, EnvironmentTestData.ACCOUNT_ID));
@@ -100,7 +103,8 @@ class EnvironmentServiceTest {
 
     @Test
     public void getByCrnAndAccountId() {
-        when(environmentRepository.findByResourceCrnAndAccountId(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
+        when(environmentRepository
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
         when(environmentDtoConverter.environmentToDto(any())).thenReturn(environmentDto);
         assertEquals(environmentDto, environmentServiceUnderTest
@@ -120,7 +124,8 @@ class EnvironmentServiceTest {
     @Test
     public void deleteByNameAndAccountIdNotFound() {
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
-        when(environmentRepository.findByNameAndAccountId(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
                 .thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
                 () -> environmentServiceWired
@@ -131,7 +136,8 @@ class EnvironmentServiceTest {
     @Test
     public void deleteByNameAndAccountId() {
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
-        when(environmentRepository.findByNameAndAccountId(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(EnvironmentTestData.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
         when(environmentDtoConverter.environmentToDto(any())).thenReturn(environmentDto);
         assertEquals(environmentDto, environmentServiceWired
@@ -142,7 +148,8 @@ class EnvironmentServiceTest {
     @Test
     public void deleteByCrnAndAccountIdNotFound() {
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
-        when(environmentRepository.findByResourceCrnAndAccountId(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
+        when(environmentRepository
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
                 .thenReturn(Optional.empty());
         assertThrows(NotFoundException.class,
                 () -> environmentServiceWired.deleteByCrnAndAccountId(EnvironmentTestData.CRN, EnvironmentTestData.ACCOUNT_ID, EnvironmentTestData.USER));
@@ -152,7 +159,8 @@ class EnvironmentServiceTest {
     @Test
     public void deleteByCrnAndAccountId() {
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
-        when(environmentRepository.findByResourceCrnAndAccountId(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
+        when(environmentRepository
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.CRN), eq(EnvironmentTestData.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
         when(environmentDtoConverter.environmentToDto(any())).thenReturn(environmentDto);
         assertEquals(environmentDto, environmentServiceWired
@@ -194,7 +202,8 @@ class EnvironmentServiceTest {
         int expected = envs.size();
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
 
-        when(environmentRepository.findByNameInAndAccountId(eq(names), eq(EnvironmentTestData.ACCOUNT_ID))).thenReturn(envs);
+        when(environmentRepository
+                .findByNameInAndAccountIdAndArchivedIsFalse(eq(names), eq(EnvironmentTestData.ACCOUNT_ID))).thenReturn(envs);
         assertEquals(expected, environmentServiceWired
                 .deleteMultipleByNames(names, EnvironmentTestData.ACCOUNT_ID, EnvironmentTestData.USER).size());
         verify(environmentServiceWired, times(expected)).delete(any(), eq(EnvironmentTestData.USER));
@@ -229,7 +238,8 @@ class EnvironmentServiceTest {
         int expected = envs.size();
         EnvironmentService environmentServiceWired = spy(environmentServiceUnderTest);
 
-        when(environmentRepository.findByResourceCrnInAndAccountId(eq(names), eq(EnvironmentTestData.ACCOUNT_ID))).thenReturn(envs);
+        when(environmentRepository
+                .findByResourceCrnInAndAccountIdAndArchivedIsFalse(eq(names), eq(EnvironmentTestData.ACCOUNT_ID))).thenReturn(envs);
         assertEquals(expected, environmentServiceWired.deleteMultipleByCrns(names, EnvironmentTestData.ACCOUNT_ID, EnvironmentTestData.USER).size());
         verify(environmentServiceWired, times(expected)).delete(any(), eq(EnvironmentTestData.USER));
     }
@@ -324,7 +334,8 @@ class EnvironmentServiceTest {
         Set<EnvironmentStatus> statuses = Set.of(EnvironmentStatus.AVAILABLE, EnvironmentStatus.CREATION_INITIATED);
         List<Environment> qresult = List.of(environment);
         when(environmentDtoConverter.environmentToDto(eq(environment))).thenReturn(environmentDto);
-        when(environmentRepository.findAllByIdInAndStatusIn(eq(resourceIds), eq(statuses))).thenReturn(qresult);
+        when(environmentRepository
+                .findAllByIdInAndStatusInAndArchivedIsFalse(eq(resourceIds), eq(statuses))).thenReturn(qresult);
         assertEquals(List.of(environmentDto), environmentServiceUnderTest.findAllByIdInAndStatusIn(resourceIds,
                 statuses));
     }
@@ -332,7 +343,8 @@ class EnvironmentServiceTest {
     @Test
     public void findAllByStatusIn() {
         when(environmentDtoConverter.environmentToDto(eq(environment))).thenReturn(environmentDto);
-        when(environmentRepository.findAllByStatusIn(eq(Set.of(EnvironmentStatus.AVAILABLE, EnvironmentStatus.CREATION_INITIATED))))
+        when(environmentRepository
+                .findAllByStatusInAndArchivedIsFalse(eq(Set.of(EnvironmentStatus.AVAILABLE, EnvironmentStatus.CREATION_INITIATED))))
                 .thenReturn(List.of(environment));
         assertEquals(List.of(environmentDto), environmentServiceUnderTest
                 .findAllByStatusIn(Set.of(EnvironmentStatus.AVAILABLE, EnvironmentStatus.CREATION_INITIATED)));
