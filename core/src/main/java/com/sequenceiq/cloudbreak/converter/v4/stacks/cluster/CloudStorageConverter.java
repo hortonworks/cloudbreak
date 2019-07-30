@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
 import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
@@ -25,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.WasbIdentity;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
 import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
@@ -62,9 +65,11 @@ public class CloudStorageConverter {
             List<StorageIdentityBase> storageIdentityRequests = cloudStorage.getCloudIdentities().stream()
                     .map(this::cloudIdentityToRequest).collect(Collectors.toList());
             result.setIdentities(storageIdentityRequests);
+
             List<StorageLocationBase> storageLocationRequests = cloudStorage.getLocations().stream()
                     .map(this::storageLocationToRequest).collect(Collectors.toList());
             result.setLocations(storageLocationRequests);
+
             NullUtil.doIfNotNull(cloudStorage.getS3GuardDynamoTableName(), tableName -> {
                 AwsStorageParameters awsStorageParameters = new AwsStorageParameters();
                 S3Guard s3Guard = new S3Guard();
@@ -72,6 +77,8 @@ public class CloudStorageConverter {
                 awsStorageParameters.setS3Guard(s3Guard);
                 result.setAws(awsStorageParameters);
             });
+
+            result.setAccountMapping(accountMappingToAccountMappingRequest(cloudStorage.getAccountMapping()));
         }
         return result;
     }
@@ -93,6 +100,8 @@ public class CloudStorageConverter {
         List<CloudIdentity> cloudIdentities = cloudStorageRequest.getIdentities().stream()
                 .map(this::identityRequestToCloudIdentity).collect(Collectors.toList());
         cloudStorage.setCloudIdentities(cloudIdentities);
+
+        cloudStorage.setAccountMapping(accountMappingRequestToAccountMapping(cloudStorageRequest.getAccountMapping()));
 
         fileSystem.setCloudStorage(cloudStorage);
 
@@ -146,6 +155,7 @@ public class CloudStorageConverter {
                 awsStorageParameters.setS3Guard(s3Guard);
                 response.setAws(awsStorageParameters);
             }
+
             List<StorageIdentityBase> storageIdentities = cloudStorage.getCloudIdentities().stream()
                     .map(this::cloudIdentityToStorageIdentityBase).collect(Collectors.toList());
             response.setIdentities(storageIdentities);
@@ -157,6 +167,8 @@ public class CloudStorageConverter {
                 return storageLocationBase;
             }).collect(Collectors.toList());
             response.setLocations(storageLocations);
+
+            response.setAccountMapping(accountMappingToAccountMappingRequest(cloudStorage.getAccountMapping()));
         }
         return response;
     }
@@ -270,4 +282,25 @@ public class CloudStorageConverter {
         wasbIdentity.setSecure(storageIdentityRequest.getWasb().isSecure());
         return wasbIdentity;
     }
+
+    private AccountMapping accountMappingRequestToAccountMapping(AccountMappingBase accountMappingRequest) {
+        AccountMapping accountMapping = null;
+        if (accountMappingRequest != null) {
+            accountMapping = new AccountMapping();
+            accountMapping.setGroupMappings(new HashMap<>(accountMappingRequest.getGroupMappings()));
+            accountMapping.setUserMappings(new HashMap<>(accountMappingRequest.getUserMappings()));
+        }
+        return accountMapping;
+    }
+
+    private AccountMappingBase accountMappingToAccountMappingRequest(AccountMapping accountMapping) {
+        AccountMappingBase accountMappingRequest = null;
+        if (accountMapping != null) {
+            accountMappingRequest = new AccountMappingBase();
+            accountMappingRequest.setGroupMappings(new HashMap<>(accountMapping.getGroupMappings()));
+            accountMappingRequest.setUserMappings(new HashMap<>(accountMapping.getUserMappings()));
+        }
+        return accountMappingRequest;
+    }
+
 }

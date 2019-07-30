@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
-import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockIdentityMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnector;
@@ -59,11 +59,13 @@ import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfiguration
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -128,7 +130,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     private CredentialConverter credentialConverter;
 
     @Inject
-    private AwsMockIdentityMappingService awsIdentityMappingService;
+    private AwsMockAccountMappingService awsMockAccountMappingService;
 
     @Inject
     private CloudStorageConverter cloudStorageConverter;
@@ -187,15 +189,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     throw new CloudbreakServiceException("Cannot collect shared service resources from datalake!");
                 }
             }
-            if (source.getType() == StackType.DATALAKE
-                    && environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK
-                    && source.getCloudPlatform() == CloudPlatform.AWS) {
 
-                Map<String, String> groupMapping = awsIdentityMappingService.getIdentityGroupMapping(source.getPlacement().getRegion(), credential);
-                Map<String, String> userMapping = awsIdentityMappingService.getIdentityUserMapping(source.getPlacement().getRegion(), credential);
-                builder.withIdentityGroupMapping(groupMapping);
-                builder.withIdentityUserMapping(userMapping);
-            }
+            decorateBuilderWithAccountMapping(source, environment, credential, builder);
 
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
@@ -242,7 +237,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     private BaseFileSystemConfigurationsView getFileSystemConfigurationView(StackV4Request source, Json credentialAttributes)
             throws IOException {
         BaseFileSystemConfigurationsView fileSystemConfigurationView = null;
-        if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCluster().getCloudStorage())) {
+        if (isCloudStorageConfigured(source)) {
             FileSystem fileSystem = cloudStorageConverter.requestToFileSystem(source.getCluster().getCloudStorage());
             fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credentialAttributes,
                     cmCloudStorageConfigProvider.getConfigQueryEntries());
@@ -257,4 +252,23 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     private KerberosConfig getKerberosConfig(StackV4Request source) {
         return kerberosConfigService.get(source.getEnvironmentCrn()).orElse(null);
     }
+
+    private void decorateBuilderWithAccountMapping(StackV4Request source, DetailedEnvironmentResponse environment, Credential credential, Builder builder) {
+        if (source.getType() == StackType.DATALAKE) {
+            AccountMappingBase accountMapping = isCloudStorageConfigured(source) ? source.getCluster().getCloudStorage().getAccountMapping() : null;
+            if (accountMapping != null) {
+                builder.withAccountMappingView(new AccountMappingView(accountMapping.getGroupMappings(), accountMapping.getUserMappings()));
+            } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK
+                    && source.getCloudPlatform() == CloudPlatform.AWS) {
+                Map<String, String> groupMappings = awsMockAccountMappingService.getGroupMappings(source.getPlacement().getRegion(), credential);
+                Map<String, String> userMappings = awsMockAccountMappingService.getUserMappings(source.getPlacement().getRegion(), credential);
+                builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings));
+            }
+        }
+    }
+
+    private boolean isCloudStorageConfigured(StackV4Request source) {
+        return cloudStorageValidationUtil.isCloudStorageConfigured(source.getCluster().getCloudStorage());
+    }
+
 }

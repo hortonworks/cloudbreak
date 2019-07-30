@@ -25,24 +25,25 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 
 public class KnoxIdBrokerConfigProviderTest {
 
     // Note: We need a predictable iteration order, so cannot rely on Map.ofEntries()
-    private static final Map<String, String> IDENTITY_USER_MAPPING = fixedIterationMapOfEntries(
+    private static final Map<String, String> USER_MAPPINGS = fixedIterationMapOfEntries(
             Map.entry("user1", "role1"),
             Map.entry("user2", "role2"),
             Map.entry("user3", "role3")
     );
 
-    private static final Map<String, String> IDENTITY_GROUP_MAPPING = fixedIterationMapOfEntries(
+    private static final Map<String, String> GROUP_MAPPINGS = fixedIterationMapOfEntries(
             Map.entry("group4", "role4"),
             Map.entry("group5", "role5")
     );
 
-    private static final String IDENTITY_USER_MAPPING_STR = "user1=role1;user2=role2;user3=role3";
+    private static final String USER_MAPPINGS_STR = "user1=role1;user2=role2;user3=role3";
 
-    private static final String IDENTITY_GROUP_MAPPING_STR = "group4=role4;group5=role5";
+    private static final String GROUP_MAPPINGS_STR = "group4=role4;group5=role5";
 
     private static final String IDBROKER_AWS_USER_MAPPING = "idbroker_aws_user_mapping";
 
@@ -107,16 +108,15 @@ public class KnoxIdBrokerConfigProviderTest {
     public void getRoleConfigWhenIdBrokerAndNoFileSystemAndAws() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AWS)
-                .withIdentityUserMapping(IDENTITY_USER_MAPPING)
-                .withIdentityGroupMapping(IDENTITY_GROUP_MAPPING)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
-                Map.entry(IDBROKER_AWS_USER_MAPPING, IDENTITY_USER_MAPPING_STR),
-                Map.entry(IDBROKER_AWS_GROUP_MAPPING, IDENTITY_GROUP_MAPPING_STR)
+                Map.entry(IDBROKER_AWS_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_AWS_GROUP_MAPPING, GROUP_MAPPINGS_STR)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -126,16 +126,15 @@ public class KnoxIdBrokerConfigProviderTest {
     public void getRoleConfigWhenIdBrokerAndNoFileSystemAndAzure() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
-                .withIdentityUserMapping(IDENTITY_USER_MAPPING)
-                .withIdentityGroupMapping(IDENTITY_GROUP_MAPPING)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
-                Map.entry(IDBROKER_AZURE_USER_MAPPING, IDENTITY_USER_MAPPING_STR),
-                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, IDENTITY_GROUP_MAPPING_STR)
+                Map.entry(IDBROKER_AZURE_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, GROUP_MAPPINGS_STR)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -145,16 +144,15 @@ public class KnoxIdBrokerConfigProviderTest {
     public void getRoleConfigWhenIdBrokerAndNoFileSystemAndGcp() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.GCP)
-                .withIdentityUserMapping(IDENTITY_USER_MAPPING)
-                .withIdentityGroupMapping(IDENTITY_GROUP_MAPPING)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
-                Map.entry(IDBROKER_GCP_USER_MAPPING, IDENTITY_USER_MAPPING_STR),
-                Map.entry(IDBROKER_GCP_GROUP_MAPPING, IDENTITY_GROUP_MAPPING_STR)
+                Map.entry(IDBROKER_GCP_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_GCP_GROUP_MAPPING, GROUP_MAPPINGS_STR)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -164,8 +162,7 @@ public class KnoxIdBrokerConfigProviderTest {
     public void getRoleConfigWhenIdBrokerAndNoFileSystemAndYarn() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.YARN)
-                .withIdentityUserMapping(IDENTITY_USER_MAPPING)
-                .withIdentityGroupMapping(IDENTITY_GROUP_MAPPING)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
@@ -200,16 +197,15 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AWS)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withIdentityUserMapping(IDENTITY_USER_MAPPING)
-                .withIdentityGroupMapping(IDENTITY_GROUP_MAPPING)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
-                Map.entry(IDBROKER_AWS_USER_MAPPING, IDENTITY_USER_MAPPING_STR),
-                Map.entry(IDBROKER_AWS_GROUP_MAPPING, IDENTITY_GROUP_MAPPING_STR)
+                Map.entry(IDBROKER_AWS_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_AWS_GROUP_MAPPING, GROUP_MAPPINGS_STR)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -223,16 +219,15 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withIdentityUserMapping(IDENTITY_USER_MAPPING)
-                .withIdentityGroupMapping(IDENTITY_GROUP_MAPPING)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
-                Map.entry(IDBROKER_AZURE_USER_MAPPING, IDENTITY_USER_MAPPING_STR),
-                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, IDENTITY_GROUP_MAPPING_STR)
+                Map.entry(IDBROKER_AZURE_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, GROUP_MAPPINGS_STR)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -246,16 +241,15 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withIdentityUserMapping(IDENTITY_USER_MAPPING)
-                .withIdentityGroupMapping(IDENTITY_GROUP_MAPPING)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
-                Map.entry(IDBROKER_AZURE_USER_MAPPING, IDENTITY_USER_MAPPING_STR),
-                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, IDENTITY_GROUP_MAPPING_STR)
+                Map.entry(IDBROKER_AZURE_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, GROUP_MAPPINGS_STR)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -269,16 +263,15 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withIdentityUserMapping(IDENTITY_USER_MAPPING)
-                .withIdentityGroupMapping(IDENTITY_GROUP_MAPPING)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
-                Map.entry(IDBROKER_AZURE_USER_MAPPING, IDENTITY_USER_MAPPING_STR),
-                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, IDENTITY_GROUP_MAPPING_STR)
+                Map.entry(IDBROKER_AZURE_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, GROUP_MAPPINGS_STR)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -292,16 +285,15 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withIdentityUserMapping(IDENTITY_USER_MAPPING)
-                .withIdentityGroupMapping(IDENTITY_GROUP_MAPPING)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
-                Map.entry(IDBROKER_AZURE_USER_MAPPING, IDENTITY_USER_MAPPING_STR),
-                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, IDENTITY_GROUP_MAPPING_STR)
+                Map.entry(IDBROKER_AZURE_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_AZURE_GROUP_MAPPING, GROUP_MAPPINGS_STR)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -315,16 +307,15 @@ public class KnoxIdBrokerConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withIdentityUserMapping(IDENTITY_USER_MAPPING)
-                .withIdentityGroupMapping(IDENTITY_GROUP_MAPPING)
+                .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(IDBROKER, tpo);
 
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
-                Map.entry(IDBROKER_GCP_USER_MAPPING, IDENTITY_USER_MAPPING_STR),
-                Map.entry(IDBROKER_GCP_GROUP_MAPPING, IDENTITY_GROUP_MAPPING_STR)
+                Map.entry(IDBROKER_GCP_USER_MAPPING, USER_MAPPINGS_STR),
+                Map.entry(IDBROKER_GCP_GROUP_MAPPING, GROUP_MAPPINGS_STR)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();

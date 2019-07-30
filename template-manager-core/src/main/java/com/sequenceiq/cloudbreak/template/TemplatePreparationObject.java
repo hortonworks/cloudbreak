@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
+import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -57,9 +58,7 @@ public class TemplatePreparationObject {
 
     private final Map<String, Object> fixInputs;
 
-    private final Map<String, String> identityGroupMapping;
-
-    private final Map<String, String> identityUserMapping;
+    private final AccountMappingView accountMappingView;
 
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
@@ -79,8 +78,7 @@ public class TemplatePreparationObject {
         sharedServiceConfigs = builder.sharedServiceConfigs;
         customInputs = builder.customInputs;
         fixInputs = builder.fixInputs;
-        identityGroupMapping = builder.identityGroupMapping;
-        identityUserMapping = builder.identityUserMapping;
+        accountMappingView = builder.accountMappingView;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -150,12 +148,8 @@ public class TemplatePreparationObject {
         return fixInputs;
     }
 
-    public Map<String, String> getIdentityGroupMapping() {
-        return identityGroupMapping;
-    }
-
-    public Map<String, String> getIdentityUserMapping() {
-        return identityUserMapping;
+    public AccountMappingView getAccountMappingView() {
+        return accountMappingView;
     }
 
     public static class Builder {
@@ -188,9 +182,7 @@ public class TemplatePreparationObject {
 
         private Map<String, Object> fixInputs = new HashMap<>();
 
-        private Map<String, String> identityGroupMapping = new HashMap<>();
-
-        private Map<String, String> identityUserMapping = new HashMap<>();
+        private AccountMappingView accountMappingView;
 
         public static Builder builder() {
             return new Builder();
@@ -287,13 +279,8 @@ public class TemplatePreparationObject {
             return this;
         }
 
-        public Builder withIdentityGroupMapping(Map<String, String> groupMapping) {
-            identityGroupMapping = groupMapping == null ? new HashMap<>() : groupMapping;
-            return this;
-        }
-
-        public Builder withIdentityUserMapping(Map<String, String> userMapping) {
-            identityUserMapping = userMapping == null ? new HashMap<>() : userMapping;
+        public Builder withAccountMappingView(AccountMappingView accountMappingView) {
+            this.accountMappingView = accountMappingView;
             return this;
         }
 
