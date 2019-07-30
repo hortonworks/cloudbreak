@@ -47,51 +47,13 @@ public class UsageLoggingUtil {
                     UsageProto.CDPDatahubClusterRequested.newBuilder();
             protoBuilder.setClusterId(cluster.getId().toString());
             protoBuilder.setDatalakeCrn(stack.getDatalakeResourceId().toString());
-            if (creator != null) {
-                if (creator.getTenant() != null && creator.getTenant().getName() != null) {
-                    protoBuilder.setAccountId(creator.getTenant().getName());
-                }
-                if (creator.getUserCrn() != null) {
-                    protoBuilder.setCreatorCrn(creator.getUserCrn());
-                }
-            }
-            if (cluster.getName() != null) {
-                protoBuilder.setClusterName(cluster.getName());
-            }
-            if (stack.getResourceCrn() != null) {
-                protoBuilder.setCrn(stack.getResourceCrn());
-            }
-            if (stack.getEnvironmentCrn() != null) {
-                protoBuilder.setEnvironmentCrn(stack.getEnvironmentCrn());
-            }
-            if (cloudPlatformEnum != UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET) {
-                protoBuilder.setEnvironmentType(cloudPlatformEnum);
-            }
+            buildDatahubRequestedProto(cluster, stack, creator, cloudPlatformEnum, protoBuilder);
             usageReporter.cdpDatahubClusterRequested(timestamp, protoBuilder.build());
         } else {
             UsageProto.CDPDatalakeClusterRequested.Builder protoBuilder =
                     UsageProto.CDPDatalakeClusterRequested.newBuilder();
             protoBuilder.setDatalakeId(cluster.getId().toString());
-            if (creator != null) {
-                if (creator.getTenant() != null && creator.getTenant().getName() != null) {
-                    protoBuilder.setAccountId(creator.getTenant().getName());
-                }
-                if (creator.getUserCrn() != null) {
-                    protoBuilder.setCreatorCrn(creator.getUserCrn());
-                }
-            }
-            if (cluster.getName() != null) {
-                protoBuilder.setDatalakeName(cluster.getName());
-            }
-            if (stack.getResourceCrn() != null) {
-                protoBuilder.setCrn(stack.getResourceCrn());
-            }
-            if (stack.getEnvironmentCrn() != null) {
-                protoBuilder.setEnvironmentCrn(stack.getEnvironmentCrn());
-            }
-            if (cloudPlatformEnum != UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET) {
-                protoBuilder.setEnvironmentType(cloudPlatformEnum);
-            }
+            buildDatalakeRequestedProto(cluster, stack, creator, cloudPlatformEnum, protoBuilder);
             usageReporter.cdpDatalakeClusterRequested(timestamp, protoBuilder.build());
         }
     }
@@ -129,6 +91,62 @@ public class UsageLoggingUtil {
                     .setNewStatus(newStatusEnum)
                     .build();
             usageReporter.cdpDatalakeClusterStatusChanged(proto);
+        }
+    }
+
+    private void buildDatalakeRequestedProto(
+            Cluster cluster,
+            Stack stack,
+            User creator,
+            UsageProto.CDPEnvironmentsEnvironmentType.Value cloudPlatformEnum,
+            UsageProto.CDPDatalakeClusterRequested.Builder protoBuilder) {
+        if (creator != null) {
+            if (creator.getTenant() != null && creator.getTenant().getName() != null) {
+                protoBuilder.setAccountId(creator.getTenant().getName());
+            }
+            if (creator.getUserCrn() != null) {
+                protoBuilder.setCreatorCrn(creator.getUserCrn());
+            }
+        }
+        if (cluster.getName() != null) {
+            protoBuilder.setDatalakeName(cluster.getName());
+        }
+        if (stack.getResourceCrn() != null) {
+            protoBuilder.setCrn(stack.getResourceCrn());
+        }
+        if (stack.getEnvironmentCrn() != null) {
+            protoBuilder.setEnvironmentCrn(stack.getEnvironmentCrn());
+        }
+        if (cloudPlatformEnum != UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET) {
+            protoBuilder.setEnvironmentType(cloudPlatformEnum);
+        }
+    }
+
+    private void buildDatahubRequestedProto(
+            Cluster cluster,
+            Stack stack,
+            User creator,
+            UsageProto.CDPEnvironmentsEnvironmentType.Value cloudPlatformEnum,
+            UsageProto.CDPDatahubClusterRequested.Builder protoBuilder) {
+        if (creator != null) {
+            if (creator.getTenant() != null && creator.getTenant().getName() != null) {
+                protoBuilder.setAccountId(creator.getTenant().getName());
+            }
+            if (creator.getUserCrn() != null) {
+                protoBuilder.setCreatorCrn(creator.getUserCrn());
+            }
+        }
+        if (cluster.getName() != null) {
+            protoBuilder.setClusterName(cluster.getName());
+        }
+        if (stack.getResourceCrn() != null) {
+            protoBuilder.setCrn(stack.getResourceCrn());
+        }
+        if (stack.getEnvironmentCrn() != null) {
+            protoBuilder.setEnvironmentCrn(stack.getEnvironmentCrn());
+        }
+        if (cloudPlatformEnum != UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET) {
+            protoBuilder.setEnvironmentType(cloudPlatformEnum);
         }
     }
 }
