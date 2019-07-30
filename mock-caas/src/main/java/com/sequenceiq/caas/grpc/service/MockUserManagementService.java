@@ -234,7 +234,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private Group createGroup(String accountId, String groupName) {
         String groupId = UUID.randomUUID().toString();
-        String groupCrn = createCrn(accountId, Crn.Service.IAM, Crn.ResourceType.GROUP, groupId);
+        String groupCrn = createCrn(accountId, Crn.Service.IAM, Crn.ResourceType.GROUP, groupId).toString();
         return Group.newBuilder()
                 .setGroupId(groupId)
                 .setCrn(groupCrn)
@@ -261,18 +261,23 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             String[] splittedCrn = machineUserIdOrCrn.split(":");
             String userName;
             String accountId;
+            String crnString;
             if (splittedCrn.length > 1) {
                 userName = splittedCrn[6];
                 accountId = splittedCrn[4];
+                crnString = machineUserIdOrCrn;
             } else {
                 userName = machineUserIdOrCrn;
                 accountId = UUID.randomUUID().toString();
+                Crn crn = createCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn(), Crn.ResourceType.MACHINE_USER, userName);
+                accountId = crn.getAccountId();
+                crnString = crn.toString();
             }
             responseObserver.onNext(
                     ListMachineUsersResponse.newBuilder()
                             .addMachineUser(MachineUser.newBuilder()
                                     .setMachineUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
-                                    .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
+                                    .setCrn(crnString)
                                     .setWorkloadUsername(sanitizeWorkloadUsername(userName))
                                     .build())
                             .build());
@@ -497,31 +502,30 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     private UserManagementProto.ResourceAssignee createResourceAssignee(String resourceCrn) {
         return UserManagementProto.ResourceAssignee.newBuilder()
                 .setAssigneeCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
-                .setResourceRoleCrn(createCrn(resourceCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager"))
+                .setResourceRoleCrn(createCrn(resourceCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
                 .build();
     }
 
     private UserManagementProto.ResourceAssignment createResourceAssigment(String assigneeCrn) {
-        String resourceCrn = createCrn(assigneeCrn, Crn.ResourceType.WORKSPACE, Crn.fromString(assigneeCrn).getAccountId());
+        String resourceCrn = createCrn(assigneeCrn, Crn.ResourceType.WORKSPACE, Crn.fromString(assigneeCrn).getAccountId()).toString();
         return UserManagementProto.ResourceAssignment.newBuilder()
                 .setResourceCrn(resourceCrn)
-                .setResourceRoleCrn(createCrn(assigneeCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager"))
+                .setResourceRoleCrn(createCrn(assigneeCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
                 .build();
     }
 
-    private String createCrn(String baseCrn, Crn.ResourceType resourceType, String resource) {
+    private Crn createCrn(String baseCrn, Crn.ResourceType resourceType, String resource) {
         Crn crn = Crn.fromString(baseCrn);
         return createCrn(crn.getAccountId(), crn.getService(), resourceType, resource);
     }
 
-    private String createCrn(String accountId, Crn.Service service, Crn.ResourceType resourceType, String resource) {
+    private Crn createCrn(String accountId, Crn.Service service, Crn.ResourceType resourceType, String resource) {
         return Crn.builder()
                 .setAccountId(accountId)
                 .setService(service)
                 .setResourceType(resourceType)
                 .setResource(resource)
-                .build()
-                .toString();
+                .build();
     }
 
     @VisibleForTesting

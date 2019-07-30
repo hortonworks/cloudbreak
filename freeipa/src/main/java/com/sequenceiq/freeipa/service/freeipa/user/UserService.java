@@ -1,12 +1,16 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -15,26 +19,32 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.converter.freeipa.user.SyncOperationToSyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.SyncOperation;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
+import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState;
 
 @Service
 public class UserService {
@@ -62,18 +72,26 @@ public class UserService {
     @Inject
     private SyncOperationToSyncOperationStatus syncOperationToSyncOperationStatus;
 
-    public SyncOperationStatus synchronizeUser(String accountId, String actorCrn, String userCrn) {
-        return synchronizeAllUsers(accountId, actorCrn, null, Set.of(userCrn));
-    }
+    public SyncOperationStatus synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+        validateParameters(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
+        LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
+                accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
 
-    public SyncOperationStatus synchronizeAllUsers(String accountId, String actorCrn, Set<String> environmentFilter, Set<String> userCrnFilter) {
+        List<Stack> stacks = getStacks(accountId, environmentCrnFilter);
+        LOGGER.debug("Found {} stacks", stacks.size());
+        if (stacks.isEmpty()) {
+            throw new NotFoundException(String.format("No matching FreeIPA stacks found for account %s with environment crn filter %s",
+                    accountId, environmentCrnFilter));
+        }
+
         SyncOperation syncOperation = syncOperationStatusService
-                .startOperation(accountId, SyncOperationType.USER_SYNC,
-                        environmentFilter == null ? List.of() : List.copyOf(environmentFilter),
-                        userCrnFilter == null ? List.of() : List.copyOf(userCrnFilter));
+                .startOperation(accountId, SyncOperationType.USER_SYNC, environmentCrnFilter, union(userCrnFilter, machineUserCrnFilter));
 
         if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
-            asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(syncOperation.getOperationId(), accountId, actorCrn, environmentFilter, userCrnFilter));
+            MDCBuilder.addFlowIdToMdcContext(syncOperation.getOperationId());
+            asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(syncOperation.getOperationId(), accountId, actorCrn, stacks,
+                        userCrnFilter, machineUserCrnFilter));
         }
 
         return syncOperationToSyncOperationStatus.convert(syncOperation);
@@ -84,29 +102,23 @@ public class UserService {
         return synchronizeStack(stack, umsState, Set.of());
     }
 
-    private void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, Set<String> environmentsFilter, Set<String> userCrnFilter) {
+    private void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
         try {
-            boolean filterUsers = userCrnFilter != null && !userCrnFilter.isEmpty();
+            boolean filterUsers = !userCrnFilter.isEmpty() || !machineUserCrnFilter.isEmpty();
 
-            // TODO allow filtering on machine users as well
-
-            List<Stack> stacks = stackService.getAllByAccountId(accountId);
-            LOGGER.debug("Found {} stacks for account {}", stacks.size(), accountId);
-            if (environmentsFilter != null && !environmentsFilter.isEmpty()) {
-                stacks = stacks.stream()
-                        .filter(stack -> environmentsFilter.contains(stack.getEnvironmentCrn()))
-                        .collect(Collectors.toList());
-            }
-            UmsState umsState = filterUsers ? umsUsersStateProvider.getUserFilteredUmsState(accountId, actorCrn, userCrnFilter)
+            UmsState umsState = filterUsers ? umsUsersStateProvider.getUserFilteredUmsState(accountId, actorCrn, userCrnFilter, machineUserCrnFilter)
                     : umsUsersStateProvider.getUmsState(accountId, actorCrn);
-
-            Set<String> userIdFilter = filterUsers ? umsState.getUsernamesFromCrns(userCrnFilter)
+            LOGGER.debug("UmsState = {}", umsState);
+            Set<String> userIdFilter = filterUsers ? umsState.getUsernamesFromCrns(userCrnFilter, machineUserCrnFilter)
                     : Set.of();
 
             Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
                     .collect(Collectors.toMap(Stack::getEnvironmentCrn,
-                            stack -> asyncTaskExecutor.submit(() -> synchronizeStack(stack, umsState, userIdFilter))));
-
+                            stack -> asyncTaskExecutor.submit(() -> {
+                                MDCBuilder.buildMdcContext(stack);
+                                return synchronizeStack(stack, umsState, userIdFilter);
+                            })));
 
             List<SuccessDetails> success = new ArrayList<>();
             List<FailureDetails> failure = new ArrayList<>();
@@ -132,6 +144,7 @@ public class UserService {
             });
             syncOperationStatusService.completeOperation(operationId, success, failure);
         } catch (RuntimeException e) {
+            LOGGER.debug("caught exception", e);
             syncOperationStatusService.failOperation(operationId, e.getLocalizedMessage());
             throw e;
         }
@@ -166,28 +179,28 @@ public class UserService {
         }
     }
 
-    private void addGroups(FreeIpaClient freeIpaClient, Set<Group> groups) throws FreeIpaClientException {
-        for (Group group : groups) {
-            LOGGER.debug("adding group {}", group.getName());
+    private void addGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups) throws FreeIpaClientException {
+        for (FmsGroup fmsGroup : fmsGroups) {
+            LOGGER.debug("adding group {}", fmsGroup.getName());
             try {
-                com.sequenceiq.freeipa.client.model.Group groupAdd = freeIpaClient.groupAdd(group.getName());
+                com.sequenceiq.freeipa.client.model.Group groupAdd = freeIpaClient.groupAdd(fmsGroup.getName());
                 LOGGER.debug("Success: {}", groupAdd);
             } catch (FreeIpaClientException e) {
                 // TODO propagate this information out to API
-                LOGGER.error("Failed to add group {}", group.getName(), e);
+                LOGGER.error("Failed to add group {}", fmsGroup.getName(), e);
             }
         }
     }
 
-    private void addUsers(FreeIpaClient freeIpaClient, Set<User> users) throws FreeIpaClientException {
-        for (User user : users) {
-            String username = user.getName();
+    private void addUsers(FreeIpaClient freeIpaClient, Set<FmsUser> fmsUsers) throws FreeIpaClientException {
+        for (FmsUser fmsUser : fmsUsers) {
+            String username = fmsUser.getName();
 
             LOGGER.debug("adding user {}", username);
 
             try {
                 com.sequenceiq.freeipa.client.model.User userAdd = freeIpaClient.userAdd(
-                        username, user.getFirstName(), user.getLastName());
+                        username, fmsUser.getFirstName(), fmsUser.getLastName());
                 LOGGER.debug("Success: {}", userAdd);
             } catch (FreeIpaClientException e) {
                 // TODO propagate this information out to API
@@ -227,5 +240,46 @@ public class UserService {
                 LOGGER.error("Failed to add {} to group", users, group, e);
             }
         }
+    }
+
+    private List<Stack> getStacks(String accountId, Set<String> environmentCrnFilter) {
+        if (environmentCrnFilter.isEmpty()) {
+            LOGGER.debug("Retrieving all stacks for account {}", accountId);
+            return stackService.getAllByAccountId(accountId);
+        } else {
+            LOGGER.debug("Retrieving stacks for account {} that match environment crns {}", accountId, environmentCrnFilter);
+            return stackService.getMultipleByEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
+        }
+    }
+
+    @VisibleForTesting
+    void validateParameters(String accountId, String actorCrn, Set<String> environmentCrnFilter,
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+        requireNonNull(accountId);
+        requireNonNull(actorCrn);
+        requireNonNull(environmentCrnFilter);
+        requireNonNull(userCrnFilter);
+        requireNonNull(machineUserCrnFilter);
+        validateCrnFilter(environmentCrnFilter, Crn.ResourceType.ENVIRONMENT);
+        validateCrnFilter(userCrnFilter, Crn.ResourceType.USER);
+        validateCrnFilter(machineUserCrnFilter, Crn.ResourceType.MACHINE_USER);
+    }
+
+    @VisibleForTesting
+    void validateCrnFilter(Set<String> crnFilter, Crn.ResourceType resourceType) {
+        crnFilter.forEach(crnString -> {
+            try {
+                Crn crn = Crn.safeFromString(crnString);
+                if (crn.getResourceType() != resourceType) {
+                    throw new BadRequestException(String.format("Crn %s is not of expected type %s", crnString, resourceType));
+                }
+            } catch (CrnParseException e) {
+                throw new BadRequestException(e.getMessage(), e);
+            }
+        });
+    }
+
+    protected Set<String> union(Collection<String> collection1, Collection<String> collection2) {
+        return Stream.concat(collection1.stream(), collection2.stream()).collect(Collectors.toSet());
     }
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -39,6 +40,10 @@ public interface StackRepository extends BaseJpaRepository<Stack, Long> {
     @CheckPermission(action = ResourceAction.READ)
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")
     Optional<Stack> findByEnvironmentCrnAndAccountId(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
+
+    @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn IN :environmentCrns AND s.terminated = -1")
+    List<Stack> findMultipleByEnvironmentCrnAndAccountId(@Param("environmentCrns") Collection<String> environmentCrns, @Param("accountId") String accountId);
 
     @CheckPermission(action = ResourceAction.READ)
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")

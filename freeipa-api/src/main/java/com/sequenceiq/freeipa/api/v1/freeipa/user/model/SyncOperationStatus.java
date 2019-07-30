@@ -21,10 +21,10 @@ public class SyncOperationStatus {
     @ApiModelProperty(value = UserModelDescriptions.USERSYNC_STATUS)
     private SynchronizationStatus status;
 
-    @ApiModelProperty(value = UserModelDescriptions.SUCCESS_ENVIRONMENTNAME)
+    @ApiModelProperty(value = UserModelDescriptions.SUCCESS_ENVIRONMENTS)
     private List<SuccessDetails> success;
 
-    @ApiModelProperty(value = UserModelDescriptions.FAILURE_ENVIRONMENTNAME)
+    @ApiModelProperty(value = UserModelDescriptions.FAILURE_ENVIRONMENTS)
     private List<FailureDetails> failure;
 
     @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ERROR)
@@ -100,5 +100,19 @@ public class SyncOperationStatus {
 
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+
+    @Override
+    public String toString() {
+        return "SyncOperationStatus{"
+                + "operationId='" + operationId + '\''
+                + ", syncOperationType=" + syncOperationType
+                + ", status=" + status
+                + ", success=" + success
+                + ", failure=" + failure
+                + ", error='" + error + '\''
+                + ", startTime=" + startTime
+                + ", endTime=" + endTime
+                + '}';
     }
 }

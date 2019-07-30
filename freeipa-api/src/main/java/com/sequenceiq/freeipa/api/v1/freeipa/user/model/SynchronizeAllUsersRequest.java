@@ -11,22 +11,27 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("SynchronizeAllUsersV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SynchronizeAllUsersRequest {
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ENVIRONMENTS)
-    private Set<String> environments = new HashSet<>();
+public class SynchronizeAllUsersRequest extends SynchronizeOperationRequestBase {
+    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_USER_CRNS)
+    private Set<String> machineUsers = new HashSet<>();
 
-    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_USERS)
+    @ApiModelProperty(value = UserModelDescriptions.USERSYNC_USER_CRNS)
     private Set<String> users = new HashSet<>();
 
     public SynchronizeAllUsersRequest() {
     }
 
-    public Set<String> getEnvironments() {
-        return environments;
+    public SynchronizeAllUsersRequest(Set<String> environments, Set<String> users) {
+        super(environments);
+        this.users = users;
     }
 
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments;
+    public Set<String> getMachineUsers() {
+        return machineUsers;
+    }
+
+    public void setMachineUsers(Set<String> machineUsers) {
+        this.machineUsers = machineUsers;
     }
 
     public Set<String> getUsers() {
@@ -35,5 +40,14 @@ public class SynchronizeAllUsersRequest {
 
     public void setUsers(Set<String> users) {
         this.users = users;
+    }
+
+    @Override
+    public String toString() {
+        return "SynchronizeAllUsersRequest{"
+                + "machineUsers=" + machineUsers
+                + ", users=" + users
+                + ", " + super.fieldsToString()
+                + '}';
     }
 }

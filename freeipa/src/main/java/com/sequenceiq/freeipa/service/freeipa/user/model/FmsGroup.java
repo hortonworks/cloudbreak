@@ -1,21 +1,9 @@
-package com.sequenceiq.freeipa.api.v1.freeipa.user.model;
+package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
+public class FmsGroup {
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel("GroupV1")
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Group {
-
-    @NotNull
-    @ApiModelProperty(value = UserModelDescriptions.GROUP_NAME, required = true)
     private String name;
 
     public void setName(String name) {
@@ -35,7 +23,7 @@ public class Group {
             return false;
         }
 
-        Group other = (Group) o;
+        FmsGroup other = (FmsGroup) o;
 
         return Objects.equals(this.name, other.name);
 
@@ -48,7 +36,7 @@ public class Group {
 
     @Override
     public String toString() {
-        return "Group{"
+        return "FmsGroup{"
                 + "name='" + name + '\''
                 + '}';
     }

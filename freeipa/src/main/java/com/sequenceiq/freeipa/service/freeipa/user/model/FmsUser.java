@@ -1,29 +1,13 @@
-package com.sequenceiq.freeipa.api.v1.freeipa.user.model;
+package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
+public class FmsUser {
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@ApiModel("UserV1")
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class User {
-
-    @NotNull
-    @ApiModelProperty(value = UserModelDescriptions.USER_NAME, required = true)
     private String name;
 
-    @NotNull
-    @ApiModelProperty(value = UserModelDescriptions.USER_FIRSTNAME, required = true)
     private String firstName;
 
-    @NotNull
-    @ApiModelProperty(value = UserModelDescriptions.USER_LASTNAME, required = true)
     private String lastName;
 
     public String getName() {
@@ -59,7 +43,7 @@ public class User {
             return false;
         }
 
-        User other = (User) o;
+        FmsUser other = (FmsUser) o;
         return Objects.equals(this.name, other.name)
                 && Objects.equals(this.firstName, other.firstName)
                 && Objects.equals(this.lastName, other.lastName);
@@ -72,7 +56,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{"
+        return "FmsUser{"
                 + "name='" + name + '\''
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''

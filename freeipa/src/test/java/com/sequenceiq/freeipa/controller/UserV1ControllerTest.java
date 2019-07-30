@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.controller;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -35,6 +36,8 @@ public class UserV1ControllerTest {
 
     private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
+    private static final String MACHINE_USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":machineUser:" + UUID.randomUUID().toString();
+
     private static final String ENV_CRN = "crn:altus:environment:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
 
     @InjectMocks
@@ -58,13 +61,28 @@ public class UserV1ControllerTest {
         when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
 
         SyncOperationStatus status = mock(SyncOperationStatus.class);
-        when(userService.synchronizeUser(ACCOUNT_ID, USER_CRN, USER_CRN)).thenReturn(status);
+        when(userService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(status);
 
         SynchronizeUserRequest request = mock(SynchronizeUserRequest.class);
 
         underTest.synchronizeUser(request);
 
-        verify(userService, times(1)).synchronizeUser(ACCOUNT_ID, USER_CRN, USER_CRN);
+        verify(userService, times(1)).synchronizeUsers(ACCOUNT_ID, USER_CRN, Set.of(), Set.of(USER_CRN), Set.of());
+    }
+
+    @Test
+    void synchronizeUserMachineUser() {
+        when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(MACHINE_USER_CRN);
+        when(threadBaseUserCrnProvider.getAccountId()).thenReturn(ACCOUNT_ID);
+
+        SyncOperationStatus status = mock(SyncOperationStatus.class);
+        when(userService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(status);
+
+        SynchronizeUserRequest request = mock(SynchronizeUserRequest.class);
+
+        underTest.synchronizeUser(request);
+
+        verify(userService, times(1)).synchronizeUsers(ACCOUNT_ID, MACHINE_USER_CRN, Set.of(), Set.of(), Set.of(MACHINE_USER_CRN));
     }
 
     @Test
@@ -74,7 +92,7 @@ public class UserV1ControllerTest {
 
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(status.getStatus()).thenReturn(SynchronizationStatus.REJECTED);
-        when(userService.synchronizeUser(ACCOUNT_ID, USER_CRN, USER_CRN)).thenReturn(status);
+        when(userService.synchronizeUsers(ACCOUNT_ID, USER_CRN, Set.of(), Set.of(USER_CRN), Set.of())).thenReturn(status);
 
         SynchronizeUserRequest request = mock(SynchronizeUserRequest.class);
 
@@ -88,16 +106,18 @@ public class UserV1ControllerTest {
 
         Set<String> environments = Set.of(ENV_CRN);
         Set<String> users = Set.of(USER_CRN);
+        Set<String> machineUsers = Set.of(MACHINE_USER_CRN);
         SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest();
         request.setEnvironments(environments);
         request.setUsers(users);
+        request.setMachineUsers(machineUsers);
 
         SyncOperationStatus status = mock(SyncOperationStatus.class);
-        when(userService.synchronizeAllUsers(ACCOUNT_ID, USER_CRN, environments, users)).thenReturn(status);
+        when(userService.synchronizeUsers(any(), any(), any(), any(), any())).thenReturn(status);
 
         underTest.synchronizeAllUsers(request);
 
-        verify(userService, times(1)).synchronizeAllUsers(ACCOUNT_ID, USER_CRN, environments, users);
+        verify(userService, times(1)).synchronizeUsers(ACCOUNT_ID, USER_CRN, environments, users, machineUsers);
     }
 
     @Test
@@ -113,7 +133,7 @@ public class UserV1ControllerTest {
 
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(status.getStatus()).thenReturn(SynchronizationStatus.REJECTED);
-        when(userService.synchronizeAllUsers(ACCOUNT_ID, USER_CRN, environments, users)).thenReturn(status);
+        when(userService.synchronizeUsers(ACCOUNT_ID, USER_CRN, environments, users, Set.of())).thenReturn(status);
 
         assertThrows(SyncOperationAlreadyRunningException.class, () -> underTest.synchronizeAllUsers(request));
     }
@@ -150,11 +170,11 @@ public class UserV1ControllerTest {
         when(request.getPassword()).thenReturn(password);
 
         SyncOperationStatus status = mock(SyncOperationStatus.class);
-        when(passwordService.setPassword(ACCOUNT_ID, USER_CRN, password, new HashSet<>())).thenReturn(status);
+        when(passwordService.setPassword(any(), any(), any(), any(), any())).thenReturn(status);
 
         underTest.setPassword(request);
 
-        verify(passwordService, times(1)).setPassword(ACCOUNT_ID, USER_CRN, password, new HashSet<>());
+        verify(passwordService, times(1)).setPassword(ACCOUNT_ID, USER_CRN, USER_CRN, password, new HashSet<>());
     }
 
     @Test
@@ -168,7 +188,7 @@ public class UserV1ControllerTest {
 
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(status.getStatus()).thenReturn(SynchronizationStatus.REJECTED);
-        when(passwordService.setPassword(ACCOUNT_ID, USER_CRN, password, new HashSet<>())).thenReturn(status);
+        when(passwordService.setPassword(ACCOUNT_ID, USER_CRN, USER_CRN, password, new HashSet<>())).thenReturn(status);
 
         assertThrows(SyncOperationAlreadyRunningException.class, () -> underTest.setPassword(request));
     }

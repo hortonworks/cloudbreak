@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -39,6 +40,10 @@ public class StackService {
     public Stack getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
         return stackRepository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
+    }
+
+    public List<Stack> getMultipleByEnvironmentCrnAndAccountId(Collection<String> environmentCrns, String accountId) {
+        return stackRepository.findMultipleByEnvironmentCrnAndAccountId(environmentCrns, accountId);
     }
 
     public Optional<Stack> findByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {

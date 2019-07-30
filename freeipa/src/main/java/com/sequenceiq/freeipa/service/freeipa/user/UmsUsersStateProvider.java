@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,7 @@ public class UmsUsersStateProvider {
     private GrpcUmsClient umsClient;
 
     public UmsState getUmsState(String accountId, String actorCrn) {
+        LOGGER.debug("Retrieving UMS state for all users and machineUsers in account {}", accountId);
         UmsState.Builder umsStateBuilder = new UmsState.Builder();
         try {
             umsClient.listAllUsers(actorCrn, accountId, Optional.empty())
@@ -40,8 +42,8 @@ public class UmsUsersStateProvider {
         return umsStateBuilder.build();
     }
 
-    public UmsState getUserFilteredUmsState(String accountId, String actorCrn, Set<String> userCrns) {
-        // TODO allow filtering on machine users as well once that's exposed in the API
+    public UmsState getUserFilteredUmsState(String accountId, String actorCrn, Collection<String> userCrns, Collection<String> machineUserCrns) {
+        LOGGER.debug("Retrieving UMS state for users [{}] and machineUsers [{}] in account {}", userCrns, machineUserCrns, accountId);
         UmsState.Builder umsStateBuilder = new UmsState.Builder();
         try {
             Set<String> groupCrns = new HashSet<>();
@@ -49,6 +51,13 @@ public class UmsUsersStateProvider {
                     .forEach(u -> {
                         GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, u.getCrn(), null, Optional.empty());
                         umsStateBuilder.addUser(u, rights);
+                        groupCrns.addAll(rights.getGroupCrnList());
+                    });
+
+            umsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns), Optional.empty())
+                    .forEach(u -> {
+                        GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, u.getCrn(), null, Optional.empty());
+                        umsStateBuilder.addMachineUser(u, rights);
                         groupCrns.addAll(rights.getGroupCrnList());
                     });
 

@@ -45,4 +45,11 @@ public class SuccessDetails {
     public int hashCode() {
         return Objects.hash(environment);
     }
+
+    @Override
+    public String toString() {
+        return "SuccessDetails{"
+                + "environment='" + environment + '\''
+                + '}';
+    }
 }
