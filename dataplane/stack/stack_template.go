@@ -327,44 +327,65 @@ func extendTemplateWithEncryptionType(template *model.StackV4Request, boolFinder
 
 func extendTemplateWithStorageType(template *model.StackV4Request, storageType cloud.CloudStorageType) {
 	if storageType == cloud.WASB {
-		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
-			Wasb: &model.WasbCloudStorageV1Parameters{
-				AccountKey:  &(&types.S{S: "____"}).S,
-				AccountName: &(&types.S{S: "____"}).S,
-				Secure:      false,
+		template.Cluster.CloudStorage = &model.CloudStorageRequest{
+			Identities: []*model.StorageIdentityBase{
+				{
+					Wasb: &model.WasbCloudStorageV1Parameters{
+						AccountKey:  &(&types.S{S: "____"}).S,
+						AccountName: &(&types.S{S: "____"}).S,
+						Secure:      false,
+					},
+				},
 			},
-			Locations: []*model.StorageLocationV4Request{},
+
+			Locations: []*model.StorageLocationBase{},
 		}
 	} else if storageType == cloud.ADLS_GEN1 {
-		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
-			Adls: &model.AdlsCloudStorageV1Parameters{
-				AccountName: &(&types.S{S: "____"}).S,
-				ClientID:    &(&types.S{S: "____"}).S,
-				Credential:  &(&types.S{S: "____"}).S,
+		template.Cluster.CloudStorage = &model.CloudStorageRequest{
+			Identities: []*model.StorageIdentityBase{
+				{
+					Adls: &model.AdlsCloudStorageV1Parameters{
+						AccountName: &(&types.S{S: "____"}).S,
+						ClientID:    &(&types.S{S: "____"}).S,
+						Credential:  &(&types.S{S: "____"}).S,
+					},
+				},
 			},
-			Locations: []*model.StorageLocationV4Request{},
+			Locations: []*model.StorageLocationBase{},
 		}
 	} else if storageType == cloud.S3 {
-		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
-			S3: &model.S3CloudStorageV1Parameters{
-				InstanceProfile: &(&types.S{S: "____"}).S,
+		template.Cluster.CloudStorage = &model.CloudStorageRequest{
+			Identities: []*model.StorageIdentityBase{
+				{
+					S3: &model.S3CloudStorageV1Parameters{
+						InstanceProfile: &(&types.S{S: "____"}).S,
+					},
+				},
 			},
-			Locations: []*model.StorageLocationV4Request{},
+			Locations: []*model.StorageLocationBase{},
 		}
 	} else if storageType == cloud.GCS {
-		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
-			Gcs: &model.GcsCloudStorageV1Parameters{
-				ServiceAccountEmail: &(&types.S{S: "____"}).S,
+		template.Cluster.CloudStorage = &model.CloudStorageRequest{
+			Identities: []*model.StorageIdentityBase{
+				{
+					Gcs: &model.GcsCloudStorageV1Parameters{
+						ServiceAccountEmail: &(&types.S{S: "____"}).S,
+					},
+				},
 			},
-			Locations: []*model.StorageLocationV4Request{},
+			Locations: []*model.StorageLocationBase{},
 		}
 	} else if storageType == cloud.ADLS_GEN2 {
-		template.Cluster.CloudStorage = &model.CloudStorageV4Request{
-			AdlsGen2: &model.AdlsGen2CloudStorageV1Parameters{
-				AccountKey:  &(&types.S{S: "____"}).S,
-				AccountName: &(&types.S{S: "____"}).S,
+		template.Cluster.CloudStorage = &model.CloudStorageRequest{
+			Identities: []*model.StorageIdentityBase{
+				{
+					AdlsGen2: &model.AdlsGen2CloudStorageV1Parameters{
+						AccountKey:  &(&types.S{S: "____"}).S,
+						AccountName: &(&types.S{S: "____"}).S,
+					},
+				},
 			},
-			Locations: []*model.StorageLocationV4Request{},
+			Locations: []*model.StorageLocationBase{},
 		}
 	}
 }

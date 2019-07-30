@@ -30,7 +30,7 @@ type ClusterV4Response struct {
 	Blueprint *BlueprintV4Response `json:"blueprint,omitempty"`
 
 	// filesystem for a specific stack
-	CloudStorage *CloudStorageV1Response `json:"cloudStorage,omitempty"`
+	CloudStorage *CloudStorageResponse `json:"cloudStorage,omitempty"`
 
 	// cm
 	Cm *ClouderaManagerV4Response `json:"cm,omitempty"`

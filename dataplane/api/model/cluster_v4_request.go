@@ -26,7 +26,7 @@ type ClusterV4Request struct {
 	BlueprintName string `json:"blueprintName,omitempty"`
 
 	// external cloud storage configuration
-	CloudStorage *CloudStorageV4Request `json:"cloudStorage,omitempty"`
+	CloudStorage *CloudStorageRequest `json:"cloudStorage,omitempty"`
 
 	// cloudera manager specific requests
 	Cm *ClouderaManagerV4Request `json:"cm,omitempty"`

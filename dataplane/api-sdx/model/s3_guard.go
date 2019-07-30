@@ -11,21 +11,21 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// AzureNetworkV1Parameters azure network v1 parameters
-// swagger:model AzureNetworkV1Parameters
-type AzureNetworkV1Parameters struct {
+// S3Guard s3 guard
+// swagger:model S3Guard
+type S3Guard struct {
 
-	// subnet Id
-	SubnetID string `json:"subnetId,omitempty"`
+	// dynamo table name
+	DynamoTableName string `json:"dynamoTableName,omitempty"`
 }
 
-// Validate validates this azure network v1 parameters
-func (m *AzureNetworkV1Parameters) Validate(formats strfmt.Registry) error {
+// Validate validates this s3 guard
+func (m *S3Guard) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *AzureNetworkV1Parameters) MarshalBinary() ([]byte, error) {
+func (m *S3Guard) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -33,8 +33,8 @@ func (m *AzureNetworkV1Parameters) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *AzureNetworkV1Parameters) UnmarshalBinary(b []byte) error {
-	var res AzureNetworkV1Parameters
+func (m *S3Guard) UnmarshalBinary(b []byte) error {
+	var res S3Guard
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

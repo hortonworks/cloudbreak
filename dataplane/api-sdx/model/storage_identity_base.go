@@ -6,7 +6,7 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"strconv"
+	"encoding/json"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -15,9 +15,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// CloudStorageV1Request cloud storage v1 request
-// swagger:model CloudStorageV1Request
-type CloudStorageV1Request struct {
+// StorageIdentityBase storage identity base
+// swagger:model StorageIdentityBase
+type StorageIdentityBase struct {
 
 	// adls
 	Adls *AdlsCloudStorageV1Parameters `json:"adls,omitempty"`
@@ -28,19 +28,19 @@ type CloudStorageV1Request struct {
 	// gcs
 	Gcs *GcsCloudStorageV1Parameters `json:"gcs,omitempty"`
 
-	// cloud storage locations
-	// Unique: true
-	Locations []*StorageLocationV1Request `json:"locations"`
-
 	// s3
 	S3 *S3CloudStorageV1Parameters `json:"s3,omitempty"`
+
+	// type
+	// Enum: [ID_BROKER LOG]
+	Type string `json:"type,omitempty"`
 
 	// wasb
 	Wasb *WasbCloudStorageV1Parameters `json:"wasb,omitempty"`
 }
 
-// Validate validates this cloud storage v1 request
-func (m *CloudStorageV1Request) Validate(formats strfmt.Registry) error {
+// Validate validates this storage identity base
+func (m *StorageIdentityBase) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAdls(formats); err != nil {
@@ -55,11 +55,11 @@ func (m *CloudStorageV1Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateLocations(formats); err != nil {
+	if err := m.validateS3(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateS3(formats); err != nil {
+	if err := m.validateType(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -73,7 +73,7 @@ func (m *CloudStorageV1Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageV1Request) validateAdls(formats strfmt.Registry) error {
+func (m *StorageIdentityBase) validateAdls(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Adls) { // not required
 		return nil
@@ -91,7 +91,7 @@ func (m *CloudStorageV1Request) validateAdls(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageV1Request) validateAdlsGen2(formats strfmt.Registry) error {
+func (m *StorageIdentityBase) validateAdlsGen2(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.AdlsGen2) { // not required
 		return nil
@@ -109,7 +109,7 @@ func (m *CloudStorageV1Request) validateAdlsGen2(formats strfmt.Registry) error 
 	return nil
 }
 
-func (m *CloudStorageV1Request) validateGcs(formats strfmt.Registry) error {
+func (m *StorageIdentityBase) validateGcs(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Gcs) { // not required
 		return nil
@@ -127,36 +127,7 @@ func (m *CloudStorageV1Request) validateGcs(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageV1Request) validateLocations(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Locations) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("locations", "body", m.Locations); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Locations); i++ {
-		if swag.IsZero(m.Locations[i]) { // not required
-			continue
-		}
-
-		if m.Locations[i] != nil {
-			if err := m.Locations[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("locations" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-func (m *CloudStorageV1Request) validateS3(formats strfmt.Registry) error {
+func (m *StorageIdentityBase) validateS3(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.S3) { // not required
 		return nil
@@ -174,7 +145,50 @@ func (m *CloudStorageV1Request) validateS3(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CloudStorageV1Request) validateWasb(formats strfmt.Registry) error {
+var storageIdentityBaseTypeTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["ID_BROKER","LOG"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		storageIdentityBaseTypeTypePropEnum = append(storageIdentityBaseTypeTypePropEnum, v)
+	}
+}
+
+const (
+
+	// StorageIdentityBaseTypeIDBROKER captures enum value "ID_BROKER"
+	StorageIdentityBaseTypeIDBROKER string = "ID_BROKER"
+
+	// StorageIdentityBaseTypeLOG captures enum value "LOG"
+	StorageIdentityBaseTypeLOG string = "LOG"
+)
+
+// prop value enum
+func (m *StorageIdentityBase) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, storageIdentityBaseTypeTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *StorageIdentityBase) validateType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Type) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *StorageIdentityBase) validateWasb(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Wasb) { // not required
 		return nil
@@ -193,7 +207,7 @@ func (m *CloudStorageV1Request) validateWasb(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *CloudStorageV1Request) MarshalBinary() ([]byte, error) {
+func (m *StorageIdentityBase) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -201,8 +215,8 @@ func (m *CloudStorageV1Request) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *CloudStorageV1Request) UnmarshalBinary(b []byte) error {
-	var res CloudStorageV1Request
+func (m *StorageIdentityBase) UnmarshalBinary(b []byte) error {
+	var res StorageIdentityBase
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

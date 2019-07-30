@@ -7,6 +7,7 @@ package v4utils
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/go-openapi/runtime"
 
@@ -20,43 +21,43 @@ type PostNotificationTestReader struct {
 
 // ReadResponse reads a server response into the received o.
 func (o *PostNotificationTestReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+	switch response.Code() {
 
-	result := NewPostNotificationTestDefault(response.Code())
-	if err := result.readResponse(response, consumer, o.formats); err != nil {
-		return nil, err
-	}
-	if response.Code()/100 == 2 {
+	case 200:
+		result := NewPostNotificationTestOK()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
 		return result, nil
-	}
-	return nil, result
 
-}
-
-// NewPostNotificationTestDefault creates a PostNotificationTestDefault with default headers values
-func NewPostNotificationTestDefault(code int) *PostNotificationTestDefault {
-	return &PostNotificationTestDefault{
-		_statusCode: code,
+	default:
+		return nil, runtime.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
-/*PostNotificationTestDefault handles this case with default header values.
+// NewPostNotificationTestOK creates a PostNotificationTestOK with default headers values
+func NewPostNotificationTestOK() *PostNotificationTestOK {
+	return &PostNotificationTestOK{}
+}
+
+/*PostNotificationTestOK handles this case with default header values.
 
 successful operation
 */
-type PostNotificationTestDefault struct {
-	_statusCode int
+type PostNotificationTestOK struct {
+	Payload string
 }
 
-// Code gets the status code for the post notification test default response
-func (o *PostNotificationTestDefault) Code() int {
-	return o._statusCode
+func (o *PostNotificationTestOK) Error() string {
+	return fmt.Sprintf("[POST /v4/utils/notification_test][%d] postNotificationTestOK  %+v", 200, o.Payload)
 }
 
-func (o *PostNotificationTestDefault) Error() string {
-	return fmt.Sprintf("[POST /v4/utils/notification_test][%d] postNotificationTest default ", o._statusCode)
-}
+func (o *PostNotificationTestOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-func (o *PostNotificationTestDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+	// response payload
+	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

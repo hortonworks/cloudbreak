@@ -81,6 +81,34 @@ func (a *Client) DeleteSdx(params *DeleteSdxParams) error {
 }
 
 /*
+DeleteSdxByCrn deletes s d x cluster by crn
+*/
+func (a *Client) DeleteSdxByCrn(params *DeleteSdxByCrnParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteSdxByCrnParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteSdxByCrn",
+		Method:             "DELETE",
+		PathPattern:        "/sdx/crn/{clusterCrn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteSdxByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
 GetSdx gets s d x cluster
 */
 func (a *Client) GetSdx(params *GetSdxParams) (*GetSdxOK, error) {
@@ -193,6 +221,34 @@ func (a *Client) GetSdxDetail(params *GetSdxDetailParams) (*GetSdxDetailOK, erro
 }
 
 /*
+GetSdxDetailByCrn gets s d x cluster detail by crn
+*/
+func (a *Client) GetSdxDetailByCrn(params *GetSdxDetailByCrnParams) (*GetSdxDetailByCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSdxDetailByCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getSdxDetailByCrn",
+		Method:             "GET",
+		PathPattern:        "/sdx/crn/{clusterCrn}/detail",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetSdxDetailByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetSdxDetailByCrnOK), nil
+
+}
+
+/*
 ListSdx lists s d x clusters
 */
 func (a *Client) ListSdx(params *ListSdxParams) (*ListSdxOK, error) {
@@ -238,6 +294,34 @@ func (a *Client) RedeploySdx(params *RedeploySdxParams) error {
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &RedeploySdxReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+RedeploySdxByCrn redeploys s d x cluster by crn
+*/
+func (a *Client) RedeploySdxByCrn(params *RedeploySdxByCrnParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRedeploySdxByCrnParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "redeploySdxByCrn",
+		Method:             "POST",
+		PathPattern:        "/sdx/crn/{clusterCrn}/redeploy",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &RedeploySdxByCrnReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})

@@ -11,21 +11,24 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// AzureNetworkV1Parameters azure network v1 parameters
-// swagger:model AzureNetworkV1Parameters
-type AzureNetworkV1Parameters struct {
+// StorageLocationBase storage location base
+// swagger:model StorageLocationBase
+type StorageLocationBase struct {
 
-	// subnet Id
-	SubnetID string `json:"subnetId,omitempty"`
+	// type
+	Type string `json:"type,omitempty"`
+
+	// value
+	Value string `json:"value,omitempty"`
 }
 
-// Validate validates this azure network v1 parameters
-func (m *AzureNetworkV1Parameters) Validate(formats strfmt.Registry) error {
+// Validate validates this storage location base
+func (m *StorageLocationBase) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *AzureNetworkV1Parameters) MarshalBinary() ([]byte, error) {
+func (m *StorageLocationBase) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -33,8 +36,8 @@ func (m *AzureNetworkV1Parameters) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *AzureNetworkV1Parameters) UnmarshalBinary(b []byte) error {
-	var res AzureNetworkV1Parameters
+func (m *StorageLocationBase) UnmarshalBinary(b []byte) error {
+	var res StorageLocationBase
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

@@ -53,6 +53,36 @@ func (a *Client) CheckClientVersionV4(params *CheckClientVersionV4Params) (*Chec
 }
 
 /*
+CheckRight checkings rights from UI
+
+Check right from UI
+*/
+func (a *Client) CheckRight(params *CheckRightParams) (*CheckRightOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCheckRightParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "checkRight",
+		Method:             "POST",
+		PathPattern:        "/v4/utils/check_right",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &CheckRightReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*CheckRightOK), nil
+
+}
+
+/*
 GetCloudStorageMatrixV4 returns supported cloud storage for stack version
 
 Define stack version at least at patch level eg. 2.6.0
@@ -175,13 +205,13 @@ PostNotificationTest triggers a new notification to the notification system coul
 
 Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
 */
-func (a *Client) PostNotificationTest(params *PostNotificationTestParams) error {
+func (a *Client) PostNotificationTest(params *PostNotificationTestParams) (*PostNotificationTestOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewPostNotificationTestParams()
 	}
 
-	_, err := a.transport.Submit(&runtime.ClientOperation{
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "postNotificationTest",
 		Method:             "POST",
 		PathPattern:        "/v4/utils/notification_test",
@@ -194,9 +224,9 @@ func (a *Client) PostNotificationTest(params *PostNotificationTestParams) error 
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*PostNotificationTestOK), nil
 
 }
 

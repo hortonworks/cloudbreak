@@ -29,6 +29,9 @@ type OperationDetails struct {
 	// Enum: [REST FLOW NOTIFICATION]
 	EventType string `json:"eventType,omitempty"`
 
+	// resource crn
+	ResourceCrn string `json:"resourceCrn,omitempty"`
+
 	// resource Id
 	ResourceID int64 `json:"resourceId,omitempty"`
 

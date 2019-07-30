@@ -63,6 +63,8 @@ for the get audit events in workspace operation typically these are written to a
 */
 type GetAuditEventsInWorkspaceParams struct {
 
+	/*ResourceCrn*/
+	ResourceCrn *string
 	/*ResourceID*/
 	ResourceID *int64
 	/*ResourceType*/
@@ -108,6 +110,17 @@ func (o *GetAuditEventsInWorkspaceParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithResourceCrn adds the resourceCrn to the get audit events in workspace params
+func (o *GetAuditEventsInWorkspaceParams) WithResourceCrn(resourceCrn *string) *GetAuditEventsInWorkspaceParams {
+	o.SetResourceCrn(resourceCrn)
+	return o
+}
+
+// SetResourceCrn adds the resourceCrn to the get audit events in workspace params
+func (o *GetAuditEventsInWorkspaceParams) SetResourceCrn(resourceCrn *string) {
+	o.ResourceCrn = resourceCrn
+}
+
 // WithResourceID adds the resourceID to the get audit events in workspace params
 func (o *GetAuditEventsInWorkspaceParams) WithResourceID(resourceID *int64) *GetAuditEventsInWorkspaceParams {
 	o.SetResourceID(resourceID)
@@ -148,6 +161,22 @@ func (o *GetAuditEventsInWorkspaceParams) WriteToRequest(r runtime.ClientRequest
 		return err
 	}
 	var res []error
+
+	if o.ResourceCrn != nil {
+
+		// query param resourceCrn
+		var qrResourceCrn string
+		if o.ResourceCrn != nil {
+			qrResourceCrn = *o.ResourceCrn
+		}
+		qResourceCrn := qrResourceCrn
+		if qResourceCrn != "" {
+			if err := r.SetQueryParam("resourceCrn", qResourceCrn); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	if o.ResourceID != nil {
 

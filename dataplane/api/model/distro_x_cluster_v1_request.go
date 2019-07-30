@@ -21,7 +21,7 @@ type DistroXClusterV1Request struct {
 	BlueprintName string `json:"blueprintName,omitempty"`
 
 	// external cloud storage configuration
-	CloudStorage *CloudStorageV1Request `json:"cloudStorage,omitempty"`
+	CloudStorage *CloudStorageRequest `json:"cloudStorage,omitempty"`
 
 	// cloudera manager specific requests
 	Cm *ClouderaManagerV1Request `json:"cm,omitempty"`

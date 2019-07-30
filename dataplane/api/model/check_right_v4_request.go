@@ -11,21 +11,21 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// AzureNetworkV1Parameters azure network v1 parameters
-// swagger:model AzureNetworkV1Parameters
-type AzureNetworkV1Parameters struct {
+// CheckRightV4Request check right v4 request
+// swagger:model CheckRightV4Request
+type CheckRightV4Request struct {
 
-	// subnet Id
-	SubnetID string `json:"subnetId,omitempty"`
+	// rights
+	Rights []string `json:"rights"`
 }
 
-// Validate validates this azure network v1 parameters
-func (m *AzureNetworkV1Parameters) Validate(formats strfmt.Registry) error {
+// Validate validates this check right v4 request
+func (m *CheckRightV4Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *AzureNetworkV1Parameters) MarshalBinary() ([]byte, error) {
+func (m *CheckRightV4Request) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -33,8 +33,8 @@ func (m *AzureNetworkV1Parameters) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *AzureNetworkV1Parameters) UnmarshalBinary(b []byte) error {
-	var res AzureNetworkV1Parameters
+func (m *CheckRightV4Request) UnmarshalBinary(b []byte) error {
+	var res CheckRightV4Request
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

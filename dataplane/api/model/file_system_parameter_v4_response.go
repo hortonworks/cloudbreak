@@ -41,6 +41,9 @@ type FileSystemParameterV4Response struct {
 
 	// secure
 	Secure bool `json:"secure,omitempty"`
+
+	// type
+	Type string `json:"type,omitempty"`
 }
 
 // Validate validates this file system parameter v4 response

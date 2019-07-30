@@ -15,14 +15,8 @@ import (
 // swagger:model AwsNetworkV1Parameters
 type AwsNetworkV1Parameters struct {
 
-	// internet gateway Id
-	InternetGatewayID string `json:"internetGatewayId,omitempty"`
-
 	// subnet Id
 	SubnetID string `json:"subnetId,omitempty"`
-
-	// vpc Id
-	VpcID string `json:"vpcId,omitempty"`
 }
 
 // Validate validates this aws network v1 parameters
