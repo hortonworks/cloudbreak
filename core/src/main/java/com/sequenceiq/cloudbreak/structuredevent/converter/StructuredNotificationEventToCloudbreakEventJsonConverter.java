@@ -1,11 +1,16 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
@@ -21,9 +26,15 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
 
     @Override
     public CloudbreakEventsJson convert(StructuredNotificationEvent source) {
-        CloudbreakEventsJson cloudbreakEvent = new CloudbreakEventsJson();
         NotificationDetails notificationDetails = source.getNotificationDetails();
         OperationDetails operationDetails = source.getOperation();
+        CloudbreakEventsJson cloudbreakEvent = getCloudbreakEventsJson(notificationDetails, operationDetails);
+        cloudbreakEvent.setStackView(stackApiViewService.retrieveById(notificationDetails.getStackId()));
+        return cloudbreakEvent;
+    }
+
+    private CloudbreakEventsJson getCloudbreakEventsJson(NotificationDetails notificationDetails, OperationDetails operationDetails) {
+        CloudbreakEventsJson cloudbreakEvent = new CloudbreakEventsJson();
         cloudbreakEvent.setEventType(notificationDetails.getNotificationType());
         cloudbreakEvent.setEventTimestamp(operationDetails.getTimestamp());
         cloudbreakEvent.setEventMessage(notificationDetails.getNotification());
@@ -45,7 +56,21 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
         if (notificationDetails.getClusterStatus() != null) {
             cloudbreakEvent.setClusterStatus(Status.valueOf(notificationDetails.getClusterStatus()));
         }
-        cloudbreakEvent.setStackView(stackApiViewService.retrieveById(notificationDetails.getStackId()));
         return cloudbreakEvent;
+    }
+
+    public List<CloudbreakEventsJson> convertAllForSameStack(List<StructuredNotificationEvent> events) {
+        if (events.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            Long stackId = events.get(0).getNotificationDetails().getStackId();
+            StackViewResponse stackViewResponse = stackApiViewService.retrieveById(stackId);
+            return events.stream()
+                    .map(event -> getCloudbreakEventsJson(event.getNotificationDetails(), event.getOperation()))
+                    .map(event -> {
+                        event.setStackView(stackViewResponse);
+                        return event;
+                    }).collect(Collectors.toList());
+        }
     }
 }
