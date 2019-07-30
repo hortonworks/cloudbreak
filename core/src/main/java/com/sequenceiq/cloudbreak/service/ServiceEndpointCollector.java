@@ -102,15 +102,16 @@ public class ServiceEndpointCollector {
                                 .collect(Collectors.toSet());
                         List<ClusterExposedServiceV4Response> uiServices = new ArrayList<>();
                         List<ClusterExposedServiceV4Response> apiServices = new ArrayList<>();
+                        boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
                         for (ExposedService exposedService : knownExposedServices) {
                             if (exposedService.isUISupported()) {
                                 ClusterExposedServiceV4Response uiService = createServiceEntry(exposedService, gateway, gatewayTopology,
-                                        managerIp, privateIps, exposedServicesInTopology, false);
+                                        managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled);
                                 uiServices.add(uiService);
                             }
                             if (exposedService.isAPISupported()) {
                                 ClusterExposedServiceV4Response apiService = createServiceEntry(exposedService, gateway, gatewayTopology,
-                                        managerIp, privateIps, exposedServicesInTopology, true);
+                                        managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled);
                                 apiServices.add(apiService);
                             }
                         }
@@ -125,14 +126,14 @@ public class ServiceEndpointCollector {
     }
 
     private ClusterExposedServiceV4Response createServiceEntry(ExposedService exposedService, Gateway gateway, GatewayTopology gatewayTopology,
-            String managerIp, Map<String, List<String>> privateIps, Set<String> exposedServicesInTopology, boolean api) {
+            String managerIp, Map<String, List<String>> privateIps, Set<String> exposedServicesInTopology, boolean api, boolean autoTlsEnabled) {
         ClusterExposedServiceV4Response service = new ClusterExposedServiceV4Response();
         service.setMode(api ? SSOType.PAM : getSSOType(exposedService, gateway));
         service.setDisplayName(exposedService.getDisplayName());
         service.setKnoxService(exposedService.getKnoxService());
         service.setServiceName(exposedService.getServiceName());
         Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, managerIp,
-                gateway, gatewayTopology.getTopologyName(), privateIps, api);
+                gateway, gatewayTopology.getTopologyName(), privateIps, api, autoTlsEnabled);
         serviceUrlForService.ifPresent(service::setServiceUrl);
         service.setOpen(isExposed(exposedService, exposedServicesInTopology));
         return service;
@@ -166,14 +167,15 @@ public class ServiceEndpointCollector {
     }
 
     private Optional<String> getServiceUrlForService(ExposedService exposedService, String managerIp, Gateway gateway,
-            String topologyName, Map<String, List<String>> privateIps, boolean api) {
+            String topologyName, Map<String, List<String>> privateIps, boolean api, boolean autoTlsEnabled) {
         if (hasKnoxUrl(exposedService) && managerIp != null) {
             switch (exposedService) {
                 case HIVE_SERVER:
                 case HIVE_SERVER_INTERACTIVE:
                     return getHiveJdbcUrl(gateway, managerIp);
                 case NAMENODE:
-                    return getHdfsUIUrl(gateway, managerIp, privateIps.get(ExposedService.NAMENODE.getServiceName()).iterator().next());
+                    String namenodeIp = privateIps.get(ExposedService.NAMENODE.getServiceName()).iterator().next();
+                    return getHdfsUIUrl(gateway, managerIp, namenodeIp, autoTlsEnabled);
                 case HBASE_UI:
                     return getHBaseServiceUrl(gateway, managerIp, privateIps.get(ExposedService.HBASE_UI.getServiceName()).iterator().next());
                 case RESOURCEMANAGER_WEB:
@@ -226,9 +228,9 @@ public class ServiceEndpointCollector {
                 : String.format("https://%s:%s/%s/%s%s", managerIp, knoxPort, gateway.getPath(), topology, knoxUrl);
     }
 
-    private Optional<String> getHdfsUIUrl(Gateway gateway, String managerIp, String nameNodePrivateIp) {
+    private Optional<String> getHdfsUIUrl(Gateway gateway, String managerIp, String nameNodePrivateIp, boolean autoTlsEnabled) {
         return getGatewayTopologyWithExposedService(gateway, ExposedService.NAMENODE)
-                .map(gt -> getHdfsUIUrlWithHostParameterFromGatewayTopology(managerIp, gt, nameNodePrivateIp));
+                .map(gt -> getHdfsUIUrlWithHostParameterFromGatewayTopology(managerIp, gt, nameNodePrivateIp, autoTlsEnabled));
     }
 
     private Optional<String> getHBaseServiceUrl(Gateway gateway, String managerIp, String hbaseMasterPrivateIp) {
@@ -247,10 +249,12 @@ public class ServiceEndpointCollector {
                 + "transportMode=http;httpPath=%s/%s%s/hive", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(), API_TOPOLOGY_POSTFIX);
     }
 
-    private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp) {
+    private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp, boolean autoTlsEnabled) {
         Gateway gateway = gt.getGateway();
-        String url = String.format("https://%s:%s/%s/%s%s?host=http://%s:%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
-                ExposedService.NAMENODE.getKnoxUrl(), nameNodePrivateIp, ExposedService.NAMENODE.getPort());
+        String protocol = autoTlsEnabled ? "https" : "http";
+        Integer port = autoTlsEnabled ? ExposedService.NAMENODE.getTlsPort() : ExposedService.NAMENODE.getPort();
+        String url = String.format("https://%s:%s/%s/%s%s?host=%s://%s:%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
+                ExposedService.NAMENODE.getKnoxUrl(), protocol, nameNodePrivateIp, port);
         return url;
     }
 
