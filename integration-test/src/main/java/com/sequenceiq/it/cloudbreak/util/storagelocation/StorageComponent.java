@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.util.storagelocation;
 import java.util.List;
 
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 
 public enum StorageComponent {
 
@@ -85,7 +86,7 @@ public enum StorageComponent {
 
     private static StorageLocationBase createStorageLocationRequest(String type, String value) {
         StorageLocationBase request = new StorageLocationBase();
-        request.setType(type);
+        request.setType(CloudStorageCdpService.valueOf(type));
         request.setValue(value);
         return request;
     }

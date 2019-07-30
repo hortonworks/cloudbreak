@@ -90,7 +90,7 @@ public class CloudStorageManifesterTest {
         assertEquals(1, cloudStorageConfigReq.getIdentities().size());
         assertEquals(CloudIdentityType.ID_BROKER, cloudStorageConfigReq.getIdentities().iterator().next().getType());
         assertEquals(1, cloudStorageConfigReq.getLocations().size());
-        assertEquals(CloudStorageCdpService.RANGER_ADMIN.name(), singleRequest.getType());
+        assertEquals(CloudStorageCdpService.RANGER_ADMIN, singleRequest.getType());
         assertEquals("ranger/example-path", singleRequest.getValue());
     }
 
@@ -136,7 +136,7 @@ public class CloudStorageManifesterTest {
                 .collect(Collectors.toSet()).size());
         assertEquals("table", cloudStorageConfigReq.getAws().getS3Guard().getDynamoTableName());
         assertEquals(1, cloudStorageConfigReq.getLocations().size());
-        assertEquals(CloudStorageCdpService.RANGER_ADMIN.name(), singleRequest.getType());
+        assertEquals(CloudStorageCdpService.RANGER_ADMIN, singleRequest.getType());
         assertEquals("ranger/example-path", singleRequest.getValue());
 
     }

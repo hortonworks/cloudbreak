@@ -304,7 +304,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     private StorageLocationBase storageLocation() {
         StorageLocationBase storageLocation = new StorageLocationBase();
         storageLocation.setValue("TheValueOfGivePropertyForStorageLocation");
-        storageLocation.setType(CloudStorageCdpService.RANGER_ADMIN.name());
+        storageLocation.setType(CloudStorageCdpService.RANGER_ADMIN);
         return storageLocation;
     }
 
