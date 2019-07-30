@@ -43,7 +43,6 @@ public class DatabaseV4RequestToDatabaseConfigConverter  extends AbstractConvers
         databaseConfig.setType(source.getType());
         databaseConfig.setEnvironmentId(source.getEnvironmentCrn());
 
-        databaseConfig.setConnectorJarUrl(source.getConnectorJarUrl());
         return databaseConfig;
     }
 }

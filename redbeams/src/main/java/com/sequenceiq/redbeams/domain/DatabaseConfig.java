@@ -78,9 +78,6 @@ public class DatabaseConfig implements ArchivableResource, AccountIdAwareResourc
     @Column(nullable = false)
     private String type;
 
-    @Column
-    private String connectorJarUrl;
-
     private boolean archived;
 
     private Long deletionTimestamp = -1L;
@@ -143,10 +140,6 @@ public class DatabaseConfig implements ArchivableResource, AccountIdAwareResourc
 
     public String getType() {
         return type;
-    }
-
-    public String getConnectorJarUrl() {
-        return connectorJarUrl;
     }
 
     public boolean isArchived() {
@@ -215,10 +208,6 @@ public class DatabaseConfig implements ArchivableResource, AccountIdAwareResourc
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public void setConnectorJarUrl(String connectorJarUrl) {
-        this.connectorJarUrl = connectorJarUrl;
     }
 
     public void setArchived(boolean archived) {

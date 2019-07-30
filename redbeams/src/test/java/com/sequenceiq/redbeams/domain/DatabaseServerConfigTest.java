@@ -72,9 +72,6 @@ public class DatabaseServerConfigTest {
         config.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
         assertEquals(ResourceStatus.SERVICE_MANAGED, config.getResourceStatus());
 
-        config.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
-        assertEquals("http://drivers.example.com/postgresql.jar", config.getConnectorJarUrl());
-
         config.setDeletionTimestamp(2L);
         assertEquals(2L, config.getDeletionTimestamp().longValue());
 
@@ -117,7 +114,6 @@ public class DatabaseServerConfigTest {
         long now = System.currentTimeMillis();
         config.setCreationDate(now);
         config.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
-        config.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
         config.setDeletionTimestamp(2L);
         config.setArchived(true);
         config.setEnvironmentId("myenvironment");
@@ -135,7 +131,6 @@ public class DatabaseServerConfigTest {
         assertEquals("dbpass", db.getConnectionPassword().getRaw());
         assertEquals(ResourceStatus.USER_MANAGED, db.getStatus());
         assertEquals("hive", db.getType());
-        assertEquals(config.getConnectorJarUrl(), db.getConnectorJarUrl());
         assertEquals(config.getEnvironmentId(), db.getEnvironmentId());
         assertEquals(config, db.getServer());
     }

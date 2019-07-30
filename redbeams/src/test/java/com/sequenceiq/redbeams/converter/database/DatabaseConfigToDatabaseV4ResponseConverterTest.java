@@ -33,8 +33,6 @@ public class DatabaseConfigToDatabaseV4ResponseConverterTest {
 
     private static final String TYPE = "type";
 
-    private static final String CONNECTOR_JAR_URL = "connectorJarUrl";
-
     private static final String ENVIRONMENT_ID = "environmentId";
 
     private static final String NAME = "name";
@@ -63,7 +61,6 @@ public class DatabaseConfigToDatabaseV4ResponseConverterTest {
         databaseConfig.setConnectionURL(CONNECTION_URL);
         databaseConfig.setDatabaseVendor(DatabaseVendor.MYSQL);
         databaseConfig.setType(TYPE);
-        databaseConfig.setConnectorJarUrl(CONNECTOR_JAR_URL);
         databaseConfig.setEnvironmentId(ENVIRONMENT_ID);
 
         DatabaseV4Response response = underTest.convert(databaseConfig);
@@ -78,7 +75,6 @@ public class DatabaseConfigToDatabaseV4ResponseConverterTest {
         assertEquals(CONNECTION_URL, response.getConnectionURL());
         assertEquals(DatabaseVendor.MYSQL.name(), response.getDatabaseEngine());
         assertEquals(TYPE, response.getType());
-        assertEquals(CONNECTOR_JAR_URL, response.getConnectorJarUrl());
         assertEquals(ENVIRONMENT_ID, response.getEnvironmentCrn());
     }
 }

@@ -47,8 +47,6 @@ public class RegisterDatabaseServerHandlerTest {
 
     private static final String CONNECTION_DRIVER = "connectionDriver";
 
-    private static final String CONNECTOR_JAR_URL = "connectorJarUrl";
-
     private static final String ROOT_USER_NAME = "rootUserName";
 
     private static final String ROOT_PASSWORD = "rootPassword";
@@ -87,7 +85,6 @@ public class RegisterDatabaseServerHandlerTest {
         dbStack.setDatabaseServer(databaseServer);
         databaseServer.setAccountId(ACCOUNT_ID);
         databaseServer.setConnectionDriver(CONNECTION_DRIVER);
-        databaseServer.setConnectorJarUrl(CONNECTOR_JAR_URL);
         databaseServer.setRootUserName(ROOT_USER_NAME);
         databaseServer.setRootPassword(ROOT_PASSWORD);
         databaseServer.setDatabaseVendor(DatabaseVendor.POSTGRES);
@@ -109,7 +106,6 @@ public class RegisterDatabaseServerHandlerTest {
         assertEquals(DB_STACK_NAME, databaseServerConfig.getName());
         assertEquals(ENVIRONMENT_ID, databaseServerConfig.getEnvironmentId());
         assertEquals(CONNECTION_DRIVER, databaseServerConfig.getConnectionDriver());
-        assertEquals(CONNECTOR_JAR_URL, databaseServerConfig.getConnectorJarUrl());
         assertEquals(ROOT_USER_NAME, databaseServerConfig.getConnectionUserName());
         assertEquals(ROOT_PASSWORD, databaseServerConfig.getConnectionPassword());
         assertEquals(DatabaseVendor.POSTGRES, databaseServerConfig.getDatabaseVendor());

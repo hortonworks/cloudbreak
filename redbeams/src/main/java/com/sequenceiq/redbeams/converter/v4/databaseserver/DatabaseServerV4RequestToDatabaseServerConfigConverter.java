@@ -39,8 +39,6 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverter
 
         server.setResourceStatus(ResourceStatus.USER_MANAGED);
 
-        server.setConnectorJarUrl(source.getConnectorJarUrl());
-
         server.setArchived(false);
         server.setDeletionTimestamp(null);
 

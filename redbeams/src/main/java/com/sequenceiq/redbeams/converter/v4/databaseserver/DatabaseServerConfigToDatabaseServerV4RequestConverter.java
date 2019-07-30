@@ -21,7 +21,6 @@ public class DatabaseServerConfigToDatabaseServerV4RequestConverter
         request.setDatabaseVendor(source.getDatabaseVendor().databaseType());
         request.setConnectionUserName("REDACTED");
         request.setConnectionPassword("REDACTED");
-        request.setConnectorJarUrl(source.getConnectorJarUrl());
 
         request.setEnvironmentCrn(source.getEnvironmentId());
 

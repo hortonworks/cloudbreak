@@ -65,7 +65,6 @@ public class RegisterDatabaseServerHandler implements EventHandler<RegisterDatab
         dbServerConfig.setName(dbStack.getName());
         dbServerConfig.setEnvironmentId(dbStack.getEnvironmentId());
         dbServerConfig.setConnectionDriver(dbStack.getDatabaseServer().getConnectionDriver());
-        dbServerConfig.setConnectorJarUrl(dbStack.getDatabaseServer().getConnectorJarUrl());
         dbServerConfig.setConnectionUserName(dbStack.getDatabaseServer().getRootUserName());
         dbServerConfig.setConnectionPassword(dbStack.getDatabaseServer().getRootPassword());
         dbServerConfig.setDatabaseVendor(dbStack.getDatabaseServer().getDatabaseVendor());

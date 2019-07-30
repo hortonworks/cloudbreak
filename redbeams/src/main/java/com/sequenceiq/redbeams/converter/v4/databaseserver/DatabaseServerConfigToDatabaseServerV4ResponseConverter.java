@@ -27,7 +27,6 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter
         response.setConnectionDriver(source.getConnectionDriver());
         response.setConnectionUserName(getConversionService().convert(source.getConnectionUserNameSecret(), SecretResponse.class));
         response.setConnectionPassword(getConversionService().convert(source.getConnectionPasswordSecret(), SecretResponse.class));
-        response.setConnectorJarUrl(source.getConnectorJarUrl());
 
         response.setCreationDate(source.getCreationDate());
 

@@ -6,13 +6,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServerV4Base;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
-import com.sequenceiq.redbeams.validation.ValidConnectorJarUrlForDatabaseVendor;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = ModelDescriptions.DATABASE_SERVER_REQUEST)
-@ValidConnectorJarUrlForDatabaseVendor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseServerV4Request extends DatabaseServerV4Base {
 

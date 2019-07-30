@@ -74,7 +74,6 @@ public class DBStackToDatabaseStackConverter {
             .flavor(dbStackDatabaseServer.getInstanceType())
             .engine(engine)
             .connectionDriver(dbStackDatabaseServer.getConnectionDriver())
-            .connectorJarUrl(dbStackDatabaseServer.getConnectorJarUrl())
             .rootUserName(dbStackDatabaseServer.getRootUserName())
             .rootPassword(dbStackDatabaseServer.getRootPassword())
             .port(dbStackDatabaseServer.getPort())
