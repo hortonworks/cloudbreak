@@ -10,7 +10,9 @@ import org.junit.Test;
 public class UsageLoggingUtilTest {
 
     UsageLoggingUtil util;
+
     Cluster cluster;
+
     Stack stack;
 
     @Test
