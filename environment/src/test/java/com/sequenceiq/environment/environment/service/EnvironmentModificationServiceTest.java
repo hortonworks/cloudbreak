@@ -84,7 +84,8 @@ class EnvironmentModificationServiceTest {
         EnvironmentEditDto environmentDto = EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
                 .withAccountId(ACCOUNT_ID)
                 .build();
-        when(environmentRepository.findByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
         environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
         verify(environmentRepository).save(any());
     }
@@ -96,7 +97,8 @@ class EnvironmentModificationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .withDescription(description)
                 .build();
-        when(environmentRepository.findByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
         environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
@@ -111,7 +113,8 @@ class EnvironmentModificationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .withRegions(Set.of("r1"))
                 .build();
-        when(environmentRepository.findByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateRegions(any(), any(), any(), any())).thenReturn(validationResultBuilder);
         when(validationResultBuilder.build()).thenReturn(validationResult);
@@ -136,7 +139,8 @@ class EnvironmentModificationServiceTest {
                         .withLongitude(0.1)
                         .build())
                 .build();
-        when(environmentRepository.findByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateRegions(any(), any(), any(), any())).thenReturn(validationResultBuilder);
         when(validationResultBuilder.build()).thenReturn(validationResult);
@@ -161,7 +165,8 @@ class EnvironmentModificationServiceTest {
                         .withLongitude(0.1)
                         .build())
                 .build();
-        when(environmentRepository.findByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateRegions(any(), any(), any(), any())).thenReturn(validationResultBuilder);
         when(validationResultBuilder.build()).thenReturn(validationResult);
@@ -190,7 +195,8 @@ class EnvironmentModificationServiceTest {
         Region region = new Region();
         region.setName("r3");
         value.setRegions(Set.of(region));
-        when(environmentRepository.findByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateRegions(any(), any(), any(), any())).thenReturn(validationResultBuilder);
         when(validationResultBuilder.build()).thenReturn(validationResult);
@@ -211,7 +217,8 @@ class EnvironmentModificationServiceTest {
                 .withNetwork(network)
                 .build();
         Environment value = new Environment();
-        when(environmentRepository.findByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
         when(networkService.findByEnvironment(any())).thenReturn(Optional.empty());
         when(networkService.saveNetwork(any(), any(), anyString())).thenReturn(new AwsNetwork());
         environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
@@ -231,7 +238,8 @@ class EnvironmentModificationServiceTest {
                 .withAuthentication(authentication)
                 .build();
         Environment value = new Environment();
-        when(environmentRepository.findByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(envAuthResult);
         environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
 
@@ -249,7 +257,8 @@ class EnvironmentModificationServiceTest {
                 .withSecurityAccess(securityAccessDto)
                 .build();
         Environment value = new Environment();
-        when(environmentRepository.findByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
         environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
@@ -262,7 +271,8 @@ class EnvironmentModificationServiceTest {
         EnvironmentEditDto environmentDto = EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
                 .withAccountId(ACCOUNT_ID)
                 .build();
-        when(environmentRepository.findByResourceCrnAndAccountId(eq(CRN), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
+        when(environmentRepository
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(CRN), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
         environmentModificationServiceUnderTest.editByCrn(CRN, environmentDto);
         verify(environmentRepository).save(any());
     }
@@ -275,7 +285,8 @@ class EnvironmentModificationServiceTest {
                 .anEnvironmentChangeCredentialDto()
                 .withCredentialName(credentialName)
                 .build();
-        when(environmentRepository.findByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
         when(credentialService.getByNameForAccountId(eq(credentialName), eq(ACCOUNT_ID))).thenReturn(value);
         environmentModificationServiceUnderTest.changeCredentialByEnvironmentName(ACCOUNT_ID, ENVIRONMENT_NAME, environmentChangeDto);
 
@@ -292,7 +303,8 @@ class EnvironmentModificationServiceTest {
                 .anEnvironmentChangeCredentialDto()
                 .withCredentialName(credentialName)
                 .build();
-        when(environmentRepository.findByResourceCrnAndAccountId(eq(CRN), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
+        when(environmentRepository
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(CRN), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
         when(credentialService.getByNameForAccountId(eq(credentialName), eq(ACCOUNT_ID))).thenReturn(value);
 
         environmentModificationServiceUnderTest.changeCredentialByEnvironmentCrn(ACCOUNT_ID, CRN, environmentChangeDto);

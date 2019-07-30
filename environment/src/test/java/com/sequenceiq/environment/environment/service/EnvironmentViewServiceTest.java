@@ -41,7 +41,8 @@ class EnvironmentViewServiceTest {
     @Test
     void findByNamesInAccount() {
         Set<EnvironmentView> queryResult = Set.of();
-        when(environmentViewRepository.findAllByNameInAndAccountId(anyCollection(), eq(ACCOUNT_ID)))
+        when(environmentViewRepository
+                .findAllByNameInAndAccountIdAndArchivedIsFalse(anyCollection(), eq(ACCOUNT_ID)))
                 .thenReturn(queryResult);
         assertEquals(queryResult, environmentViewServiceUnderTest.findByNamesInAccount(Set.of("name1", "name2"), ACCOUNT_ID),
                 "findByNamesInAccount expected to give back the same result as repository mock (findAllByNameInAndAccountId)");
@@ -56,7 +57,8 @@ class EnvironmentViewServiceTest {
     @Test
     void findByResourceCrnsInAccount() {
         Set<EnvironmentView> queryResult = Set.of();
-        when(environmentViewRepository.findAllByResourceCrnInAndAccountId(anyCollection(), eq(ACCOUNT_ID)))
+        when(environmentViewRepository
+                .findAllByResourceCrnInAndAccountIdAndArchivedIsFalse(anyCollection(), eq(ACCOUNT_ID)))
                 .thenReturn(queryResult);
         assertEquals(queryResult, environmentViewServiceUnderTest.findByResourceCrnsInAccount(Set.of("crn1", "crn2"), ACCOUNT_ID),
                 "findByResourceCrnsInAccount expected to give back the same result as repository mock (findAllByResourceCrnInAndAccountId)");
@@ -83,33 +85,37 @@ class EnvironmentViewServiceTest {
     @Test
     void findAllByCredentialId() {
         environmentViewServiceUnderTest.findAllByCredentialId(1L);
-        verify(environmentViewRepository).findAllByCredentialId(eq(1L));
+        verify(environmentViewRepository).findAllByCredentialIdAndArchivedIsFalse(eq(1L));
     }
 
     @Test
     void getIdByName() {
         long value = 1L;
-        when(environmentViewRepository.getIdByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(value);
+        when(environmentViewRepository
+                .getIdByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(value);
         assertEquals(value, environmentViewServiceUnderTest.getIdByName(ENVIRONMENT_NAME, ACCOUNT_ID));
     }
 
     @Test
     void getIdByNameNotFound() {
-        when(environmentViewRepository.getIdByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(null);
+        when(environmentViewRepository
+                .getIdByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(null);
         assertThrows(NotFoundException.class, () -> environmentViewServiceUnderTest.getIdByName(ENVIRONMENT_NAME, ACCOUNT_ID));
     }
 
     @Test
     void getIdByCrn() {
         long value = 1L;
-        when(environmentViewRepository.getIdByResourceCrnAndAccountId(eq(CRN), eq(ACCOUNT_ID))).thenReturn(value);
+        when(environmentViewRepository
+                .getIdByResourceCrnAndAccountIdAndArchivedIsFalse(eq(CRN), eq(ACCOUNT_ID))).thenReturn(value);
         assertEquals(value, environmentViewServiceUnderTest.getIdByCrn(CRN, ACCOUNT_ID));
 
     }
 
     @Test
     void getIdByCrnNotFound() {
-        when(environmentViewRepository.getIdByResourceCrnAndAccountId(eq(CRN), eq(ACCOUNT_ID))).thenReturn(null);
+        when(environmentViewRepository
+                .getIdByResourceCrnAndAccountIdAndArchivedIsFalse(eq(CRN), eq(ACCOUNT_ID))).thenReturn(null);
         assertThrows(NotFoundException.class, () -> environmentViewServiceUnderTest.getIdByCrn(CRN, ACCOUNT_ID));
     }
 

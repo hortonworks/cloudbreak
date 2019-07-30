@@ -77,14 +77,16 @@ public class EnvironmentService {
     }
 
     public EnvironmentDto getByNameAndAccountId(String environmentName, String accountId) {
-        Optional<Environment> environment = environmentRepository.findByNameAndAccountId(environmentName, accountId);
+        Optional<Environment> environment = environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId);
         MDCBuilder.buildMdcContext(environment
                 .orElseThrow(notFound("Environment with name:", environmentName)));
         return environmentDtoConverter.environmentToDto(environment.get());
     }
 
     public EnvironmentDto getByCrnAndAccountId(String crn, String accountId) {
-        Optional<Environment> environment = environmentRepository.findByResourceCrnAndAccountId(crn, accountId);
+        Optional<Environment> environment = environmentRepository
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(() -> new NotFoundException(String.format("No environment found with resource CRN '%s'", crn))));
         return environmentDtoConverter.environmentToDto(environment.get());
     }
@@ -95,7 +97,8 @@ public class EnvironmentService {
     }
 
     public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn) {
-        Optional<Environment> environment = environmentRepository.findByNameAndAccountId(environmentName, accountId);
+        Optional<Environment> environment = environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(()
                 -> new NotFoundException(String.format("No environment found with name '%s'", environmentName))));
         LOGGER.debug(String.format("Deleting environment [name: %s]", environment.get().getName()));
@@ -104,7 +107,8 @@ public class EnvironmentService {
     }
 
     public EnvironmentDto deleteByCrnAndAccountId(String crn, String accountId, String actualUserCrn) {
-        Optional<Environment> environment = environmentRepository.findByResourceCrnAndAccountId(crn, accountId);
+        Optional<Environment> environment = environmentRepository
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(()
                 -> new NotFoundException(String.format("No environment found with crn '%s'", crn))));
         LOGGER.debug(String.format("Deleting  environment [name: %s]", environment.get().getName()));
@@ -123,7 +127,8 @@ public class EnvironmentService {
     public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn) {
         List<EnvironmentDto> environmentDtos = new ArrayList<>();
         //TODO: it can have less results than the desired - is it okay?
-        Set<Environment> environments = environmentRepository.findByNameInAndAccountId(environmentNames, accountId);
+        Set<Environment> environments = environmentRepository
+                .findByNameInAndAccountIdAndArchivedIsFalse(environmentNames, accountId);
         for (Environment environment : environments) {
             LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
             //TODO: it will fail with the n th element and finished - this is a bug
@@ -136,7 +141,8 @@ public class EnvironmentService {
     public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn) {
         List<EnvironmentDto> environmentDtos = new ArrayList<>();
         //TODO: it can have less results than the desired - is it okay?
-        Set<Environment> environments = environmentRepository.findByResourceCrnInAndAccountId(crns, accountId);
+        Set<Environment> environments = environmentRepository
+                .findByResourceCrnInAndAccountIdAndArchivedIsFalse(crns, accountId);
         for (Environment environment : environments) {
             LOGGER.debug(String.format("Starting to archive environment [CRN: %s]", environment.getName()));
             //TODO: it will fail with the n th element and finished - this is a bug
@@ -194,7 +200,7 @@ public class EnvironmentService {
     }
 
     boolean isNameOccupied(String name, String accountId) {
-        return environmentRepository.existsWithNameInAccount(name, accountId);
+        return environmentRepository.existsWithNameAndAccountAndArchivedIsFalse(name, accountId);
     }
 
     CloudRegions getRegionsByEnvironment(Environment environment) {
@@ -227,12 +233,14 @@ public class EnvironmentService {
     }
 
     public List<EnvironmentDto> findAllByIdInAndStatusIn(Collection<Long> resourceIds, Collection<EnvironmentStatus> environmentStatuses) {
-        List<Environment> environments = environmentRepository.findAllByIdInAndStatusIn(resourceIds, environmentStatuses);
+        List<Environment> environments = environmentRepository
+                .findAllByIdInAndStatusInAndArchivedIsFalse(resourceIds, environmentStatuses);
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
     }
 
     public List<EnvironmentDto> findAllByStatusIn(Collection<EnvironmentStatus> environmentStatuses) {
-        List<Environment> environments = environmentRepository.findAllByStatusIn(environmentStatuses);
+        List<Environment> environments = environmentRepository
+                .findAllByStatusInAndArchivedIsFalse(environmentStatuses);
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
     }
 
