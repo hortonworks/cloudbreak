@@ -10,6 +10,7 @@ import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -41,6 +42,10 @@ public class EnvironmentEditRequest {
 
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource;
+
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
+    private AwsEnvironmentParameters aws;
 
     public String getDescription() {
         return description;
@@ -104,5 +109,13 @@ public class EnvironmentEditRequest {
 
     public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         this.idBrokerMappingSource = idBrokerMappingSource;
+    }
+
+    public AwsEnvironmentParameters getAws() {
+        return aws;
+    }
+
+    public void setAws(AwsEnvironmentParameters aws) {
+        this.aws = aws;
     }
 }

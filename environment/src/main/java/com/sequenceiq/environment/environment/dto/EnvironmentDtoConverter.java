@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.dto;
 
-import java.io.IOException;
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
+
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -10,8 +11,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.aws.AwsEnvironmentParamsDto;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 
 @Component
 public class EnvironmentDtoConverter {
@@ -20,11 +21,14 @@ public class EnvironmentDtoConverter {
 
     private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
 
+    private final Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap;
+
     private final AuthenticationDtoConverter authenticationDtoConverter;
 
     public EnvironmentDtoConverter(Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap,
-            AuthenticationDtoConverter authenticationDtoConverter) {
+            Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap, AuthenticationDtoConverter authenticationDtoConverter) {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
+        this.environmentParamsConverterMap = environmentParamsConverterMap;
         this.authenticationDtoConverter = authenticationDtoConverter;
     }
 
@@ -52,25 +56,12 @@ public class EnvironmentDtoConverter {
                 .withTunnel(environment.getTunnel())
                 .withSecurityAccess(environmentToSecurityAccessDto(environment))
                 .withIdBrokerMappingSource(environment.getIdBrokerMappingSource());
-        if (environment.getCloudPlatform().equals(CloudPlatform.AWS.name())) {
-            builder.withAws(getParameterAs(environment, AwsEnvironmentParamsDto.class));
-        }
-        if (environment.getNetwork() != null) {
-            builder.withNetwork(environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()))
-                    .convertToDto(environment.getNetwork()));
-        }
-        return builder.build();
-    }
 
-    private <T> T getParameterAs(Environment environment, Class<T> clss) {
-        try {
-            return environment.getParameters().get(clss);
-        } catch (IOException e) {
-            LOGGER.info("Environment parameters cannot be deserialize. {}", e.getMessage(), e);
-        } catch (NullPointerException e) {
-            LOGGER.info("Environment parameter value is null");
-        }
-        return null;
+        doIfNotNull(environment.getParameters(), parameters -> builder.withParameters(
+                environmentParamsConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform())).convertToDto(parameters)));
+        doIfNotNull(environment.getNetwork(), network -> builder.withNetwork(
+                environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform())).convertToDto(network)));
+        return builder.build();
     }
 
     public Environment creationDtoToEnvironment(EnvironmentCreationDto creationDto) {

@@ -9,6 +9,7 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
 public class EnvironmentEditDto {
 
@@ -32,6 +33,8 @@ public class EnvironmentEditDto {
 
     private final IdBrokerMappingSource idBrokerMappingSource;
 
+    private final ParametersDto parameters;
+
     public EnvironmentEditDto(
             String description,
             Set<String> regions,
@@ -42,7 +45,8 @@ public class EnvironmentEditDto {
             EnvironmentTelemetry telemetry,
             SecurityAccessDto securityAccess,
             Tunnel tunnel,
-            IdBrokerMappingSource idBrokerMappingSource) {
+            IdBrokerMappingSource idBrokerMappingSource,
+            ParametersDto parameters) {
         this.description = description;
         this.accountId = accountId;
         if (CollectionUtils.isEmpty(regions)) {
@@ -57,6 +61,7 @@ public class EnvironmentEditDto {
         this.securityAccess = securityAccess;
         this.tunnel = tunnel;
         this.idBrokerMappingSource = idBrokerMappingSource;
+        this.parameters = parameters;
     }
 
     public String getDescription() {
@@ -103,6 +108,10 @@ public class EnvironmentEditDto {
         return idBrokerMappingSource;
     }
 
+    public ParametersDto getParameters() {
+        return parameters;
+    }
+
     public static final class EnvironmentEditDtoBuilder {
         private String description;
 
@@ -123,6 +132,8 @@ public class EnvironmentEditDto {
         private Tunnel tunnel;
 
         private IdBrokerMappingSource idBrokerMappingSource;
+
+        private ParametersDto parameters;
 
         private EnvironmentEditDtoBuilder() {
         }
@@ -181,9 +192,14 @@ public class EnvironmentEditDto {
             return this;
         }
 
+        public EnvironmentEditDtoBuilder withParameters(ParametersDto parameters) {
+            this.parameters = parameters;
+            return this;
+        }
+
         public EnvironmentEditDto build() {
             return new EnvironmentEditDto(description, regions, accountId, location, network,
-                    authentication, telemetry, securityAccess, tunnel, idBrokerMappingSource);
+                    authentication, telemetry, securityAccess, tunnel, idBrokerMappingSource, parameters);
         }
     }
 }

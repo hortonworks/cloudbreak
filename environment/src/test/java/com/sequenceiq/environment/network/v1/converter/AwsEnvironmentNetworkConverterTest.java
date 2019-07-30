@@ -3,6 +3,7 @@ package com.sequenceiq.environment.network.v1.converter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
 import java.util.Map;
@@ -10,6 +11,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -17,8 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.v1.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -58,6 +61,10 @@ class AwsEnvironmentNetworkConverterTest {
 
     private static final String SUBNET_CIDR_2 = "2.2.2.2/24";
 
+    @Mock
+    private EnvironmentViewConverter environmentViewConverter;
+
+    @InjectMocks
     private AwsEnvironmentNetworkConverter underTest = new AwsEnvironmentNetworkConverter();
 
     @Test
@@ -80,7 +87,7 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(SUBNET_1, actual.getSubnetMetasMap().get(SUBNET_1).getId());
         assertEquals(SUBNET_2, actual.getSubnetMetasMap().get(SUBNET_2).getId());
         assertEquals(SUBNET_3, actual.getSubnetMetasMap().get(SUBNET_3).getId());
-        assertEnvironmentView(environment, actual);
+        verify(environmentViewConverter).convert(environment);
     }
 
     @Test
@@ -101,7 +108,7 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(SUBNET_1, actual.getSubnetMetasMap().get(SUBNET_1).getId());
         assertEquals(SUBNET_2, actual.getSubnetMetasMap().get(SUBNET_2).getId());
         assertEquals(SUBNET_3, actual.getSubnetMetasMap().get(SUBNET_3).getId());
-        assertEnvironmentView(environment, actual);
+        verify(environmentViewConverter).convert(environment);
     }
 
     @Test
@@ -184,22 +191,6 @@ class AwsEnvironmentNetworkConverterTest {
         awsNetwork.setResourceCrn("crn");
         awsNetwork.setVpcId(VPC_ID);
         return awsNetwork;
-    }
-
-    private void assertEnvironmentView(Environment environment, AwsNetwork actual) {
-        EnvironmentView actualView = actual.getEnvironments().iterator().next();
-        assertEquals(environment.getId(), actualView.getId());
-        assertEquals(environment.getName(), actualView.getName());
-        assertEquals(environment.getAccountId(), actualView.getAccountId());
-        assertEquals(environment.getDescription(), actualView.getDescription());
-        assertEquals(environment.getCloudPlatform(), actualView.getCloudPlatform());
-        assertEquals(environment.getCredential(), actualView.getCredential());
-        assertEquals(environment.getLatitude(), actualView.getLatitude());
-        assertEquals(environment.getLongitude(), actualView.getLongitude());
-        assertEquals(environment.getLocation(), actualView.getLocation());
-        assertEquals(environment.getLocationDisplayName(), actualView.getLocationDisplayName());
-        assertEquals(environment.getNetwork(), actualView.getNetwork());
-        assertEquals(environment.getRegions(), actualView.getRegions());
     }
 
     private Environment createEnvironment() {

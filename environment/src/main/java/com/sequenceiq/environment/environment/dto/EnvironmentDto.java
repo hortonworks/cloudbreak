@@ -12,7 +12,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Region;
-import com.sequenceiq.environment.environment.dto.aws.AwsEnvironmentParamsDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
@@ -67,7 +67,7 @@ public class EnvironmentDto implements Payload {
 
     private IdBrokerMappingSource idBrokerMappingSource;
 
-    private AwsEnvironmentParamsDto aws;
+    private ParametersDto parameters;
 
     @Override
     public Long getResourceId() {
@@ -263,12 +263,12 @@ public class EnvironmentDto implements Payload {
         this.idBrokerMappingSource = idBrokerMappingSource;
     }
 
-    public AwsEnvironmentParamsDto getAws() {
-        return aws;
+    public ParametersDto getParameters() {
+        return parameters;
     }
 
-    public void setAws(AwsEnvironmentParamsDto aws) {
-        this.aws = aws;
+    public void setParameters(ParametersDto parameters) {
+        this.parameters = parameters;
     }
 
     public static Builder builder() {
@@ -322,7 +322,7 @@ public class EnvironmentDto implements Payload {
 
         private IdBrokerMappingSource idBrokerMappingSource;
 
-        private AwsEnvironmentParamsDto aws;
+        private ParametersDto parameters;
 
         private Builder() {
         }
@@ -442,8 +442,8 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
-        public Builder withAws(AwsEnvironmentParamsDto aws) {
-            this.aws = aws;
+        public Builder withParameters(ParametersDto parameters) {
+            this.parameters = parameters;
             return this;
         }
 
@@ -472,7 +472,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setSecurityAccess(securityAccess);
             environmentDto.setTunnel(tunnel);
             environmentDto.setIdBrokerMappingSource(idBrokerMappingSource);
-            environmentDto.setAws(aws);
+            environmentDto.setParameters(parameters);
             return environmentDto;
         }
     }

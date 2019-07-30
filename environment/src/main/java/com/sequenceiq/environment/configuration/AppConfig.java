@@ -23,6 +23,7 @@ import com.sequenceiq.environment.environment.validation.network.EnvironmentNetw
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.logger.MDCContextFilter;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
 
 @Configuration
@@ -36,6 +37,9 @@ public class AppConfig {
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
+
+    @Inject
+    private List<EnvironmentParametersConverter> environmentParametersConverters;
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
@@ -84,6 +88,13 @@ public class AppConfig {
         return environmentSecurityGroupValidators
                 .stream()
                 .collect(Collectors.toMap(EnvironmentSecurityGroupValidator::getCloudPlatform, Function.identity()));
+    }
+
+    @Bean
+    public Map<CloudPlatform, EnvironmentParametersConverter> environmentParametersConvertersByCloudPlatform() {
+        return environmentParametersConverters
+                .stream()
+                .collect(Collectors.toMap(EnvironmentParametersConverter::getCloudPlatform, Function.identity()));
     }
 
     @Bean
