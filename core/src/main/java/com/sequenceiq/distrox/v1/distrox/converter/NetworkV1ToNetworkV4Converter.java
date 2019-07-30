@@ -2,10 +2,10 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -16,24 +16,41 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
-import com.sequenceiq.distrox.v1.distrox.StackOperation;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @Component
 public class NetworkV1ToNetworkV4Converter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackOperation.class);
-
-    public NetworkV4Request convertToNetworkV4Request(Pair<NetworkV1Request, EnvironmentNetworkResponse> network) {
-        EnvironmentNetworkResponse value = network.getValue();
+    public NetworkV4Request convertToNetworkV4Request(Pair<NetworkV1Request, DetailedEnvironmentResponse> network) {
+        EnvironmentNetworkResponse value = network.getValue().getNetwork();
         NetworkV1Request key = network.getKey();
+        if (key == null) {
+            key = new NetworkV1Request();
+        }
 
         NetworkV4Request response = new NetworkV4Request();
-        if (key != null) {
-            response.setAws(getIfNotNull(new ImmutablePair<>(key.getAws(), value), this::convertToAwsStackRequest));
-            response.setAzure(getIfNotNull(new ImmutablePair<>(key.getAzure(), value), this::convertToAzureStackRequest));
+
+        switch (network.getValue().getCloudPlatform()) {
+            case "AWS":
+                response.setAws(getAwsNetworkParameters(Optional.ofNullable(key.getAws()), value));
+                break;
+            case "AZURE":
+                response.setAzure(getAzureNetworkParameters(Optional.ofNullable(key.getAzure()), value));
+                break;
+            default:
         }
         return response;
+    }
+
+    private AzureNetworkV4Parameters getAzureNetworkParameters(Optional<AzureNetworkV1Parameters> azure, EnvironmentNetworkResponse value) {
+        AzureNetworkV1Parameters params = azure.orElse(new AzureNetworkV1Parameters());
+        return getIfNotNull(new ImmutablePair<>(params, value), this::convertToAzureStackRequest);
+    }
+
+    private AwsNetworkV4Parameters getAwsNetworkParameters(Optional<AwsNetworkV1Parameters> key, EnvironmentNetworkResponse value) {
+        AwsNetworkV1Parameters params = key.orElse(new AwsNetworkV1Parameters());
+        return getIfNotNull(new ImmutablePair<>(params, value), this::convertToAwsStackRequest);
     }
 
     private AzureNetworkV4Parameters convertToAzureStackRequest(Pair<AzureNetworkV1Parameters, EnvironmentNetworkResponse> source) {

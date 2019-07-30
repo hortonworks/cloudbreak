@@ -17,6 +17,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,7 +37,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
     @Test
     public void testConvertToStackRequestWhenAwsPresentedWithSubnet() {
         NetworkV1Request networkV1Request = awsNetworkV1Request();
-        EnvironmentNetworkResponse environmentNetworkResponse = awsEnvironmentNetwork();
+        DetailedEnvironmentResponse environmentNetworkResponse = awsEnvironmentNetwork();
 
 
         NetworkV4Request networkV4Request = underTest
@@ -49,7 +50,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
     @Test
     public void testConvertToStackRequestWhenAwsPresentedWithoutSubnet() {
         NetworkV1Request networkV1Request = awsEmptyNetworkV1Request();
-        EnvironmentNetworkResponse environmentNetworkResponse = awsEnvironmentNetwork();
+        DetailedEnvironmentResponse environmentNetworkResponse = awsEnvironmentNetwork();
 
 
         NetworkV4Request networkV4Request = underTest
@@ -62,7 +63,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
     @Test
     public void testConvertToStackRequestWhenAzurePresentedWithSubnet() {
         NetworkV1Request networkV1Request = azureNetworkV1Request();
-        EnvironmentNetworkResponse environmentNetworkResponse = azureEnvironmentNetwork();
+        DetailedEnvironmentResponse environmentNetworkResponse = azureEnvironmentNetwork();
 
 
         NetworkV4Request networkV4Request = underTest
@@ -76,7 +77,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
     @Test
     public void testConvertToStackRequestWhenAzurePresentedWithoutSubnet() {
         NetworkV1Request networkV1Request = azureEmptyNetworkV1Request();
-        EnvironmentNetworkResponse environmentNetworkResponse = azureEnvironmentNetwork();
+        DetailedEnvironmentResponse environmentNetworkResponse = azureEnvironmentNetwork();
 
 
         NetworkV4Request networkV4Request = underTest
@@ -90,7 +91,7 @@ public class NetworkV1ToNetworkV4ConverterTest {
     @Test
     public void testConvertToStackRequestWhenYarnPresented() {
         NetworkV1Request networkV1Request = yarnNetworkV1Request();
-        EnvironmentNetworkResponse environmentNetworkResponse = yarnEnvironmentNetwork();
+        DetailedEnvironmentResponse environmentNetworkResponse = yarnEnvironmentNetwork();
 
 
         NetworkV4Request networkV4Request = underTest
@@ -99,7 +100,9 @@ public class NetworkV1ToNetworkV4ConverterTest {
         Assert.assertTrue(networkV4Request.createYarn().asMap().size() == 1);
     }
 
-    private EnvironmentNetworkResponse awsEnvironmentNetwork() {
+    private DetailedEnvironmentResponse awsEnvironmentNetwork() {
+        DetailedEnvironmentResponse der = new DetailedEnvironmentResponse();
+        der.setCloudPlatform("AWS");
         EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
         environmentNetworkResponse.setSubnetIds(SUBNET_IDS);
 
@@ -108,7 +111,8 @@ public class NetworkV1ToNetworkV4ConverterTest {
 
         environmentNetworkResponse.setAws(environmentNetworkAwsParams);
 
-        return environmentNetworkResponse;
+        der.setNetwork(environmentNetworkResponse);
+        return der;
     }
 
     private NetworkV1Request awsNetworkV1Request() {
@@ -132,7 +136,9 @@ public class NetworkV1ToNetworkV4ConverterTest {
         return networkV1Request;
     }
 
-    private EnvironmentNetworkResponse azureEnvironmentNetwork() {
+    private DetailedEnvironmentResponse azureEnvironmentNetwork() {
+        DetailedEnvironmentResponse der = new DetailedEnvironmentResponse();
+        der.setCloudPlatform("AZURE");
         EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
         environmentNetworkResponse.setSubnetIds(SUBNET_IDS);
 
@@ -143,7 +149,8 @@ public class NetworkV1ToNetworkV4ConverterTest {
 
         environmentNetworkResponse.setAzure(environmentNetworkAzureParams);
 
-        return environmentNetworkResponse;
+        der.setNetwork(environmentNetworkResponse);
+        return der;
     }
 
     private NetworkV1Request azureNetworkV1Request() {
@@ -167,7 +174,9 @@ public class NetworkV1ToNetworkV4ConverterTest {
         return networkV1Request;
     }
 
-    private EnvironmentNetworkResponse yarnEnvironmentNetwork() {
+    private DetailedEnvironmentResponse yarnEnvironmentNetwork() {
+        DetailedEnvironmentResponse der = new DetailedEnvironmentResponse();
+        der.setCloudPlatform("YARN");
         EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
 
         EnvironmentNetworkYarnParams environmentNetwork = new EnvironmentNetworkYarnParams();
@@ -175,8 +184,8 @@ public class NetworkV1ToNetworkV4ConverterTest {
 
 
         environmentNetworkResponse.setYarn(environmentNetwork);
-
-        return environmentNetworkResponse;
+        der.setNetwork(environmentNetworkResponse);
+        return der;
     }
 
     private NetworkV1Request yarnNetworkV1Request() {
