@@ -8,7 +8,6 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.validation.ValidJdbcConnectionUrl;
-import com.sequenceiq.cloudbreak.validation.ValidUrl;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -42,11 +41,6 @@ public abstract class DatabaseV4Base implements Serializable {
 
     @ApiModelProperty(value = Database.CONNECTION_DRIVER)
     private String connectionDriver;
-
-    @Size(max = 150)
-    @ValidUrl
-    @ApiModelProperty(Database.CONNECTOR_JAR_URL)
-    private String connectorJarUrl;
 
     @ApiModelProperty(Database.ENVIRONMENT_CRN)
     private String environmentCrn;
@@ -89,14 +83,6 @@ public abstract class DatabaseV4Base implements Serializable {
 
     public void setConnectionDriver(String connectionDriver) {
         this.connectionDriver = connectionDriver;
-    }
-
-    public String getConnectorJarUrl() {
-        return connectorJarUrl;
-    }
-
-    public void setConnectorJarUrl(String connectorJarUrl) {
-        this.connectorJarUrl = connectorJarUrl;
     }
 
     public String getEnvironmentCrn() {

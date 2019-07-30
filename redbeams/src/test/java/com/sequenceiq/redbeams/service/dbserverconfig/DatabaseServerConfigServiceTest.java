@@ -209,7 +209,7 @@ public class DatabaseServerConfigServiceTest {
         doAnswer(new Answer() {
             public Object answer(InvocationOnMock invocation) {
                 Errors errors = invocation.getArgument(1);
-                errors.rejectValue("connectorJarUrl", "", "bad jar");
+                errors.rejectValue("databaseVendor", "", "bad vendor");
                 errors.reject("", "epic fail");
                 return null;
             }
@@ -379,7 +379,7 @@ public class DatabaseServerConfigServiceTest {
         doAnswer(new Answer() {
             public Object answer(InvocationOnMock invocation) {
                 Errors errors = invocation.getArgument(1);
-                errors.rejectValue("connectorJarUrl", "", "bad jar");
+                errors.rejectValue("databaseVendor", "", "bad vendor");
                 errors.reject("", "epic fail");
                 return null;
             }
@@ -388,7 +388,7 @@ public class DatabaseServerConfigServiceTest {
         String result = underTest.testConnection(SERVER_CRN.toString());
 
         assertTrue(result.contains("epic fail"));
-        assertTrue(result.contains("connectorJarUrl: bad jar"));
+        assertTrue(result.contains("databaseVendor: bad vendor"));
         verify(connectionValidator).validate(eq(server), any(Errors.class));
     }
 

@@ -22,7 +22,6 @@ public class DatabaseConfigToDatabaseV4ResponseConverter extends AbstractConvers
         json.setConnectionUserName(getConversionService().convert(source.getConnectionUserName().getSecret(), SecretResponse.class));
         json.setConnectionPassword(getConversionService().convert(source.getConnectionPassword().getSecret(), SecretResponse.class));
         json.setDatabaseEngineDisplayName(source.getDatabaseVendor().displayName());
-        json.setConnectorJarUrl(source.getConnectorJarUrl());
         json.setCreationDate(source.getCreationDate());
         json.setEnvironmentCrn(source.getEnvironmentId());
         json.setType(source.getType());

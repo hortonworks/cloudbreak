@@ -50,7 +50,6 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
         server.setConnectionUserName("root");
         server.setConnectionPassword("cloudera");
-        server.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
         server.setCreationDate(System.currentTimeMillis());
         server.setEnvironmentId("myenvironment");
         server.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
@@ -75,7 +74,6 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertEquals(server.getDatabaseVendor().displayName(), response.getDatabaseVendorDisplayName());
         assertNotNull(response.getConnectionUserName());
         assertNotNull(response.getConnectionPassword());
-        assertEquals(server.getConnectorJarUrl(), response.getConnectorJarUrl());
         assertEquals(server.getCreationDate(), response.getCreationDate());
         assertEquals(server.getEnvironmentId(), response.getEnvironmentCrn());
         assertEquals(server.getResourceStatus(), response.getResourceStatus());
@@ -95,7 +93,6 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
         server.setConnectionUserName("root");
         server.setConnectionPassword("cloudera");
-        server.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
         server.setCreationDate(System.currentTimeMillis());
         server.setEnvironmentId("myenvironment");
         server.setResourceStatus(ResourceStatus.USER_MANAGED);

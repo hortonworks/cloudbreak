@@ -25,7 +25,6 @@ public final class ModelDescriptions {
         public static final String DESCRIPTION = "Description of the database";
         public static final String CONNECTION_URL = "JDBC connection URL in the form of jdbc:<db-type>:<driver-specific-part>";
         public static final String CONNECTION_DRIVER = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
-        public static final String CONNECTOR_JAR_URL = "URL that points to the JAR of the connection driver";
         public static final String DB_ENGINE = "Name of the database vendor (MYSQL, POSTGRES...)";
         public static final String DB_ENGINE_DISPLAYNAME = "Display name of the database vendor (MySQL, PostgreSQL, ...)";
         public static final String VERSION = "Version of the Database";
@@ -52,7 +51,6 @@ public final class ModelDescriptions {
         public static final String HOST = "Host of the database server";
         public static final String PORT = "Port of the database server";
         public static final String CONNECTION_DRIVER = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
-        public static final String CONNECTOR_JAR_URL = "URL that points to the JAR of the connection driver";
         public static final String DATABASE_VENDOR = "Name of the database vendor (MYSQL, POSTGRES, ...)";
         public static final String DATABASE_VENDOR_DISPLAY_NAME = "Display name of the database vendor (MySQL, PostgreSQL, ...)";
         public static final String USERNAME = "Username of the administrative user of the database server";
@@ -93,7 +91,6 @@ public final class ModelDescriptions {
         public static final String INSTANCE_TYPE = "Instance type of the database server";
         public static final String DATABASE_VENDOR = "Database vendor of the database server";
         public static final String CONNECTION_DRIVER = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
-        public static final String CONNECTOR_JAR_URL = "URL that points to the JAR of the connection driver (JDBC connector)";
         public static final String STORAGE_SIZE = "Storage size of the database server, in GB";
         public static final String ROOT_USER_NAME = "Root user name of the database server";
         public static final String ROOT_USER_PASSWORD = "Root user password of the database server";

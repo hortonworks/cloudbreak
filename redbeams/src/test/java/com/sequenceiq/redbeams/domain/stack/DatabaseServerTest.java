@@ -41,9 +41,6 @@ public class DatabaseServerTest {
         server.setConnectionDriver("org.postgresql.Driver");
         assertEquals("org.postgresql.Driver", server.getConnectionDriver());
 
-        server.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
-        assertEquals("http://drivers.example.com/postgresql.jar", server.getConnectorJarUrl());
-
         server.setStorageSize(50L);
         assertEquals(50L, server.getStorageSize().longValue());
 

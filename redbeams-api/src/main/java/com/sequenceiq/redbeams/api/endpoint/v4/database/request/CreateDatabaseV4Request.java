@@ -2,6 +2,8 @@ package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
@@ -17,12 +19,15 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateDatabaseV4Request implements Serializable {
 
+    @NotNull
     @ApiModelProperty(DatabaseServer.CRN)
     private String existingDatabaseServerCrn;
 
+    @NotNull
     @ApiModelProperty(Database.NAME)
     private String databaseName;
 
+    @NotNull
     @ApiModelProperty(Database.TYPE)
     private String type;
 

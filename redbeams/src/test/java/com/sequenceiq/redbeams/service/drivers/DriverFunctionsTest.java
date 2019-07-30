@@ -28,20 +28,18 @@ public class DriverFunctionsTest {
         DatabaseConfig databaseConfig = new DatabaseConfig();
         databaseConfig.setName("name");
         databaseConfig.setDatabaseVendor(DatabaseVendor.POSTGRES);
-        databaseConfig.setConnectorJarUrl("");
 
         underTest.execWithDatabaseDriver(databaseConfig,
                 d -> assertThat(d.getDelegate() instanceof org.postgresql.Driver).isTrue());
     }
 
     @Test
-    public void testDriverFunctionsLoadFailure() {
+    public void testDriverFunctionsUnsupportedVendor() {
         DatabaseServerConfig databaseServerConfig = new DatabaseServerConfig();
         databaseServerConfig.setName("name");
         databaseServerConfig.setDatabaseVendor(DatabaseVendor.MYSQL);
-        databaseServerConfig.setConnectorJarUrl("");
 
-        thrown.expect(DriverLoadingException.class);
+        thrown.expect(UnsupportedOperationException.class);
         underTest.execWithDatabaseDriver(databaseServerConfig, d -> {
             // Do nothing
         });

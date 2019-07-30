@@ -29,7 +29,6 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverterTest {
         request.setConnectionUserName("root");
         request.setConnectionPassword("cloudera");
         request.setConnectionDriver("org.postgresql.Driver");
-        request.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
         request.setEnvironmentCrn("myenvironment");
 
         DatabaseServerConfig server = converter.convert(request);
@@ -42,7 +41,6 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverterTest {
         assertEquals(request.getConnectionUserName(), server.getConnectionUserName());
         assertEquals(request.getConnectionPassword(), server.getConnectionPassword());
         assertEquals(request.getConnectionDriver(), server.getConnectionDriver());
-        assertEquals(request.getConnectorJarUrl(), server.getConnectorJarUrl());
         assertEquals(request.getEnvironmentCrn(), server.getEnvironmentId());
         assertEquals(ResourceStatus.USER_MANAGED, server.getResourceStatus());
     }

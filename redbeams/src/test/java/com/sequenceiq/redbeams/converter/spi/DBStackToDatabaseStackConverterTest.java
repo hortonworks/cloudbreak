@@ -60,7 +60,6 @@ public class DBStackToDatabaseStackConverterTest {
         server.setInstanceType("db.m3.medium");
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
         server.setConnectionDriver("org.postgresql.Driver");
-        server.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
         server.setRootUserName("root");
         server.setRootPassword("cloudera");
         server.setStorageSize(50L);
@@ -84,7 +83,6 @@ public class DBStackToDatabaseStackConverterTest {
         assertEquals("db.m3.medium", convertedStack.getDatabaseServer().getFlavor());
         assertEquals(DatabaseEngine.POSTGRESQL, convertedStack.getDatabaseServer().getEngine());
         assertEquals("org.postgresql.Driver", convertedStack.getDatabaseServer().getConnectionDriver());
-        assertEquals("http://drivers.example.com/postgresql.jar", convertedStack.getDatabaseServer().getConnectorJarUrl());
         assertEquals("root", convertedStack.getDatabaseServer().getRootUserName());
         assertEquals("cloudera", convertedStack.getDatabaseServer().getRootPassword());
         assertEquals(50L, convertedStack.getDatabaseServer().getStorageSize().longValue());

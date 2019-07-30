@@ -91,9 +91,6 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
     private DBStack dbStack;
 
     @Column
-    private String connectorJarUrl;
-
-    @Column
     private boolean archived;
 
     @Column
@@ -226,14 +223,6 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
         this.resourceStatus = resourceStatus;
     }
 
-    public String getConnectorJarUrl() {
-        return connectorJarUrl;
-    }
-
-    public void setConnectorJarUrl(String connectorJarUrl) {
-        this.connectorJarUrl = connectorJarUrl;
-    }
-
     public Long getDeletionTimestamp() {
         return deletionTimestamp;
     }
@@ -300,7 +289,6 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
         databaseConfig.setConnectionPassword(password);
         databaseConfig.setStatus(status);
         databaseConfig.setType(type);
-        databaseConfig.setConnectorJarUrl(connectorJarUrl);
         databaseConfig.setEnvironmentId(environmentId);
         databaseConfig.setServer(this);
 
