@@ -79,11 +79,11 @@ public class AzureDatabaseServerView {
     }
 
     public Boolean getGeoRedundantBackup() {
-        return Boolean.parseBoolean(databaseServer.getStringParameter(GEO_REDUNDANT_BACKUP));
+        return databaseServer.getParameter(GEO_REDUNDANT_BACKUP, Boolean.class);
     }
 
     public Boolean getStorageAutoGrow() {
-        return Boolean.parseBoolean(databaseServer.getStringParameter(STORAGE_AUTO_GROW));
+        return databaseServer.getParameter(STORAGE_AUTO_GROW, Boolean.class);
     }
 
     public String getAdminLoginName() {

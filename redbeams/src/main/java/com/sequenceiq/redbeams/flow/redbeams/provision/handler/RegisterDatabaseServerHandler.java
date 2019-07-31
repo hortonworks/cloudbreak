@@ -1,7 +1,6 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.handler;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -68,21 +67,15 @@ public class RegisterDatabaseServerHandler implements EventHandler<RegisterDatab
         dbServerConfig.setConnectionUserName(dbStack.getDatabaseServer().getRootUserName());
         dbServerConfig.setConnectionPassword(dbStack.getDatabaseServer().getRootPassword());
         dbServerConfig.setDatabaseVendor(dbStack.getDatabaseServer().getDatabaseVendor());
-        dbServerConfig.setPort(databaseServer.getPort());
         dbServerConfig.setDbStack(dbStack);
 
-        Optional<CloudResource> dbHostname = cloudResourceHelper.getResourceTypeFromList(ResourceType.RDS_HOSTNAME, dbResources);
-        if (dbHostname.isEmpty()) {
-            throw new IllegalStateException("DB hostname not found for allocated database.");
-        }
+        CloudResource dbHostname = cloudResourceHelper.getResourceTypeFromList(ResourceType.RDS_HOSTNAME, dbResources)
+                .orElseThrow(() -> new IllegalStateException("DB hostname not found for allocated database."));
+        CloudResource dbPort = cloudResourceHelper.getResourceTypeFromList(ResourceType.RDS_PORT, dbResources)
+                .orElseThrow(() -> new IllegalStateException("DB port not found for allocated database."));
 
-        Optional<CloudResource> dbPort = cloudResourceHelper.getResourceTypeFromList(ResourceType.RDS_PORT, dbResources);
-        if (dbPort.isEmpty()) {
-            throw new IllegalStateException("DB port not found for allocated database.");
-        }
-
-        dbServerConfig.setHost(dbHostname.get().getName());
-        dbServerConfig.setPort(Integer.parseInt(dbPort.get().getName()));
+        dbServerConfig.setHost(dbHostname.getName());
+        dbServerConfig.setPort(Integer.parseInt(dbPort.getName()));
         dbServerConfig.setResourceCrn(dbStack.getResourceCrn());
 
         Selectable response;
