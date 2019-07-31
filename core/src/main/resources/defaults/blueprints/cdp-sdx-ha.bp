@@ -234,10 +234,6 @@
                     {
                         "name": "zookeeper_service",
                         "ref": "zookeeper"
-                    },
-                    {
-                        "name": "offsets.topic.replication.factor",
-                        "value": "1"
                     }
                 ],
                 "serviceType": "KAFKA"
