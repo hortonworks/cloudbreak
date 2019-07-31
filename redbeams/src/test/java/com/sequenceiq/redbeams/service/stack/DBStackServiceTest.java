@@ -14,8 +14,8 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.repository.DBStackRepository;
 
 public class DBStackServiceTest {
