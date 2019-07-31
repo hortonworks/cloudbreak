@@ -92,6 +92,17 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         StackTestDto stack = getTestContext().given(StackTestDto.class);
         ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
 
+        return withStackRequest(stack, cluster);
+    }
+
+    public SdxInternalTestDto withStackRequest(String stackKey, String clusterKey) {
+        StackTestDto stack = getTestContext().given(stackKey, StackTestDto.class);
+        ClusterTestDto cluster = getTestContext().given(clusterKey, ClusterTestDto.class);
+
+        return withStackRequest(stack, cluster);
+    }
+
+    private SdxInternalTestDto withStackRequest(StackTestDto stack, ClusterTestDto cluster) {
         cluster.withName(cluster.getName())
                 .withBlueprintName(DEFAULT_SDX_BLUEPRINT_NAME)
                 .withValidateBlueprint(Boolean.FALSE);

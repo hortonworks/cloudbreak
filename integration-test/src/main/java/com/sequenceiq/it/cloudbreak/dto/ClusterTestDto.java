@@ -118,5 +118,10 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
         getRequest().setValidateBlueprint(validateBlueprint);
         return this;
     }
+
+    public ClusterTestDto withDatabases(Set<String> databases) {
+        getRequest().setDatabases(databases);
+        return this;
+    }
 }
 

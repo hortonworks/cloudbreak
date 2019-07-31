@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -325,6 +327,27 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
         sharedServiceRequest.setDatalakeName(datalakeClusterName);
         getRequest().setSharedService(sharedServiceRequest);
+        return this;
+    }
+
+    public StackTestDtoBase<T> withDomainName(String domainName) {
+        CustomDomainSettingsV4Request request = Optional.ofNullable(getRequest().getCustomDomain()).orElse(new CustomDomainSettingsV4Request());
+        request.setDomainName(domainName);
+        getRequest().setCustomDomain(request);
+        return this;
+    }
+
+    public StackTestDtoBase<T> withClusterNameAsSubdomain(Boolean clusterNameAsSubdomain) {
+        CustomDomainSettingsV4Request request = Optional.ofNullable(getRequest().getCustomDomain()).orElse(new CustomDomainSettingsV4Request());
+        request.setClusterNameAsSubdomain(clusterNameAsSubdomain);
+        getRequest().setCustomDomain(request);
+        return this;
+    }
+
+    public StackTestDtoBase<T> withHostgroupNameAsHostname(Boolean hostgroupNameAsHostname) {
+        CustomDomainSettingsV4Request request = Optional.ofNullable(getRequest().getCustomDomain()).orElse(new CustomDomainSettingsV4Request());
+        request.setHostgroupNameAsHostname(hostgroupNameAsHostname);
+        getRequest().setCustomDomain(request);
         return this;
     }
 
