@@ -22,6 +22,9 @@ type EnvironmentV1Request struct {
 	// SSH key for accessing cluster node instances.
 	Authentication *EnvironmentAuthenticationV1Request `json:"authentication,omitempty"`
 
+	// AWS Specific parameters.
+	Aws *AwsEnvironmentV1Parameters `json:"aws,omitempty"`
+
 	// Cloud platform of the environment.
 	// Max Length: 100
 	// Min Length: 0
@@ -37,6 +40,10 @@ type EnvironmentV1Request struct {
 
 	// Properties for FreeIpa which can be attached to the given environment
 	FreeIpa *AttachedFreeIpaRequest `json:"freeIpa,omitempty"`
+
+	// IDBroker mapping source.
+	// Enum: [NONE MOCK]
+	IDBrokerMappingSource string `json:"idBrokerMappingSource,omitempty"`
 
 	// Location of the environment.
 	// Required: true
@@ -75,6 +82,10 @@ func (m *EnvironmentV1Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateAws(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateCloudPlatform(formats); err != nil {
 		res = append(res, err)
 	}
@@ -84,6 +95,10 @@ func (m *EnvironmentV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateFreeIpa(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateIDBrokerMappingSource(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -139,6 +154,24 @@ func (m *EnvironmentV1Request) validateAuthentication(formats strfmt.Registry) e
 	return nil
 }
 
+func (m *EnvironmentV1Request) validateAws(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Aws) { // not required
+		return nil
+	}
+
+	if m.Aws != nil {
+		if err := m.Aws.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("aws")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *EnvironmentV1Request) validateCloudPlatform(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.CloudPlatform) { // not required
@@ -186,6 +219,49 @@ func (m *EnvironmentV1Request) validateFreeIpa(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+var environmentV1RequestTypeIDBrokerMappingSourcePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["NONE","MOCK"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		environmentV1RequestTypeIDBrokerMappingSourcePropEnum = append(environmentV1RequestTypeIDBrokerMappingSourcePropEnum, v)
+	}
+}
+
+const (
+
+	// EnvironmentV1RequestIDBrokerMappingSourceNONE captures enum value "NONE"
+	EnvironmentV1RequestIDBrokerMappingSourceNONE string = "NONE"
+
+	// EnvironmentV1RequestIDBrokerMappingSourceMOCK captures enum value "MOCK"
+	EnvironmentV1RequestIDBrokerMappingSourceMOCK string = "MOCK"
+)
+
+// prop value enum
+func (m *EnvironmentV1Request) validateIDBrokerMappingSourceEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, environmentV1RequestTypeIDBrokerMappingSourcePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *EnvironmentV1Request) validateIDBrokerMappingSource(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.IDBrokerMappingSource) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateIDBrokerMappingSourceEnum("idBrokerMappingSource", "body", m.IDBrokerMappingSource); err != nil {
+		return err
 	}
 
 	return nil

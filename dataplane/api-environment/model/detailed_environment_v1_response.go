@@ -22,6 +22,9 @@ type DetailedEnvironmentV1Response struct {
 	// SSH key for accessing cluster node instances.
 	Authentication *EnvironmentAuthenticationV1Response `json:"authentication,omitempty"`
 
+	// AWS Specific parameters.
+	Aws *AwsEnvironmentV1Parameters `json:"aws,omitempty"`
+
 	// Cloud platform of the environment.
 	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
@@ -46,6 +49,10 @@ type DetailedEnvironmentV1Response struct {
 	// Status of the environment.
 	// Enum: [CREATION_INITIATED DELETE_INITIATED UPDATE_INITIATED NETWORK_CREATION_IN_PROGRESS NETWORK_DELETE_IN_PROGRESS RDBMS_DELETE_IN_PROGRESS FREEIPA_CREATION_IN_PROGRESS FREEIPA_DELETE_IN_PROGRESS AVAILABLE ARCHIVED CREATE_FAILED DELETE_FAILED UPDATE_FAILED]
 	EnvironmentStatus string `json:"environmentStatus,omitempty"`
+
+	// IDBroker mapping source.
+	// Enum: [NONE MOCK]
+	IDBrokerMappingSource string `json:"idBrokerMappingSource,omitempty"`
 
 	// Location of the environment.
 	Location *LocationV1Response `json:"location,omitempty"`
@@ -81,11 +88,19 @@ func (m *DetailedEnvironmentV1Response) Validate(formats strfmt.Registry) error 
 		res = append(res, err)
 	}
 
+	if err := m.validateAws(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateCredential(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateEnvironmentStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateIDBrokerMappingSource(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -129,6 +144,24 @@ func (m *DetailedEnvironmentV1Response) validateAuthentication(formats strfmt.Re
 		if err := m.Authentication.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("authentication")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *DetailedEnvironmentV1Response) validateAws(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Aws) { // not required
+		return nil
+	}
+
+	if m.Aws != nil {
+		if err := m.Aws.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("aws")
 			}
 			return err
 		}
@@ -225,6 +258,49 @@ func (m *DetailedEnvironmentV1Response) validateEnvironmentStatus(formats strfmt
 
 	// value enum
 	if err := m.validateEnvironmentStatusEnum("environmentStatus", "body", m.EnvironmentStatus); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var detailedEnvironmentV1ResponseTypeIDBrokerMappingSourcePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["NONE","MOCK"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		detailedEnvironmentV1ResponseTypeIDBrokerMappingSourcePropEnum = append(detailedEnvironmentV1ResponseTypeIDBrokerMappingSourcePropEnum, v)
+	}
+}
+
+const (
+
+	// DetailedEnvironmentV1ResponseIDBrokerMappingSourceNONE captures enum value "NONE"
+	DetailedEnvironmentV1ResponseIDBrokerMappingSourceNONE string = "NONE"
+
+	// DetailedEnvironmentV1ResponseIDBrokerMappingSourceMOCK captures enum value "MOCK"
+	DetailedEnvironmentV1ResponseIDBrokerMappingSourceMOCK string = "MOCK"
+)
+
+// prop value enum
+func (m *DetailedEnvironmentV1Response) validateIDBrokerMappingSourceEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, detailedEnvironmentV1ResponseTypeIDBrokerMappingSourcePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *DetailedEnvironmentV1Response) validateIDBrokerMappingSource(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.IDBrokerMappingSource) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateIDBrokerMappingSourceEnum("idBrokerMappingSource", "body", m.IDBrokerMappingSource); err != nil {
 		return err
 	}
 

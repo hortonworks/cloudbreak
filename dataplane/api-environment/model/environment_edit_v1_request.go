@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -20,10 +22,17 @@ type EnvironmentEditV1Request struct {
 	// SSH key for accessing cluster node instances.
 	Authentication *EnvironmentAuthenticationV1Request `json:"authentication,omitempty"`
 
+	// AWS Specific parameters.
+	Aws *AwsEnvironmentV1Parameters `json:"aws,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
+
+	// IDBroker mapping source.
+	// Enum: [NONE MOCK]
+	IDBrokerMappingSource string `json:"idBrokerMappingSource,omitempty"`
 
 	// Location of the environment.
 	Location *LocationV1Request `json:"location,omitempty"`
@@ -50,7 +59,15 @@ func (m *EnvironmentEditV1Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateAws(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateDescription(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateIDBrokerMappingSource(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -98,6 +115,24 @@ func (m *EnvironmentEditV1Request) validateAuthentication(formats strfmt.Registr
 	return nil
 }
 
+func (m *EnvironmentEditV1Request) validateAws(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Aws) { // not required
+		return nil
+	}
+
+	if m.Aws != nil {
+		if err := m.Aws.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("aws")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *EnvironmentEditV1Request) validateDescription(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Description) { // not required
@@ -109,6 +144,49 @@ func (m *EnvironmentEditV1Request) validateDescription(formats strfmt.Registry) 
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var environmentEditV1RequestTypeIDBrokerMappingSourcePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["NONE","MOCK"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		environmentEditV1RequestTypeIDBrokerMappingSourcePropEnum = append(environmentEditV1RequestTypeIDBrokerMappingSourcePropEnum, v)
+	}
+}
+
+const (
+
+	// EnvironmentEditV1RequestIDBrokerMappingSourceNONE captures enum value "NONE"
+	EnvironmentEditV1RequestIDBrokerMappingSourceNONE string = "NONE"
+
+	// EnvironmentEditV1RequestIDBrokerMappingSourceMOCK captures enum value "MOCK"
+	EnvironmentEditV1RequestIDBrokerMappingSourceMOCK string = "MOCK"
+)
+
+// prop value enum
+func (m *EnvironmentEditV1Request) validateIDBrokerMappingSourceEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, environmentEditV1RequestTypeIDBrokerMappingSourcePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *EnvironmentEditV1Request) validateIDBrokerMappingSource(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.IDBrokerMappingSource) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateIDBrokerMappingSourceEnum("idBrokerMappingSource", "body", m.IDBrokerMappingSource); err != nil {
 		return err
 	}
 
