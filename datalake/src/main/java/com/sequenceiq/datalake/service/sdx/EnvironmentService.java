@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -35,13 +36,13 @@ public class EnvironmentService {
     @Inject
     private EnvironmentServiceCrnClient environmentServiceCrnClient;
 
-    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId) {
+    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, String requestId) {
         PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
                 DURATION_IN_MINUTES_FOR_ENV_POLLING, TimeUnit.MINUTES);
-        return waitAndGetEnvironment(sdxId, pollingConfig);
+        return waitAndGetEnvironment(sdxId, pollingConfig, requestId);
     }
 
-    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, PollingConfig pollingConfig) {
+    public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, PollingConfig pollingConfig, String requestId) {
         Optional<SdxCluster> sdxClusterOptional = sdxClusterRepository.findById(sdxId);
         if (sdxClusterOptional.isPresent()) {
             SdxCluster sdxCluster = sdxClusterOptional.get();
@@ -49,6 +50,7 @@ public class EnvironmentService {
                     .stopIfException(false)
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> {
+                        MDCBuilder.addRequestIdToMdcContext(requestId);
                         LOGGER.info("Creation polling environment for environment status: '{}' in '{}' env",
                                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(

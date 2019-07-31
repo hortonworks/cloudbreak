@@ -4,8 +4,8 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class RdsDeletionWaitRequest extends SdxEvent {
 
-    public RdsDeletionWaitRequest(Long sdxId, String userId) {
-        super(sdxId, userId);
+    public RdsDeletionWaitRequest(Long sdxId, String userId, String requestId) {
+        super(sdxId, userId, requestId);
     }
 
     @Override

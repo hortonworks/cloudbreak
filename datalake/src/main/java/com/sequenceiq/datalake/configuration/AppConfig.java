@@ -15,9 +15,11 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.datalake.logger.MDCContextFilter;
+import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
-import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
+import com.sequenceiq.redbeams.client.RedbeamsServiceClientBuilder;
+import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
 
 @Configuration
 @EnableAsync
@@ -48,6 +50,9 @@ public class AppConfig implements AsyncConfigurer {
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
+    @Inject
+    private ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
+
     @Bean
     public CloudbreakServiceUserCrnClient cloudbreakClient() {
         return new CloudbreakUserCrnClientBuilder(cloudbreakUrl)
@@ -67,16 +72,20 @@ public class AppConfig implements AsyncConfigurer {
     }
 
     @Bean
-    public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
-        FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
-        MDCContextFilter filter = new MDCContextFilter(threadBasedUserCrnProvider, null);
-        registrationBean.setFilter(filter);
-        registrationBean.setOrder(Integer.MAX_VALUE);
-        return registrationBean;
+    public RedbeamsServiceCrnClient redbeamsServiceCrnClient() {
+        return new RedbeamsServiceClientBuilder(redbeamsServerUrl)
+                .withCertificateValidation(certificateValidation)
+                .withIgnorePreValidation(ignorePreValidation)
+                .withDebug(restDebug)
+                .build();
     }
 
     @Bean
-    public RedbeamsApiClientParams redbeamsApiClientParams() {
-        return new RedbeamsApiClientParams(restDebug, certificateValidation, ignorePreValidation, redbeamsServerUrl);
+    public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
+        FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
+        MDCContextFilter filter = new MDCContextFilter(threadBasedUserCrnProvider, threadBasedRequestIdProvider, null);
+        registrationBean.setFilter(filter);
+        registrationBean.setOrder(Integer.MAX_VALUE);
+        return registrationBean;
     }
 }
