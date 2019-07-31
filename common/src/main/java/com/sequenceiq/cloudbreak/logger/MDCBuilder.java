@@ -47,8 +47,8 @@ public class MDCBuilder {
             MdcContext.builder()
                     .resourceCrn(getFieldValues(object, LoggerContextKey.RESOURCE_CRN.toString(), LoggerContextKey.CRN.toString()))
                     .resourceType(object.getClass().getSimpleName().toUpperCase())
-                    .resourceName(getFieldValue(object, LoggerContextKey.NAME.toString()))
-                    .environmentCrn(getFieldValue(object, LoggerContextKey.ENVIRONMENT_CRN.toString()))
+                    .resourceName(getFieldValues(object, LoggerContextKey.NAME.toString(), LoggerContextKey.CLUSTER_NAME.toString()))
+                    .environmentCrn(getFieldValues(object, LoggerContextKey.ENVIRONMENT_CRN.toString(), LoggerContextKey.ENV_CRN.toString()))
                     .tenant(getFieldValue(object, LoggerContextKey.ACCOUNT_ID.toString()))
                     .buildMdc();
         }

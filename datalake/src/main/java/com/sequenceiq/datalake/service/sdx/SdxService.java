@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
@@ -149,6 +150,8 @@ public class SdxService {
             throw new BadRequestException("Can not parse internal stackrequest", e);
         }
 
+        MDCBuilder.buildMdcContext(sdxCluster);
+
         sdxCluster = sdxClusterRepository.save(sdxCluster);
 
         LOGGER.info("trigger SDX creation: {}", sdxCluster);
@@ -260,7 +263,7 @@ public class SdxService {
     }
 
     public void deleteSdxByClusterCrn(String userCrn, String clusterCrn) {
-        LOGGER.info("Delete sdx");
+        LOGGER.info("Deleting SDX {}", clusterCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn).ifPresentOrElse(this::deleteSdxCluster, () -> {
             throw notFound("SDX cluster", clusterCrn).get();
@@ -268,7 +271,7 @@ public class SdxService {
     }
 
     public void deleteSdx(String userCrn, String name) {
-        LOGGER.info("Delete sdx");
+        LOGGER.info("Deleting SDX {}", name);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name).ifPresentOrElse(this::deleteSdxCluster, () -> {
             throw notFound("SDX cluster", name).get();
@@ -276,10 +279,11 @@ public class SdxService {
     }
 
     private void deleteSdxCluster(SdxCluster sdxCluster) {
+        MDCBuilder.buildMdcContext(sdxCluster);
         sdxCluster.setStatus(SdxClusterStatus.DELETE_REQUESTED);
         sdxClusterRepository.save(sdxCluster);
         sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
-        LOGGER.info("sdx delete triggered: {}", sdxCluster.getClusterName());
+        LOGGER.info("SDX delete triggered: {}", sdxCluster.getClusterName());
     }
 
     private String createCrn(@Nonnull String accountId) {

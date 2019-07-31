@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
@@ -40,21 +41,27 @@ public class SdxReactorFlowManager {
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
+    @Inject
+    private ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
+
     public void triggerSdxCreation(Long sdxId) {
         String selector = ENV_WAIT_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
-        notify(selector, new SdxEvent(selector, sdxId, userId));
+        String requestId = threadBasedRequestIdProvider.getRequestId();
+        notify(selector, new SdxEvent(selector, sdxId, userId, requestId));
     }
 
     public void triggerSdxDeletion(Long sdxId) {
         String selector = SDX_DELETE_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
-        notify(selector, new SdxEvent(selector, sdxId, userId));
+        String requestId = threadBasedRequestIdProvider.getRequestId();
+        notify(selector, new SdxEvent(selector, sdxId, userId, requestId));
     }
 
     public void cancelRunningFlows(Long sdxId) {
         String userId = threadBasedUserCrnProvider.getUserCrn();
-        SdxEvent cancelEvent = new SdxEvent(Flow2Handler.FLOW_CANCEL, sdxId, userId);
+        String requestId = threadBasedRequestIdProvider.getRequestId();
+        SdxEvent cancelEvent = new SdxEvent(Flow2Handler.FLOW_CANCEL, sdxId, userId, requestId);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }
 

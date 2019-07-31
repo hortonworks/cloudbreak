@@ -67,6 +67,8 @@ class ProvisionerServiceTest {
 
     private static final String USER_CRN = "crn:altus:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
+    private static final String REQUEST_ID = "requestId";
+
     @Mock
     private SdxClusterRepository sdxClusterRepository;
 
@@ -149,7 +151,7 @@ class ProvisionerServiceTest {
 
         when(sdxClusterRepository.findById(2L)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 100, TimeUnit.MILLISECONDS);
-        Assertions.assertThrows(PollerStoppedException.class, () -> provisionerService.waitCloudbreakClusterCreation(id, pollingConfig));
+        Assertions.assertThrows(PollerStoppedException.class, () -> provisionerService.waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID));
     }
 
     @Test
@@ -167,7 +169,8 @@ class ProvisionerServiceTest {
 
         when(sdxClusterRepository.findById(2L)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
-        Assertions.assertThrows(UserBreakException.class, () -> provisionerService.waitCloudbreakClusterCreation(id, pollingConfig), "Stack creation failed");
+        Assertions.assertThrows(UserBreakException.class, () -> provisionerService
+                .waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID), "Stack creation failed");
     }
 
     @Test
@@ -194,7 +197,7 @@ class ProvisionerServiceTest {
 
         when(sdxClusterRepository.findById(2L)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 1000, TimeUnit.MILLISECONDS);
-        provisionerService.waitCloudbreakClusterCreation(id, pollingConfig);
+        provisionerService.waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID);
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster savedSdxCluster = captor.getValue();
@@ -284,7 +287,7 @@ class ProvisionerServiceTest {
         when(cloudbreakClient.withCrn(anyString())).thenReturn(cbEndpointMock);
 
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
-        Assertions.assertThrows(PollerStoppedException.class, () -> provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig));
+        Assertions.assertThrows(PollerStoppedException.class, () -> provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig, REQUEST_ID));
     }
 
     @Test
@@ -308,7 +311,7 @@ class ProvisionerServiceTest {
         when(cloudbreakClient.withCrn(anyString())).thenReturn(cbEndpointMock);
 
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
-        Assertions.assertThrows(UserBreakException.class, () -> provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig));
+        Assertions.assertThrows(UserBreakException.class, () -> provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig, REQUEST_ID));
     }
 
     @Test
@@ -326,7 +329,7 @@ class ProvisionerServiceTest {
         when(cloudbreakClient.withCrn(anyString())).thenReturn(cbEndpointMock);
 
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
-        provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig);
+        provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig, REQUEST_ID);
 
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());

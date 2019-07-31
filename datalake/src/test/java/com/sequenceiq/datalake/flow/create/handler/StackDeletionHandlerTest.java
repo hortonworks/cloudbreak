@@ -37,6 +37,8 @@ class StackDeletionHandlerTest {
 
     private static String userId = "userId";
 
+    private static String requestId = "requestId";
+
     @Mock
     private ProvisionerService provisionerService;
 
@@ -54,12 +56,13 @@ class StackDeletionHandlerTest {
     @Test
     void acceptTestStackDeletionSuccess() {
         long id = 2L;
-        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId);
+        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId, requestId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
-        doNothing().when(provisionerService).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
+        doNothing().when(provisionerService).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class), eq(requestId));
         stackDeletionHandler.accept(receivedEvent);
 
-        verify(provisionerService, times(1)).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
+        verify(provisionerService, times(1))
+                .waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class), eq(requestId));
         final ArgumentCaptor<String> eventSelector = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Event> sentEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
@@ -73,12 +76,14 @@ class StackDeletionHandlerTest {
     @Test
     void acceptTestStackDeletionFailed() {
         long id = 2L;
-        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId);
+        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId, requestId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
-        doThrow(new UserBreakException("stack deletion failed")).when(provisionerService).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
+        doThrow(new UserBreakException("stack deletion failed")).when(provisionerService)
+                .waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class), eq(requestId));
         stackDeletionHandler.accept(receivedEvent);
 
-        verify(provisionerService, times(1)).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
+        verify(provisionerService, times(1))
+                .waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class), eq(requestId));
         final ArgumentCaptor<String> eventSelector = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Event> sentEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
@@ -92,12 +97,14 @@ class StackDeletionHandlerTest {
     @Test
     void acceptTestPollerStackTimeout() {
         long id = 2L;
-        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId);
+        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId, requestId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
-        doThrow(new PollerStoppedException("stack deletion timeout")).when(provisionerService).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
+        doThrow(new PollerStoppedException("stack deletion timeout")).when(provisionerService)
+                .waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class), eq(requestId));
         stackDeletionHandler.accept(receivedEvent);
 
-        verify(provisionerService, times(1)).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
+        verify(provisionerService, times(1))
+                .waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class), eq(requestId));
         final ArgumentCaptor<String> eventSelector = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Event> sentEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
@@ -111,12 +118,14 @@ class StackDeletionHandlerTest {
     @Test
     void acceptTestPollerStackOtherError() {
         long id = 2L;
-        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId);
+        StackDeletionWaitRequest stackCreationWaitRequest = new StackDeletionWaitRequest(id, userId, requestId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
-        doThrow(new PollerException("stack deletion error")).when(provisionerService).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
+        doThrow(new PollerException("stack deletion error")).when(provisionerService)
+                .waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class), eq(requestId));
         stackDeletionHandler.accept(receivedEvent);
 
-        verify(provisionerService, times(1)).waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class));
+        verify(provisionerService, times(1))
+                .waitCloudbreakClusterDeletion(eq(id), any(PollingConfig.class), eq(requestId));
         final ArgumentCaptor<String> eventSelector = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Event> sentEvent = ArgumentCaptor.forClass(Event.class);
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
