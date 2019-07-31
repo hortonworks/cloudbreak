@@ -13,6 +13,9 @@ public class AttemptBasedTimeoutChecker implements TimeoutChecker {
     @Override
     public boolean checkTimeout() {
         attempt++;
+        if (maxAttempts < 0) {
+            return false;
+        }
         return attempt >= maxAttempts;
     }
 }
