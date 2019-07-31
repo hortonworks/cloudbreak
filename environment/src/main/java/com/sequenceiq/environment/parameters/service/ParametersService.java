@@ -49,8 +49,8 @@ public class ParametersService {
     }
 
     @SuppressWarnings("unchecked")
-    public BaseParameters save(BaseParameters network) {
-        Object saved = baseParametersRepository.save(network);
+    private BaseParameters save(BaseParameters parameters) {
+        Object saved = baseParametersRepository.save(parameters);
         return (BaseParameters) saved;
     }
 }
