@@ -45,6 +45,10 @@ import com.sequenceiq.environment.environment.validation.EnvironmentValidatorSer
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
+import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @ExtendWith(SpringExtension.class)
@@ -279,6 +283,32 @@ class EnvironmentModificationServiceTest {
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(CRN), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
         environmentModificationServiceUnderTest.editByCrn(CRN, environmentDto);
         verify(environmentRepository).save(any());
+    }
+
+    @Test
+    public void editByNameParameters() {
+        String dynamotable = "dynamotable";
+        ParametersDto parameters = ParametersDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withAwsParameters(AwsParametersDto.builder()
+                        .withDynamoDbTableName(dynamotable)
+                        .build())
+                .build();
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
+                .withAccountId(ACCOUNT_ID)
+                .withParameters(parameters)
+                .build();
+        Environment environment = new Environment();
+        BaseParameters baseParameters = new AwsParameters();
+
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
+        when(parametersService.saveParameters(environment, parameters, ACCOUNT_ID)).thenReturn(baseParameters);
+
+        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+
+        verify(parametersService).saveParameters(environment, parameters, ACCOUNT_ID);
+        assertEquals(baseParameters, environment.getParameters());
     }
 
     @Test

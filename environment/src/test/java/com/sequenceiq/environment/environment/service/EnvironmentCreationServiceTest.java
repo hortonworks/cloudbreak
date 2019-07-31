@@ -35,6 +35,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @ExtendWith(SpringExtension.class)
@@ -81,10 +83,12 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testCreate() {
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
         final EnvironmentCreationDto environmentCreationDto = new EnvironmentCreationDto.Builder()
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
+                .withParameters(parametersDto)
                 .build();
         final Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
@@ -104,6 +108,7 @@ class EnvironmentCreationServiceTest {
         environmentCreationServiceUnderTest
                 .create(environmentCreationDto, ACCOUNT_ID, EnvironmentTestData.USER);
         verify(environmentService, times(2)).save(any());
+        verify(parametersService).saveParameters(eq(environment), eq(parametersDto), eq(ACCOUNT_ID));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
