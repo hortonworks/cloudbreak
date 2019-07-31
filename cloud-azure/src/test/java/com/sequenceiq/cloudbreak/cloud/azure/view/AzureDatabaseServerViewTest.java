@@ -47,7 +47,7 @@ public class AzureDatabaseServerViewTest {
 
     @Test
     public void testGeoRedundantBackup() {
-        when(server.getStringParameter(GEO_REDUNDANT_BACKUP)).thenReturn("true");
+        when(server.getParameter(GEO_REDUNDANT_BACKUP, Boolean.class)).thenReturn(true);
         assertThat(underTest.getGeoRedundantBackup()).isEqualTo(true);
     }
 
@@ -71,7 +71,7 @@ public class AzureDatabaseServerViewTest {
 
     @Test
     public void testStorageAutoGrow() {
-        when(server.getStringParameter(STORAGE_AUTO_GROW)).thenReturn("true");
+        when(server.getParameter(STORAGE_AUTO_GROW, Boolean.class)).thenReturn(true);
         assertThat(underTest.getStorageAutoGrow()).isEqualTo(true);
     }
 

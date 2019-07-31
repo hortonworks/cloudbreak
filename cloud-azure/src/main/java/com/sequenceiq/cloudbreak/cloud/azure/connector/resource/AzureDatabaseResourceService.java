@@ -81,10 +81,27 @@ public class AzureDatabaseResourceService {
                 .type(ResourceType.RDS_PORT)
                 .name(Integer.toString(POSTGRESQL_SERVER_PORT))
                 .build());
+        databaseResources.add(CloudResource.builder()
+                .type(ResourceType.AZURE_RESOURCE_GROUP)
+                .name(resourceGroupName)
+                .build());
 
         return databaseResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
                 .collect(Collectors.toList());
+    }
+
+    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack) {
+        CloudContext cloudContext = ac.getCloudContext();
+        AzureClient client = ac.getParameter(AzureClient.class);
+        String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, stack);
+
+        client.deleteResourceGroup(resourceGroupName);
+
+        return Lists.newArrayList(new CloudResourceStatus(CloudResource.builder()
+                .type(ResourceType.AZURE_RESOURCE_GROUP)
+                .name(resourceGroupName)
+                .build(), ResourceStatus.DELETED));
     }
 }
 
