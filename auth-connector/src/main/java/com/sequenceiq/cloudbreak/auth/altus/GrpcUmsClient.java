@@ -351,11 +351,12 @@ public class GrpcUmsClient {
      * @param accountId the account ID
      * @return metadata as string
      */
-    public String getIdentityProviderMetadataXml(String accountId) {
+    public String getIdentityProviderMetadataXml(String accountId, String actorCrn) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = makeClient(channelWrapper.getChannel(), accountId);
-            LOGGER.debug("Getting IdP metadata through account ID: {}", accountId);
-            return client.getIdentityProviderMetadataXml(UUID.randomUUID().toString(), accountId);
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            String requestId = UUID.randomUUID().toString();
+            LOGGER.debug("Getting IdP metadata through account ID: {}, request id: {}", accountId, requestId);
+            return client.getIdentityProviderMetadataXml(requestId, accountId);
         }
     }
 
