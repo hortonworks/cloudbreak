@@ -8,8 +8,8 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.repository.DBStackRepository;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 
