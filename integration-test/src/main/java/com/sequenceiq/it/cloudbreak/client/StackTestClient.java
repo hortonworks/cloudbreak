@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.v4.stack.RepairClusterAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.ChangeImageAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackBlueprintRequestAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackCreateAction;
@@ -77,6 +78,10 @@ public class StackTestClient {
 
     public Action<StackTestDto, CloudbreakClient> changeImage() {
         return new ChangeImageAction();
+    }
+
+    public Action<StackTestDto, CloudbreakClient> repairCluster() {
+        return new RepairClusterAction();
     }
 
 }
