@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller.validation.filesystem;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -44,12 +43,6 @@ public class FileSystemValidator {
             String userId, Long workspaceId) {
         if (cloudStorageRequest == null) {
             return;
-        }
-        if (CollectionUtils.isEmpty(cloudStorageRequest.getLocations()) && CollectionUtils.isNotEmpty(cloudStorageRequest.getIdentities())) {
-            throw new BadRequestException("In cloudStorage request only identities were filled. Please specify the locations too.");
-        }
-        if (CollectionUtils.isNotEmpty(cloudStorageRequest.getLocations()) && CollectionUtils.isEmpty(cloudStorageRequest.getIdentities())) {
-            throw new BadRequestException("In cloudStorage request only locations were filled. Please specify the identities too.");
         }
         LOGGER.info("Sending fileSystemRequest to {} to validate the file system", platform);
         CloudContext cloudContext = new CloudContext(null, null, platform, userId, workspaceId);
