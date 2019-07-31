@@ -153,6 +153,10 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return resourceOpt.get();
     }
 
+    public Optional<DatabaseServerConfig> getByCrn(Crn resourceCrn) {
+        return repository.findByResourceCrn(resourceCrn);
+    }
+
     public DatabaseServerConfig deleteByName(String environmentCrn, String name) {
         DatabaseServerConfig resource = getByName(DEFAULT_WORKSPACE, environmentCrn, name);
         return delete(resource);

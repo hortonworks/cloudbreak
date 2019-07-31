@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerRequest;
@@ -49,9 +48,8 @@ public class DeregisterDatabaseServerHandler implements EventHandler<DeregisterD
         DBStack dbStack = request.getDbStack();
 
         try {
-            DatabaseServerConfig dbServerConfig = databaseServerConfigService.getByCrn(dbStack.getResourceCrn().toString());
-
-            databaseServerConfigService.archive(dbServerConfig);
+            databaseServerConfigService.getByCrn(dbStack.getResourceCrn())
+                    .ifPresent(dsc -> databaseServerConfigService.archive(dsc));
             eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
         } catch (Exception e) {
             DeregisterDatabaseServerFailed failure = new DeregisterDatabaseServerFailed(request.getResourceId(), e);
