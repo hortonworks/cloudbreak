@@ -30,7 +30,7 @@ public enum ExposedService {
     LIVY_SERVER("Livy Server", "LIVY_SERVER", "LIVYSERVER1", "/livy/ui/", true, 8998, 8998, false, true),
     OOZIE_UI("Oozie Server", "OOZIE_SERVER", "OOZIE", "/oozie/", true, 11000, 11443, false, true),
     SOLR("Solr Server", "SOLR_SERVER", "SOLR", "/solr/", true, 8983, 8985, false, true),
-    HBASE_UI("HBase UI", "MASTER", "HBASEUI", "/hbase/webui/master", true, 16010, 16010, false, false),
+    HBASE_UI("HBase UI", "MASTER", "HBASEUI", "/hbase/webui/master/", true, 16010, 16010, false, false),
     HBASE_REST("HBase Rest", "HBASERESTSERVER", "WEBHBASE", "/hbase/", true, 20550, 20550, true, true),
     NIFI("Nifi", "NIFI_NODE", "NIFI", "/nifi-app/nifi/", true, 8080, 8443, false, false);
 

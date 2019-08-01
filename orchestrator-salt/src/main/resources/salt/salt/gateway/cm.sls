@@ -7,6 +7,8 @@ add_knox_settings_to_cm:
     - template: jinja
     - source: salt://gateway/config/cm/knox.settings.j2
     - unless: grep "PROXYUSER_KNOX_GROUPS" /etc/cloudera-scm-server/cm.settings
+    - context:
+        knox_address: {{ salt['pillar.get']('gateway:address') }}
 
 cloudera_manager_setup_knox:
   file.replace:
