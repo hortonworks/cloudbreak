@@ -148,7 +148,13 @@
           {
             "refName": "hive_on_tez-HIVESERVER2-BASE",
             "roleType": "HIVESERVER2",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "hive_hs2_config_safety_valve",
+                "value": "<property><name>hive.server2.thrift.http.port</name><value>10001</value></property><property><name>hive.server2.thrift.http.path</name><value>cliservice</value></property><property><name>hive.server2.transport.mode</name><value>http</value></property><property><name>hive.server2.allow.user.substitution</name><value>true</value></property><property><name>hive.server2.authentication.spnego.keytab</name><value>hive.keytab</value></property><property><name>hive.server2.authentication.spnego.principal</name><value>HTTP/_HOST@GCE.CLOUDERA.COM</value></property>"
+              }
+            ]
           }
         ]
       },
