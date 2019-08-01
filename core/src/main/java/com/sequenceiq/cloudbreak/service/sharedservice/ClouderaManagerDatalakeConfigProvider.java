@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -12,12 +11,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
@@ -30,9 +27,6 @@ public class ClouderaManagerDatalakeConfigProvider {
 
     @Inject
     private TransactionService transactionService;
-
-    @Inject
-    private RdsConfigService rdsConfigService;
 
     @Inject
     private DatalakeConfigApiConnector datalakeConfigApiConnector;
@@ -53,13 +47,9 @@ public class ClouderaManagerDatalakeConfigProvider {
             return transactionService.required(() -> {
                 DatalakeResources datalakeResources = datalakeResourcesService.findByDatalakeStackId(datalakeStack.getId()).orElse(null);
                 if (datalakeResources == null) {
-                    datalakeResources = collectDatalakeResources(datalakeStack, connector);
+                    datalakeResources = collectDatalakeResources(datalakeStack, cluster, connector);
                     datalakeResources.setDatalakeStackId(datalakeStack.getId());
                     datalakeResources.setEnvironmentCrn(datalakeStack.getEnvironmentCrn());
-                    Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
-                    if (rdsConfigs != null) {
-                        datalakeResources.setRdsConfigs(new HashSet<>(rdsConfigs));
-                    }
                     Workspace workspace = datalakeStack.getWorkspace();
                     storeDatalakeResources(datalakeResources, workspace);
                 }
@@ -71,11 +61,12 @@ public class ClouderaManagerDatalakeConfigProvider {
         }
     }
 
-    public DatalakeResources collectDatalakeResources(Stack datalakeStack, DatalakeConfigApi connector) {
+    public DatalakeResources collectDatalakeResources(Stack datalakeStack, Cluster cluster, DatalakeConfigApi connector) {
         String ambariIp = datalakeStack.getAmbariIp();
         String ambariFqdn = datalakeStack.getGatewayInstanceMetadata().isEmpty()
                 ? datalakeStack.getAmbariIp() : datalakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN();
-        return collectDatalakeResources(datalakeStack.getName(), ambariFqdn, ambariIp, ambariFqdn, connector);
+        return collectDatalakeResources(datalakeStack.getName(), ambariFqdn, ambariIp, ambariFqdn, connector
+        );
     }
 
     //CHECKSTYLE:OFF

@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,26 +35,25 @@ public class CloudStorageConfigDetails {
 
         Set<ConfigQueryEntry> filtered = new HashSet<>();
         Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
-        boolean attachedCluster = request.isAttachedCluster();
-
         for (Map.Entry<String, Set<String>> serviceHostgroupEntry : componentsByHostGroup.entrySet()) {
             for (String service : serviceHostgroupEntry.getValue()) {
                 Set<ConfigQueryEntry> collectedEntries = configQueryEntries.getEntries()
                         .stream()
                         .filter(configQueryEntry -> configQueryEntry.getRelatedServices().stream().
                                 anyMatch(relatedService -> relatedService.equalsIgnoreCase(service)))
-                        .filter(configQueryEntry -> {
-                            if ((configQueryEntry.isRequiredForAttachedCluster() && attachedCluster) || !attachedCluster) {
-                                return true;
-                            }
-                            LOGGER.debug("sdfsdfsdfdsf");
-                            return false;
-                        })
                         .filter(configQueryEntry -> configQueryEntry.getSupportedStorages().contains(request.getFileSystemType().toUpperCase()))
                         .collect(Collectors.toSet());
                 filtered.addAll(collectedEntries);
             }
         }
+
+        boolean attachedCluster = request.isAttachedCluster();
+
+        List<ConfigQueryEntry> collectedEntries = configQueryEntries.getEntries()
+                .stream()
+                .filter(configQueryEntry -> configQueryEntry.isRequiredForAttachedCluster() && attachedCluster)
+                .collect(Collectors.toList());
+        filtered.addAll(collectedEntries);
 
         String fileSystemTypeRequest = request.getFileSystemType();
         FileSystemType fileSystemType = FileSystemType.valueOf(fileSystemTypeRequest);
