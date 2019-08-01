@@ -67,7 +67,10 @@ public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversi
             baseFileSystem = getConversionService().convert(source.getWasb(), WasbFileSystem.class);
         } else if (source.getAdlsGen2() != null) {
             baseFileSystem = getConversionService().convert(source.getAdlsGen2(), AdlsGen2FileSystem.class);
+        } else {
+            baseFileSystem = new BaseFileSystem();
         }
+
         try {
             fileSystem.setConfigurations(new Json(baseFileSystem));
         } catch (IllegalArgumentException ignored) {

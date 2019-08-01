@@ -61,6 +61,7 @@ public class FileSystemToCloudStorageRequestConverterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(fileSystem.getConfigurations()).thenReturn(configurations);
+        when(fileSystem.getConfigurations().getValue()).thenReturn("{}");
     }
 
     @Test

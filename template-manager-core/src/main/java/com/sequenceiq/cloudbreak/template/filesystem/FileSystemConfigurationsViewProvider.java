@@ -44,21 +44,26 @@ public class FileSystemConfigurationsViewProvider {
 
     private BaseFileSystemConfigurationsView getBaseFileSystemConfigurationsView(FileSystem source, Set<StorageLocationView> locations) throws IOException {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView = null;
-        if (source.getType().isAdls()) {
+        if (source.getConfigurations() != null && source.getConfigurations().getValue() != null) {
+            if (source.getType().isAdls()) {
+                fileSystemConfigurationsView =
+                        new AdlsFileSystemConfigurationsView(source.getConfigurations().get(AdlsFileSystem.class), locations, false);
+            } else if (source.getType().isGcs()) {
+                fileSystemConfigurationsView =
+                        new GcsFileSystemConfigurationsView(source.getConfigurations().get(GcsFileSystem.class), locations, false);
+            } else if (source.getType().isS3()) {
+                fileSystemConfigurationsView =
+                        new S3FileSystemConfigurationsView(source.getConfigurations().get(S3FileSystem.class), locations, false);
+            } else if (source.getType().isWasb()) {
+                fileSystemConfigurationsView =
+                        new WasbFileSystemConfigurationsView(source.getConfigurations().get(WasbFileSystem.class), locations, false);
+            } else if (source.getType().isAdlsGen2()) {
+                fileSystemConfigurationsView =
+                        new AdlsGen2FileSystemConfigurationsView(source.getConfigurations().get(AdlsGen2FileSystem.class), locations, false);
+            }
+        } else {
             fileSystemConfigurationsView =
-                    new AdlsFileSystemConfigurationsView(source.getConfigurations().get(AdlsFileSystem.class), locations, false);
-        } else if (source.getType().isGcs()) {
-            fileSystemConfigurationsView =
-                    new GcsFileSystemConfigurationsView(source.getConfigurations().get(GcsFileSystem.class), locations, false);
-        } else if (source.getType().isS3()) {
-            fileSystemConfigurationsView =
-                    new S3FileSystemConfigurationsView(source.getConfigurations().get(S3FileSystem.class), locations, false);
-        } else if (source.getType().isWasb()) {
-            fileSystemConfigurationsView =
-                    new WasbFileSystemConfigurationsView(source.getConfigurations().get(WasbFileSystem.class), locations, false);
-        } else if (source.getType().isAdlsGen2()) {
-            fileSystemConfigurationsView =
-                    new AdlsGen2FileSystemConfigurationsView(source.getConfigurations().get(AdlsGen2FileSystem.class), locations, false);
+                    new BaseFileSystemConfigurationsView(source.getType().name(), locations);
         }
         return fileSystemConfigurationsView;
     }

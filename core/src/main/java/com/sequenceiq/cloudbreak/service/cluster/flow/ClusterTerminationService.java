@@ -181,8 +181,10 @@ public class ClusterTerminationService {
         try {
             FileSystemConfigurator<BaseFileSystemConfigurationsView> fsConfigurator = fileSystemConfigurators.get(fileSystem.getType());
             BaseFileSystemConfigurationsView fsConfiguration = fileSystemConfigurationsViewProvider.propagateConfigurationsView(fileSystem);
-            fsConfiguration.setStorageContainer("cloudbreak" + stackId);
-            fsConfigurator.deleteResources(fsConfiguration);
+            if (fsConfiguration != null) {
+                fsConfiguration.setStorageContainer("cloudbreak" + stackId);
+                fsConfigurator.deleteResources(fsConfiguration);
+            }
         } catch (IOException e) {
             throw new TerminationFailedException("File system resources could not be deleted: ", e);
         }
