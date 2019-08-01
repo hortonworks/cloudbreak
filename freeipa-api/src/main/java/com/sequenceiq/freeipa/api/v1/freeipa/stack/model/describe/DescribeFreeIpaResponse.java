@@ -63,6 +63,9 @@ public class DescribeFreeIpaResponse {
 
     private String statusReason;
 
+    @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_APPLICATION_VERSION)
+    private String appVersion;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -149,5 +152,13 @@ public class DescribeFreeIpaResponse {
 
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
     }
 }

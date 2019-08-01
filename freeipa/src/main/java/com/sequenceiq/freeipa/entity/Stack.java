@@ -79,6 +79,8 @@ public class Stack {
 
     private String owner;
 
+    private String appVersion;
+
     public Long getId() {
         return id;
     }
@@ -247,5 +249,13 @@ public class Stack {
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
     }
 }
