@@ -52,6 +52,7 @@ public class FileSystemToSpiFileSystemConverterTest {
         MockitoAnnotations.initMocks(this);
         when(fileSystem.getName()).thenReturn(TEST_NAME);
         when(fileSystem.getConfigurations()).thenReturn(configuration);
+        when(fileSystem.getConfigurations().getValue()).thenReturn("{}");
     }
 
     @Test

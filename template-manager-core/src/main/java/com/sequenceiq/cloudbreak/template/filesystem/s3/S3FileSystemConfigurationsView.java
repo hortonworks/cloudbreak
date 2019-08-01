@@ -12,7 +12,7 @@ public class S3FileSystemConfigurationsView extends BaseFileSystemConfigurations
     private String instanceProfile;
 
     public S3FileSystemConfigurationsView(S3FileSystem s3FileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
-        super(s3FileSystem.getStorageContainer(), deafultFs, locations);
+        super(FileSystemType.S3.name(), s3FileSystem.getStorageContainer(), deafultFs, locations);
         instanceProfile = s3FileSystem.getInstanceProfile();
     }
 
@@ -24,8 +24,4 @@ public class S3FileSystemConfigurationsView extends BaseFileSystemConfigurations
         this.instanceProfile = instanceProfile;
     }
 
-    @Override
-    public String getType() {
-        return FileSystemType.S3.name();
-    }
 }

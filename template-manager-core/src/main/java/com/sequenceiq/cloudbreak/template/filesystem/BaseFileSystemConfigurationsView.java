@@ -4,15 +4,24 @@ import java.util.Collection;
 
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
-public abstract class BaseFileSystemConfigurationsView implements ProvisionEntity {
+public class BaseFileSystemConfigurationsView implements ProvisionEntity {
 
     private String storageContainer;
 
     private final boolean defaultFs;
 
+    private final String type;
+
     private final Collection<StorageLocationView> locations;
 
-    protected BaseFileSystemConfigurationsView(String storageContainer, boolean defaultFs, Collection<StorageLocationView> locations) {
+    protected BaseFileSystemConfigurationsView(String type, Collection<StorageLocationView> locations) {
+        this.type = type;
+        this.defaultFs = false;
+        this.locations = locations;
+    }
+
+    protected BaseFileSystemConfigurationsView(String type, String storageContainer, boolean defaultFs, Collection<StorageLocationView> locations) {
+        this.type = type;
         this.storageContainer = storageContainer;
         this.defaultFs = defaultFs;
         this.locations = locations;
@@ -34,6 +43,8 @@ public abstract class BaseFileSystemConfigurationsView implements ProvisionEntit
         return locations;
     }
 
-    public abstract String getType();
+    public String getType() {
+        return type;
+    }
 }
 

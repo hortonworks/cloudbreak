@@ -61,6 +61,7 @@ public class FileSystemToFileSystemRequestConverterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(fileSystem.getConfigurations()).thenReturn(configurations);
+        when(fileSystem.getConfigurations().getValue()).thenReturn("{}");
     }
 
     @Test

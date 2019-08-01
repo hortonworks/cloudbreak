@@ -54,8 +54,6 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
 
     private static final FileSystemType EXAMPLE_FILE_SYSTEM_TYPE = GCS;
 
-    private static final boolean EXAMPLE_IS_DEFAULT_FS_VALUE = true;
-
     @InjectMocks
     private FileSystemToCloudStorageV4ResponseConverter underTest;
 
@@ -72,6 +70,7 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(fileSystem.getConfigurations()).thenReturn(configurations);
+        when(fileSystem.getConfigurations().getValue()).thenReturn("{}");
     }
 
     @Test

@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.template.filesystem;
 
+import java.io.Serializable;
+
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 
-public class StorageLocationView {
+public class StorageLocationView implements Serializable {
 
     private final String configFile;
 

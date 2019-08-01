@@ -28,14 +28,16 @@ public class FileSystemToSpiFileSystemConverter extends AbstractConversionServic
     public SpiFileSystem convert(FileSystem source) {
         CloudFileSystemView cloudFileSystemView = null;
         try {
-            if (source.getType().isAdls()) {
-                cloudFileSystemView = getConversionService().convert(source.getConfigurations().get(AdlsFileSystem.class), CloudAdlsView.class);
-            } else if (source.getType().isGcs()) {
-                cloudFileSystemView = getConversionService().convert(source.getConfigurations().get(GcsFileSystem.class), CloudGcsView.class);
-            } else if (source.getType().isS3()) {
-                cloudFileSystemView = getConversionService().convert(source.getConfigurations().get(S3FileSystem.class), CloudS3View.class);
-            } else if (source.getType().isWasb()) {
-                cloudFileSystemView = getConversionService().convert(source.getConfigurations().get(WasbFileSystem.class), CloudWasbView.class);
+            if (source.getConfigurations() != null && source.getConfigurations().getValue() != null) {
+                if (source.getType().isAdls()) {
+                    cloudFileSystemView = getConversionService().convert(source.getConfigurations().get(AdlsFileSystem.class), CloudAdlsView.class);
+                } else if (source.getType().isGcs()) {
+                    cloudFileSystemView = getConversionService().convert(source.getConfigurations().get(GcsFileSystem.class), CloudGcsView.class);
+                } else if (source.getType().isS3()) {
+                    cloudFileSystemView = getConversionService().convert(source.getConfigurations().get(S3FileSystem.class), CloudS3View.class);
+                } else if (source.getType().isWasb()) {
+                    cloudFileSystemView = getConversionService().convert(source.getConfigurations().get(WasbFileSystem.class), CloudWasbView.class);
+                }
             }
         } catch (IOException e) {
             LOGGER.warn("Error occurred when tried to convert filesystem object: {}", e.getMessage());

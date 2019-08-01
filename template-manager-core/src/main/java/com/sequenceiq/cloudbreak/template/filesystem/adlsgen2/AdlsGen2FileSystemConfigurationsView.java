@@ -20,7 +20,7 @@ public class AdlsGen2FileSystemConfigurationsView extends BaseFileSystemConfigur
     private String storageContainer;
 
     public AdlsGen2FileSystemConfigurationsView(AdlsGen2FileSystem adlsGen2FileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
-        super(adlsGen2FileSystem.getStorageContainer(), deafultFs, locations);
+        super(FileSystemType.ADLS_GEN_2.name(), adlsGen2FileSystem.getStorageContainer(), deafultFs, locations);
         accountName = adlsGen2FileSystem.getAccountName();
         accountKey = adlsGen2FileSystem.getAccountKey();
         storageContainerName = adlsGen2FileSystem.getStorageContainerName();
@@ -60,11 +60,6 @@ public class AdlsGen2FileSystemConfigurationsView extends BaseFileSystemConfigur
     @Override
     public void setStorageContainer(String storageContainer) {
         this.storageContainer = storageContainer;
-    }
-
-    @Override
-    public String getType() {
-        return FileSystemType.ADLS_GEN_2.name();
     }
 
     public boolean isSecure() {
