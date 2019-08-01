@@ -67,6 +67,7 @@ public class StackRequestManifester {
 
     public StackV4Request setupStackRequestForCloudbreak(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         try {
+            LOGGER.info("Setting up stack request of SDX {} for cloudbreak", sdxCluster.getClusterName());
             StackV4Request stackRequest = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);
             stackRequest.setName(sdxCluster.getClusterName());
             if (stackRequest.getTags() == null) {

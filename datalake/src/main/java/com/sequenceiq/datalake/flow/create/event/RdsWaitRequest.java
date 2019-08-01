@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.create.event;
 
+import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -9,6 +10,11 @@ public class RdsWaitRequest extends SdxEvent {
 
     public RdsWaitRequest(Long sdxId, String userId, String requestId, DetailedEnvironmentResponse detailedEnvironmentResponse) {
         super(sdxId, userId, requestId);
+        this.detailedEnvironmentResponse = detailedEnvironmentResponse;
+    }
+
+    public RdsWaitRequest(SdxContext context, DetailedEnvironmentResponse detailedEnvironmentResponse) {
+        super(context);
         this.detailedEnvironmentResponse = detailedEnvironmentResponse;
     }
 

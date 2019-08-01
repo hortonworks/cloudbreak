@@ -55,7 +55,8 @@ dependencies {
 }
 
 checkstyle {
-  sourceSets = []
+  checkstyleMain.enabled = false
+  checkstyleTest.enabled = false
 }
 
 spotbugs {

@@ -82,7 +82,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE sresourceCrn= :crn AND s.workspace.id= :workspaceId AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
+            + "WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
     Optional<Stack> findByCrnAndWorkspaceIdWithLists(@Param("crn") String crn, @Param("workspaceId") Long workspaceId,
             @Param("showTerminated") Boolean showTerminated, @Param("terminatedAfter") Long terminatedAfter);
 

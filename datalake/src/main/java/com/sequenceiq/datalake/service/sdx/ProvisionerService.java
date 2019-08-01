@@ -81,7 +81,9 @@ public class ProvisionerService {
                             StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
                                     .stackV4Endpoint()
                                     .get(0L, sdxCluster.getClusterName(), Collections.emptySet());
-                            LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
+                            LOGGER.info("Stack status of SDX {} by response from cloudbreak: {}", sdxCluster.getClusterName(),
+                                    stackV4Response.getStatus().name());
+                            LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
                             if (Status.DELETE_FAILED.equals(stackV4Response.getStatus())) {
                                 return AttemptResults.breakFor(
                                         "Stack deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
@@ -143,7 +145,9 @@ public class ProvisionerService {
                             StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
                                     .stackV4Endpoint()
                                     .get(0L, sdxCluster.getClusterName(), Collections.emptySet());
-                            LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
+                            LOGGER.info("Stack status of SDX {} by response from cloudbreak: {}", sdxCluster.getClusterName(),
+                                    stackV4Response.getStatus().name());
+                            LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
                             ClusterV4Response cluster = stackV4Response.getCluster();
                             if (stackAndClusterAvailable(stackV4Response, cluster)) {
                                 return AttemptResults.finishWith(stackV4Response);

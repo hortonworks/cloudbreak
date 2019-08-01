@@ -50,12 +50,14 @@ public class ClouderaManagerClientProvider {
         cmClient.setVerifyingSsl(true);
 
         try {
-            SSLContext sslContext = SSLContexts.custom()
-                    .loadTrustMaterial(KeyStoreUtil.createTrustStore(clientConfig.getServerCert()), null)
-                    .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientConfig.getClientCert(), clientConfig.getClientKey()), "consul".toCharArray())
-                    .build();
-            cmClient.getHttpClient().setSslSocketFactory(sslContext.getSocketFactory());
-            cmClient.getHttpClient().setHostnameVerifier(CertificateTrustManager.hostnameVerifier());
+            if (isCmSslConfigValidClientConfigValid(clientConfig)) {
+                SSLContext sslContext = SSLContexts.custom()
+                        .loadTrustMaterial(KeyStoreUtil.createTrustStore(clientConfig.getServerCert()), null)
+                        .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientConfig.getClientCert(), clientConfig.getClientKey()), "consul".toCharArray())
+                        .build();
+                cmClient.getHttpClient().setSslSocketFactory(sslContext.getSocketFactory());
+                cmClient.getHttpClient().setHostnameVerifier(CertificateTrustManager.hostnameVerifier());
+            }
             cmClient.getHttpClient().setConnectTimeout(1L, TimeUnit.MINUTES);
             cmClient.getHttpClient().setReadTimeout(1L, TimeUnit.MINUTES);
             cmClient.getHttpClient().setWriteTimeout(1L, TimeUnit.MINUTES);
@@ -64,5 +66,9 @@ public class ClouderaManagerClientProvider {
             LOGGER.info("Can not create SSL context for Cloudera Manager", e);
             throw new CloudbreakServiceException(e);
         }
+    }
+
+    private boolean isCmSslConfigValidClientConfigValid(HttpClientConfig config) {
+        return config.getClientCert() != null && config.getServerCert() != null && config.getClientKey() != null;
     }
 }
