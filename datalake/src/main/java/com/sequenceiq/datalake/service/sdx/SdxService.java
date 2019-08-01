@@ -168,7 +168,7 @@ public class SdxService {
         stackV4Request = getStackRequest(stackV4Request, sdxClusterRequest.getClusterShape(), environment.getCloudPlatform());
         if (isCloudStorageConfigured(sdxClusterRequest)) {
             CloudStorageRequest cloudStorageRequest =
-                    cloudStorageManifester.initCloudStorageRequest(environment.getCloudPlatform(),
+                    cloudStorageManifester.initCloudStorageRequest(environment,
                             stackV4Request.getCluster().getBlueprintName(), sdxCluster, sdxClusterRequest);
             stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
         }
