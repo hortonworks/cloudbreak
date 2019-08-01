@@ -16,12 +16,13 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 @Service
 public class NetworkCreationRequestFactory {
 
-    private final SubnetCidrProvider subnetCidrProvider;
+    private final SubnetCidrProvider extendedSubnetCidrProvider;
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    public NetworkCreationRequestFactory(SubnetCidrProvider subnetCidrProvider, CredentialToCloudCredentialConverter credentialToCloudCredentialConverter) {
-        this.subnetCidrProvider = subnetCidrProvider;
+    public NetworkCreationRequestFactory(SubnetCidrProvider extendedSubnetCidrProvider,
+            CredentialToCloudCredentialConverter credentialToCloudCredentialConverter) {
+        this.extendedSubnetCidrProvider = extendedSubnetCidrProvider;
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
     }
 
@@ -50,7 +51,7 @@ public class NetworkCreationRequestFactory {
     }
 
     private Set<String> getSubNetCidrs(String networkCidr) {
-        return subnetCidrProvider.provide(networkCidr);
+        return extendedSubnetCidrProvider.provide(networkCidr);
     }
 
     private Optional<Boolean> getNoPublicIp(NetworkDto networkDto) {

@@ -40,11 +40,11 @@ class NetworkCreationRequestFactoryTest {
 
     private static final Set<String> SUBNET_CIDRS = Collections.singleton("10.10.1.1/24");
 
-    private final SubnetCidrProvider subnetCidrProvider = Mockito.mock(SubnetCidrProvider.class);
+    private final DefaultSubnetCidrProvider defaultSubnetCidrProvider = Mockito.mock(DefaultSubnetCidrProvider.class);
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = Mockito.mock(CredentialToCloudCredentialConverter.class);
 
-    private final NetworkCreationRequestFactory underTest = new NetworkCreationRequestFactory(subnetCidrProvider, credentialToCloudCredentialConverter);
+    private final NetworkCreationRequestFactory underTest = new NetworkCreationRequestFactory(defaultSubnetCidrProvider, credentialToCloudCredentialConverter);
 
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsAreNotPresent() {
@@ -52,12 +52,12 @@ class NetworkCreationRequestFactoryTest {
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
-        when(subnetCidrProvider.provide(NETWORK_CIDR)).thenReturn(SUBNET_CIDRS);
+        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR)).thenReturn(SUBNET_CIDRS);
 
         NetworkCreationRequest actual = underTest.create(environmentDto);
 
         verify(credentialToCloudCredentialConverter).convert(environmentDto.getCredential());
-        verify(subnetCidrProvider).provide(NETWORK_CIDR);
+        verify(defaultSubnetCidrProvider).provide(NETWORK_CIDR);
         assertEquals(ENV_NAME, actual.getEnvName());
         assertEquals(STACK_NAME, actual.getStackName());
         assertEquals(cloudCredential, actual.getCloudCredential());
@@ -75,12 +75,12 @@ class NetworkCreationRequestFactoryTest {
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
-        when(subnetCidrProvider.provide(NETWORK_CIDR)).thenReturn(SUBNET_CIDRS);
+        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR)).thenReturn(SUBNET_CIDRS);
 
         NetworkCreationRequest actual = underTest.create(environmentDto);
 
         verify(credentialToCloudCredentialConverter).convert(environmentDto.getCredential());
-        verify(subnetCidrProvider).provide(NETWORK_CIDR);
+        verify(defaultSubnetCidrProvider).provide(NETWORK_CIDR);
 
         assertEquals(ENV_NAME, actual.getEnvName());
         assertEquals(STACK_NAME, actual.getStackName());
