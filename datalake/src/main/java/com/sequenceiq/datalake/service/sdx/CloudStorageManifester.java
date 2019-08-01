@@ -10,18 +10,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.cloudstorage.S3Guard;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
-import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
@@ -33,9 +36,10 @@ public class CloudStorageManifester {
     @Inject
     private CloudbreakServiceUserCrnClient cloudbreakClient;
 
-    public CloudStorageRequest initCloudStorageRequest(String cloudPlatform, String blueprint, SdxCluster sdxCluster, SdxClusterRequest clusterRequest) {
+    public CloudStorageRequest initCloudStorageRequest(DetailedEnvironmentResponse environment, String blueprint,
+        SdxCluster sdxCluster, SdxClusterRequest clusterRequest) {
         SdxCloudStorageRequest cloudStorage = clusterRequest.getCloudStorage();
-        validateCloudStorage(cloudPlatform, cloudStorage);
+        validateCloudStorage(environment.getCloudPlatform(), cloudStorage);
 
         FileSystemParameterV4Responses fileSystemRecommendations = getFileSystemRecommendations(sdxCluster.getInitiatorUserCrn(),
                 blueprint,
@@ -46,7 +50,8 @@ public class CloudStorageManifester {
 
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
         setStorageLocations(fileSystemRecommendations, cloudStorageRequest);
-        setIdentities(cloudStorage, cloudStorageRequest);
+        setStorageParameters(environment, cloudStorageRequest);
+        setIdentities(environment, cloudStorage, cloudStorageRequest);
         return cloudStorageRequest;
     }
 
@@ -60,23 +65,63 @@ public class CloudStorageManifester {
         cloudStorageRequest.setLocations(storageLocations);
     }
 
-    private void setIdentities(SdxCloudStorageRequest cloudStorage, CloudStorageRequest cloudStorageRequest) {
-        StorageIdentityBase logStorageIdentity = new StorageIdentityBase();
-        logStorageIdentity.setType(CloudIdentityType.LOG);
-        FileSystemType fileSystemType = cloudStorage.getFileSystemType();
-        if (fileSystemType.isS3()) {
-            S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
-            s3CloudStorageV1Parameters.setInstanceProfile(cloudStorage.getS3().getInstanceProfile());
-            logStorageIdentity.setS3(s3CloudStorageV1Parameters);
-        } else if (fileSystemType.isWasb()) {
-            WasbCloudStorageV1Parameters wasbCloudStorageV1Parameters = new WasbCloudStorageV1Parameters();
-            WasbCloudStorageV1Parameters wasb = cloudStorage.getWasb();
-            wasbCloudStorageV1Parameters.setSecure(wasb.isSecure());
-            wasbCloudStorageV1Parameters.setAccountName(wasb.getAccountName());
-            wasbCloudStorageV1Parameters.setAccountKey(wasb.getAccountKey());
-            logStorageIdentity.setWasb(wasbCloudStorageV1Parameters);
+    private void setStorageParameters(DetailedEnvironmentResponse environment, CloudStorageRequest cloudStorageRequest) {
+        if (isS3GuardConfigured(environment)) {
+            if (!Strings.isNullOrEmpty(environment.getAws().getS3guard().getDynamoDbTableName())) {
+                AwsStorageParameters awsStorageParameters = new AwsStorageParameters();
+                S3Guard s3Guard = new S3Guard();
+                s3Guard.setDynamoTableName(environment.getAws().getS3guard().getDynamoDbTableName());
+                awsStorageParameters.setS3Guard(s3Guard);
+                cloudStorageRequest.setAws(awsStorageParameters);
+            }
         }
-        cloudStorageRequest.setIdentities(List.of(logStorageIdentity));
+    }
+
+    private boolean isS3GuardConfigured(DetailedEnvironmentResponse environment) {
+        return environment.getAws() != null && environment.getAws().getS3guard() != null;
+    }
+
+    private void setIdentities(DetailedEnvironmentResponse environment,
+        SdxCloudStorageRequest cloudStorage,
+        CloudStorageRequest cloudStorageRequest) {
+        addIdBrokerIdentity(cloudStorage, cloudStorageRequest);
+        addLogIdentity(environment, cloudStorageRequest);
+    }
+
+    private void addIdBrokerIdentity(SdxCloudStorageRequest cloudStorage, CloudStorageRequest cloudStorageRequest) {
+        StorageIdentityBase idBroker = new StorageIdentityBase();
+        idBroker.setType(CloudIdentityType.ID_BROKER);
+        FileSystemType fileSystemType = cloudStorage.getFileSystemType();
+        if (isFileSystemConfigured(fileSystemType)) {
+            if (fileSystemType.isS3()) {
+                idBroker.setS3(cloudStorage.getS3());
+            } else if (fileSystemType.isWasb()) {
+                idBroker.setWasb(cloudStorage.getWasb());
+            }
+            cloudStorageRequest.getIdentities().add(idBroker);
+        }
+    }
+
+    private boolean isFileSystemConfigured(FileSystemType fileSystemType) {
+        return fileSystemType != null;
+    }
+
+    private void addLogIdentity(DetailedEnvironmentResponse environment, CloudStorageRequest cloudStorageRequest) {
+        StorageIdentityBase log = new StorageIdentityBase();
+        log.setType(CloudIdentityType.LOG);
+        if (isLoggingConfigured(environment)) {
+            LoggingResponse logging = environment.getTelemetry().getLogging();
+            if (logging.getS3() != null) {
+                log.setS3(logging.getS3());
+            } else if (logging.getWasb() != null) {
+                log.setWasb(logging.getWasb());
+            }
+            cloudStorageRequest.getIdentities().add(log);
+        }
+    }
+
+    private boolean isLoggingConfigured(DetailedEnvironmentResponse environment) {
+        return environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null;
     }
 
     private void validateCloudStorage(String cloudPlatform, SdxCloudStorageRequest cloudStorage) {

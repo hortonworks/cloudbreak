@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,10 +27,16 @@ import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
@@ -56,7 +63,9 @@ public class CloudStorageManifesterTest {
         SdxCluster sdxCluster = new SdxCluster();
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setCloudStorage(new SdxCloudStorageRequest());
-        underTest.initCloudStorageRequest("AWS", exampleBlueprintName, sdxCluster, sdxClusterRequest);
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("AWS");
+        underTest.initCloudStorageRequest(environment, exampleBlueprintName, sdxCluster, sdxClusterRequest);
     }
 
     @Test
@@ -73,9 +82,60 @@ public class CloudStorageManifesterTest {
         s3Params.setInstanceProfile("instance:profile");
         cloudStorageRequest.setS3(s3Params);
         sdxClusterRequest.setCloudStorage(cloudStorageRequest);
-        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest("AWS", exampleBlueprintName, sdxCluster, sdxClusterRequest);
-        assertEquals(1, cloudStorageConfigReq.getLocations().size());
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("AWS");
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, exampleBlueprintName, sdxCluster, sdxClusterRequest);
         StorageLocationBase singleRequest = cloudStorageConfigReq.getLocations().iterator().next();
+
+        assertEquals(1, cloudStorageConfigReq.getIdentities().size());
+        assertEquals(CloudIdentityType.ID_BROKER, cloudStorageConfigReq.getIdentities().iterator().next().getType());
+        assertEquals(1, cloudStorageConfigReq.getLocations().size());
+        assertEquals(CloudStorageCdpService.RANGER_ADMIN.name(), singleRequest.getType());
+        assertEquals("ranger/example-path", singleRequest.getValue());
+    }
+
+    @Test
+    public void whenEnvironmentHasLoggingEnabledThenShouldApplyAsLogIdentity() {
+        mockFileSystemResponseForCloudbreakClient();
+        SdxCluster sdxCluster = new SdxCluster();
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxCluster.setInitiatorUserCrn(USER_CRN);
+        sdxCluster.setClusterName("sdx-cluster");
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("example-path");
+        cloudStorageRequest.setFileSystemType(FileSystemType.S3);
+        S3CloudStorageV1Parameters s3Params = new S3CloudStorageV1Parameters();
+        s3Params.setInstanceProfile("instance:profile");
+        cloudStorageRequest.setS3(s3Params);
+        sdxClusterRequest.setCloudStorage(cloudStorageRequest);
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("AWS");
+        TelemetryResponse telemetryResponse = new TelemetryResponse();
+        LoggingResponse loggingResponse = new LoggingResponse();
+        S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
+        s3CloudStorageV1Parameters.setInstanceProfile("logprofile");
+        loggingResponse.setS3(s3CloudStorageV1Parameters);
+        telemetryResponse.setLogging(loggingResponse);
+        AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
+        S3GuardRequestParameters s3GuardRequestParameters = new S3GuardRequestParameters();
+        s3GuardRequestParameters.setDynamoDbTableName("table");
+        awsEnvironmentParameters.setS3guard(s3GuardRequestParameters);
+        environment.setAws(awsEnvironmentParameters);
+        environment.setTelemetry(telemetryResponse);
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, exampleBlueprintName, sdxCluster, sdxClusterRequest);
+        StorageLocationBase singleRequest = cloudStorageConfigReq.getLocations().iterator().next();
+
+        assertEquals(2, cloudStorageConfigReq.getIdentities().size());
+        assertEquals(1, cloudStorageConfigReq.getIdentities()
+                .stream()
+                .filter(r -> r.getType().equals(CloudIdentityType.ID_BROKER))
+                .collect(Collectors.toSet()).size());
+        assertEquals(1, cloudStorageConfigReq.getIdentities()
+                .stream()
+                .filter(r -> r.getType().equals(CloudIdentityType.LOG))
+                .collect(Collectors.toSet()).size());
+        assertEquals("table", cloudStorageConfigReq.getAws().getS3Guard().getDynamoTableName());
+        assertEquals(1, cloudStorageConfigReq.getLocations().size());
         assertEquals(CloudStorageCdpService.RANGER_ADMIN.name(), singleRequest.getType());
         assertEquals("ranger/example-path", singleRequest.getValue());
 
