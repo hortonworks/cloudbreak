@@ -15,9 +15,9 @@ public enum ExposedService {
     ALL("Every Service", "ALL", "", "", true, null, null, false, true),
 
     CLOUDERA_MANAGER("CM-API", "CM-API", "CM-API", "/cm-api/", true, 7180, 7183, true, true),
-    CLOUDERA_MANAGER_UI("CM-UI", "CM-UI", "CM-UI", "/cmf/home", true, 7180, 7183, false, false),
+    CLOUDERA_MANAGER_UI("CM-UI", "CM-UI", "CM-UI", "/cmf/home/", true, 7180, 7183, false, false),
     HUE("HUE", "HUE_LOAD_BALANCER", "HUE", "/hue/", true, 8889, 8889, false, false),
-    WEBHDFS("WebHDFS", "NAMENODE", "WEBHDFS", "/webhdfs/v1", true, 9870, 9871, true, true),
+    WEBHDFS("WebHDFS", "NAMENODE", "WEBHDFS", "/webhdfs/v1/", true, 9870, 9871, true, true),
     NAMENODE("Name Node", "NAMENODE", "HDFSUI", "/hdfs/", true, 9870, 9871, false, false),
     RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "YARNUIV2", "/yarnuiv2/", true, 8088, 8090, false, true),
     JOB_HISTORY_SERVER("Job History Server", "JOBHISTORY", "JOBHISTORYUI", "/jobhistory/", true, 19888, 19890, false, false),
@@ -27,12 +27,12 @@ public enum ExposedService {
     SPARK_HISTORY_SERVER("Spark History Server", "SPARK_YARN_HISTORY_SERVER", "SPARKHISTORYUI", "/sparkhistory/", true, 18088, 18488, false, false),
     ZEPPELIN("Zeppelin", "ZEPPELIN_SERVER", "ZEPPELIN", "/zeppelin/", false, 8885, 8886, false, false),
     RANGER("Ranger", "RANGER_ADMIN", "RANGER", "/ranger/", true, 6080, 6182, false, true),
-    LIVY_SERVER("Livy Server", "LIVY_SERVER", "LIVYSERVER1", "/livy/ui", true, 8998, 8998, false, true),
+    LIVY_SERVER("Livy Server", "LIVY_SERVER", "LIVYSERVER1", "/livy/ui/", true, 8998, 8998, false, true),
     OOZIE_UI("Oozie Server", "OOZIE_SERVER", "OOZIE", "/oozie/", true, 11000, 11443, false, true),
     SOLR("Solr Server", "SOLR_SERVER", "SOLR", "/solr/", true, 8983, 8985, false, true),
     HBASE_UI("HBase UI", "MASTER", "HBASEUI", "/hbase/webui/master", true, 16010, 16010, false, false),
     HBASE_REST("HBase Rest", "HBASERESTSERVER", "WEBHBASE", "/hbase/", true, 20550, 20550, true, true),
-    NIFI("Nifi", "NIFI_NODE", "NIFI", "/nifi-app/nifi", true, 8080, 8443, false, false);
+    NIFI("Nifi", "NIFI_NODE", "NIFI", "/nifi-app/nifi/", true, 8080, 8443, false, false);
 
     private final String displayName;
     private final String serviceName;
