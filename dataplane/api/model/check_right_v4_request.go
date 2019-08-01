@@ -6,9 +6,14 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // CheckRightV4Request check right v4 request
@@ -21,6 +26,52 @@ type CheckRightV4Request struct {
 
 // Validate validates this check right v4 request
 func (m *CheckRightV4Request) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateRights(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+var checkRightV4RequestRightsItemsEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["DISTROX_READ","DISTROX_WRITE","SDX_READ","SDX_WRITE","ENVIRONMENT_READ","ENVIRONMENT_WRITE"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		checkRightV4RequestRightsItemsEnum = append(checkRightV4RequestRightsItemsEnum, v)
+	}
+}
+
+func (m *CheckRightV4Request) validateRightsItemsEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, checkRightV4RequestRightsItemsEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *CheckRightV4Request) validateRights(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Rights) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Rights); i++ {
+
+		// value enum
+		if err := m.validateRightsItemsEnum("rights"+"."+strconv.Itoa(i), "body", m.Rights[i]); err != nil {
+			return err
+		}
+
+	}
+
 	return nil
 }
 

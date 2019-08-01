@@ -18,6 +18,9 @@ import (
 // swagger:model CloudStorageResponse
 type CloudStorageResponse struct {
 
+	// cloud storage account mapping
+	AccountMapping *AccountMappingBase `json:"accountMapping,omitempty"`
+
 	// aws
 	Aws *AwsStorageParameters `json:"aws,omitempty"`
 
@@ -31,6 +34,10 @@ type CloudStorageResponse struct {
 // Validate validates this cloud storage response
 func (m *CloudStorageResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateAccountMapping(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateAws(formats); err != nil {
 		res = append(res, err)
@@ -47,6 +54,24 @@ func (m *CloudStorageResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *CloudStorageResponse) validateAccountMapping(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.AccountMapping) { // not required
+		return nil
+	}
+
+	if m.AccountMapping != nil {
+		if err := m.AccountMapping.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("accountMapping")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

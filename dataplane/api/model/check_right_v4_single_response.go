@@ -6,9 +6,13 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // CheckRightV4SingleResponse check right v4 single response
@@ -19,11 +23,76 @@ type CheckRightV4SingleResponse struct {
 	Result bool `json:"result,omitempty"`
 
 	// right
+	// Enum: [DISTROX_READ DISTROX_WRITE SDX_READ SDX_WRITE ENVIRONMENT_READ ENVIRONMENT_WRITE]
 	Right string `json:"right,omitempty"`
 }
 
 // Validate validates this check right v4 single response
 func (m *CheckRightV4SingleResponse) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateRight(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+var checkRightV4SingleResponseTypeRightPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["DISTROX_READ","DISTROX_WRITE","SDX_READ","SDX_WRITE","ENVIRONMENT_READ","ENVIRONMENT_WRITE"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		checkRightV4SingleResponseTypeRightPropEnum = append(checkRightV4SingleResponseTypeRightPropEnum, v)
+	}
+}
+
+const (
+
+	// CheckRightV4SingleResponseRightDISTROXREAD captures enum value "DISTROX_READ"
+	CheckRightV4SingleResponseRightDISTROXREAD string = "DISTROX_READ"
+
+	// CheckRightV4SingleResponseRightDISTROXWRITE captures enum value "DISTROX_WRITE"
+	CheckRightV4SingleResponseRightDISTROXWRITE string = "DISTROX_WRITE"
+
+	// CheckRightV4SingleResponseRightSDXREAD captures enum value "SDX_READ"
+	CheckRightV4SingleResponseRightSDXREAD string = "SDX_READ"
+
+	// CheckRightV4SingleResponseRightSDXWRITE captures enum value "SDX_WRITE"
+	CheckRightV4SingleResponseRightSDXWRITE string = "SDX_WRITE"
+
+	// CheckRightV4SingleResponseRightENVIRONMENTREAD captures enum value "ENVIRONMENT_READ"
+	CheckRightV4SingleResponseRightENVIRONMENTREAD string = "ENVIRONMENT_READ"
+
+	// CheckRightV4SingleResponseRightENVIRONMENTWRITE captures enum value "ENVIRONMENT_WRITE"
+	CheckRightV4SingleResponseRightENVIRONMENTWRITE string = "ENVIRONMENT_WRITE"
+)
+
+// prop value enum
+func (m *CheckRightV4SingleResponse) validateRightEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, checkRightV4SingleResponseTypeRightPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *CheckRightV4SingleResponse) validateRight(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Right) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateRightEnum("right", "body", m.Right); err != nil {
+		return err
+	}
+
 	return nil
 }
 
