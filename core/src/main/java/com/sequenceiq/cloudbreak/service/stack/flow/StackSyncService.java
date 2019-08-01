@@ -26,7 +26,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -34,7 +36,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -244,7 +245,11 @@ public class StackSyncService {
         String name;
         name = instanceMetaData.getDiscoveryFQDN() == null ? instanceMetaData.getInstanceId() : String.format("%s (%s)", instanceMetaData.getInstanceId(),
                 instanceMetaData.getDiscoveryFQDN());
-
+        hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN())
+                .ifPresent(hm -> {
+                    hm.setHostMetadataState(HostMetadataState.UNHEALTHY);
+                    hostMetadataService.save(hm);
+                });
         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_DELETED_CBMETADATA.code(),
                         Collections.singletonList(name)));

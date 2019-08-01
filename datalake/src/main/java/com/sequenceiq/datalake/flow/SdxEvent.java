@@ -23,12 +23,20 @@ public class SdxEvent implements Selectable, Acceptable {
         this(null, sdxId, userId, requestId);
     }
 
+    public SdxEvent(SdxContext context) {
+        this(null, context.getSdxId(), context.getUserId(), context.getRequestId());
+    }
+
     public SdxEvent(String selector, Long sdxId, String userId, String requestId) {
         this.selector = selector;
         this.sdxId = sdxId;
         this.userId = userId;
         this.requestId = requestId;
         accepted = new Promise<>();
+    }
+
+    public SdxEvent(String selector, SdxContext context) {
+        this(selector, context.getSdxId(), context.getUserId(), context.getRequestId());
     }
 
     public SdxEvent(String selector, Long sdxId, String userId, String requestId, Promise<Boolean> accepted) {

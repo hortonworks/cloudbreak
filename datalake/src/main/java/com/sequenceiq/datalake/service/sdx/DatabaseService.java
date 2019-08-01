@@ -51,6 +51,7 @@ public class DatabaseService {
 
     public DatabaseServerStatusV4Response create(Long sdxId, Optional<SdxCluster> sdxClusterOptional, DetailedEnvironmentResponse env, String requestId) {
         if (sdxClusterOptional.isPresent()) {
+            LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxClusterOptional.get().getClusterName());
             DatabaseServerStatusV4Response resp = redbeamsClient
                     .withCrn(threadBasedUserCrnProvider.getUserCrn())
                     .databaseServerV4Endpoint().create(getDatabaseRequest(env));
@@ -74,6 +75,7 @@ public class DatabaseService {
 
     public void terminate(Long sdxId, Optional<SdxCluster> sdxClusterOptional, String requestId) {
         sdxClusterOptional.ifPresentOrElse(sdxCluster -> {
+            LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
             DatabaseServerTerminationOutcomeV4Response resp = redbeamsClient
                     .withCrn(threadBasedUserCrnProvider.getUserCrn())
                     .databaseServerV4Endpoint().terminate(sdxCluster.getDatabaseCrn());

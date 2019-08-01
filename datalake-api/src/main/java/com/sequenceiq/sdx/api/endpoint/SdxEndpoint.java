@@ -21,6 +21,7 @@ import com.sequenceiq.sdx.api.model.RedeploySdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -89,6 +90,11 @@ public interface SdxEndpoint {
     @Path("/crn/{clusterCrn}/detail")
     @ApiOperation(value = "get SDX cluster detail by crn", produces = "application/json", nickname = "getSdxDetailByCrn")
     SdxClusterDetailResponse getDetailByCrn(@PathParam("clusterCrn") String clusterCrn, @QueryParam("entries") Set<String> entries);
+
+    @POST
+    @Path("/crn/{crn}/manual_repair")
+    @ApiOperation(value = "repairs an sdxNode ni the specified hostgroup", nickname = "repairSdxNode")
+    void repairCluster(@PathParam("crn") String crn, SdxRepairRequest clusterRepairRequest);
 
     @GET
     @Path("list")

@@ -55,7 +55,7 @@ public class SdxDeleteActions {
 
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId(), payload.getRequestId());
+                return SdxContext.from(flowParameters, payload);
             }
 
             @Override
@@ -68,7 +68,7 @@ public class SdxDeleteActions {
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return new StackDeletionFailedEvent(payload.getResourceId(), payload.getUserId(), payload.getRequestId(), ex);
+                return StackDeletionFailedEvent.from(payload, ex);
             }
         };
     }
@@ -79,7 +79,7 @@ public class SdxDeleteActions {
 
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId(), payload.getRequestId());
+                return SdxContext.from(flowParameters, payload);
             }
 
             @Override
@@ -92,12 +92,12 @@ public class SdxDeleteActions {
 
             @Override
             protected Selectable createRequest(SdxContext context) {
-                return new StackDeletionWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId());
+                return StackDeletionWaitRequest.from(context);
             }
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return new StackDeletionFailedEvent(payload.getResourceId(), payload.getUserId(), payload.getRequestId(), ex);
+                return StackDeletionFailedEvent.from(payload, ex);
             }
         };
     }
@@ -108,7 +108,7 @@ public class SdxDeleteActions {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     StackDeletionSuccessEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId(), payload.getRequestId());
+                return SdxContext.from(flowParameters, payload);
             }
 
             @Override
@@ -121,12 +121,12 @@ public class SdxDeleteActions {
 
             @Override
             protected Object getFailurePayload(StackDeletionSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return new StackDeletionFailedEvent(payload.getResourceId(), payload.getUserId(), payload.getRequestId(), ex);
+                return StackDeletionFailedEvent.from(payload, ex);
             }
 
             @Override
             protected Selectable createRequest(SdxContext context) {
-                return new RdsDeletionWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId());
+                return RdsDeletionWaitRequest.from(context);
             }
         };
     }
@@ -137,7 +137,7 @@ public class SdxDeleteActions {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     RdsDeletionSuccessEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId(), payload.getRequestId());
+                return SdxContext.from(flowParameters, payload);
             }
 
             @Override
@@ -161,7 +161,7 @@ public class SdxDeleteActions {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     StackDeletionFailedEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId(), payload.getRequestId());
+                return SdxContext.from(flowParameters, payload);
             }
 
             @Override

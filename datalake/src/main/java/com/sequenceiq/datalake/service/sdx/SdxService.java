@@ -67,11 +67,13 @@ public class SdxService {
     private Clock clock;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<SdxClusterStatus> statuses) {
+        LOGGER.info("Searching for SDX cluster by ids and statuses.");
         List<SdxCluster> sdxClusters = sdxClusterRepository.findByIdInAndStatusIn(resourceIds, statuses);
         return sdxClusters.stream().map(SdxCluster::getId).collect(Collectors.toSet());
     }
 
     public SdxCluster getById(Long id) {
+        LOGGER.info("Searching for SDX cluster by id {}", id);
         Optional<SdxCluster> sdxClusters = sdxClusterRepository.findById(id);
         if (sdxClusters.isPresent()) {
             return sdxClusters.get();
@@ -82,6 +84,7 @@ public class SdxService {
 
     public StackV4Response getDetail(String userCrn, String name, Set<String> entries) {
         try {
+            LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", name);
             return cloudbreakClient.withCrn(userCrn).stackV4Endpoint().get(0L, name, entries);
         } catch (javax.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);
@@ -90,6 +93,7 @@ public class SdxService {
     }
 
     public SdxCluster getByCrn(String userCrn, String clusterCrn) {
+        LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (sdxCluster.isPresent()) {
@@ -100,6 +104,7 @@ public class SdxService {
     }
 
     public SdxCluster getByAccountIdAndSdxName(String userCrn, String name) {
+        LOGGER.info("Searching for SDX cluster by name {}", name);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name);
         if (sdxCluster.isPresent()) {
@@ -114,6 +119,7 @@ public class SdxService {
     }
 
     public void updateSdxStatus(Long id, SdxClusterStatus sdxClusterStatus, String statusReason) {
+        LOGGER.info("Updating status of SDX cluster {} to {}", id, sdxClusterStatus.name());
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findById(id);
         sdxCluster.ifPresentOrElse(sdx -> {
             sdx.setStatus(sdxClusterStatus);
@@ -123,6 +129,7 @@ public class SdxService {
     }
 
     public SdxCluster createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request) {
+        LOGGER.info("Creating SDX cluster with name {}", name);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
         validateInternalSdxRequest(stackV4Request, sdxClusterRequest.getClusterShape());
         SdxCluster sdxCluster = new SdxCluster();
@@ -249,11 +256,13 @@ public class SdxService {
     }
 
     public List<SdxCluster> listSdxByEnvCrn(String userCrn, String envCrn) {
+        LOGGER.info("Listing SDX clusters by environment crn {}", envCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(accountIdFromCrn, envCrn);
     }
 
     public List<SdxCluster> listSdx(String userCrn, String envName) {
+        LOGGER.info("Listing SDX clusters by environment name {}", envName);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         if (envName != null) {
             return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);

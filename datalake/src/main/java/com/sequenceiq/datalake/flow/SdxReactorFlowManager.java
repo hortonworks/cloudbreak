@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.flow;
 
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.ENV_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
+import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVENT;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -15,11 +16,13 @@ import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -56,6 +59,13 @@ public class SdxReactorFlowManager {
         String userId = threadBasedUserCrnProvider.getUserCrn();
         String requestId = threadBasedRequestIdProvider.getRequestId();
         notify(selector, new SdxEvent(selector, sdxId, userId, requestId));
+    }
+
+    public void triggerSdxRepairFlow(Long sdxId, SdxRepairRequest repairRequest) {
+        String selector = SDX_REPAIR_EVENT.event();
+        String userId = threadBasedUserCrnProvider.getUserCrn();
+        String requestId = threadBasedRequestIdProvider.getRequestId();
+        notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, requestId, repairRequest));
     }
 
     public void cancelRunningFlows(Long sdxId) {

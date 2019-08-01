@@ -11,16 +11,18 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.notification.NotificationController;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.RedeploySdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Controller
 public class SdxController extends NotificationController implements SdxEndpoint {
@@ -30,6 +32,9 @@ public class SdxController extends NotificationController implements SdxEndpoint
 
     @Inject
     private SdxService sdxService;
+
+    @Inject
+    private SdxRepairService repairService;
 
     @Inject
     private SdxClusterConverter sdxClusterConverter;
@@ -98,6 +103,13 @@ public class SdxController extends NotificationController implements SdxEndpoint
         StackV4Response stackV4Response = sdxService.getDetail(userCrn, sdxCluster.getClusterName(), entries);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
+    }
+
+    @Override
+    public void repairCluster(String clusterCrn, SdxRepairRequest clusterRepairRequest) {
+        throw new UnsupportedOperationException("Repair is not yet supported for SDX");
+        // String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        //repairService.triggerRepair(userCrn, clusterCrn, clusterRepairRequest);
     }
 
     @Override

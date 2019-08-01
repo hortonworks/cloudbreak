@@ -14,6 +14,11 @@ public class SdxFailureEvent extends SdxEvent {
         this.exception = exception;
     }
 
+    public SdxFailureEvent(String selector, SdxContext context, Exception exception) {
+        super(selector, context);
+        this.exception = exception;
+    }
+
     public Exception getException() {
         return exception;
     }

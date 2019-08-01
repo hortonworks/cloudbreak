@@ -18,6 +18,17 @@ public class SdxContext extends CommonContext {
         this.requestId = requestId;
     }
 
+    public SdxContext(FlowParameters flowParameters, SdxEvent event) {
+        super(flowParameters);
+        sdxId = event.getResourceId();
+        userId = event.getUserId();
+        requestId = event.getRequestId();
+    }
+
+    public static SdxContext from(FlowParameters flowParameters, SdxEvent event) {
+        return new SdxContext(flowParameters, event);
+    }
+
     public Long getSdxId() {
         return sdxId;
     }

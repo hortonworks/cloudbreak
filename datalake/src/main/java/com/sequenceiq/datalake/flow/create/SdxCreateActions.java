@@ -56,7 +56,7 @@ public class SdxCreateActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId(), payload.getRequestId());
+                return SdxContext.from(flowParameters, payload);
             }
 
             @Override
@@ -68,12 +68,12 @@ public class SdxCreateActions {
 
             @Override
             protected Selectable createRequest(SdxContext context) {
-                return new EnvWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId());
+                return EnvWaitRequest.from(context);
             }
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return new SdxCreateFailedEvent(payload.getResourceId(), payload.getUserId(), payload.getRequestId(), ex);
+                return SdxCreateFailedEvent.from(payload, ex);
             }
         };
     }
@@ -84,20 +84,19 @@ public class SdxCreateActions {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     EnvWaitSuccessEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId(), payload.getRequestId());
+                return SdxContext.from(flowParameters, payload);
             }
 
             @Override
             protected void doExecute(SdxContext context, EnvWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
-                RdsWaitRequest req = new RdsWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId(),
-                        payload.getDetailedEnvironmentResponse());
+                RdsWaitRequest req = new RdsWaitRequest(context, payload.getDetailedEnvironmentResponse());
                 sendEvent(context, req.selector(), req);
             }
 
             @Override
             protected Object getFailurePayload(EnvWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return new SdxCreateFailedEvent(payload.getResourceId(), payload.getUserId(), payload.getRequestId(), ex);
+                return SdxCreateFailedEvent.from(payload, ex);
             }
         };
     }
@@ -109,7 +108,7 @@ public class SdxCreateActions {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     RdsWaitSuccessEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId(), payload.getRequestId());
+                return SdxContext.from(flowParameters, payload);
             }
 
             @Override
@@ -125,7 +124,7 @@ public class SdxCreateActions {
 
             @Override
             protected Object getFailurePayload(RdsWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return new SdxCreateFailedEvent(payload.getResourceId(), payload.getUserId(), payload.getRequestId(), ex);
+                return SdxCreateFailedEvent.from(payload, ex);
             }
         };
     }
@@ -136,7 +135,7 @@ public class SdxCreateActions {
 
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId(), payload.getRequestId());
+                return SdxContext.from(flowParameters, payload);
             }
 
             @Override
@@ -147,12 +146,12 @@ public class SdxCreateActions {
 
             @Override
             protected Selectable createRequest(SdxContext context) {
-                return new StackCreationWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId());
+                return StackCreationWaitRequest.from(context);
             }
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return new SdxCreateFailedEvent(payload.getResourceId(), payload.getUserId(), payload.getRequestId(), ex);
+                return SdxCreateFailedEvent.from(payload, ex);
             }
         };
     }
@@ -163,7 +162,7 @@ public class SdxCreateActions {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     StackCreationSuccessEvent payload) {
-                return new SdxContext(flowParameters, payload.getResourceId(), payload.getUserId(), payload.getRequestId());
+                return SdxContext.from(flowParameters, payload);
             }
 
             @Override
@@ -187,7 +186,7 @@ public class SdxCreateActions {
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     SdxCreateFailedEvent payload) {
                 notificationService.send(ResourceEvent.SDX_CLUSTER_CREATION_FAILED, payload, payload.getUserId());
-                return new SdxContext(flowParameters, payload.getResourceId(), null, payload.getRequestId());
+                return SdxContext.from(flowParameters, payload);
             }
 
             @Override
