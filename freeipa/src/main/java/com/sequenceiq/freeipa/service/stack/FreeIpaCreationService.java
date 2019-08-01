@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -90,12 +91,16 @@ public class FreeIpaCreationService {
     @Inject
     private TransactionService transactionService;
 
+    @Value("${info.app.version:}")
+    private String appVersion;
+
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
         String userCrn = crnService.getUserCrn();
         Future<User> userFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, Optional.empty()));
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
         Stack stack = stackConverter.convert(request, accountId, userFuture, credential.getCloudPlatform());
         stack.setResourceCrn(crnService.createCrn(accountId, Crn.ResourceType.FREEIPA));
+        stack.setAppVersion(appVersion);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
 
         SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys();
