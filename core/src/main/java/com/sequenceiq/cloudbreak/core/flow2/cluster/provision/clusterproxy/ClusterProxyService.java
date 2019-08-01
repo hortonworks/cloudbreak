@@ -52,7 +52,14 @@ public class ClusterProxyService {
     }
 
     public ConfigRegistrationResponse registerCluster(Stack stack) throws JsonProcessingException {
-        ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
+        // Registering twice - once with Stack CRN and another time with Cluster Id. This is
+        // for backwards compatibility. Will remove this after all consumers start using Stack CRN instead of Cluster Id.
+        registerCluster(stack, clusterId(stack.getCluster()));
+        return registerCluster(stack, stack.getResourceCrn());
+    }
+
+    private ConfigRegistrationResponse registerCluster(Stack stack, String clusterIdentifier) throws JsonProcessingException {
+        ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack, clusterIdentifier);
         LOGGER.debug("Cluster Proxy config request: {}", proxyConfigRequest);
         ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(clusterProxyUrl + registerConfigPath,
                 requestEntity(proxyConfigRequest), ConfigRegistrationResponse.class);
@@ -64,24 +71,38 @@ public class ClusterProxyService {
     public void registerGatewayConfiguration(Long stackId) throws JsonProcessingException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         if  (!stack.getCluster().hasGateway()) {
-            LOGGER.info("Cluster {} in environment {} not configured with Gateway (Knox). Not updating Cluster Proxy with Gateway url.",
-                    stack.getCluster().getName(), stack.getEnvironmentCrn());
+            LOGGER.warn("Cluster {} with crn {} in environment {} not configured with Gateway (Knox). Not updating Cluster Proxy with Gateway url.",
+                    stack.getCluster().getName(), stack.getResourceCrn(), stack.getEnvironmentCrn());
             return;
         }
-        ConfigUpdateRequest request = createProxyConfigUpdateRequest(stack);
+        // Registering twice - once with Stack CRN and another time with Cluster Id. This is
+        // for backwards compatibility. Will remove this after all consumers start using Stack CRN instead of Cluster Id.
+        registerGateway(stack, clusterId(stack.getCluster()));
+        registerGateway(stack, stack.getResourceCrn());
+
+    }
+
+    private void registerGateway(Stack stack, String clusterIdentifier) throws JsonProcessingException {
+        ConfigUpdateRequest request = createProxyConfigUpdateRequest(stack, clusterIdentifier);
         LOGGER.debug("Cluster Proxy config update request: {}", request);
         ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(clusterProxyUrl + updateConfigPath,
                 requestEntity(request), ConfigRegistrationResponse.class);
 
         LOGGER.debug("Cluster Proxy config update response: {}", response);
-
     }
 
-    public void deregisterCluster(Cluster cluster) throws JsonProcessingException {
-        LOGGER.debug("Removing cluster proxy configuration for cluster with crn: {}", clusterCrn(cluster));
+    public void deregisterCluster(Stack stack) throws JsonProcessingException {
+        // De-registering twice - once with Stack CRN and another time with Cluster Id. This is
+        // for backwards compatibility. Will remove this after all consumers start using Stack CRN instead of Cluster Id.
+        deregister(stack, clusterId(stack.getCluster()));
+        deregister(stack, stack.getResourceCrn());
+    }
+
+    private void deregister(Stack stack, String clusterIdentifier) throws JsonProcessingException {
+        LOGGER.debug("Removing cluster proxy configuration for cluster with crn: {} and cluster identifier: {}", stack.getResourceCrn(), clusterIdentifier);
         restTemplate.postForEntity(clusterProxyUrl + removeConfigPath,
-                requestEntity(new ConfigDeleteRequest(clusterCrn(cluster))), ConfigRegistrationResponse.class);
-        LOGGER.debug("Removed cluster proxy configuration for cluster with crn: {}", clusterCrn(cluster));
+                requestEntity(new ConfigDeleteRequest(clusterIdentifier)), ConfigRegistrationResponse.class);
+        LOGGER.debug("Removed cluster proxy configuration for cluster with crn: {} and cluster identifier: {}", stack.getResourceCrn(), clusterIdentifier);
     }
 
     private HttpEntity<String> requestEntity(ConfigRegistrationRequest proxyConfigRequest) throws JsonProcessingException {
@@ -102,7 +123,7 @@ public class ClusterProxyService {
         return new HttpEntity<>(JsonUtil.writeValueAsString(proxyConfigRequest), headers);
     }
 
-    private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
+    private ConfigRegistrationRequest createProxyConfigRequest(Stack stack, String clusterIdentifier) {
         Cluster cluster = stack.getCluster();
 
         String cloudbreakUser = cluster.getCloudbreakAmbariUser();
@@ -114,17 +135,17 @@ public class ClusterProxyService {
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
                 new ClusterServiceCredential(dpUser, dpPasswordVaultPath, true));
         ClusterServiceConfig serviceConfig = new ClusterServiceConfig("cloudera-manager", singletonList(clusterManagerUrl(stack)), credentials);
-        return new ConfigRegistrationRequest(clusterCrn(cluster), singletonList(serviceConfig));
+        return new ConfigRegistrationRequest(clusterIdentifier, singletonList(serviceConfig));
     }
 
-    private ConfigUpdateRequest createProxyConfigUpdateRequest(Stack stack) {
+    private ConfigUpdateRequest createProxyConfigUpdateRequest(Stack stack, String clusterIdentifier) {
         String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
         Cluster cluster = stack.getCluster();
         String knoxUrl = String.format("https://%s:8443/%s", gatewayIp, cluster.getGateway().getPath());
-        return new ConfigUpdateRequest(clusterCrn(cluster), knoxUrl);
+        return new ConfigUpdateRequest(clusterIdentifier, knoxUrl);
     }
 
-    private String clusterCrn(Cluster cluster) {
+    private String clusterId(Cluster cluster) {
         return cluster.getId().toString();
     }
 
