@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
+import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationException;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
@@ -91,7 +92,8 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
             response = new KeytabConfigurationSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Error during keytab configuration, stackId: " + stackId, e);
-            response = new KeytabConfigurationFailed(stackId, e);
+            KeytabConfigurationException configurationException = new KeytabConfigurationException("Keytab generation failed with: " + e.getMessage(), e);
+            response = new KeytabConfigurationFailed(stackId, configurationException);
         }
         eventBus.notify(response.selector(), new Event<>(keytabConfigurationRequestEvent.getHeaders(), response));
     }
