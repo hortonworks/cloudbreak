@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.template.filesystem.CloudStorageConfigDetails;
@@ -29,6 +30,9 @@ public class CmCloudStorageConfigDetails {
     @Inject
     private CloudStorageConfigDetails cloudStorageConfigDetails;
 
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
     private ConfigQueryEntries configQueryEntries;
 
     @PostConstruct
@@ -43,7 +47,7 @@ public class CmCloudStorageConfigDetails {
     }
 
     public Set<ConfigQueryEntry> queryParameters(FileSystemConfigQueryObject request) {
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(request.getBlueprintText());
+        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(request.getBlueprintText());
         return cloudStorageConfigDetails.queryParameters(cmTemplateProcessor, configQueryEntries, request);
     }
 

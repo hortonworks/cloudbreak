@@ -47,6 +47,9 @@ public class SharedServiceConfigProvider {
     @Inject
     private DatalakeConfigApiConnector datalakeConfigApiConnector;
 
+    @Inject
+    private RemoteDataContextWorkaroundService remoteDataContextWorkaroundService;
+
     public Cluster configureCluster(@Nonnull Cluster requestedCluster, User user, Workspace workspace) {
         Objects.requireNonNull(requestedCluster);
         Stack stack = requestedCluster.getStack();
@@ -55,6 +58,7 @@ public class SharedServiceConfigProvider {
             if (datalakeResources.isPresent()) {
                 DatalakeResources datalakeResource = datalakeResources.get();
                 setupRds(requestedCluster, datalakeResource);
+                setupStoragePath(requestedCluster, datalakeResource);
             }
         }
         return requestedCluster;
@@ -148,7 +152,13 @@ public class SharedServiceConfigProvider {
                             .stream()
                             .filter(rdsConfig -> ResourceStatus.USER_MANAGED == rdsConfig.getStatus())
                             .collect(toSet()));
+
+            requestedCluster.setRdsConfigs(remoteDataContextWorkaroundService.prepareRdsConfigs(requestedCluster, datalakeResources));
         }
+    }
+
+    private void setupStoragePath(Cluster requestedCluster, DatalakeResources datalakeResources) {
+        requestedCluster.setFileSystem(remoteDataContextWorkaroundService.prepareFilesytem(requestedCluster, datalakeResources));
     }
 
     private Stack queryStack(Long sourceClusterId, Optional<String> sourceClusterName, User user, Workspace workspace) {
