@@ -179,7 +179,7 @@ public class ServiceEndpointCollector {
                 case HBASE_UI:
                     return getHBaseServiceUrl(gateway, managerIp, privateIps.get(ExposedService.HBASE_UI.getServiceName()).iterator().next());
                 case RESOURCEMANAGER_WEB:
-                    String knoxUrl = api ? "/resourcemanager" : exposedService.getKnoxUrl();
+                    String knoxUrl = api ? "/resourcemanager/" : exposedService.getKnoxUrl();
                     return Optional.of(getExposedServiceUrl(managerIp, gateway, topologyName, knoxUrl, api));
                 default:
                     return Optional.of(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService, api));
@@ -253,14 +253,14 @@ public class ServiceEndpointCollector {
         Gateway gateway = gt.getGateway();
         String protocol = autoTlsEnabled ? "https" : "http";
         Integer port = autoTlsEnabled ? ExposedService.NAMENODE.getTlsPort() : ExposedService.NAMENODE.getPort();
-        String url = String.format("https://%s:%s/%s/%s%s?host=%s://%s:%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
+        String url = String.format("https://%s:%s/%s/%s%s?host=%s://%s:%s/", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
                 ExposedService.NAMENODE.getKnoxUrl(), protocol, nameNodePrivateIp, port);
         return url;
     }
 
     private String getHBaseUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp) {
         Gateway gateway = gt.getGateway();
-        String url = String.format("https://%s:%s/%s/%s%s?host=%s&port=%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
+        String url = String.format("https://%s:%s/%s/%s%s?host=%s&port=%s/", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
                 ExposedService.HBASE_UI.getKnoxUrl(), nameNodePrivateIp, ExposedService.HBASE_UI.getPort());
         return url;
     }
