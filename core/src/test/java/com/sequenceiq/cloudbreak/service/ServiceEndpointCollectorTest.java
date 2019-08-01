@@ -133,7 +133,7 @@ public class ServiceEndpointCollectorTest {
                 new ExposedService[]{HIVE_SERVER}, GatewayType.CENTRAL);
 
         String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
-        assertEquals("/gateway-path/topology1/cmf/home", result);
+        assertEquals("/gateway-path/topology1/cmf/home/", result);
     }
 
     @Test
@@ -142,7 +142,7 @@ public class ServiceEndpointCollectorTest {
                 new ExposedService[]{HIVE_SERVER}, GatewayType.INDIVIDUAL);
 
         String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
-        assertEquals("https://127.0.0.1:8443/gateway-path/topology1/cmf/home", result);
+        assertEquals("https://127.0.0.1:8443/gateway-path/topology1/cmf/home/", result);
     }
 
     @Test
