@@ -286,6 +286,7 @@
       },
       {
         "refName": "hive",
+        "displayName": "Hive Metastore",
         "roleConfigGroups": [
           {
             "base": true,
