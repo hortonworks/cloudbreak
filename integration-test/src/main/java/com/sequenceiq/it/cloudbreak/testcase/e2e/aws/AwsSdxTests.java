@@ -184,6 +184,7 @@ public class AwsSdxTests extends BasicSdxTests {
     private List<String> getVolumeIdList(AmazonEC2Client amazonEC2Client, String instanceId) {
         DescribeInstancesResult master = amazonEC2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId));
         return master.getReservations().get(0).getInstances().get(0).getBlockDeviceMappings().stream()
+                .filter(dev -> !"/dev/xvda".equals(dev.getDeviceName()))
                 .map(InstanceBlockDeviceMapping::getEbs)
                 .map(EbsInstanceBlockDevice::getVolumeId)
                 .collect(Collectors.toList());
