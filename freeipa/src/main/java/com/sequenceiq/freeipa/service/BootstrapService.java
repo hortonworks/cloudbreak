@@ -73,7 +73,8 @@ public class BootstrapService {
         Set<Node> allNodes = instanceMetaDatas.stream()
                 .map(im -> {
                     String generatedHostName = hostDiscoveryService.generateHostname(freeIpa.getHostname(), null, im.getPrivateId(), false);
-                    return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), generatedHostName, freeIpa.getDomain(), im.getInstanceGroup().getGroupName());
+                    return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), im.getInstanceId(), im.getInstanceGroup().getTemplate().getInstanceType(),
+                            generatedHostName, freeIpa.getDomain(), im.getInstanceGroup().getGroupName());
                 }).collect(Collectors.toSet());
         BootstrapParams params = new BootstrapParams();
         params.setCloud(stack.getCloudPlatform());

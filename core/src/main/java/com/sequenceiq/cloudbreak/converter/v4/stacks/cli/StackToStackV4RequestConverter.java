@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -40,6 +41,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 
 @Component
 public class StackToStackV4RequestConverter extends AbstractConversionServiceAwareConverter<Stack, StackV4Request> {
@@ -55,6 +58,9 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
 
+    @Inject
+    private TelemetryConverter telemetryConverter;
+
     @Override
     public StackV4Request convert(Stack source) {
         StackV4Request stackV4Request = new StackV4Request();
@@ -67,11 +73,20 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         stackV4Request.setInstanceGroups(getInstanceGroups(source));
         prepareImage(source, stackV4Request);
         prepareTags(source, stackV4Request);
+        prepareTelemetryRequest(source, stackV4Request);
         prepareDatalakeRequest(source, stackV4Request);
         stackV4Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
         prepareInputs(source, stackV4Request);
         stackV4Request.setTimeToLive(getStackTimeToLive(source));
         return stackV4Request;
+    }
+
+    private void prepareTelemetryRequest(Stack source, StackV4Request stackV4Request) {
+        Telemetry telemetry = componentConfigProviderService.getTelemetry(source.getId());
+        if (telemetry != null) {
+            TelemetryRequest telemetryRequest = telemetryConverter.convertToRequest(telemetry);
+            stackV4Request.setTelemetry(telemetryRequest);
+        }
     }
 
     private void prepareDatalakeRequest(Stack source, StackV4Request stackRequest) {

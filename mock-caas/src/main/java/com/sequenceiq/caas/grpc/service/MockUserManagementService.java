@@ -80,6 +80,10 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String ALTUS_PRIVATE_KEY = "altus_private_key";
 
+    private static final String CDP_ACCESS_KEY_ID = "cdp_access_key_id";
+
+    private static final String CDP_PRIVATE_KEY = "cdp_private_key";
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -89,15 +93,23 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Value("#{'${auth.config.dir:}/${auth.license.file:}'}")
     private String cmLicenseFilePath;
 
-    @Value("#{'${auth.config.dir:}/${auth.altus.credential.file:}'}")
-    private String altusCredentialFile;
+    @Value("#{'${auth.config.dir:}/${auth.databus.credential.tp.file:}'}")
+    private String databusTpCredentialFile;
 
-    @Value("${auth.altus.credential.profile:default}")
-    private String altusCredentialProfile;
+    @Value("#{'${auth.config.dir:}/${auth.databus.credential.fluent.file:}'}")
+    private String databusFluentCredentialFile;
+
+    @Value("${auth.databus.credential.tp.profile:default}")
+    private String databusTpCredentialProfile;
+
+    @Value("${auth.databus.credential.fluent.profile:default}")
+    private String databusFluentCredentialProfile;
 
     private String cbLicense;
 
-    private AltusCredential altusCredential;
+    private AltusCredential telemetyPublisherCredential;
+
+    private AltusCredential fluentCredential;
 
     private final Map<String, Set<String>> accountUsers = new ConcurrentHashMap<>();
 
@@ -106,7 +118,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @PostConstruct
     public void init() {
         this.cbLicense = getLicense();
-        this.altusCredential = getAltusCredential();
+        this.telemetyPublisherCredential = getAltusCredential(databusTpCredentialFile, databusTpCredentialProfile);
+        this.fluentCredential = getAltusCredential(databusFluentCredentialFile, databusFluentCredentialProfile);
     }
 
     @Override
@@ -364,6 +377,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             StreamObserver<UserManagementProto.CreateAccessKeyResponse> responseObserver) {
         String accessKeyId = null;
         String privateKey = null;
+        AltusCredential altusCredential = UserManagementProto.AccessKeyType.Value.UNSET.equals(request.getType())
+                ? telemetyPublisherCredential : fluentCredential;
         if (altusCredential != null) {
             accessKeyId = altusCredential.getAccessKey();
             privateKey = new String(altusCredential.getPrivateKey());
@@ -461,15 +476,15 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         return license;
     }
 
-    private AltusCredential getAltusCredential() {
+    private AltusCredential getAltusCredential(String altusCredentialFile, String altusCredentialProfile) {
         if (StringUtils.isNoneEmpty(altusCredentialFile, altusCredentialProfile)
                 && Files.exists(Paths.get(altusCredentialFile))) {
             try {
                 Map<String, Properties> propsMap = iniUtil.parseIni(new FileReader(altusCredentialFile));
                 if (propsMap.containsKey(altusCredentialProfile)) {
                     Properties prop = propsMap.get(altusCredentialProfile);
-                    String accessKey = prop.getProperty(ALTUS_ACCESS_KEY_ID);
-                    String privateKey = prop.getProperty(ALTUS_PRIVATE_KEY);
+                    String accessKey = prop.getProperty(ALTUS_ACCESS_KEY_ID, prop.getProperty(CDP_ACCESS_KEY_ID));
+                    String privateKey = prop.getProperty(ALTUS_PRIVATE_KEY, prop.getProperty(CDP_PRIVATE_KEY));
                     return new AltusCredential(accessKey, privateKey.toCharArray());
                 }
             } catch (IOException e) {

@@ -218,7 +218,10 @@ class OrchestratorRecipeExecutor {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
                 if (hostNames.contains(im.getDiscoveryFQDN())) {
-                    agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
+                    String instanceId = im.getInstanceId();
+                    String instanceType = instanceGroup.getTemplate().getInstanceType();
+                    agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType,
+                            im.getDiscoveryFQDN(), im.getInstanceGroupName()));
                 }
             }
         }

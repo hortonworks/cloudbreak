@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -308,10 +309,11 @@ public class GrpcUmsClient {
      * @param actorCrn       actor that executes the key generation
      * @param machineUserCrn machine user (owner of the access key)
      * @param requestId      id for the request
+     * @param accessKeyType  algorithm type used for the access key
      * @return access / private key holder object
      */
     public AltusCredential generateAccessSecretKeyPair(String actorCrn, String machineUserCrn,
-            Optional<String> requestId) {
+            Optional<String> requestId, UserManagementProto.AccessKeyType.Value accessKeyType) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.info("Generating new access / secret key pair for {}", machineUserCrn);
@@ -319,6 +321,50 @@ public class GrpcUmsClient {
                     requestId.orElse(UUID.randomUUID().toString()), actorCrn, machineUserCrn);
             return new AltusCredential(accessKeyResponse.getAccessKey().getAccessKeyId(), accessKeyResponse.getPrivateKey().toCharArray());
         }
+    }
+
+    /**
+     * Generate new machine user (if it is needed) and access api key for this user.
+     * Also assign built-in dabaus uploader role for the machine user (if the role is not empty).
+     * @param machineUserName machine user name
+     * @param userCrn crn of the actor
+     * @param roleCrn crn of the role
+     * @return credential (access/secret keypair)
+     */
+    public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String roleCrn) {
+        return createMachineUserAndGenerateKeys(machineUserName, userCrn, roleCrn, UserManagementProto.AccessKeyType.Value.UNSET);
+    }
+
+    /**
+     * Generate new machine user (if it is needed) and access api key for this user.
+     * Also assign built-in dabaus uploader role for the machine user (if the role is not empty).
+     * @param machineUserName machine user name
+     * @param userCrn crn of the actor
+     * @param roleCrn crn of the role
+     * @param accessKeyType algorithm type used for the access key
+     * @return credential (access/secret keypair)
+     */
+    public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn,
+            String roleCrn, UserManagementProto.AccessKeyType.Value accessKeyType) {
+        UserManagementProto.MachineUser machineUser = createMachineUser(machineUserName, userCrn, Optional.empty());
+        if (StringUtils.isNotEmpty(roleCrn)) {
+            assignMachineUserRole(userCrn, machineUser.getCrn(), roleCrn, Optional.empty());
+        }
+        return generateAccessSecretKeyPair(userCrn, machineUser.getCrn(), Optional.empty(), accessKeyType);
+    }
+
+    /**
+     * Cleanup machine user related resources (access keys, role, user)
+     * @param machineUserName machine user name
+     * @param userCrn crn of the actor
+     * @param roleCrn crn of the role
+     */
+    public void clearMachineUserWithAccessKeysAndRole(String machineUserName, String userCrn, String roleCrn) {
+        if (StringUtils.isNotEmpty(roleCrn)) {
+            unassignMachineUserRole(userCrn, machineUserName, roleCrn, Optional.empty());
+        }
+        deleteMachineUserAccessKeys(userCrn, machineUserName, Optional.empty());
+        deleteMachineUser(machineUserName, userCrn, Optional.empty());
     }
 
     /**
@@ -394,5 +440,19 @@ public class GrpcUmsClient {
             UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             client.notifyResourceDeleted(requestId.orElse(UUID.randomUUID().toString()), resourceCrn);
         }
+    }
+
+    /**
+     * Get built-in Dbus uploader role
+     * Partition and region is hard coded right now, if it will change use the same as the user crn
+     */
+    public String getBuiltInDatabusRoleCrn() {
+        Crn databusCrn = Crn.builder()
+                .setAccountId("altus")
+                .setService(Crn.Service.IAM)
+                .setResourceType(Crn.ResourceType.ROLE)
+                .setResource("DbusUploader")
+                .build();
+        return databusCrn.toString();
     }
 }

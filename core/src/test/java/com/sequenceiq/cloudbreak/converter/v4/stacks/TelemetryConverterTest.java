@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.telemetry.response.WorkloadAnalyticsResponse;
@@ -23,7 +24,7 @@ public class TelemetryConverterTest {
 
     @Before
     public void setUp() {
-        underTest = new TelemetryConverter(true, DATABUS_ENDPOINT);
+        underTest = new TelemetryConverter(true, true, true, DATABUS_ENDPOINT);
     }
 
     @Test
@@ -33,7 +34,8 @@ public class TelemetryConverterTest {
         S3CloudStorageV1Parameters s3Params = new S3CloudStorageV1Parameters();
         s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
         logging.setS3(s3Params);
-        Telemetry telemetry = new Telemetry(logging, null);
+        Telemetry telemetry = new Telemetry();
+        telemetry.setLogging(logging);
         // WHEN
         TelemetryResponse result = underTest.convert(telemetry);
         // THEN
@@ -47,9 +49,11 @@ public class TelemetryConverterTest {
         S3CloudStorageV1Parameters s3Params = new S3CloudStorageV1Parameters();
         s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
         logging.setS3(s3Params);
-        Telemetry telemetry = new Telemetry(logging, null);
+        Telemetry telemetry = new Telemetry();
+        telemetry.setLogging(logging);
         // WHEN
-        TelemetryResponse result = new TelemetryConverter(false, DATABUS_ENDPOINT).convert(telemetry);
+        TelemetryResponse result = new TelemetryConverter(false, true, true, DATABUS_ENDPOINT)
+                .convert(telemetry);
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertNull(result.getWorkloadAnalytics());
@@ -65,7 +69,7 @@ public class TelemetryConverterTest {
         loggingResponse.setS3(s3Params);
         response.setLogging(loggingResponse);
         // WHEN
-        Telemetry result = underTest.convert(response);
+        TelemetryRequest result = underTest.convert(response, true);
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertEquals(DATABUS_ENDPOINT, result.getWorkloadAnalytics().getDatabusEndpoint());
@@ -84,9 +88,10 @@ public class TelemetryConverterTest {
         waResponse.setDatabusEndpoint("myOtherEndpoint");
         response.setWorkloadAnalytics(waResponse);
         // WHEN
-        Telemetry result = underTest.convert(response);
+        TelemetryRequest result = underTest.convert(response, false);
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertEquals("myOtherEndpoint", result.getWorkloadAnalytics().getDatabusEndpoint());
     }
+
 }

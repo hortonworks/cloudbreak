@@ -26,7 +26,7 @@ public class TelemetryApiConverterTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        underTest = new TelemetryApiConverter("http://mydatabus.endpoint.com");
+        underTest = new TelemetryApiConverter(false, "http://mydatabus.endpoint.com");
     }
 
     @Test
@@ -54,7 +54,7 @@ public class TelemetryApiConverterTest {
         S3CloudStorageParameters s3Params = new S3CloudStorageParameters();
         s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
         logging.setS3(s3Params);
-        EnvironmentTelemetry telemetry = new EnvironmentTelemetry(logging, null);
+        EnvironmentTelemetry telemetry = new EnvironmentTelemetry(logging, null, false);
         // WHEN
         TelemetryResponse result = underTest.convert(telemetry);
         // THEN

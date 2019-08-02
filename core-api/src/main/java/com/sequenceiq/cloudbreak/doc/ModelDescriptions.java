@@ -201,6 +201,8 @@ public class ModelDescriptions {
         public static final String TELEMETRY_WA_DATABUS_ENDPOINT = "telemetry - workload altus service (databus) endpoint url";
         public static final String TELEMETRY_WA_ACCESS_KEY = "telemetry - workload altus access key - for non-production usage only";
         public static final String TELEMETRY_WA_PRIVATE_KEY = "telemetry - workload altus private key (RSA) - for non-production usage only";
+        public static final String REPORT_DEPLOYMENT_LOGS = "enable cluster deployment log reporting.";
+        public static final String WORKLOAD_ANALYTICS = "enable workload analytics for the cluser";
         public static final String CREDENTIAL = "stack related credential";
         public static final String AUTHENTICATION = "stack related authentication";
         public static final String FILESYSTEM = "cluster related filesystem";

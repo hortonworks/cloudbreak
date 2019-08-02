@@ -65,7 +65,6 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -147,7 +146,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         updateCluster(source, stack, workspace);
-        stack.getComponents().add(getTelemetryComponent(stack, environment));
+        stack.getComponents().add(getTelemetryComponent(stack, source));
         setNetworkIfApplicable(source, stack, environment);
 
         stack.setGatewayPort(source.getGatewayPort());
@@ -197,9 +196,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(Stack stack, DetailedEnvironmentResponse environment) {
-        TelemetryResponse envTelemetryResp = environment != null ? environment.getTelemetry() : null;
-        Telemetry telemetry = telemetryConverter.convert(envTelemetryResp);
+    private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(Stack stack,
+            StackV4Request source) {
+        Telemetry telemetry = telemetryConverter.convert(source.getTelemetry());
         try {
             return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.TELEMETRY, ComponentType.TELEMETRY.name(), Json.silent(telemetry), stack);
         } catch (Exception e) {

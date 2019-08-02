@@ -1,11 +1,13 @@
-package com.sequenceiq.cloudbreak.fluent;
+package com.sequenceiq.cloudbreak.telemetry.fluent;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 
-public class FluentConfigView {
+import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
+
+public class FluentConfigView implements TelemetryConfigView {
 
     private static final String LOG_FOLDER_DEFAULT = "/var/log";
 
@@ -15,11 +17,21 @@ public class FluentConfigView {
 
     private static final String PROVIDER_PREFIX_DEFAULT = "stdout";
 
+    private static final String DBUS_APP_NAME_DEFAULT = "datahub";
+
     private static final String EMPTY_CONFIG_DEFAULT = "";
 
     private static final Integer PARTITION_INTERVAL_DEFAULT = 5;
 
     private final boolean enabled;
+
+    private final boolean cloudStorageLoggingEnabled;
+
+    private final boolean reportClusterDeploymentLogs;
+
+    private final boolean meteringEnabled;
+
+    private final String databusAppName;
 
     private final String user;
 
@@ -53,6 +65,10 @@ public class FluentConfigView {
 
     private FluentConfigView(Builder builder) {
         this.enabled = builder.enabled;
+        this.cloudStorageLoggingEnabled = builder.cloudStorageLoggingEnabled;
+        this.reportClusterDeploymentLogs = builder.reportClusterDeploymentLogs;
+        this.meteringEnabled = builder.meteringEnabled;
+        this.databusAppName = builder.databusAppName;
         this.user = builder.user;
         this.group = builder.group;
         this.serverLogFolderPrefix = builder.serverLogFolderPrefix;
@@ -130,13 +146,35 @@ public class FluentConfigView {
         return enabled;
     }
 
+    public boolean isCloudStorageLoggingEnabled() {
+        return cloudStorageLoggingEnabled;
+    }
+
+    public boolean isReportClusterDeploymentLogs() {
+        return reportClusterDeploymentLogs;
+    }
+
+    public boolean isMeteringEnabled() {
+        return meteringEnabled;
+    }
+
+    public String getDatabusAppName() {
+        return databusAppName;
+    }
+
     public Map<String, Object> getOverrideAttributes() {
         return this.overrideAttributes;
     }
 
+    @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("enabled", this.enabled);
+        map.put("cloudStorageLoggingEnabled", this.cloudStorageLoggingEnabled);
+        map.put("dbusMeteringEnabled", this.meteringEnabled);
+        map.put("dbusAppName", ObjectUtils.defaultIfNull(
+                this.databusAppName, DBUS_APP_NAME_DEFAULT));
+        map.put("dbusReportDeploymentLogs", this.reportClusterDeploymentLogs);
         map.put("user", ObjectUtils.defaultIfNull(this.user, TD_AGENT_USER_DEFAULT));
         map.put("group", ObjectUtils.defaultIfNull(this.group, TD_AGENT_GROUP_DEFAULT));
         map.put("providerPrefix", ObjectUtils.defaultIfNull(this.providerPrefix, PROVIDER_PREFIX_DEFAULT));
@@ -153,7 +191,7 @@ public class FluentConfigView {
         map.put("azureInstanceMsi", ObjectUtils.defaultIfNull(this.azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
         if (this.overrideAttributes != null) {
             for (Map.Entry<String, Object> entry : this.overrideAttributes.entrySet()) {
-                if (map.containsKey(entry.getKey())) {
+                if (!"enabled".equalsIgnoreCase(entry.getKey()) && map.containsKey(entry.getKey())) {
                     map.put(entry.getKey(), entry.getValue());
                 }
             }
@@ -164,6 +202,14 @@ public class FluentConfigView {
     public static final class Builder {
 
         private boolean enabled;
+
+        private boolean cloudStorageLoggingEnabled;
+
+        private boolean reportClusterDeploymentLogs;
+
+        private boolean meteringEnabled;
+
+        private String databusAppName;
 
         private String user;
 
@@ -274,8 +320,28 @@ public class FluentConfigView {
             return this;
         }
 
+        public Builder withReportClusterDeploymentLogs(boolean reportClusterDeploymentLogs) {
+            this.reportClusterDeploymentLogs = reportClusterDeploymentLogs;
+            return this;
+        }
+
         public Builder withOverrideAttributes(Map<String, Object> overrideAttributes) {
             this.overrideAttributes = overrideAttributes;
+            return this;
+        }
+
+        public Builder withCloudStorageLoggingEnabled(boolean cloudStorageLoggingEnabled) {
+            this.cloudStorageLoggingEnabled = cloudStorageLoggingEnabled;
+            return this;
+        }
+
+        public Builder withMeteringEnabled(boolean meteringEnabled) {
+            this.meteringEnabled = meteringEnabled;
+            return this;
+        }
+
+        public Builder withDatabusAppName(String databusAppName) {
+            this.databusAppName = databusAppName;
             return this;
         }
     }

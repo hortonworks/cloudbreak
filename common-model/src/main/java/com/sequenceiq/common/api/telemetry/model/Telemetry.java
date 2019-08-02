@@ -13,21 +13,58 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Telemetry implements Serializable {
 
-    private final Logging logging;
+    @JsonProperty("logging")
+    private Logging logging;
 
-    private final WorkloadAnalytics workloadAnalytics;
+    @JsonProperty("workloadAnalytics")
+    private WorkloadAnalytics workloadAnalytics;
 
-    public Telemetry(@JsonProperty("logging") Logging logging,
-            @JsonProperty("workloadAnalytics") WorkloadAnalytics workloadAnalytics) {
-        this.logging = logging;
-        this.workloadAnalytics = workloadAnalytics;
-    }
+    @JsonProperty("databusEndpoint")
+    private String databusEndpoint;
+
+    @JsonProperty("meteringEnabled")
+    private boolean meteringEnabled;
+
+    @JsonProperty("reportDeploymentLogs")
+    private boolean reportDeploymentLogs;
 
     public Logging getLogging() {
         return logging;
     }
 
+    public void setLogging(Logging logging) {
+        this.logging = logging;
+    }
+
     public WorkloadAnalytics getWorkloadAnalytics() {
         return workloadAnalytics;
+    }
+
+    public void setWorkloadAnalytics(WorkloadAnalytics workloadAnalytics) {
+        this.workloadAnalytics = workloadAnalytics;
+    }
+
+    public String getDatabusEndpoint() {
+        return databusEndpoint;
+    }
+
+    public void setDatabusEndpoint(String databusEndpoint) {
+        this.databusEndpoint = databusEndpoint;
+    }
+
+    public boolean isMeteringEnabled() {
+        return meteringEnabled;
+    }
+
+    public void setMeteringEnabled(boolean meteringEnabled) {
+        this.meteringEnabled = meteringEnabled;
+    }
+
+    public boolean isReportDeploymentLogs() {
+        return reportDeploymentLogs;
+    }
+
+    public void setReportDeploymentLogs(boolean reportDeploymentLogs) {
+        this.reportDeploymentLogs = reportDeploymentLogs;
     }
 }

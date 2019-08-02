@@ -4,6 +4,11 @@
 {% else %}
     {% set fluent_enabled = False %}
 {% endif %}
+{% if salt['pillar.get']('fluent:cloudStorageLoggingEnabled') %}
+    {% set cloud_storage_logging_enabled = True %}
+{% else %}
+    {% set cloud_storage_logging_enabled = False %}
+{% endif %}
 {% if grains['init'] == 'upstart' %}
     {% set is_systemd = False %}
 {% else %}
@@ -22,21 +27,16 @@
 {% set azore_storage_account = salt['pillar.get']('fluent:azureStorageAccount') %}
 {% set azure_storage_access_key = salt['pillar.get']('fluent:azureStorageAccessKey') %}
 
-{% set dbus_endpoint = salt['pillar.get']('fluent:dbusEndpoint') %}
-{% set dbus_acces_key_id = salt['pillar.get']('fluent:dbusAccesKeyId') %}
-{% set dbus_access_key_secret = salt['pillar.get']('fluent:dbusAccessKeySecret') %}
-{% set dbus_access_key_secret_algorithm = salt['pillar.get']('fluent:dbusAccessKeySecretAlgorithm') %}
-
-{% if salt['pillar.get']('fluent:dbusReportBundleEnabled') %}
-    {% set dbus_report_bundle_enabled = True %}
+{% if salt['pillar.get']('fluent:dbusReportDeploymentLogs') %}
+    {% set dbus_report_deployment_logs_enabled = True %}
 {% else %}
-    {% set dbus_report_bundle_enabled = False %}
+    {% set dbus_report_deployment_logs_enabled = False %}
 {% endif %}
 
-{% if salt['pillar.get']('fluent:dbusReportBundleDisableStop') %}
-    {% set dbus_report_bundle_disable_stop = True %}
+{% if salt['pillar.get']('fluent:dbusReportDeploymentLogsDisableStop') %}
+    {% set dbus_report_deployment_logs_disable_stop = True %}
 {% else %}
-    {% set dbus_report_bundle_disable_stop = False %}
+    {% set dbus_report_deployment_logs_disable_stop = False %}
 {% endif %}
 
 {% if salt['pillar.get']('fluent:dbusMeteringEnabled') %}
@@ -44,8 +44,7 @@
 {% else %}
     {% set dbus_metering_enabled = False %}
 {% endif %}
-
-{% set dbus_valid = dbus_endpoint and dbus_acces_key_id and dbus_access_key_secret %}
+{% set dbus_app_name = salt['pillar.get']('fluent:dbusAppName')%}
 
 {% set partition_interval = salt['pillar.get']('fluent:partitionIntervalMin') %}
 {% set cloudera_public_gem_repo = 'https://repository.cloudera.com/cloudera/api/gems/cloudera-gems/' %}
@@ -69,18 +68,15 @@
     "providerPrefix": provider_prefix,
     "partitionIntervalMin": partition_interval,
     "logFolderName": log_folder,
+    "cloudStorageLoggingEnabled": cloud_storage_logging_enabled,
     "s3LogArchiveBucketName" : s3_log_bucket,
     "azureStorageAccount": azore_storage_account,
     "azureContainer": azure_container,
     "azureInstanceMsi": azure_storage_instance_msi,
     "azureStorageAccessKey": azure_storage_access_key,
-    "dbusEndpoint": dbus_endpoint,
-    "dbusAccesKeyId": dbus_acces_key_id,
-    "dbusAccessKeySecret": dbus_access_key_secret,
-    "dbusAccessKeySecretAlgorithm": dbus_access_key_secret_algorithm,
-    "dbusValid": dbus_valid,
-    "dbusReportBundleEnabled": dbus_report_bundle_enabled,
-    "dbusReportBundleDisableStop": dbus_report_bundle_disable_stop,
+    "dbusAppName": dbus_app_name,
+    "dbusReportDeploymentLogs": dbus_report_deployment_logs_enabled,
+    "dbusReportDeploymentLogsDisableStop": dbus_report_deployment_logs_disable_stop,
     "dbusMeteringEnabled": dbus_metering_enabled,
     "clouderaPublicGemRepo": cloudera_public_gem_repo,
     "clouderaAzurePluginVersion": cloudera_azure_plugin_version,

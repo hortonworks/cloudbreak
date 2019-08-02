@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -47,6 +48,9 @@ public class StackV4Request extends StackV4Base {
 
     @ApiModelProperty(StackModelDescription.TAGS)
     private TagsV4Request tags;
+
+    @ApiModelProperty(StackModelDescription.TELEMETRY)
+    private TelemetryRequest telemetry;
 
     @Valid
     @ApiModelProperty(PLACEMENT_SETTINGS)
@@ -187,5 +191,13 @@ public class StackV4Request extends StackV4Base {
 
     public void setInputs(Map<String, Object> inputs) {
         this.inputs = inputs;
+    }
+
+    public TelemetryRequest getTelemetry() {
+        return telemetry;
+    }
+
+    public void setTelemetry(TelemetryRequest telemetry) {
+        this.telemetry = telemetry;
     }
 }

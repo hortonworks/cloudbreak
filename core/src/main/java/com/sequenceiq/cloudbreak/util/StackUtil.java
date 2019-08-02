@@ -63,7 +63,10 @@ public class StackUtil {
             if (instanceGroup.getNodeCount() != 0) {
                 for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
                     if (im.getDiscoveryFQDN() != null) {
-                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
+                        String instanceId = im.getInstanceId();
+                        String instanceType = instanceGroup.getTemplate().getInstanceType();
+                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType,
+                                im.getDiscoveryFQDN(), im.getInstanceGroupName()));
                     }
                 }
             }
@@ -77,7 +80,10 @@ public class StackUtil {
             if (instanceGroup.getNodeCount() != 0) {
                 for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
                     if (im.getDiscoveryFQDN() != null && hostnames.contains(im.getDiscoveryFQDN())) {
-                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
+                        String instanceId = im.getInstanceId();
+                        String instanceType = instanceGroup.getTemplate().getInstanceType();
+                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType,
+                                im.getDiscoveryFQDN(), im.getInstanceGroupName()));
                     }
                 }
             }
@@ -93,12 +99,14 @@ public class StackUtil {
             if (instanceGroup.getNodeCount() != 0) {
                 for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
                     if (im.getDiscoveryFQDN() != null) {
-                        String dataVolumes = instanceToVolumeInfoMap.getOrDefault(im.getInstanceId(), Map.of()).getOrDefault("dataVolumes", "");
-                        String serialIds = instanceToVolumeInfoMap.getOrDefault(im.getInstanceId(), Map.of()).getOrDefault("serialIds", "");
-                        String fstab = instanceToVolumeInfoMap.getOrDefault(im.getInstanceId(), Map.of()).getOrDefault("fstab", "");
-                        String uuids = instanceToVolumeInfoMap.getOrDefault(im.getInstanceId(), Map.of()).getOrDefault("uuids", "");
-                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName(),
-                                dataVolumes, serialIds, fstab, uuids));
+                        String instanceId = im.getInstanceId();
+                        String instanceType = instanceGroup.getTemplate().getInstanceType();
+                        String dataVolumes = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("dataVolumes", "");
+                        String serialIds = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("serialIds", "");
+                        String fstab = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("fstab", "");
+                        String uuids = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("uuids", "");
+                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType,
+                                im.getDiscoveryFQDN(), im.getInstanceGroupName(), dataVolumes, serialIds, fstab, uuids));
                     }
                 }
             }
@@ -114,11 +122,13 @@ public class StackUtil {
             if (instanceGroup.getNodeCount() != 0) {
                 for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
                     if (im.getDiscoveryFQDN() != null && newNodeAddresses.contains(im.getPrivateIp())) {
-                        String dataVolumes = instanceToVolumeInfoMap.getOrDefault(im.getInstanceId(), Map.of()).getOrDefault("dataVolumes", "");
-                        String serialIds = instanceToVolumeInfoMap.getOrDefault(im.getInstanceId(), Map.of()).getOrDefault("serialIds", "");
-                        String fstab = instanceToVolumeInfoMap.getOrDefault(im.getInstanceId(), Map.of()).getOrDefault("fstab", "");
-                        String uuids = instanceToVolumeInfoMap.getOrDefault(im.getInstanceId(), Map.of()).getOrDefault("uuids", "");
-                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName(),
+                        String instanceId = im.getInstanceId();
+                        String instanceType = instanceGroup.getTemplate().getInstanceType();
+                        String dataVolumes = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("dataVolumes", "");
+                        String serialIds = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("serialIds", "");
+                        String fstab = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("fstab", "");
+                        String uuids = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("uuids", "");
+                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType, im.getDiscoveryFQDN(), im.getInstanceGroupName(),
                                 dataVolumes, serialIds, fstab, uuids));
                     }
                 }

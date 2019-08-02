@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +16,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.network.DefaultNetworkRequiredService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
@@ -62,6 +66,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
     @Inject
     private SdxConverter sdxConverter;
 
+    @Inject
+    private TelemetryConverter telemetryConverter;
+
     public StackV4Request convert(DistroXV1Request source) {
         DetailedEnvironmentResponse environment = environmentClientService.getByName(source.getEnvironmentName());
         if (environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
@@ -85,6 +92,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setSharedService(sdxConverter.getSharedService(source.getSdx(), environment.getCrn()));
         request.setCustomDomain(null);
         request.setTimeToLive(source.getTimeToLive());
+        request.setTelemetry(getTelemetryRequest(source, environment));
         return request;
     }
 
@@ -115,7 +123,14 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSharedService(getIfNotNull(source.getSdx(), sdxConverter::getSharedService));
         request.setTimeToLive(source.getTimeToLive());
+        request.setTelemetry(getTelemetryRequest(source, environment));
         return request;
+    }
+
+    private TelemetryRequest getTelemetryRequest(DistroXV1Request source, DetailedEnvironmentResponse environment) {
+        TelemetryResponse envTelemetryResp = environment != null ? environment.getTelemetry() : null;
+        boolean workloadAnalytics = ObjectUtils.defaultIfNull(source.getWorkloadAnalytics(), true);
+        return telemetryConverter.convert(envTelemetryResp, workloadAnalytics);
     }
 
     private NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment) {
@@ -168,6 +183,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSdx(getIfNotNull(source.getSharedService(), sdxConverter::getSdx));
+        request.setWorkloadAnalytics(getIfNotNull(source.getTelemetry(), telemetry -> telemetry.getWorkloadAnalytics() != null));
         return request;
     }
 

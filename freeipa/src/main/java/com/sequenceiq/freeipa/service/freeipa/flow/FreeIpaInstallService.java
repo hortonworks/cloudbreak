@@ -48,7 +48,9 @@ public class FreeIpaInstallService {
         Set<InstanceMetaData> instanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet();
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDatas);
         Set<Node> allNodes = instanceMetaDatas.stream()
-                .map(im -> new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), "testGroup")).collect(Collectors.toSet());
+                .map(im -> new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
+                        im.getInstanceGroup().getTemplate().getInstanceType(), im.getDiscoveryFQDN(), "testGroup"))
+                .collect(Collectors.toSet());
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
 
         SaltConfig saltConfig = new SaltConfig();

@@ -129,7 +129,9 @@ public class ClusterBootstrapper {
             } else {
                 String generatedHostName = hostDiscoveryService.generateHostname(stack.getCustomHostname(), im.getInstanceGroupName(),
                         im.getPrivateId(), stack.isHostgroupNameAsHostname());
-                nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), generatedHostName, domain, im.getInstanceGroupName()));
+                String instanceId = im.getInstanceId();
+                String instanceType = im.getInstanceGroup().getTemplate().getInstanceType();
+                nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, generatedHostName, domain, im.getInstanceGroupName()));
             }
         }
         try {
@@ -303,11 +305,13 @@ public class ClusterBootstrapper {
      */
     private Node createNode(String customHostname, InstanceMetaData im, String domain, boolean hostgroupAsHostname) {
         String discoveryFQDN = im.getDiscoveryFQDN();
+        String instanceId = im.getInstanceId();
+        String instanceType = im.getInstanceGroup().getTemplate().getInstanceType();
         if (isNoneBlank(discoveryFQDN)) {
-            return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), im.getShortHostname(), domain, im.getInstanceGroupName());
+            return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, im.getShortHostname(), domain, im.getInstanceGroupName());
         } else {
             String hostname = hostDiscoveryService.generateHostname(customHostname, im.getInstanceGroupName(), im.getPrivateId(), hostgroupAsHostname);
-            return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), hostname, domain, im.getInstanceGroupName());
+            return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, hostname, domain, im.getInstanceGroupName());
         }
     }
 

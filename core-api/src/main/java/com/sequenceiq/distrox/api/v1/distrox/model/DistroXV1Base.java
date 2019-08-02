@@ -28,6 +28,9 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
     @ApiModelProperty
     private YarnDistroXV1Parameters yarn;
 
+    @ApiModelProperty(StackModelDescription.WORKLOAD_ANALYTICS)
+    private Boolean workloadAnalytics = Boolean.TRUE;
+
     @ApiModelProperty
     private Long timeToLive;
 
@@ -72,5 +75,13 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
 
     public void setYarn(YarnDistroXV1Parameters yarn) {
         this.yarn = yarn;
+    }
+
+    public Boolean getWorkloadAnalytics() {
+        return workloadAnalytics;
+    }
+
+    public void setWorkloadAnalytics(Boolean workloadAnalytics) {
+        this.workloadAnalytics = workloadAnalytics;
     }
 }

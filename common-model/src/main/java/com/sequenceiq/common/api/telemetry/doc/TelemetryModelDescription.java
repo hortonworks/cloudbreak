@@ -9,6 +9,7 @@ public class TelemetryModelDescription {
     public static final String TELEMETRY_LOGGING_WASB_ATTRIBUTES = "telemetry - logging wasb attributes";
     public static final String TELEMETRY_LOGGING_STORAGE_LOCATION = "telemetry - logging storage location / container";
     public static final String TELEMETRY_WA_DATABUS_ENDPOINT = "telemetry - workload altus service (databus) endpoint url";
+    public static final String TELEMETRY_REPORT_DEPLOYMENT_LOGS_ENABLED = "enable cluster deployment log reporting.";
 
     private TelemetryModelDescription() {
     }

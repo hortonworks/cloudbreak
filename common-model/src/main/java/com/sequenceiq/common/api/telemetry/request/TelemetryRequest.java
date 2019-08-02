@@ -1,8 +1,7 @@
 package com.sequenceiq.common.api.telemetry.request;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.common.api.telemetry.base.TelemetryBase;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -10,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "TelemetryRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TelemetryRequest implements Serializable {
+public class TelemetryRequest extends TelemetryBase {
 
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING)
     private LoggingRequest logging;

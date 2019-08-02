@@ -441,14 +441,32 @@ public class UmsClient {
      * @return key creation response
      */
     CreateAccessKeyResponse createAccessPrivateKeyPair(String requestId, String userCrn, String machineUserName) {
+        return createAccessPrivateKeyPair(requestId, userCrn, machineUserName,
+                UserManagementProto.AccessKeyType.Value.UNSET);
+    }
+
+    /**
+     * Wraps a call to create an access private key pair with specified algorithm
+     *
+     * @param requestId       the request ID for the request
+     * @param userCrn         the user CRN
+     * @param machineUserName the machine user name
+     * @param accessKeyType   accessKeyType
+     * @return key creation response
+     */
+    CreateAccessKeyResponse createAccessPrivateKeyPair(String requestId, String userCrn, String machineUserName,
+            UserManagementProto.AccessKeyType.Value accessKeyType) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
-        return newStub(requestId).createAccessKey(
-                CreateAccessKeyRequest.newBuilder()
-                        .setAccountId(Crn.fromString(userCrn).getAccountId())
-                        .setMachineUserNameOrCrn(machineUserName)
-                        .build());
+        CreateAccessKeyRequest.Builder builder = CreateAccessKeyRequest.newBuilder();
+        builder.setAccountId(Crn.fromString(userCrn).getAccountId())
+                .setMachineUserNameOrCrn(machineUserName)
+                .setType(accessKeyType);
+        if (!UserManagementProto.AccessKeyType.Value.UNSET.equals(accessKeyType)) {
+            builder.setType(accessKeyType);
+        }
+        return newStub(requestId).createAccessKey(builder.build());
     }
 
     /**
@@ -542,7 +560,7 @@ public class UmsClient {
     /**
      * Queries the metadata file used to configure SSO authentication on clusters.
      * @param requestId the Request ID
-     * @param userCrn the user CRN
+     * @param accountId the user CRN
      * @return metadata as string
      */
     public String getIdentityProviderMetadataXml(String requestId, String accountId) {
