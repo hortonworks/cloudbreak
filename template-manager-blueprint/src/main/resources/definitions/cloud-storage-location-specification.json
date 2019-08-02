@@ -37,7 +37,7 @@
       "defaultPath": "{{{ defaultPath }}}{{{#if-false datalakeCluster}}}{{{#if-false attachedCluster}}}/{{{ clusterName }}}{{{/if-false}}}{{{/if-false}}}/oplogs/yarn-app-logs",
       "propertyDisplayName": "YARN Application Logs",
       "relatedServices": ["NODEMANAGER", "RESOURCEMANAGER", "YARN_CLIENT"],
-      "requiredForAttachedCluster": false,
+      "requiredForAttachedCluster": true,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {

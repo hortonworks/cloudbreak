@@ -70,12 +70,14 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
     @Override
     public RDSConfig delete(RDSConfig rdsConfig) {
         MDCBuilder.buildMdcContext(rdsConfig);
-        LOGGER.debug("Archiving {} with name: {}", resource().getReadableName(), rdsConfig.getName());
         prepareDeletion(rdsConfig);
-        rdsConfig.setArchived(true);
-        rdsConfig.setDeletionTimestamp(System.currentTimeMillis());
-        rdsConfig.unsetRelationsToEntitiesToBeDeleted();
-        repository().save(rdsConfig);
+        if (!isRdsInUseByOthers(rdsConfig)) {
+            LOGGER.debug("Archiving {} with name: {}", resource().getReadableName(), rdsConfig.getName());
+            rdsConfig.setArchived(true);
+            rdsConfig.setDeletionTimestamp(System.currentTimeMillis());
+            rdsConfig.unsetRelationsToEntitiesToBeDeleted();
+            repository().save(rdsConfig);
+        }
         return rdsConfig;
     }
 
@@ -120,15 +122,22 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
 
     @Override
     protected void prepareDeletion(RDSConfig resource) {
-        Set<Cluster> clustersWithThisProxy = getClustersUsingResource(resource);
-        if (!clustersWithThisProxy.isEmpty()) {
-            String clusters = clustersWithThisProxy
+
+    }
+
+    private boolean isRdsInUseByOthers(RDSConfig resource) {
+        boolean inUse = false;
+        Set<Cluster> clustersWithThisRds = getClustersUsingResource(resource);
+        if (!clustersWithThisRds.isEmpty()) {
+            String clusters = clustersWithThisRds
                     .stream()
                     .map(Cluster::getName)
                     .collect(Collectors.joining(", "));
-            throw new BadRequestException(String.format(resource().getReadableName() + " '%s' cannot be deleted"
-                    + " because there are clusters associated with it: [%s].", resource.getName(), clusters));
+            LOGGER.info("{} will not be deleted because there are clusters associated with it: {}, this is quite normal, "
+                    + "since we are reusing the sdx database.", resource.getName(), clusters);
+            inUse = true;
         }
+        return inUse;
     }
 
     @Override

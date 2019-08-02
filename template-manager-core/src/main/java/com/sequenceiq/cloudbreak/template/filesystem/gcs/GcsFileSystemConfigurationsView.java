@@ -12,7 +12,7 @@ public class GcsFileSystemConfigurationsView extends BaseFileSystemConfiguration
     private String serviceAccountEmail;
 
     public GcsFileSystemConfigurationsView(GcsFileSystem gcsFileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
-        super(gcsFileSystem.getStorageContainer(), deafultFs, locations);
+        super(FileSystemType.GCS.name(), gcsFileSystem.getStorageContainer(), deafultFs, locations);
         serviceAccountEmail = gcsFileSystem.getServiceAccountEmail();
     }
 
@@ -22,10 +22,5 @@ public class GcsFileSystemConfigurationsView extends BaseFileSystemConfiguration
 
     public void setServiceAccountEmail(String serviceAccountEmail) {
         this.serviceAccountEmail = serviceAccountEmail;
-    }
-
-    @Override
-    public String getType() {
-        return FileSystemType.GCS.name();
     }
 }
