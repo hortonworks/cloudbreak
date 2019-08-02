@@ -8,6 +8,8 @@ public final class VolumeUtils {
 
     private static final int FIRST_VOLUME = 1;
 
+    private static final long GB_TO_BYTES = 1024 * 1024 * 1024;
+
     private VolumeUtils() {
         throw new IllegalStateException();
     }
@@ -70,5 +72,9 @@ public final class VolumeUtils {
 
     private static String getVolumeDir(int volumeIndex, String dirPrefix, String directory) {
         return dirPrefix + volumeIndex + '/' + directory;
+    }
+
+    public static long convertGBToBytes(int sizeInGb) {
+        return sizeInGb * GB_TO_BYTES;
     }
 }

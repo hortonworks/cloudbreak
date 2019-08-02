@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.template;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -213,11 +215,13 @@ public class TemplatePreparationObject {
                     Template template = instanceGroup.getTemplate();
                     int volumeCount = template == null ? 1 : template.getVolumeTemplates().stream()
                             .mapToInt(volume -> volume.getVolumeCount()).sum();
+                    Set<VolumeTemplate> volumeTemplates = template == null ? Collections.EMPTY_SET
+                            : template.getVolumeTemplates();
                     Set<String> fqdns = instanceGroup.getAllInstanceMetaData().stream()
                             .map(InstanceMetaData::getDiscoveryFQDN)
                             .collect(Collectors.toSet());
                     hostgroupViews.add(new HostgroupView(hostGroup.getName(), volumeCount,
-                            instanceGroup.getInstanceGroupType(), fqdns));
+                            instanceGroup.getInstanceGroupType(), fqdns, volumeTemplates));
                 } else {
                     hostgroupViews.add(new HostgroupView(hostGroup.getName()));
                 }

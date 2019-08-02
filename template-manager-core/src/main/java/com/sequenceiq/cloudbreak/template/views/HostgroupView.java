@@ -2,9 +2,11 @@ package com.sequenceiq.cloudbreak.template.views;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class HostgroupView {
@@ -21,6 +23,8 @@ public class HostgroupView {
 
     private final SortedSet<String> hosts;
 
+    private final Set<VolumeTemplate> volumeTemplates;
+
     public HostgroupView(String name, int volumeCount, InstanceGroupType instanceGroupType, Collection<String> hosts) {
         this.name = name;
         this.volumeCount = volumeCount;
@@ -35,6 +39,25 @@ public class HostgroupView {
                 })
             : Collections.emptySortedSet();
         nodeCount = this.hosts.size();
+        volumeTemplates = Collections.emptySet();
+    }
+
+    public HostgroupView(String name, int volumeCount, InstanceGroupType instanceGroupType,
+            Collection<String> hosts, Set<VolumeTemplate> volumeTemplates) {
+        this.name = name;
+        this.volumeCount = volumeCount;
+        instanceGroupConfigured = true;
+        this.instanceGroupType = instanceGroupType;
+        this.hosts = hosts != null
+                ? Collections.unmodifiableSortedSet(new TreeSet<>(hosts) {
+            @Override
+            public String toString() {
+                return String.join(",", this);
+            }
+        })
+                : Collections.emptySortedSet();
+        nodeCount = this.hosts.size();
+        this.volumeTemplates = Collections.unmodifiableSet(volumeTemplates);
     }
 
     public HostgroupView(String name, int volumeCount, InstanceGroupType instanceGroupType, Integer nodeCount) {
@@ -44,6 +67,7 @@ public class HostgroupView {
         this.instanceGroupType = instanceGroupType;
         this.nodeCount = nodeCount;
         hosts = Collections.emptySortedSet();
+        volumeTemplates = Collections.emptySet();
     }
 
     public HostgroupView(String name) {
@@ -53,6 +77,7 @@ public class HostgroupView {
         instanceGroupType = InstanceGroupType.CORE;
         nodeCount = 0;
         hosts = Collections.emptySortedSet();
+        volumeTemplates = Collections.emptySet();
     }
 
     public String getName() {
@@ -77,5 +102,9 @@ public class HostgroupView {
 
     public SortedSet<String> getHosts() {
         return hosts;
+    }
+
+    public Set<VolumeTemplate> getVolumeTemplates() {
+        return volumeTemplates;
     }
 }
