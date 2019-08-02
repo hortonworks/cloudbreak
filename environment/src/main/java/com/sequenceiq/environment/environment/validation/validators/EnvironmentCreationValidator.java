@@ -8,6 +8,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.cloudbreak.validation.SubnetValidator;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
@@ -18,6 +19,8 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
 public class EnvironmentCreationValidator {
+
+    private static final String EXPECTED_NETWORK_MASK = "16";
 
     private final EnvironmentRegionValidator environmentRegionValidator;
 
@@ -47,12 +50,19 @@ public class EnvironmentCreationValidator {
         NetworkDto networkDto = request.getNetwork();
         if (networkDto != null && Strings.isNullOrEmpty(networkDto.getNetworkCidr())) {
             EnvironmentNetworkValidator environmentNetworkValidator = environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(cloudPlatform));
+            if (networkDto.getNetworkCidr() != null && isInvalidNetworkMask(networkDto.getNetworkCidr())) {
+                resultBuilder.error(String.format("The netmask must be /%s.", EXPECTED_NETWORK_MASK));
+            }
             if (environmentNetworkValidator != null) {
                 environmentNetworkValidator.validate(networkDto, resultBuilder);
             } else {
                 resultBuilder.error(String.format("Environment specific network is not supported for cloud platform: '%s'!", cloudPlatform));
             }
         }
+    }
+
+    private boolean isInvalidNetworkMask(String networkCidr) {
+        return !new SubnetValidator().isValid(networkCidr, null) || !networkCidr.split("/")[1].equals(EXPECTED_NETWORK_MASK);
     }
 
     private void validateSecurityGroup(EnvironmentCreationDto request, String cloudPlatform, ValidationResultBuilder resultBuilder) {

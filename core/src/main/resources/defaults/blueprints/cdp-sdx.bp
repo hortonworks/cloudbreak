@@ -256,6 +256,14 @@
           {
             "name": "offsets.topic.replication.factor",
             "value": "1"
+          },
+          {
+            "name": "transaction.state.log.replication.factor",
+            "value": "1"
+          },
+          {
+            "name": "transaction.state.log.min.isr",
+            "value": "1"
           }
         ],
         "serviceType": "KAFKA"

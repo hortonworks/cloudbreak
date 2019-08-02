@@ -13,7 +13,7 @@ public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIp
 
     public static final int FREEIPA_RETRYING_INTERVAL = 5000;
 
-    public static final int FREEIPA_RETRYING_COUNT = 240;
+    public static final int FREEIPA_RETRYING_COUNT = 900;
 
     public static final int FREEIPA_FAILURE_COUNT = 3;
 
