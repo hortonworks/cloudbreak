@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -168,7 +169,7 @@ public class YarnResourceConnectorTest {
         InstanceGroupType type = InstanceGroupType.CORE;
         Collection<CloudInstance> instances = Lists.newArrayList(cloudInstanceMock, cloudInstanceMock);
 
-        return new Group(name, type, instances, null, null, null, null, null, 50);
+        return new Group(name, type, instances, null, null, null, null, null, 50, Optional.empty());
     }
 
     private void setUpStackParameters() {

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter.spi;
 
 import static com.sequenceiq.common.model.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -20,16 +20,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.requests.CloudStorageParameters;
-import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.model.FileSystemType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -58,7 +58,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
         SpiFileSystem result = underTest.convert(request);
 
-        assertEquals(expected, result.getCloudFileSystem());
+        assertEquals(expected, result.getCloudFileSystems().get(0));
         assertEquals(FileSystemType.ADLS, result.getType());
         verify(conversionService, times(1)).convert(adls, CloudAdlsView.class);
         verify(conversionService, times(0)).convert(any(CloudStorageParameters.class), eq(CloudGcsView.class));
@@ -75,7 +75,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
         SpiFileSystem result = underTest.convert(request);
 
-        assertEquals(expected, result.getCloudFileSystem());
+        assertEquals(expected, result.getCloudFileSystems().get(0));
         assertEquals(FileSystemType.GCS, result.getType());
         verify(conversionService, times(1)).convert(gcs, CloudGcsView.class);
         verify(conversionService, times(0)).convert(any(CloudStorageParameters.class), eq(CloudAdlsView.class));
@@ -92,7 +92,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
         SpiFileSystem result = underTest.convert(request);
 
-        assertEquals(expected, result.getCloudFileSystem());
+        assertEquals(expected, result.getCloudFileSystems().get(0));
         assertEquals(FileSystemType.S3, result.getType());
         verify(conversionService, times(1)).convert(s3, CloudS3View.class);
         verify(conversionService, times(0)).convert(any(CloudStorageParameters.class), eq(CloudAdlsView.class));
@@ -109,7 +109,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
         SpiFileSystem result = underTest.convert(request);
 
-        assertEquals(expected, result.getCloudFileSystem());
+        assertEquals(expected, result.getCloudFileSystems().get(0));
         assertEquals(WASB, result.getType());
         verify(conversionService, times(1)).convert(wasb, CloudWasbView.class);
         verify(conversionService, times(0)).convert(any(CloudStorageParameters.class), eq(CloudAdlsView.class));
@@ -126,7 +126,7 @@ public class FileSystemRequestToSpiFileSystemConverterTest {
 
         SpiFileSystem result = underTest.convert(request);
 
-        assertNull(result.getCloudFileSystem());
+        assertTrue(result.getCloudFileSystems().isEmpty());
         verify(conversionService, times(0)).convert(any(CloudStorageParameters.class), eq(CloudWasbView.class));
         verify(conversionService, times(0)).convert(any(CloudStorageParameters.class), eq(CloudAdlsView.class));
         verify(conversionService, times(0)).convert(any(CloudStorageParameters.class), eq(CloudGcsView.class));

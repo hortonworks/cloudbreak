@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -19,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -27,6 +29,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Sets;
@@ -39,9 +42,12 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
@@ -107,6 +113,9 @@ public class StackToCloudStackConverterTest {
     private Cluster cluster;
 
     @Mock
+    private Blueprint blueprint;
+
+    @Mock
     private com.sequenceiq.cloudbreak.domain.Network stackNetwork;
 
     @Mock
@@ -115,11 +124,25 @@ public class StackToCloudStackConverterTest {
     @Mock
     private FileSystemConverter fileSystemConverter;
 
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Mock
+    private CmTemplateProcessor cmTemplateProcessor;
+
+    @Mock
+    private CloudFileSystemViewBuilder cloudFileSystemViewBuilder;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
         when(stack.getCluster()).thenReturn(cluster);
+        when(cluster.getBlueprint()).thenReturn(blueprint);
+        when(blueprint.getBlueprintText()).thenReturn("blueprintText");
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
+        when(cmTemplateProcessor.getComponentsByHostGroup()).thenReturn(Mockito.mock(Map.class));
+        when(cloudFileSystemViewBuilder.build(any(), any(), any())).thenReturn(Optional.empty());
     }
 
     @Test

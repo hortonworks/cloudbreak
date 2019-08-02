@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.model.filesystem;
 
 import java.util.Objects;
 
+import com.sequenceiq.common.model.CloudIdentityType;
+
 public class CloudWasbView extends CloudFileSystemView {
 
     private String accountKey;
@@ -11,6 +13,10 @@ public class CloudWasbView extends CloudFileSystemView {
     private boolean secure;
 
     private String resourceGroupName;
+
+    public CloudWasbView(CloudIdentityType cloudIdentityType) {
+        super(cloudIdentityType);
+    }
 
     public String getAccountKey() {
         return accountKey;

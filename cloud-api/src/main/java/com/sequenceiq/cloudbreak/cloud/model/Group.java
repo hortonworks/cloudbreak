@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -29,8 +30,11 @@ public class Group extends DynamicModel {
 
     private final int rootVolumeSize;
 
+    private final Optional<CloudFileSystemView> identity;
+
     public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
-            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, int rootVolumeSize) {
+            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey,
+            int rootVolumeSize, Optional<CloudFileSystemView> identity) {
         this.name = name;
         this.type = type;
         this.instances = ImmutableList.copyOf(instances);
@@ -40,10 +44,12 @@ public class Group extends DynamicModel {
         this.publicKey = publicKey;
         this.loginUserName = loginUserName;
         this.rootVolumeSize = rootVolumeSize;
+        this.identity = identity;
     }
 
     public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
-            Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, int rootVolumeSize) {
+            Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName,
+            String publicKey, int rootVolumeSize, Optional<CloudFileSystemView> identity) {
         super(parameters);
         this.name = name;
         this.type = type;
@@ -54,6 +60,7 @@ public class Group extends DynamicModel {
         this.publicKey = publicKey;
         this.loginUserName = loginUserName;
         this.rootVolumeSize = rootVolumeSize;
+        this.identity = identity;
     }
 
     public CloudInstance getReferenceInstanceConfiguration() {
@@ -97,6 +104,10 @@ public class Group extends DynamicModel {
 
     public int getRootVolumeSize() {
         return rootVolumeSize;
+    }
+
+    public Optional<CloudFileSystemView> getIdentity() {
+        return identity;
     }
 
     @Override

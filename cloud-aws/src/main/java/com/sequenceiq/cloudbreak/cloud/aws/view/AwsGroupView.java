@@ -42,9 +42,13 @@ public class AwsGroupView {
 
     private final Boolean useNetworkCidrAsSourceForDefaultRules;
 
+    private final Boolean hasInstanceProfile;
+
+    private final String instanceProfile;
+
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Boolean ebsEncrypted, Integer rootVolumeSize,
             Map<String, Long> volumeCounts, Double spotPrice, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, Boolean kmsKeyDefined,
-            String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules) {
+            String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules, String instanceProfile) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -61,6 +65,12 @@ public class AwsGroupView {
         this.volumeCounts = volumeCounts;
         autoScalingGroupName = getAutoScalingGroupName(groupName);
         this.useNetworkCidrAsSourceForDefaultRules = useNetworkCidrAsSourceForDefaultRules;
+        this.instanceProfile = instanceProfile;
+        if (instanceProfile != null) {
+            hasInstanceProfile = true;
+        } else {
+            hasInstanceProfile = false;
+        }
     }
 
     public static String getAutoScalingGroupName(String groupName) {
@@ -141,5 +151,13 @@ public class AwsGroupView {
 
     public Boolean getUseNetworkCidrAsSourceForDefaultRules() {
         return useNetworkCidrAsSourceForDefaultRules;
+    }
+
+    public Boolean getHasInstanceProfile() {
+        return hasInstanceProfile;
+    }
+
+    public String getInstanceProfile() {
+        return instanceProfile;
     }
 }

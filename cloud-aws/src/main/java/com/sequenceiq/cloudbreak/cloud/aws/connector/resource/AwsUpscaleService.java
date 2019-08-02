@@ -142,7 +142,7 @@ public class AwsUpscaleService {
                     .filter(instance -> Objects.isNull(instance.getInstanceId())).collect(Collectors.toList());
 
             return new Group(group.getName(), group.getType(), newInstances, group.getSecurity(), null, group.getParameters(),
-                    group.getInstanceAuthentication(), group.getLoginUserName(), group.getPublicKey(), group.getRootVolumeSize());
+                    group.getInstanceAuthentication(), group.getLoginUserName(), group.getPublicKey(), group.getRootVolumeSize(), group.getIdentity());
         }).collect(Collectors.toList());
     }
 

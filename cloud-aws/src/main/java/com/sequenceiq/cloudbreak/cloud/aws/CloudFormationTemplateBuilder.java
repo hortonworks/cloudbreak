@@ -21,9 +21,10 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -44,7 +45,7 @@ public class CloudFormationTemplateBuilder {
         Map<String, Object> model = new HashMap<>();
         Collection<AwsGroupView> awsGroupViews = new ArrayList<>();
         Collection<AwsGroupView> awsGatewayGroupViews = new ArrayList<>();
-        int i = 0;
+        int subnetCounter = 0;
         boolean multigw = context.stack.getGroups().stream().filter(g -> g.getType() == InstanceGroupType.GATEWAY).count() > 1;
         for (Group group : context.stack.getGroups()) {
             AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
@@ -60,16 +61,17 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getSpotPrice(),
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityIds(),
-                    getSubnetIds(context.existingSubnetIds, i, group, multigw),
+                    getSubnetIds(context.existingSubnetIds, subnetCounter, group, multigw),
                     awsInstanceView.isKmsEnabled(),
                     awsInstanceView.getKmsKey(),
                     encryptedAMI,
-                    group.getSecurity().isUseNetworkCidrAsSourceForDefaultRules());
+                    group.getSecurity().isUseNetworkCidrAsSourceForDefaultRules(),
+                    getInstanceProfile(group));
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);
             }
-            i++;
+            subnetCounter++;
         }
         model.put("instanceGroups", awsGroupViews);
         model.put("gatewayGroups", awsGatewayGroupViews);
@@ -93,6 +95,13 @@ public class CloudFormationTemplateBuilder {
         }
     }
 
+    private String getInstanceProfile(Group group) {
+        return group.getIdentity().map(cloudFileSystemView -> {
+                    CloudS3View cloudS3View = CloudS3View.class.cast(cloudFileSystemView);
+                    return cloudS3View.getInstanceProfile();
+                }).orElse(null);
+    }
+
     public String build(RDSModelContext context) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
@@ -107,9 +116,9 @@ public class CloudFormationTemplateBuilder {
         }
     }
 
-    private String getSubnetIds(List<String> existingSubnetIds, int i, Group group, boolean multigw) {
+    private String getSubnetIds(List<String> existingSubnetIds, int subnetCounter, Group group, boolean multigw) {
         return (multigw && group.getType() == InstanceGroupType.GATEWAY && !isNullOrEmptyList(existingSubnetIds))
-                ? existingSubnetIds.get(i % existingSubnetIds.size()) : null;
+                ? existingSubnetIds.get(subnetCounter % existingSubnetIds.size()) : null;
     }
 
     private boolean isNullOrEmptyList(Collection<?> list) {
@@ -224,25 +233,11 @@ public class CloudFormationTemplateBuilder {
     }
 
     public static class RDSModelContext {
-        // private AuthenticatedContext ac;
-
-        // private DatabaseStack stack;
-
         private String template;
 
         private boolean hasPort;
 
         private boolean hasSecurityGroup;
-
-        // public RDSModelContext withAuthenticatedContext(AuthenticatedContext ac) {
-        //     this.ac = ac;
-        //     return this;
-        // }
-
-        // public RDSModelContext withStack(DatabaseStack stack) {
-        //     this.stack = stack;
-        //     return this;
-        // }
 
         public RDSModelContext withTemplate(String template) {
             this.template = template;

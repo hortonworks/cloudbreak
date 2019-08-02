@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -20,18 +23,18 @@ public class FileSystemValidationV4RequestToSpiFileSystemConverter
 
     @Override
     public SpiFileSystem convert(FileSystemValidationV4Request source) {
-        CloudFileSystemView cloudFileSystemView = null;
+        List<CloudFileSystemView> cloudFileSystemViews = new ArrayList<>();
         if (source.getAdls() != null) {
-            cloudFileSystemView = cloudStorageParametersConverter.adlsToCloudView(source.getAdls());
+            cloudFileSystemViews.add(cloudStorageParametersConverter.adlsToCloudView(source.getAdls()));
         } else if (source.getGcs() != null) {
-            cloudFileSystemView = cloudStorageParametersConverter.gcsToCloudView(source.getGcs());
+            cloudFileSystemViews.add(cloudStorageParametersConverter.gcsToCloudView(source.getGcs()));
         } else if (source.getS3() != null) {
-            cloudFileSystemView = cloudStorageParametersConverter.s3ToCloudView(source.getS3());
+            cloudFileSystemViews.add(cloudStorageParametersConverter.s3ToCloudView(source.getS3()));
         } else if (source.getWasb() != null) {
-            cloudFileSystemView = cloudStorageParametersConverter.wasbToCloudView(source.getWasb());
+            cloudFileSystemViews.add(cloudStorageParametersConverter.wasbToCloudView(source.getWasb()));
         } else if (source.getAdlsGen2() != null) {
-            cloudFileSystemView = cloudStorageParametersConverter.adlsGen2ToCloudView(source.getAdlsGen2());
+            cloudFileSystemViews.add(cloudStorageParametersConverter.adlsGen2ToCloudView(source.getAdlsGen2()));
         }
-        return new SpiFileSystem(source.getName(), FileSystemType.valueOf(source.getType()), cloudFileSystemView);
+        return new SpiFileSystem(source.getName(), FileSystemType.valueOf(source.getType()), cloudFileSystemViews);
     }
 }

@@ -15,11 +15,11 @@ public class AwsInstanceProfileView {
     }
 
     public boolean isInstanceProfileAvailable() {
-        return cloudFileSystem.isPresent() && (cloudFileSystem.get().getCloudFileSystem() instanceof CloudS3View);
+        return cloudFileSystem.isPresent() && (cloudFileSystem.get().getCloudFileSystems() instanceof CloudS3View);
     }
 
     public String getInstanceProfile() {
-        return ((CloudS3View) cloudFileSystem.get().getCloudFileSystem()).getInstanceProfile();
+        return ((CloudS3View) cloudFileSystem.get().getCloudFileSystems()).getInstanceProfile();
     }
 
 }

@@ -19,7 +19,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
@@ -40,13 +39,17 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -78,8 +81,14 @@ public class StackToCloudStackConverter {
     @Inject
     private FileSystemConverter fileSystemConverter;
 
-    @Autowired
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Inject
     private ConverterUtil converterUtil;
+
+    @Inject
+    private CloudFileSystemViewBuilder cloudFileSystemViewBuilder;
 
     public CloudStack convert(Stack stack) {
         return convert(stack, Collections.emptySet());
@@ -95,7 +104,7 @@ public class StackToCloudStackConverter {
 
     public CloudStack convert(Stack stack, Collection<String> deleteRequestedInstances) {
         Image image = null;
-        List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), stack.getStackAuthentication(), deleteRequestedInstances);
+        List<Group> instanceGroups = buildInstanceGroups(stack, stack.getInstanceGroupsAsList(), stack.getStackAuthentication(), deleteRequestedInstances);
         try {
             image = imageService.getImage(stack.getId());
         } catch (CloudbreakImageNotFoundException e) {
@@ -104,7 +113,7 @@ public class StackToCloudStackConverter {
         Network network = buildNetwork(stack);
         StackTemplate stackTemplate = componentConfigProviderService.getStackTemplate(stack.getId());
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
-        SpiFileSystem cloudFileSystem = buildCloudFileSystem(stack);
+        SpiFileSystem cloudFileSystem = buildSpiFileSystem(stack);
         String template = null;
         if (stackTemplate != null) {
             template = stackTemplate.getTemplate();
@@ -115,7 +124,7 @@ public class StackToCloudStackConverter {
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {
-        List<Group> groups = buildInstanceGroups(stack.getInstanceGroupsAsList(), stack.getStackAuthentication(), Collections.emptySet());
+        List<Group> groups = buildInstanceGroups(stack, stack.getInstanceGroupsAsList(), stack.getStackAuthentication(), Collections.emptySet());
         List<CloudInstance> cloudInstances = new ArrayList<>();
         for (Group group : groups) {
             cloudInstances.addAll(group.getInstances());
@@ -186,44 +195,32 @@ public class StackToCloudStackConverter {
         return result;
     }
 
-    private List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication, Collection<String> deleteRequests) {
+    private List<Group> buildInstanceGroups(Stack stack, List<InstanceGroup> instanceGroups,
+            StackAuthentication stackAuthentication, Collection<String> deleteRequests) {
         // sort by name to avoid shuffling the different instance groups
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
+        Cluster cluster = stack.getCluster();
+        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(cluster.getBlueprint().getBlueprintText());
+        Map<String, Set<String>> componentsByHostGroup = cmTemplateProcessor.getComponentsByHostGroup();
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (instanceGroup.getTemplate() != null) {
-                CloudInstance skeleton = null;
-                List<CloudInstance> instances = new ArrayList<>();
                 Template template = instanceGroup.getTemplate();
-                // existing instances
-                for (InstanceMetaData metaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
-                    InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-                    instances.add(buildInstance(metaData, template, stackAuthentication, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
-                }
-                if (instanceGroup.getNodeCount() == 0) {
-                    skeleton = buildInstance(null, template, stackAuthentication, instanceGroup.getGroupName(), 0L,
-                            CREATE_REQUESTED);
-                }
-                Json attributes = instanceGroup.getAttributes();
                 InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
-                Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
-
-                Integer rootVolumeSize = instanceGroup.getTemplate().getRootVolumeSize();
-                if (Objects.isNull(rootVolumeSize)) {
-                    rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(instanceGroup.getTemplate().cloudPlatform());
-                }
-
+                Optional<CloudFileSystemView> cloudFileSystemView
+                        = cloudFileSystemViewBuilder.build(cluster.getFileSystem(), componentsByHostGroup, instanceGroup);
                 groups.add(
                         new Group(instanceGroup.getGroupName(),
                                 instanceGroup.getInstanceGroupType(),
-                                instances,
+                                buildCloudInstances(stackAuthentication, deleteRequests, instanceGroup, template),
                                 buildSecurity(instanceGroup),
-                                skeleton,
-                                fields,
+                                buildCloudInstanceSkeleton(stackAuthentication, instanceGroup, template),
+                                getFields(instanceGroup),
                                 instanceAuthentication,
                                 instanceAuthentication.getLoginUserName(),
                                 instanceAuthentication.getPublicKey(),
-                                rootVolumeSize)
+                                getRootVolumeSize(instanceGroup),
+                                cloudFileSystemView)
                 );
             }
         }
@@ -235,6 +232,17 @@ public class StackToCloudStackConverter {
                 stackAuthentication.getPublicKey(),
                 stackAuthentication.getPublicKeyId(),
                 stackAuthentication.getLoginUserName());
+    }
+
+    private List<CloudInstance> buildCloudInstances(StackAuthentication stackAuthentication, Collection<String> deleteRequests,
+            InstanceGroup instanceGroup, Template template) {
+        List<CloudInstance> instances = new ArrayList<>();
+        // existing instances
+        for (InstanceMetaData metaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+            InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
+            instances.add(buildInstance(metaData, template, stackAuthentication, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
+        }
+        return instances;
     }
 
     private Security buildSecurity(InstanceGroup ig) {
@@ -261,15 +269,37 @@ public class StackToCloudStackConverter {
         return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds());
     }
 
-    private SpiFileSystem buildCloudFileSystem(Stack stack) {
-        SpiFileSystem cloudFileSystem = null;
+    private CloudInstance buildCloudInstanceSkeleton(StackAuthentication stackAuthentication, InstanceGroup instanceGroup, Template template) {
+        CloudInstance skeleton = null;
+        if (instanceGroup.getNodeCount() == 0) {
+            skeleton = buildInstance(null, template, stackAuthentication, instanceGroup.getGroupName(), 0L,
+                    CREATE_REQUESTED);
+        }
+        return skeleton;
+    }
+
+    private Map<String, Object> getFields(InstanceGroup instanceGroup) {
+        Json attributes = instanceGroup.getAttributes();
+        return attributes == null ? Collections.emptyMap() : attributes.getMap();
+    }
+
+    private Integer getRootVolumeSize(InstanceGroup instanceGroup) {
+        Integer rootVolumeSize = instanceGroup.getTemplate().getRootVolumeSize();
+        if (Objects.isNull(rootVolumeSize)) {
+            rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(instanceGroup.getTemplate().cloudPlatform());
+        }
+        return rootVolumeSize;
+    }
+
+    private SpiFileSystem buildSpiFileSystem(Stack stack) {
+        SpiFileSystem spiFileSystem = null;
         if (stack.getCluster() != null) {
             FileSystem fileSystem = stack.getCluster().getFileSystem();
             if (fileSystem != null) {
-                cloudFileSystem = fileSystemConverter.fileSystemToSpi(fileSystem);
+                spiFileSystem = fileSystemConverter.fileSystemToSpi(fileSystem);
             }
         }
-        return cloudFileSystem;
+        return spiFileSystem;
     }
 
     private Network buildNetwork(Stack stack) {

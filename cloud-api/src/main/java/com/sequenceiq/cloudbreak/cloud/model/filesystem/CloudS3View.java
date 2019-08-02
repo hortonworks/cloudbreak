@@ -2,9 +2,15 @@ package com.sequenceiq.cloudbreak.cloud.model.filesystem;
 
 import java.util.Objects;
 
+import com.sequenceiq.common.model.CloudIdentityType;
+
 public class CloudS3View extends CloudFileSystemView {
 
     private String instanceProfile;
+
+    public CloudS3View(CloudIdentityType cloudIdentityType) {
+        super(cloudIdentityType);
+    }
 
     public String getInstanceProfile() {
         return instanceProfile;

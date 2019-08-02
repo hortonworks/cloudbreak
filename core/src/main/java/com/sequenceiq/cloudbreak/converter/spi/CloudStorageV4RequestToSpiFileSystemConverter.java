@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
@@ -18,24 +21,24 @@ public class CloudStorageV4RequestToSpiFileSystemConverter extends AbstractConve
 
     @Override
     public SpiFileSystem convert(CloudStorageV4Request source) {
-        CloudFileSystemView baseFileSystem = null;
+        List<CloudFileSystemView> cloudFileSystemViews = new ArrayList<>();
         FileSystemType type = null;
         if (source.getAdls() != null) {
-            baseFileSystem = getConversionService().convert(source.getAdls(), CloudAdlsView.class);
+            cloudFileSystemViews.add(getConversionService().convert(source.getAdls(), CloudAdlsView.class));
             type = FileSystemType.ADLS;
         } else if (source.getGcs() != null) {
-            baseFileSystem = getConversionService().convert(source.getGcs(), CloudGcsView.class);
+            cloudFileSystemViews.add(getConversionService().convert(source.getGcs(), CloudGcsView.class));
             type = FileSystemType.GCS;
         } else if (source.getS3() != null) {
-            baseFileSystem = getConversionService().convert(source.getS3(), CloudS3View.class);
+            cloudFileSystemViews.add(getConversionService().convert(source.getS3(), CloudS3View.class));
             type = FileSystemType.S3;
         } else if (source.getWasb() != null) {
-            baseFileSystem = getConversionService().convert(source.getWasb(), CloudWasbView.class);
+            cloudFileSystemViews.add(getConversionService().convert(source.getWasb(), CloudWasbView.class));
             type = FileSystemType.WASB;
         } else if (source.getAdlsGen2() != null) {
-            baseFileSystem = getConversionService().convert(source.getAdlsGen2(), CloudAdlsGen2View.class);
+            cloudFileSystemViews.add(getConversionService().convert(source.getAdlsGen2(), CloudAdlsGen2View.class));
             type = FileSystemType.ADLS_GEN_2;
         }
-        return new SpiFileSystem("", type, baseFileSystem);
+        return new SpiFileSystem("", type, cloudFileSystemViews);
     }
 }

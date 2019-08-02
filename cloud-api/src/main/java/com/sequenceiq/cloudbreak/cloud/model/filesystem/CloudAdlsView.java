@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model.filesystem;
 
+import com.sequenceiq.common.model.CloudIdentityType;
+
 public class CloudAdlsView extends CloudFileSystemView {
 
     public static final String CREDENTIAL_SECRET_KEY = "secretKey";
@@ -23,6 +25,10 @@ public class CloudAdlsView extends CloudFileSystemView {
     private String resourceGroupName;
 
     private String adlsTrackingClusterTypeKey;
+
+    public CloudAdlsView(CloudIdentityType cloudIdentityType) {
+        super(cloudIdentityType);
+    }
 
     public String getAccountName() {
         return accountName;

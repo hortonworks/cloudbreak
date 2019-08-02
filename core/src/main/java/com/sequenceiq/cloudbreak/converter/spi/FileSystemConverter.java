@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -10,6 +14,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
@@ -19,9 +24,11 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
+import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 @Component
 public class FileSystemConverter {
@@ -32,34 +39,41 @@ public class FileSystemConverter {
     private ConversionService conversionService;
 
     public SpiFileSystem fileSystemToSpi(FileSystem source) {
-        CloudFileSystemView cloudFileSystemView = null;
+        List<CloudFileSystemView> cloudFileSystemViews = Collections.emptyList();
         if (source.getConfigurations() != null && source.getConfigurations().getValue() != null) {
-            cloudFileSystemView = legacyConvertFromConfiguration(source);
+            cloudFileSystemViews = legacyConvertFromConfiguration(source);
         } else {
-            CloudStorage cloudStorage = source.getCloudStorage();
-            if (cloudStorage != null) {
-                // TODO: add support for multiple identities or multiple SpiFileSystems
-                CloudIdentity cloudIdentity = cloudStorage.getCloudIdentities().get(0);
-                if (cloudIdentity != null) {
-                    if (source.getType().isS3()) {
-                        cloudFileSystemView = cloudIdentityToS3View(cloudIdentity);
-                    } else if (source.getType().isWasb()) {
-                        cloudFileSystemView = cloudIdentityToWasbView(cloudIdentity);
-                    }
-                }
-            }
+            cloudFileSystemViews = convertFromCloudStorage(source, cloudFileSystemViews);
         }
-        return new SpiFileSystem(source.getName(), source.getType(), cloudFileSystemView);
+        return new SpiFileSystem(source.getName(), source.getType(), cloudFileSystemViews);
+    }
+
+    private List<CloudFileSystemView> convertFromCloudStorage(FileSystem source, List<CloudFileSystemView> cloudFileSystemViews) {
+        CloudStorage cloudStorage = source.getCloudStorage();
+        if (cloudStorage != null) {
+            cloudFileSystemViews = cloudStorage.getCloudIdentities().stream()
+                    .map(cloudIdentity -> {
+                        if (source.getType().isS3()) {
+                            return cloudIdentityToS3View(cloudIdentity);
+                        } else if (source.getType().isWasb()) {
+                            return cloudIdentityToWasbView(cloudIdentity);
+                        }
+                        return null;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+        return cloudFileSystemViews;
     }
 
     private CloudS3View cloudIdentityToS3View(CloudIdentity cloudIdentity) {
-        CloudS3View cloudS3View = new CloudS3View();
+        CloudS3View cloudS3View = new CloudS3View(cloudIdentity.getIdentityType());
         cloudS3View.setInstanceProfile(cloudIdentity.getS3Identity().getInstanceProfile());
         return cloudS3View;
     }
 
     private CloudFileSystemView cloudIdentityToWasbView(CloudIdentity cloudIdentity) {
-        CloudWasbView cloudWasbView = new CloudWasbView();
+        CloudWasbView cloudWasbView = new CloudWasbView(cloudIdentity.getIdentityType());
         cloudWasbView.setAccountName(cloudIdentity.getWasbIdentity().getAccountName());
         cloudWasbView.setAccountKey(cloudIdentity.getWasbIdentity().getAccountKey());
         cloudWasbView.setSecure(cloudIdentity.getWasbIdentity().isSecure());
@@ -67,20 +81,70 @@ public class FileSystemConverter {
         return cloudWasbView;
     }
 
-    private CloudFileSystemView legacyConvertFromConfiguration(FileSystem source) {
+    private List<CloudFileSystemView> legacyConvertFromConfiguration(FileSystem source) {
         try {
+            CloudFileSystemView fileSystemView;
             if (source.getType().isAdls()) {
-                return conversionService.convert(source.getConfigurations().get(AdlsFileSystem.class), CloudAdlsView.class);
+                AdlsFileSystem adlsFileSystem = source.getConfigurations().get(AdlsFileSystem.class);
+                fileSystemView = convertAdlsLegacy(adlsFileSystem);
             } else if (source.getType().isGcs()) {
-                return conversionService.convert(source.getConfigurations().get(GcsFileSystem.class), CloudGcsView.class);
+                GcsFileSystem gcsFileSystem = source.getConfigurations().get(GcsFileSystem.class);
+                fileSystemView = convertGcsLegacy(gcsFileSystem);
             } else if (source.getType().isS3()) {
-                return conversionService.convert(source.getConfigurations().get(S3FileSystem.class), CloudS3View.class);
+                S3FileSystem s3FileSystem = source.getConfigurations().get(S3FileSystem.class);
+                fileSystemView = convertS3Legacy(s3FileSystem);
             } else if (source.getType().isWasb()) {
-                return conversionService.convert(source.getConfigurations().get(WasbFileSystem.class), CloudWasbView.class);
+                WasbFileSystem wasbFileSystem = source.getConfigurations().get(WasbFileSystem.class);
+                fileSystemView = convertWasbLegacy(wasbFileSystem);
+            } else if (source.getType().isAdlsGen2()) {
+                AdlsGen2FileSystem adlsGen2FileSystem = source.getConfigurations().get(AdlsGen2FileSystem.class);
+                fileSystemView = convertAdlsGen2Legacy(adlsGen2FileSystem);
+            } else {
+                return Collections.emptyList();
             }
+            return List.of(fileSystemView);
         } catch (IOException e) {
             LOGGER.warn("Error occurred when tried to convert filesystem object: {}", e.getMessage());
         }
-        return null;
+        return Collections.emptyList();
+    }
+
+    private CloudWasbView convertWasbLegacy(WasbFileSystem source) {
+        CloudWasbView cloudWasbView = new CloudWasbView(CloudIdentityType.LOG);
+        cloudWasbView.setAccountName(source.getAccountName());
+        cloudWasbView.setAccountKey(source.getAccountKey());
+        cloudWasbView.setSecure(source.isSecure());
+        cloudWasbView.setResourceGroupName(source.getStorageContainerName());
+        return cloudWasbView;
+    }
+
+    private CloudS3View convertS3Legacy(S3FileSystem source) {
+        CloudS3View cloudS3View = new CloudS3View(CloudIdentityType.LOG);
+        cloudS3View.setInstanceProfile(source.getInstanceProfile());
+        return cloudS3View;
+    }
+
+    private CloudGcsView convertGcsLegacy(GcsFileSystem source) {
+        CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
+        cloudGcsView.setServiceAccountEmail(source.getServiceAccountEmail());
+        return cloudGcsView;
+    }
+
+    private CloudAdlsView convertAdlsLegacy(AdlsFileSystem source) {
+        CloudAdlsView cloudAdlsView = new CloudAdlsView(CloudIdentityType.LOG);
+        cloudAdlsView.setTenantId(source.getTenantId());
+        cloudAdlsView.setCredential(source.getCredential());
+        cloudAdlsView.setAccountName(source.getAccountName());
+        cloudAdlsView.setClientId(source.getClientId());
+        return cloudAdlsView;
+    }
+
+    private CloudAdlsGen2View convertAdlsGen2Legacy(AdlsGen2FileSystem source) {
+        CloudAdlsGen2View cloudAdlsGen2View = new CloudAdlsGen2View(CloudIdentityType.LOG);
+        cloudAdlsGen2View.setAccountName(source.getAccountName());
+        cloudAdlsGen2View.setAccountKey(source.getAccountKey());
+        cloudAdlsGen2View.setResourceGroupName(source.getStorageContainerName());
+        cloudAdlsGen2View.setSecure(source.isSecure());
+        return cloudAdlsGen2View;
     }
 }

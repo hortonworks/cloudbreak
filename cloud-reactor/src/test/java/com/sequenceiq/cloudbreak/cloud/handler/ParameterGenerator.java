@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
@@ -80,7 +81,7 @@ public class ParameterGenerator {
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         Security security = new Security(rules, emptyList());
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50, Optional.empty()));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
