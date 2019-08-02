@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
+import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariEnsureComponentsAreStoppedResult;
@@ -26,6 +28,8 @@ public enum ClusterUpscaleEvent implements FlowEvent {
     CLUSTER_REPAIR_SINGLE_MASTER_START_EVENT(EventSelectorUtil.selector(AmbariRepairSingleMasterStartResult.class)),
     UPLOAD_UPSCALE_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(UploadUpscaleRecipesResult.class)),
     UPLOAD_UPSCALE_RECIPES_FAILED_EVENT(EventSelectorUtil.failureSelector(UploadUpscaleRecipesResult.class)),
+    RECONFIGURE_KEYTABS_FINISHED_EVENT(EventSelectorUtil.selector(KeytabConfigurationSuccess.class)),
+    RECONFIGURE_KEYTABS_FAILED_EVENT(EventSelectorUtil.selector(KeytabConfigurationFailed.class)),
     CHECK_HOST_METADATA_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleCheckHostMetadataResult.class)),
     CHECK_HOST_METADATA_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscaleCheckHostMetadataResult.class)),
 
