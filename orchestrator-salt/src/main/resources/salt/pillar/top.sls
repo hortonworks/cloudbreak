@@ -15,7 +15,9 @@ base:
     - docker
     - metadata.init
     - proxy.proxy
+    - databus
     - fluent
+    - metering
 
   'G@roles:ad_member or G@roles:ad_leave':
     - match: compound

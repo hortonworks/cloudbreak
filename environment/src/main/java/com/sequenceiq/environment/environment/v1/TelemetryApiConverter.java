@@ -21,9 +21,13 @@ import com.sequenceiq.environment.environment.dto.telemetry.WasbCloudStoragePara
 @Component
 public class TelemetryApiConverter {
 
+    private final boolean reportDeploymentLogs;
+
     private final String databusEndpoint;
 
-    public TelemetryApiConverter(@Value("${altus.databus.endpoint:}") String databusEndpoint) {
+    public TelemetryApiConverter(@Value("${cluster.deployment.logs.report:false}") boolean reportDeploymentLogs,
+            @Value("${altus.databus.endpoint:}") String databusEndpoint) {
+        this.reportDeploymentLogs = reportDeploymentLogs;
         this.databusEndpoint = databusEndpoint;
     }
 
@@ -47,7 +51,8 @@ public class TelemetryApiConverter {
                         StringUtils.isNotEmpty(waRequest.getDatabusEndpoint()) ? waRequest.getDatabusEndpoint() : databusEndpoint
                 );
             }
-            telemetry = new EnvironmentTelemetry(logging, workloadAnalytics);
+            boolean reportDeploymentLogsEnabled = reportDeploymentLogs ? request.getReportDeploymentLogs() : false;
+            telemetry = new EnvironmentTelemetry(logging, workloadAnalytics, reportDeploymentLogsEnabled);
         }
         return telemetry;
     }
@@ -94,6 +99,7 @@ public class TelemetryApiConverter {
             response = new TelemetryResponse();
             response.setLogging(loggingResponse);
             response.setWorkloadAnalytics(waResponse);
+            response.setReportDeploymentLogs(telemetry.isReportDeploymentLogs());
         }
         return response;
     }

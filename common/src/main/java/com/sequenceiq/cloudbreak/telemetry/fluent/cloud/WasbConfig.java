@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.fluent.cloud;
+package com.sequenceiq.cloudbreak.telemetry.fluent.cloud;
 
 public class WasbConfig extends CloudStorageConfig {
 

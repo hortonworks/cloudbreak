@@ -42,9 +42,9 @@ public class GrainAddRunnerTest {
         targets.add("10.0.0.2");
         targets.add("10.0.0.3");
         Set<Node> allNode = new HashSet<>();
-        allNode.add(new Node("10.0.0.1", "5.5.5.1", "10-0-0-1.example.com", "hg"));
-        allNode.add(new Node("10.0.0.2", "5.5.5.2", "10-0-0-2.example.com", "hg"));
-        allNode.add(new Node("10.0.0.3", "5.5.5.3", "10-0-0-3.example.com", "hg"));
+        allNode.add(new Node("10.0.0.1", "5.5.5.1", "i-1234", "m5.xlarge", "10-0-0-1.example.com", "hg"));
+        allNode.add(new Node("10.0.0.2", "5.5.5.2", "i-1234", "m5.xlarge", "10-0-0-2.example.com", "hg"));
+        allNode.add(new Node("10.0.0.3", "5.5.5.3", "i-1234", "m5.xlarge", "10-0-0-3.example.com", "hg"));
 
         PowerMockito.mockStatic(SaltStates.class);
         ApplyResponse applyResponse = new ApplyResponse();
@@ -75,9 +75,9 @@ public class GrainAddRunnerTest {
         targets.add("10.0.0.2");
         targets.add("10.0.0.3");
         Set<Node> allNode = new HashSet<>();
-        allNode.add(new Node("10.0.0.1", "5.5.5.1", "10-0-0-1.example.com", "hg"));
-        allNode.add(new Node("10.0.0.2", "5.5.5.2", "10-0-0-2.example.com", "hg"));
-        allNode.add(new Node("10.0.0.3", "5.5.5.3", "10-0-0-3.example.com", "hg"));
+        allNode.add(new Node("10.0.0.1", "5.5.5.1", "i-1234", "m5.xlarge", "10-0-0-1.example.com", "hg"));
+        allNode.add(new Node("10.0.0.2", "5.5.5.2", "i-1234", "m5.xlarge", "10-0-0-2.example.com", "hg"));
+        allNode.add(new Node("10.0.0.3", "5.5.5.3", "i-1234", "m5.xlarge", "10-0-0-3.example.com", "hg"));
 
         PowerMockito.mockStatic(SaltStates.class);
         ApplyResponse applyResponse = new ApplyResponse();

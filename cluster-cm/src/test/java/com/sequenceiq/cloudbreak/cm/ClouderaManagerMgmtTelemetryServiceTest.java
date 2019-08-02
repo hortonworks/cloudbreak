@@ -55,7 +55,8 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         Stack stack = new Stack();
         stack.setType(StackType.WORKLOAD);
         WorkloadAnalytics wa = new WorkloadAnalytics();
-        Telemetry telemetry = new Telemetry(null, wa);
+        Telemetry telemetry = new Telemetry();
+        telemetry.setWorkloadAnalytics(wa);
         ApiConfigList apiConfigList = new ApiConfigList();
         ApiResponse response = new ApiResponse<>(0, null, apiConfigList);
         AltusCredential credential = new AltusCredential("accessKey", "secretKey".toCharArray());
@@ -74,7 +75,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         // GIVEN
         Stack stack = new Stack();
         stack.setType(StackType.WORKLOAD);
-        Telemetry telemetry = new Telemetry(null, null);
+        Telemetry telemetry = new Telemetry();
         // WHEN
         underTest.setupTelemetryRole(stack, null, null, null, telemetry);
         // THEN
@@ -87,7 +88,8 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         Stack stack = new Stack();
         stack.setType(StackType.DATALAKE);
         WorkloadAnalytics wa = new WorkloadAnalytics();
-        Telemetry telemetry = new Telemetry(null, wa);
+        Telemetry telemetry = new Telemetry();
+        telemetry.setWorkloadAnalytics(wa);
         // WHEN
         underTest.setupTelemetryRole(stack, null, null, null, telemetry);
         // THEN

@@ -202,5 +202,4 @@ public class ClusterV4Request implements JsonEntity {
     public void setValidateBlueprint(Boolean validateBlueprint) {
         this.validateBlueprint = validateBlueprint;
     }
-
 }

@@ -105,7 +105,7 @@ fluent_stop:
     - group: "{{ fluent.group }}"
     - file_mode: 640
     - context:
-        databusClusterBundleLogs: "true"
+        databusReportDeploymentLogs: "true"
 
 /etc/td-agent/td-agent_simple_profile.conf:
   file.managed:
@@ -115,11 +115,11 @@ fluent_stop:
     - group: "{{ fluent.group }}"
     - file_mode: 640
     - context:
-        databusClusterBundleLogs: "false"
+        databusReportDeploymentLogs: "false"
 
 copy_td_agent_conf:
   cmd.run:
-{%- if not fluent.dbusReportBundleEnabled or (dbus_lock_exists and (not fluent.dbusReportBundleDisableStop)) %}
+{%- if not fluent.dbusReportDeploymentLogs or (dbus_lock_exists and (not fluent.dbusReportDeploymentLogsDisableStop)) %}
     - name: "cp /etc/td-agent/td-agent_simple_profile.conf /etc/td-agent/td-agent.conf"
     - onlyif: "! diff /etc/td-agent/td-agent_simple_profile.conf /etc/td-agent/td-agent.conf"
 {% else %}
@@ -127,7 +127,7 @@ copy_td_agent_conf:
     - onlyif: "! diff /etc/td-agent/td-agent_bundle_profile.conf /etc/td-agent/td-agent.conf"
 {% endif %}
 
-
+{% if fluent.cloudStorageLoggingEnabled %}
 /etc/td-agent/input.conf:
   file.managed:
     - source: salt://fluent/template/input.conf.j2
@@ -137,6 +137,7 @@ copy_td_agent_conf:
     - file_mode: 640
     - context:
         providerPrefix: {{ fluent.providerPrefix }}
+{% endif %}
 
 /etc/td-agent/databus_metering.conf:
    file.managed:
@@ -164,6 +165,7 @@ copy_td_agent_conf:
     - group: "{{ fluent.group }}"
     - file_mode: 640
 
+{% if fluent.cloudStorageLoggingEnabled %}
 /etc/td-agent/output.conf:
   file.managed:
     - name: /etc/td-agent/output.conf
@@ -172,16 +174,22 @@ copy_td_agent_conf:
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
     - file_mode: 640
+{% endif %}
 
 /etc/td-agent/databus_credential:
    file.managed:
-    - source: salt://fluent/template/databus_credential.j2
+    - source: salt://databus/template/databus_credential.j2
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
     - file_mode: '0600'
+    - context:
+        profileName: "dbus"
+        accessKeyIdName: "databus_access_key_id"
+        accessKeySecretName: "databus_access_secret_key"
+        accessKeySecretAlgoName: "databus_access_secret_key_algo"
 
-{%- if (not dbus_lock_exists) and fluent.dbusReportBundleEnabled %}
+{%- if (not dbus_lock_exists) and fluent.dbusReportDeploymentLogs %}
 /etc/td-agent/databus_bundle.lock:
    file.managed:
      - user: "{{ fluent.user }}"
@@ -217,7 +225,7 @@ fluent_start:
       - TD_AGENT_GROUP: "{{ fluent.group }}"
 {% endif %}
 
-{%- if not fluent.dbusReportBundleDisableStop %}
+{%- if not fluent.dbusReportDeploymentLogsDisableStop %}
 /etc/td-agent/delayed_restart.sh:
    file.managed:
     - source: salt://fluent/template/delayed_restart.sh.j2

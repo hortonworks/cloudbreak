@@ -1,0 +1,17 @@
+{%- from 'metering/settings.sls' import metering with context %}
+{%- from 'nodes/settings.sls' import host with context %}
+# CONFIGURED BY SALT - do not edit
+[Event]
+ClusterCRN = {{ metering.clusterCrn }}
+InstanceID = {{ host.instance_id }}
+InstanceType = {{ host.instance_type }}
+InstanceIP = {{ host.private_address }}
+ServiceType = {{ metering.serviceType }}
+ServiceVersion = {{ metering.serviceVersion }}
+WorkloadCRN = {{ metering.clusterCrn }}
+
+[Output]
+Path = /var/log/metering/heartbeats.json
+Period = 60
+MaxBytes = 5120
+BackupCount = 10

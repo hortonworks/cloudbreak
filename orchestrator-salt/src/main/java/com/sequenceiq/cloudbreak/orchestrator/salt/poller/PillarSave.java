@@ -45,7 +45,8 @@ public class PillarSave implements OrchestratorBootstrap {
         Map<String, Map<String, Object>> fqdn = hosts
                 .stream()
                 .filter(node -> node.getHostname() != null)
-                .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp())));
+                .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp(),
+                        node.getInstanceId(), node.getInstanceType())));
         pillar = new Pillar("/nodes/hosts.sls", singletonMap("hosts", fqdn), targets);
         this.targets = targets;
         originalTargets = targets;
@@ -84,7 +85,8 @@ public class PillarSave implements OrchestratorBootstrap {
         originalTargets = targets;
     }
 
-    private Map<String, Object> discovery(String hostname, String publicAddress) {
+    private Map<String, Object> discovery(String hostname, String publicAddress,
+            String instanceId, String instanceType) {
         Map<String, Object> map = new HashMap<>();
         map.put("fqdn", hostname);
         map.put("hostname", hostname.split("\\.")[0]);
@@ -92,6 +94,8 @@ public class PillarSave implements OrchestratorBootstrap {
         // Deprecated: this is just for backward compatibility, it is no longer in use
         map.put("custom_domain", true);
         map.put("public_address", StringUtils.isEmpty(publicAddress) ? Boolean.FALSE : Boolean.TRUE);
+        map.put("instance_id", instanceId);
+        map.put("instance_type", instanceType);
         return map;
     }
 

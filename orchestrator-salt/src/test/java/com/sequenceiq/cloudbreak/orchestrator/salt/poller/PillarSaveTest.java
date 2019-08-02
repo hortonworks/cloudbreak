@@ -35,9 +35,9 @@ public class PillarSaveTest {
         when(saltConnector.pillar(any(), any(Pillar.class))).thenReturn(responses);
 
         Set<Node> nodes = new HashSet<>();
-        nodes.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg"));
-        nodes.add(new Node("10.0.0.2", "1.1.1.2", "10-0-0-2.example.com", "hg"));
-        nodes.add(new Node("10.0.0.3", "1.1.1.3", "10-0-0-3.example.com", "hg"));
+        nodes.add(new Node("10.0.0.1", "1.1.1.1", "i-1234", "m5.xlarge", "10-0-0-1.example.com", "hg"));
+        nodes.add(new Node("10.0.0.2", "1.1.1.2", "i-1234", "m5.xlarge", "10-0-0-2.example.com", "hg"));
+        nodes.add(new Node("10.0.0.3", "1.1.1.3", "i-1234", "m5.xlarge", "10-0-0-3.example.com", "hg"));
         PillarSave pillarSave = new PillarSave(saltConnector, Sets.newHashSet("10.0.0.1"), nodes);
         pillarSave.call();
         ArgumentCaptor<Pillar> pillarCaptor = ArgumentCaptor.forClass(Pillar.class);

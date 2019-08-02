@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.fluent.cloud;
+package com.sequenceiq.cloudbreak.telemetry.fluent.cloud;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;

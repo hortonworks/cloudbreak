@@ -1,5 +1,6 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
-{%- if fluent.dbusValid and fluent.dbusReportBundleEnabled %}
+{%- from 'databus/settings.sls' import databus with context %}
+{%- if databus.valid and fluent.dbusReportDeploymentLogs %}
 <match databus**>
   @type copy
   <store ignore_error>
@@ -8,9 +9,9 @@
     credential_profile_name          dbus
     credential_file_reload_interval  60
     debug                            false
-    endpoint                         "{{ fluent.dbusEndpoint }}"
+    endpoint                         "{{ databus.endpoint }}"
     event_message_field              message
-    headers                          app:distrox
+    headers                          app:{{ fluent.dbusAppName }}
     stream_name                      LogCollection
     partition_key                    "#{Socket.gethostname}"
 
@@ -24,7 +25,7 @@
     </buffer>
   </store>
 </match>
-{% elif fluent.dbusReportBundleEnabled %}
+{% elif fluent.dbusReportDeploymentLogs %}
 # DBUS settings are not valid - check dbus credentials file
 {% else %}
 # DBUS report bundle is disabled

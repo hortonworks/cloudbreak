@@ -5,6 +5,10 @@ public class Node {
 
     private final String publicIp;
 
+    private final String instanceId;
+
+    private final String instanceType;
+
     private String hostname;
 
     private String domain;
@@ -19,28 +23,31 @@ public class Node {
 
     private String uuids;
 
-    public Node(String privateIp, String publicIp, String fqdn, String hostGroup) {
-        this(privateIp, publicIp, fqdn, null, hostGroup);
+    public Node(String privateIp, String publicIp, String instanceId, String instanceType, String fqdn, String hostGroup) {
+        this(privateIp, publicIp, instanceId, instanceType, fqdn, null, hostGroup);
     }
 
-    public Node(String privateIp, String publicIp, String fqdn, String hostGroup, String dataVolumes, String serialIds, String fstab, String uuids) {
-        this(privateIp, publicIp, fqdn, null, hostGroup);
+    public Node(String privateIp, String publicIp, String instanceId, String instanceType, String fqdn, String hostGroup, String dataVolumes,
+            String serialIds, String fstab, String uuids) {
+        this(privateIp, publicIp, instanceId, instanceType, fqdn, null, hostGroup);
         this.dataVolumes = dataVolumes;
         this.serialIds = serialIds;
         this.fstab = fstab;
         this.uuids = uuids;
     }
 
-    public Node(String privateIp, String publicIp, String fqdn, String domain, String hostGroup) {
-        this(privateIp, publicIp);
+    public Node(String privateIp, String publicIp, String instanceId, String instanceType, String fqdn, String domain, String hostGroup) {
+        this(privateIp, publicIp, instanceId, instanceType);
         hostname = fqdn;
         this.hostGroup = hostGroup;
         this.domain = domain;
     }
 
-    public Node(String privateIp, String publicIp) {
+    public Node(String privateIp, String publicIp, String instanceId, String instanceType) {
         this.privateIp = privateIp;
         this.publicIp = publicIp;
+        this.instanceId = instanceId;
+        this.instanceType = instanceType;
     }
 
     public String getPrivateIp() {
@@ -83,6 +90,14 @@ public class Node {
         return uuids;
     }
 
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public String getInstanceType() {
+        return instanceType;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Node{");
@@ -95,6 +110,8 @@ public class Node {
         sb.append(", serialIds='").append(serialIds).append('\'');
         sb.append(", fstab='").append(fstab).append('\'');
         sb.append(", uuids='").append(uuids).append('\'');
+        sb.append(", instanceId='").append(instanceId).append('\'');
+        sb.append(", instanceType='").append(instanceType).append('\'');
         sb.append('}');
         return sb.toString();
     }

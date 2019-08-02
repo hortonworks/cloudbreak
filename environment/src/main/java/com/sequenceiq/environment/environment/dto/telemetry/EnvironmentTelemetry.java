@@ -17,10 +17,14 @@ public class EnvironmentTelemetry implements Serializable {
 
     private final EnvironmentWorkloadAnalytics workloadAnalytics;
 
+    private final boolean reportDeploymentLogs;
+
     public EnvironmentTelemetry(@JsonProperty("logging") EnvironmentLogging logging,
-            @JsonProperty("workloadAnalytics") EnvironmentWorkloadAnalytics workloadAnalytics) {
+            @JsonProperty("workloadAnalytics") EnvironmentWorkloadAnalytics workloadAnalytics,
+            @JsonProperty("reportDeploymentLogs") boolean reportDeploymentLogs) {
         this.logging = logging;
         this.workloadAnalytics = workloadAnalytics;
+        this.reportDeploymentLogs = reportDeploymentLogs;
     }
 
     public EnvironmentLogging getLogging() {
@@ -29,5 +33,9 @@ public class EnvironmentTelemetry implements Serializable {
 
     public EnvironmentWorkloadAnalytics getWorkloadAnalytics() {
         return workloadAnalytics;
+    }
+
+    public boolean isReportDeploymentLogs() {
+        return reportDeploymentLogs;
     }
 }

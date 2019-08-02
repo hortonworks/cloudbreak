@@ -61,9 +61,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -110,9 +108,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
                 "redhat6", "", "default", "default-id", new HashMap<>()));
         when(componentConfigProviderService.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
         when(componentConfigProviderService.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
-        when(componentConfigProviderService.getTelemetry(anyLong())).thenReturn(new Telemetry(
-                new Logging(),
-                new WorkloadAnalytics()));
+        when(componentConfigProviderService.getTelemetry(anyLong())).thenReturn(new Telemetry());
         when(clusterComponentConfigProvider.getHDPRepo(anyLong())).thenReturn(new StackRepoDetails());
         when(clusterComponentConfigProvider.getAmbariRepo(anyLong())).thenReturn(new AmbariRepo());
         DatalakeResources datalakeResources = new DatalakeResources();

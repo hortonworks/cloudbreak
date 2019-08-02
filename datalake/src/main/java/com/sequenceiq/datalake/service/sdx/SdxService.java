@@ -30,6 +30,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -171,6 +173,16 @@ public class SdxService {
                     cloudStorageManifester.initCloudStorageRequest(environment,
                             stackV4Request.getCluster().getBlueprintName(), sdxCluster, sdxClusterRequest);
             stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
+            if (environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null) {
+                TelemetryRequest telemetryRequest = new TelemetryRequest();
+                LoggingRequest loggingRequest = new LoggingRequest();
+                loggingRequest.setS3(environment.getTelemetry().getLogging().getS3());
+                loggingRequest.setWasb(environment.getTelemetry().getLogging().getWasb());
+                telemetryRequest.setLogging(loggingRequest);
+                telemetryRequest.setReportDeploymentLogs(
+                        environment.getTelemetry().getReportDeploymentLogs());
+                stackV4Request.setTelemetry(telemetryRequest);
+            }
         }
         return stackV4Request;
     }

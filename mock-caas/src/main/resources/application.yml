@@ -3,6 +3,9 @@ auth:
     file: license.txt
   config:
     dir: /etc/auth
-  altus:
+  databus:
     credential:
-      file: altus_credentials
+      tp:
+        file: altus_credentials
+      fluent:
+        file: databus_credentials

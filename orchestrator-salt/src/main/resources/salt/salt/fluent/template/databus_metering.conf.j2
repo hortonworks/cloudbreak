@@ -1,9 +1,10 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
-{%- if fluent.dbusValid and fluent.dbusMeteringEnabled %}
+{%- from 'databus/settings.sls' import databus with context %}
+{%- if databus.valid and fluent.dbusMeteringEnabled %}
 <source>
   @type tail
   format none
-  path /var/log/cdp-metering/metering.json*
+  path /var/log/metering/heartbeats.json*
   pos_file /var/log/td-agent/pos/metering.json.pos
   tag metering_databus.metering-json
   read_from_head true
@@ -17,10 +18,9 @@
     credential_profile_name          dbus
     credential_file_reload_interval  60
     debug                            false
-    endpoint                         "{{ fluent.dbusEndpoint }}"
-    event_message_field              message
-    headers                          app:distrox
-    stream_name                      LogCollection
+    endpoint                         "{{ databus.endpoint }}"
+    headers                          app:{{ fluent.dbusAppName }}
+    stream_name                      Metering
     partition_key                    "#{Socket.gethostname}"
 
     <buffer tag,time>

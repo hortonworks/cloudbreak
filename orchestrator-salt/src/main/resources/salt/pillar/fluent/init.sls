@@ -9,16 +9,14 @@ fluent:
   providerPrefix: "stdout"
   partitionIntervalMin: 5
   logFolderName: cluster-logs
+  cloudStorageLoggingEnabled: false
   s3LogArchiveBucketName:
   azureStorageAccount:
   azureContainer:
   azureInstanceMsi:
   azureStorageAccessKey:
-  dbusEndpoint:
-  dbusAccesKeyId:
-  dbusAccessKeySecret:
-  dbusAccessKeySecretAlgorithm: Ed25519
-  dbusReportBundleEnabled: true
-  dbusReportBundleDisableStop: false
-  dbusMeteringEnabled: true
+  dbusAppName: datahub
+  dbusReportDeploymentLogs: false
+  dbusReportDeploymentLogsDisableStop: false
+  dbusMeteringEnabled: false
 

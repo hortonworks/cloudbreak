@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.cm;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
@@ -45,44 +43,6 @@ public class ClouderaManagerDatabusServiceTest {
     }
 
     @Test
-    public void testCreateMachineUserAndGenerateKeys() {
-        // GIVEN
-        UserManagementProto.MachineUser machineUser = UserManagementProto.MachineUser.newBuilder()
-                .setMachineUserName("machineUser")
-                .setCrn(USER_CRN)
-                .build();
-        AltusCredential altusCredential = new AltusCredential("accessKey", "secretKey".toCharArray());
-        when(umsClient.createMachineUser(any(), any(), any())).thenReturn(machineUser);
-        doNothing().when(umsClient).assignMachineUserRole(any(), any(), any(), any());
-        when(umsClient.generateAccessSecretKeyPair(any(), any(), any())).thenReturn(altusCredential);
-
-        // WHEN
-        underTest.createMachineUserAndGenerateKeys(stack);
-
-        // THEN
-        assertEquals("secretKey", new String(altusCredential.getPrivateKey()));
-        verify(umsClient, times(1)).createMachineUser(any(), any(), any());
-        verify(umsClient, times(1)).assignMachineUserRole(any(), any(), any(), any());
-        verify(umsClient, times(1)).generateAccessSecretKeyPair(any(), any(), any());
-    }
-
-    @Test
-    public void testCleanupMachineUser() {
-        // GIVEN
-        doNothing().when(umsClient).unassignMachineUserRole(any(), any(), any(), any());
-        doNothing().when(umsClient).deleteMachineUserAccessKeys(any(), any(), any());
-        doNothing().when(umsClient).deleteMachineUser(any(), any(), any());
-
-        // WHEN
-        underTest.cleanUpMachineUser(stack);
-
-        // THEN
-        verify(umsClient, times(1)).unassignMachineUserRole(any(), any(), any(), any());
-        verify(umsClient, times(1)).deleteMachineUserAccessKeys(any(), any(), any());
-        verify(umsClient, times(1)).deleteMachineUser(any(), any(), any());
-    }
-
-    @Test
     public void testGetAltusCredential() {
         // GIVEN
         AltusCredential credential = new AltusCredential("accessKey", "secretKey".toCharArray());
@@ -92,7 +52,7 @@ public class ClouderaManagerDatabusServiceTest {
                 .build();
         when(umsClient.createMachineUser(any(), any(), any())).thenReturn(machineUser);
         doNothing().when(umsClient).assignMachineUserRole(any(), any(), any(), any());
-        when(umsClient.generateAccessSecretKeyPair(any(), any(), any())).thenReturn(credential);
+        when(umsClient.createMachineUserAndGenerateKeys(any(), any(), any())).thenReturn(credential);
         // WHEN
         AltusCredential result = underTest.getAltusCredential(stack);
         // THEN
@@ -107,14 +67,5 @@ public class ClouderaManagerDatabusServiceTest {
         String result = underTest.trimAndReplacePrivateKey(rawPrivateKey.toCharArray());
         // THEN
         assertEquals("BEGIN\\nline1\\nline2\\nlastline", result);
-    }
-
-    @Test
-    public void testBuiltInDatabusUploaderRoleCrn() {
-        // GIVEN
-        // WHEN
-        String result = underTest.getBuiltInDatabusCrn();
-        // THEN
-        assertEquals("crn:altus:iam:us-west-1:altus:role:DbusUploader", result);
     }
 }
