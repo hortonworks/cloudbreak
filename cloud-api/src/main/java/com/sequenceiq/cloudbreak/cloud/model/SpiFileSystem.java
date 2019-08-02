@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.common.model.FileSystemType;
@@ -10,12 +13,16 @@ public class SpiFileSystem extends DynamicModel {
 
     private FileSystemType type;
 
-    private CloudFileSystemView cloudFileSystem;
+    private List<CloudFileSystemView> cloudFileSystems;
 
-    public SpiFileSystem(String name, FileSystemType type, CloudFileSystemView cloudFileSystem) {
+    public SpiFileSystem(String name, FileSystemType type, List<CloudFileSystemView> cloudFileSystems) {
         this.name = name;
         this.type = type;
-        this.cloudFileSystem = cloudFileSystem;
+        if (cloudFileSystems != null) {
+            this.cloudFileSystems = cloudFileSystems;
+        } else {
+            this.cloudFileSystems = new ArrayList<>();
+        }
     }
 
     public String getName() {
@@ -34,12 +41,16 @@ public class SpiFileSystem extends DynamicModel {
         this.type = type;
     }
 
-    public CloudFileSystemView getCloudFileSystem() {
-        return cloudFileSystem;
+    public List<CloudFileSystemView> getCloudFileSystems() {
+        return cloudFileSystems;
     }
 
-    public void setCloudFileSystem(CloudFileSystemView cloudFileSystem) {
-        this.cloudFileSystem = cloudFileSystem;
+    public void setCloudFileSystems(List<CloudFileSystemView> cloudFileSystems) {
+        if (cloudFileSystems != null) {
+            this.cloudFileSystems = cloudFileSystems;
+        } else {
+            this.cloudFileSystems = new ArrayList<>();
+        }
     }
 
     @Override

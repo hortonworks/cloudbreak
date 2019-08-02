@@ -17,11 +17,11 @@ jar {
 
 
 dependencies {
-  // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.9.12'
   compile project(':cloud-api')
   compile project(':cloud-template')
 
+  // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
+  compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.9.12'
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   compile group: 'commons-io',                    name: 'commons-io',                     version: '2.4'

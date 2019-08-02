@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -68,7 +69,7 @@ public class OpenStackFlavorVerifierTest {
     public void openStackNullFlavor() {
         try {
             Group g1 = new Group("name", InstanceGroupType.GATEWAY, new ArrayList<>(), null, null,
-                    null, "loginUserName", "publicKey", 50);
+                    null, "loginUserName", "publicKey", 50, Optional.empty());
             List<Group> instanceGroups = ImmutableList.of(g1);
             when(flavorService.list()).thenReturn(null);
             underTest.flavorsExist(osClient, instanceGroups);
@@ -95,7 +96,7 @@ public class OpenStackFlavorVerifierTest {
         CloudInstance skeleton = new CloudInstance("id1", template, null);
 
         Group group = new Group("name", InstanceGroupType.GATEWAY, new ArrayList<>(), null, skeleton,
-                null, "loginUserName", "publicKey", 50);
+                null, "loginUserName", "publicKey", 50, Optional.empty());
         return group;
     }
 

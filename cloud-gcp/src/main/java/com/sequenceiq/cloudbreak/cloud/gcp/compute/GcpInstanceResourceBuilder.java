@@ -43,6 +43,7 @@ import com.google.api.services.compute.model.ServiceAccount;
 import com.google.api.services.compute.model.Tags;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
@@ -61,6 +62,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
@@ -201,15 +203,23 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private List<ServiceAccount> extractServiceAccounts(CloudStack cloudStack) {
-        if (!cloudStack.getFileSystem().isPresent()) {
+        if (noFileSystemIsConfigured(cloudStack)) {
             return null;
         }
-        CloudGcsView cloudFileSystem = (CloudGcsView) cloudStack.getFileSystem().get().getCloudFileSystem();
+        List<CloudFileSystemView> cloudFileSystems = cloudStack.getFileSystem().get().getCloudFileSystems();
+        if (cloudFileSystems.size() > 1) {
+            throw new CloudConnectorException("Multiple file systems (identities) are not yet supported on GCP!");
+        }
+        CloudGcsView cloudFileSystem = (CloudGcsView) cloudFileSystems.get(0);
         String email = cloudFileSystem.getServiceAccountEmail();
         return StringUtils.isEmpty(email) ? null
                 : singletonList(new ServiceAccount()
                         .setEmail(email)
                         .setScopes(singletonList("https://www.googleapis.com/auth/cloud-platform")));
+    }
+
+    private boolean noFileSystemIsConfigured(CloudStack cloudStack) {
+        return cloudStack.getFileSystem().isEmpty() || cloudStack.getFileSystem().get().getCloudFileSystems().isEmpty();
     }
 
     @Override

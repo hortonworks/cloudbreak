@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -129,9 +130,11 @@ public abstract class AwsComponentTest {
                 getCloudInstance(instanceAuthentication, "worker", workerStatuses, 1L, null),
                 getCloudInstance(instanceAuthentication, "worker", InstanceStatus.STARTED, 2L, INSTANCE_ID_3));
         List<Group> groups = List.of(new Group("master", InstanceGroupType.CORE, masterInstances, security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()),
                 new Group("worker", InstanceGroupType.CORE, workerInstances, security, null,
-                        instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
+                        instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         Network network = new Network(new Subnet(CIDR));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
@@ -151,7 +154,8 @@ public abstract class AwsComponentTest {
         Security security = getSecurity();
 
         List<Group> groups = List.of(new Group("group1", InstanceGroupType.CORE, List.of(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         Network network = new Network(new Subnet(CIDR));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
@@ -170,8 +174,8 @@ public abstract class AwsComponentTest {
         return new Security(rules, emptyList());
     }
 
-    private CloudInstance getCloudInstance(InstanceAuthentication instanceAuthentication, String groupName, InstanceStatus instanceStatus, long privateId,
-            String instanceId) {
+    private CloudInstance getCloudInstance(InstanceAuthentication instanceAuthentication,
+            String groupName, InstanceStatus instanceStatus, long privateId, String instanceId) {
         List<Volume> volumes = Arrays.asList(
                 new Volume("/hadoop/fs1", "HDD", SIZE_DISK_1),
                 new Volume("/hadoop/fs2", "HDD", SIZE_DISK_2)

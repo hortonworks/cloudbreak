@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -116,32 +117,43 @@ public class CloudStorageConverter {
     }
 
     public SpiFileSystem requestToSpiFileSystem(CloudStorageBase cloudStorageRequest) {
-        CloudFileSystemView cloudFileSystemView = null;
+        List<CloudFileSystemView> cloudFileSystemViews = new ArrayList<>();
         FileSystemType type = null;
         if (!cloudStorageRequest.getIdentities().isEmpty()) {
-            // TODO: add support for multiple cloudFileSystemViews or multiple SpiFileSystems
-            StorageIdentityBase storageIdentity = cloudStorageRequest.getIdentities().get(0);
-            if (storageIdentity != null) {
-                if (storageIdentity.getAdls() != null) {
-                    cloudFileSystemView = cloudStorageParametersConverter.adlsToCloudView(storageIdentity.getAdls());
-                    type = FileSystemType.ADLS;
-                } else if (storageIdentity.getGcs() != null) {
-                    cloudFileSystemView = cloudStorageParametersConverter.gcsToCloudView(storageIdentity.getGcs());
-                    type = FileSystemType.GCS;
-                } else if (storageIdentity.getS3() != null) {
-                    cloudFileSystemView = cloudStorageParametersConverter.s3ToCloudView(storageIdentity.getS3());
-                    type = FileSystemType.S3;
-                } else if (storageIdentity.getWasb() != null) {
-                    cloudFileSystemView = cloudStorageParametersConverter.wasbToCloudView(storageIdentity.getWasb());
-                    type = FileSystemType.WASB;
-                } else if (storageIdentity.getAdlsGen2() != null) {
-                    cloudFileSystemView = cloudStorageParametersConverter.adlsGen2ToCloudView(storageIdentity.getAdlsGen2());
-                    type = FileSystemType.ADLS_GEN_2;
+            for (StorageIdentityBase storageIdentity : cloudStorageRequest.getIdentities()) {
+                if (storageIdentity != null) {
+                    if (storageIdentity.getAdls() != null) {
+                        cloudFileSystemViews.add(cloudStorageParametersConverter.adlsToCloudView(storageIdentity));
+                        type = FileSystemType.ADLS;
+                    } else if (storageIdentity.getGcs() != null) {
+                        cloudFileSystemViews.add(cloudStorageParametersConverter.gcsToCloudView(storageIdentity));
+                        type = FileSystemType.GCS;
+                    } else if (storageIdentity.getS3() != null) {
+                        cloudFileSystemViews.add(cloudStorageParametersConverter.s3ToCloudView(storageIdentity));
+                        type = FileSystemType.S3;
+                    } else if (storageIdentity.getWasb() != null) {
+                        cloudFileSystemViews.add(cloudStorageParametersConverter.wasbToCloudView(storageIdentity));
+                        type = FileSystemType.WASB;
+                    } else if (storageIdentity.getAdlsGen2() != null) {
+                        cloudFileSystemViews.add(cloudStorageParametersConverter.adlsGen2ToCloudView(storageIdentity));
+                        type = FileSystemType.ADLS_GEN_2;
+                    }
                 }
             }
         }
-        // TODO: add support for multiple cloudFileSystemViews or multiple SpiFileSystems
-        return new SpiFileSystem("", type, cloudFileSystemView);
+        validateCloudFileSystemViews(cloudFileSystemViews, type);
+        return new SpiFileSystem("", type, cloudFileSystemViews);
+    }
+
+    private void validateCloudFileSystemViews(List<CloudFileSystemView> cloudFileSystemViews, FileSystemType type) {
+        if (type == FileSystemType.WASB_INTEGRATED) {
+            throw new BadRequestException(type + " FileSystemType is not supported.");
+        }
+        if (cloudFileSystemViews.size() > 1) {
+            if (type != FileSystemType.S3) {
+                throw new BadRequestException("Multiple identities for " + type + " is not supported yet.");
+            }
+        }
     }
 
     public CloudStorageResponse fileSystemToResponse(FileSystem fileSystem) {

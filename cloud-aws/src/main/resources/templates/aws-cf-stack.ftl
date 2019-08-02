@@ -2,7 +2,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "Deploys a Hortonworks Data Platform cluster on AWS.",
+  "Description" : "Deploys a Cloudera Data Platform cluster on AWS.",
 
   "Parameters" : {
 
@@ -12,13 +12,6 @@
       "MinLength": "1",
       "MaxLength": "50"
     },
-
-    <#if enableInstanceProfile && existingRole>
-     "InstanceProfile" : {
-          "Description" : "InstanceProfile name or ARN that is assigned to every virtual machine",
-          "Type" : "String"
-     },
-    </#if>
 
     <#if existingVPC>
     "VPCId" : {
@@ -124,47 +117,6 @@
   </#if>
 
   "Resources" : {
-
-  <#if enableInstanceProfile && !existingRole>
-        "S3AccessRole" : {
-            "Type"  : "AWS::IAM::Role",
-            "Properties" : {
-                "AssumeRolePolicyDocument" : {
-                    "Statement" : [ {
-                        "Effect" : "Allow",
-                        "Principal" : {
-                            "Service" : [ "ec2.amazonaws.com" ]
-                        },
-                        "Action" : [ "sts:AssumeRole" ]
-                    } ]
-                },
-                "Path" : "/"
-            }
-        },
-
-        "S3RolePolicies" : {
-            "Type" : "AWS::IAM::Policy",
-            "Properties" : {
-                "PolicyName" : "s3access",
-                "PolicyDocument" : {
-                    "Statement" : [ {
-                        "Effect" : "Allow",
-                        "Action" : "s3:*",
-                        "Resource" : "*"
-                    }]
-                },
-                "Roles" : [ { "Ref" : "S3AccessRole" } ]
-            }
-        },
-
-        "S3InstanceProfile" : {
-            "Type" : "AWS::IAM::InstanceProfile",
-            "Properties" : {
-                "Path" : "/",
-                "Roles" : [ { "Ref" : "S3AccessRole" } ]
-            }
-        },
-    </#if>
 
     <#if mapPublicIpOnLaunch>
         <#list gatewayGroups as group>
@@ -324,11 +276,8 @@
         <#if group.ebsOptimized == true>
         "EbsOptimized" : "true",
         </#if>
-        <#if enableInstanceProfile && !existingRole>
-        "IamInstanceProfile" : { "Ref": "S3InstanceProfile" },
-        </#if>
-        <#if existingRole && enableInstanceProfile>
-        "IamInstanceProfile" : { "Ref": "InstanceProfile" },
+        <#if group.hasInstanceProfile>
+        "IamInstanceProfile" : "${group.instanceProfile}",
         </#if>
       	"BlockDeviceMappings" : [
       	  {

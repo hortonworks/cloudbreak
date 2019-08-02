@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -216,7 +217,7 @@ class GcpDiskResourceBuilderTest {
 
     private Group createGroup(int rootVolumeSize) {
         return new Group(name, InstanceGroupType.CORE, Collections.singletonList(createDefaultCloudInstance()), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), rootVolumeSize);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), rootVolumeSize, Optional.empty());
     }
 
     private CloudInstance createDefaultCloudInstance() {

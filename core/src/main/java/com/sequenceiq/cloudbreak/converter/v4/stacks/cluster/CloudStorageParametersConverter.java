@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
+import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
@@ -17,6 +18,7 @@ import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 @Component
 public class CloudStorageParametersConverter {
@@ -39,8 +41,17 @@ public class CloudStorageParametersConverter {
         return fileSystemConfigurations;
     }
 
+    public CloudAdlsView adlsToCloudView(StorageIdentityBase source) {
+        CloudAdlsView cloudAdlsView = new CloudAdlsView(source.getType());
+        cloudAdlsView.setAccountName(source.getAdls().getAccountName());
+        cloudAdlsView.setClientId(source.getAdls().getClientId());
+        cloudAdlsView.setCredential(source.getAdls().getCredential());
+        cloudAdlsView.setTenantId(source.getAdls().getTenantId());
+        return cloudAdlsView;
+    }
+
     public CloudAdlsView adlsToCloudView(AdlsCloudStorageV1Parameters source) {
-        CloudAdlsView cloudAdlsView = new CloudAdlsView();
+        CloudAdlsView cloudAdlsView = new CloudAdlsView(CloudIdentityType.LOG);
         cloudAdlsView.setAccountName(source.getAccountName());
         cloudAdlsView.setClientId(source.getClientId());
         cloudAdlsView.setCredential(source.getCredential());
@@ -63,8 +74,14 @@ public class CloudStorageParametersConverter {
         return fileSystemConfigurations;
     }
 
+    public CloudGcsView gcsToCloudView(StorageIdentityBase source) {
+        CloudGcsView cloudGcsView = new CloudGcsView(source.getType());
+        cloudGcsView.setServiceAccountEmail(source.getGcs().getServiceAccountEmail());
+        return cloudGcsView;
+    }
+
     public CloudGcsView gcsToCloudView(GcsCloudStorageV1Parameters source) {
-        CloudGcsView cloudGcsView = new CloudGcsView();
+        CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
         cloudGcsView.setServiceAccountEmail(source.getServiceAccountEmail());
         return cloudGcsView;
     }
@@ -75,8 +92,14 @@ public class CloudStorageParametersConverter {
         return fileSystemConfigurations;
     }
 
+    public CloudS3View s3ToCloudView(StorageIdentityBase source) {
+        CloudS3View cloudS3View = new CloudS3View(source.getType());
+        cloudS3View.setInstanceProfile(source.getS3().getInstanceProfile());
+        return cloudS3View;
+    }
+
     public CloudS3View s3ToCloudView(S3CloudStorageV1Parameters source) {
-        CloudS3View cloudS3View = new CloudS3View();
+        CloudS3View cloudS3View = new CloudS3View(CloudIdentityType.LOG);
         cloudS3View.setInstanceProfile(source.getInstanceProfile());
         return cloudS3View;
     }
@@ -89,8 +112,16 @@ public class CloudStorageParametersConverter {
         return wasbFileSystem;
     }
 
+    public CloudWasbView wasbToCloudView(StorageIdentityBase source) {
+        CloudWasbView cloudWasbView = new CloudWasbView(source.getType());
+        cloudWasbView.setAccountKey(source.getWasb().getAccountKey());
+        cloudWasbView.setAccountName(source.getWasb().getAccountName());
+        cloudWasbView.setSecure(source.getWasb().isSecure());
+        return cloudWasbView;
+    }
+
     public CloudWasbView wasbToCloudView(WasbCloudStorageV1Parameters source) {
-        CloudWasbView cloudWasbView = new CloudWasbView();
+        CloudWasbView cloudWasbView = new CloudWasbView(CloudIdentityType.LOG);
         cloudWasbView.setAccountKey(source.getAccountKey());
         cloudWasbView.setAccountName(source.getAccountName());
         cloudWasbView.setSecure(source.isSecure());
@@ -104,8 +135,16 @@ public class CloudStorageParametersConverter {
         return adlsGen2FileSystem;
     }
 
+    public CloudAdlsGen2View adlsGen2ToCloudView(StorageIdentityBase source) {
+        CloudAdlsGen2View cloudAdlsGen2View = new CloudAdlsGen2View(source.getType());
+        cloudAdlsGen2View.setAccountKey(source.getWasb().getAccountKey());
+        cloudAdlsGen2View.setAccountName(source.getWasb().getAccountName());
+        cloudAdlsGen2View.setSecure(source.getWasb().isSecure());
+        return cloudAdlsGen2View;
+    }
+
     public CloudAdlsGen2View adlsGen2ToCloudView(AdlsGen2CloudStorageV1Parameters source) {
-        CloudAdlsGen2View cloudAdlsGen2View = new CloudAdlsGen2View();
+        CloudAdlsGen2View cloudAdlsGen2View = new CloudAdlsGen2View(CloudIdentityType.LOG);
         cloudAdlsGen2View.setAccountKey(source.getAccountKey());
         cloudAdlsGen2View.setAccountName(source.getAccountName());
         cloudAdlsGen2View.setSecure(source.isSecure());

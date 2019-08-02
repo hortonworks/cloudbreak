@@ -408,7 +408,8 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                 }
             }
             groups.add(new Group(group.getName(), group.getType(), instances, group.getSecurity(), null, stack.getInstanceAuthentication(),
-                    stack.getInstanceAuthentication().getLoginUserName(), stack.getInstanceAuthentication().getPublicKey(), group.getRootVolumeSize()));
+                    stack.getInstanceAuthentication().getLoginUserName(), stack.getInstanceAuthentication().getPublicKey(),
+                    group.getRootVolumeSize(), Optional.empty()));
         }
         return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), stack.getTags(),
                 stack.getTemplate(), stack.getInstanceAuthentication(), stack.getInstanceAuthentication().getLoginUserName(),

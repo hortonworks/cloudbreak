@@ -202,7 +202,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                                 instanceAuthentication,
                                 instanceAuthentication.getLoginUserName(),
                                 instanceAuthentication.getPublicKey(),
-                                rootVolumeSize)
+                                rootVolumeSize, Optional.empty())
                 );
             }
         }

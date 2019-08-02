@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,6 +79,7 @@ import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.FileSystemType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -263,12 +265,12 @@ public class GcpInstanceResourceBuilderTest {
         context.addComputeResources(0L, buildableResources);
 
         String email = "service@email.com";
-        CloudGcsView cloudGcsView = new CloudGcsView();
+        CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
         cloudGcsView.setServiceAccountEmail(email);
 
         CloudStack cloudStack = new CloudStack(Collections.emptyList(), new Network(null), image,
                 emptyMap(), emptyMap(), null, null, null, null,
-                new SpiFileSystem("test", FileSystemType.GCS, cloudGcsView));
+                new SpiFileSystem("test", FileSystemType.GCS, List.of(cloudGcsView)));
 
         // WHEN
         when(compute.instances()).thenReturn(instances);
@@ -289,7 +291,7 @@ public class GcpInstanceResourceBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = newCloudInstance(params, instanceAuthentication);
         return new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50, Optional.empty());
     }
 
     public CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {
