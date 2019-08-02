@@ -98,7 +98,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE sresourceCrn= :crn "
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.resourceCrn= :crn "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneByCrnWithLists(@Param("crn") String crn);
 

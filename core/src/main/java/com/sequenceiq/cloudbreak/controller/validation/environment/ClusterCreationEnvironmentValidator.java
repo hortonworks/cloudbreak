@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.controller.validation.environment;
 
 import static java.util.Optional.ofNullable;
 
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -13,16 +13,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -46,22 +47,8 @@ public class ClusterCreationEnvironmentValidator {
         Long workspaceId = stack.getWorkspace().getId();
         validateRdsConfigNames(clusterRequest.getDatabases(), resultBuilder, workspaceId);
         validateProxyConfig(clusterRequest.getProxyConfigCrn(), resultBuilder);
+        validateAutoTls(clusterRequest, stack, resultBuilder);
         return resultBuilder.build();
-    }
-
-    private void validateConfigByName(
-            String configName, Long workspaceId,
-            ValidationResultBuilder resultBuilder,
-            BiFunction<String, Long, ? extends WorkspaceAwareResource> repositoryCall,
-            String resourceTypeName) {
-
-        if (StringUtils.isNotEmpty(configName)) {
-            try {
-                repositoryCall.apply(configName, workspaceId);
-            } catch (NotFoundException nfe) {
-                resultBuilder.error(String.format("Stack cannot use '%s' %s resource which doesn't exist in the same workspace.", configName, resourceTypeName));
-            }
-        }
     }
 
     private void validateRdsConfigNames(Set<String> rdsConfigNames, ValidationResultBuilder resultBuilder, Long workspaceId) {
@@ -85,6 +72,19 @@ public class ClusterCreationEnvironmentValidator {
                 proxyConfigDtoService.getByCrn(resourceCrn);
             } catch (CloudbreakServiceException ex) {
                 resultBuilder.error(String.format("The specified '%s' Proxy config resource couldn't be used: %s.", resourceCrn, ex.getMessage()));
+            }
+        }
+    }
+
+    private void validateAutoTls(ClusterV4Request clusterRequest, Stack stack, ValidationResultBuilder resultBuilder) {
+        Boolean autoTls = Optional.ofNullable(clusterRequest.getCm())
+                .map(ClouderaManagerV4Request::getEnableAutoTls)
+                .orElse(Boolean.FALSE);
+        if (autoTls) {
+            Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn());
+            boolean freeipa = kerberosConfig.map(kc -> KerberosType.FREEIPA == kc.getType()).orElse(Boolean.FALSE);
+            if (!freeipa) {
+                resultBuilder.error("AutoTls is only enabled for clusters with FreeIpa!");
             }
         }
     }

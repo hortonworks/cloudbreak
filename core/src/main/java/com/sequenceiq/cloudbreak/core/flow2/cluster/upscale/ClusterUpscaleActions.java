@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.EnsureClusterComponentsAreStoppedRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariEnsureComponentsAreStoppedResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariGatherInstalledComponentsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariGatherInstalledComponentsResult;
@@ -33,21 +32,24 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInitComponentsR
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInitComponentsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInstallComponentsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInstallComponentsResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RegenerateKerberosKeytabsRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RegenerateKerberosKeytabsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariRepairSingleMasterStartResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariRestartAllRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariRestartAllResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStartComponentsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStartComponentsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStartServerAndAgentRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartServerAndAgentResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStopComponentsRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopClusterComponentsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStopServerAndAgentRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStopServerAndAgentResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.EnsureClusterComponentsAreStoppedRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RegenerateKerberosKeytabsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RegenerateKerberosKeytabsResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartServerAndAgentResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopClusterComponentsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesRequest;
@@ -102,11 +104,27 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "CHECK_HOST_METADATA_STATE")
-    public Action<?, ?> checkHostMetadataAction() {
+    @Bean(name = "RECONFIGURE_KEYTABS_STATE")
+    public Action<?, ?> configureKeytabsAction() {
         return new AbstractClusterUpscaleAction<>(UploadUpscaleRecipesResult.class) {
             @Override
             protected void doExecute(ClusterUpscaleContext context, UploadUpscaleRecipesResult payload, Map<Object, Object> variables) {
+                if (context.isSinglePrimaryGateway() && ClusterManagerType.CLOUDERA_MANAGER.equals(context.getClusterManagerType())) {
+                    KeytabConfigurationRequest keytabConfigurationRequest = new KeytabConfigurationRequest(context.getStackId());
+                    sendEvent(context, keytabConfigurationRequest.selector(), keytabConfigurationRequest);
+                } else {
+                    KeytabConfigurationSuccess keytabConfigurationSuccess = new KeytabConfigurationSuccess(context.getStackId());
+                    sendEvent(context, keytabConfigurationSuccess.selector(), keytabConfigurationSuccess);
+                }
+            }
+        };
+    }
+
+    @Bean(name = "CHECK_HOST_METADATA_STATE")
+    public Action<?, ?> checkHostMetadataAction() {
+        return new AbstractClusterUpscaleAction<>(KeytabConfigurationSuccess.class) {
+            @Override
+            protected void doExecute(ClusterUpscaleContext context, KeytabConfigurationSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
