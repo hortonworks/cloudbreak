@@ -55,4 +55,5 @@ rootProject.name = 'cloudbreak'
 include 'authorization'
 include 'workspace-authorization-api'
 include 'authorization-common'
+include 'idbmms-connector'
 
