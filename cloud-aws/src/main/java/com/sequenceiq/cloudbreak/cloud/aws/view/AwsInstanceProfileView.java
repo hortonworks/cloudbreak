@@ -15,7 +15,7 @@ public class AwsInstanceProfileView {
     }
 
     public boolean isInstanceProfileAvailable() {
-        return cloudFileSystem.isPresent() && (cloudFileSystem.get().getCloudFileSystem() instanceof CloudS3View);
+        return cloudFileSystem.isPresent() && (cloudFileSystem.get().getCloudFileSystem() instanceof CloudS3View) && getInstanceProfile() != null;
     }
 
     public String getInstanceProfile() {

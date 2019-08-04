@@ -19,10 +19,10 @@ import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
-import com.sequenceiq.common.api.cloudstorage.CloudStorageV1Parameters;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.BaseFileSystem;
+import com.sequenceiq.common.api.filesystem.FileSystemType;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
@@ -40,8 +40,9 @@ public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversi
     public FileSystem convert(CloudStorageV4Request source) {
         FileSystem fileSystem = new FileSystem();
         fileSystem.setName(nameGenerator.generateName(FILESYSTEM));
-        CloudStorageV1Parameters cloudStorageParameters = fileSystemResolver.propagateConfiguration(source);
-        fileSystem.setType(cloudStorageParameters.getType());
+
+        FileSystemType fileSystemType = fileSystemResolver.determineFileSystemType(source);
+        fileSystem.setType(fileSystemType);
 
         Set<StorageLocation> locations = new HashSet<>();
         if (source.getLocations() != null) {
@@ -56,6 +57,7 @@ public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversi
         } catch (IllegalArgumentException ignored) {
             throw new BadRequestException(String.format("Storage locations could not be parsed: %s", source));
         }
+
         BaseFileSystem baseFileSystem = null;
         if (source.getAdls() != null) {
             baseFileSystem = getConversionService().convert(source.getAdls(), AdlsFileSystem.class);

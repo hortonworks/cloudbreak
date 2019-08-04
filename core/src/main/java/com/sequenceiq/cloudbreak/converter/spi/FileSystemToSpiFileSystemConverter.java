@@ -28,7 +28,7 @@ public class FileSystemToSpiFileSystemConverter extends AbstractConversionServic
     public SpiFileSystem convert(FileSystem source) {
         CloudFileSystemView cloudFileSystemView = null;
         try {
-            if (source.getConfigurations() != null && source.getConfigurations().getValue() != null) {
+            if (source.getType() != null && source.getConfigurations() != null && source.getConfigurations().getValue() != null) {
                 if (source.getType().isAdls()) {
                     cloudFileSystemView = getConversionService().convert(source.getConfigurations().get(AdlsFileSystem.class), CloudAdlsView.class);
                 } else if (source.getType().isGcs()) {
