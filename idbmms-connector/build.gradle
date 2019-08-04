@@ -5,10 +5,22 @@ buildscript {
     mavenLocal()
     mavenCentral()
     maven { url = "$repoUrl" }
+    maven { url 'http://repo.spring.io/libs-release' }
     jcenter()
   }
   dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
     classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
+  }
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+dependencyManagement {
+  dependencies {
+    dependencySet(group: 'org.springframework.boot', version: springBootVersion) {
+      entry 'spring-boot-starter-test'
+    }
   }
 }
 
@@ -21,10 +33,8 @@ dependencies {
   }
 
   testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
-}
-
-dependencies {
   testCompile group: 'junit', name: 'junit', version: '4.12'
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 }
 
 checkstyle {
