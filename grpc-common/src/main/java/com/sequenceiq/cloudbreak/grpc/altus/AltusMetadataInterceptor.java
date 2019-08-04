@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.auth.altus;
+package com.sequenceiq.cloudbreak.grpc.altus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -58,7 +58,7 @@ public class AltusMetadataInterceptor implements ClientInterceptor {
      * @param requestId the request ID
      * @param actorCrn  the actor CRN
      */
-    AltusMetadataInterceptor(String requestId, String actorCrn) {
+    public AltusMetadataInterceptor(String requestId, String actorCrn) {
         this.requestId = checkNotNull(requestId);
         this.actorCrn = checkNotNull(actorCrn);
     }
@@ -82,4 +82,5 @@ public class AltusMetadataInterceptor implements ClientInterceptor {
             }
         };
     }
+
 }

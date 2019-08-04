@@ -6,6 +6,7 @@ import org.springframework.util.StringUtils;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationGrpc;
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
+import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 
 import io.grpc.ManagedChannel;
 

@@ -32,6 +32,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Machi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
+import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
@@ -560,7 +561,7 @@ public class UmsClient {
     /**
      * Queries the metadata file used to configure SSO authentication on clusters.
      * @param requestId the Request ID
-     * @param accountId the user CRN
+     * @param accountId the account ID
      * @return metadata as string
      */
     public String getIdentityProviderMetadataXml(String requestId, String accountId) {
@@ -573,4 +574,5 @@ public class UmsClient {
         GetIdPMetadataForWorkloadSSOResponse response = newStub(requestId).getIdPMetadataForWorkloadSSO(request);
         return response.getMetadata();
     }
+
 }
