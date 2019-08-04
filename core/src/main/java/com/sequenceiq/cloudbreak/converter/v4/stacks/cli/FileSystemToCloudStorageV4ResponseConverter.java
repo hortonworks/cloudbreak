@@ -36,28 +36,32 @@ public class FileSystemToCloudStorageV4ResponseConverter extends AbstractConvers
         response.setId(source.getId());
         response.setName(source.getName());
         response.setLocations(getStorageLocationRequests(source));
-        try {
-            if (source.getConfigurations() != null && source.getConfigurations().getValue() != null) {
-                if (source.getType().isAdls()) {
-                    AdlsCloudStorageV1Parameters adls = getConversionService()
-                            .convert(source.getConfigurations().get(AdlsFileSystem.class), AdlsCloudStorageV1Parameters.class);
-                    adls.setCredential(null);
-                    response.setAdls(adls);
-                } else if (source.getType().isGcs()) {
-                    response.setGcs(getConversionService().convert(source.getConfigurations().get(GcsFileSystem.class), GcsCloudStorageV1Parameters.class));
-                } else if (source.getType().isS3()) {
-                    response.setS3(getConversionService().convert(source.getConfigurations().get(S3FileSystem.class), S3CloudStorageV1Parameters.class));
-                } else if (source.getType().isWasb()) {
-                    response.setWasb(getConversionService().convert(source.getConfigurations().get(WasbFileSystem.class), WasbCloudStorageV1Parameters.class));
-                } else if (source.getType().isAdlsGen2()) {
-                    response.setAdlsGen2(getConversionService().convert(source.getConfigurations().get(AdlsGen2FileSystem.class),
-                            AdlsGen2CloudStorageV1Parameters.class));
+        if (source.getType() != null) {
+            response.setType(source.getType().name());
+            try {
+                if (source.getConfigurations() != null && source.getConfigurations().getValue() != null) {
+                    if (source.getType().isAdls()) {
+                        AdlsCloudStorageV1Parameters adls = getConversionService()
+                                .convert(source.getConfigurations().get(AdlsFileSystem.class), AdlsCloudStorageV1Parameters.class);
+                        adls.setCredential(null);
+                        response.setAdls(adls);
+                    } else if (source.getType().isGcs()) {
+                        response.setGcs(getConversionService().convert(source.getConfigurations()
+                                .get(GcsFileSystem.class), GcsCloudStorageV1Parameters.class));
+                    } else if (source.getType().isS3()) {
+                        response.setS3(getConversionService().convert(source.getConfigurations().get(S3FileSystem.class), S3CloudStorageV1Parameters.class));
+                    } else if (source.getType().isWasb()) {
+                        response.setWasb(getConversionService().convert(source.getConfigurations()
+                                .get(WasbFileSystem.class), WasbCloudStorageV1Parameters.class));
+                    } else if (source.getType().isAdlsGen2()) {
+                        response.setAdlsGen2(getConversionService().convert(source.getConfigurations().get(AdlsGen2FileSystem.class),
+                                AdlsGen2CloudStorageV1Parameters.class));
+                    }
                 }
+            } catch (IOException ioe) {
+                LOGGER.info("Something happened while we tried to obtain/convert file system", ioe);
             }
-        } catch (IOException ioe) {
-            LOGGER.info("Something happened while we tried to obtain/convert file system", ioe);
         }
-        response.setType(source.getType().name());
         return response;
     }
 

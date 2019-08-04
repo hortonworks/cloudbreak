@@ -1,47 +1,52 @@
 package com.sequenceiq.cloudbreak.service.filesystem;
 
-import java.io.IOException;
-
-import javax.ws.rs.BadRequestException;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.common.api.cloudstorage.CloudStorageV1Parameters;
-import com.sequenceiq.common.api.filesystem.BaseFileSystem;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
+import com.sequenceiq.common.api.filesystem.FileSystemType;
 
 @Service
 public class FileSystemResolver {
 
-    private static final String NOT_SUPPORTED_FS_PROVIDED = "Unable to determine file system type, or unsupported file system type provided!";
+    public FileSystemType determineFileSystemType(CloudStorageV4Request source) {
+        FileSystemType fileSystemType = null;
 
-    public CloudStorageV1Parameters propagateConfiguration(CloudStorageV4Request source) {
-        CloudStorageV1Parameters cloudStorageParameters;
         if (source.getAdls() != null) {
-            cloudStorageParameters = source.getAdls();
+            fileSystemType = source.getAdls().getType();
         } else if (source.getGcs() != null) {
-            cloudStorageParameters = source.getGcs();
+            fileSystemType = source.getGcs().getType();
         } else if (source.getWasb() != null) {
-            cloudStorageParameters = source.getWasb();
+            fileSystemType = source.getWasb().getType();
         } else if (source.getS3() != null) {
-            cloudStorageParameters = source.getS3();
+            fileSystemType = source.getS3().getType();
         } else if (source.getAdlsGen2() != null) {
-            cloudStorageParameters = source.getAdlsGen2();
-        } else {
-            throw new BadRequestException(NOT_SUPPORTED_FS_PROVIDED);
+            fileSystemType = source.getAdlsGen2().getType();
         }
-        return cloudStorageParameters;
+
+        if (fileSystemType == null && source.getLocations() != null) {
+            fileSystemType = determineFileSystemTypeBasedOnLocations(source.getLocations());
+
+        }
+        return fileSystemType;
     }
 
-    public BaseFileSystem propagateConfiguration(FileSystem source) {
-        BaseFileSystem fileSystem;
-        try {
-            fileSystem = source.getConfigurations().get(BaseFileSystem.class);
-        } catch (IOException e) {
-            throw new BadRequestException(NOT_SUPPORTED_FS_PROVIDED);
+    private FileSystemType determineFileSystemTypeBasedOnLocations(Set<StorageLocationV4Request> locations) {
+        FileSystemType fileSystemType = null;
+        for (StorageLocationV4Request location : locations) {
+            for (FileSystemType probableFsTye : FileSystemType.values()) {
+                if (locationStartsWith(location.getValue(), probableFsTye)) {
+                    fileSystemType = probableFsTye;
+                    break;
+                }
+            }
         }
-        return fileSystem;
+        return fileSystemType;
     }
 
+    private boolean locationStartsWith(String path, FileSystemType probableFsTye) {
+        return path != null && path.startsWith(probableFsTye.getProtocol());
+    }
 }

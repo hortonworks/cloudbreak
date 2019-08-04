@@ -30,7 +30,7 @@ public class CloudStorageValidationUtilTest {
     public void testIsCloudStorageConfiguredWhenCloudStorageNotNull() {
         boolean actual = underTest.isCloudStorageConfigured(new CloudStorageV4Request());
 
-        Assert.assertFalse(actual);
+        Assert.assertTrue(actual);
     }
 
     @Test
