@@ -1,0 +1,178 @@
+syntax = "proto3";
+
+package idbrokermappingmanagement;
+
+option java_package = "com.cloudera.thunderhead.service.idbrokermappingmanagement";
+option java_outer_classname = "IdBrokerMappingManagementProto";
+
+import "version.proto";
+
+// Protocol for ID Broker Mapping Management Service. This service runs in the
+// CDP control plane. It receives requests to get and set ID Broker mappings
+// from the CDP Environments API Service, and from backend services that need
+// access to the mappings (for example, the Datalake Management Service).
+//
+// For future compatibility, all rpcs must take a request and return a response
+// even if there is initially no content for these messages.
+service IdBrokerMappingManagement {
+  // Get the service version.
+  rpc GetVersion (version.VersionRequest)
+    returns (version.VersionResponse) {}
+
+  // Get all ID Broker mappings for an environment.
+  rpc GetMappings (GetMappingsRequest)
+    returns (GetMappingsResponse) {}
+
+  // Set all ID Broker mappings for an environment. WARNING: overwrites all
+  // existing mapping state, including the dataAccessRole and the baselineRole.
+  rpc SetMappings (SetMappingsRequest)
+    returns (SetMappingsResponse) {}
+
+  // Deletes all ID Broker mappings for an environment.
+  rpc deleteMappings (DeleteMappingsRequest)
+    returns (DeleteMappingsResponse) {}
+
+  // Sync ID Broker mappings for an environment to all associated datalake clusters.
+  rpc SyncMappings (SyncMappingsRequest)
+    returns (SyncMappingsResponse) {}
+
+  // Get the status of an ID Broker mapping sync attempt.
+  rpc GetMappingsSyncStatus (GetMappingsSyncStatusRequest)
+    returns (GetMappingsSyncStatusResponse) {}
+
+  // Get all ID Broker mappings for an environment in a form that matches
+  // ID Broker's configuration model.
+  rpc GetMappingsConfig (GetMappingsConfigRequest)
+    returns (GetMappingsConfigResponse) {}
+}
+
+message GetMappingsRequest {
+  // The name or CRN of the environment.
+  string environmentNameOrCrn = 1;
+}
+
+message GetMappingsResponse {
+  // The version of the mappings.
+  int64 mappingsVersion = 1;
+  // A map of actor and group CRNs to cloud provider roles. Does not include
+  // mappings for data access services.
+  map<string, string> mappings = 2;
+  // The cloud provider role to which data access services will be mapped
+  // (e.g., an ARN in AWS, a Resource ID in Azure).
+  string dataAccessRole = 3;
+  // The cloud provider role associated with the baseline instance identity
+  // (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
+  // that write to cloud storage will be mapped to this role.
+  string baselineRole = 4;
+}
+
+message SetMappingsRequest {
+  // The name or CRN of the environment.
+  string environmentNameOrCrn = 1;
+  // A map of actor and group CRNs to cloud provider roles. Does not include
+  // mappings for data access services.
+  map<string, string> mappings = 2;
+  // The cloud provider role to which data access services will be mapped
+  // (e.g., an ARN in AWS, a Resource ID in Azure).
+  string dataAccessRole = 3;
+  // The cloud provider role associated with the baseline instance identity
+  // (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
+  // that write to cloud storage will be mapped to this role.
+  string baselineRole = 4;
+}
+
+message SetMappingsResponse {
+  // The version of the mappings.
+  int64 mappingsVersion = 1;
+  // A map of actor and group CRNs to cloud provider roles. Does not include
+  // mappings for data access services.
+  map<string, string> mappings = 2;
+  // The cloud provider role to which data access services will be mapped
+  // (e.g., an ARN in AWS, a Resource ID in Azure).
+  string dataAccessRole = 3;
+  // The cloud provider role associated with the baseline instance identity
+  // (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
+  // that write to cloud storage will be mapped to this role.
+  string baselineRole = 4;
+}
+
+message DeleteMappingsRequest {
+  // The name or CRN of the environment.
+  string environmentNameOrCrn = 1;
+}
+
+message DeleteMappingsResponse {
+}
+
+message SyncMappingsRequest {
+  // The name or CRN of the environment.
+  string environmentNameOrCrn = 1;
+}
+
+message SyncMappingsResponse {
+  // A unique identifier for this sync attempt.
+  string syncId = 1;
+}
+
+message GetMappingsSyncStatusRequest {
+  // The name or CRN of the environment.
+  string environmentNameOrCrn = 1;
+  // Optional syncId for the sync attempt whose status is desired. If omitted,
+  // the status of the most recent sync attempt for the environment is returned.
+  string syncId = 2;
+}
+
+message GetMappingsSyncStatusResponse {
+  // The version of the mappings.
+  int64 mappingsVersion = 1;
+  // ID of the sync attempt.
+  string syncId = 2;
+  // The overall sync status for all datalake clusters affected by this sync attempt.
+  SyncStatus.Value globalStatus = 3;
+  // Map of datalake cluster CRN to detailed sync status for each datalake cluster
+  // affected by this sync attempt.
+  map<string, SyncStatusDetails> statuses = 4;
+}
+
+message SyncStatusDetails {
+  // Summary status of the sync operation.
+  SyncStatus.Value status = 1;
+  // Start date of the sync operation in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  // Omitted if status is NEVER_RUN.
+  uint64 startDateMs = 2;
+  // End date of the sync operation in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  // Omitted if status i NEVER_RUN or RUNNING.
+  uint64 endDateMs = 3;
+  // Additional detail about the cause of failure. Only present for status FAILED.
+  string errorDetail = 4;
+}
+
+message SyncStatus {
+  enum Value {
+    // A value indicating that the enum is unset.
+    UNSET = 0;
+    // No mappings sync operation has ever been run.
+    NEVER_RUN = 1;
+    // The mappings sync operation is currently running.
+    RUNNING = 2;
+    // The mappings sync operation completed successfully.
+    COMPLETED = 3;
+    // The mappings sync operation failed.
+    FAILED = 4;
+  }
+}
+
+message GetMappingsConfigRequest {
+  // The CRN of the environment.
+  string environmentCrn = 1;
+}
+
+message GetMappingsConfigResponse {
+  // The version of the mappings.
+  int64 mappingsVersion = 1;
+  // A map of actor workloadUsernames to cloud provider roles. Includes
+  // mappings for data access services.
+  map<string, string> actorMappings = 2;
+  // A map of group names to cloud provider roles.
+  map<string, string> groupMappings = 3;
+}

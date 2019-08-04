@@ -39,6 +39,9 @@
         <Package name="~com\.cloudera\.thunderhead\.service\.usermanagement.*"/>
     </Match>
     <Match>
+        <Package name="~com\.cloudera\.thunderhead\.service\.idbrokermappingmanagement.*"/>
+    </Match>
+    <Match>
         <Package name="~com\.cloudera\.thunderhead\.service\.minasshd.*"/>
     </Match>
     <Match>
