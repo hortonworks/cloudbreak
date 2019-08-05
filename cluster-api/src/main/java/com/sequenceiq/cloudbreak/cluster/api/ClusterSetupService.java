@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
@@ -27,4 +28,6 @@ public interface ClusterSetupService {
     void waitForServices(int requestId) throws CloudbreakException;
 
     String getSdxContext();
+
+    void setupProxy(ProxyConfig proxyConfig);
 }

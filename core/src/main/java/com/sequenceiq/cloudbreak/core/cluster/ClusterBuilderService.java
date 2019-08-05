@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.ClouderaManagerDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -103,6 +105,9 @@ public class ClusterBuilderService {
     @Inject
     private LdapConfigService ldapConfigService;
 
+    @Inject
+    private ProxyConfigDtoService proxyConfigDtoService;
+
     public void startCluster(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
@@ -125,6 +130,16 @@ public class ClusterBuilderService {
         cluster.setExtendedBlueprintText(blueprintText);
         clusterService.updateCluster(cluster);
         final Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
+
+        if (cluster.getProxyConfigCrn() != null) {
+            ProxyConfig proxyConfig = proxyConfigDtoService.getByCrn(cluster.getProxyConfigCrn());
+            if (proxyConfig != null) {
+                LOGGER.info("proxyConfig is not null, setup proxy for cluster");
+                connector.clusterSetupService().setupProxy(proxyConfig);
+            } else {
+                LOGGER.info("proxyConfig was not found by proxyConfigCrn");
+            }
+        }
 
         Set<DatalakeResources> datalakeResources = datalakeResourcesService
                 .findDatalakeResourcesByWorkspaceAndEnvironment(stack.getWorkspace().getId(), stack.getEnvironmentCrn());
