@@ -29,13 +29,15 @@
           }
         },
         "nodeCount": 1,
-        "type": "CORE",
+        "type": "GATEWAY",
         "recoveryMode": "MANUAL",
         "securityGroup": {
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
               "ports": [
+                "9443",
+                "443",
                 "22"
               ],
               "protocol": "tcp"
@@ -98,16 +100,14 @@
             "size": 50
           }
         },
-        "nodeCount": 1,
-        "type": "GATEWAY",
+        "nodeCount": 2,
+        "type": "CORE",
         "recoveryMode": "MANUAL",
         "securityGroup": {
           "securityRules": [
             {
               "subnet": "0.0.0.0/0",
               "ports": [
-                "9443",
-                "443",
                 "22"
               ],
               "protocol": "tcp"
@@ -170,7 +170,7 @@
             "size": 50
           }
         },
-        "nodeCount": 1,
+        "nodeCount": 3,
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "securityGroup": {
