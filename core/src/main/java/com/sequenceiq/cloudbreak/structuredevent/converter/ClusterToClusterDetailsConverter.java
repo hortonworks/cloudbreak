@@ -83,7 +83,7 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
     }
 
     private void convertFileSystemProperties(ClusterDetails clusterDetails, FileSystem fileSystem) {
-        if (fileSystem != null) {
+        if (fileSystem != null && fileSystem.getType() != null) {
             clusterDetails.setFileSystemType(fileSystem.getType().name());
         }
     }
