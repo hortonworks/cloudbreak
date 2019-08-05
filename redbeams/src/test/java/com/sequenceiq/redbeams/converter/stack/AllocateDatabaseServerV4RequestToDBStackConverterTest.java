@@ -24,7 +24,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
@@ -61,6 +64,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private static final String OWNER_CRN = "crn:altus:iam:us-west-1:cloudera:user:bob@cloudera.com";
 
+    private static final String ENVIRONMENT_CRN = "myenv";
+
     private static final String VERSION = "1.2.3.4";
 
     private static final Instant NOW = Instant.now();
@@ -76,6 +81,11 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private static final String USERNAME = "username";
 
     private static final String DEFAULT_SECURITY_GROUP_ID = "defaultSecurityGroupId";
+
+    private static final String UNKNOWN_CLOUD_PLATFORM = "UnknownCloudPlatform";
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private EnvironmentService environmentService;
@@ -133,7 +143,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .withCloudPlatform(CloudPlatform.AWS.name())
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName("myRegion").build())
                 .build();
-        when(environmentService.getByCrn("myenv")).thenReturn(environment);
+        when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
 
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
@@ -201,7 +211,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                         )
                         .build())
                 .build();
-        when(environmentService.getByCrn("myenv")).thenReturn(environment);
+        when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(subnetChooserService.chooseSubnetsFromDifferentAzs(any())).thenReturn(cloudSubnets);
         when(networkParameterAdder.addNetworkParameters(any(), any())).thenReturn(NETWORK_REQUEST_PARAMETERS);
         when(userGeneratorService.generatePassword()).thenReturn(PASSWORD);
@@ -225,9 +235,37 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         verify(userGeneratorService).generateUserName();
     }
 
+    @Test
+    public void testConversionWhenRequestAndEnvironmentCloudplatformsDiffer() throws IOException {
+        allocateRequest.setCloudPlatform(CloudPlatform.AWS);
+        allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+                .withCloudPlatform(UNKNOWN_CLOUD_PLATFORM)
+                .build();
+        when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cloud platform of the request AWS and the environment " + UNKNOWN_CLOUD_PLATFORM + " do not match.");
+
+        underTest.convert(allocateRequest, OWNER_CRN);
+    }
+
+    @Test
+    public void testConversionWhenUnsupportedCloudplatform() throws IOException {
+        allocateRequest.setCloudPlatform(CloudPlatform.YARN);
+        allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+                .withCloudPlatform(CloudPlatform.YARN.name())
+                .build();
+        when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cloud platform YARN not supported yet.");
+
+        underTest.convert(allocateRequest, OWNER_CRN);
+    }
+
     private void setupAllocateRequest(boolean provideOptionalFields) {
 
-        allocateRequest.setEnvironmentCrn("myenv");
+        allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
 //        allocateRequest.setRegion("us-east-1");
         // allocateRequest.setCloudPlatform(CloudPlatform.AWS);
         if (provideOptionalFields) {
