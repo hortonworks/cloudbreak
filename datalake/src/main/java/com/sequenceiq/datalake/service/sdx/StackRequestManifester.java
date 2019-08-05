@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -30,13 +31,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.se
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
+import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
@@ -44,10 +52,15 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAcce
 @Service
 public class StackRequestManifester {
 
+    static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StackRequestManifester.class);
 
     @Inject
     private GatewayManifester gatewayManifester;
+
+    @Inject
+    private GrpcIdbmmsClient idbmmsClient;
 
     public void configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
@@ -55,17 +68,17 @@ public class StackRequestManifester {
         addStackV4RequestAsString(sdxCluster, generatedStackV4Request);
     }
 
-    public void addStackV4RequestAsString(SdxCluster sdxCluster, StackV4Request internalRequest) {
+    private void addStackV4RequestAsString(SdxCluster sdxCluster, StackV4Request internalRequest) {
         try {
             LOGGER.info("Forming request from Internal Request");
             sdxCluster.setStackRequestToCloudbreak(JsonUtil.writeValueAsString(internalRequest));
         } catch (JsonProcessingException e) {
-            LOGGER.info("Can not parse stack request");
-            throw new BadRequestException("Can not parse stack request", e);
+            LOGGER.error("Can not serialize stack request as JSON");
+            throw new BadRequestException("Can not serialize stack request as JSON", e);
         }
     }
 
-    public StackV4Request setupStackRequestForCloudbreak(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+    private StackV4Request setupStackRequestForCloudbreak(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         try {
             LOGGER.info("Setting up stack request of SDX {} for cloudbreak", sdxCluster.getClusterName());
             StackV4Request stackRequest = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);
@@ -75,7 +88,8 @@ public class StackRequestManifester {
                 try {
                     tags.setUserDefined(sdxCluster.getTags().get(HashMap.class));
                 } catch (IOException e) {
-                    throw new BadRequestException("can not convert from json to tags");
+                    LOGGER.error("Can not parse JSON to tags");
+                    throw new BadRequestException("Can not parse JSON to tags", e);
                 }
                 stackRequest.setTags(tags);
             }
@@ -95,10 +109,11 @@ public class StackRequestManifester {
             setupAuthentication(environment, stackRequest);
             setupSecurityAccess(environment, stackRequest);
             setupClusterRequest(stackRequest);
+            setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             return stackRequest;
         } catch (IOException e) {
-            LOGGER.error("Can not parse json to stack request");
-            throw new IllegalStateException("Can not parse json to stack request", e);
+            LOGGER.error("Can not parse JSON to stack request");
+            throw new IllegalStateException("Can not parse JSON to stack request", e);
         }
     }
 
@@ -130,7 +145,7 @@ public class StackRequestManifester {
         stackRequest.setNetwork(convertNetwork(environmentResponse.getNetwork()));
     }
 
-    public NetworkV4Request convertNetwork(EnvironmentNetworkResponse network) {
+    private NetworkV4Request convertNetwork(EnvironmentNetworkResponse network) {
         NetworkV4Request response = new NetworkV4Request();
         response.setAws(getIfNotNull(network.getAws(), aws -> convertToAwsNetwork(network)));
         response.setAzure(getIfNotNull(network.getAzure(), azure -> convertToAzureNetwork(network)));
@@ -220,4 +235,29 @@ public class StackRequestManifester {
             cluster.setPassword(PasswordUtil.generatePassword());
         }
     }
+
+    void setupCloudStorageAccountMapping(StackV4Request stackRequest, String environmentCrn, IdBrokerMappingSource mappingSource, String cloudPlatform) {
+        CloudStorageRequest cloudStorage = stackRequest.getCluster().getCloudStorage();
+        if (cloudStorage != null && cloudStorage.getAccountMapping() == null) {
+            // In case of SdxClusterRequest with cloud storage, or SdxInternalClusterRequest with cloud storage but missing "accountMapping" property,
+            // getAccountMapping() == null means we need to fetch mappings from IDBMMS.
+            if (mappingSource == IdBrokerMappingSource.IDBMMS) {
+                LOGGER.info("Fetching account mappings from IDBMMS for environment {}", environmentCrn);
+                // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
+                MappingsConfig mappingsConfig = idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
+                AccountMappingBase accountMapping = new AccountMappingBase();
+                accountMapping.setGroupMappings(mappingsConfig.getGroupMappings());
+                accountMapping.setUserMappings(mappingsConfig.getActorMappings());
+                cloudStorage.setAccountMapping(accountMapping);
+            } else {
+                LOGGER.info("IDBMMS usage is disabled for environment {}. Proceeding with {} mappings.", environmentCrn,
+                        mappingSource == IdBrokerMappingSource.MOCK && CloudPlatform.AWS.name().equals(cloudPlatform) ? "mock" : "missing");
+            }
+        } else {
+            // getAccountMapping() != null is possible only in case of SdxInternalClusterRequest, in which case the user-given values will be honored.
+            LOGGER.info("{} for environment {}.", cloudStorage == null ? "Cloud storage is disabled" : "Applying user-provided mappings",
+                    environmentCrn);
+        }
+    }
+
 }

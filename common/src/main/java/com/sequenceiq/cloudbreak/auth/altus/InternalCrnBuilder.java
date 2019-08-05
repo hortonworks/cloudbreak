@@ -1,16 +1,36 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.sequenceiq.cloudbreak.auth.altus.Crn.Service;
 
+/**
+ * Builder for constructing the user CRN for an internal actor.
+ *
+ * <p>
+ * <strong>Note:</strong> The current Altus implementation ({@code services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crns.java},
+ * lines 718--724) recognizes the CRN formulated here as an internal actor <em>only if</em> the service in the constructor {@link #InternalCrnBuilder(Service)}
+ * is given as {@link Service#IAM}. So be sure to use that service type for all calls targeting Altus / CDP-CP components like IAM or any service depending
+ * on this check (e.g. IDBMMS). Calls taking place among CB services may, of course, specify any {@link Service} constant as they see fit.
+ * </p>
+ */
 public class InternalCrnBuilder {
 
     private static final String INTERNAL_USER_CRN = "__internal__actor__";
 
     private static final String INTERNAL_ACCOUNT = "altus";
 
-    private Service serviceType;
+    private final Service serviceType;
 
+    /**
+     * Creates a new {@code InternalCrnBuilder} instance using the given {@code serviceType}. Please read the class javadoc for the implications of how this
+     * parameter is interpreted.
+     *
+     * @param serviceType service type to base the CRN on; must not be {@code null}
+     * @throws NullPointerException if {@code serviceType == null}
+     */
     public InternalCrnBuilder(Service serviceType) {
+        checkNotNull(serviceType);
         this.serviceType = serviceType;
     }
 
@@ -32,4 +52,5 @@ public class InternalCrnBuilder {
     public String getInternalCrnForServiceAsString() {
         return getInternalCrnForService().toString();
     }
+
 }

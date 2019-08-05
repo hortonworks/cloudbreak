@@ -37,6 +37,7 @@ public class GrpcIdbmmsClient {
      * @param environmentCrn the environment CRN to get mappings for
      * @param requestId an optional request ID
      * @return the mappings config associated with environment {@code environmentCrn}; never {@code null}
+     * @throws IdbmmsOperationException if any problem is encountered during the IDBMMS call processing
      */
     public MappingsConfig getMappingsConfig(String actorCrn, String environmentCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
