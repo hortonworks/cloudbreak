@@ -9,12 +9,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public enum CloudStorageCdpService {
 
-    ZEPPELIN_SERVER,
-    ZEPPELIN_SERVER_S3,
-    RESOURCE_MANAGER,
+    ZEPPELIN_NOTEBOOK_S3,
+    ZEPPELIN_NOTEBOOK,
+    YARN_LOG,
     HIVE_METASTORE_WAREHOUSE,
     HIVE_METASTORE_EXTERNAL_WAREHOUSE,
-    RANGER_ADMIN;
+    RANGER_AUDIT;
 
     @JsonIgnore
     public static String typeListing() {

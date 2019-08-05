@@ -1,7 +1,7 @@
 {
   "entries": [
     {
-      "type": "ZEPPELIN_SERVER_S3",
+      "type": "ZEPPELIN_NOTEBOOK_S3",
       "propertyName": "zeppelin.notebook.s3.bucket",
       "propertyFile": "zeppelin-site",
       "description": "The directory where Zeppelin notebooks are saved",
@@ -12,7 +12,7 @@
       "supportedStorages": ["S3"]
     },
     {
-      "type": "ZEPPELIN_SERVER",
+      "type": "ZEPPELIN_NOTEBOOK",
       "propertyName": "zeppelin.notebook.dir",
       "propertyFile": "zeppelin-site",
       "description": "The directory where Zeppelin notebooks are saved",
@@ -23,7 +23,7 @@
       "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2"]
     },
     {
-      "type": "RESOURCE_MANAGER",
+      "type": "YARN_LOG",
       "propertyName": "yarn.nodemanager.remote-app-log-dir",
       "propertyFile": "yarn-site",
       "description": "This is the directory where aggregated application logs will be stored by YARN",
@@ -56,7 +56,7 @@
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
-      "type": "RANGER_ADMIN",
+      "type": "RANGER_AUDIT",
       "propertyName": "ranger_plugin_hdfs_audit_url",
       "propertyFile": "ranger-audit",
       "description": "This is the directory where audit logs will be stored by Ranger",

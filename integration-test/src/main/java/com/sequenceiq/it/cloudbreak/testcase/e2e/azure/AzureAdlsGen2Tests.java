@@ -106,7 +106,7 @@ public class AzureAdlsGen2Tests extends AbstractE2ETest {
         adlsGen2.setAccountKey(accountKey);
         adlsGen2.setAccountName(accountName);
         StorageLocationBase storageLocationBase = new StorageLocationBase();
-        storageLocationBase.setType(CloudStorageCdpService.RANGER_ADMIN);
+        storageLocationBase.setType(CloudStorageCdpService.RANGER_AUDIT);
         storageLocationBase.setValue("somePath");
         request.setLocations(List.of(storageLocationBase));
         StorageIdentityBase storageIdentityBase = new StorageIdentityBase();
