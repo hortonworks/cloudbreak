@@ -30,6 +30,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.RECONFIGURE_KEYTABS_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.RECONFIGURE_KEYTABS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.UPLOAD_UPSCALE_RECIPES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.UPLOAD_UPSCALE_RECIPES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.UPSCALE_AMBARI_FAILED_EVENT;
@@ -52,6 +54,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.FINALIZE_UPSCALE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.RECONFIGURE_KEYTABS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPLOAD_UPSCALE_RECIPES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPSCALING_AMBARI_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleState.UPSCALING_CLUSTER_MANAGER_STATE;
@@ -69,8 +72,10 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
             new Builder<ClusterUpscaleState, ClusterUpscaleEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
                     .from(INIT_STATE).to(UPLOAD_UPSCALE_RECIPES_STATE).event(CLUSTER_UPSCALE_TRIGGER_EVENT).noFailureEvent()
-                    .from(UPLOAD_UPSCALE_RECIPES_STATE).to(CHECK_HOST_METADATA_STATE).event(UPLOAD_UPSCALE_RECIPES_FINISHED_EVENT)
+                    .from(UPLOAD_UPSCALE_RECIPES_STATE).to(RECONFIGURE_KEYTABS_STATE).event(UPLOAD_UPSCALE_RECIPES_FINISHED_EVENT)
                         .failureEvent(UPLOAD_UPSCALE_RECIPES_FAILED_EVENT)
+                    .from(RECONFIGURE_KEYTABS_STATE).to(CHECK_HOST_METADATA_STATE).event(RECONFIGURE_KEYTABS_FINISHED_EVENT)
+                        .failureEvent(RECONFIGURE_KEYTABS_FAILED_EVENT)
                     .from(CHECK_HOST_METADATA_STATE).to(UPSCALING_CLUSTER_MANAGER_STATE).event(CHECK_HOST_METADATA_FINISHED_EVENT)
                         .failureEvent(CHECK_HOST_METADATA_FAILED_EVENT)
                     .from(UPSCALING_CLUSTER_MANAGER_STATE).to(UPSCALING_AMBARI_FINISHED_STATE).event(UPSCALE_AMBARI_FINISHED_EVENT)

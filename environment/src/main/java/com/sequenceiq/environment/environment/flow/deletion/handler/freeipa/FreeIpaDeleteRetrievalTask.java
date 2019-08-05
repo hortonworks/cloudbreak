@@ -67,7 +67,7 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
         try {
             String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
             Status status = freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn).getStatus();
-            if (status.equals(Status.DELETE_FAILED)) {
+            if (status.equals(Status.DELETE_FAILED) || status.equals(Status.CREATE_FAILED)) {
                 return false;
             }
             return status.isFailed();
