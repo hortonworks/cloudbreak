@@ -9,6 +9,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ProcessingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,9 @@ public class ProvisionerService {
                 String errorMessage = ClientErrorExceptionHandler.getErrorMessage(e);
                 LOGGER.info("Can not delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
                 throw new RuntimeException("Can not delete stack, client error happened on Cloudbreak side: " + errorMessage);
+            } catch (ProcessingException e) {
+                LOGGER.info("Can not delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), e);
+                throw new RuntimeException("Can not delete stack, client error happened on Cloudbreak side: " + e.getMessage());
             }
         }, () -> {
             throw notFound("SDX cluster", id).get();
