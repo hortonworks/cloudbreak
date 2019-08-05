@@ -20,7 +20,7 @@ import (
 type StorageLocationBase struct {
 
 	// type
-	// Enum: [ZEPPELIN_SERVER ZEPPELIN_SERVER_S3 RESOURCE_MANAGER HIVE_METASTORE_WAREHOUSE HIVE_METASTORE_EXTERNAL_WAREHOUSE RANGER_ADMIN]
+	// Enum: [ZEPPELIN_NOTEBOOK_S3 ZEPPELIN_NOTEBOOK YARN_LOG HIVE_METASTORE_WAREHOUSE HIVE_METASTORE_EXTERNAL_WAREHOUSE RANGER_AUDIT]
 	Type string `json:"type,omitempty"`
 
 	// value
@@ -45,7 +45,7 @@ var storageLocationBaseTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["ZEPPELIN_SERVER","ZEPPELIN_SERVER_S3","RESOURCE_MANAGER","HIVE_METASTORE_WAREHOUSE","HIVE_METASTORE_EXTERNAL_WAREHOUSE","RANGER_ADMIN"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["ZEPPELIN_NOTEBOOK_S3","ZEPPELIN_NOTEBOOK","YARN_LOG","HIVE_METASTORE_WAREHOUSE","HIVE_METASTORE_EXTERNAL_WAREHOUSE","RANGER_AUDIT"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -55,14 +55,14 @@ func init() {
 
 const (
 
-	// StorageLocationBaseTypeZEPPELINSERVER captures enum value "ZEPPELIN_SERVER"
-	StorageLocationBaseTypeZEPPELINSERVER string = "ZEPPELIN_SERVER"
+	// StorageLocationBaseTypeZEPPELINNOTEBOOKS3 captures enum value "ZEPPELIN_NOTEBOOK_S3"
+	StorageLocationBaseTypeZEPPELINNOTEBOOKS3 string = "ZEPPELIN_NOTEBOOK_S3"
 
-	// StorageLocationBaseTypeZEPPELINSERVERS3 captures enum value "ZEPPELIN_SERVER_S3"
-	StorageLocationBaseTypeZEPPELINSERVERS3 string = "ZEPPELIN_SERVER_S3"
+	// StorageLocationBaseTypeZEPPELINNOTEBOOK captures enum value "ZEPPELIN_NOTEBOOK"
+	StorageLocationBaseTypeZEPPELINNOTEBOOK string = "ZEPPELIN_NOTEBOOK"
 
-	// StorageLocationBaseTypeRESOURCEMANAGER captures enum value "RESOURCE_MANAGER"
-	StorageLocationBaseTypeRESOURCEMANAGER string = "RESOURCE_MANAGER"
+	// StorageLocationBaseTypeYARNLOG captures enum value "YARN_LOG"
+	StorageLocationBaseTypeYARNLOG string = "YARN_LOG"
 
 	// StorageLocationBaseTypeHIVEMETASTOREWAREHOUSE captures enum value "HIVE_METASTORE_WAREHOUSE"
 	StorageLocationBaseTypeHIVEMETASTOREWAREHOUSE string = "HIVE_METASTORE_WAREHOUSE"
@@ -70,8 +70,8 @@ const (
 	// StorageLocationBaseTypeHIVEMETASTOREEXTERNALWAREHOUSE captures enum value "HIVE_METASTORE_EXTERNAL_WAREHOUSE"
 	StorageLocationBaseTypeHIVEMETASTOREEXTERNALWAREHOUSE string = "HIVE_METASTORE_EXTERNAL_WAREHOUSE"
 
-	// StorageLocationBaseTypeRANGERADMIN captures enum value "RANGER_ADMIN"
-	StorageLocationBaseTypeRANGERADMIN string = "RANGER_ADMIN"
+	// StorageLocationBaseTypeRANGERAUDIT captures enum value "RANGER_AUDIT"
+	StorageLocationBaseTypeRANGERAUDIT string = "RANGER_AUDIT"
 )
 
 // prop value enum
