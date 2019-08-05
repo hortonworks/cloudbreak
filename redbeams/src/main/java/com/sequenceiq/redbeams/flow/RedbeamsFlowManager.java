@@ -3,27 +3,41 @@ package com.sequenceiq.redbeams.flow;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationFlowConfig;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
 public class RedbeamsFlowManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsFlowManager.class);
+
     private static final long WAIT_FOR_ACCEPT = 10L;
+
+    private static final long TIMEOUT_MILLIS = 5000;
+
+    private static final long SLEEP_MILLIS = 100;
 
     @Inject
     private EventBus reactor;
@@ -33,6 +47,12 @@ public class RedbeamsFlowManager {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
+    @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
+    private Clock clock;
 
     private final Random random = ThreadLocalRandom.current();
 
@@ -73,7 +93,17 @@ public class RedbeamsFlowManager {
         }
     }
 
-    public Map<String, Object> getHeaderWithUserCrn(Map<String, Object> headers) {
+    public void cancelRunningFlowsIfNeeded(Long dbstackId) {
+        if (flowLogService.isOtherFlowRunningExceptFlowConfigs(dbstackId, Set.of(RedbeamsTerminationFlowConfig.class))) {
+            Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
+            reactor.notify(
+                    Flow2Handler.FLOW_CANCEL,
+                    eventFactory.createEventWithErrHandler(headerWithUserCrn, new RedbeamsEvent(Flow2Handler.FLOW_CANCEL, dbstackId))
+            );
+        }
+    }
+
+    private Map<String, Object> getHeaderWithUserCrn(Map<String, Object> headers) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         Map<String, Object> decoratedHeader;
         decoratedHeader = headers != null ? new HashMap<>(headers) : new HashMap<>();

@@ -115,6 +115,12 @@ public class FlowLogDBService implements FlowLogService {
         return !flowIds.isEmpty();
     }
 
+    @Override
+    public boolean isOtherFlowRunningExceptFlowConfigs(Long stackId, Set<Class> exceptFlowConfigs) {
+        Set<String> flowIds = flowLogRepository.findAllRunningFlowIdsByResourceIdExceptFlowConfigs(stackId, exceptFlowConfigs);
+        return !flowIds.isEmpty();
+    }
+
     public boolean repeatedFlowState(FlowLog lastFlowLog, String event) {
         return Optional.ofNullable(lastFlowLog).map(FlowLog::getNextEvent).map(flowLog -> flowLog.equalsIgnoreCase(event)).orElse(false);
     }

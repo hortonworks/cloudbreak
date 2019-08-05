@@ -40,9 +40,6 @@ public class RedbeamsCreationService {
             throw new BadRequestException("A stack for this database server already exists in the environment");
         }
 
-        // The database server does not receive a resource CRN until its stack
-        // is successfully created and it is then registered.
-
         // possible future change is to use a flow here (GetPlatformTemplateRequest, modified for database server)
         // for now, just get it synchronously / within this thread, it ought to be quick
         CloudPlatformVariant platformVariant = new CloudPlatformVariant(dbStack.getCloudPlatform(), dbStack.getPlatformVariant());
