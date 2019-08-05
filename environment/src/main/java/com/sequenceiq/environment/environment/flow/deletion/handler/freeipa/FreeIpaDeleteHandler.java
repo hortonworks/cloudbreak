@@ -93,7 +93,7 @@ public class FreeIpaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
 
     private boolean isFreeIpaExistsForEnvironment(Environment env) {
         try {
-            LOGGER.debug("About to call freeipa describe with ");
+            LOGGER.debug("About to call freeipa describe with env crn '{}'.", env.getResourceCrn());
             freeIpaV1Endpoint.describe(env.getResourceCrn());
             return true;
         } catch (NotFoundException probablyResourceDoesNotExists) {
