@@ -43,7 +43,10 @@ dependencies {
     exclude group: 'junit'
   }
   testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api'
+  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-params',           version: junitJupiterVersion
   testImplementation group: 'org.mockito',               name: 'mockito-core'
+  testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',       version: mockitoVersion
+
 
   implementation     group: 'io.projectreactor',         name: 'reactor-core',                          version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion

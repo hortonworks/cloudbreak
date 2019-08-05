@@ -25,6 +25,12 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
             + "AND fl.flowType != 'com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig'")
     Set<String> findAllRunningNonTerminationFlowIdsByResourceId(@Param("resourceId") Long resourceId);
 
+    @Query("SELECT DISTINCT fl.flowId FROM FlowLog fl "
+            + "WHERE fl.stateStatus = 'PENDING' AND fl.resourceId = :resourceId "
+            + "AND fl.flowType NOT IN :exceptFlowConfigs")
+    Set<String> findAllRunningFlowIdsByResourceIdExceptFlowConfigs(
+            @Param("resourceId") Long resourceId, @Param("exceptFlowConfigs") Set<Class> exceptFlowConfigs);
+
     @Query("SELECT DISTINCT fl.flowId, fl.resourceId, fl.cloudbreakNodeId FROM FlowLog fl WHERE fl.stateStatus = 'PENDING'")
     List<Object[]> findAllPending();
 
