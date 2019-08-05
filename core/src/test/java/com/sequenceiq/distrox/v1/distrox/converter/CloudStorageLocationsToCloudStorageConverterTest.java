@@ -81,7 +81,7 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setTelemetry(telemetry);
 
-        CloudStorageCdpService eStorageLocationType = CloudStorageCdpService.RANGER_ADMIN;
+        CloudStorageCdpService eStorageLocationType = CloudStorageCdpService.RANGER_AUDIT;
         String eStorageLocationValue = "MYBUCKET/CONTAINER";
         StorageLocationBase storageLocationBase = new StorageLocationBase();
         storageLocationBase.setType(eStorageLocationType);
@@ -97,7 +97,7 @@ class CloudStorageLocationsToCloudStorageConverterTest {
 
     @Test
     void testConvertWhenEnvironmentDoesNotHaveTelemetryButCloudStorageLocationsIsNotEmpty() {
-        CloudStorageCdpService eStorageLocationType = CloudStorageCdpService.RANGER_ADMIN;
+        CloudStorageCdpService eStorageLocationType = CloudStorageCdpService.RANGER_AUDIT;
         String eStorageLocationValue = "MYBUCKET/CONTAINER";
         StorageLocationBase storageLocationBase = new StorageLocationBase();
         storageLocationBase.setType(eStorageLocationType);

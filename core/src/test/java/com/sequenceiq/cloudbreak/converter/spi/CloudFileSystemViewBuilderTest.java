@@ -34,7 +34,7 @@ public class CloudFileSystemViewBuilderTest {
 
     private static final String LOG_INSTANCE_PROFILE = "logInstanceProfile";
 
-    private static final CloudStorageCdpService SERVICE_1 = CloudStorageCdpService.ZEPPELIN_SERVER_S3;
+    private static final CloudStorageCdpService SERVICE_1 = CloudStorageCdpService.ZEPPELIN_NOTEBOOK_S3;
 
     private static final String PATH_1 = "path1";
 
@@ -46,7 +46,7 @@ public class CloudFileSystemViewBuilderTest {
 
     private static final String PATH_3 = "path3";
 
-    private static final CloudStorageCdpService SERVICE_4 = CloudStorageCdpService.RANGER_ADMIN;
+    private static final CloudStorageCdpService SERVICE_4 = CloudStorageCdpService.RANGER_AUDIT;
 
     private static final String PATH_4 = "path4";
 

@@ -43,7 +43,7 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
     @Test
     public void testConvertCheckAllPropertyPassedProperly() {
         FileSystemParameterV4Response expected = new FileSystemParameterV4Response();
-        expected.setType(CloudStorageCdpService.RANGER_ADMIN.name());
+        expected.setType(CloudStorageCdpService.RANGER_AUDIT.name());
         expected.setDefaultPath(TEST_PATH_VALUE);
         expected.setProtocol(TEST_PROTOCOL);
         expected.setDescription(TEST_DESCRIPTION);
@@ -59,7 +59,7 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
 
     private ConfigQueryEntry createConfigQueryEntry() {
         ConfigQueryEntry entry = new ConfigQueryEntry();
-        entry.setType(CloudStorageCdpService.RANGER_ADMIN);
+        entry.setType(CloudStorageCdpService.RANGER_AUDIT);
         entry.setDefaultPath(TEST_PATH_VALUE);
         entry.setProtocol(TEST_PROTOCOL);
         entry.setDescription(TEST_DESCRIPTION);
