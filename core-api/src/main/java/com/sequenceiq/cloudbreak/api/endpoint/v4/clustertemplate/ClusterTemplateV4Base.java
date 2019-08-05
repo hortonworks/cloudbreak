@@ -30,7 +30,7 @@ public abstract class ClusterTemplateV4Base implements JsonEntity {
     @NotNull
     private DistroXV1Request distroXTemplate;
 
-    @ApiModelProperty(required = true, allowableValues = "SPARK,HIVE,DATASCIENCE,EDW,ETL,OTHER")
+    @ApiModelProperty(required = true)
     private ClusterTemplateV4Type type = ClusterTemplateV4Type.OTHER;
 
     @ApiModelProperty(ClusterTemplateModelDescription.CLOUD_PLATFORM)

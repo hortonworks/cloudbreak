@@ -64,6 +64,10 @@ public class RestUrlParserTest {
 
     private static final String PATH_CODE_GRANT_FLOW = "code_grant_flow";
 
+    private static final String CRN = "crn";
+
+    private static final String NAME = "name";
+
     private static final String ID_REGEX = "\\d+";
 
     private static final String CRN_REGEX = "[^/]+";
@@ -159,7 +163,9 @@ public class RestUrlParserTest {
     private void checkResourceEvent(String methodPath, Map<String, String> params) {
         String[] parts = methodPath.substring(1).split(SLASH);
         String resourceEvent = null;
-        if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && !("audits".equals(parts[2]) && parts[3].matches(ID_REGEX))
+        if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && (parts[3].equals(CRN) || parts[3].equals(NAME))) {
+            resourceEvent = parts[2];
+        } else if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && !("audits".equals(parts[2]) && parts[3].matches(ID_REGEX))
                 && !(PATH_CREDENTIALS.equals(parts[2]) && PATH_CODE_GRANT_FLOW.equals(parts[3])) && !RESOURCE_NAME.equals(parts[parts.length - 1])) {
             // Skip v4/{workspaceId}/audits/{auditId}
             // Skip v4/{workspaceId}/blueprints/{name} and similars
@@ -231,8 +237,8 @@ public class RestUrlParserTest {
             assertEquals("params should contains resource crn", RESOURCE_CRN, params.get(RestUrlParser.RESOURCE_NAME));
             assertNull("params must not contain resource ID when having a resource crn", params.get(RestUrlParser.RESOURCE_ID));
         } else {
-            assertNull("params must not contain resource ID", params.get(RestUrlParser.RESOURCE_ID));
-            assertNull("params must not contain resource name", params.get(RestUrlParser.RESOURCE_NAME));
+            assertNull(String.format("%s method params must not contain resource ID", methodPath), params.get(RestUrlParser.RESOURCE_ID));
+            assertNull(String.format("%s method params must not contain resource name", methodPath), params.get(RestUrlParser.RESOURCE_NAME));
         }
     }
 
@@ -304,6 +310,10 @@ public class RestUrlParserTest {
                     if (methodPath.startsWith("/v4/workspaces")) {
                         methodPath = methodPath.replace('{' + pathParamValue + '}', WORKSPACE_NAME);
                     } else if (methodPath.startsWith("/autoscale/stack")) {
+                        methodPath = methodPath.replace('{' + pathParamValue + '}', RESOURCE_CRN);
+                    } else if (pathParam.value().equals(NAME)) {
+                        methodPath = methodPath.replace('{' + pathParamValue + '}', RESOURCE_NAME);
+                    }  else if (pathParam.value().equals(CRN)) {
                         methodPath = methodPath.replace('{' + pathParamValue + '}', RESOURCE_CRN);
                     } else {
                         methodPath = methodPath.replace('{' + pathParamValue + '}', RESOURCE_NAME);

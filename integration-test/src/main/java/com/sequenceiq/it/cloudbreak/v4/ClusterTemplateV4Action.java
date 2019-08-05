@@ -40,7 +40,7 @@ public class ClusterTemplateV4Action {
         clusterTemplateV4Entity.setResponse(
                 client.getCloudbreakClient()
                         .clusterTemplateV4EndPoint()
-                        .get(workspaceId, clusterTemplateV4Entity.getName()));
+                        .getByName(workspaceId, clusterTemplateV4Entity.getName()));
         Log.logJSON(String.format(" get %s cluster template response: ", clusterTemplateV4Entity.getName()),
                 new Object[]{clusterTemplateV4Entity.getResponse()});
     }
@@ -66,7 +66,7 @@ public class ClusterTemplateV4Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(String.format(" delete %s cluster template with Name. ", clusterTemplateV4Entity.getName()));
 
-        client.getCloudbreakClient().clusterTemplateV4EndPoint().delete(workspaceId, clusterTemplateV4Entity.getName());
+        client.getCloudbreakClient().clusterTemplateV4EndPoint().deleteByName(workspaceId, clusterTemplateV4Entity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {

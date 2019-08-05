@@ -56,7 +56,7 @@ public class V4ExistingResourceByCrnOrNameRestUrlParser extends RestUrlParser {
 
     @Override
     protected String getResourceEvent(Matcher matcher) {
-        return null;
+        return matcher.group(RESOURCE_TYPE_GROUP_NUMBER);
     }
 
 }

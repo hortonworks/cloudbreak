@@ -64,7 +64,7 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
     @Override
     public void delete(TestContext testContext, ClusterTemplateV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().clusterTemplateV4EndPoint().delete(client.getWorkspaceId(), entity.getName());
+            client.getCloudbreakClient().clusterTemplateV4EndPoint().deleteByName(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }

@@ -48,7 +48,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     public ClusterTemplateV4Response post(Long workspaceId, @Valid ClusterTemplateV4Request request) {
         ClusterTemplate clusterTemplate = clusterTemplateService.createForLoggedInUser(converterUtil.convert(request, ClusterTemplate.class), workspaceId);
-        return get(workspaceId, clusterTemplate.getName());
+        return getByName(workspaceId, clusterTemplate.getName());
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     }
 
     @Override
-    public ClusterTemplateV4Response get(Long workspaceId, String name) {
+    public ClusterTemplateV4Response getByName(Long workspaceId, String name) {
         try {
             ClusterTemplateV4Response clusterTemplateV4Response = transactionService.required(() ->
                     converterUtil.convert(clusterTemplateService.getByNameForWorkspaceId(name, workspaceId), ClusterTemplateV4Response.class));
@@ -78,8 +78,26 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     }
 
     @Override
-    public ClusterTemplateV4Response delete(Long workspaceId, String name) {
-        ClusterTemplate clusterTemplate = clusterTemplateService.delete(name, workspaceId);
+    public ClusterTemplateV4Response deleteByName(Long workspaceId, String name) {
+        ClusterTemplate clusterTemplate = clusterTemplateService.deleteByName(name, workspaceId);
+        return converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class);
+    }
+
+    @Override
+    public ClusterTemplateV4Response getByCrn(Long workspaceId, String crn) {
+        try {
+            ClusterTemplateV4Response clusterTemplateV4Response = transactionService.required(() ->
+                    converterUtil.convert(clusterTemplateService.getByCrn(crn, workspaceId), ClusterTemplateV4Response.class));
+            environmentServiceDecorator.prepareEnvironment(clusterTemplateV4Response);
+            return clusterTemplateV4Response;
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    @Override
+    public ClusterTemplateV4Response deleteByCrn(Long workspaceId, String crn) {
+        ClusterTemplate clusterTemplate = clusterTemplateService.deleteByCrn(crn, workspaceId);
         return converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class);
     }
 

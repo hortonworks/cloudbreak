@@ -20,7 +20,7 @@ public class ClusterTemplateGetAction implements Action<ClusterTemplateTestDto, 
         Log.logJSON(LOGGER, " ClusterTemplateEntity get request:\n", testDto.getRequest());
         ClusterTemplateV4Response response = client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
-                .get(client.getWorkspaceId(), testDto.getName());
+                .getByName(client.getWorkspaceId(), testDto.getName());
         testDto.setResponses(Sets.newHashSet(response));
         Log.logJSON(LOGGER, " ClusterTemplateEntity get call was successful:\n", response);
         return testDto;
