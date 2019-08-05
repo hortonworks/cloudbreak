@@ -19,9 +19,6 @@ type TelemetryResponse struct {
 	// Cloud Logging (telemetry) settings.
 	Logging *LoggingResponse `json:"logging,omitempty"`
 
-	// enable cluster deployment log reporting.
-	ReportDeploymentLogs bool `json:"reportDeploymentLogs,omitempty"`
-
 	// Workload analytics (telemetry) settings.
 	WorkloadAnalytics *WorkloadAnalyticsResponse `json:"workloadAnalytics,omitempty"`
 }

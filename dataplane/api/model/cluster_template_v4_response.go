@@ -57,7 +57,7 @@ type ClusterTemplateV4Response struct {
 
 	// type
 	// Required: true
-	// Enum: [SPARK HIVE DATASCIENCE EDW ETL OTHER]
+	// Enum: [SPARK HIVE EDW ETL DATASCIENCE DATAMART DATAMART_HA DATALAKE DATAENGINEERING DATAENGINEERING_HA OTHER]
 	Type *string `json:"type"`
 }
 
@@ -250,7 +250,7 @@ var clusterTemplateV4ResponseTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["SPARK","HIVE","DATASCIENCE","EDW","ETL","OTHER"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["SPARK","HIVE","EDW","ETL","DATASCIENCE","DATAMART","DATAMART_HA","DATALAKE","DATAENGINEERING","DATAENGINEERING_HA","OTHER"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -266,14 +266,29 @@ const (
 	// ClusterTemplateV4ResponseTypeHIVE captures enum value "HIVE"
 	ClusterTemplateV4ResponseTypeHIVE string = "HIVE"
 
-	// ClusterTemplateV4ResponseTypeDATASCIENCE captures enum value "DATASCIENCE"
-	ClusterTemplateV4ResponseTypeDATASCIENCE string = "DATASCIENCE"
-
 	// ClusterTemplateV4ResponseTypeEDW captures enum value "EDW"
 	ClusterTemplateV4ResponseTypeEDW string = "EDW"
 
 	// ClusterTemplateV4ResponseTypeETL captures enum value "ETL"
 	ClusterTemplateV4ResponseTypeETL string = "ETL"
+
+	// ClusterTemplateV4ResponseTypeDATASCIENCE captures enum value "DATASCIENCE"
+	ClusterTemplateV4ResponseTypeDATASCIENCE string = "DATASCIENCE"
+
+	// ClusterTemplateV4ResponseTypeDATAMART captures enum value "DATAMART"
+	ClusterTemplateV4ResponseTypeDATAMART string = "DATAMART"
+
+	// ClusterTemplateV4ResponseTypeDATAMARTHA captures enum value "DATAMART_HA"
+	ClusterTemplateV4ResponseTypeDATAMARTHA string = "DATAMART_HA"
+
+	// ClusterTemplateV4ResponseTypeDATALAKE captures enum value "DATALAKE"
+	ClusterTemplateV4ResponseTypeDATALAKE string = "DATALAKE"
+
+	// ClusterTemplateV4ResponseTypeDATAENGINEERING captures enum value "DATAENGINEERING"
+	ClusterTemplateV4ResponseTypeDATAENGINEERING string = "DATAENGINEERING"
+
+	// ClusterTemplateV4ResponseTypeDATAENGINEERINGHA captures enum value "DATAENGINEERING_HA"
+	ClusterTemplateV4ResponseTypeDATAENGINEERINGHA string = "DATAENGINEERING_HA"
 
 	// ClusterTemplateV4ResponseTypeOTHER captures enum value "OTHER"
 	ClusterTemplateV4ResponseTypeOTHER string = "OTHER"

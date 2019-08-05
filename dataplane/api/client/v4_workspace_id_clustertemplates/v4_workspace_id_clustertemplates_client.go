@@ -55,32 +55,62 @@ func (a *Client) CreateClusterTemplateInWorkspace(params *CreateClusterTemplateI
 }
 
 /*
-DeleteClusterTemplateInWorkspace deletes cluster template by name in workspace
+DeleteClusterTemplateByCrnInWorkspace deletes cluster template by crn in workspace
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
 */
-func (a *Client) DeleteClusterTemplateInWorkspace(params *DeleteClusterTemplateInWorkspaceParams) (*DeleteClusterTemplateInWorkspaceOK, error) {
+func (a *Client) DeleteClusterTemplateByCrnInWorkspace(params *DeleteClusterTemplateByCrnInWorkspaceParams) (*DeleteClusterTemplateByCrnInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteClusterTemplateInWorkspaceParams()
+		params = NewDeleteClusterTemplateByCrnInWorkspaceParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "deleteClusterTemplateInWorkspace",
+		ID:                 "deleteClusterTemplateByCrnInWorkspace",
 		Method:             "DELETE",
-		PathPattern:        "/v4/{workspaceId}/cluster_templates/{name}",
+		PathPattern:        "/v4/{workspaceId}/cluster_templates/crn/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteClusterTemplateInWorkspaceReader{formats: a.formats},
+		Reader:             &DeleteClusterTemplateByCrnInWorkspaceReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteClusterTemplateInWorkspaceOK), nil
+	return result.(*DeleteClusterTemplateByCrnInWorkspaceOK), nil
+
+}
+
+/*
+DeleteClusterTemplateByNameInWorkspace deletes cluster template by name in workspace
+
+A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
+*/
+func (a *Client) DeleteClusterTemplateByNameInWorkspace(params *DeleteClusterTemplateByNameInWorkspaceParams) (*DeleteClusterTemplateByNameInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteClusterTemplateByNameInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteClusterTemplateByNameInWorkspace",
+		Method:             "DELETE",
+		PathPattern:        "/v4/{workspaceId}/cluster_templates/name/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteClusterTemplateByNameInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteClusterTemplateByNameInWorkspaceOK), nil
 
 }
 
@@ -115,32 +145,62 @@ func (a *Client) DeleteClusterTemplatesInWorkspace(params *DeleteClusterTemplate
 }
 
 /*
-GetClusterTemplateInWorkspace gets cluster template by name in workspace
+GetClusterTemplateByCrnInWorkspace gets cluster template by crn in workspace
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
 */
-func (a *Client) GetClusterTemplateInWorkspace(params *GetClusterTemplateInWorkspaceParams) (*GetClusterTemplateInWorkspaceOK, error) {
+func (a *Client) GetClusterTemplateByCrnInWorkspace(params *GetClusterTemplateByCrnInWorkspaceParams) (*GetClusterTemplateByCrnInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetClusterTemplateInWorkspaceParams()
+		params = NewGetClusterTemplateByCrnInWorkspaceParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getClusterTemplateInWorkspace",
+		ID:                 "getClusterTemplateByCrnInWorkspace",
 		Method:             "GET",
-		PathPattern:        "/v4/{workspaceId}/cluster_templates/{name}",
+		PathPattern:        "/v4/{workspaceId}/cluster_templates/crn/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetClusterTemplateInWorkspaceReader{formats: a.formats},
+		Reader:             &GetClusterTemplateByCrnInWorkspaceReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetClusterTemplateInWorkspaceOK), nil
+	return result.(*GetClusterTemplateByCrnInWorkspaceOK), nil
+
+}
+
+/*
+GetClusterTemplateByNameInWorkspace gets cluster template by name in workspace
+
+A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
+*/
+func (a *Client) GetClusterTemplateByNameInWorkspace(params *GetClusterTemplateByNameInWorkspaceParams) (*GetClusterTemplateByNameInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetClusterTemplateByNameInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getClusterTemplateByNameInWorkspace",
+		Method:             "GET",
+		PathPattern:        "/v4/{workspaceId}/cluster_templates/name/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetClusterTemplateByNameInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetClusterTemplateByNameInWorkspaceOK), nil
 
 }
 

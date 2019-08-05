@@ -65,9 +65,6 @@ type DistroXV1Request struct {
 	// time to live
 	TimeToLive int64 `json:"timeToLive,omitempty"`
 
-	// enable workload analytics for the cluser
-	WorkloadAnalytics bool `json:"workloadAnalytics,omitempty"`
-
 	// yarn
 	Yarn *YarnDistroXV1Parameters `json:"yarn,omitempty"`
 }

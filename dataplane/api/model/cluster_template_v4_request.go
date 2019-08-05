@@ -40,7 +40,7 @@ type ClusterTemplateV4Request struct {
 
 	// type
 	// Required: true
-	// Enum: [SPARK HIVE DATASCIENCE EDW ETL OTHER]
+	// Enum: [SPARK HIVE EDW ETL DATASCIENCE DATAMART DATAMART_HA DATALAKE DATAENGINEERING DATAENGINEERING_HA OTHER]
 	Type *string `json:"type"`
 }
 
@@ -130,7 +130,7 @@ var clusterTemplateV4RequestTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["SPARK","HIVE","DATASCIENCE","EDW","ETL","OTHER"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["SPARK","HIVE","EDW","ETL","DATASCIENCE","DATAMART","DATAMART_HA","DATALAKE","DATAENGINEERING","DATAENGINEERING_HA","OTHER"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -146,14 +146,29 @@ const (
 	// ClusterTemplateV4RequestTypeHIVE captures enum value "HIVE"
 	ClusterTemplateV4RequestTypeHIVE string = "HIVE"
 
-	// ClusterTemplateV4RequestTypeDATASCIENCE captures enum value "DATASCIENCE"
-	ClusterTemplateV4RequestTypeDATASCIENCE string = "DATASCIENCE"
-
 	// ClusterTemplateV4RequestTypeEDW captures enum value "EDW"
 	ClusterTemplateV4RequestTypeEDW string = "EDW"
 
 	// ClusterTemplateV4RequestTypeETL captures enum value "ETL"
 	ClusterTemplateV4RequestTypeETL string = "ETL"
+
+	// ClusterTemplateV4RequestTypeDATASCIENCE captures enum value "DATASCIENCE"
+	ClusterTemplateV4RequestTypeDATASCIENCE string = "DATASCIENCE"
+
+	// ClusterTemplateV4RequestTypeDATAMART captures enum value "DATAMART"
+	ClusterTemplateV4RequestTypeDATAMART string = "DATAMART"
+
+	// ClusterTemplateV4RequestTypeDATAMARTHA captures enum value "DATAMART_HA"
+	ClusterTemplateV4RequestTypeDATAMARTHA string = "DATAMART_HA"
+
+	// ClusterTemplateV4RequestTypeDATALAKE captures enum value "DATALAKE"
+	ClusterTemplateV4RequestTypeDATALAKE string = "DATALAKE"
+
+	// ClusterTemplateV4RequestTypeDATAENGINEERING captures enum value "DATAENGINEERING"
+	ClusterTemplateV4RequestTypeDATAENGINEERING string = "DATAENGINEERING"
+
+	// ClusterTemplateV4RequestTypeDATAENGINEERINGHA captures enum value "DATAENGINEERING_HA"
+	ClusterTemplateV4RequestTypeDATAENGINEERINGHA string = "DATAENGINEERING_HA"
 
 	// ClusterTemplateV4RequestTypeOTHER captures enum value "OTHER"
 	ClusterTemplateV4RequestTypeOTHER string = "OTHER"
