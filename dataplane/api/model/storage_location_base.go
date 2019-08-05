@@ -6,9 +6,13 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // StorageLocationBase storage location base
@@ -16,6 +20,7 @@ import (
 type StorageLocationBase struct {
 
 	// type
+	// Enum: [ZEPPELIN_SERVER ZEPPELIN_SERVER_S3 RESOURCE_MANAGER HIVE_METASTORE_WAREHOUSE HIVE_METASTORE_EXTERNAL_WAREHOUSE RANGER_ADMIN]
 	Type string `json:"type,omitempty"`
 
 	// value
@@ -24,6 +29,70 @@ type StorageLocationBase struct {
 
 // Validate validates this storage location base
 func (m *StorageLocationBase) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+var storageLocationBaseTypeTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["ZEPPELIN_SERVER","ZEPPELIN_SERVER_S3","RESOURCE_MANAGER","HIVE_METASTORE_WAREHOUSE","HIVE_METASTORE_EXTERNAL_WAREHOUSE","RANGER_ADMIN"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		storageLocationBaseTypeTypePropEnum = append(storageLocationBaseTypeTypePropEnum, v)
+	}
+}
+
+const (
+
+	// StorageLocationBaseTypeZEPPELINSERVER captures enum value "ZEPPELIN_SERVER"
+	StorageLocationBaseTypeZEPPELINSERVER string = "ZEPPELIN_SERVER"
+
+	// StorageLocationBaseTypeZEPPELINSERVERS3 captures enum value "ZEPPELIN_SERVER_S3"
+	StorageLocationBaseTypeZEPPELINSERVERS3 string = "ZEPPELIN_SERVER_S3"
+
+	// StorageLocationBaseTypeRESOURCEMANAGER captures enum value "RESOURCE_MANAGER"
+	StorageLocationBaseTypeRESOURCEMANAGER string = "RESOURCE_MANAGER"
+
+	// StorageLocationBaseTypeHIVEMETASTOREWAREHOUSE captures enum value "HIVE_METASTORE_WAREHOUSE"
+	StorageLocationBaseTypeHIVEMETASTOREWAREHOUSE string = "HIVE_METASTORE_WAREHOUSE"
+
+	// StorageLocationBaseTypeHIVEMETASTOREEXTERNALWAREHOUSE captures enum value "HIVE_METASTORE_EXTERNAL_WAREHOUSE"
+	StorageLocationBaseTypeHIVEMETASTOREEXTERNALWAREHOUSE string = "HIVE_METASTORE_EXTERNAL_WAREHOUSE"
+
+	// StorageLocationBaseTypeRANGERADMIN captures enum value "RANGER_ADMIN"
+	StorageLocationBaseTypeRANGERADMIN string = "RANGER_ADMIN"
+)
+
+// prop value enum
+func (m *StorageLocationBase) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, storageLocationBaseTypeTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *StorageLocationBase) validateType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Type) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -20,8 +22,9 @@ type DistroXClusterV1Request struct {
 	// blueprint name for the cluster
 	BlueprintName string `json:"blueprintName,omitempty"`
 
-	// external cloud storage configuration
-	CloudStorage *CloudStorageRequest `json:"cloudStorage,omitempty"`
+	// storage locations by CDP services
+	// Unique: true
+	CloudStorageLocations []*StorageLocationBase `json:"cloudStorageLocations"`
 
 	// cloudera manager specific requests
 	Cm *ClouderaManagerV1Request `json:"cm,omitempty"`
@@ -57,7 +60,7 @@ type DistroXClusterV1Request struct {
 func (m *DistroXClusterV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCloudStorage(formats); err != nil {
+	if err := m.validateCloudStorageLocations(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -83,19 +86,30 @@ func (m *DistroXClusterV1Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DistroXClusterV1Request) validateCloudStorage(formats strfmt.Registry) error {
+func (m *DistroXClusterV1Request) validateCloudStorageLocations(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.CloudStorage) { // not required
+	if swag.IsZero(m.CloudStorageLocations) { // not required
 		return nil
 	}
 
-	if m.CloudStorage != nil {
-		if err := m.CloudStorage.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("cloudStorage")
-			}
-			return err
+	if err := validate.UniqueItems("cloudStorageLocations", "body", m.CloudStorageLocations); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.CloudStorageLocations); i++ {
+		if swag.IsZero(m.CloudStorageLocations[i]) { // not required
+			continue
 		}
+
+		if m.CloudStorageLocations[i] != nil {
+			if err := m.CloudStorageLocations[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("cloudStorageLocations" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
