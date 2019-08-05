@@ -27,6 +27,7 @@ dependencies {
   compile project(':environment-api')
   compile project(':redbeams-api')
   compile project(':notification-sender')
+  compile project(':idbmms-connector')
 
   implementation     group: 'com.google.code.gson',      name: 'gson',                            version: '2.6.2'
   implementation     group: 'dnsjava',                   name: 'dnsjava',                         version: '2.1.7'

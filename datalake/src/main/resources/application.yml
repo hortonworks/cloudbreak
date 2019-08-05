@@ -30,6 +30,8 @@ sdx:
     ssotype: SSO_PROVIDER
 
 altus:
+  idbmms:
+    host: localhost
   ums:
     host: localhost
 
