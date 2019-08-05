@@ -20,7 +20,6 @@
           "hdfs-BALANCER-BASE",
           "hdfs-GATEWAY-BASE",
           "hdfs-NAMENODE-BASE",
-          "hdfs-NFSGATEWAY-BASE",
           "hdfs-SECONDARYNAMENODE-BASE",
           "hive-HIVEMETASTORE-BASE",
           "kafka-GATEWAY-BASE",
@@ -219,11 +218,6 @@
             "base": true,
             "refName": "hdfs-GATEWAY-BASE",
             "roleType": "GATEWAY"
-          },
-          {
-            "base": true,
-            "refName": "hdfs-NFSGATEWAY-BASE",
-            "roleType": "NFSGATEWAY"
           }
         ],
         "serviceConfigs": [
