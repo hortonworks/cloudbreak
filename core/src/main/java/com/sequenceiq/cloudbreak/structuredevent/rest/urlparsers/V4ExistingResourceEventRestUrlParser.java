@@ -18,7 +18,7 @@ public class V4ExistingResourceEventRestUrlParser extends RestUrlParser {
 
     // Irregular requests containing event followed by resource name at the end: v4/{workspaceId}/credentials/*
     // Irregular requests with resource name format followed by resource name at the end: remaining patterns
-    private static final Pattern ANTI_PATTERN = Pattern.compile("v4/\\d+/(credentials/.+|(blueprints)/(name|crn)/([^/]+))");
+    private static final Pattern ANTI_PATTERN = Pattern.compile("v4/\\d+/(credentials/.+|(blueprints)|(cluster_templates)/(name|crn)/([^/]+))");
 
     private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/([^/]+)/([a-z_]+)");
 

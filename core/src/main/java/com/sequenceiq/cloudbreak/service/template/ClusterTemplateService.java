@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.template;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -203,15 +204,31 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return AuthorizationResource.DATAHUB;
     }
 
-    public ClusterTemplate delete(String name, Long workspaceId) {
+    public ClusterTemplate deleteByName(String name, Long workspaceId) {
         ClusterTemplate clusterTemplate = getByNameForWorkspaceId(name, workspaceId);
         clusterTemplate = delete(clusterTemplate);
         stackTemplateService.delete(clusterTemplate.getStackTemplate());
         return clusterTemplate;
     }
 
+    public ClusterTemplate getByCrn(String crn, Long workspaceId) {
+        Optional<ClusterTemplate> clusterTemplateOptional = clusterTemplateRepository.getByCrnForWorkspaceId(crn, workspaceId);
+        if (clusterTemplateOptional.isEmpty()) {
+            throw new BadRequestException(
+                    String.format("clustertemplate does not exist with crn '%s' in workspace %s", crn, workspaceId));
+        }
+        return clusterTemplateOptional.get();
+    }
+
+    public ClusterTemplate deleteByCrn(String crn, Long workspaceId) {
+        ClusterTemplate clusterTemplate = getByCrn(crn, workspaceId);
+        clusterTemplate = delete(clusterTemplate);
+        stackTemplateService.delete(clusterTemplate.getStackTemplate());
+        return clusterTemplate;
+    }
+
     public Set<ClusterTemplate> deleteMultiple(Set<String> names, Long workspaceId) {
-        return names.stream().map(name -> delete(name, workspaceId)).collect(Collectors.toSet());
+        return names.stream().map(name -> deleteByName(name, workspaceId)).collect(Collectors.toSet());
     }
 
     private String createCRN(String accountId) {

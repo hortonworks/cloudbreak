@@ -18,7 +18,7 @@ public class ClusterTemplateDeleteAction implements Action<ClusterTemplateTestDt
         Log.log(LOGGER, "ClusterTemplateEntity delete, name: " + testDto.getRequest().getName());
         client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
-                .delete(client.getWorkspaceId(), testDto.getRequest().getName());
+                .deleteByName(client.getWorkspaceId(), testDto.getRequest().getName());
         Log.log(LOGGER, "ClusterTemplateEntity deleted successfully: " + testDto.getResponse().getId());
 
         return testDto;

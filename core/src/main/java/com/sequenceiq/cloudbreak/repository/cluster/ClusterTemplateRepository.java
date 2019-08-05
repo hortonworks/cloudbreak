@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.repository.cluster;
 
 import static com.sequenceiq.authorization.resource.ResourceAction.READ;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -11,13 +12,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByTarget;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 
 @EntityType(entityClass = ClusterTemplate.class)
 @Transactional(TxType.REQUIRED)
@@ -33,4 +34,8 @@ public interface ClusterTemplateRepository extends WorkspaceResourceRepository<C
     @Query("SELECT c FROM ClusterTemplate c WHERE c.workspace.id= :workspaceId AND c.status <> 'DEFAULT_DELETED'")
     @CheckPermissionsByReturnValue
     Set<ClusterTemplate> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
+
+    @Query("SELECT c FROM ClusterTemplate c WHERE c.resourceCrn= :crn AND c.workspace.id= :workspaceId AND c.status <> 'DEFAULT_DELETED'")
+    @CheckPermissionsByReturnValue
+    Optional<ClusterTemplate> getByCrnForWorkspaceId(@Param("crn") String crn, @Param("workspaceId") Long workspaceId);
 }
