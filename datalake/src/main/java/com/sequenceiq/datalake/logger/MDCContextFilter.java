@@ -34,15 +34,19 @@ public class MDCContextFilter extends OncePerRequestFilter {
 
     private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
+    private final ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
+
     private final Runnable mdcAppender;
 
-    public MDCContextFilter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider, Runnable mdcAppender) {
+    public MDCContextFilter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
+            ThreadBasedRequestIdProvider threadBasedRequestIdProvider, Runnable mdcAppender) {
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
+        this.threadBasedRequestIdProvider = threadBasedRequestIdProvider;
         this.mdcAppender = mdcAppender;
     }
 
-    public MDCContextFilter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
-        this(threadBasedUserCrnProvider, () -> {
+    public MDCContextFilter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider, ThreadBasedRequestIdProvider threadBasedRequestIdProvider) {
+        this(threadBasedUserCrnProvider, threadBasedRequestIdProvider, () -> {
         });
     }
 
@@ -59,7 +63,9 @@ public class MDCContextFilter extends OncePerRequestFilter {
         if (mdcAppender != null) {
             mdcAppender.run();
         }
+        threadBasedRequestIdProvider.setRequestId(wrapper.getHeader(REQUEST_ID_HEADER));
         filterChain.doFilter(wrapper, response);
+        threadBasedRequestIdProvider.removeRequestId();
     }
 
     private static class RequestIdHeaderInjectingHttpRequestWrapper extends HttpServletRequestWrapper {

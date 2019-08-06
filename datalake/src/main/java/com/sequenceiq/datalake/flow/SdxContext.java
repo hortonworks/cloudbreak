@@ -9,10 +9,13 @@ public class SdxContext extends CommonContext {
 
     private String userId;
 
-    public SdxContext(FlowParameters flowParameters, Long sdxId, String userId) {
+    private String requestId;
+
+    public SdxContext(FlowParameters flowParameters, Long sdxId, String userId, String requestId) {
         super(flowParameters);
         this.sdxId = sdxId;
         this.userId = userId;
+        this.requestId = requestId;
     }
 
     public Long getSdxId() {
@@ -31,4 +34,11 @@ public class SdxContext extends CommonContext {
         this.userId = userId;
     }
 
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
 }

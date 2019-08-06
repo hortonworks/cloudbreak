@@ -57,8 +57,6 @@ start_metering_heartbeat_application:
   service.running:
     - enable: True
     - name: metering-heartbeat-application
-    - watch:
-       - file: /etc/systemd/system/metering-heartbeat-application.service
 {% endif %}
 
 {% else %}

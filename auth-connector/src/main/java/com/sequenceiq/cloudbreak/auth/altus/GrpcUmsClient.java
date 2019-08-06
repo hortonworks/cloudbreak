@@ -318,7 +318,7 @@ public class GrpcUmsClient {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.info("Generating new access / secret key pair for {}", machineUserCrn);
             CreateAccessKeyResponse accessKeyResponse = client.createAccessPrivateKeyPair(
-                    requestId.orElse(UUID.randomUUID().toString()), actorCrn, machineUserCrn);
+                    requestId.orElse(UUID.randomUUID().toString()), actorCrn, machineUserCrn, accessKeyType);
             return new AltusCredential(accessKeyResponse.getAccessKey().getAccessKeyId(), accessKeyResponse.getPrivateKey().toCharArray());
         }
     }

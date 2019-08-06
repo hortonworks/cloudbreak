@@ -6,8 +6,8 @@ public class SdxCreateFailedEvent extends SdxEvent {
 
     private Exception exception;
 
-    public SdxCreateFailedEvent(Long sdxId, String userId, Exception exception) {
-        super(sdxId, userId);
+    public SdxCreateFailedEvent(Long sdxId, String userId, String requestId, Exception exception) {
+        super(sdxId, userId, requestId);
         this.exception = exception;
     }
 

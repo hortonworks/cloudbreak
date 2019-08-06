@@ -13,6 +13,7 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
@@ -40,7 +41,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new SdxCreateFailedEvent(resourceId, null, e);
+        return new SdxCreateFailedEvent(resourceId, null, null, e);
     }
 
     @Override
@@ -48,25 +49,27 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
         StackCreationWaitRequest stackCreationWaitRequest = handlerEvent.getData();
         Long sdxId = stackCreationWaitRequest.getResourceId();
         String userId = stackCreationWaitRequest.getUserId();
+        String requestId = stackCreationWaitRequest.getRequestId();
+        MDCBuilder.addRequestIdToMdcContext(requestId);
         Selectable response;
         try {
             LOGGER.debug("start polling stack creation process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
-            provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig);
-            response = new StackCreationSuccessEvent(sdxId, userId);
+            provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig, requestId);
+            response = new StackCreationSuccessEvent(sdxId, userId, requestId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Polling exited before timeout for SDX: {}. Cause: ", sdxId, userBreakException);
-            response = new SdxCreateFailedEvent(sdxId, userId, userBreakException);
+            response = new SdxCreateFailedEvent(sdxId, userId, requestId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Poller stopped for SDX: {}", sdxId, pollerStoppedException);
-            response = new SdxCreateFailedEvent(sdxId, userId,
+            response = new SdxCreateFailedEvent(sdxId, userId, requestId,
                     new PollerStoppedException("SDX cluster creation timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Polling failed for stack: {}", sdxId, exception);
-            response = new SdxCreateFailedEvent(sdxId, userId, exception);
+            response = new SdxCreateFailedEvent(sdxId, userId, requestId, exception);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in stack creation wait phase", anotherException);
-            response = new SdxCreateFailedEvent(sdxId, userId, anotherException);
+            response = new SdxCreateFailedEvent(sdxId, userId, requestId, anotherException);
         }
         sendEvent(response, handlerEvent);
     }

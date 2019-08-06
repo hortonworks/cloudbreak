@@ -6,8 +6,8 @@ public class StackDeletionFailedEvent extends SdxEvent {
 
     private Exception exception;
 
-    public StackDeletionFailedEvent(Long sdxId, String userId, Exception exception) {
-        super(sdxId, userId);
+    public StackDeletionFailedEvent(Long sdxId, String userId, String requestId, Exception exception) {
+        super(sdxId, userId, requestId);
         this.exception = exception;
     }
 

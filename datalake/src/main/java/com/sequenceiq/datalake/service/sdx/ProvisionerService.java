@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -64,7 +65,7 @@ public class ProvisionerService {
         });
     }
 
-    public void waitCloudbreakClusterDeletion(Long id, PollingConfig pollingConfig) {
+    public void waitCloudbreakClusterDeletion(Long id, PollingConfig pollingConfig, String requestId) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(false)
@@ -72,6 +73,7 @@ public class ProvisionerService {
                     .run(() -> {
                         LOGGER.info("Deletion polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         try {
+                            MDCBuilder.addRequestIdToMdcContext(requestId);
                             StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
                                     .stackV4Endpoint()
                                     .get(0L, sdxCluster.getClusterName(), Collections.emptySet());
@@ -125,8 +127,7 @@ public class ProvisionerService {
         });
     }
 
-    public void waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig) {
-
+    public void waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig, String requestId) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(false)
@@ -134,6 +135,7 @@ public class ProvisionerService {
                     .run(() -> {
                         LOGGER.info("Polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         try {
+                            MDCBuilder.addRequestIdToMdcContext(requestId);
                             StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
                                     .stackV4Endpoint()
                                     .get(0L, sdxCluster.getClusterName(), Collections.emptySet());

@@ -7,8 +7,8 @@ public class RdsWaitRequest extends SdxEvent {
 
     private DetailedEnvironmentResponse detailedEnvironmentResponse;
 
-    public RdsWaitRequest(Long sdxId, String userId, DetailedEnvironmentResponse detailedEnvironmentResponse) {
-        super(sdxId, userId);
+    public RdsWaitRequest(Long sdxId, String userId, String requestId, DetailedEnvironmentResponse detailedEnvironmentResponse) {
+        super(sdxId, userId, requestId);
         this.detailedEnvironmentResponse = detailedEnvironmentResponse;
     }
 
