@@ -40,7 +40,7 @@ type ClusterTemplateV4Request struct {
 
 	// type
 	// Required: true
-	// Enum: [SPARK HIVE EDW ETL DATASCIENCE DATAMART DATAMART_HA DATALAKE DATAENGINEERING DATAENGINEERING_HA OTHER]
+	// Enum: [SPARK HIVE EDW ETL DATASCIENCE DATAMART DATALAKE DATAENGINEERING DATAENGINEERING_HA OTHER]
 	Type *string `json:"type"`
 }
 
@@ -130,7 +130,7 @@ var clusterTemplateV4RequestTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["SPARK","HIVE","EDW","ETL","DATASCIENCE","DATAMART","DATAMART_HA","DATALAKE","DATAENGINEERING","DATAENGINEERING_HA","OTHER"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["SPARK","HIVE","EDW","ETL","DATASCIENCE","DATAMART","DATALAKE","DATAENGINEERING","DATAENGINEERING_HA","OTHER"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -157,9 +157,6 @@ const (
 
 	// ClusterTemplateV4RequestTypeDATAMART captures enum value "DATAMART"
 	ClusterTemplateV4RequestTypeDATAMART string = "DATAMART"
-
-	// ClusterTemplateV4RequestTypeDATAMARTHA captures enum value "DATAMART_HA"
-	ClusterTemplateV4RequestTypeDATAMARTHA string = "DATAMART_HA"
 
 	// ClusterTemplateV4RequestTypeDATALAKE captures enum value "DATALAKE"
 	ClusterTemplateV4RequestTypeDATALAKE string = "DATALAKE"

@@ -80,6 +80,9 @@ type StackV4Request struct {
 	// stack related tags
 	Tags *TagsV4Request `json:"tags,omitempty"`
 
+	// stack related telemetry settings
+	Telemetry *TelemetryRequest `json:"telemetry,omitempty"`
+
 	// time to live
 	TimeToLive int64 `json:"timeToLive,omitempty"`
 
@@ -144,6 +147,10 @@ func (m *StackV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateTags(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateTelemetry(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -387,6 +394,24 @@ func (m *StackV4Request) validateTags(formats strfmt.Registry) error {
 		if err := m.Tags.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tags")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *StackV4Request) validateTelemetry(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Telemetry) { // not required
+		return nil
+	}
+
+	if m.Telemetry != nil {
+		if err := m.Telemetry.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("telemetry")
 			}
 			return err
 		}

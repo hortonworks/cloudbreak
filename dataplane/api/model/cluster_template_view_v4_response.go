@@ -64,7 +64,7 @@ type ClusterTemplateViewV4Response struct {
 	Status string `json:"status,omitempty"`
 
 	// type of the cluster template
-	// Enum: [SPARK HIVE EDW ETL DATASCIENCE DATAMART DATAMART_HA DATALAKE DATAENGINEERING DATAENGINEERING_HA OTHER]
+	// Enum: [SPARK HIVE EDW ETL DATASCIENCE DATAMART DATALAKE DATAENGINEERING DATAENGINEERING_HA OTHER]
 	Type string `json:"type,omitempty"`
 }
 
@@ -235,7 +235,7 @@ var clusterTemplateViewV4ResponseTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["SPARK","HIVE","EDW","ETL","DATASCIENCE","DATAMART","DATAMART_HA","DATALAKE","DATAENGINEERING","DATAENGINEERING_HA","OTHER"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["SPARK","HIVE","EDW","ETL","DATASCIENCE","DATAMART","DATALAKE","DATAENGINEERING","DATAENGINEERING_HA","OTHER"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -262,9 +262,6 @@ const (
 
 	// ClusterTemplateViewV4ResponseTypeDATAMART captures enum value "DATAMART"
 	ClusterTemplateViewV4ResponseTypeDATAMART string = "DATAMART"
-
-	// ClusterTemplateViewV4ResponseTypeDATAMARTHA captures enum value "DATAMART_HA"
-	ClusterTemplateViewV4ResponseTypeDATAMARTHA string = "DATAMART_HA"
 
 	// ClusterTemplateViewV4ResponseTypeDATALAKE captures enum value "DATALAKE"
 	ClusterTemplateViewV4ResponseTypeDATALAKE string = "DATALAKE"
