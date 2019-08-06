@@ -41,7 +41,6 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -74,6 +73,7 @@ public class UserService {
 
     public SyncOperationStatus synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+
         validateParameters(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
         LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
                 accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
@@ -88,36 +88,34 @@ public class UserService {
         SyncOperation syncOperation = syncOperationStatusService
                 .startOperation(accountId, SyncOperationType.USER_SYNC, environmentCrnFilter, union(userCrnFilter, machineUserCrnFilter));
 
+        LOGGER.info("Starting operation [{}] with status [{}]", syncOperation.getOperationId(), syncOperation.getStatus());
+
         if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
             MDCBuilder.addFlowIdToMdcContext(syncOperation.getOperationId());
-            asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(syncOperation.getOperationId(), accountId, actorCrn, stacks,
-                        userCrnFilter, machineUserCrnFilter));
+            asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(
+                syncOperation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
         }
 
         return syncOperationToSyncOperationStatus.convert(syncOperation);
     }
 
-    public SyncStatusDetail syncAllUsersForStack(String accountId, String actorCrn, Stack stack) {
-        UmsState umsState = umsUsersStateProvider.getUmsState(accountId, actorCrn);
-        return synchronizeStack(stack, umsState, Set.of());
-    }
-
-    private void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
-            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+    private void asyncSynchronizeUsers(
+        String operationId, String accountId, String actorCrn, List<Stack> stacks,
+        Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
         try {
-            boolean filterUsers = !userCrnFilter.isEmpty() || !machineUserCrnFilter.isEmpty();
+            Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
+            Map<String, UsersState> envToUmsStateMap = umsUsersStateProvider
+                .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter);
 
-            UmsState umsState = filterUsers ? umsUsersStateProvider.getUserFilteredUmsState(accountId, actorCrn, userCrnFilter, machineUserCrnFilter)
-                    : umsUsersStateProvider.getUmsState(accountId, actorCrn);
-            LOGGER.debug("UmsState = {}", umsState);
-            Set<String> userIdFilter = filterUsers ? umsState.getUsernamesFromCrns(userCrnFilter, machineUserCrnFilter)
-                    : Set.of();
+            // TODO: fix me.
+            Set<String> userIdFilter = Set.of();
+//            Set<String> userIdFilter = filterUsers ? umsState.getUsernamesFromCrns(userCrnFilter, machineUserCrnFilter) : Set.of();
 
             Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
                     .collect(Collectors.toMap(Stack::getEnvironmentCrn,
                             stack -> asyncTaskExecutor.submit(() -> {
                                 MDCBuilder.buildMdcContext(stack);
-                                return synchronizeStack(stack, umsState, userIdFilter);
+                                return synchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), userIdFilter);
                             })));
 
             List<SuccessDetails> success = new ArrayList<>();
@@ -144,19 +142,25 @@ public class UserService {
             });
             syncOperationStatusService.completeOperation(operationId, success, failure);
         } catch (RuntimeException e) {
-            LOGGER.debug("caught exception", e);
+            LOGGER.error("User sync operation {} failed with error:", e);
             syncOperationStatusService.failOperation(operationId, e.getLocalizedMessage());
             throw e;
         }
     }
 
-    private SyncStatusDetail synchronizeStack(Stack stack, UmsState umsState, Set<String> userIdFilter) {
+    private SyncStatusDetail synchronizeStack(Stack stack, UsersState umsUsersState, Set<String> userIdFilter) {
+
         // TODO improve exception handling
+        // TODO: AP- Check if ums user has any user to be sync'ed, if not, skip. DH- revisit this check when implementing user removal
         String environmentCrn = stack.getEnvironmentCrn();
         try {
             LOGGER.info("Syncing Environment {}", environmentCrn);
-            UsersState umsUsersState = umsState.getUsersState(environmentCrn);
             LOGGER.debug("UMS UsersState = {}", umsUsersState);
+            if (umsUsersState.getUsers() == null || umsUsersState.getUsers().size() == 0) {
+                String message = "Failed to synchronize environment " + stack.getEnvironmentCrn() + " No User to sync for this environment";
+                LOGGER.warn(message);
+                return SyncStatusDetail.fail(environmentCrn, message);
+            }
 
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
             UsersState ipaUsersState = userIdFilter.isEmpty() ? freeIpaUsersStateProvider.getUsersState(freeIpaClient)

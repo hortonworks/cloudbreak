@@ -15,6 +15,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementBlockingStub;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Actor;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
@@ -24,6 +25,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest;
@@ -97,6 +100,35 @@ public class UmsClient {
             groups.addAll(response.getGroupList());
             requestBuilder.setPageToken(response.getNextPageToken());
         } while (response.hasNextPageToken());
+        return groups;
+    }
+
+    /**
+     * Wraps calls to ListGroupsForMember with an Account ID and member CRN.
+     *
+     * @param requestId             the request ID for the request
+     * @param accountId             the account ID
+     * @param memberCrn             member (e.g., user) CRN for which groups are fetched.
+     * @return the list of group CRNs
+     */
+    public List<String> listGroupsForMembers(String requestId, String accountId, String memberCrn) {
+        checkNotNull(accountId);
+        checkNotNull(memberCrn);
+
+        Actor.Builder actor = Actor.newBuilder().setAccountId(accountId).setUserIdOrCrn(memberCrn);
+        ListGroupsForMemberRequest.Builder request = ListGroupsForMemberRequest.newBuilder()
+            .setMember(actor.build());
+
+        ListGroupsForMemberResponse response;
+        List<String> groups = new ArrayList<>();
+        do {
+            response = newStub(requestId).listGroupsForMember(request.build());
+            for (int i = 0; i < response.getGroupCrnCount(); i++) {
+                String grpCRN = response.getGroupCrn(i);
+                groups.add(grpCRN);
+            }
+        } while (response.hasNextPageToken());
+
         return groups;
     }
 
