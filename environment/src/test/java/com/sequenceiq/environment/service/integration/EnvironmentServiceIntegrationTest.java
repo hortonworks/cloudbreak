@@ -55,6 +55,7 @@ import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.service.RequestProvider;
+import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
 import com.sequenceiq.environment.service.integration.testconfiguration.TestConfigurationForServiceIntegration;
@@ -98,6 +99,9 @@ public class EnvironmentServiceIntegrationTest {
 
     @MockBean
     private UmsAuthorizationService umsAuthorizationService;
+
+    @MockBean
+    private NetworkService networkService;
 
     @Inject
     private ProxyConfigRepository proxyConfigRepository;

@@ -5,8 +5,11 @@ import static com.sequenceiq.environment.environment.service.EnvironmentTestData
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.USER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -75,8 +78,8 @@ class EnvironmentResourceServiceTest {
         Environment environment = new Environment();
         NetworkDto networkDto = null;
         BaseNetwork network = new AwsNetwork();
-        when(networkService.saveNetwork(eq(environment), eq(networkDto), eq(ACCOUNT_ID))).thenReturn(network);
-        assertEquals(network, environmentResourceServiceUnderTest.createAndSetNetwork(environment, networkDto, ACCOUNT_ID));
+        when(networkService.saveNetwork(eq(environment), eq(networkDto), eq(ACCOUNT_ID), any())).thenReturn(network);
+        assertEquals(network, environmentResourceServiceUnderTest.createAndSetNetwork(environment, networkDto, ACCOUNT_ID, Map.of()));
     }
 
     @Configuration

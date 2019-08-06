@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
@@ -145,7 +147,8 @@ public class EnvironmentModificationService {
     }
 
     private BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkCreationDto, String accountId) {
-        return networkService.saveNetwork(environment, networkCreationDto, accountId);
+        Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, networkCreationDto);
+        return networkService.saveNetwork(environment, networkCreationDto, accountId, subnetMetas);
     }
 
     private void editDescriptionIfChanged(Environment environment, EnvironmentEditDto editDto) {
