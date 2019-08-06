@@ -97,7 +97,13 @@
           {
             "refName": "hive-HIVESERVER2-BASE",
             "roleType": "HIVESERVER2",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                 "name": "hive_server2_transport_mode",
+                 "value": "http"
+              }
+            ]
           }
         ]
       },
