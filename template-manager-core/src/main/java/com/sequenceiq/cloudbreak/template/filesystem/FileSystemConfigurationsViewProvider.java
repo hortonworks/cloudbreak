@@ -81,7 +81,7 @@ public class FileSystemConfigurationsViewProvider {
             return getLegacyConfigurations(source, locations);
         }
         CloudStorage cloudStorage = source.getCloudStorage();
-        if (cloudStorage != null) {
+        if (cloudStorage != null && cloudStorage.getCloudIdentities() != null && !cloudStorage.getCloudIdentities().isEmpty()) {
             // TODO: SUPPORT MULTIPLE IDENTITIES
             CloudIdentity cloudIdentity = cloudStorage.getCloudIdentities().get(0);
             if (cloudIdentity != null) {
@@ -92,7 +92,8 @@ public class FileSystemConfigurationsViewProvider {
                 }
             }
         }
-        return null;
+
+        return new BaseFileSystemConfigurationsView(source.getType().name(), locations);
     }
 
     private BaseFileSystemConfigurationsView getLegacyConfigurations(FileSystem source, Set<StorageLocationView> locations) throws IOException {
