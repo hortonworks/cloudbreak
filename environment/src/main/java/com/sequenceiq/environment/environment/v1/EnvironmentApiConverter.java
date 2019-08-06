@@ -235,18 +235,21 @@ public class EnvironmentApiConverter {
                 .withSubnetIds(network.getSubnetIds())
                 .withNetworkCidr(network.getNetworkCidr())
                 .withSubnetMetas(network.getSubnetMetas())
-                .withAws(EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder.anEnvironmentNetworkAwsParams()
-                        .withVpcId(getIfNotNull(network.getAws(), AwsParams::getVpcId))
-                        .build())
-                .withAzure(EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder.anEnvironmentNetworkAzureParams()
-                        .withNetworkId(getIfNotNull(network.getAzure(), AzureParams::getNetworkId))
-                        .withResourceGroupName(getIfNotNull(network.getAzure(), AzureParams::getResourceGroupName))
-                        .withNoFirewallRules(getIfNotNull(network.getAzure(), AzureParams::isNoFirewallRules))
-                        .withNoPublicIp(getIfNotNull(network.getAzure(), AzureParams::isNoPublicIp))
-                        .build())
-                .withYarn(EnvironmentNetworkYarnParams.EnvironmentNetworkYarnParamsBuilder.anEnvironmentNetworkYarnParams()
-                        .withQueue(getIfNotNull(network.getYarn(), YarnParams::getQueue))
-                        .build())
+                .withAws(getIfNotNull(network.getAws(), p -> EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder
+                        .anEnvironmentNetworkAwsParams()
+                        .withVpcId(p.getVpcId())
+                        .build()))
+                .withAzure(getIfNotNull(network.getAzure(), p -> EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder
+                        .anEnvironmentNetworkAzureParams()
+                        .withNetworkId(p.getNetworkId())
+                        .withResourceGroupName(p.getResourceGroupName())
+                        .withNoFirewallRules(p.isNoFirewallRules())
+                        .withNoPublicIp(p.isNoPublicIp())
+                        .build()))
+                .withYarn(getIfNotNull(network.getYarn(), p -> EnvironmentNetworkYarnParams.EnvironmentNetworkYarnParamsBuilder
+                        .anEnvironmentNetworkYarnParams()
+                        .withQueue(p.getQueue())
+                        .build()))
                 .build();
     }
 
