@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidIfExactlyOneNonNull;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerTest;
@@ -17,7 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ValidIfExactlyOneNonNull(fields = { "existingDatabaseServerCrn", "databaseServer" })
 public class DatabaseServerTestV4Request implements Serializable {
 
-    @Valid
+    @ValidCrn
     @ApiModelProperty(DatabaseServerTest.EXISTING_CRN)
     private String existingDatabaseServerCrn;
 

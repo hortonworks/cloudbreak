@@ -14,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
@@ -29,11 +30,14 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Authorization;
 
+import org.springframework.validation.annotation.Validated;
+
 @Path("/v4/databases")
 @Produces(MediaType.APPLICATION_JSON)
 @Api(tags = { "databases" },
     protocols = "http,https",
     authorizations = { @Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY) })
+@Validated
 public interface DatabaseV4Endpoint {
 
     @GET
@@ -41,7 +45,8 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.LIST, notes = DatabaseNotes.LIST,
             nickname = "listDatabases")
     DatabaseV4Responses list(
-        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentCrn") String environmentCrn
+        @ValidCrn @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
+        @QueryParam("environmentCrn") String environmentCrn
     );
 
     @POST
@@ -58,7 +63,8 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.GET_BY_NAME, notes = DatabaseNotes.GET_BY_NAME,
             nickname = "getDatabase")
     DatabaseV4Response get(
-        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentCrn") String environmentCrn,
+        @ValidCrn @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
+        @QueryParam("environmentCrn") String environmentCrn,
         @ApiParam(DatabaseParamDescriptions.NAME) @PathParam("name") String name
     );
 
@@ -67,7 +73,8 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.DELETE_BY_NAME, notes = DatabaseNotes.DELETE_BY_NAME,
             nickname = "deleteDatabase")
     DatabaseV4Response delete(
-        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentCrn") String environmentCrn,
+        @ValidCrn @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
+        @QueryParam("environmentCrn") String environmentCrn,
         @ApiParam(DatabaseParamDescriptions.NAME) @PathParam("name") String name
     );
 
@@ -77,7 +84,8 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.DELETE_MULTIPLE_BY_NAME, notes = DatabaseNotes.DELETE_MULTIPLE_BY_NAME,
             nickname = "deleteMultipleDatabases")
     DatabaseV4Responses deleteMultiple(
-        @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true) @QueryParam("environmentCrn") String environmentCrn,
+        @ValidCrn @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
+        @QueryParam("environmentCrn") String environmentCrn,
         @ApiParam(DatabaseParamDescriptions.NAMES) Set<String> names
     );
 
