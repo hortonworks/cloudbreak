@@ -67,7 +67,7 @@ public class AltusIAMService {
         } else if (StackType.WORKLOAD.equals(stack.getType())) {
             clusterType = "datahub";
         }
-        return String.format(clusterType, FLUENT_DATABUS_MACHINE_USER_NAME_PATTERN,
+        return String.format(FLUENT_DATABUS_MACHINE_USER_NAME_PATTERN, clusterType,
                 Crn.fromString(stack.getResourceCrn()).getResource());
     }
 }
