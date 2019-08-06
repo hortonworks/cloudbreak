@@ -59,7 +59,7 @@ public class AltusIAMService {
 
     // for datalake metering is not supported/required right now
     private boolean isMeteringOrDeploymentReportingSupported(Stack stack, Telemetry telemetry) {
-        return telemetry.isReportDeploymentLogs() || (telemetry.isMeteringEnabled() && !StackType.DATALAKE.equals(stack.getType()));
+        return telemetry != null && (telemetry.isReportDeploymentLogs() || (telemetry.isMeteringEnabled() && !StackType.DATALAKE.equals(stack.getType())));
     }
 
     private String getFluentDatabusMachineUserName(Stack stack) {

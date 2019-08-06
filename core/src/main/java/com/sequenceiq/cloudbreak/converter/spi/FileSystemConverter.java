@@ -50,7 +50,7 @@ public class FileSystemConverter {
 
     private List<CloudFileSystemView> convertFromCloudStorage(FileSystem source, List<CloudFileSystemView> cloudFileSystemViews) {
         CloudStorage cloudStorage = source.getCloudStorage();
-        if (cloudStorage != null) {
+        if (cloudStorage != null && cloudStorage.getCloudIdentities() != null && !cloudStorage.getCloudIdentities().isEmpty()) {
             cloudFileSystemViews = cloudStorage.getCloudIdentities().stream()
                     .map(cloudIdentity -> {
                         if (source.getType().isS3()) {

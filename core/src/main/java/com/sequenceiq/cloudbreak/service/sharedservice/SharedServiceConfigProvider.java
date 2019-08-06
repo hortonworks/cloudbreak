@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
@@ -158,7 +159,8 @@ public class SharedServiceConfigProvider {
     }
 
     private void setupStoragePath(Cluster requestedCluster, DatalakeResources datalakeResources) {
-        requestedCluster.setFileSystem(remoteDataContextWorkaroundService.prepareFilesytem(requestedCluster, datalakeResources));
+        FileSystem fileSystem = remoteDataContextWorkaroundService.prepareFilesytem(requestedCluster, datalakeResources);
+        requestedCluster.setFileSystem(fileSystem);
     }
 
     private Stack queryStack(Long sourceClusterId, Optional<String> sourceClusterName, User user, Workspace workspace) {

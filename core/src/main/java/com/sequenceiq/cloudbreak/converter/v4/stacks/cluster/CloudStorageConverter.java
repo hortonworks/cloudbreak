@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
 import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +39,6 @@ import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.model.CloudStorageCdpService;
-import com.sequenceiq.common.model.FileSystemAwareCloudStorage;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Component
@@ -88,8 +87,8 @@ public class CloudStorageConverter {
         FileSystem fileSystem = new FileSystem();
 
         fileSystem.setName(nameGenerator.generateName(FILESYSTEM));
-        FileSystemAwareCloudStorage cloudStorageParameters = fileSystemResolver.resolveFileSystem(cloudStorageRequest);
-        fileSystem.setType(cloudStorageParameters.getType());
+        FileSystemType fileSystemType = fileSystemResolver.determineFileSystemType(cloudStorageRequest);
+        fileSystem.setType(fileSystemType);
 
         CloudStorage cloudStorage = new CloudStorage();
         String s3GuardDynamoTableName = getS3GuardDynamoTableName(cloudStorageRequest);
@@ -98,9 +97,13 @@ public class CloudStorageConverter {
                 .map(this::storageLocationRequestToStorageLocation).collect(Collectors.toList());
         cloudStorage.setLocations(storageLocations);
 
-        List<CloudIdentity> cloudIdentities = cloudStorageRequest.getIdentities().stream()
-                .map(this::identityRequestToCloudIdentity).collect(Collectors.toList());
-        cloudStorage.setCloudIdentities(cloudIdentities);
+        if (cloudStorageRequest.getIdentities() != null) {
+
+            List<CloudIdentity> cloudIdentities = cloudStorageRequest.getIdentities().stream()
+                    .map(this::identityRequestToCloudIdentity).collect(Collectors.toList());
+            cloudStorage.setCloudIdentities(cloudIdentities);
+
+        }
 
         cloudStorage.setAccountMapping(accountMappingRequestToAccountMapping(cloudStorageRequest.getAccountMapping()));
 
@@ -119,7 +122,7 @@ public class CloudStorageConverter {
     public SpiFileSystem requestToSpiFileSystem(CloudStorageBase cloudStorageRequest) {
         List<CloudFileSystemView> cloudFileSystemViews = new ArrayList<>();
         FileSystemType type = null;
-        if (!cloudStorageRequest.getIdentities().isEmpty()) {
+        if (cloudStorageRequest.getIdentities() != null && !cloudStorageRequest.getIdentities().isEmpty()) {
             for (StorageIdentityBase storageIdentity : cloudStorageRequest.getIdentities()) {
                 if (storageIdentity != null) {
                     if (storageIdentity.getAdls() != null) {

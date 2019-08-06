@@ -188,8 +188,10 @@ public class ClusterTerminationService {
             ConfigQueryEntries configQueryEntries = cmCloudStorageConfigProvider.getConfigQueryEntries();
             BaseFileSystemConfigurationsView fsConfiguration
                     = fileSystemConfigurationsViewProvider.propagateConfigurationsView(fileSystem, configQueryEntries);
-            fsConfiguration.setStorageContainer("cloudbreak" + stackId);
-            fsConfigurator.deleteResources(fsConfiguration);
+            if (fsConfiguration != null) {
+                fsConfiguration.setStorageContainer("cloudbreak" + stackId);
+                fsConfigurator.deleteResources(fsConfiguration);
+            }
         } catch (IOException e) {
             throw new TerminationFailedException("File system resources could not be deleted: ", e);
         }

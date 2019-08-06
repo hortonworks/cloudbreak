@@ -3,13 +3,10 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
@@ -18,7 +15,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -60,7 +56,7 @@ public class DistroXClusterToClusterConverter {
         response.setPassword(source.getPassword());
         response.setProxyConfigCrn(getIfNotNull(source.getProxy(), this::getProxyCrnByName));
         response.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
-        response.setCloudStorage(cloudStorageConverter.convert(source.getCloudStorageLocations(), environment));
+        response.setCloudStorage(source.getCloudStorage());
         response.setValidateBlueprint(source.getValidateBlueprint());
         response.setExecutorType(ExecutorType.DEFAULT);
         response.setCustomContainer(null);
@@ -76,9 +72,7 @@ public class DistroXClusterToClusterConverter {
         response.setUserName(source.getUserName());
         response.setPassword(source.getPassword());
         response.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
-        Set<StorageLocationBase> storageLocations = getIfNotNull(source.getCloudStorage(),
-                cloudStorage -> CollectionUtils.isNotEmpty(cloudStorage.getLocations()) ? new HashSet<>(cloudStorage.getLocations()) : null);
-        response.setCloudStorageLocations(storageLocations);
+        response.setCloudStorage(source.getCloudStorage());
         response.setProxy(source.getProxyConfigCrn());
         return response;
     }
