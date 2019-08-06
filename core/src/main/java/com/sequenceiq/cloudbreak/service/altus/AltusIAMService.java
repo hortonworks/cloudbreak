@@ -29,7 +29,7 @@ public class AltusIAMService {
      * Generate machine user for fluentd - databus communication
      */
     public AltusCredential generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry) {
-        if (isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
+        if (telemetry != null && isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
             return umsClient.createMachineUserAndGenerateKeys(
                     getFluentDatabusMachineUserName(stack),
                     stack.getCreator().getUserCrn(),
@@ -43,7 +43,7 @@ public class AltusIAMService {
      * Delete machine user with its access keys (and unassign databus role if required)
      */
     public void clearFluentMachineUser(Stack stack, Telemetry telemetry) {
-        if (isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
+        if (telemetry != null && isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
             try {
                 String machineUserName = getFluentDatabusMachineUserName(stack);
                 String userCrn = stack.getCreator().getUserCrn();
