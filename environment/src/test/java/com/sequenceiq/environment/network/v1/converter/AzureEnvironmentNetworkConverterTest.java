@@ -83,7 +83,7 @@ class AzureEnvironmentNetworkConverterTest {
                 .withSubnetIds(SUBNET_IDS)
                 .build();
 
-        AzureNetwork actual = (AzureNetwork) underTest.convert(environment, networkDto);
+        AzureNetwork actual = (AzureNetwork) underTest.convert(environment, networkDto, Map.of());
 
         assertEquals(NETWORK_NAME, actual.getName());
         assertEquals(NETWORK_ID, actual.getNetworkId());
@@ -93,9 +93,6 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.EXISTING, actual.getRegistrationType());
         assertEquals(SUBNET_IDS, actual.getSubnetIdsSet());
-        assertEquals(SUBNET_1, actual.getSubnetMetasMap().get(SUBNET_1).getId());
-        assertEquals(SUBNET_2, actual.getSubnetMetasMap().get(SUBNET_2).getId());
-        assertEquals(SUBNET_3, actual.getSubnetMetasMap().get(SUBNET_3).getId());
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -107,7 +104,7 @@ class AzureEnvironmentNetworkConverterTest {
                 .withSubnetIds(SUBNET_IDS)
                 .build();
 
-        AzureNetwork actual = (AzureNetwork) underTest.convert(environment, networkDto);
+        AzureNetwork actual = (AzureNetwork) underTest.convert(environment, networkDto, Map.of());
 
         assertEquals(environment.getName(), actual.getName());
         assertNull(actual.getNetworkId());
@@ -117,9 +114,6 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
         assertEquals(SUBNET_IDS, actual.getSubnetIdsSet());
-        assertEquals(SUBNET_1, actual.getSubnetMetasMap().get(SUBNET_1).getId());
-        assertEquals(SUBNET_2, actual.getSubnetMetasMap().get(SUBNET_2).getId());
-        assertEquals(SUBNET_3, actual.getSubnetMetasMap().get(SUBNET_3).getId());
         verify(environmentViewConverter).convert(environment);
     }
 

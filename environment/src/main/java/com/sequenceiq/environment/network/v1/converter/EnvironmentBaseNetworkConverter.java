@@ -1,9 +1,8 @@
 package com.sequenceiq.environment.network.v1.converter;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -20,14 +19,14 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
     private EnvironmentViewConverter environmentViewConverter;
 
     @Override
-    public BaseNetwork convert(Environment environment, NetworkDto creationDto) {
+    public BaseNetwork convert(Environment environment, NetworkDto creationDto, Map<String, CloudSubnet> subnetMetas) {
         BaseNetwork result = createProviderSpecificNetwork(creationDto);
         result.setName(creationDto.getNetworkName() != null ? creationDto.getNetworkName() : environment.getName());
         result.setNetworkCidr(creationDto.getNetworkCidr());
         result.setEnvironments(convertEnvToView(environment));
         setRegistrationType(result, creationDto);
         result.setSubnetIds(creationDto.getSubnetIds());
-        result.setSubnetMetas(creationDto.getSubnetIds().stream().collect(Collectors.toMap(Function.identity(), id -> new CloudSubnet(id, null))));
+        result.setSubnetMetas(subnetMetas);
         return result;
     }
 

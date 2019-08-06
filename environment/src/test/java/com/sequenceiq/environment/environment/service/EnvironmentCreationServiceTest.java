@@ -35,6 +35,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
@@ -63,6 +64,9 @@ class EnvironmentCreationServiceTest {
     @MockBean
     private ParametersService parametersService;
 
+    @MockBean
+    private NetworkService networkService;
+
     @Inject
     private EnvironmentCreationService environmentCreationServiceUnderTest;
 
@@ -77,7 +81,7 @@ class EnvironmentCreationServiceTest {
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto, ACCOUNT_ID,
                 USER));
         verify(environmentService, never()).save(any());
-        verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any());
+        verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
 
@@ -109,7 +113,7 @@ class EnvironmentCreationServiceTest {
                 .create(environmentCreationDto, ACCOUNT_ID, EnvironmentTestData.USER);
         verify(environmentService, times(2)).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto), eq(ACCOUNT_ID));
-        verify(environmentResourceService).createAndSetNetwork(any(), any(), any());
+        verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
 
@@ -138,7 +142,7 @@ class EnvironmentCreationServiceTest {
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto, ACCOUNT_ID,
                 EnvironmentTestData.USER));
         verify(environmentService, never()).save(any());
-        verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any());
+        verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
 
