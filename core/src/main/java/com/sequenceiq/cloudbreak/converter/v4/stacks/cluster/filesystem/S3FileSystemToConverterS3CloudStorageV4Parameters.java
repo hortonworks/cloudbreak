@@ -14,6 +14,7 @@ public class S3FileSystemToConverterS3CloudStorageV4Parameters
     public S3CloudStorageV1Parameters convert(S3FileSystem source) {
         S3CloudStorageV1Parameters fileSystemConfigurations = new S3CloudStorageV1Parameters();
         fileSystemConfigurations.setInstanceProfile(source.getInstanceProfile());
+        fileSystemConfigurations.setS3GuardDynamoTableName(source.getS3GuardDynamoTableName());
         return fileSystemConfigurations;
     }
 }

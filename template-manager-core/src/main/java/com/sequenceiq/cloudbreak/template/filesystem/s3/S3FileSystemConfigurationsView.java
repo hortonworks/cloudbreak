@@ -11,9 +11,12 @@ public class S3FileSystemConfigurationsView extends BaseFileSystemConfigurations
 
     private String instanceProfile;
 
+    private String s3GuardDynamoTableName;
+
     public S3FileSystemConfigurationsView(S3FileSystem s3FileSystem, Collection<StorageLocationView> locations, boolean deafultFs) {
         super(FileSystemType.S3.name(), s3FileSystem.getStorageContainer(), deafultFs, locations);
         instanceProfile = s3FileSystem.getInstanceProfile();
+        s3GuardDynamoTableName = s3FileSystem.getS3GuardDynamoTableName();
     }
 
     public String getInstanceProfile() {
@@ -24,4 +27,11 @@ public class S3FileSystemConfigurationsView extends BaseFileSystemConfigurations
         this.instanceProfile = instanceProfile;
     }
 
+    public String getS3GuardDynamoTableName() {
+        return s3GuardDynamoTableName;
+    }
+
+    public void setS3GuardDynamoTableName(String s3GuardDynamoTableName) {
+        this.s3GuardDynamoTableName = s3GuardDynamoTableName;
+    }
 }

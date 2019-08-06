@@ -89,6 +89,7 @@ public class CloudStorageParametersConverter {
     public S3FileSystem s3ToFileSystem(S3CloudStorageV1Parameters source) {
         S3FileSystem fileSystemConfigurations = new S3FileSystem();
         fileSystemConfigurations.setInstanceProfile(source.getInstanceProfile());
+        fileSystemConfigurations.setS3GuardDynamoTableName(source.getS3GuardDynamoTableName());
         return fileSystemConfigurations;
     }
 
@@ -101,6 +102,7 @@ public class CloudStorageParametersConverter {
     public CloudS3View s3ToCloudView(S3CloudStorageV1Parameters source) {
         CloudS3View cloudS3View = new CloudS3View(CloudIdentityType.LOG);
         cloudS3View.setInstanceProfile(source.getInstanceProfile());
+        cloudS3View.setInstanceProfile(source.getS3GuardDynamoTableName());
         return cloudS3View;
     }
 
