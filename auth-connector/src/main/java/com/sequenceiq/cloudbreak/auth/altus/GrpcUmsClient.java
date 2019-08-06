@@ -70,6 +70,24 @@ public class GrpcUmsClient {
     }
 
     /**
+     * Retrieves group list for a specified member from UMS.
+     *
+     * @param accountId the account Id
+     * @param requestId an optional request Id
+     * @param memberCrn the member to list
+     * @return the list of group crns associated with this member
+     */
+    public List<String> listGroupsForMember(String actorCrn, String accountId, String memberCrn, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Listing group information for member {} in account {} using request ID {}", memberCrn, accountId, requestId);
+            List<String> groups = client.listGroupsForMembers(requestId.orElse(UUID.randomUUID().toString()), accountId, memberCrn);
+            LOGGER.debug("{} Groups found for account {}", groups.size(), accountId);
+            return groups;
+        }
+    }
+
+    /**
      * Retrieves user details from UMS.
      *
      * @param actorCrn  the CRN of the actor
@@ -248,7 +266,7 @@ public class GrpcUmsClient {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.info("Checking right {} for user {}!", right, userCrn);
-            client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, null);
+            client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, resource);
             LOGGER.info("User {} has right {}!", userCrn, right);
             return true;
         } catch (Exception e) {

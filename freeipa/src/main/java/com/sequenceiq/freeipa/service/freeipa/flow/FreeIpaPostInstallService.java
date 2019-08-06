@@ -57,7 +57,5 @@ public class FreeIpaPostInstallService {
             freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);
         }
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
-
-        userService.syncAllUsersForStack(threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), stack);
     }
 }
