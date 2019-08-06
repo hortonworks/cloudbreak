@@ -1,8 +1,8 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,10 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState.Builder;
 
 @Service
 public class UmsUsersStateProvider {
@@ -24,48 +28,122 @@ public class UmsUsersStateProvider {
     @Inject
     private GrpcUmsClient umsClient;
 
-    public UmsState getUmsState(String accountId, String actorCrn) {
-        LOGGER.debug("Retrieving UMS state for all users and machineUsers in account {}", accountId);
-        UmsState.Builder umsStateBuilder = new UmsState.Builder();
+    public Map<String, UmsState> getEnvToUmsStateMap(String accountId, String actorCrn, Set<String> environmentsFilter,
+                Set<String> userCrns, Set<String> machineUserCrns) {
+        if (environmentsFilter == null || environmentsFilter.size() == 0) {
+            LOGGER.error("Environment Filter argument is null of empty");
+            throw new RuntimeException("Environment Filter argument is null of empty");
+        }
+
         try {
-            umsClient.listAllUsers(actorCrn, accountId, Optional.empty())
-                    .forEach(u -> umsStateBuilder.addUser(u, umsClient.getRightsForUser(actorCrn, u.getCrn(), null, Optional.empty())));
+            List<User> users = userCrns.isEmpty() ? umsClient.listAllUsers(actorCrn, accountId, Optional.empty())
+                    : umsClient.listUsers(actorCrn, accountId, List.copyOf(userCrns), Optional.empty());
+            List<MachineUser> machineUsers = machineUserCrns.isEmpty() ? umsClient.listAllMachineUsers(actorCrn, accountId, Optional.empty())
+                    : umsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns), Optional.empty());
 
-            umsClient.listAllMachineUsers(actorCrn, accountId, Optional.empty())
-                    .forEach(u -> umsStateBuilder.addMachineUser(u, umsClient.getRightsForUser(actorCrn, u.getCrn(), null, Optional.empty())));
+            // TODO: No need to fetch groups
+            List<Group> groups = umsClient.listAllGroups(actorCrn, accountId, Optional.empty());
+            // TODO: existing code still fetched rights to calculate groups when using user filter. Can we get rid of that too?
+//            } else {
+//                // filter for set of users
+//                Set<String> groupCrns = new HashSet<>();
+//                users = umsClient.listUsers(actorCrn, accountId, List.copyOf(userCrns), Optional.empty());
+//                users.forEach(u -> {
+//                    // TODO: No need of Rights call here
+//                    GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, u.getCrn(), null, Optional.empty());
+//                    // below line is used in common private method
+//                    //umsStateBuilder.addUser(u, rights);
+//                    groupCrns.addAll(rights.getGroupCrnList());
+//                });
+//
+//                machineUsers = new ArrayList<>();
+//                groups = umsClient.listGroups(actorCrn, accountId, List.copyOf(groupCrns), Optional.empty());
+//            }
+            return getEnvToUmsStateMap(accountId, actorCrn, environmentsFilter, users, machineUsers, groups);
 
-            umsClient.listAllGroups(actorCrn, accountId, Optional.empty())
-                    .forEach(g -> umsStateBuilder.addGroup(g));
         } catch (RuntimeException e) {
             throw new UmsOperationException(String.format("Error during UMS operation: %s", e.getMessage()));
         }
-        return umsStateBuilder.build();
     }
 
-    public UmsState getUserFilteredUmsState(String accountId, String actorCrn, Collection<String> userCrns, Collection<String> machineUserCrns) {
-        LOGGER.debug("Retrieving UMS state for users [{}] and machineUsers [{}] in account {}", userCrns, machineUserCrns, accountId);
+    private Map<String, UmsState> getEnvToUmsStateMap(
+        String accountId, String actorCrn, Set<String> environmentsFilter, List<User> users, List<MachineUser> machineUsers, List<Group> groups) {
         UmsState.Builder umsStateBuilder = new UmsState.Builder();
-        try {
-            Set<String> groupCrns = new HashSet<>();
-            umsClient.listUsers(actorCrn, accountId, List.copyOf(userCrns), Optional.empty())
-                    .forEach(u -> {
-                        GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, u.getCrn(), null, Optional.empty());
-                        umsStateBuilder.addUser(u, rights);
-                        groupCrns.addAll(rights.getGroupCrnList());
-                    });
 
-            umsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns), Optional.empty())
-                    .forEach(u -> {
-                        GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, u.getCrn(), null, Optional.empty());
-                        umsStateBuilder.addMachineUser(u, rights);
-                        groupCrns.addAll(rights.getGroupCrnList());
-                    });
+        // TODO: No need of CDP Groups to be sync'ed
+        groups.stream().forEach(g -> umsStateBuilder.addGroup(g));
 
-            umsClient.listGroups(actorCrn, accountId, List.copyOf(groupCrns), Optional.empty())
-                    .forEach(g -> umsStateBuilder.addGroup(g));
-        } catch (RuntimeException e) {
-            throw new UmsOperationException(String.format("Error during UMS operation: %s", e.getMessage()));
+        // process each user and update environmentCRN -> UmsState map
+        Map<String, UmsState> envUmsStateMap = new HashMap<>();
+
+        environmentsFilter.stream().forEach(envCRN -> {
+            processForEnvironmentRights(umsStateBuilder, actorCrn, envCRN, users, machineUsers);
+            envUmsStateMap.put(envCRN, umsStateBuilder.build());
+        });
+
+        return envUmsStateMap;
+    }
+
+    private void processForEnvironmentRights(
+        Builder umsStateBuilder, String actorCrn, String envCRN, List<User> allUsers, List<MachineUser> allMachineUsers) {
+        // for all users, check right for the passed envCRN
+        for (User u : allUsers) {
+
+            // TODO: Remove commented code
+//            GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, u.getCrn(), envCRN, Optional.empty());
+//            // check if user has right for this env
+//            List<ResourceRoleAssignment> assignedResourceRoles = rights.getResourceRolesAssignmentList();
+//            if (rights.getThunderheadAdmin()) {
+//                umsStateBuilder.addAdminUser(u);
+//                continue;
+//
+//            }
+//
+//            if (assignedResourceRoles == null || assignedResourceRoles.size() == 0) {
+//                continue;
+//            }
+
+            // TODO: Optimize, First check if READ is there or not, if not there, there is no point in checking for WRITE.
+            if (umsClient.checkRight(actorCrn, u.getCrn(), ResourceAction.WRITE.getAuthorizationName(), envCRN, Optional.empty())) {
+                // this is admin user having write access
+                umsStateBuilder.addAdminUser(u);
+            } else if (umsClient.checkRight(actorCrn, u.getCrn(), ResourceAction.READ.getAuthorizationName(), envCRN, Optional.empty())) {
+                // This is regular Environment user
+                // TODO: Remove get Rights call, as its not needed anymore.
+                umsStateBuilder.addUser(u, umsClient.getRightsForUser(actorCrn, u.getCrn(), envCRN, Optional.empty()));
+            }
+
+            // else no other user is for this environment.
         }
-        return umsStateBuilder.build();
+
+        // machine users
+        for (MachineUser machineUser : allMachineUsers) {
+
+            // TODO: Remove commented code
+//            GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, machineUser.getCrn(), envCRN, Optional.empty());
+//            // check if user has right for this env
+//            List<ResourceRoleAssignment> assignedResourceRoles = rights.getResourceRolesAssignmentList();
+//            if (rights.getThunderheadAdmin()) {
+//                umsStateBuilder.addAdminUser(u);
+//                continue;
+//
+//            }
+//
+//            if (assignedResourceRoles == null || assignedResourceRoles.size() == 0) {
+//                continue;
+//            }
+
+            // Machine User can be a power user also
+            if (umsClient.checkRight(actorCrn, machineUser.getCrn(), ResourceAction.WRITE.getAuthorizationName(), envCRN, Optional.empty())) {
+                // this is admin user having write access
+                umsStateBuilder.addAdminMachineUser(machineUser);
+            } else if (umsClient.checkRight(actorCrn, machineUser.getCrn(), ResourceAction.READ.getAuthorizationName(), envCRN, Optional.empty())) {
+                // This is regular Environment user
+                // TODO: Remove get Rights call, as its not needed anymore.
+                umsStateBuilder.addMachineUser(machineUser, umsClient.getRightsForUser(actorCrn, machineUser.getCrn(), envCRN, Optional.empty()));
+            }
+            // else no other user is for this environment.
+        }
+
     }
 }

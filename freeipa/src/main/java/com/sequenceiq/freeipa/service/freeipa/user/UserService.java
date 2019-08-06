@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -98,26 +99,31 @@ public class UserService {
     }
 
     public SyncStatusDetail syncAllUsersForStack(String accountId, String actorCrn, Stack stack) {
-        UmsState umsState = umsUsersStateProvider.getUmsState(accountId, actorCrn);
-        return synchronizeStack(stack, umsState, Set.of());
+        // TODO: Fix this for environment filter.
+        Set<String> environmentsFilter = new HashSet<>();
+        environmentsFilter.add(stack.getEnvironmentCrn());
+        Map<String, UmsState> envToUmsStateMap = umsUsersStateProvider.getEnvToUmsStateMap(accountId, actorCrn, environmentsFilter, Set.of(), Set.of());
+        return synchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), Set.of());
     }
 
     private void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
         try {
-            boolean filterUsers = !userCrnFilter.isEmpty() || !machineUserCrnFilter.isEmpty();
+            Set<String> envs = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
+            // environmentCRN -> {umsState}
+            // Then for each stack (which is pulled for list of environments, below code, call envUmsStateMap.get(environmentCRN)
+            Map<String, UmsState> envToUmsStateMap = umsUsersStateProvider.getEnvToUmsStateMap(accountId, actorCrn, envs, userCrnFilter, machineUserCrnFilter);
 
-            UmsState umsState = filterUsers ? umsUsersStateProvider.getUserFilteredUmsState(accountId, actorCrn, userCrnFilter, machineUserCrnFilter)
-                    : umsUsersStateProvider.getUmsState(accountId, actorCrn);
-            LOGGER.debug("UmsState = {}", umsState);
-            Set<String> userIdFilter = filterUsers ? umsState.getUsernamesFromCrns(userCrnFilter, machineUserCrnFilter)
-                    : Set.of();
+            // TODO: fix me
+            Set<String> userIdFilter = Set.of();
+//            Set<String> userIdFilter = filterUsers ? umsState.getUsernamesFromCrns(userCrnFilter, machineUserCrnFilter) : Set.of();
+
 
             Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
                     .collect(Collectors.toMap(Stack::getEnvironmentCrn,
                             stack -> asyncTaskExecutor.submit(() -> {
                                 MDCBuilder.buildMdcContext(stack);
-                                return synchronizeStack(stack, umsState, userIdFilter);
+                                return synchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), userIdFilter);
                             })));
 
             List<SuccessDetails> success = new ArrayList<>();
@@ -144,14 +150,17 @@ public class UserService {
             });
             syncOperationStatusService.completeOperation(operationId, success, failure);
         } catch (RuntimeException e) {
-            LOGGER.debug("caught exception", e);
+            LOGGER.error("User sync operation {} failed with error:", e);
             syncOperationStatusService.failOperation(operationId, e.getLocalizedMessage());
             throw e;
         }
     }
 
     private SyncStatusDetail synchronizeStack(Stack stack, UmsState umsState, Set<String> userIdFilter) {
+
+        // if umsState is empty, then there is no users found for this env
         // TODO improve exception handling
+        // TODO: Check if ums user has any user to be sync'ed, if not, skip.
         String environmentCrn = stack.getEnvironmentCrn();
         try {
             LOGGER.info("Syncing Environment {}", environmentCrn);

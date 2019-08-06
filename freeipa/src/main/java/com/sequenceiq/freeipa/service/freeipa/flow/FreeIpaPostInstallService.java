@@ -58,6 +58,7 @@ public class FreeIpaPostInstallService {
         }
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
 
-        userService.syncAllUsersForStack(threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), stack);
+        // TODO: Remove this - https://jira.cloudera.com/browse/CDPCP-502
+        // userService.syncAllUsersForStack(threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), stack);
     }
 }

@@ -248,7 +248,8 @@ public class GrpcUmsClient {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.info("Checking right {} for user {}!", right, userCrn);
-            client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, null);
+            //client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, null);
+            client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, resource);
             LOGGER.info("User {} has right {}!", userCrn, right);
             return true;
         } catch (Exception e) {
