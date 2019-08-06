@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.zookeeper;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
-import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildVolumePathStringZeroVolumeHandled;
+import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildSingleVolumePath;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,8 +22,8 @@ public class ZooKeeperVolumeConfigProvider implements CmHostGroupRoleConfigProvi
         Integer volumeCount = Objects.nonNull(hostGroupView) ? hostGroupView.getVolumeCount() : 0;
         if (ZooKeeperRoles.ZOOKEEPER_SERVER.equals(roleType)) {
             return List.of(
-                    config("dataDir", buildVolumePathStringZeroVolumeHandled(volumeCount, "zookeeper")),
-                    config("dataLogDir", buildVolumePathStringZeroVolumeHandled(volumeCount, "zookeeper"))
+                    config("dataDir", buildSingleVolumePath(volumeCount, "zookeeper")),
+                    config("dataLogDir", buildSingleVolumePath(volumeCount, "zookeeper"))
             );
         }
         return List.of();
