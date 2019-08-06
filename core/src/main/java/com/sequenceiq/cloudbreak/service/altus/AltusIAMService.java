@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.altus;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,22 +30,22 @@ public class AltusIAMService {
     /**
      * Generate machine user for fluentd - databus communication
      */
-    public AltusCredential generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry) {
-        if (isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
-            return umsClient.createMachineUserAndGenerateKeys(
+    public Optional<AltusCredential> generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry) {
+        if (telemetry != null && isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
+            return Optional.of(umsClient.createMachineUserAndGenerateKeys(
                     getFluentDatabusMachineUserName(stack),
                     stack.getCreator().getUserCrn(),
                     umsClient.getBuiltInDatabusRoleCrn(),
-                    UserManagementProto.AccessKeyType.Value.ED25519);
+                    UserManagementProto.AccessKeyType.Value.ED25519));
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
      * Delete machine user with its access keys (and unassign databus role if required)
      */
     public void clearFluentMachineUser(Stack stack, Telemetry telemetry) {
-        if (isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
+        if (telemetry != null && isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
             try {
                 String machineUserName = getFluentDatabusMachineUserName(stack);
                 String userCrn = stack.getCreator().getUserCrn();

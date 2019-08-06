@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +55,7 @@ public class TelemetryDecoratorTest {
         MockitoAnnotations.initMocks(this);
         AltusCredential altusCredential = new AltusCredential("myAccessKey", "mySecretKey".toCharArray());
         given(altusIAMService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class)))
-                .willReturn(altusCredential);
+                .willReturn(Optional.of(altusCredential));
         underTest = new TelemetryDecorator(databusConfigService, fluentConfigService,
                 meteringConfigService, altusIAMService, "1.0.0");
     }
