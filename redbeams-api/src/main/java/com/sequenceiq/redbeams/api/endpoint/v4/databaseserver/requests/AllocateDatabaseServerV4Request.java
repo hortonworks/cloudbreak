@@ -8,6 +8,7 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDBStackV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
@@ -30,6 +31,7 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
     private String name;
 
     @NotNull
+    @ValidCrn
     @ApiModelProperty(value = DatabaseServer.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
