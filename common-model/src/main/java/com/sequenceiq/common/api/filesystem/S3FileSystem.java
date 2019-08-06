@@ -14,12 +14,22 @@ public class S3FileSystem extends BaseFileSystem {
 
     private String instanceProfile;
 
+    private String s3GuardDynamoTableName;
+
     public String getInstanceProfile() {
         return instanceProfile;
     }
 
     public void setInstanceProfile(String instanceProfile) {
         this.instanceProfile = instanceProfile;
+    }
+
+    public String getS3GuardDynamoTableName() {
+        return s3GuardDynamoTableName;
+    }
+
+    public void setS3GuardDynamoTableName(String s3GuardDynamoTableName) {
+        this.s3GuardDynamoTableName = s3GuardDynamoTableName;
     }
 
     @Override
@@ -31,12 +41,12 @@ public class S3FileSystem extends BaseFileSystem {
             return false;
         }
         S3FileSystem that = (S3FileSystem) o;
-        return Objects.equals(instanceProfile, that.instanceProfile);
+        return Objects.equals(instanceProfile, that.instanceProfile)
+                && Objects.equals(s3GuardDynamoTableName, that.s3GuardDynamoTableName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(instanceProfile);
+        return Objects.hash(instanceProfile, s3GuardDynamoTableName);
     }
-
 }

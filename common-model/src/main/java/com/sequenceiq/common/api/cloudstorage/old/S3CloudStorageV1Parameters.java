@@ -19,6 +19,9 @@ public class S3CloudStorageV1Parameters implements FileSystemAwareCloudStorage {
     @NotNull
     private String instanceProfile;
 
+    @ApiModelProperty
+    private String s3GuardDynamoTableName;
+
     @ApiModelProperty(hidden = true)
     @Override
     public FileSystemType getType() {
@@ -33,6 +36,14 @@ public class S3CloudStorageV1Parameters implements FileSystemAwareCloudStorage {
         this.instanceProfile = instanceProfile;
     }
 
+    public String getS3GuardDynamoTableName() {
+        return s3GuardDynamoTableName;
+    }
+
+    public void setS3GuardDynamoTableName(String s3GuardDynamoTableName) {
+        this.s3GuardDynamoTableName = s3GuardDynamoTableName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -42,12 +53,12 @@ public class S3CloudStorageV1Parameters implements FileSystemAwareCloudStorage {
             return false;
         }
         S3CloudStorageV1Parameters that = (S3CloudStorageV1Parameters) o;
-        return Objects.equals(instanceProfile, that.instanceProfile);
+        return Objects.equals(instanceProfile, that.instanceProfile)
+                && Objects.equals(s3GuardDynamoTableName, that.s3GuardDynamoTableName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(instanceProfile);
+        return Objects.hash(instanceProfile, s3GuardDynamoTableName);
     }
-
 }

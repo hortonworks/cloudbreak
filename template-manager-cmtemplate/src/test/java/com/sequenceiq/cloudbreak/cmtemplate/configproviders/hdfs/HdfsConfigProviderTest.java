@@ -63,7 +63,8 @@ public class HdfsConfigProviderTest {
                 + "<value>org.apache.hadoop.security.HttpCrossOriginFilterInitializer,"
                 + "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer</value>"
                 + "</property><property><name>fs.s3a.metadatastore.impl</name><value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value>"
-                + "</property><property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>", serviceConfigs.get(0).getValue());
+                + "</property><property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>"
+                + "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>", serviceConfigs.get(0).getValue());
     }
 
     @Test
@@ -81,6 +82,7 @@ public class HdfsConfigProviderTest {
                 + "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer</value>"
                 + "</property><property><name>fs.s3a.metadatastore.impl</name><value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value>"
                 + "</property><property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>"
+                + "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>"
                 + "<property><name>fs.s3a.authoritative.path</name><value>s3a://bucket/warehouse/managed</value></property>", serviceConfigs.get(0).getValue());
     }
 
@@ -97,8 +99,10 @@ public class HdfsConfigProviderTest {
 
         BaseFileSystemConfigurationsView fileSystemConfigurationsView;
         if (useS3FileSystem) {
+            S3FileSystem s3FileSystem = new S3FileSystem();
+            s3FileSystem.setS3GuardDynamoTableName("dynamoTable");
             fileSystemConfigurationsView =
-                    new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
+                    new S3FileSystemConfigurationsView(s3FileSystem, locations, false);
         } else {
             fileSystemConfigurationsView =
                     new AdlsFileSystemConfigurationsView(new AdlsFileSystem(), locations, false);

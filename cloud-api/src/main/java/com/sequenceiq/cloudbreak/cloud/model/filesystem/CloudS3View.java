@@ -8,6 +8,8 @@ public class CloudS3View extends CloudFileSystemView {
 
     private String instanceProfile;
 
+    private String s3GuardDynamoTableName;
+
     public CloudS3View(CloudIdentityType cloudIdentityType) {
         super(cloudIdentityType);
     }
@@ -20,6 +22,14 @@ public class CloudS3View extends CloudFileSystemView {
         this.instanceProfile = instanceProfile;
     }
 
+    public String getS3GuardDynamoTableName() {
+        return s3GuardDynamoTableName;
+    }
+
+    public void setS3GuardDynamoTableName(String s3GuardDynamoTableName) {
+        this.s3GuardDynamoTableName = s3GuardDynamoTableName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -29,12 +39,12 @@ public class CloudS3View extends CloudFileSystemView {
             return false;
         }
         CloudS3View that = (CloudS3View) o;
-        return Objects.equals(instanceProfile, that.instanceProfile);
+        return Objects.equals(instanceProfile, that.instanceProfile)
+                && Objects.equals(s3GuardDynamoTableName, that.s3GuardDynamoTableName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(instanceProfile);
+        return Objects.hash(instanceProfile, s3GuardDynamoTableName);
     }
-
 }
