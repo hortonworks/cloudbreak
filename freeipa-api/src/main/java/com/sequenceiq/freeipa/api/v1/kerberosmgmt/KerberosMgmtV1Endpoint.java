@@ -43,17 +43,23 @@ public interface KerberosMgmtV1Endpoint {
 
     @DELETE
     @Path("serviceprincipal")
-    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_DELETE_SERVICE_PRINCIPAL, notes = KeytabModelNotes.DELETE_SERVICE_PRINCIPAL_NOTES,
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_DELETE_SERVICE_PRINCIPAL, produces = ContentType.JSON,
+            notes = KeytabModelNotes.DELETE_SERVICE_PRINCIPAL_NOTES,
             nickname = "deleteServicePrinciapalV1")
     void deleteServicePrincipal(@Valid ServicePrincipalRequest request) throws Exception;
 
     @DELETE
     @Path("host")
-    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_DELETE_HOST, notes = KeytabModelNotes.DELETE_HOST_NOTES, nickname = "deleteHostV1")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_DELETE_HOST, produces = ContentType.JSON, notes = KeytabModelNotes.DELETE_HOST_NOTES,
+            nickname = "deleteHostV1")
     void deleteHost(@Valid HostRequest request) throws Exception;
 
     @DELETE
     @Path("cleanupClusterSecrets")
-    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_CLEANUP, notes = KeytabModelNotes.CLEANUP_NOTES, nickname = "cleanupClusterSecretsV1")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_CLEANUP, produces = ContentType.JSON, notes = KeytabModelNotes.CLEANUP_NOTES,
+            nickname = "cleanupClusterSecretsV1")
     void cleanupClusterSecrets(@Valid VaultCleanupRequest request) throws Exception;
 }

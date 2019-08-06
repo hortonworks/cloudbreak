@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 import static java.util.Collections.singletonMap;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -76,11 +77,11 @@ public class TelemetryDecorator {
 
     public Map<String, SaltPillarProperties> decoratePillar(Map<String, SaltPillarProperties> servicePillar,
             Stack stack, Telemetry telemetry) {
-        AltusCredential altusCredential = altusIAMService.generateDatabusMachineUserForFluent(stack, telemetry);
+        Optional<AltusCredential> altusCredential = altusIAMService.generateDatabusMachineUserForFluent(stack, telemetry);
         String clusterType = StackType.DATALAKE.equals(stack.getType()) ? CLUSTER_TYPE_SDX : CLUSTER_TYPE_DISTROX;
         String serviceType = StackType.WORKLOAD.equals(stack.getType()) ? CLUSTER_TYPE_DISTROX.toUpperCase() : "";
-        String accessKey = altusCredential != null ? altusCredential.getAccessKey() : null;
-        char[] privateKey = altusCredential != null ? altusCredential.getPrivateKey() : null;
+        String accessKey = altusCredential.map(AltusCredential::getAccessKey).orElse(null);
+        char[] privateKey = altusCredential.map(AltusCredential::getPrivateKey).orElse(null);
 
         DatabusConfigView databusConfigView = databusConfigService.createDatabusConfigs(accessKey, privateKey,
                 null, telemetry.getDatabusEndpoint());

@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -287,6 +288,30 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (JsonProcessingException e) {
             LOGGER.info("Failed to serialize remote context.", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void setupProxy(ProxyConfig proxyConfig) {
+        LOGGER.info("Setup proxy for CM");
+        ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
+        ApiConfigList proxyConfigList = new ApiConfigList();
+        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_server").value(proxyConfig.getServerHost()));
+        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_port").value(String.valueOf(proxyConfig.getServerPort())));
+        proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_protocol").value(proxyConfig.getProtocol().toUpperCase()));
+        if (proxyConfig.getUserName() != null) {
+            proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_user").value(proxyConfig.getUserName()));
+        }
+        if (proxyConfig.getPassword() != null) {
+            proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_password").value(proxyConfig.getPassword()));
+        }
+        try {
+            LOGGER.info("Update settings with: " + proxyConfigList);
+            clouderaManagerResourceApi.updateConfig("Update proxy settings", proxyConfigList);
+        } catch (ApiException e) {
+            String failMessage = "Update proxy settings failed";
+            LOGGER.error(failMessage, e);
+            throw new ClouderaManagerOperationFailedException(failMessage, e);
         }
     }
 

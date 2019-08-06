@@ -86,7 +86,7 @@ public class FileSystemConfigurationsViewProvider {
             CloudIdentity cloudIdentity = cloudStorage.getCloudIdentities().get(0);
             if (cloudIdentity != null) {
                 if (source.getType().isS3()) {
-                    return s3IdentityToConfigView(locations, cloudIdentity);
+                    return s3IdentityToConfigView(locations, cloudIdentity, cloudStorage);
                 } else if (source.getType().isWasb()) {
                     return wasbIdentityToConfigView(locations, cloudIdentity);
                 }
@@ -110,9 +110,10 @@ public class FileSystemConfigurationsViewProvider {
         return null;
     }
 
-    private BaseFileSystemConfigurationsView s3IdentityToConfigView(Set<StorageLocationView> locations, CloudIdentity cloudIdentity) {
+    private BaseFileSystemConfigurationsView s3IdentityToConfigView(Set<StorageLocationView> locations, CloudIdentity cloudIdentity, CloudStorage cloudStorage) {
         S3FileSystem s3FileSystem = new S3FileSystem();
         s3FileSystem.setInstanceProfile(cloudIdentity.getS3Identity().getInstanceProfile());
+        s3FileSystem.setS3GuardDynamoTableName(cloudStorage.getS3GuardDynamoTableName());
         return new S3FileSystemConfigurationsView(s3FileSystem, locations, false);
     }
 

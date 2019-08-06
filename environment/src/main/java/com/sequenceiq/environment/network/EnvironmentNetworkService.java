@@ -3,6 +3,8 @@ package com.sequenceiq.environment.network;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
@@ -25,6 +27,8 @@ import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConvert
 
 @Component
 public class EnvironmentNetworkService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentNetworkService.class);
 
     private final CloudPlatformConnectors cloudPlatformConnectors;
 
@@ -58,6 +62,8 @@ public class EnvironmentNetworkService {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(environment);
         if (networkConnector != null) {
             networkConnector.deleteNetworkWithSubnets(networkDeletionRequest);
+        } else {
+            LOGGER.info("No network connector for cloud platform: {}", environment.getCloudPlatform());
         }
     }
 
