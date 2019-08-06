@@ -194,6 +194,7 @@ public class TelemetryDecoratorTest {
         Cluster cluster = new Cluster();
         cluster.setName("cl1");
         stack.setCluster(cluster);
+        stack.setResourceCrn("crn:altus:cloudbreak:us-west-1:someone:stack:12345");
         return stack;
     }
 

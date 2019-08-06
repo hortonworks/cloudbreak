@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
@@ -92,7 +93,10 @@ public class TelemetryDecorator {
         // for datalake - metering is not enabled yet
         boolean meteringEnabled = telemetry.isMeteringEnabled() && !StackType.DATALAKE.equals(stack.getType());
 
-        FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(stack.getCluster().getName(),
+        String clusterNameWithUUID = String.format("%s-%s",
+                stack.getCluster().getName(), Crn.fromString(stack.getResourceCrn()).getResource());
+
+        FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterNameWithUUID,
                 clusterType, stack.getCloudPlatform(), databusConfigView.isEnabled(), meteringEnabled, telemetry);
         if (fluentConfigView.isEnabled()) {
             Map<String, Object> fluentConfig = fluentConfigView.toMap();
