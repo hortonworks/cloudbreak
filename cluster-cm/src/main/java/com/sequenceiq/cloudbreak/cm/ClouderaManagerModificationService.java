@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -118,16 +119,39 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void restartStaleServices(MgmtServiceResourceApi mgmtServiceResourceApi, ClustersResourceApi clustersResourceApi)
             throws ApiException, CloudbreakException {
-        LOGGER.debug("Restarting Cloudera Management Services in Cloudera Manager.");
-        ApiCommand restartCommand = mgmtServiceResourceApi.restartCommand();
-        pollRestart(restartCommand);
-        LOGGER.debug("Restarted Coudera Management Services in Cloudera Manager.");
+        restartClouderaManagementServices(mgmtServiceResourceApi);
+        restartCMStaleServices(clustersResourceApi);
+    }
 
+    private void restartCMStaleServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
         LOGGER.debug("Restarting stale services and redeploying client configurations in Cloudera Manager.");
-        ApiCommand restartServicesCommand = clustersResourceApi.restartCommand(stack.getName(),
-                new ApiRestartClusterArgs().redeployClientConfiguration(Boolean.TRUE).restartOnlyStaleServices(Boolean.TRUE));
+        Optional<ApiCommand> optionalRestartCommand = clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY").getItems().stream()
+                .filter(cmd -> "RestartWaitingForStalenessSuccess".equals(cmd.getName())).findFirst();
+        ApiCommand restartServicesCommand;
+        if (optionalRestartCommand.isPresent()) {
+            restartServicesCommand = optionalRestartCommand.get();
+            LOGGER.debug("Restart for stale services is already running with id: [{}]", restartServicesCommand.getId());
+        } else {
+            restartServicesCommand = clustersResourceApi.restartCommand(stack.getName(),
+                    new ApiRestartClusterArgs().redeployClientConfiguration(Boolean.TRUE).restartOnlyStaleServices(Boolean.TRUE));
+        }
         pollRestart(restartServicesCommand);
         LOGGER.debug("Restarted stale services in Cloudera Manager.");
+    }
+
+    private void restartClouderaManagementServices(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException, CloudbreakException {
+        LOGGER.debug("Restarting Cloudera Management Services in Cloudera Manager.");
+        Optional<ApiCommand> optionalRestartCommand = mgmtServiceResourceApi.listActiveCommands("SUMMARY").getItems().stream()
+                .filter(cmd -> "Restart".equals(cmd.getName())).findFirst();
+        ApiCommand restartCommand;
+        if (optionalRestartCommand.isPresent()) {
+            restartCommand = optionalRestartCommand.get();
+            LOGGER.debug("Restart for CMS is already running with id: [{}]", restartCommand.getId());
+        } else {
+            restartCommand = mgmtServiceResourceApi.restartCommand();
+        }
+        pollRestart(restartCommand);
+        LOGGER.debug("Restarted Coudera Management Services in Cloudera Manager.");
     }
 
     private void pollRestart(ApiCommand restartCommand) throws CloudbreakException {

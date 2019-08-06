@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -29,6 +30,7 @@ import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
@@ -92,7 +94,7 @@ class ClouderaManagerModificationServiceTest {
     private List<HostMetadata> hostMetadataList;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws ApiException {
         MockitoAnnotations.initMocks(this);
 
         stack.setName(STACK_NAME);
@@ -120,6 +122,11 @@ class ClouderaManagerModificationServiceTest {
     void upscaleClusterNoHostToUpscale() throws Exception {
         HostMetadata originalHm = new HostMetadata();
         originalHm.setHostName("original");
+
+        ApiCommandList apiCommandList = new ApiCommandList();
+        apiCommandList.setItems(List.of());
+        when(clustersResourceApi.listActiveCommands(anyString(), anyString())).thenReturn(apiCommandList);
+        when(mgmtServiceResourceApi.listActiveCommands(anyString())).thenReturn(apiCommandList);
 
         setUpListClusterHosts();
         setUpRestartServices();
@@ -192,6 +199,11 @@ class ClouderaManagerModificationServiceTest {
         PollingResult applyTemplatePollingResult = PollingResult.SUCCESS;
         when(clouderaManagerPollingServiceProvider.applyHostTemplatePollingService(eq(stack), eq(apiClientMock), eq(applyHostTemplateCommandId)))
                 .thenReturn(applyTemplatePollingResult);
+
+        ApiCommandList apiCommandList = new ApiCommandList();
+        apiCommandList.setItems(List.of());
+        when(clustersResourceApi.listActiveCommands(anyString(), anyString())).thenReturn(apiCommandList);
+        when(mgmtServiceResourceApi.listActiveCommands(anyString())).thenReturn(apiCommandList);
 
         ArgumentCaptor<ApiRestartClusterArgs> apiRestartClusterArgs = setUpRestartServices();
 
