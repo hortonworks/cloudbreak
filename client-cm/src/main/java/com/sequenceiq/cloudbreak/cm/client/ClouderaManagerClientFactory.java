@@ -25,11 +25,11 @@ public class ClouderaManagerClientFactory {
     @Inject
     private ClouderaManagerClientProvider clouderaManagerClientProvider;
 
-    public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig) {
+    public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
         return clouderaManagerClientProvider.getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin");
     }
 
-    public ApiClient getClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) {
+    public ApiClient getClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
         if (StringUtils.isNoneBlank(user, password)) {
             return clouderaManagerClientProvider.getClouderaManagerClient(clientConfig,
                     gatewayPort, user, password);
@@ -38,7 +38,7 @@ public class ClouderaManagerClientFactory {
         }
     }
 
-    public ApiClient getRootClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) {
+    public ApiClient getRootClient(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
         if (StringUtils.isNoneBlank(user, password)) {
             return clouderaManagerClientProvider.getClouderaManagerRootClient(clientConfig,
                     gatewayPort, user, password);
