@@ -141,10 +141,12 @@ func assembleFreeIpaRequest(c *cli.Context) *freeIpaModel.CreateFreeIpaV1Request
 func SynchronizeAllUsers(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "sync all users to FreeIpa")
 
-	users := c.StringSlice(fl.FlIpaUsersSlice.Name)
-	environments := c.StringSlice(fl.FlIpaEnvironmentsSlice.Name)
+	users := c.StringSlice(fl.FlIpaUserCrnsSlice.Name)
+	machineUsers := c.StringSlice(fl.FlIpaMachineUserCrnsSlice.Name)
+	environments := c.StringSlice(fl.FlIpaEnvironmentCrnsSlice.Name)
 	SynchronizeAllUsersV1Request := freeIpaModel.SynchronizeAllUsersV1Request{
 		Users:        users,
+		MachineUsers: machineUsers,
 		Environments: environments,
 	}
 
@@ -165,10 +167,13 @@ func SynchronizeAllUsers(c *cli.Context) {
 func SynchronizeCurrentUser(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "sync current user to FreeIpa")
 
-	var req freeIpaModel.SynchronizeUserV1Request
+	environments := c.StringSlice(fl.FlIpaEnvironmentCrnsSlice.Name)
+	SynchronizeUserV1Request := freeIpaModel.SynchronizeUserV1Request{
+		Environments: environments,
+	}
 
 	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
-	resp, err := freeIpaClient.V1freeipauser.SynchronizeUserV1(v1freeipauser.NewSynchronizeUserV1Params().WithBody(&req))
+	resp, err := freeIpaClient.V1freeipauser.SynchronizeUserV1(v1freeipauser.NewSynchronizeUserV1Params().WithBody(&SynchronizeUserV1Request))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -184,7 +189,7 @@ func SynchronizeCurrentUser(c *cli.Context) {
 func SetPassword(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "set user password in FreeIpa")
 
-	environments := c.StringSlice(fl.FlIpaEnvironmentsSlice.Name)
+	environments := c.StringSlice(fl.FlIpaEnvironmentCrnsSlice.Name)
 	password := c.String(fl.FlIpaUserPassword.Name)
 	SetPasswordV1Request := freeIpaModel.SetPasswordV1Request{
 		Environments: environments,

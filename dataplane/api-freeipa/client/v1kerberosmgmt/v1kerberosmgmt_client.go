@@ -25,9 +25,39 @@ type Client struct {
 }
 
 /*
+CleanupClusterSecretsV1 cleanups the secrets associated with the cluster
+
+Deletes all the secrets that are associated for the given cluster.
+*/
+func (a *Client) CleanupClusterSecretsV1(params *CleanupClusterSecretsV1Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCleanupClusterSecretsV1Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "cleanupClusterSecretsV1",
+		Method:             "DELETE",
+		PathPattern:        "/v1/kerberosmgmt/cleanupClusterSecrets",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &CleanupClusterSecretsV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
 DeleteHostV1 deletes the host
 
-Deletes the host and all the principals associated with the host
+Deletes the host and all the principals associated with the host in the FreeIPA. It also deletes vault secrets associated with the host.
 */
 func (a *Client) DeleteHostV1(params *DeleteHostV1Params) error {
 	// TODO: Validate the params before sending
@@ -39,7 +69,7 @@ func (a *Client) DeleteHostV1(params *DeleteHostV1Params) error {
 		ID:                 "deleteHostV1",
 		Method:             "DELETE",
 		PathPattern:        "/v1/kerberosmgmt/host",
-		ProducesMediaTypes: []string{""},
+		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
@@ -57,7 +87,7 @@ func (a *Client) DeleteHostV1(params *DeleteHostV1Params) error {
 /*
 DeleteServicePrinciapalV1 deletes the service principal
 
-Deletes the pricipal
+Deletes the principal from the FreeIPA. It also deletes vault secrets associated with the principal
 */
 func (a *Client) DeleteServicePrinciapalV1(params *DeleteServicePrinciapalV1Params) error {
 	// TODO: Validate the params before sending
@@ -69,7 +99,7 @@ func (a *Client) DeleteServicePrinciapalV1(params *DeleteServicePrinciapalV1Para
 		ID:                 "deleteServicePrinciapalV1",
 		Method:             "DELETE",
 		PathPattern:        "/v1/kerberosmgmt/serviceprincipal",
-		ProducesMediaTypes: []string{""},
+		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
@@ -117,7 +147,7 @@ func (a *Client) GenerateServiceKeytabV1(params *GenerateServiceKeytabV1Params) 
 /*
 GetServiceKeytabV1 gets the keytab for the provided service on a specific host
 
-Retrieves the existing keytab for the service principal derived from the host and service provided. Gets the existing keytab without modification not effeting the prior keytab. The keytab in the response is base64 encoded.
+Retrieves the existing keytab for the service principal derived from the host and service provided. Gets the existing keytab without modification and not effecting the prior keytab. The keytab in the response is base64 encoded.
 */
 func (a *Client) GetServiceKeytabV1(params *GetServiceKeytabV1Params) (*GetServiceKeytabV1OK, error) {
 	// TODO: Validate the params before sending

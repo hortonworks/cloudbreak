@@ -17,6 +17,9 @@ import (
 // swagger:model ServiceKeytabV1Request
 type ServiceKeytabV1Request struct {
 
+	// CRN of the cluster
+	ClusterCrn string `json:"clusterCrn,omitempty"`
+
 	// If true existing keytab won't be overriden for service in normal scenario. Preserving the keytab is best effort, it may invalidate prior keytabs.
 	DoNotRecreateKeytab bool `json:"doNotRecreateKeytab,omitempty"`
 

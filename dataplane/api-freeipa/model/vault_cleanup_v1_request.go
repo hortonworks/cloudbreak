@@ -13,9 +13,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// HostV1Request host v1 request
-// swagger:model HostV1Request
-type HostV1Request struct {
+// VaultCleanupV1Request vault cleanup v1 request
+// swagger:model VaultCleanupV1Request
+type VaultCleanupV1Request struct {
 
 	// CRN of the cluster
 	ClusterCrn string `json:"clusterCrn,omitempty"`
@@ -23,21 +23,13 @@ type HostV1Request struct {
 	// CRN of the environment
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
-
-	// Hostname where the service is running
-	// Required: true
-	ServerHostName *string `json:"serverHostName"`
 }
 
-// Validate validates this host v1 request
-func (m *HostV1Request) Validate(formats strfmt.Registry) error {
+// Validate validates this vault cleanup v1 request
+func (m *VaultCleanupV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEnvironmentCrn(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateServerHostName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -47,7 +39,7 @@ func (m *HostV1Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *HostV1Request) validateEnvironmentCrn(formats strfmt.Registry) error {
+func (m *VaultCleanupV1Request) validateEnvironmentCrn(formats strfmt.Registry) error {
 
 	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
@@ -56,17 +48,8 @@ func (m *HostV1Request) validateEnvironmentCrn(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *HostV1Request) validateServerHostName(formats strfmt.Registry) error {
-
-	if err := validate.Required("serverHostName", "body", m.ServerHostName); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // MarshalBinary interface implementation
-func (m *HostV1Request) MarshalBinary() ([]byte, error) {
+func (m *VaultCleanupV1Request) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -74,8 +57,8 @@ func (m *HostV1Request) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *HostV1Request) UnmarshalBinary(b []byte) error {
-	var res HostV1Request
+func (m *VaultCleanupV1Request) UnmarshalBinary(b []byte) error {
+	var res VaultCleanupV1Request
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

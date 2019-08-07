@@ -17,7 +17,7 @@ import (
 // swagger:model SetPasswordV1Request
 type SetPasswordV1Request struct {
 
-	// Optional environments to sync
+	// Optional environment crns to sync
 	// Unique: true
 	Environments []string `json:"environments"`
 

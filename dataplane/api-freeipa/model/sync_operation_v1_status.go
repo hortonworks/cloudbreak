@@ -26,7 +26,7 @@ type SyncOperationV1Status struct {
 	// error information about operation failure
 	Error string `json:"error,omitempty"`
 
-	// environment names where operation failed
+	// details about environments where operation failed
 	Failure []*FailureDetailsV1 `json:"failure"`
 
 	// User synchronization operation id
@@ -40,7 +40,7 @@ type SyncOperationV1Status struct {
 	// Enum: [REQUESTED RUNNING COMPLETED FAILED REJECTED TIMEDOUT]
 	Status string `json:"status,omitempty"`
 
-	// environment names where operation succeeded
+	// details about environments where operation succeeded
 	Success []*SuccessDetailsV1 `json:"success"`
 
 	// Operation type

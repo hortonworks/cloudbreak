@@ -20,6 +20,9 @@ import (
 // swagger:model DescribeFreeIpaV1Response
 type DescribeFreeIpaV1Response struct {
 
+	// version of the application provisioned FreeIPA
+	AppVersion string `json:"appVersion,omitempty"`
+
 	// freeipa stack related authentication
 	// Required: true
 	Authentication *StackAuthenticationV1Response `json:"authentication"`

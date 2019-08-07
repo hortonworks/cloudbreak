@@ -65,7 +65,7 @@ for the synchronize user v1 operation typically these are written to a http.Requ
 type SynchronizeUserV1Params struct {
 
 	/*Body*/
-	Body model.SynchronizeUserV1Request
+	Body *model.SynchronizeUserV1Request
 
 	timeout    time.Duration
 	Context    context.Context
@@ -106,13 +106,13 @@ func (o *SynchronizeUserV1Params) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the synchronize user v1 params
-func (o *SynchronizeUserV1Params) WithBody(body model.SynchronizeUserV1Request) *SynchronizeUserV1Params {
+func (o *SynchronizeUserV1Params) WithBody(body *model.SynchronizeUserV1Request) *SynchronizeUserV1Params {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the synchronize user v1 params
-func (o *SynchronizeUserV1Params) SetBody(body model.SynchronizeUserV1Request) {
+func (o *SynchronizeUserV1Params) SetBody(body *model.SynchronizeUserV1Request) {
 	o.Body = body
 }
 

@@ -17,6 +17,9 @@ import (
 // swagger:model ServicePrincipalV1Request
 type ServicePrincipalV1Request struct {
 
+	// CRN of the cluster
+	ClusterCrn string `json:"clusterCrn,omitempty"`
+
 	// CRN of the environment
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`

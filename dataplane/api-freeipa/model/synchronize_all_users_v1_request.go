@@ -17,11 +17,15 @@ import (
 // swagger:model SynchronizeAllUsersV1Request
 type SynchronizeAllUsersV1Request struct {
 
-	// Optional environments to sync
+	// Optional environment crns to sync
 	// Unique: true
 	Environments []string `json:"environments"`
 
-	// Optional users to sync
+	// Optional user crns to sync
+	// Unique: true
+	MachineUsers []string `json:"machineUsers"`
+
+	// Optional user crns to sync
 	// Unique: true
 	Users []string `json:"users"`
 }
@@ -31,6 +35,10 @@ func (m *SynchronizeAllUsersV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEnvironments(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMachineUsers(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -51,6 +59,19 @@ func (m *SynchronizeAllUsersV1Request) validateEnvironments(formats strfmt.Regis
 	}
 
 	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *SynchronizeAllUsersV1Request) validateMachineUsers(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MachineUsers) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("machineUsers", "body", m.MachineUsers); err != nil {
 		return err
 	}
 

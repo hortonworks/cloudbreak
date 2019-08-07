@@ -1245,18 +1245,25 @@ var (
 			Usage: "writes the values into the profile",
 		},
 	}
-	FlIpaUsersSlice = StringSliceFlag{
+	FlIpaUserCrnsSlice = StringSliceFlag{
 		RequiredFlag: OPTIONAL,
 		StringSliceFlag: cli.StringSliceFlag{
-			Name:  "user",
-			Usage: "name of users to sync (provide option once for each name)",
+			Name:  "user-crn",
+			Usage: "crn of users to sync (provide option once for each user)",
 		},
 	}
-	FlIpaEnvironmentsSlice = StringSliceFlag{
+	FlIpaMachineUserCrnsSlice = StringSliceFlag{
 		RequiredFlag: OPTIONAL,
 		StringSliceFlag: cli.StringSliceFlag{
-			Name:  "environment",
-			Usage: "name of environments to sync (provide option once for each name)",
+			Name:  "machine-user-crn",
+			Usage: "crn of machine users to sync (provide option once for each machine user)",
+		},
+	}
+	FlIpaEnvironmentCrnsSlice = StringSliceFlag{
+		RequiredFlag: OPTIONAL,
+		StringSliceFlag: cli.StringSliceFlag{
+			Name:  "env-crn",
+			Usage: "crn of environments to sync (provide option once for each environment)",
 		},
 	}
 	FlIpaUserPassword = StringFlag{
