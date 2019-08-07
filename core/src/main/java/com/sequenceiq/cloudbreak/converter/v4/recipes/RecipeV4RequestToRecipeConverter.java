@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.recipes;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Recipe;
@@ -15,8 +16,17 @@ public class RecipeV4RequestToRecipeConverter extends AbstractConversionServiceA
         Recipe recipe = new Recipe();
         recipe.setName(source.getName());
         recipe.setDescription(source.getDescription());
-        recipe.setRecipeType(RecipeType.valueOf(source.getType().name()));
+        recipe.setRecipeType(recipeType(source.getType()));
         recipe.setContent(source.getContent());
         return recipe;
+    }
+
+    private RecipeType recipeType(RecipeV4Type recipeType) {
+        if (recipeType.equals(RecipeV4Type.POST_AMBARI_START)) {
+            return RecipeType.POST_CLOUDERA_MANAGER_START;
+        } else if (recipeType.equals(RecipeV4Type.PRE_AMBARI_START)) {
+            return RecipeType.PRE_CLOUDERA_MANAGER_START;
+        }
+        return RecipeType.valueOf(recipeType.name());
     }
 }
