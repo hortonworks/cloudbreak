@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.common.TelemetrySetting;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -74,7 +75,7 @@ public class TelemetryConverterTest {
         sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
         sdxClusterResponse.setName("sdxName");
         // WHEN
-        TelemetryRequest result = underTest.convert(response, sdxClusterResponse, true);
+        TelemetryRequest result = underTest.convert(response, sdxClusterResponse, TelemetrySetting.ENABLED);
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertEquals(DATABUS_ENDPOINT, result.getWorkloadAnalytics().getDatabusEndpoint());
@@ -91,6 +92,7 @@ public class TelemetryConverterTest {
         s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
         loggingResponse.setS3(s3Params);
         response.setLogging(loggingResponse);
+        response.setReportDeploymentLogs(TelemetrySetting.ENABLED);
         WorkloadAnalyticsResponse waResponse = new WorkloadAnalyticsResponse();
         waResponse.setDatabusEndpoint("myOtherEndpoint");
         response.setWorkloadAnalytics(waResponse);
@@ -98,8 +100,9 @@ public class TelemetryConverterTest {
         sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
         sdxClusterResponse.setName("sdxName");
         // WHEN
-        TelemetryRequest result = underTest.convert(response, sdxClusterResponse, false);
+        TelemetryRequest result = underTest.convert(response, sdxClusterResponse, TelemetrySetting.DISABLED);
         // THEN
+        assertEquals(TelemetrySetting.ENABLED, result.getReportDeploymentLogs());
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertEquals("myOtherEndpoint", result.getWorkloadAnalytics().getDatabusEndpoint());
         assertEquals("sdxId", result.getWorkloadAnalytics().getAttributes().get("databus.header.sdx.id").toString());
@@ -118,7 +121,7 @@ public class TelemetryConverterTest {
         WorkloadAnalyticsResponse waResponse = new WorkloadAnalyticsResponse();
         response.setWorkloadAnalytics(waResponse);
         // WHEN
-        TelemetryRequest result = underTest.convert(response, null, false);
+        TelemetryRequest result = underTest.convert(response, null, TelemetrySetting.DISABLED);
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertTrue(result.getWorkloadAnalytics().getAttributes().isEmpty());

@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.common.api.telemetry.common.TelemetrySetting;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
@@ -59,7 +60,9 @@ public class AltusIAMService {
 
     // for datalake metering is not supported/required right now
     private boolean isMeteringOrDeploymentReportingSupported(Stack stack, Telemetry telemetry) {
-        return telemetry != null && (telemetry.isReportDeploymentLogs() || (telemetry.isMeteringEnabled() && !StackType.DATALAKE.equals(stack.getType())));
+        return TelemetrySetting.ENABLED.equals(telemetry.getReportDeploymentLogs())
+                || (TelemetrySetting.ENABLED.equals(telemetry.getMetering())
+                && !StackType.DATALAKE.equals(stack.getType()));
     }
 
     private String getFluentDatabusMachineUserName(Stack stack) {

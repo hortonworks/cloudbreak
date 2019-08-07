@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.common.TelemetrySetting;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
@@ -51,8 +52,9 @@ public class TelemetryApiConverter {
                         StringUtils.isNotEmpty(waRequest.getDatabusEndpoint()) ? waRequest.getDatabusEndpoint() : databusEndpoint
                 );
             }
-            boolean reportDeploymentLogsEnabled = reportDeploymentLogs ? request.getReportDeploymentLogs() : false;
-            telemetry = new EnvironmentTelemetry(logging, workloadAnalytics, reportDeploymentLogsEnabled);
+            TelemetrySetting telemetrySetting = reportDeploymentLogs
+                    ? request.getReportDeploymentLogs() : TelemetrySetting.DISABLED;
+            telemetry = new EnvironmentTelemetry(logging, workloadAnalytics, telemetrySetting);
         }
         return telemetry;
     }
@@ -99,7 +101,7 @@ public class TelemetryApiConverter {
             response = new TelemetryResponse();
             response.setLogging(loggingResponse);
             response.setWorkloadAnalytics(waResponse);
-            response.setReportDeploymentLogs(telemetry.isReportDeploymentLogs());
+            response.setReportDeploymentLogs(telemetry.getReportDeploymentLogs());
         }
         return response;
     }

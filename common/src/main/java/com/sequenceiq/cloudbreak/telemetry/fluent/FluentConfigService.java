@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.WasbConfig;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.WasbConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.common.TelemetrySetting;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -76,13 +77,13 @@ public class FluentConfigService {
     private boolean fillMeteringAndDeploymentReportConfigs(Telemetry telemetry, boolean databusEnabled,
             boolean meteringEnabled, FluentConfigView.Builder builder) {
         boolean validDatabusLogging = false;
-        if (meteringEnabled || telemetry.isReportDeploymentLogs()) {
+        if (meteringEnabled || TelemetrySetting.ENABLED.equals(telemetry.getReportDeploymentLogs())) {
             if (databusEnabled && meteringEnabled) {
                 builder.withMeteringEnabled(true);
                 LOGGER.debug("Fluent will be configured to send metering events.");
                 validDatabusLogging = true;
             }
-            if (databusEnabled && telemetry.isReportDeploymentLogs()) {
+            if (databusEnabled && TelemetrySetting.ENABLED.equals(telemetry.getReportDeploymentLogs())) {
                 builder.withReportClusterDeploymentLogs(true);
                 LOGGER.debug("Fluent based metering is enabled.");
                 validDatabusLogging = true;

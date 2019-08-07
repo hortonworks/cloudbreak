@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.common.TelemetrySetting;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
@@ -54,7 +55,7 @@ public class TelemetryApiConverterTest {
         S3CloudStorageParameters s3Params = new S3CloudStorageParameters();
         s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
         logging.setS3(s3Params);
-        EnvironmentTelemetry telemetry = new EnvironmentTelemetry(logging, null, false);
+        EnvironmentTelemetry telemetry = new EnvironmentTelemetry(logging, null, TelemetrySetting.DISABLED);
         // WHEN
         TelemetryResponse result = underTest.convert(telemetry);
         // THEN

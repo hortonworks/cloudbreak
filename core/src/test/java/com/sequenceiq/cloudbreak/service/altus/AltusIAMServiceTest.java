@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.common.api.telemetry.common.TelemetrySetting;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public class AltusIAMServiceTest {
@@ -46,7 +47,7 @@ public class AltusIAMServiceTest {
         cluster.setId(1L);
         stack.setCluster(cluster);
         telemetry = new Telemetry();
-        telemetry.setReportDeploymentLogs(true);
+        telemetry.setReportDeploymentLogs(TelemetrySetting.ENABLED);
         underTest = new AltusIAMService(umsClient);
     }
 

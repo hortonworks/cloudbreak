@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.common.api.telemetry.common.TelemetrySetting;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
@@ -66,7 +67,7 @@ public class TelemetryConverter {
             response = new TelemetryResponse();
             response.setLogging(loggingResponse);
             response.setWorkloadAnalytics(waResponse);
-            response.setReportDeploymentLogs(telemetry.isReportDeploymentLogs());
+            response.setReportDeploymentLogs(telemetry.getReportDeploymentLogs());
         }
         return response;
     }
@@ -92,13 +93,11 @@ public class TelemetryConverter {
             telemetry = new Telemetry();
             telemetry.setLogging(logging);
             telemetry.setWorkloadAnalytics(workloadAnalytics);
-            if (reportDeploymentLogs) {
-                telemetry.setReportDeploymentLogs(request.getReportDeploymentLogs());
-            }
+            telemetry.setReportDeploymentLogs(reportDeploymentLogs
+                    ? request.getReportDeploymentLogs() : TelemetrySetting.DISABLED);
         }
-        if (meteringEnabled) {
-            telemetry.setMeteringEnabled(true);
-        }
+        telemetry.setMetering(meteringEnabled
+                ? TelemetrySetting.ENABLED : TelemetrySetting.DISABLED);
         if (StringUtils.isNotEmpty(databusEndpoint)) {
             telemetry.setDatabusEndpoint(databusEndpoint);
         }
@@ -106,7 +105,7 @@ public class TelemetryConverter {
     }
 
     public TelemetryRequest convert(TelemetryResponse response,
-            SdxClusterResponse sdxClusterResponse, boolean enableWorkloadAnalytics) {
+            SdxClusterResponse sdxClusterResponse, TelemetrySetting workloadAnalyticsSetting) {
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         if (response != null) {
             LoggingRequest loggingRequest = null;
@@ -121,15 +120,15 @@ public class TelemetryConverter {
             telemetryRequest.setReportDeploymentLogs(response.getReportDeploymentLogs());
         }
         telemetryRequest.setWorkloadAnalytics(
-                createWorkloadAnalyticsRequest(response, sdxClusterResponse, enableWorkloadAnalytics));
+                createWorkloadAnalyticsRequest(response, sdxClusterResponse, workloadAnalyticsSetting));
         return telemetryRequest;
     }
 
     private WorkloadAnalyticsRequest createWorkloadAnalyticsRequest(TelemetryResponse response,
-            SdxClusterResponse sdxClusterResponse, boolean enableWorkloadAnalytics) {
+            SdxClusterResponse sdxClusterResponse, TelemetrySetting workloadAnalyticsSetting) {
         WorkloadAnalyticsRequest workloadAnalyticsRequest = null;
         if (telemetryPublisherEnabled) {
-            if (enableWorkloadAnalytics) {
+            if (TelemetrySetting.ENABLED.equals(workloadAnalyticsSetting)) {
                 workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
                 if (StringUtils.isNotEmpty(databusEndpoint)) {
                     workloadAnalyticsRequest.setDatabusEndpoint(databusEndpoint);
@@ -180,7 +179,7 @@ public class TelemetryConverter {
                 waRequest.setAttributes(workloadAnalytics.getAttributes());
                 telemetryRequest.setWorkloadAnalytics(waRequest);
             }
-            telemetryRequest.setReportDeploymentLogs(telemetry.isReportDeploymentLogs());
+            telemetryRequest.setReportDeploymentLogs(telemetry.getReportDeploymentLogs());
         }
         return telemetryRequest;
     }

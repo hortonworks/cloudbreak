@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigView;
+import com.sequenceiq.common.api.telemetry.common.TelemetrySetting;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 /**
@@ -89,7 +90,8 @@ public class TelemetryDecorator {
         }
 
         // for datalake - metering is not enabled yet
-        boolean meteringEnabled = telemetry.isMeteringEnabled() && !StackType.DATALAKE.equals(stack.getType());
+        boolean meteringEnabled = TelemetrySetting.ENABLED.equals(telemetry.getMetering())
+                && !StackType.DATALAKE.equals(stack.getType());
 
         FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterType,
                 stack.getCloudPlatform(), databusConfigView.isEnabled(), meteringEnabled, telemetry);

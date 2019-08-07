@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.network.DefaultNetworkRequiredService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.common.api.telemetry.common.TelemetrySetting;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
@@ -139,7 +141,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private TelemetryRequest getTelemetryRequest(DistroXV1Request source, DetailedEnvironmentResponse environment,
             SdxClusterResponse sdxClusterResponse) {
         TelemetryResponse envTelemetryResp = environment != null ? environment.getTelemetry() : null;
-        boolean workloadAnalytics = true;
+        TelemetrySetting workloadAnalytics = ObjectUtils.defaultIfNull(
+                source.getWorkloadAnalytics(), TelemetrySetting.ENABLED);
         return telemetryConverter.convert(envTelemetryResp, sdxClusterResponse, workloadAnalytics);
     }
 
@@ -201,7 +204,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSdx(getIfNotNull(source.getSharedService(), sdxConverter::getSdx));
-        request.setWorkloadAnalytics(isWorkloadAnalyticsEnabled(source, source.getTelemetry(), sdxClusterResponse));
+        request.setWorkloadAnalytics(getWorkloadAnalyticsSetting(source, source.getTelemetry(), sdxClusterResponse));
         return request;
     }
 
@@ -209,22 +212,22 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return CloudPlatform.valueOf(environment.getCloudPlatform());
     }
 
-    private boolean isWorkloadAnalyticsEnabled(StackV4Request source, TelemetryRequest telemetryRequest,
-            SdxClusterResponse sdxClusterResponse) {
-        boolean waEnabled = false;
+    private TelemetrySetting getWorkloadAnalyticsSetting(StackV4Request source,
+            TelemetryRequest telemetryRequest, SdxClusterResponse sdxClusterResponse) {
+        TelemetrySetting waSetting = TelemetrySetting.DISABLED;
         if (telemetryRequest != null && telemetryRequest.getWorkloadAnalytics() != null) {
-            waEnabled = true;
+            waSetting = TelemetrySetting.ENABLED;
         }
-        if (!waEnabled) {
+        if (TelemetrySetting.DISABLED.equals(waSetting)) {
             TelemetryResponse telemetryResponse =
                     getIfNotNull(source.getEnvironmentCrn(),
                             crn -> environmentClientService.getByCrn(crn).getTelemetry());
-            if (telemetryConverter.convert(telemetryResponse, sdxClusterResponse, true)
+            if (telemetryConverter.convert(telemetryResponse, sdxClusterResponse, TelemetrySetting.ENABLED)
                     .getWorkloadAnalytics() != null) {
-                waEnabled = true;
+                waSetting = TelemetrySetting.ENABLED;
             }
         }
-        return waEnabled;
+        return waSetting;
     }
 
     private TagsV4Request getTags(TagsV1Request source) {

@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.WasbConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.common.TelemetrySetting;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -187,7 +188,7 @@ public class FluentConfigServiceTest {
     public void testCreateFluentConfigMetering() {
         // GIVEN
         Telemetry telemetry = new Telemetry();
-        telemetry.setMeteringEnabled(true);
+        telemetry.setMetering(TelemetrySetting.ENABLED);
         telemetry.setDatabusEndpoint("myEndpoint");
         // WHEN
         FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
@@ -201,7 +202,7 @@ public class FluentConfigServiceTest {
     public void testCreateFluentConfigMeteringWithoutDatabusEndpoint() {
         // GIVEN
         Telemetry telemetry = new Telemetry();
-        telemetry.setMeteringEnabled(true);
+        telemetry.setMetering(TelemetrySetting.ENABLED);
         // WHEN
         FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
                 false, false, telemetry);
@@ -214,7 +215,7 @@ public class FluentConfigServiceTest {
     public void testCreateFluentConfigMeteringWithoutDatabusSecret() {
         // GIVEN
         Telemetry telemetry = new Telemetry();
-        telemetry.setMeteringEnabled(true);
+        telemetry.setMetering(TelemetrySetting.ENABLED);
         // WHEN
         FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
                 false, false, telemetry);
@@ -227,7 +228,7 @@ public class FluentConfigServiceTest {
     public void testCreateFluentConfigReportDeploymentLogs() {
         // GIVEN
         Telemetry telemetry = new Telemetry();
-        telemetry.setReportDeploymentLogs(true);
+        telemetry.setReportDeploymentLogs(TelemetrySetting.ENABLED);
         // WHEN
         FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
                 true, false, telemetry);
@@ -240,7 +241,7 @@ public class FluentConfigServiceTest {
     public void testCreateFluentConfigReportDeploymentLogsWithoutDatabus() {
         // GIVEN
         Telemetry telemetry = new Telemetry();
-        telemetry.setReportDeploymentLogs(true);
+        telemetry.setReportDeploymentLogs(TelemetrySetting.ENABLED);
         // WHEN
         FluentConfigView result = underTest.createFluentConfigs(CLUSTER_TYPE_DEFAULT, PLATFORM_DEFAULT,
                 false, true, telemetry);
