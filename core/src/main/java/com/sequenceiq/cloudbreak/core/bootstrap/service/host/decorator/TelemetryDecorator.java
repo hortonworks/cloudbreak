@@ -94,7 +94,7 @@ public class TelemetryDecorator {
         // for datalake - metering is not enabled yet
         boolean meteringEnabled = telemetry.isMeteringEnabled() && !StackType.DATALAKE.equals(stack.getType());
 
-        String clusterNameWithUUID = String.format("%s-%s",
+        String clusterNameWithUUID = String.format("%s_%s",
                 stack.getCluster().getName(), Crn.fromString(stack.getResourceCrn()).getResource());
 
         FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterNameWithUUID,
