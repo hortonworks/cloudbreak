@@ -47,4 +47,13 @@ public class HostRequest {
     public void setClusterCrn(String clusterCrn) {
         this.clusterCrn = clusterCrn;
     }
+
+    @Override
+    public String toString() {
+        return "HostRequest{"
+                + "environmentCrn='" + environmentCrn + '\''
+                + ", serverHostName='" + serverHostName + '\''
+                + ", clusterCrn='" + clusterCrn + '\''
+                + '}';
+    }
 }

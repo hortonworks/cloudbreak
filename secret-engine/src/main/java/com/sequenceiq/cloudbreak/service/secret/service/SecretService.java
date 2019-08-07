@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
+import com.sequenceiq.cloudbreak.service.secret.SecretOperationException;
 import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine;
@@ -29,6 +30,8 @@ import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 @Service
 @ConditionalOnBean({VaultKvV2Engine.class, VaultKvV1Engine.class, VaultConfig.class})
 public class SecretService {
+
+    public static final int MAX_VAUL_PATH_LENGTH = 256;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretService.class);
 
@@ -62,6 +65,9 @@ public class SecretService {
      * @throws Exception is thrown in case the key-value key is already contains a secret
      */
     public String put(String key, String value) throws Exception {
+        if (key.length() > MAX_VAUL_PATH_LENGTH) {
+            throw new SecretOperationException(String.format("Key size [%s] is greater than 256", key.length()));
+        }
         long start = System.currentTimeMillis();
         boolean exists = persistentEngine.isExists(key);
         long duration = System.currentTimeMillis() - start;

@@ -35,6 +35,18 @@ public class MDCBuilder {
         MDC.put(LoggerContextKey.REQUEST_ID.toString(), requestId);
     }
 
+    public static void addEnvToMdcContext(String env) {
+        MDC.put(LoggerContextKey.ENV_CRN.toString(), env);
+    }
+
+    public static void addResourceCrnToMdcContext(String crn) {
+        MDC.put(LoggerContextKey.RESOURCE_CRN.toString(), crn);
+    }
+
+    public static void addAccountToMdcContext(String account) {
+        MDC.put(LoggerContextKey.ACCOUNT_ID.toString(), account);
+    }
+
     public static void buildMdcContext(Object object) {
         if (object == null) {
             MDC.put(LoggerContextKey.USER_CRN.toString(), null);
