@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.util.UsersResourceApiProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -63,8 +64,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         Cluster cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
-        UsersResourceApi usersResourceApi = usersResourceApiProvider.getResourceApi(stack.getGatewayPort(), user, password, clientConfig);
         try {
+            UsersResourceApi usersResourceApi = usersResourceApiProvider.getResourceApi(stack.getGatewayPort(), user, password, clientConfig);
             ApiUser2List oldUserList = usersResourceApi.readUsers2("SUMMARY");
             Optional<ApiUser2> oldAdminUser = oldUserList.getItems().stream()
                     .filter(apiUser2 -> apiUser2.getName().equals(stack.getCluster().getUserName()))
@@ -75,7 +76,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             } else {
                 throw new CloudbreakException("Can't find original admin user");
             }
-        } catch (ApiException e) {
+        } catch (ApiException | ClouderaManagerClientInitException e) {
             LOGGER.info("Can't replace original admin user due to: ", e);
             throw new CloudbreakException("Can't replace original admin user due to: " + e.getMessage());
         }
@@ -86,8 +87,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         Cluster cluster = stack.getCluster();
         String cmUser = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
-        UsersResourceApi usersResourceApi = usersResourceApiProvider.getResourceApi(stack.getGatewayPort(), cmUser, password, clientConfig);
         try {
+            UsersResourceApi usersResourceApi = usersResourceApiProvider.getResourceApi(stack.getGatewayPort(), cmUser, password, clientConfig);
             ApiUser2List oldUserList = usersResourceApi.readUsers2("SUMMARY");
             Optional<ApiUser2> oldAdminUser = oldUserList.getItems().stream()
                     .filter(apiUser2 -> apiUser2.getName().equals(stack.getCluster().getUserName()))
@@ -99,7 +100,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             } else {
                 throw new CloudbreakException("Can't find admin user");
             }
-        } catch (ApiException e) {
+        } catch (ApiException | ClouderaManagerClientInitException e) {
             LOGGER.info("Can't replace admin password due to: ", e);
             throw new CloudbreakException("Can't replace admin password due to: " + e.getMessage());
         }
@@ -126,8 +127,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     @Override
     public void changeOriginalCredentialsAndCreateCloudbreakUser(boolean ldapConfigured) throws CloudbreakException {
         LOGGER.debug("change original admin user and create cloudbreak user");
-        UsersResourceApi usersResourceApi = usersResourceApiProvider.getDefaultUsersResourceApi(stack.getGatewayPort(), clientConfig);
         try {
+            UsersResourceApi usersResourceApi = usersResourceApiProvider.getDefaultUsersResourceApi(stack.getGatewayPort(), clientConfig);
             Optional<ApiUser2> oldAdminUser = getOldAdminUser(usersResourceApi);
             if (oldAdminUser.isPresent()) {
                 Cluster cluster = stack.getCluster();
@@ -149,7 +150,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             } else {
                 throw new CloudbreakException("Can't find original admin user");
             }
-        } catch (ApiException e) {
+        } catch (ApiException | ClouderaManagerClientInitException e) {
             LOGGER.info("Can't replace original admin user due to: ", e);
             throw new CloudbreakException("Can't replace original admin user due to: " + e.getMessage());
         }
@@ -162,7 +163,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
                 String password = stack.getCluster().getCloudbreakAmbariPassword();
                 UsersResourceApi usersResourceApi = usersResourceApiProvider.getResourceApi(stack.getGatewayPort(), user, password, clientConfig);
                 usersResourceApi.deleteUser2(ADMIN_USER);
-            } catch (ApiException e) {
+            } catch (ApiException | ClouderaManagerClientInitException e) {
                 LOGGER.info("Can't remove default admin user due to: ", e);
             }
         }
@@ -183,8 +184,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     public void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig) throws CloudbreakException {
         try {
             ldapService.setupLdap(stack, stack.getCluster(), clientConfig, ldapConfig);
-        } catch (ApiException apiException) {
-            throw new CloudbreakException(apiException);
+        } catch (ApiException | ClouderaManagerClientInitException e) {
+            throw new CloudbreakException(e);
         }
     }
 

@@ -21,6 +21,7 @@ import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
@@ -32,7 +33,8 @@ public class ClouderaManagerLdapService {
     @Inject
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
-    public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig, LdapView ldapView) throws ApiException {
+    public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig, LdapView ldapView)
+            throws ApiException, ClouderaManagerClientInitException {
         if (ldapView != null) {
             String user = cluster.getCloudbreakAmbariUser();
             String password = cluster.getCloudbreakAmbariPassword();
