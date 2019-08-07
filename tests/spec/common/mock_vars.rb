@@ -43,7 +43,7 @@ RSpec.shared_context "mock shared vars", :a => :b do
     @blueprint_url = ENV['CLUSTER_DEFINITION_URL']
     @blueprint_file = "../../blueprints/test.bp"
 
-    @recipe_types = Array["pre-ambari-start", "pre-termination","post-ambari-start", "post-cluster-install"]
+    @recipe_types = Array["pre-cloudera-manager-start", "pre-termination","post-cloudera-manager-start", "post-cluster-install"]
     @recipe_name = "cli-recipe"
     @recipe_file = "../../recipes/echo.sh"
 

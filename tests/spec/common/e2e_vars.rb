@@ -12,7 +12,7 @@ RSpec.shared_context "e2e shared vars", :a => :b do
   @ambari_user = "admin"
   @ambari_password = 'Admin123!@#\"'
 
-  @recipe_types = Array["pre-ambari-start", "pre-termination", "post-ambari-start", "post-cluster-install"]
+  @recipe_types = Array["pre-cloudera-manager-start", "pre-termination", "post-cloudera-manager-start", "post-cluster-install"]
   @recipe_name = "cli-recipe"
   @recipe_file = "../../recipes/echo.sh"
 

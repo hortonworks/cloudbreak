@@ -63,10 +63,14 @@ func CreateRecipeFromFile(c *cli.Context) {
 
 func getExecutionType(executionType string) string {
 	switch strings.ToLower(executionType) {
+	case "pre-cloudera-manager-start":
+		return "PRE_CLOUDERA_MANAGER_START"
+	case "post-cloudera-manager-start":
+		return "POST_CLOUDERA_MANAGER_START"
 	case "pre-ambari-start":
-		return "PRE_AMBARI_START"
+		return "PRE_CLOUDERA_MANAGER_START"
 	case "post-ambari-start":
-		return "POST_AMBARI_START"
+		return "POST_CLOUDERA_MANAGER_START"
 	case "post-cluster-install":
 		return "POST_CLUSTER_INSTALL"
 	case "pre-termination":

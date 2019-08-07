@@ -18,7 +18,7 @@ RSpec.describe 'Audit test cases', :type => :aruba do
       cb.recipe.list.build
     end
     if !(result[0])
-      result = cb.recipe.create.from_file.name("recipe-audit").execution_type("pre-ambari-start").file(@recipe_file).build(false) 
+      result = cb.recipe.create.from_file.name("recipe-audit").execution_type("pre-cloudera-manager-start").file(@recipe_file).build(false) 
       expect(result.exit_status).to eql 0 
     end
       result = cb.recipe.describe.name("recipe-audit").build(false)

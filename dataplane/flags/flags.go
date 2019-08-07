@@ -357,7 +357,7 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "execution-type",
-			Usage: "type of execution [pre-ambari-start, pre-termination, post-ambari-start, post-cluster-install]",
+			Usage: "type of execution [pre-cloudera-manager-start, pre-ambari-start, pre-termination, post-cloudera-manager-start, post-ambari-start, post-cluster-install]",
 		},
 	}
 	FlCMUserOptional = StringFlag{
