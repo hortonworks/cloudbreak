@@ -18,7 +18,6 @@
             <property name="tokens" value="BNOT,DEC,DOT,INC,LNOT,UNARY_MINUS,UNARY_PLUS" />
         </module>
         <module name="NoWhitespaceBefore" />
-        <module name="OperatorWrap" />
         <module name="ParenPad" />
         <module name="TypecastParenPad" />
         <module name="WhitespaceAfter" />

@@ -11,4 +11,9 @@ public class DisableKerberosResult extends ClusterPlatformResult<DisableKerberos
     public DisableKerberosResult(String statusReason, Exception errorDetails, DisableKerberosRequest request) {
         super(statusReason, errorDetails, request);
     }
+
+    @Override
+    public String toString() {
+        return "DisableKerberosResult{" + super.toString() + "}";
+    }
 }

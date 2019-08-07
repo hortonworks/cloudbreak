@@ -54,4 +54,13 @@ public abstract class ClusterPlatformResult<R extends ClusterPlatformRequest> im
     public Long getResourceId() {
         return request.getResourceId();
     }
+
+    @Override
+    public String toString() {
+        return "ClusterPlatformResult{"
+                + "status=" + status
+                + ", statusReason='" + statusReason + '\''
+                + ", errorDetails=" + errorDetails
+                + '}';
+    }
 }
