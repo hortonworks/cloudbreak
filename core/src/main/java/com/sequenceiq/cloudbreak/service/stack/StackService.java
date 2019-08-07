@@ -533,23 +533,23 @@ public class StackService {
         stack.setPlatformVariant(connector.checkAndGetPlatformVariant(stack).value());
     }
 
-    public void deleteByName(Long id, Boolean forced, Boolean deleteDependencies, User user) {
+    public void deleteByName(Long id, Boolean forced, User user) {
         stackRepository.findById(id).map(stack -> {
-            deleteByName(stack.getName(), stack.getWorkspace().getId(), forced, deleteDependencies, user);
+            deleteByName(stack.getName(), stack.getWorkspace().getId(), forced, user);
             return stack;
         }).orElseThrow(notFound("Stack", id));
     }
 
-    public void deleteByName(String name, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
+    public void deleteByName(String name, Long workspaceId, Boolean forced, User user) {
         stackRepository.findByNameAndWorkspaceId(name, workspaceId).map(stack -> {
-            deleteByName(stack, forced, deleteDependencies, user);
+            deleteByName(stack, forced, user);
             return stack;
         }).orElseThrow(notFound("Stack", name));
     }
 
-    public void deleteByCrn(String crn, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
+    public void deleteByCrn(String crn, Long workspaceId, Boolean forced, User user) {
         stackRepository.findByCrnAndWorkspaceId(crn, workspaceId).map(stack -> {
-            deleteByName(stack, forced, deleteDependencies, user);
+            deleteByName(stack, forced, user);
             return stack;
         }).orElseThrow(notFound("Stack", crn));
     }
@@ -905,7 +905,7 @@ public class StackService {
         }
     }
 
-    private void deleteByName(Stack stack, Boolean forced, Boolean deleteDependencies, User user) {
+    private void deleteByName(Stack stack, Boolean forced, User user) {
         LOGGER.info("Check permission for stack {} in environment {}.", stack.getName(), stack.getEnvironmentCrn());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         LOGGER.info("Check stack that no cluster is attached to {} in environment.", stack.getEnvironmentCrn());
@@ -923,12 +923,12 @@ public class StackService {
                 if (!runningFlowForced) {
                     LOGGER.info("Terminate stack {} in environment {} because the current flow is not force termination.",
                             stack.getName(), stack.getEnvironmentCrn());
-                    flowManager.triggerTermination(stack.getId(), true, deleteDependencies);
+                    flowManager.triggerTermination(stack.getId(), true);
                 }
             });
         } else if (!stack.isDeleteCompleted() && !stack.isDeleteInProgress()) {
             LOGGER.info("Terminate stack {} in environment {}.", stack.getName(), stack.getEnvironmentCrn());
-            flowManager.triggerTermination(stack.getId(), forced, deleteDependencies);
+            flowManager.triggerTermination(stack.getId(), forced);
         } else {
             LOGGER.debug("Stack is already deleted.");
         }

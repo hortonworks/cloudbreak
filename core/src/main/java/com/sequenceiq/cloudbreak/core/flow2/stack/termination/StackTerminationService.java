@@ -47,9 +47,6 @@ public class StackTerminationService {
     private StackUpdater stackUpdater;
 
     @Inject
-    private DependecyDeletionService dependecyDeletionService;
-
-    @Inject
     private CloudbreakMetricService metricService;
 
     @Inject
@@ -65,16 +62,13 @@ public class StackTerminationService {
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
-    public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean deleteDependencies) {
+    public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload) {
         LOGGER.debug("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
         terminationService.finalizeTermination(stack.getId(), true);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_TERMINATED, BillingStatus.BILLING_TERMINATED.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
-        if (deleteDependencies) {
-            dependecyDeletionService.deleteDependencies(stack);
-        }
         if (stack.getType() == StackType.DATALAKE) {
             datalakeResourcesService.findByDatalakeStackId(stack.getId()).ifPresent(datalakeResources ->
                     datalakeResourcesService.deleteWithMdcContextRestore(datalakeResources));
@@ -84,7 +78,7 @@ public class StackTerminationService {
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }
 
-    public void handleStackTerminationError(StackView stackView, StackFailureEvent payload, boolean forced, Boolean deleteDependencies) {
+    public void handleStackTerminationError(StackView stackView, StackFailureEvent payload, boolean forced) {
         String stackUpdateMessage;
         Msg eventMessage;
         DetailedStackStatus status;
@@ -101,9 +95,6 @@ public class StackTerminationService {
             stackUpdateMessage = "Stack was force terminated.";
             status = DetailedStackStatus.DELETE_COMPLETED;
             eventMessage = Msg.STACK_FORCED_DELETE_COMPLETED;
-            if (deleteDependencies) {
-                dependecyDeletionService.deleteDependencies(stackView);
-            }
         }
         flowMessageService.fireEventAndLog(stackView.getId(), eventMessage, status.name(), stackUpdateMessage);
     }

@@ -23,8 +23,7 @@ public class TerminationFlowEventChainFactory implements FlowEventChainFactory<T
     public Queue<Selectable> createFlowTriggerEventQueue(TerminationEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackEvent(ClusterTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), null));
-        flowEventChain.add(new TerminationEvent(StackTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), event.getForced(),
-                event.getDeleteDependencies()));
+        flowEventChain.add(new TerminationEvent(StackTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), event.getForced()));
         return flowEventChain;
     }
 }

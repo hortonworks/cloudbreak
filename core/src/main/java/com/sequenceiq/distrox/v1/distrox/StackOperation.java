@@ -130,15 +130,15 @@ public class StackOperation {
         return stackResponse;
     }
 
-    public void delete(StackAccessDto stackAccessDto, Long workspaceId, Boolean forced, Boolean deleteDependencies) {
+    public void delete(StackAccessDto stackAccessDto, Long workspaceId, Boolean forced) {
         validateAccessDto(stackAccessDto);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         if (isNotEmpty(stackAccessDto.getName())) {
             LOGGER.info("Delete Stack in workspace {} with name {}.", workspaceId, stackAccessDto.getName());
-            stackCommonService.deleteByNameInWorkspace(stackAccessDto.getName(), workspaceId, forced, deleteDependencies, user);
+            stackCommonService.deleteByNameInWorkspace(stackAccessDto.getName(), workspaceId, forced, user);
         } else {
             LOGGER.info("Delete Stack in workspace {} with crn {}.", workspaceId, stackAccessDto.getCrn());
-            stackCommonService.deleteByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, forced, deleteDependencies, user);
+            stackCommonService.deleteByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, forced, user);
         }
     }
 
@@ -194,11 +194,11 @@ public class StackOperation {
         }
     }
 
-    public void deleteWithKerberos(@NotNull StackAccessDto stackAccessDto, Long workspaceId, Boolean withStackDelete, Boolean deleteDependencies) {
+    public void deleteWithKerberos(@NotNull StackAccessDto stackAccessDto, Long workspaceId, Boolean withStackDelete) {
         if (isNotEmpty(stackAccessDto.getName())) {
-            stackCommonService.deleteWithKerberosByNameInWorkspace(stackAccessDto.getName(), workspaceId, withStackDelete, deleteDependencies);
+            stackCommonService.deleteWithKerberosByNameInWorkspace(stackAccessDto.getName(), workspaceId, withStackDelete);
         } else {
-            stackCommonService.deleteWithKerberosByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, withStackDelete, deleteDependencies);
+            stackCommonService.deleteWithKerberosByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId, withStackDelete);
         }
     }
 

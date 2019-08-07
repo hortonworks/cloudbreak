@@ -46,7 +46,6 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
     @Override
     protected void prepareExecution(TerminationEvent payload, Map<Object, Object> variables) {
         variables.put("FORCEDTERMINATION", payload.getForced());
-        variables.put("DELETEDEPENDENCIES", payload.getDeleteDependencies());
     }
 
     @Override

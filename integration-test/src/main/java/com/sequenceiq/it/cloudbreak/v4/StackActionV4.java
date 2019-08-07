@@ -73,13 +73,13 @@ public class StackActionV4 {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete: " + entity.getName());
         client.getCloudbreakClient().stackV4Endpoint()
-                .delete(workspaceId, entity.getName(), forced, false);
+                .delete(workspaceId, entity.getName(), forced);
     }
 
     public static StackTestDto delete(TestContext testContext, StackTestDto entity, CloudbreakClient cloudbreakClient) {
         Log.log(LOGGER, " delete: " + entity.getName());
         cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
-                .delete(cloudbreakClient.getWorkspaceId(), entity.getName(), false, false);
+                .delete(cloudbreakClient.getWorkspaceId(), entity.getName(), false);
         return entity;
     }
 
@@ -90,7 +90,7 @@ public class StackActionV4 {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete: " + stackTestDto.getName());
         client.getCloudbreakClient().stackV4Endpoint()
-                .deleteWithKerberos(workspaceId, stackTestDto.getName(), true, false);
+                .deleteWithKerberos(workspaceId, stackTestDto.getName(), true);
     }
 
     public static void determineNetworkAwsFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {

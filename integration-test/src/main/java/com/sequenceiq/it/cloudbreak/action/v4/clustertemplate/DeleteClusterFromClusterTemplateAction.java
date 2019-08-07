@@ -34,7 +34,7 @@ public class DeleteClusterFromClusterTemplateAction implements Action<ClusterTem
         StackTemplateTestDto stackEntity = testContext.get(stackTemplateKey);
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .delete(client.getWorkspaceId(), stackEntity.getResponse().getName(), false, null);
+                .delete(client.getWorkspaceId(), stackEntity.getResponse().getName(), false);
         Log.logJSON(LOGGER, " Stack from template created  successfully:\n", testDto.getResponse());
         Log.log(LOGGER, "Stack from template ID: " + testDto.getResponse().getId());
         return testDto;

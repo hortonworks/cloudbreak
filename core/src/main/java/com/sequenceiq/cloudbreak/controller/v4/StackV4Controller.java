@@ -54,8 +54,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
-    public void delete(Long workspaceId, String name, Boolean forced, Boolean deleteDependencies) {
-        stackOperation.delete(aStackAccessDtoBuilder().withName(name).build(), workspaceId, forced, deleteDependencies);
+    public void delete(Long workspaceId, String name, Boolean forced) {
+        stackOperation.delete(aStackAccessDtoBuilder().withName(name).build(), workspaceId, forced);
     }
 
     @Override
@@ -99,8 +99,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
-    public void deleteWithKerberos(Long workspaceId, String name, Boolean withStackDelete, Boolean deleteDependencies) {
-        stackOperation.deleteWithKerberos(aStackAccessDtoBuilder().withName(name).build(), workspaceId, withStackDelete, deleteDependencies);
+    public void deleteWithKerberos(Long workspaceId, String name, Boolean withStackDelete) {
+        stackOperation.deleteWithKerberos(aStackAccessDtoBuilder().withName(name).build(), workspaceId, withStackDelete);
     }
 
     @Override

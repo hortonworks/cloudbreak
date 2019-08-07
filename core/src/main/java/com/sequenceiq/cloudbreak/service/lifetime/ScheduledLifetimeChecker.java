@@ -70,7 +70,7 @@ public class ScheduledLifetimeChecker {
         if (!stack.isDeleteCompleted()) {
             LOGGER.debug("Trigger termination of stack: '{}', workspace: '{}', tenant: '{}'.",
                     stack.getName(), stack.getWorkspace().getName(), stack.getWorkspace().getTenant().getName());
-            flowManager.triggerTermination(stack.getId(), false, false);
+            flowManager.triggerTermination(stack.getId(), false);
         }
     }
 

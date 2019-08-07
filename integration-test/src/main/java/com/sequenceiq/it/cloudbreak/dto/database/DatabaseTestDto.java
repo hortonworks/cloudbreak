@@ -108,7 +108,7 @@ public class DatabaseTestDto extends DeletableTestDto<DatabaseV4Request, Databas
     @Override
     public void delete(TestContext testContext, DatabaseV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true, false);
+            client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true);
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }

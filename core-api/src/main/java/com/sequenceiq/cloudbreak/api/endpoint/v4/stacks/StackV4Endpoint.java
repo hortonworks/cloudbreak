@@ -82,8 +82,7 @@ public interface StackV4Endpoint {
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "deleteStackInWorkspaceV4")
-    void delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
-            @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
+    void delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @PUT
     @Path("{name}/sync")
@@ -141,8 +140,7 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_WITH_KERBEROS_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES)
     void deleteWithKerberos(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("withStackDelete") @DefaultValue("false") Boolean withStackDelete,
-            @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
+            @QueryParam("withStackDelete") @DefaultValue("false") Boolean withStackDelete);
 
     @GET
     @Path("{name}/request")
