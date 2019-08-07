@@ -23,6 +23,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
@@ -37,7 +38,9 @@ import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -54,6 +57,10 @@ class ClouderaManagerModificationServiceTest {
     private static final String STACK_NAME = "stack_name";
 
     private static final String HOST_GROUP_NAME = "host_group_name";
+
+    private static final long CLUSTER_ID = 1L;
+
+    private static final BigDecimal REFRESH_PARCEL_REPOS_ID = new BigDecimal(1);
 
     @InjectMocks
     private ClouderaManagerModificationService underTest;
@@ -85,6 +92,15 @@ class ClouderaManagerModificationServiceTest {
     @Mock
     private MgmtServiceResourceApi mgmtServiceResourceApi;
 
+    @Mock
+    private ClouderaManagerResourceApi clouderaManagerResourceApi;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentProvider;
+
+    @Mock
+    private ClouderaManagerRepo clouderaManagerRepo;
+
     private Cluster cluster;
 
     private HostGroup hostGroup;
@@ -98,8 +114,9 @@ class ClouderaManagerModificationServiceTest {
         MockitoAnnotations.initMocks(this);
 
         stack.setName(STACK_NAME);
-        stack.setCluster(cluster);
         cluster = new Cluster();
+        cluster.setId(CLUSTER_ID);
+        stack.setCluster(cluster);
         hostMetadataList = createHmListWithUpscaledHost();
         hostGroup = new HostGroup();
         hostGroup.setName(HOST_GROUP_NAME);
@@ -127,7 +144,27 @@ class ClouderaManagerModificationServiceTest {
         apiCommandList.setItems(List.of());
         when(clustersResourceApi.listActiveCommands(anyString(), anyString())).thenReturn(apiCommandList);
         when(mgmtServiceResourceApi.listActiveCommands(anyString())).thenReturn(apiCommandList);
+        when(clouderaManagerRepo.getPredefined()).thenReturn(Boolean.TRUE);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        setUpListClusterHosts();
+        setUpRestartServices();
 
+        underTest.upscaleCluster(hostGroup, List.of(originalHm), instaneMetadata);
+        verify(clouderaManagerClientFactory, never()).getHostsResourceApi(any());
+    }
+
+    @Test
+    void upscaleClusterRecovery() throws Exception {
+        HostMetadata originalHm = new HostMetadata();
+        originalHm.setHostName("original");
+
+        ApiCommandList apiCommandList = new ApiCommandList();
+        apiCommandList.setItems(List.of());
+        when(clouderaManagerClientFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
+        when(clustersResourceApi.listActiveCommands(anyString(), anyString())).thenReturn(apiCommandList);
+        when(mgmtServiceResourceApi.listActiveCommands(anyString())).thenReturn(apiCommandList);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
         setUpListClusterHosts();
         setUpRestartServices();
 
