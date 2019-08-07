@@ -97,8 +97,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerStackStart(STACK_ID);
         underTest.triggerClusterStop(STACK_ID);
         underTest.triggerClusterStart(STACK_ID);
-        underTest.triggerTermination(STACK_ID, false, false);
-        underTest.triggerTermination(STACK_ID, false, true);
+        underTest.triggerTermination(STACK_ID, false);
+        underTest.triggerTermination(STACK_ID, false);
         underTest.triggerStackUpscale(STACK_ID, instanceGroupAdjustment, true);
         underTest.triggerStackDownscale(STACK_ID, instanceGroupAdjustment);
         underTest.triggerStackRemoveInstance(STACK_ID, "hostgroup", 5L);
@@ -113,8 +113,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerFullSyncWithoutCheck(STACK_ID);
         underTest.triggerClusterCredentialReplace(STACK_ID, "admin", "admin1");
         underTest.triggerClusterCredentialUpdate(STACK_ID, "admin1");
-        underTest.triggerClusterTermination(stack, false, false);
-        underTest.triggerClusterTermination(stack, true, false);
+        underTest.triggerClusterTermination(stack, false);
+        underTest.triggerClusterTermination(stack, true);
         underTest.triggerClusterUpgrade(STACK_ID);
         underTest.triggerManualRepairFlow(STACK_ID);
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
@@ -135,7 +135,7 @@ public class ReactorFlowManagerTest {
 
     @Test
     public void testClusterTerminationOnlyNotSecuredCluster() {
-        underTest.triggerClusterTermination(stack, false, false);
+        underTest.triggerClusterTermination(stack, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
@@ -148,14 +148,14 @@ public class ReactorFlowManagerTest {
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
         when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env")).thenReturn(true);
 
-        underTest.triggerClusterTermination(stack, false, false);
+        underTest.triggerClusterTermination(stack, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
     public void testClusterTerminationNotSecuredClusterAndStack() {
-        underTest.triggerClusterTermination(stack, true, false);
+        underTest.triggerClusterTermination(stack, true);
 
         verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
@@ -168,7 +168,7 @@ public class ReactorFlowManagerTest {
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
         when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env")).thenReturn(true);
 
-        underTest.triggerClusterTermination(stack, true, false);
+        underTest.triggerClusterTermination(stack, true);
 
         verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
     }

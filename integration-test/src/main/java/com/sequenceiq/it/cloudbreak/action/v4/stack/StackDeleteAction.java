@@ -23,7 +23,7 @@ public class StackDeleteAction implements Action<StackTestDto, CloudbreakClient>
         Log.logJSON(LOGGER, " Stack delete request:\n", testDto.getRequest());
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .delete(client.getWorkspaceId(), testDto.getName(), false, false);
+                .delete(client.getWorkspaceId(), testDto.getName(), false);
         Log.logJSON(LOGGER, " Stack deletion was successful:\n", testDto.getResponse());
         Log.log(LOGGER, format(" crn: %s", testDto.getResponse().getCrn()));
         return testDto;

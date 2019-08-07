@@ -31,7 +31,7 @@ public class StackTestAction {
         Log.logJSON(LOGGER, " Stack delete request:\n", entity.getRequest());
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .delete(client.getWorkspaceId(), entity.getName(), false, false);
+                .delete(client.getWorkspaceId(), entity.getName(), false);
         Log.logJSON(LOGGER, " Stack deletion was successful:\n", entity.getResponse());
         Log.log(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;

@@ -90,7 +90,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     @Override
     public void delete(TestContext testContext, StackV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true, false);
+            client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true);
             testContext.await(this, STACK_DELETED, key("wait-purge-stack-" + entity.getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);

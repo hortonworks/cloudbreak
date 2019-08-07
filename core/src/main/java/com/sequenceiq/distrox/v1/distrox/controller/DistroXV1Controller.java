@@ -98,8 +98,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         stackOperation.delete(
                 aStackAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
-                forced,
-                false);
+                forced);
     }
 
     @Override
@@ -107,8 +106,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         stackOperation.delete(
                 aStackAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
-                forced,
-                false);
+                forced);
     }
 
     @Override
@@ -298,8 +296,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         stackOperation.deleteWithKerberos(
                 aStackAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
-                true,
-                false);
+                true);
 
     }
 
@@ -308,8 +305,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         stackOperation.deleteWithKerberos(
                 aStackAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
-                true,
-                false);
+                true);
 
     }
 }

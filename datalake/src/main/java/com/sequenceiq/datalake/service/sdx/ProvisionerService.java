@@ -51,7 +51,7 @@ public class ProvisionerService {
             try {
                 cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
                         .stackV4Endpoint()
-                        .delete(0L, sdxCluster.getClusterName(), false, false);
+                        .delete(0L, sdxCluster.getClusterName(), false);
                 sdxCluster.setStatus(SdxClusterStatus.STACK_DELETION_IN_PROGRESS);
                 sdxClusterRepository.save(sdxCluster);
             } catch (NotFoundException e) {

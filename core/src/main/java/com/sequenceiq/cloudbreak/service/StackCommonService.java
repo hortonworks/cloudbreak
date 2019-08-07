@@ -112,12 +112,12 @@ public class StackCommonService {
         return stackCreatorService.createStack(user, workspace, stackRequest);
     }
 
-    public void deleteByNameInWorkspace(String name, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
-        stackService.deleteByName(name, workspaceId, forced, deleteDependencies, user);
+    public void deleteByNameInWorkspace(String name, Long workspaceId, Boolean forced, User user) {
+        stackService.deleteByName(name, workspaceId, forced, user);
     }
 
-    public void deleteByCrnInWorkspace(String crn, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
-        stackService.deleteByCrn(crn, workspaceId, forced, deleteDependencies, user);
+    public void deleteByCrnInWorkspace(String crn, Long workspaceId, Boolean forced, User user) {
+        stackService.deleteByCrn(crn, workspaceId, forced, user);
     }
 
     public StackV4Response get(Long id, Set<String> entries) {
@@ -227,20 +227,20 @@ public class StackCommonService {
         }
     }
 
-    public void deleteWithKerberosByNameInWorkspace(String name, Long workspaceId, Boolean withStackDelete, Boolean deleteDependencies) {
+    public void deleteWithKerberosByNameInWorkspace(String name, Long workspaceId, Boolean withStackDelete) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        clusterService.delete(stack.getId(), withStackDelete, deleteDependencies);
+        clusterService.delete(stack.getId(), withStackDelete);
     }
 
-    public void deleteWithKerberosByCrnInWorkspace(String crn, Long workspaceId, Boolean withStackDelete, Boolean deleteDependencies) {
+    public void deleteWithKerberosByCrnInWorkspace(String crn, Long workspaceId, Boolean withStackDelete) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        clusterService.delete(stack.getId(), withStackDelete, deleteDependencies);
+        clusterService.delete(stack.getId(), withStackDelete);
     }
 
     public void repairClusterByName(Long workspaceId, String name, ClusterRepairV4Request clusterRepairRequest) {

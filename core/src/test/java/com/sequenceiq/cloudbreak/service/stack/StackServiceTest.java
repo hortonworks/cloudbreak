@@ -217,13 +217,13 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndForcedAndDeleteDepsThenExceptionShouldCome() {
+    public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndNotForcedThenExceptionShouldCome() {
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, user);
 
         verify(stackRepository, times(0)).findById(anyLong());
         verify(stackRepository, times(0)).findById(STACK_ID);
@@ -232,13 +232,13 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndDeleteDepsButNotForcedThenExceptionShouldCome() {
+    public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndForcedThenExceptionShouldCome() {
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
         verify(stackRepository, times(0)).findById(anyLong());
         verify(stackRepository, times(0)).findById(STACK_ID);
@@ -247,44 +247,13 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndForcedButNotDeleteDepsThenExceptionShouldCome() {
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.empty());
-
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
-
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, false, user);
-
-        verify(stackRepository, times(0)).findById(anyLong());
-        verify(stackRepository, times(0)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
-    }
-
-    @Test
-    public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndNotForcedAndNotDeleteDepsThenExceptionShouldCome() {
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.empty());
-
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
-
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, false, user);
-
-        verify(stackRepository, times(0)).findById(anyLong());
-        verify(stackRepository, times(0)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
-    }
-
-    @Test
-    public void testDeleteWhenStackCouldNotFindByItsIdForWorkspaceAndForcedAndDeleteDepsThenExceptionShouldCome() {
+    public void testDeleteWhenStackCouldNotFindByItsIdForWorkspaceAndForcedThenExceptionShouldCome() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
 
-        underTest.deleteByName(STACK_ID, true, true, user);
-
+        underTest.deleteByName(STACK_ID, true, user);
         verify(stackRepository, times(1)).findById(anyLong());
         verify(stackRepository, times(1)).findById(STACK_ID);
         verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -292,41 +261,13 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWhenStackCouldNotFindByItsIdForWorkspaceAndDeleteDepsButNotForcedThenExceptionShouldCome() {
+    public void testDeleteWhenStackCouldNotFindByItsIdForWorkspaceAndNotForcedThenExceptionShouldCome() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
 
-        underTest.deleteByName(STACK_ID, true, true, user);
-        verify(stackRepository, times(1)).findById(anyLong());
-        verify(stackRepository, times(1)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
-    }
-
-    @Test
-    public void testDeleteWhenStackCouldNotFindByItsIdForWorkspaceAndForcedButNotDeleteDepsThenExceptionShouldCome() {
-        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
-
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
-
-        underTest.deleteByName(STACK_ID, true, true, user);
-        verify(stackRepository, times(1)).findById(anyLong());
-        verify(stackRepository, times(1)).findById(STACK_ID);
-        verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
-        verify(stackRepository, times(1)).findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID);
-    }
-
-    @Test
-    public void testDeleteWhenStackCouldNotFindByItsIdForWorkspaceAndNotForcedAndNotDeleteDepsThenExceptionShouldCome() {
-        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
-
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_ID));
-
-        underTest.deleteByName(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, user);
         verify(stackRepository, times(1)).findById(anyLong());
         verify(stackRepository, times(1)).findById(STACK_ID);
         verify(stackRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
@@ -341,9 +282,9 @@ public class StackServiceTest {
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stack.isDeleteCompleted()).thenReturn(true);
 
-        underTest.deleteByName(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -356,9 +297,9 @@ public class StackServiceTest {
         doNothing().when(permissionCheckingUtils).checkPermissionForUser(any(), any(), anyString());
         when(stack.isDeleteCompleted()).thenReturn(true);
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -374,9 +315,9 @@ public class StackServiceTest {
         expectedException.expect(AccessDeniedException.class);
         expectedException.expectMessage(STACK_DELETE_ACCESS_DENIED);
 
-        underTest.deleteByName(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -391,9 +332,9 @@ public class StackServiceTest {
         expectedException.expect(AccessDeniedException.class);
         expectedException.expectMessage(STACK_DELETE_ACCESS_DENIED);
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -406,10 +347,10 @@ public class StackServiceTest {
         doNothing().when(permissionCheckingUtils).checkPermissionForUser(any(), any(), anyString());
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
 
-        underTest.deleteByName(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, user);
 
-        verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(flowManager, times(1)).triggerTermination(STACK_ID, true, true);
+        verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean());
+        verify(flowManager, times(1)).triggerTermination(STACK_ID, true);
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -421,10 +362,10 @@ public class StackServiceTest {
         doNothing().when(permissionCheckingUtils).checkPermissionForUser(any(), any(), anyString());
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
-        verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(flowManager, times(1)).triggerTermination(STACK_ID, true, true);
+        verify(flowManager, times(1)).triggerTermination(anyLong(), anyBoolean());
+        verify(flowManager, times(1)).triggerTermination(STACK_ID, true);
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -432,7 +373,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWithForceAndDeleteDepsByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+    public void testDeleteWithForceByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack1 = mock(Stack.class);
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
@@ -444,9 +385,9 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -454,7 +395,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWithForceButWithoutDeleteDepsByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+    public void testDeleteWithoutForceByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack1 = mock(Stack.class);
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
@@ -466,9 +407,9 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, false, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -476,51 +417,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWithOutForceButWithDeleteDepsByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack1 = mock(Stack.class);
-        Stack stack2 = mock(Stack.class);
-        when(stack1.getName()).thenReturn("stack1");
-        when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
-        when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
-
-
-        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
-        expectedException.expect(BadRequestException.class);
-
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, true, user);
-
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-    }
-
-    @Test
-    public void testDeleteWithOutForceAndDeleteDepsByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack1 = mock(Stack.class);
-        Stack stack2 = mock(Stack.class);
-        when(stack1.getName()).thenReturn("stack1");
-        when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
-        when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
-
-
-        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
-        expectedException.expect(BadRequestException.class);
-
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, false, user);
-
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-    }
-
-    @Test
-    public void testDeleteWithForceAndDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+    public void testDeleteWithForceByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
@@ -530,9 +427,9 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -540,7 +437,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWithForceButWithoutDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+    public void testDeleteWithoutForceByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
@@ -550,9 +447,9 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, false, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -560,47 +457,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWithOutForceButWithDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack = mock(Stack.class);
-        when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
-        when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
-
-
-        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
-        expectedException.expect(BadRequestException.class);
-
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, true, user);
-
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-    }
-
-    @Test
-    public void testDeleteWithOutForceAndDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack = mock(Stack.class);
-        when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
-        when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
-
-
-        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
-        expectedException.expect(BadRequestException.class);
-
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, false, user);
-
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-    }
-
-    @Test
-    public void testDeleteWithForceAndDeleteDepsByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+    public void testDeleteWithForceByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack1 = mock(Stack.class);
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
@@ -613,9 +470,9 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.deleteByName(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -623,7 +480,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWithForceButWithoutDeleteDepsByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+    public void testDeleteWithoutForceByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack1 = mock(Stack.class);
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
@@ -636,9 +493,9 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
         expectedException.expect(BadRequestException.class);
 
-        underTest.deleteByName(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -646,53 +503,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWithOutForceButWithDeleteDepsByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack1 = mock(Stack.class);
-        Stack stack2 = mock(Stack.class);
-        when(stack1.getName()).thenReturn("stack1");
-        when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
-        when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
-
-
-        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
-        expectedException.expect(BadRequestException.class);
-
-        underTest.deleteByName(STACK_ID, true, true, user);
-
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-    }
-
-    @Test
-    public void testDeleteWithOutForceAndDeleteDepsByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack1 = mock(Stack.class);
-        Stack stack2 = mock(Stack.class);
-        when(stack1.getName()).thenReturn("stack1");
-        when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
-        when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
-
-
-        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, String.format("%s, %s", "stack1", "stack2")));
-        expectedException.expect(BadRequestException.class);
-
-        underTest.deleteByName(STACK_ID, true, true, user);
-
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-    }
-
-    @Test
-    public void testDeleteWithForceAndDeleteDepsByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+    public void testDeleteWithForceByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
@@ -703,9 +514,9 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.deleteByName(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -713,7 +524,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void testDeleteWithForceButWithoutDeleteDepsByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
+    public void testDeleteWithoutForceByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
@@ -724,51 +535,9 @@ public class StackServiceTest {
         expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
         expectedException.expect(BadRequestException.class);
 
-        underTest.deleteByName(STACK_ID, true, true, user);
+        underTest.deleteByName(STACK_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-    }
-
-    @Test
-    public void testDeleteWithOutForceButWithDeleteDepsByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack = mock(Stack.class);
-        when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
-        when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
-
-
-        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
-        expectedException.expect(BadRequestException.class);
-
-        underTest.deleteByName(STACK_ID, true, true, user);
-
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
-        verify(permissionCheckingUtils, times(1))
-                .checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-    }
-
-    @Test
-    public void testDeleteWithOutForceAndDeleteDepsByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack = mock(Stack.class);
-        when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
-        when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
-
-
-        expectedException.expectMessage(String.format(HAS_ATTACHED_CLUSTERS_MESSAGE, "stack"));
-        expectedException.expect(BadRequestException.class);
-
-        underTest.deleteByName(STACK_ID, true, true, user);
-
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionForUser(any(AuthorizationResource.class), any(ResourceAction.class), anyString());
         verify(permissionCheckingUtils, times(1))
@@ -785,9 +554,9 @@ public class StackServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         when(stack.getWorkspace()).thenReturn(workspace);
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
     }
 
     @Test
@@ -803,9 +572,9 @@ public class StackServiceTest {
         flowLog.setCurrentState(StackTerminationState.PRE_TERMINATION_STATE.name());
         when(flowLogService.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(Collections.singletonList(flowLog));
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
-        verify(flowManager, times(1)).triggerTermination(anyLong(), eq(true), anyBoolean());
+        verify(flowManager, times(1)).triggerTermination(anyLong(), eq(true));
     }
 
     @Test
@@ -821,9 +590,9 @@ public class StackServiceTest {
         flowLog.setCurrentState(StackTerminationState.PRE_TERMINATION_STATE.name());
         when(flowLogService.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(Collections.singletonList(flowLog));
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
     }
 
     @Test
@@ -836,9 +605,9 @@ public class StackServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         when(stack.getWorkspace()).thenReturn(workspace);
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(flowLogService, times(0)).findAllByStackIdOrderByCreatedDesc(STACK_ID);
     }
 
@@ -852,9 +621,9 @@ public class StackServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         when(stack.getWorkspace()).thenReturn(workspace);
 
-        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, true, user);
+        underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, user);
 
-        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
         verify(flowLogService, times(0)).findAllByStackIdOrderByCreatedDesc(STACK_ID);
     }
 

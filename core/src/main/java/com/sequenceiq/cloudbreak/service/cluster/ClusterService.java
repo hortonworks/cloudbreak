@@ -385,11 +385,11 @@ public class ClusterService {
         return repository.save(cluster);
     }
 
-    public void delete(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
+    public void delete(Long stackId, Boolean withStackDelete) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Cluster delete requested.");
         markVolumesForDeletion(stack);
-        flowManager.triggerClusterTermination(stack, withStackDelete, deleteDependencies);
+        flowManager.triggerClusterTermination(stack, withStackDelete);
     }
 
     private void markVolumesForDeletion(Stack stack) {

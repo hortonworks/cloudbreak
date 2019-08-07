@@ -104,91 +104,47 @@ public class StackOperationTest {
     }
 
     @Test
-    public void testDeleteWhenDtoNameFilledAndForcedTrueAndDeleteDependenciesTrueThenDeleteCalled() {
-        underTest.delete(aStackAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), true, true);
+    public void testDeleteWhenDtoNameFilledAndForcedTrueThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), true);
 
         verify(userService, times(1)).getOrCreate(any());
         verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), true, true, user);
-        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), true, user);
+        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), any());
     }
 
     @Test
-    public void testDeleteWhenDtoNameFilledAndForcedFalseAndDeleteDependenciesTrueThenDeleteCalled() {
-        underTest.delete(aStackAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), false, true);
+    public void testDeleteWhenDtoNameFilledAndForcedFalseThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), false);
 
         verify(userService, times(1)).getOrCreate(any());
         verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), false, true, user);
-        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), false, user);
+        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), any());
     }
 
     @Test
-    public void testDeleteWhenDtoNameFilledAndForcedTrueAndDeleteDependenciesFalseThenDeleteCalled() {
-        underTest.delete(aStackAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), true, false);
+    public void testDeleteWhenDtoCrnFilledAndForcedTrueThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), true);
 
         verify(userService, times(1)).getOrCreate(any());
         verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), true, false, user);
-        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), true, user);
+        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), any());
     }
 
     @Test
-    public void testDeleteWhenDtoNameFilledAndBothForcedAndDeleteDependenciesAreFalseThenDeleteCalled() {
-        underTest.delete(aStackAccessDtoBuilder().withName(stack.getName()).build(), stack.getWorkspace().getId(), false, false);
+    public void testDeleteWhenDtoCrnFilledAndForcedFalseThenDeleteCalled() {
+        underTest.delete(aStackAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), false);
 
         verify(userService, times(1)).getOrCreate(any());
         verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByNameInWorkspace(stack.getName(), stack.getWorkspace().getId(), false, false, user);
-        verify(stackCommonService, times(0)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-    }
-
-    @Test
-    public void testDeleteWhenDtoCrnFilledAndForcedTrueAndDeleteDependenciesTrueThenDeleteCalled() {
-        underTest.delete(aStackAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), true, true);
-
-        verify(userService, times(1)).getOrCreate(any());
-        verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), true, true, user);
-        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-    }
-
-    @Test
-    public void testDeleteWhenDtoCrnFilledAndForcedFalseAndDeleteDependenciesTrueThenDeleteCalled() {
-        underTest.delete(aStackAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), false, true);
-
-        verify(userService, times(1)).getOrCreate(any());
-        verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), false, true, user);
-        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-    }
-
-    @Test
-    public void testDeleteWhenDtoCrnFilledAndForcedTrueAndDeleteDependenciesFalseThenDeleteCalled() {
-        underTest.delete(aStackAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), true, false);
-
-        verify(userService, times(1)).getOrCreate(any());
-        verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), true, false, user);
-        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-    }
-
-    @Test
-    public void testDeleteWhenDtoCrnFilledAndBothForcedAndDeleteDependenciesAreFalseThenDeleteCalled() {
-        underTest.delete(aStackAccessDtoBuilder().withCrn(stack.getResourceCrn()).build(), stack.getWorkspace().getId(), false, false);
-
-        verify(userService, times(1)).getOrCreate(any());
-        verify(userService, times(1)).getOrCreate(cloudbreakUser);
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
-        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), false, false, user);
-        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(anyString(), anyLong(), anyBoolean(), any());
+        verify(stackCommonService, times(1)).deleteByCrnInWorkspace(stack.getResourceCrn(), stack.getWorkspace().getId(), false, user);
+        verify(stackCommonService, times(0)).deleteByNameInWorkspace(anyString(), anyLong(), anyBoolean(), any());
     }
 
     @Test
@@ -196,7 +152,7 @@ public class StackOperationTest {
         exceptionRule.expect(BadRequestException.class);
         exceptionRule.expectMessage(INVALID_DTO_MESSAGE);
 
-        underTest.delete(aStackAccessDtoBuilder().build(), stack.getWorkspace().getId(), true, true);
+        underTest.delete(aStackAccessDtoBuilder().build(), stack.getWorkspace().getId(), true);
 
         verify(stackCommonService, times(0)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
         verify(stackCommonService, times(0)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());
@@ -207,7 +163,7 @@ public class StackOperationTest {
         exceptionRule.expect(IllegalArgumentException.class);
         exceptionRule.expectMessage(NULL_DTO_EXCEPTION_MESSAGE);
 
-        underTest.delete(null, stack.getWorkspace().getId(), true, true);
+        underTest.delete(null, stack.getWorkspace().getId(), true);
 
         verify(stackCommonService, times(0)).findStackByNameAndWorkspaceId(anyString(), anyLong(), anySet(), any());
         verify(stackCommonService, times(0)).findStackByCrnAndWorkspaceId(anyString(), anyLong(), anySet(), any());

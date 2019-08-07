@@ -49,7 +49,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false, false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false, false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false, false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
     }
 
     @Test
@@ -92,7 +92,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false, false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false, false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false, false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
     }
 
     @Test
@@ -147,7 +147,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false, false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
     }
 
     @Test
@@ -166,7 +166,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false, false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
     }
 
     @Test
@@ -194,7 +194,7 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(1)).triggerTermination(stack.getId(), false, false);
+        verify(flowManager, times(1)).triggerTermination(stack.getId(), false);
     }
 
     @Test
@@ -219,6 +219,6 @@ public class ScheduledLifetimeCheckerTest {
 
         underTest.validate();
 
-        verify(flowManager, times(0)).triggerTermination(stack.getId(), false, false);
+        verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
     }
 }
