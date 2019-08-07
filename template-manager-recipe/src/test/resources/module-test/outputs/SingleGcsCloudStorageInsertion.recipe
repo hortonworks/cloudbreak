@@ -14,7 +14,6 @@ printIfValid() {
 function printLogic() {
 	if true; then
 	    if false; then
-	        printIfValid "instanceProfile:               " "{{{fileSystemConfigs.s3.instanceProfile}}}"
 	        printIfValid "storage container:             " "{{{fileSystemConfigs.s3.storageContainer}}}"
 	        printIfValid "configFile:                    " "{{{fileSystemConfigs.s3.locations.[0].configFile}}}"
 	        printIfValid "property:                      " "{{{fileSystemConfigs.s3.locations.[0].property}}}"

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
-import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.adlsgen2.AdlsGen2FileSystemConfigurationsView;
@@ -81,18 +80,13 @@ public class FileSystemConfigurationsViewProvider {
             return getLegacyConfigurations(source, locations);
         }
         CloudStorage cloudStorage = source.getCloudStorage();
-        if (cloudStorage != null && cloudStorage.getCloudIdentities() != null && !cloudStorage.getCloudIdentities().isEmpty()) {
-            // TODO: SUPPORT MULTIPLE IDENTITIES
-            CloudIdentity cloudIdentity = cloudStorage.getCloudIdentities().get(0);
-            if (cloudIdentity != null) {
-                if (source.getType().isS3()) {
-                    return s3IdentityToConfigView(locations, cloudIdentity, cloudStorage);
-                } else if (source.getType().isWasb()) {
-                    return wasbIdentityToConfigView(locations, cloudIdentity);
-                }
+        if (cloudStorage != null) {
+            if (source.getType().isS3()) {
+                return s3IdentityToConfigView(locations, cloudStorage);
+            } else if (source.getType().isWasb()) {
+                return wasbIdentityToConfigView(locations);
             }
         }
-
         return new BaseFileSystemConfigurationsView(source.getType().name(), locations);
     }
 
@@ -111,20 +105,14 @@ public class FileSystemConfigurationsViewProvider {
         return null;
     }
 
-    private BaseFileSystemConfigurationsView s3IdentityToConfigView(Set<StorageLocationView> locations, CloudIdentity cloudIdentity, CloudStorage cloudStorage) {
+    private BaseFileSystemConfigurationsView s3IdentityToConfigView(Set<StorageLocationView> locations, CloudStorage cloudStorage) {
         S3FileSystem s3FileSystem = new S3FileSystem();
-        s3FileSystem.setInstanceProfile(cloudIdentity.getS3Identity().getInstanceProfile());
         s3FileSystem.setS3GuardDynamoTableName(cloudStorage.getS3GuardDynamoTableName());
         return new S3FileSystemConfigurationsView(s3FileSystem, locations, false);
     }
 
-    private BaseFileSystemConfigurationsView wasbIdentityToConfigView(Set<StorageLocationView> locations, CloudIdentity cloudIdentity) {
+    private BaseFileSystemConfigurationsView wasbIdentityToConfigView(Set<StorageLocationView> locations) {
         WasbFileSystem wasbFileSystem = new WasbFileSystem();
-        wasbFileSystem.setAccountName(cloudIdentity.getWasbIdentity().getAccountName());
-        wasbFileSystem.setAccountKey(cloudIdentity.getWasbIdentity().getAccountKey());
-        wasbFileSystem.setStorageContainerName(cloudIdentity.getWasbIdentity().getStorageContainerName());
-        wasbFileSystem.setStorageContainer(cloudIdentity.getWasbIdentity().getStorageContainerName());
-        wasbFileSystem.setSecure(cloudIdentity.getWasbIdentity().isSecure());
         return new WasbFileSystemConfigurationsView(wasbFileSystem, locations, false);
     }
 }

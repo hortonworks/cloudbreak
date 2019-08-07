@@ -47,10 +47,12 @@ public class FileSystemConfigurationProvider {
         BaseFileSystemConfigurationsView fileSystemConfiguration = null;
         if (fileSystem != null) {
             fileSystemConfiguration = fileSystemConfigurationsViewProvider.propagateConfigurationsView(fileSystem, configQueryEntries);
-            fileSystemConfiguration.setStorageContainer("cloudbreak" + stackId);
-            if (CloudConstants.AZURE.equals(platformVariant) && credentialAttributes != null) {
-                fileSystemConfiguration = azureFileSystemConfigProvider.decorateFileSystemConfiguration(uuid, credentialAttributes,
-                        resource.orElse(null), fileSystemConfiguration);
+            if (fileSystemConfiguration != null) {
+                fileSystemConfiguration.setStorageContainer("cloudbreak" + stackId);
+                if (CloudConstants.AZURE.equals(platformVariant) && credentialAttributes != null) {
+                    fileSystemConfiguration = azureFileSystemConfigProvider.decorateFileSystemConfiguration(uuid, credentialAttributes,
+                            resource.orElse(null), fileSystemConfiguration);
+                }
             }
         }
         return fileSystemConfiguration;
