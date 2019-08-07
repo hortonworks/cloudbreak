@@ -105,14 +105,14 @@ public class ServiceEndpointCollector {
                         boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
                         for (ExposedService exposedService : knownExposedServices) {
                             if (exposedService.isUISupported()) {
-                                ClusterExposedServiceV4Response uiService = createServiceEntry(exposedService, gateway, gatewayTopology,
+                                List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
                                         managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled);
-                                uiServices.add(uiService);
+                                uiServices.addAll(uiServiceOnPrivateIps);
                             }
                             if (exposedService.isAPISupported()) {
-                                ClusterExposedServiceV4Response apiService = createServiceEntry(exposedService, gateway, gatewayTopology,
+                                List<ClusterExposedServiceV4Response> apiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
                                         managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled);
-                                apiServices.add(apiService);
+                                apiServices.addAll(apiServiceOnPrivateIps);
                             }
                         }
                         clusterExposedServiceMap.put(gatewayTopology.getTopologyName(), uiServices);
@@ -125,18 +125,32 @@ public class ServiceEndpointCollector {
         return Collections.emptyMap();
     }
 
-    private ClusterExposedServiceV4Response createServiceEntry(ExposedService exposedService, Gateway gateway, GatewayTopology gatewayTopology,
+    private List<ClusterExposedServiceV4Response> createServiceEntries(ExposedService exposedService, Gateway gateway, GatewayTopology gatewayTopology,
             String managerIp, Map<String, List<String>> privateIps, Set<String> exposedServicesInTopology, boolean api, boolean autoTlsEnabled) {
-        ClusterExposedServiceV4Response service = new ClusterExposedServiceV4Response();
-        service.setMode(api ? SSOType.PAM : getSSOType(exposedService, gateway));
-        service.setDisplayName(exposedService.getDisplayName());
-        service.setKnoxService(exposedService.getKnoxService());
-        service.setServiceName(exposedService.getServiceName());
-        Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, managerIp,
+        List<ClusterExposedServiceV4Response> services = new ArrayList<>();
+        List<String> serviceUrlsForService = getServiceUrlsForService(exposedService, managerIp,
                 gateway, gatewayTopology.getTopologyName(), privateIps, api, autoTlsEnabled);
-        serviceUrlForService.ifPresent(service::setServiceUrl);
-        service.setOpen(isExposed(exposedService, exposedServicesInTopology));
-        return service;
+        if (serviceUrlsForService.isEmpty()) {
+            ClusterExposedServiceV4Response service = new ClusterExposedServiceV4Response();
+            service.setMode(api ? SSOType.PAM : getSSOType(exposedService, gateway));
+            service.setDisplayName(exposedService.getDisplayName());
+            service.setKnoxService(exposedService.getKnoxService());
+            service.setServiceName(exposedService.getServiceName());
+            service.setOpen(isExposed(exposedService, exposedServicesInTopology));
+            services.add(service);
+        } else {
+            serviceUrlsForService.forEach(url -> {
+                ClusterExposedServiceV4Response service = new ClusterExposedServiceV4Response();
+                service.setMode(api ? SSOType.PAM : getSSOType(exposedService, gateway));
+                service.setDisplayName(exposedService.getDisplayName());
+                service.setKnoxService(exposedService.getKnoxService());
+                service.setServiceName(exposedService.getServiceName());
+                service.setOpen(isExposed(exposedService, exposedServicesInTopology));
+                service.setServiceUrl(url);
+                services.add(service);
+            });
+        }
+        return services;
     }
 
     private SSOType getSSOType(ExposedService exposedService, Gateway gateway) {
@@ -166,26 +180,41 @@ public class ServiceEndpointCollector {
         return Stream.empty();
     }
 
-    private Optional<String> getServiceUrlForService(ExposedService exposedService, String managerIp, Gateway gateway,
+    private List<String> getServiceUrlsForService(ExposedService exposedService, String managerIp, Gateway gateway,
             String topologyName, Map<String, List<String>> privateIps, boolean api, boolean autoTlsEnabled) {
+        List<String> urls = new ArrayList<>();
         if (hasKnoxUrl(exposedService) && managerIp != null) {
             switch (exposedService) {
                 case HIVE_SERVER:
                 case HIVE_SERVER_INTERACTIVE:
-                    return getHiveJdbcUrl(gateway, managerIp);
+                    getHiveJdbcUrl(gateway, managerIp).ifPresent(urls::add);
+                    break;
                 case NAMENODE:
-                    String namenodeIp = privateIps.get(ExposedService.NAMENODE.getServiceName()).iterator().next();
-                    return getHdfsUIUrl(gateway, managerIp, namenodeIp, autoTlsEnabled);
+                    List<String> hdfsUrls = privateIps.get(ExposedService.NAMENODE.getServiceName())
+                            .stream()
+                            .map(namenodeIp -> getHdfsUIUrl(gateway, managerIp, namenodeIp, autoTlsEnabled))
+                            .flatMap(Optional::stream)
+                            .collect(Collectors.toList());
+                    urls.addAll(hdfsUrls);
+                    break;
                 case HBASE_UI:
-                    return getHBaseServiceUrl(gateway, managerIp, privateIps.get(ExposedService.HBASE_UI.getServiceName()).iterator().next());
+                    List<String> hbaseUrls = privateIps.get(ExposedService.HBASE_UI.getServiceName())
+                            .stream()
+                            .map(hbaseIp -> getHBaseServiceUrl(gateway, managerIp, hbaseIp))
+                            .flatMap(Optional::stream)
+                            .collect(Collectors.toList());
+                    urls.addAll(hbaseUrls);
+                    break;
                 case RESOURCEMANAGER_WEB:
                     String knoxUrl = api ? "/resourcemanager/" : exposedService.getKnoxUrl();
-                    return Optional.of(getExposedServiceUrl(managerIp, gateway, topologyName, knoxUrl, api));
+                    urls.add(getExposedServiceUrl(managerIp, gateway, topologyName, knoxUrl, api));
+                    break;
                 default:
-                    return Optional.of(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService, api));
+                    urls.add(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService, api));
+                    break;
             }
         }
-        return Optional.empty();
+        return urls;
     }
 
     private boolean hasKnoxUrl(ExposedService exposedService) {
