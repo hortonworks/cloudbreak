@@ -59,10 +59,10 @@ public class ProvisionerService {
             } catch (ClientErrorException e) {
                 String errorMessage = ClientErrorExceptionHandler.getErrorMessage(e);
                 LOGGER.info("Can not delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
-                throw new RuntimeException("Can not delete stack, client error happened on Cloudbreak side: " + errorMessage);
+                throw new RuntimeException("Cannot delete stack, client error happened on Cloudbreak side: " + errorMessage);
             } catch (ProcessingException e) {
                 LOGGER.info("Can not delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), e);
-                throw new RuntimeException("Can not delete stack, client error happened on Cloudbreak side: " + e.getMessage());
+                throw new RuntimeException("Cannot delete stack, client error happened on Cloudbreak side: " + e.getMessage());
             }
         }, () -> {
             throw notFound("SDX cluster", id).get();

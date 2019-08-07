@@ -937,8 +937,8 @@ public class StackService {
     private void checkStackHasNoAttachedClusters(Stack stack) {
         Set<Stack> attachedOnes = findClustersConnectedToDatalakeByDatalakeStackId(stack.getId());
         if (!attachedOnes.isEmpty()) {
-            throw new BadRequestException(String.format("Stack has attached clusters! Please remove them before try to delete this one. %nThe following "
-                            + "clusters has to be deleted before terminating the datalake cluster: %s",
+            throw new BadRequestException(String.format("Data Lake has attached Data Hub clusters! "
+                            + "Please delete Data Hub cluster %s before deleting this Data Lake",
                     String.join(", ", attachedOnes.stream().map(Stack::getName).collect(Collectors.toSet()))));
         }
     }
