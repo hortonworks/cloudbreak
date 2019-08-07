@@ -39,9 +39,10 @@ type environmentOutTableDescribe struct {
 
 type environmentOutJsonDescribe struct {
 	*environment
-	ProxyConfigs []string                           `json:"ProxyConfigs" yaml:"ProxyConfigs"`
-	Network      model.EnvironmentNetworkV1Response `json:"Network" yaml:"Network"`
-	Telemetry    model.TelemetryResponse            `json:"Telemetry" yaml:"Telemetry"`
+	ProxyConfigs   []string                                  `json:"ProxyConfigs" yaml:"ProxyConfigs"`
+	Network        model.EnvironmentNetworkV1Response        `json:"Network" yaml:"Network"`
+	Telemetry      model.TelemetryResponse                   `json:"Telemetry" yaml:"Telemetry"`
+	Authentication model.EnvironmentAuthenticationV1Response `json:"Authentication" yaml:"Authentication"`
 }
 
 type environmentListJsonDescribe struct {
@@ -280,7 +281,7 @@ func DescribeEnvironment(c *cli.Context) {
 	}
 	env := resp.Payload
 	if output.Format != "table" && output.Format != "yaml" {
-		output.Write(append(EnvironmentHeader, "Network", "Telemetry"), convertResponseToJsonOutput(env))
+		output.Write(append(EnvironmentHeader, "Network", "Telemetry", "Authentication"), convertResponseToJsonOutput(env))
 	} else {
 		output.Write(append(EnvironmentHeader), convertResponseToTableOutput(env))
 	}
@@ -381,6 +382,9 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentV1Response) *envi
 	}
 	if env.Telemetry != nil {
 		result.Telemetry = *env.Telemetry
+	}
+	if env.Authentication != nil {
+		result.Authentication = *env.Authentication
 	}
 	return result
 }
