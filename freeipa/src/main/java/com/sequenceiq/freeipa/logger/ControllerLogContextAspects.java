@@ -23,7 +23,7 @@ public class ControllerLogContextAspects {
     @Inject
     private LogContextService logContextService;
 
-    @Pointcut("execution(public * com.sequenceiq.freeipa.**.*Controller.*(..))")
+    @Pointcut("execution(public * com.sequenceiq.freeipa..*Controller.*(..))")
     public void interceptControllerMethodCalls() {
     }
 

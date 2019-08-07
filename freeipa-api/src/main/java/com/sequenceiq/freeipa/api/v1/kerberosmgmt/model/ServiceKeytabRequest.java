@@ -81,4 +81,16 @@ public class ServiceKeytabRequest {
     public void setClusterCrn(String clusterCrn) {
         this.clusterCrn = clusterCrn;
     }
+
+    @Override
+    public String toString() {
+        return "ServiceKeytabRequest{"
+                + "environmentCrn='" + environmentCrn + '\''
+                + ", serviceName='" + serviceName + '\''
+                + ", serverHostName='" + serverHostName + '\''
+                + ", clusterCrn='" + clusterCrn + '\''
+                + ", doNotRecreateKeytab=" + doNotRecreateKeytab
+                + ", roleRequest=" + roleRequest
+                + '}';
+    }
 }

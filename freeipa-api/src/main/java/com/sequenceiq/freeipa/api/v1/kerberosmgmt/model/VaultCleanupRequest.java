@@ -34,4 +34,12 @@ public class VaultCleanupRequest {
     public void setClusterCrn(String clusterCrn) {
         this.clusterCrn = clusterCrn;
     }
+
+    @Override
+    public String toString() {
+        return "VaultCleanupRequest{"
+                + "environmentCrn='" + environmentCrn + '\''
+                + ", clusterCrn='" + clusterCrn + '\''
+                + '}';
+    }
 }

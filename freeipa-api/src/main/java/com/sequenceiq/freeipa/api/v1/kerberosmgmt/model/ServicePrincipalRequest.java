@@ -59,4 +59,14 @@ public class ServicePrincipalRequest {
     public void setClusterCrn(String clusterCrn) {
         this.clusterCrn = clusterCrn;
     }
+
+    @Override
+    public String toString() {
+        return "ServicePrincipalRequest{"
+                + "environmentCrn='" + environmentCrn + '\''
+                + ", serviceName='" + serviceName + '\''
+                + ", serverHostName='" + serverHostName + '\''
+                + ", clusterCrn='" + clusterCrn + '\''
+                + '}';
+    }
 }

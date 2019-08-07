@@ -36,4 +36,12 @@ public class RoleRequest {
     public void setPrivileges(Set<String> privileges) {
         this.privileges = privileges;
     }
+
+    @Override
+    public String toString() {
+        return "RoleRequest{"
+                + "roleName='" + roleName + '\''
+                + ", privileges=" + privileges
+                + '}';
+    }
 }
