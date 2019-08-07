@@ -43,7 +43,7 @@ public class ClouderaManagerStartupListenerTask extends ClusterBasedStatusChecke
             String errorMessage = e.getMessage();
             if (ArrayUtils.contains(ERROR_CODES, e.getCode())
                     || containsIgnoreCase(errorMessage, CONNECTION_REFUSED_MESSAGE) || containsIgnoreCase(errorMessage, CONNECT_TIMED_OUT)) {
-                LOGGER.debug("cloudera manager is not running");
+                LOGGER.debug("Cloudera Manager is not running");
                 return false;
             } else {
                 throw new ClouderaManagerOperationFailedException("Cloudera Manager startup failed", e);

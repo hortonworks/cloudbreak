@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
@@ -31,9 +32,11 @@ import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -71,6 +74,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Inject
     private ClouderaManagerDatabusService databusService;
 
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentProvider;
+
     private final Stack stack;
 
     private final HttpClientConfig clientConfig;
@@ -95,7 +101,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             throws CloudbreakException {
         ClustersResourceApi clustersResourceApi = clouderaManagerClientFactory.getClustersResourceApi(client);
         try {
-            List<ApiHostRef> hostRefs = clustersResourceApi.listHosts(stack.getName()).getItems();
+            String clusterName = stack.getName();
+            List<ApiHostRef> hostRefs = clustersResourceApi.listHosts(clusterName).getItems();
             List<String> clusterHosts = hostRefs.stream().map(ApiHostRef::getHostname).collect(Collectors.toList());
             List<String> upscaleHostNames = hostMetadata.stream()
                     .map(HostMetadata::getHostName)
@@ -104,9 +111,14 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             if (!upscaleHostNames.isEmpty()) {
                 List<ApiHost> hosts = clouderaManagerClientFactory.getHostsResourceApi(client).readHosts("SUMMARY").getItems();
                 ApiHostRefList body = createUpscaledHostRefList(upscaleHostNames, hosts);
-                clustersResourceApi.addHosts(stack.getName(), body);
+                clustersResourceApi.addHosts(clusterName, body);
                 activateParcel(clustersResourceApi);
                 applyHostGroupRolesOnUpscaledHosts(body, hostGroup.getName());
+            } else {
+                Long clusterId = stack.getCluster().getId();
+                if (!isPrewarmed(clusterId)) {
+                    redistributeParcelsForRecovery();
+                }
             }
             MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerClientFactory.getMgmtServiceResourceApi(client);
             restartStaleServices(mgmtServiceResourceApi, clustersResourceApi);
@@ -115,6 +127,26 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             throw new CloudbreakException("Failed to upscale", e);
         }
 
+    }
+
+    private void redistributeParcelsForRecovery() throws ApiException, CloudbreakException {
+        LOGGER.debug("Refreshing parcel repos");
+        ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
+        ApiCommand refreshParcelRepos = clouderaManagerResourceApi.refreshParcelRepos();
+        PollingResult activateParcelsPollingResult =
+                clouderaManagerPollingServiceProvider.deployClientConfigPollingService(stack, client, refreshParcelRepos.getId());
+        if (isExited(activateParcelsPollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for parcel activation");
+        } else if (isTimeout(activateParcelsPollingResult)) {
+            throw new CloudbreakException("Timeout while Cloudera Manager was activating parcels.");
+        }
+        LOGGER.debug("Refreshed parcel repos");
+    }
+
+    private Boolean isPrewarmed(Long clusterId) {
+        return Optional.ofNullable(clusterComponentProvider.getClouderaManagerRepoDetails(clusterId))
+                .map(ClouderaManagerRepo::getPredefined)
+                .orElse(Boolean.FALSE);
     }
 
     private void restartStaleServices(MgmtServiceResourceApi mgmtServiceResourceApi, ClustersResourceApi clustersResourceApi)

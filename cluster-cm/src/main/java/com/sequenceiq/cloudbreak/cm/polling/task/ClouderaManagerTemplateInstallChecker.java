@@ -52,7 +52,7 @@ public class ClouderaManagerTemplateInstallChecker extends AbstractClouderaManag
                 throw new ClouderaManagerOperationFailedException(msg);
             }
         } catch (ApiException e) {
-            LOGGER.debug("cloudera manager is not running", e);
+            LOGGER.debug("Cloudera Manager is not running", e);
             return false;
         }
     }
