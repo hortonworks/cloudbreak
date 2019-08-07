@@ -30,7 +30,7 @@ FREEIPA_PORT = $(shell echo \${PORT})
 ifeq ($(FREEIPA_PORT),)
         FREEIPA_PORT = 8090
 endif
-CB_IP = $(shell echo \${IP})
+REDBEAMS_IP = $(shell echo \${IP})
 ifeq ($(REDBEAMS_IP),)
         REDBEAMS_IP = localhost
 endif
@@ -38,7 +38,6 @@ REDBEAMS_PORT = $(shell echo \${PORT})
 ifeq ($(REDBEAMS_PORT),)
         REDBEAMS_PORT = 8087
 endif
-
 ifeq ($(ENVIRONMENT_IP),)
         ENVIRONMENT_IP = localhost
 endif

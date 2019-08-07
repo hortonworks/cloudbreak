@@ -109,22 +109,22 @@ func NewEnvironmentClient(address string, apiKeyID, privateKey string) *Environm
 	return &Environment{Environment: environmentclient.New(transport, strfmt.Default)}
 }
 
-func NewRedbeamsClientFromContext(c *cli.Context) *Redbeams {
-	return NewRedbeamsClientFrom(c.String(fl.FlServerOptional.Name), c.String(fl.FlApiKeyIDOptional.Name), c.String(fl.FlPrivateKeyOptional.Name))
-}
-
-func NewRedbeamsClientFrom(address string, apiKeyID, privateKey string) *Redbeams {
-	u.CheckServerAddress(address)
-	var transport *utils.Transport
-	const baseAPIPath string = "/redbeams/api"
-	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
-	return &Redbeams{Redbeams: redbeamsclient.New(transport, strfmt.Default)}
-}
-
 func NewEnvironmentActorCrnHTTPClient(address string, actorCrn string) *Environment {
 	u.CheckServerAddress(address)
 	var transport *utils.Transport
 	const baseAPIPath string = "/environmentservice/api"
 	transport = apikeyauth.GetActorCrnAuthTransport(address, baseAPIPath, actorCrn)
 	return &Environment{Environment: environmentclient.New(transport, strfmt.Default)}
+}
+
+func NewRedbeamsClientFromContext(c *cli.Context) *Redbeams {
+	return NewRedbeamsClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlApiKeyIDOptional.Name), c.String(fl.FlPrivateKeyOptional.Name))
+}
+
+func NewRedbeamsClient(address string, apiKeyID, privateKey string) *Redbeams {
+	u.CheckServerAddress(address)
+	var transport *utils.Transport
+	const baseAPIPath string = "/redbeams/api"
+	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
+	return &Redbeams{Redbeams: redbeamsclient.New(transport, strfmt.Default)}
 }
