@@ -98,8 +98,8 @@ public class StackServiceTest {
 
     private static final String STACK_NOT_FOUND_BY_NAME_MESSAGE = "Stack '%s' not found";
 
-    private static final String HAS_ATTACHED_CLUSTERS_MESSAGE = "Stack has attached clusters! Please remove them before try to delete this one. %nThe following"
-            + " clusters has to be deleted before terminating the datalake cluster: %s";
+    private static final String HAS_ATTACHED_CLUSTERS_MESSAGE = "Data Lake has attached Data Hub clusters! "
+            + "Please delete Data Hub cluster %s before deleting this Data Lake";
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
