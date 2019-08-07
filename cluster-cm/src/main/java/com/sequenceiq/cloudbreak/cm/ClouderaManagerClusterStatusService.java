@@ -37,9 +37,11 @@ import com.cloudera.api.swagger.model.ApiServiceState;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -90,11 +92,15 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     @PostConstruct
-    public void initApiClient() {
+    public void initApiClient() throws ClusterClientInitException {
         Cluster cluster = stack.getCluster();
         String cloudbreakAmbariUser = cluster.getCloudbreakAmbariUser();
         String cloudbreakAmbariPassword = cluster.getCloudbreakAmbariPassword();
-        client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
+        try {
+            client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
+        } catch (ClouderaManagerClientInitException e) {
+            throw new ClusterClientInitException(e);
+        }
     }
 
     @Override

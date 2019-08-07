@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -23,7 +24,7 @@ public interface ClusterApi {
 
     String CLOUDERA_MANAGER = "CLOUDERA_MANAGER";
 
-    default void waitForServer(Stack stack) throws CloudbreakException {
+    default void waitForServer(Stack stack) throws CloudbreakException, ClusterClientInitException {
         clusterSetupService().waitForServer();
     }
 
@@ -37,7 +38,7 @@ public interface ClusterApi {
                 kerberosConfig);
     }
 
-    default void waitForHosts(Stack stack, Set<HostMetadata> hostsInCluster) {
+    default void waitForHosts(Stack stack, Set<HostMetadata> hostsInCluster) throws ClusterClientInitException {
         clusterSetupService().waitForHosts(hostsInCluster);
     }
 
