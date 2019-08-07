@@ -14,7 +14,6 @@ printIfValid() {
 function printLogic() {
 	if true; then
 	    if true; then
-	        printIfValid "instanceProfile:               " "InstanceProfileValue"
 	        printIfValid "storage container:             " "someContainer"
 	        printIfValid "configFile:                    " "1_file"
 	        printIfValid "property:                      " "1_property"

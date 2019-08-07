@@ -13,7 +13,6 @@ printIfValid() {
 
 function printLogic() {
 	if true; then
-		printIfValid "instanceProfile:                            " "InstanceProfileValue"
 		printIfValid "storage container:                          " "someContainer"
 		printIfValid "Attached cloud storage location parameters: " "1_file: [1_property: 1_test/test/end], 2_file: [2_property: 2_test/test/end], "
 		printIfValid "default file system?                        " "false"

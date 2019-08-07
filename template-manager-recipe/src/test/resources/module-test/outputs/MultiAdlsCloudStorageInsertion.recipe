@@ -13,7 +13,6 @@ printIfValid() {
 
 function printLogic() {
 	if false; then
-		printIfValid "instanceProfile:                            " "{{{fileSystemConfigs.s3.instanceProfile}}}"
 		printIfValid "storage container:                          " "{{{fileSystemConfigs.s3.storageContainer}}}"
 		printIfValid "Attached cloud storage location parameters: " ""
 		printIfValid "default file system?                        " "{{{fileSystemConfigs.s3.defaultFs}}}"
