@@ -11,8 +11,8 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/dataplane/api-redbeams/client/v4databases"
-	"github.com/hortonworks/cb-cli/dataplane/api-redbeams/client/v4databaseservers"
+	"github.com/hortonworks/cb-cli/dataplane/api-redbeams/client/database_servers"
+	"github.com/hortonworks/cb-cli/dataplane/api-redbeams/client/databases"
 )
 
 // Default redbeams HTTP client.
@@ -24,7 +24,7 @@ const (
 	DefaultHost string = "localhost"
 	// DefaultBasePath is the default BasePath
 	// found in Meta (info) section of spec file
-	DefaultBasePath string = "/api"
+	DefaultBasePath string = "/redbeams/api"
 )
 
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
@@ -58,9 +58,9 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Redbeams {
 	cli := new(Redbeams)
 	cli.Transport = transport
 
-	cli.V4databases = v4databases.New(transport, formats)
+	cli.DatabaseServers = database_servers.New(transport, formats)
 
-	cli.V4databaseservers = v4databaseservers.New(transport, formats)
+	cli.Databases = databases.New(transport, formats)
 
 	return cli
 }
@@ -106,9 +106,9 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // Redbeams is a client for redbeams
 type Redbeams struct {
-	V4databases *v4databases.Client
+	DatabaseServers *database_servers.Client
 
-	V4databaseservers *v4databaseservers.Client
+	Databases *databases.Client
 
 	Transport runtime.ClientTransport
 }
@@ -117,8 +117,8 @@ type Redbeams struct {
 func (c *Redbeams) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
-	c.V4databases.SetTransport(transport)
+	c.DatabaseServers.SetTransport(transport)
 
-	c.V4databaseservers.SetTransport(transport)
+	c.Databases.SetTransport(transport)
 
 }

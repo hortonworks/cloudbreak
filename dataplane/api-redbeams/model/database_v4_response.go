@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DatabaseV4Response database v4 response
+// DatabaseV4Response Response containing information about a database that was acted upon, e.g., retrieved, deleted, listed
 // swagger:model DatabaseV4Response
 type DatabaseV4Response struct {
 
@@ -21,51 +21,46 @@ type DatabaseV4Response struct {
 	// Required: true
 	ConnectionDriver *string `json:"connectionDriver"`
 
-	// Password to use for the jdbc connection
+	// Password to use for authentication
 	ConnectionPassword *SecretResponse `json:"connectionPassword,omitempty"`
 
-	// JDBC connection URL in the form of JDBC:<db-type>://<address>:<port>/<db>
+	// JDBC connection URL in the form of jdbc:<db-type>:<driver-specific-part>
 	// Required: true
 	ConnectionURL *string `json:"connectionURL"`
 
-	// Username to use for the jdbc connection
+	// Username to use for authentication
 	ConnectionUserName *SecretResponse `json:"connectionUserName,omitempty"`
 
-	// URL that points to the jar of the connection driver(connector)
-	// Max Length: 150
-	// Min Length: 0
-	ConnectorJarURL *string `json:"connectorJarUrl,omitempty"`
-
-	// Creation date / time of the resource, in epoch milliseconds
+	// Creation date / time of the database, in epoch milliseconds
 	CreationDate int64 `json:"creationDate,omitempty"`
 
-	// CRN of the resource
+	// CRN of the database
 	Crn string `json:"crn,omitempty"`
 
-	// Name of the external database engine (MYSQL, POSTGRES...)
+	// Name of the database vendor (MYSQL, POSTGRES...)
 	// Required: true
 	DatabaseEngine *string `json:"databaseEngine"`
 
-	// Display name of the external database engine (Mysql, PostgreSQL...)
+	// Display name of the database vendor (MySQL, PostgreSQL, ...)
 	// Required: true
 	DatabaseEngineDisplayName *string `json:"databaseEngineDisplayName"`
 
-	// Description of the resource
+	// Description of the database
 	// Max Length: 1000000
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// Crn of the environment of the resource
+	// CRN of the environment of the database
 	EnvironmentCrn string `json:"environmentCrn,omitempty"`
 
-	// Name of the database configuration resource
+	// Name of the database
 	// Required: true
 	// Max Length: 100
 	// Min Length: 5
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
-	// Type of database, aka the service name that will use the database like HIVE, DRUID, SUPERSET, RANGER, etc.
+	// Type of database, i.e., the service name that will use the database (HIVE, DRUID, SUPERSET, RANGER, ...)
 	// Required: true
 	// Max Length: 56
 	// Min Length: 3
@@ -90,10 +85,6 @@ func (m *DatabaseV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateConnectionUserName(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateConnectorJarURL(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -172,23 +163,6 @@ func (m *DatabaseV4Response) validateConnectionUserName(formats strfmt.Registry)
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *DatabaseV4Response) validateConnectorJarURL(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ConnectorJarURL) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("connectorJarUrl", "body", string(*m.ConnectorJarURL), 0); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("connectorJarUrl", "body", string(*m.ConnectorJarURL), 150); err != nil {
-		return err
 	}
 
 	return nil

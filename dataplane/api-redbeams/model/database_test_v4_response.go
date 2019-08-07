@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DatabaseTestV4Response database test v4 response
+// DatabaseTestV4Response Response for testing connectivity to a database
 // swagger:model DatabaseTestV4Response
 type DatabaseTestV4Response struct {
 

@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -13,7 +15,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DatabaseServerV4Response database server v4 response
+// DatabaseServerV4Response Response containing information about a database server that was acted upon, e.g., retrieved, deleted, listed
 // swagger:model DatabaseServerV4Response
 type DatabaseServerV4Response struct {
 
@@ -24,18 +26,13 @@ type DatabaseServerV4Response struct {
 	// Password of the administrative user of the database server
 	ConnectionPassword *SecretResponse `json:"connectionPassword,omitempty"`
 
-	// User name of the administrative user of the database server
+	// Username of the administrative user of the database server
 	ConnectionUserName *SecretResponse `json:"connectionUserName,omitempty"`
 
-	// URL that points to the JAR of the connection driver (JDBC connector)
-	// Max Length: 150
-	// Min Length: 0
-	ConnectorJarURL *string `json:"connectorJarUrl,omitempty"`
-
-	// Creation date / time of the resource, in epoch milliseconds
+	// Creation date / time of the database server, in epoch milliseconds
 	CreationDate int64 `json:"creationDate,omitempty"`
 
-	// CRN of the resource
+	// CRN of the database server
 	Crn string `json:"crn,omitempty"`
 
 	// Name of the database vendor (MYSQL, POSTGRES, ...)
@@ -46,12 +43,12 @@ type DatabaseServerV4Response struct {
 	// Required: true
 	DatabaseVendorDisplayName *string `json:"databaseVendorDisplayName"`
 
-	// Description of the resource
+	// Description of the database server
 	// Max Length: 1000000
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// Crn of the environment of the resource
+	// CRN of the environment of the database server
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
 
@@ -59,7 +56,7 @@ type DatabaseServerV4Response struct {
 	// Required: true
 	Host *string `json:"host"`
 
-	// ID of the resource
+	// Internal ID of the database server
 	ID int64 `json:"id,omitempty"`
 
 	// Name of the database server
@@ -72,6 +69,17 @@ type DatabaseServerV4Response struct {
 	// Port of the database server
 	// Required: true
 	Port *int32 `json:"port"`
+
+	// Ownership status of the database server
+	// Enum: [UNKNOWN SERVICE_MANAGED USER_MANAGED]
+	ResourceStatus string `json:"resourceStatus,omitempty"`
+
+	// Status of the database server stack
+	// Enum: [REQUESTED CREATE_IN_PROGRESS AVAILABLE UPDATE_IN_PROGRESS UPDATE_REQUESTED UPDATE_FAILED CREATE_FAILED ENABLE_SECURITY_FAILED DELETE_REQUESTED PRE_DELETE_IN_PROGRESS DELETE_IN_PROGRESS DELETE_FAILED DELETE_COMPLETED STOPPED STOP_REQUESTED START_REQUESTED STOP_IN_PROGRESS START_IN_PROGRESS START_FAILED STOP_FAILED WAIT_FOR_SYNC MAINTENANCE_MODE_ENABLED]
+	Status string `json:"status,omitempty"`
+
+	// Additional status information about the database server stack
+	StatusReason string `json:"statusReason,omitempty"`
 }
 
 // Validate validates this database server v4 response
@@ -87,10 +95,6 @@ func (m *DatabaseServerV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateConnectionUserName(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateConnectorJarURL(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -119,6 +123,14 @@ func (m *DatabaseServerV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validatePort(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateResourceStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateStatus(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -168,23 +180,6 @@ func (m *DatabaseServerV4Response) validateConnectionUserName(formats strfmt.Reg
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *DatabaseServerV4Response) validateConnectorJarURL(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ConnectorJarURL) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("connectorJarUrl", "body", string(*m.ConnectorJarURL), 0); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("connectorJarUrl", "body", string(*m.ConnectorJarURL), 150); err != nil {
-		return err
 	}
 
 	return nil
@@ -267,6 +262,155 @@ func (m *DatabaseServerV4Response) validateName(formats strfmt.Registry) error {
 func (m *DatabaseServerV4Response) validatePort(formats strfmt.Registry) error {
 
 	if err := validate.Required("port", "body", m.Port); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var databaseServerV4ResponseTypeResourceStatusPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["UNKNOWN","SERVICE_MANAGED","USER_MANAGED"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		databaseServerV4ResponseTypeResourceStatusPropEnum = append(databaseServerV4ResponseTypeResourceStatusPropEnum, v)
+	}
+}
+
+const (
+
+	// DatabaseServerV4ResponseResourceStatusUNKNOWN captures enum value "UNKNOWN"
+	DatabaseServerV4ResponseResourceStatusUNKNOWN string = "UNKNOWN"
+
+	// DatabaseServerV4ResponseResourceStatusSERVICEMANAGED captures enum value "SERVICE_MANAGED"
+	DatabaseServerV4ResponseResourceStatusSERVICEMANAGED string = "SERVICE_MANAGED"
+
+	// DatabaseServerV4ResponseResourceStatusUSERMANAGED captures enum value "USER_MANAGED"
+	DatabaseServerV4ResponseResourceStatusUSERMANAGED string = "USER_MANAGED"
+)
+
+// prop value enum
+func (m *DatabaseServerV4Response) validateResourceStatusEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, databaseServerV4ResponseTypeResourceStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *DatabaseServerV4Response) validateResourceStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ResourceStatus) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateResourceStatusEnum("resourceStatus", "body", m.ResourceStatus); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var databaseServerV4ResponseTypeStatusPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["REQUESTED","CREATE_IN_PROGRESS","AVAILABLE","UPDATE_IN_PROGRESS","UPDATE_REQUESTED","UPDATE_FAILED","CREATE_FAILED","ENABLE_SECURITY_FAILED","DELETE_REQUESTED","PRE_DELETE_IN_PROGRESS","DELETE_IN_PROGRESS","DELETE_FAILED","DELETE_COMPLETED","STOPPED","STOP_REQUESTED","START_REQUESTED","STOP_IN_PROGRESS","START_IN_PROGRESS","START_FAILED","STOP_FAILED","WAIT_FOR_SYNC","MAINTENANCE_MODE_ENABLED"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		databaseServerV4ResponseTypeStatusPropEnum = append(databaseServerV4ResponseTypeStatusPropEnum, v)
+	}
+}
+
+const (
+
+	// DatabaseServerV4ResponseStatusREQUESTED captures enum value "REQUESTED"
+	DatabaseServerV4ResponseStatusREQUESTED string = "REQUESTED"
+
+	// DatabaseServerV4ResponseStatusCREATEINPROGRESS captures enum value "CREATE_IN_PROGRESS"
+	DatabaseServerV4ResponseStatusCREATEINPROGRESS string = "CREATE_IN_PROGRESS"
+
+	// DatabaseServerV4ResponseStatusAVAILABLE captures enum value "AVAILABLE"
+	DatabaseServerV4ResponseStatusAVAILABLE string = "AVAILABLE"
+
+	// DatabaseServerV4ResponseStatusUPDATEINPROGRESS captures enum value "UPDATE_IN_PROGRESS"
+	DatabaseServerV4ResponseStatusUPDATEINPROGRESS string = "UPDATE_IN_PROGRESS"
+
+	// DatabaseServerV4ResponseStatusUPDATEREQUESTED captures enum value "UPDATE_REQUESTED"
+	DatabaseServerV4ResponseStatusUPDATEREQUESTED string = "UPDATE_REQUESTED"
+
+	// DatabaseServerV4ResponseStatusUPDATEFAILED captures enum value "UPDATE_FAILED"
+	DatabaseServerV4ResponseStatusUPDATEFAILED string = "UPDATE_FAILED"
+
+	// DatabaseServerV4ResponseStatusCREATEFAILED captures enum value "CREATE_FAILED"
+	DatabaseServerV4ResponseStatusCREATEFAILED string = "CREATE_FAILED"
+
+	// DatabaseServerV4ResponseStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
+	DatabaseServerV4ResponseStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+
+	// DatabaseServerV4ResponseStatusDELETEREQUESTED captures enum value "DELETE_REQUESTED"
+	DatabaseServerV4ResponseStatusDELETEREQUESTED string = "DELETE_REQUESTED"
+
+	// DatabaseServerV4ResponseStatusPREDELETEINPROGRESS captures enum value "PRE_DELETE_IN_PROGRESS"
+	DatabaseServerV4ResponseStatusPREDELETEINPROGRESS string = "PRE_DELETE_IN_PROGRESS"
+
+	// DatabaseServerV4ResponseStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
+	DatabaseServerV4ResponseStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
+
+	// DatabaseServerV4ResponseStatusDELETEFAILED captures enum value "DELETE_FAILED"
+	DatabaseServerV4ResponseStatusDELETEFAILED string = "DELETE_FAILED"
+
+	// DatabaseServerV4ResponseStatusDELETECOMPLETED captures enum value "DELETE_COMPLETED"
+	DatabaseServerV4ResponseStatusDELETECOMPLETED string = "DELETE_COMPLETED"
+
+	// DatabaseServerV4ResponseStatusSTOPPED captures enum value "STOPPED"
+	DatabaseServerV4ResponseStatusSTOPPED string = "STOPPED"
+
+	// DatabaseServerV4ResponseStatusSTOPREQUESTED captures enum value "STOP_REQUESTED"
+	DatabaseServerV4ResponseStatusSTOPREQUESTED string = "STOP_REQUESTED"
+
+	// DatabaseServerV4ResponseStatusSTARTREQUESTED captures enum value "START_REQUESTED"
+	DatabaseServerV4ResponseStatusSTARTREQUESTED string = "START_REQUESTED"
+
+	// DatabaseServerV4ResponseStatusSTOPINPROGRESS captures enum value "STOP_IN_PROGRESS"
+	DatabaseServerV4ResponseStatusSTOPINPROGRESS string = "STOP_IN_PROGRESS"
+
+	// DatabaseServerV4ResponseStatusSTARTINPROGRESS captures enum value "START_IN_PROGRESS"
+	DatabaseServerV4ResponseStatusSTARTINPROGRESS string = "START_IN_PROGRESS"
+
+	// DatabaseServerV4ResponseStatusSTARTFAILED captures enum value "START_FAILED"
+	DatabaseServerV4ResponseStatusSTARTFAILED string = "START_FAILED"
+
+	// DatabaseServerV4ResponseStatusSTOPFAILED captures enum value "STOP_FAILED"
+	DatabaseServerV4ResponseStatusSTOPFAILED string = "STOP_FAILED"
+
+	// DatabaseServerV4ResponseStatusWAITFORSYNC captures enum value "WAIT_FOR_SYNC"
+	DatabaseServerV4ResponseStatusWAITFORSYNC string = "WAIT_FOR_SYNC"
+
+	// DatabaseServerV4ResponseStatusMAINTENANCEMODEENABLED captures enum value "MAINTENANCE_MODE_ENABLED"
+	DatabaseServerV4ResponseStatusMAINTENANCEMODEENABLED string = "MAINTENANCE_MODE_ENABLED"
+)
+
+// prop value enum
+func (m *DatabaseServerV4Response) validateStatusEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, databaseServerV4ResponseTypeStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *DatabaseServerV4Response) validateStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Status) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
 		return err
 	}
 

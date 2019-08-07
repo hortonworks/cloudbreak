@@ -18,7 +18,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var sdxClusterHeader = []string{"Name"}
+var sdxClusterHeader = []string{"Crn", "Name", "EnvironmentName", "EnvironmentCrn", "StackCrn", "Status", "StatusReason"}
 
 type sdxClusterOutput struct {
 	Crn            string `json:"Crn" yaml:"Crn"`
@@ -191,20 +191,12 @@ func DescribeSdx(c *cli.Context) {
 
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	sdxCluster := resp.Payload
-	if output.Format != "table" {
-		output.Write(append(sdxClusterHeader, "ContentAsBase64", "ID"), &sdxClusterOutput{sdxCluster.Crn, sdxCluster.Name,
-			sdxCluster.EnvironmentName,
-			sdxCluster.EnvironmentCrn,
-			sdxCluster.StackCrn,
-			sdxCluster.Status,
-			sdxCluster.StatusReason})
-	} else {
-		output.Write(append(sdxClusterHeader, "ID"), &sdxClusterOutput{sdxCluster.Crn, sdxCluster.Name,
-			sdxCluster.EnvironmentName,
-			sdxCluster.EnvironmentCrn,
-			sdxCluster.StackCrn,
-			sdxCluster.Status,
-			sdxCluster.StatusReason})
-	}
+	output.Write(sdxClusterHeader, &sdxClusterOutput{sdxCluster.Crn,
+		sdxCluster.Name,
+		sdxCluster.EnvironmentName,
+		sdxCluster.EnvironmentCrn,
+		sdxCluster.StackCrn,
+		sdxCluster.Status,
+		sdxCluster.StatusReason})
 	log.Infof("[DescribeSdx] Describe a particular SDX cluster")
 }

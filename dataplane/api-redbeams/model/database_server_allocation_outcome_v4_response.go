@@ -19,15 +19,15 @@ import (
 // swagger:model DatabaseServerAllocationOutcomeV4Response
 type DatabaseServerAllocationOutcomeV4Response struct {
 
-	// Crn of the environment of the resource
+	// CRN of the environment of the database server
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
 
-	// Name of the external database server
+	// Name of the database server
 	// Required: true
 	Name *string `json:"name"`
 
-	// CRN of the resource
+	// CRN of the database server
 	// Required: true
 	ResourceCrn *string `json:"resourceCrn"`
 

@@ -8,25 +8,74 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
-// CreateDatabaseV4Request create database v4 request
+// CreateDatabaseV4Request Request for creating a new database on a registered database server
 // swagger:model CreateDatabaseV4Request
 type CreateDatabaseV4Request struct {
 
-	// Name of the database configuration resource
-	DatabaseName string `json:"databaseName,omitempty"`
+	// Name of the database
+	// Required: true
+	DatabaseName *string `json:"databaseName"`
 
-	// Crn of the database server
-	ExistingDatabaseServerCrn string `json:"existingDatabaseServerCrn,omitempty"`
+	// CRN of the database server
+	// Required: true
+	ExistingDatabaseServerCrn *string `json:"existingDatabaseServerCrn"`
 
-	// Type of database, aka the service name that will use the database like HIVE, DRUID, SUPERSET, RANGER, etc.
-	Type string `json:"type,omitempty"`
+	// Type of database, i.e., the service name that will use the database (HIVE, DRUID, SUPERSET, RANGER, ...)
+	// Required: true
+	Type *string `json:"type"`
 }
 
 // Validate validates this create database v4 request
 func (m *CreateDatabaseV4Request) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateDatabaseName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateExistingDatabaseServerCrn(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *CreateDatabaseV4Request) validateDatabaseName(formats strfmt.Registry) error {
+
+	if err := validate.Required("databaseName", "body", m.DatabaseName); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *CreateDatabaseV4Request) validateExistingDatabaseServerCrn(formats strfmt.Registry) error {
+
+	if err := validate.Required("existingDatabaseServerCrn", "body", m.ExistingDatabaseServerCrn); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *CreateDatabaseV4Request) validateType(formats strfmt.Registry) error {
+
+	if err := validate.Required("type", "body", m.Type); err != nil {
+		return err
+	}
+
 	return nil
 }
 

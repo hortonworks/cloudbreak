@@ -25,10 +25,10 @@ func init() {
 						Name:   "list",
 						Usage:  "list all RBDMS instances",
 						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlWaitOptional).AddAuthenticationFlags().Build(),
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn).AddAuthenticationFlags().AddOutputFlag().Build(),
 						Action: redbeams.ListRBDMSInstances,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlWaitOptional).AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn).AddAuthenticationFlags().AddOutputFlag().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -40,7 +40,7 @@ func init() {
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().Build(),
 						Action: redbeams.DeleteRBDMSInstance,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlWaitOptional).AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},

@@ -14,7 +14,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// DatabaseV4Responses database v4 responses
+// DatabaseV4Responses A set of multiple database responses
 // swagger:model DatabaseV4Responses
 type DatabaseV4Responses struct {
 

@@ -16,8 +16,11 @@ import (
 // swagger:model NetworkV4Request
 type NetworkV4Request struct {
 
-	// AWS-specific parameters of the specified network
+	// AWS-specific parameters for the network
 	Aws *AwsNetworkV4Parameters `json:"aws,omitempty"`
+
+	// Azure-specific parameters for the network
+	Azure *AzureNetworkV4Parameters `json:"azure,omitempty"`
 }
 
 // Validate validates this network v4 request
@@ -25,6 +28,10 @@ func (m *NetworkV4Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAws(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateAzure(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -44,6 +51,24 @@ func (m *NetworkV4Request) validateAws(formats strfmt.Registry) error {
 		if err := m.Aws.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("aws")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *NetworkV4Request) validateAzure(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Azure) { // not required
+		return nil
+	}
+
+	if m.Azure != nil {
+		if err := m.Azure.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("azure")
 			}
 			return err
 		}

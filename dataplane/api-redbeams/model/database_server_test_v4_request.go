@@ -12,14 +12,14 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// DatabaseServerTestV4Request database server test v4 request
+// DatabaseServerTestV4Request Request for testing connectivity to a database server
 // swagger:model DatabaseServerTestV4Request
 type DatabaseServerTestV4Request struct {
 
-	// Unsaved database server config to be tested for connectivity
+	// Information about an unregistered database server to be tested for connectivity
 	DatabaseServer *DatabaseServerV4Request `json:"databaseServer,omitempty"`
 
-	// Crn of saved database server config to be tested for connectivity
+	// CRN of registered database server to be tested for connectivity
 	ExistingDatabaseServerCrn string `json:"existingDatabaseServerCrn,omitempty"`
 }
 

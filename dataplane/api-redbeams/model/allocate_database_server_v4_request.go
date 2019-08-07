@@ -13,17 +13,18 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// AllocateDatabaseServerV4Request allocate database server v4 request
+// AllocateDatabaseServerV4Request Request for allocating a new database server in a provider
 // swagger:model AllocateDatabaseServerV4Request
 type AllocateDatabaseServerV4Request struct {
 
-	// AWS-specific parameters of the database stack
+	// AWS-specific parameters for the database stack
 	Aws AwsDBStackV4Parameters `json:"aws,omitempty"`
 
-	// Database server of the database stack
-	DatabaseServer *DatabaseServerV4Request `json:"databaseServer,omitempty"`
+	// Database server information for the database stack
+	// Required: true
+	DatabaseServer *DatabaseServerV4Request `json:"databaseServer"`
 
-	// Crn of the environment of the resource
+	// CRN of the environment of the database server
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
 
@@ -33,7 +34,7 @@ type AllocateDatabaseServerV4Request struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name string `json:"name,omitempty"`
 
-	// Network of the database stack
+	// Network information for the database stack
 	Network *NetworkV4Request `json:"network,omitempty"`
 }
 
@@ -65,8 +66,8 @@ func (m *AllocateDatabaseServerV4Request) Validate(formats strfmt.Registry) erro
 
 func (m *AllocateDatabaseServerV4Request) validateDatabaseServer(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.DatabaseServer) { // not required
-		return nil
+	if err := validate.Required("databaseServer", "body", m.DatabaseServer); err != nil {
+		return err
 	}
 
 	if m.DatabaseServer != nil {

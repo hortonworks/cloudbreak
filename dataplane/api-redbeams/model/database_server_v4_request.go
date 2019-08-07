@@ -16,28 +16,28 @@ import (
 // swagger:model DatabaseServerV4Request
 type DatabaseServerV4Request struct {
 
-	// AWS-specific parameters of the specified database server
+	// AWS-specific parameters for the database server
 	Aws *AwsDatabaseServerV4Parameters `json:"aws,omitempty"`
+
+	// Azure-specific parameters for the database server
+	Azure *AzureDatabaseServerV4Parameters `json:"azure,omitempty"`
 
 	// Name of the JDBC connection driver (for example: 'org.postgresql.Driver')
 	ConnectionDriver string `json:"connectionDriver,omitempty"`
 
-	// URL that points to the JAR of the connection driver (JDBC connector)
-	ConnectorJarURL string `json:"connectorJarUrl,omitempty"`
-
-	// Database vendor of the database server
+	// Name of the database vendor (MYSQL, POSTGRES, ...)
 	DatabaseVendor string `json:"databaseVendor,omitempty"`
 
 	// Instance type of the database server
 	InstanceType string `json:"instanceType,omitempty"`
 
-	// Port for the database
+	// Port of the database server
 	Port int32 `json:"port,omitempty"`
 
-	// Root user name of the database server
+	// Username of the administrative user of the database server
 	RootUserName string `json:"rootUserName,omitempty"`
 
-	// Root user password of the database server
+	// Password of the administrative user of the database server
 	RootUserPassword string `json:"rootUserPassword,omitempty"`
 
 	// Security group of the database server
@@ -52,6 +52,10 @@ func (m *DatabaseServerV4Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAws(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateAzure(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -75,6 +79,24 @@ func (m *DatabaseServerV4Request) validateAws(formats strfmt.Registry) error {
 		if err := m.Aws.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("aws")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *DatabaseServerV4Request) validateAzure(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Azure) { // not required
+		return nil
+	}
+
+	if m.Azure != nil {
+		if err := m.Azure.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("azure")
 			}
 			return err
 		}

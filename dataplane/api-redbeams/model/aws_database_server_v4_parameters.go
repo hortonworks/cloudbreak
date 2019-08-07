@@ -15,10 +15,10 @@ import (
 // swagger:model AwsDatabaseServerV4Parameters
 type AwsDatabaseServerV4Parameters struct {
 
-	// backup retention period
+	// Time to retain backups, in days
 	BackupRetentionPeriod int32 `json:"backupRetentionPeriod,omitempty"`
 
-	// engine version
+	// Version of the database engine (vendor)
 	EngineVersion string `json:"engineVersion,omitempty"`
 }
 

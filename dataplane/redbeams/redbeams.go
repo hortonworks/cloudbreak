@@ -1,14 +1,15 @@
 package redbeams
 
 import (
-	"github.com/hortonworks/cb-cli/dataplane/api-redbeams/client/v4databaseservers"
+	"time"
+
+	"github.com/hortonworks/cb-cli/dataplane/api-redbeams/client/database_servers"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"github.com/hortonworks/dp-cli-common/utils"
 	commonutils "github.com/hortonworks/dp-cli-common/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
-	"time"
 )
 
 type ClientRedbeams oauth.Redbeams
@@ -29,9 +30,9 @@ func (redbeams *redbeamsDetails) DataAsStringArray() []string {
 func ListRBDMSInstances(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "List Rbdms instances in environment")
 	envCrn := c.String(fl.FlEnvironmentCrn.Name)
-	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.V4databaseservers
+	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
 
-	resp, err := redbeamsDbServerClient.ListDatabaseServers(v4databaseservers.NewListDatabaseServersParams().WithEnvironmentCrn(envCrn))
+	resp, err := redbeamsDbServerClient.ListDatabaseServers(database_servers.NewListDatabaseServersParams().WithEnvironmentCrn(envCrn))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -46,7 +47,7 @@ func ListRBDMSInstances(c *cli.Context) {
 			Name:           *response.Name,
 			CRN:            response.Crn,
 			EnvironmentCrn: *response.EnvironmentCrn,
-			//Status:         response.Status,
+			Status:         response.Status,
 		}
 		tableRows = append(tableRows, row)
 	}
@@ -57,8 +58,8 @@ func DeleteRBDMSInstance(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "delete RBDMS instance")
 	crn := c.String(fl.FlCrn.Name)
 
-	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.V4databaseservers
-	result, err := redbeamsDbServerClient.DeleteDatabaseServerByCrn(v4databaseservers.NewDeleteDatabaseServerByCrnParams().WithCrn(crn))
+	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
+	result, err := redbeamsDbServerClient.DeleteDatabaseServerByCrn(database_servers.NewDeleteDatabaseServerByCrnParams().WithCrn(crn))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

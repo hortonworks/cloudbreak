@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// CreateDatabaseV4Response create database v4 response
+// CreateDatabaseV4Response Response for creating a new database on a registered database server
 // swagger:model CreateDatabaseV4Response
 type CreateDatabaseV4Response struct {
 

@@ -13,15 +13,15 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DatabaseV4Identifiers database v4 identifiers
+// DatabaseV4Identifiers Identifiers that together identify a database in an environment
 // swagger:model DatabaseV4Identifiers
 type DatabaseV4Identifiers struct {
 
-	// Crn of the environment of the resource
+	// CRN of the environment of the database
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
 
-	// Name of the database configuration resource
+	// Name of the database
 	// Required: true
 	// Max Length: 100
 	// Min Length: 5

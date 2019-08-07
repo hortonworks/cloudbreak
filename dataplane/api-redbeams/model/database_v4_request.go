@@ -13,46 +13,41 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// DatabaseV4Request database v4 request
+// DatabaseV4Request Request containing information about a database to be registered
 // swagger:model DatabaseV4Request
 type DatabaseV4Request struct {
 
 	// Name of the JDBC connection driver (for example: 'org.postgresql.Driver')
 	ConnectionDriver string `json:"connectionDriver,omitempty"`
 
-	// Password to use for the JDBC connection
+	// Password to use for authentication
 	// Required: true
 	ConnectionPassword *string `json:"connectionPassword"`
 
-	// JDBC connection URL in the form of JDBC:<db-type>://<address>:<port>/<db>
+	// JDBC connection URL in the form of jdbc:<db-type>:<driver-specific-part>
 	// Required: true
 	ConnectionURL *string `json:"connectionURL"`
 
-	// Username to use for the JDBC connection
+	// Username to use for authentication
 	// Required: true
 	ConnectionUserName *string `json:"connectionUserName"`
 
-	// URL that points to the jar of the connection driver(connector)
-	// Max Length: 150
-	// Min Length: 0
-	ConnectorJarURL *string `json:"connectorJarUrl,omitempty"`
-
-	// Description of the resource
+	// Description of the database
 	// Max Length: 1000000
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// Crn of the environment of the resource
+	// CRN of the environment of the database
 	EnvironmentCrn string `json:"environmentCrn,omitempty"`
 
-	// Name of the database configuration resource
+	// Name of the database
 	// Required: true
 	// Max Length: 100
 	// Min Length: 5
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
-	// Type of database, aka the service name that will use the database like HIVE, DRUID, SUPERSET, RANGER, etc.
+	// Type of database, i.e., the service name that will use the database (HIVE, DRUID, SUPERSET, RANGER, ...)
 	// Required: true
 	// Max Length: 56
 	// Min Length: 3
@@ -73,10 +68,6 @@ func (m *DatabaseV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateConnectionUserName(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateConnectorJarURL(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -119,23 +110,6 @@ func (m *DatabaseV4Request) validateConnectionURL(formats strfmt.Registry) error
 func (m *DatabaseV4Request) validateConnectionUserName(formats strfmt.Registry) error {
 
 	if err := validate.Required("connectionUserName", "body", m.ConnectionUserName); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *DatabaseV4Request) validateConnectorJarURL(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ConnectorJarURL) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("connectorJarUrl", "body", string(*m.ConnectorJarURL), 0); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("connectorJarUrl", "body", string(*m.ConnectorJarURL), 150); err != nil {
 		return err
 	}
 

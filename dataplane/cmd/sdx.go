@@ -46,10 +46,10 @@ func init() {
 				Name:   "describe",
 				Usage:  "describes an SDX cluster",
 				Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-				Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build(),
+				Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().AddOutputFlag().Build(),
 				Action: sdx.DescribeSdx,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().AddOutputFlag().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
@@ -58,10 +58,10 @@ func init() {
 				Name:   "list",
 				Usage:  "list SDX clusters",
 				Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentNameOptional, fl.FlWaitOptional).AddAuthenticationFlags().Build(),
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentNameOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
 				Action: sdx.ListSdx,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentNameOptional, fl.FlWaitOptional).AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentNameOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
