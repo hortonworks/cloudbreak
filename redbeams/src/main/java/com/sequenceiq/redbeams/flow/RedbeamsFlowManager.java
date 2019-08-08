@@ -3,7 +3,6 @@ package com.sequenceiq.redbeams.flow;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -24,7 +23,6 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
-import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationFlowConfig;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -94,13 +92,8 @@ public class RedbeamsFlowManager {
     }
 
     public void cancelRunningFlowsIfNeeded(Long dbstackId) {
-        if (flowLogService.isOtherFlowRunningExceptFlowConfigs(dbstackId, Set.of(RedbeamsTerminationFlowConfig.class))) {
-            Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
-            reactor.notify(
-                    Flow2Handler.FLOW_CANCEL,
-                    eventFactory.createEventWithErrHandler(headerWithUserCrn, new RedbeamsEvent(Flow2Handler.FLOW_CANCEL, dbstackId))
-            );
-        }
+        RedbeamsEvent cancelEvent = new RedbeamsEvent(Flow2Handler.FLOW_CANCEL, dbstackId);
+        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }
 
     private Map<String, Object> getHeaderWithUserCrn(Map<String, Object> headers) {

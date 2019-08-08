@@ -29,4 +29,9 @@ public class SdxFlowInformation implements ApplicationFlowInformation {
     public List<String> getAllowedParallelFlows() {
         return ALLOWED_PARALLEL_FLOWS;
     }
+
+    @Override
+    public List<Class<? extends FlowConfiguration<?>>> getTerminationFlow() {
+        return Collections.singletonList(SdxDeleteFlowConfig.class);
+    }
 }

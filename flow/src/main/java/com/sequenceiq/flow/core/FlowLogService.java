@@ -30,8 +30,6 @@ public interface FlowLogService {
 
     boolean isOtherFlowRunning(Long stackId);
 
-    boolean isOtherFlowRunningExceptFlowConfigs(Long stackId, Set<Class> exceptFlowTypes);
-
     boolean repeatedFlowState(FlowLog lastFlowLog, String event);
 
     void updateLastFlowLogPayload(FlowLog lastFlowLog, Payload payload, Map<Object, Object> variables);

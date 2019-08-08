@@ -269,7 +269,7 @@ public class HeartbeatServiceTest {
 
         List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getResourceId).distinct().collect(Collectors.toList());
         when(haApplication.getDeletingResources(anySet())).thenReturn(Set.of(stackIds.get(0), stackIds.get(2)));
-        doReturn(HelloWorldFlowConfig.class).when(applicationFlowInformation).getTerminationFlow();
+        doReturn(Collections.singletonList(HelloWorldFlowConfig.class)).when(applicationFlowInformation).getTerminationFlow();
         List<FlowLog> invalidFlowLogs = myNewFlowLogs.stream()
                 .filter(fl -> fl.getResourceId().equals(stackIds.get(0)) || fl.getResourceId().equals(stackIds.get(2))).collect(Collectors.toList());
 
@@ -334,7 +334,7 @@ public class HeartbeatServiceTest {
 
         List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getResourceId).distinct().collect(Collectors.toList());
         when(haApplication.getDeletingResources(anySet())).thenReturn(Set.of(stackIds.get(0), stackIds.get(2)));
-        doReturn(HelloWorldFlowConfig.class).when(applicationFlowInformation).getTerminationFlow();
+        doReturn(Collections.singletonList(HelloWorldFlowConfig.class)).when(applicationFlowInformation).getTerminationFlow();
 
         heartbeatService.scheduledFlowDistribution();
 
@@ -549,7 +549,7 @@ public class HeartbeatServiceTest {
                 .map(FlowLog::getResourceId)
                 .collect(Collectors.toSet());
         when(haApplication.getDeletingResources(anySet())).thenReturn(deletedResources);
-        doReturn(HelloWorldFlowConfig.class).when(applicationFlowInformation).getTerminationFlow();
+        doReturn(Collections.singletonList(HelloWorldFlowConfig.class)).when(applicationFlowInformation).getTerminationFlow();
 
         List<Node> nodes = heartbeatService.distributeFlows();
 

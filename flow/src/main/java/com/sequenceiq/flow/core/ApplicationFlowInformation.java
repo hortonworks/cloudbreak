@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.core;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.sequenceiq.flow.core.config.FlowConfiguration;
@@ -9,7 +10,7 @@ public interface ApplicationFlowInformation  {
 
     List<String> getAllowedParallelFlows();
 
-    default Class<? extends FlowConfiguration<?>> getTerminationFlow() {
-        return null;
+    default List<Class<? extends FlowConfiguration<?>>> getTerminationFlow() {
+        return Collections.emptyList();
     }
 }
