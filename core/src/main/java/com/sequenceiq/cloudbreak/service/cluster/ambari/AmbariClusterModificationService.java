@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,8 @@ import groovyx.net.http.HttpResponseException;
 public class AmbariClusterModificationService implements ClusterModificationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterModificationService.class);
+
+    private static final String KEY_OF_RACK_INFO = "rack";
 
     @Inject
     private AmbariClientFactory clientFactory;
@@ -220,11 +223,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                 blueprintName = blueprintsMap.keySet().iterator().next();
             }
             List<Map<String, String>> hostGroupAssociation = hostGroupAssociationBuilder.buildHostGroupAssociation(hostGroup);
-            Map<String, String> hostsWithRackInfo = hostGroupAssociation.stream()
-                    .filter(associationMap -> hosts.stream().anyMatch(host -> host.equals(associationMap.get(FQDN))))
-                    .collect(Collectors.toMap(association -> association.get(FQDN), association ->
-                            association.get("rack") != null ? association.get("rack") : "/default-rack"));
-            int upscaleRequestCode = ambariClient.addHostsAndRackInfoWithBlueprint(blueprintName, hostGroup.getName(), hostsWithRackInfo);
+            int upscaleRequestCode = addHosts(hosts, ambariClient, hostGroup, blueprintName, hostGroupAssociation);
             return singletonMap("UPSCALE_REQUEST", upscaleRequestCode);
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
@@ -234,6 +233,34 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                 throw new CloudbreakServiceException("Ambari could not install services. " + errorMessage, e);
             }
         }
+    }
+
+    private int addHosts(List<String> hosts, AmbariClient client, HostGroup hostGroup, String blueprintName, List<Map<String, String>> hostInfos)
+            throws URISyntaxException, IOException {
+        List<Map<String, String>> hostInfoOfCandidates = hostInfos.stream()
+                .filter(associationMap -> hosts.stream().anyMatch(host -> host.equals(associationMap.get(FQDN))))
+                .collect(Collectors.toList());
+        if (allCandidatesDoesNotHaveRackInfo(hostInfoOfCandidates)) {
+            LOGGER.info("Adding hosts with blueprint to Ambari for hostgroup: '{}'", hostGroup.getName());
+            List<String> hostNamesToAdd = hostInfoOfCandidates
+                    .stream()
+                    .map(associationMap -> associationMap.get(FQDN))
+                    .collect(Collectors.toList());
+            return client.addHostsWithBlueprint(blueprintName, hostGroup.getName(), hostNamesToAdd);
+        } else {
+            LOGGER.info("Adding hosts with blueprint and rack info to Ambari for hostgroup: '{}'", hostGroup.getName());
+            Map<String, String> hostsWithRackInfo = hostInfoOfCandidates
+                    .stream()
+                    .collect(Collectors.toMap(association -> association.get(FQDN), association ->
+                            association.get(KEY_OF_RACK_INFO) != null ? association.get(KEY_OF_RACK_INFO) : "/default-rack"));
+            return client.addHostsAndRackInfoWithBlueprint(blueprintName, hostGroup.getName(), hostsWithRackInfo);
+        }
+    }
+
+    private boolean allCandidatesDoesNotHaveRackInfo(List<Map<String, String>> hostInfoForCandidates) {
+        return hostInfoForCandidates
+                .stream()
+                .allMatch(associationMap -> StringUtils.isEmpty(associationMap.get(KEY_OF_RACK_INFO)));
     }
 
 }
