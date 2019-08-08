@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.DisableKerberosResultToStackFailureEventConverter;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
@@ -108,6 +109,11 @@ public class ClusterTerminationActions {
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterTerminationFlowService.handleClusterTerminationError(payload);
                 sendEvent(context);
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackFailureEvent>> payloadConverters) {
+                payloadConverters.add(new DisableKerberosResultToStackFailureEventConverter());
             }
 
             @Override
