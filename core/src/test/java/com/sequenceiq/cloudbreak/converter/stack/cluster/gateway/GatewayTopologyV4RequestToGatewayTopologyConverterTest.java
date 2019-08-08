@@ -86,7 +86,8 @@ public class GatewayTopologyV4RequestToGatewayTopologyConverterTest {
         GatewayTopology result = underTest.convert(gatewayTopologyJson);
 
         assertEquals(TOPOLOGY_NAME, result.getTopologyName());
-        assertTrue(result.getExposedServices().get(ExposedServices.class).getServices().containsAll(ExposedService.getAllKnoxExposed()));
+        assertTrue(result.getExposedServices().get(ExposedServices.class).getServices().contains("ALL"));
+        assertTrue(result.getExposedServices().get(ExposedServices.class).getFullServiceList().containsAll(ExposedService.getAllKnoxExposed()));
     }
 
     @Test

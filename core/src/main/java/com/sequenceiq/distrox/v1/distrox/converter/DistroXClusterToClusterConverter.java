@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class DistroXClusterToClusterConverter {
@@ -42,7 +41,7 @@ public class DistroXClusterToClusterConverter {
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
-    public ClusterV4Request convert(DistroXClusterV1Request source, DetailedEnvironmentResponse environment) {
+    public ClusterV4Request convert(DistroXClusterV1Request source) {
         ClusterV4Request response = new ClusterV4Request();
         if (isEmpty(source.getExposedServices())) {
             source.setExposedServices(List.of("ALL"));

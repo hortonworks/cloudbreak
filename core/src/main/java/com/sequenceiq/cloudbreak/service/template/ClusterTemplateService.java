@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.template;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -183,10 +184,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         if (clusterTemplateLoaderService.isDefaultClusterTemplateUpdateNecessaryForUser(clusterTemplates)) {
             LOGGER.debug("Modifying clusterTemplates based on the defaults for the '{} ({})' workspace.", workspace.getName(), workspace.getId());
             Collection<ClusterTemplate> outdatedTemplates = clusterTemplateLoaderService.collectOutdatedTemplatesInDb(clusterTemplates);
-            outdatedTemplates.forEach(ct -> {
-                ct.setStatus(ResourceStatus.OUTDATED);
-                delete(ct);
-            });
+            delete(new HashSet<>(outdatedTemplates));
             clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
             clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
             LOGGER.debug("ClusterTemplate modifications finished based on the defaults for '{}' workspace.", workspace.getId());

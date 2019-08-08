@@ -38,14 +38,16 @@ public class GatewayTopologyJsonToExposedServicesConverterTest {
     private final GatewayTopologyV4RequestToExposedServicesConverter underTest = new GatewayTopologyV4RequestToExposedServicesConverter();
 
     @Test
-    public void testWithAllServices() {
+    public void testWithFullServiceList() {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(TOPOLOGY_NAME);
         gatewayTopologyJson.setExposedServices(Collections.singletonList("ALL"));
 
         ExposedServices exposedServices = underTest.convert(gatewayTopologyJson);
 
-        assertEquals(ExposedService.getAllKnoxExposed().size(), exposedServices.getServices().size());
+        assertEquals(ExposedService.getAllKnoxExposed().size(), exposedServices.getFullServiceList().size());
+        assertEquals(1, exposedServices.getServices().size());
+        assertEquals("ALL", exposedServices.getServices().get(0));
     }
 
     @Test
@@ -69,5 +71,8 @@ public class GatewayTopologyJsonToExposedServicesConverterTest {
 
         assertEquals(1L, exposedServices.getServices().size());
         assertEquals(CLOUDERA_MANAGER_UI, exposedServices.getServices().get(0));
+
+        assertEquals(1L, exposedServices.getFullServiceList().size());
+        assertEquals(CLOUDERA_MANAGER_UI, exposedServices.getFullServiceList().get(0));
     }
 }

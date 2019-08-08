@@ -108,16 +108,16 @@ public class ClusterTemplateLoaderService {
         return collectOutdatedTemplatesInDb(defaultClusterTemplateCache.defaultClusterTemplateRequests(), clusterTemplates);
     }
 
-    public Collection<ClusterTemplate> collectOutdatedTemplatesInDb(Map<String, String> defaultTemplates,
-            Collection<ClusterTemplate> defaultTemplatesInDb) {
+    public Collection<ClusterTemplate> collectOutdatedTemplatesInDb(Map<String, String> defaultTemplates, Collection<ClusterTemplate> defaultTemplatesInDb) {
         Collection<ClusterTemplate> outdatedTemplates = new HashSet<>();
-        for (ClusterTemplate templateInDB : defaultTemplatesInDb) {
+        for (ClusterTemplate templateInDB : filterTemplatesForDefaults(defaultTemplatesInDb)) {
             Optional<String> defaultTemplate = Optional.ofNullable(defaultTemplates.get(templateInDB.getName()));
             if (defaultTemplate.isPresent()) {
                 defaultTemplate
                         .filter(defaultTmplBase64 -> isTemplatesContentDifferent(templateInDB, defaultTmplBase64))
                         .ifPresent(defaultTmplBase64 -> outdatedTemplates.add(templateInDB));
             } else {
+                templateInDB.setStatus(ResourceStatus.OUTDATED);
                 outdatedTemplates.add(templateInDB);
             }
         }
