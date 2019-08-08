@@ -197,10 +197,10 @@ public class UserService {
     }
 
     private void addUsersToGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
-        LOGGER.debug("adding users to groups: {}", groupMapping);
+        LOGGER.debug("adding users to groups: [{}]", groupMapping);
         for (String group : groupMapping.keySet()) {
             Set<String> users = Set.copyOf(groupMapping.get(group));
-            LOGGER.debug("adding users {} to group {}", users, group);
+            LOGGER.debug("adding users [{}] to group [{}]", users, group);
 
             try {
                 // TODO specialize response object
@@ -208,7 +208,7 @@ public class UserService {
                 LOGGER.debug("Success: {}", groupAddMember.getResult());
             } catch (FreeIpaClientException e) {
                 // TODO propagate this information out to API
-                LOGGER.error("Failed to add {} to group", users, group, e);
+                LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
             }
         }
     }
@@ -224,7 +224,7 @@ public class UserService {
                 LOGGER.debug("Success: {}", groupRemoveMembers.getResult());
             } catch (FreeIpaClientException e) {
                 // TODO propagate this information out to API
-                LOGGER.error("Failed to add {} to group", users, group, e);
+                LOGGER.error("Failed to add [{}] to group [{}]", users, group, e);
             }
         }
     }

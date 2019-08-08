@@ -52,6 +52,8 @@ public class FreeIpaClientBuilder {
 
     private static final int SO_TIMEOUT = 30 * 1000;
 
+    private static final int READ_TIMEOUT_MILLIS = 60 * 1000 * 5;
+
     private final PoolingHttpClientConnectionManager connectionManager;
 
     private String basePath = "/ipa";
@@ -96,6 +98,7 @@ public class FreeIpaClientBuilder {
                 Map.of("Cookie", "ipa_session=" + sessionCookie));
         jsonRpcHttpClient.setSslContext(sslContext);
         jsonRpcHttpClient.setHostNameVerifier(hostnameVerifier());
+        jsonRpcHttpClient.setReadTimeoutMillis(READ_TIMEOUT_MILLIS);
         return new FreeIpaClient(jsonRpcHttpClient);
     }
 
