@@ -51,7 +51,7 @@ type SimpleEnvironmentV1Response struct {
 	EnvironmentStatus string `json:"environmentStatus,omitempty"`
 
 	// IDBroker mapping source.
-	// Enum: [NONE MOCK]
+	// Enum: [NONE MOCK IDBMMS]
 	IDBrokerMappingSource string `json:"idBrokerMappingSource,omitempty"`
 
 	// Location of the environment.
@@ -268,7 +268,7 @@ var simpleEnvironmentV1ResponseTypeIDBrokerMappingSourcePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["NONE","MOCK"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["NONE","MOCK","IDBMMS"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -283,6 +283,9 @@ const (
 
 	// SimpleEnvironmentV1ResponseIDBrokerMappingSourceMOCK captures enum value "MOCK"
 	SimpleEnvironmentV1ResponseIDBrokerMappingSourceMOCK string = "MOCK"
+
+	// SimpleEnvironmentV1ResponseIDBrokerMappingSourceIDBMMS captures enum value "IDBMMS"
+	SimpleEnvironmentV1ResponseIDBrokerMappingSourceIDBMMS string = "IDBMMS"
 )
 
 // prop value enum
