@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.zeppelin.ZeppelinRoles.ZEPPELIN_SERVER;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
@@ -27,8 +26,6 @@ public class ZeppelinS3CloudStorageRoleConfigProvider extends AbstractRoleConfig
     private static final String ZEPPELIN_NOTEBOOK_S3_USER = "zeppelin.notebook.s3.user";
 
     private static final String ZEPPELIN_S3_NOTEBOOK_REPO = "org.apache.zeppelin.notebook.repo.S3NotebookRepo";
-
-    private static final Pattern S3A_BUCKET_PATTERN = Pattern.compile(FileSystemType.S3.getProtocol() + "://([\\w.-]+)(?:/(.*))?");
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
@@ -63,12 +60,11 @@ public class ZeppelinS3CloudStorageRoleConfigProvider extends AbstractRoleConfig
 
         ConfigUtils.getStorageLocationForServiceProperty(source, ZEPPELIN_NOTEBOOK_S3_BUCKET)
                 .ifPresent(storageLocation -> {
-                    hmsCloudStorage.append(
-                            ConfigUtils.getSafetyValveProperty(ZEPPELIN_NOTEBOOK_S3_BUCKET,
-                                    S3A_BUCKET_PATTERN.matcher(storageLocation.getValue()).replaceAll("$1")));
+                    hmsCloudStorage.append(ConfigUtils.getSafetyValveProperty(ZEPPELIN_NOTEBOOK_S3_BUCKET,
+                            ConfigUtils.getBucketFromStorageLocation(storageLocation.getValue())));
 
                     hmsCloudStorage.append(ConfigUtils.getSafetyValveProperty(ZEPPELIN_NOTEBOOK_S3_USER,
-                            S3A_BUCKET_PATTERN.matcher(storageLocation.getValue()).replaceAll("$2")));
+                            ConfigUtils.getObjectPathFromStorageLocation(storageLocation.getValue())));
                 });
 
         return hmsCloudStorage.toString();
