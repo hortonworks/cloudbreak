@@ -244,7 +244,9 @@ public class HeartbeatService {
             if (!deletingResourceIds.isEmpty()) {
                 return flowLogs.stream()
                         .filter(fl -> deletingResourceIds.contains(fl.getResourceId()))
-                        .filter(fl -> !fl.getFlowType().equals(applicationFlowInformation.getTerminationFlow()))
+                        .filter(fl -> applicationFlowInformation.getTerminationFlow().stream()
+                                .map(Class::getName)
+                                .noneMatch(terminationFlowClassName -> terminationFlowClassName.equals(fl.getFlowType().getName())))
                         .collect(Collectors.toList());
             }
         }

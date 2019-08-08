@@ -267,9 +267,9 @@ public class ReactorFlowManager {
         notify(stackId, selector, new MaintenanceModeValidationTriggerEvent(selector, stackId));
     }
 
-    public void cancelRunningFlows(Long stackId) {
-        StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
-        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(createEventParameters(stackId), cancelEvent));
+    public void cancelRunningFlows(Long resourceId) {
+        StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, resourceId);
+        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(createEventParameters(resourceId), cancelEvent));
     }
 
     private void notify(Long stackId, String selector, Acceptable acceptable) {

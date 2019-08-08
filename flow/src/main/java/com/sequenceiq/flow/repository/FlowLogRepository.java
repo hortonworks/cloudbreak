@@ -13,6 +13,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogIdFlowAndType;
 import com.sequenceiq.flow.domain.StateStatus;
 
 @Transactional(TxType.REQUIRED)
@@ -20,16 +21,9 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
 
     Optional<FlowLog> findFirstByFlowIdOrderByCreatedDesc(String flowId);
 
-    @Query("SELECT DISTINCT fl.flowId FROM FlowLog fl "
-            + "WHERE fl.stateStatus = 'PENDING' AND fl.resourceId = :resourceId "
-            + "AND fl.flowType != 'com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig'")
-    Set<String> findAllRunningNonTerminationFlowIdsByResourceId(@Param("resourceId") Long resourceId);
-
-    @Query("SELECT DISTINCT fl.flowId FROM FlowLog fl "
-            + "WHERE fl.stateStatus = 'PENDING' AND fl.resourceId = :resourceId "
-            + "AND fl.flowType NOT IN :exceptFlowConfigs")
-    Set<String> findAllRunningFlowIdsByResourceIdExceptFlowConfigs(
-            @Param("resourceId") Long resourceId, @Param("exceptFlowConfigs") Set<Class> exceptFlowConfigs);
+    @Query("SELECT fl.flowId as flowId, fl.flowType as flowType FROM FlowLog fl "
+            + "WHERE fl.stateStatus = 'PENDING' AND fl.resourceId = :resourceId")
+    Set<FlowLogIdFlowAndType> findAllRunningFlowLogByResourceId(@Param("resourceId") Long resourceId);
 
     @Query("SELECT DISTINCT fl.flowId, fl.resourceId, fl.cloudbreakNodeId FROM FlowLog fl WHERE fl.stateStatus = 'PENDING'")
     List<Object[]> findAllPending();

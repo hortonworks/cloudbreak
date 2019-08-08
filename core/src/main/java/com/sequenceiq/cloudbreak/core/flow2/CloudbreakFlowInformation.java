@@ -59,7 +59,7 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
     }
 
     @Override
-    public Class<? extends FlowConfiguration<?>> getTerminationFlow() {
-        return StackTerminationFlowConfig.class;
+    public List<Class<? extends FlowConfiguration<?>>> getTerminationFlow() {
+        return Arrays.asList(StackTerminationFlowConfig.class, ClusterTerminationFlowConfig.class);
     }
 }

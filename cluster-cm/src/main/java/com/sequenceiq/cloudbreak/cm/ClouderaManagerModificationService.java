@@ -250,7 +250,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             ApiCommand apiCommand = clustersResourceApi.stopCommand(cluster.getName());
             PollingResult pollingResult = clouderaManagerPollingServiceProvider.stopPollingService(stack, client, apiCommand.getId());
             if (isExited(pollingResult)) {
-                throw new CancellationException("Cluster was terminated while waiting for Hadoop services to start");
+                throw new CancellationException("Cluster was terminated while waiting for Hadoop services to stop");
             } else if (isTimeout(pollingResult)) {
                 throw new CloudbreakException("Timeout while stopping Cloudera Manager services.");
             }

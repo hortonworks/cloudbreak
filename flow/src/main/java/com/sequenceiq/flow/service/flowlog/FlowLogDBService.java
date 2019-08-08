@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -20,11 +21,13 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogIdFlowAndType;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.repository.FlowLogRepository;
@@ -43,6 +46,9 @@ public class FlowLogDBService implements FlowLogService {
 
     @Inject
     private FlowChainLogService flowChainLogService;
+
+    @Inject
+    private ApplicationFlowInformation applicationFlowInformation;
 
     @Inject
     @Qualifier("JsonWriterOptions")
@@ -110,14 +116,18 @@ public class FlowLogDBService implements FlowLogService {
         flowLogRepository.updateLastLogStatusInFlow(lastFlowLog.getId(), stateStatus);
     }
 
-    public boolean isOtherFlowRunning(Long stackId) {
-        Set<String> flowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByResourceId(stackId);
-        return !flowIds.isEmpty();
+    private Set<String> findAllRunningNonTerminationFlowIdsByResourceId(Long resourceId) {
+        Set<FlowLogIdFlowAndType> allRunningFlowIdsByResourceId = flowLogRepository.findAllRunningFlowLogByResourceId(resourceId);
+        return allRunningFlowIdsByResourceId.stream()
+                .filter(flowLog -> applicationFlowInformation.getTerminationFlow().stream()
+                        .map(Class::getName)
+                        .noneMatch(terminationFlowClassName -> terminationFlowClassName.equals(flowLog.getFlowType().getName())))
+                .map(FlowLogIdFlowAndType::getFlowId)
+                .collect(Collectors.toSet());
     }
 
-    @Override
-    public boolean isOtherFlowRunningExceptFlowConfigs(Long stackId, Set<Class> exceptFlowConfigs) {
-        Set<String> flowIds = flowLogRepository.findAllRunningFlowIdsByResourceIdExceptFlowConfigs(stackId, exceptFlowConfigs);
+    public boolean isOtherFlowRunning(Long resourceId) {
+        Set<String> flowIds = findAllRunningNonTerminationFlowIdsByResourceId(resourceId);
         return !flowIds.isEmpty();
     }
 
@@ -141,8 +151,8 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public Set<String> findAllRunningNonTerminationFlowIdsByStackId(Long stackId) {
-        return flowLogRepository.findAllRunningNonTerminationFlowIdsByResourceId(stackId);
+    public Set<String> findAllRunningNonTerminationFlowIdsByStackId(Long resourceId) {
+        return findAllRunningNonTerminationFlowIdsByResourceId(resourceId);
     }
 
     @Override
