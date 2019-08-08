@@ -12,9 +12,9 @@ public class StackTagsToTagsV4ResponseConverter extends AbstractConversionServic
     @Override
     public TagsV4Response convert(StackTags source) {
         TagsV4Response response = new TagsV4Response();
-        response.setApplicationTags(source.getApplicationTags());
-        response.setDefaultTags(source.getDefaultTags());
-        response.setUserDefinedTags(source.getUserDefinedTags());
+        response.setApplication(source.getApplicationTags());
+        response.setDefaults(source.getDefaultTags());
+        response.setUserDefined(source.getUserDefinedTags());
         return response;
     }
 

@@ -11,35 +11,35 @@ import io.swagger.annotations.ApiModelProperty;
 public class TagsV4Response implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.APPLICATION_TAGS)
-    private Map<String, String> applicationTags = new HashMap<>();
+    private Map<String, String> application = new HashMap<>();
 
     @ApiModelProperty(StackModelDescription.USERDEFINED_TAGS)
-    private Map<String, String> userDefinedTags = new HashMap<>();
+    private Map<String, String> userDefined = new HashMap<>();
 
     @ApiModelProperty(StackModelDescription.DEFAULT_TAGS)
-    private Map<String, String> defaultTags = new HashMap<>();
+    private Map<String, String> defaults = new HashMap<>();
 
-    public Map<String, String> getApplicationTags() {
-        return applicationTags;
+    public Map<String, String> getApplication() {
+        return application;
     }
 
-    public void setApplicationTags(Map<String, String> applicationTags) {
-        this.applicationTags = applicationTags;
+    public void setApplication(Map<String, String> application) {
+        this.application = application;
     }
 
-    public Map<String, String> getUserDefinedTags() {
-        return userDefinedTags;
+    public Map<String, String> getUserDefined() {
+        return userDefined;
     }
 
-    public void setUserDefinedTags(Map<String, String> userDefinedTags) {
-        this.userDefinedTags = userDefinedTags;
+    public void setUserDefined(Map<String, String> userDefined) {
+        this.userDefined = userDefined;
     }
 
-    public Map<String, String> getDefaultTags() {
-        return defaultTags;
+    public Map<String, String> getDefaults() {
+        return defaults;
     }
 
-    public void setDefaultTags(Map<String, String> defaultTags) {
-        this.defaultTags = defaultTags;
+    public void setDefaults(Map<String, String> defaults) {
+        this.defaults = defaults;
     }
 }
