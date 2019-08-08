@@ -1,8 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
-
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -49,23 +46,16 @@ public class DatabaseService {
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
-    public DatabaseServerStatusV4Response create(Long sdxId, Optional<SdxCluster> sdxClusterOptional, DetailedEnvironmentResponse env, String requestId) {
-        if (sdxClusterOptional.isPresent()) {
-            LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxClusterOptional.get().getClusterName());
-            DatabaseServerStatusV4Response resp = redbeamsClient
-                    .withCrn(threadBasedUserCrnProvider.getUserCrn())
-                    .databaseServerV4Endpoint().create(getDatabaseRequest(env));
-            sdxClusterOptional.ifPresent(sdxCluster -> {
-                sdxCluster.setDatabaseCrn(resp.getResourceCrn());
-                sdxCluster.setStatus(SdxClusterStatus.EXTERNAL_DATABASE_CREATION_IN_PROGRESS);
-                sdxClusterRepository.save(sdxCluster);
-            });
-            DatabaseServerStatusV4Response waitResp = waitAndGetDatabase(sdxClusterOptional.get(), resp.getResourceCrn(),
-                    status -> status.isAvailable(), status -> Status.CREATE_FAILED.equals(status), requestId);
-            return waitResp;
-        } else {
-            throw notFound("SDX cluster", sdxId).get();
-        }
+    public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env, String requestId) {
+        LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
+        DatabaseServerStatusV4Response resp = redbeamsClient
+                .withCrn(threadBasedUserCrnProvider.getUserCrn())
+                .databaseServerV4Endpoint().create(getDatabaseRequest(env));
+            sdxCluster.setDatabaseCrn(resp.getResourceCrn());
+            sdxCluster.setStatus(SdxClusterStatus.EXTERNAL_DATABASE_CREATION_IN_PROGRESS);
+            sdxClusterRepository.save(sdxCluster);
+        return waitAndGetDatabase(sdxCluster, resp.getResourceCrn(),
+                Status::isAvailable, Status.CREATE_FAILED::equals, requestId);
     }
 
     private void saveStatus(SdxCluster cluster, SdxClusterStatus status) {
@@ -73,18 +63,18 @@ public class DatabaseService {
         sdxClusterRepository.save(cluster);
     }
 
-    public void terminate(Long sdxId, Optional<SdxCluster> sdxClusterOptional, String requestId) {
-        sdxClusterOptional.ifPresentOrElse(sdxCluster -> {
-            LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
+    public void terminate(SdxCluster sdxCluster, String requestId) {
+        LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
+        try {
             DatabaseServerTerminationOutcomeV4Response resp = redbeamsClient
                     .withCrn(threadBasedUserCrnProvider.getUserCrn())
                     .databaseServerV4Endpoint().terminate(sdxCluster.getDatabaseCrn());
-            saveStatus(sdxClusterOptional.get(), SdxClusterStatus.EXTERNAL_DATABASE_DELETION_IN_PROGRESS);
-            waitAndGetDatabase(sdxCluster, resp.getResourceCrn(), status -> Status.DELETE_COMPLETED.equals(status),
-                    status -> Status.DELETE_FAILED.equals(status), requestId);
-        }, () -> {
-            throw notFound("SDX cluster", sdxId).get();
-        });
+            saveStatus(sdxCluster, SdxClusterStatus.EXTERNAL_DATABASE_DELETION_IN_PROGRESS);
+            waitAndGetDatabase(sdxCluster, resp.getResourceCrn(), Status.DELETE_COMPLETED::equals,
+                    Status.DELETE_FAILED::equals, requestId);
+        } catch (NotFoundException notFoundException) {
+            LOGGER.info("Database server is deleted on redbeams side {}", sdxCluster.getDatabaseCrn());
+        }
     }
 
     private AllocateDatabaseServerV4Request getDatabaseRequest(DetailedEnvironmentResponse env) {
@@ -119,7 +109,7 @@ public class DatabaseService {
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn, PollingConfig pollingConfig,
             Function<Status, Boolean> exitcrit, Function<Status, Boolean> failurecrit, String requestId) {
-        DatabaseServerStatusV4Response databaseResponse = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+        return Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(false)
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> {
@@ -145,7 +135,6 @@ public class DatabaseService {
                         return AttemptResults.finishWith(null);
                     }
                 });
-        return databaseResponse;
     }
 
     private DatabaseServerStatusV4Response getDatabaseStatus(String databaseCrn) {

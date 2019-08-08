@@ -1,7 +1,8 @@
 package com.sequenceiq.datalake.flow.create.handler;
 
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -17,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
-import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.create.event.RdsWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.RdsWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
@@ -51,36 +51,37 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
     protected void doAccept(HandlerEvent event) {
         RdsWaitRequest rdsWaitRequest = event.getData();
         Long sdxId = rdsWaitRequest.getResourceId();
-        Optional<SdxCluster> sdxCluster = sdxClusterRepository.findById(sdxId);
         String userId = rdsWaitRequest.getUserId();
         String requestId = rdsWaitRequest.getRequestId();
         MDCBuilder.addRequestIdToMdcContext(requestId);
         DetailedEnvironmentResponse env = rdsWaitRequest.getDetailedEnvironmentResponse();
-        Selectable response;
         try {
-            if (sdxCluster.map(SdxCluster::getCreateDatabase).orElse(Boolean.FALSE)) {
-                validForDatabaseCreation(sdxId, env);
-                LOGGER.debug("start polling database for sdx: {}", sdxId);
-                DatabaseServerStatusV4Response db = databaseService.create(sdxId, sdxCluster, env, requestId);
-                response = new RdsWaitSuccessEvent(sdxId, userId, requestId, env, db);
-            } else {
-                LOGGER.debug("skipping creation of database for sdx: {}", sdxId);
-                response = new RdsWaitSuccessEvent(sdxId, userId, requestId, env, null);
-            }
+            sdxClusterRepository.findById(sdxId).ifPresentOrElse(sdxCluster -> {
+                if (sdxCluster.isCreateDatabase()) {
+                    validForDatabaseCreation(sdxId, env);
+                    LOGGER.debug("start polling database for sdx: {}", sdxId);
+                    DatabaseServerStatusV4Response db = databaseService.create(sdxCluster, env, requestId);
+                    sendEvent(new RdsWaitSuccessEvent(sdxId, userId, requestId, env, db), event);
+                } else {
+                    LOGGER.debug("skipping creation of database for sdx: {}", sdxId);
+                    sendEvent(new RdsWaitSuccessEvent(sdxId, userId, requestId, env, null), event);
+                }
+            }, () -> {
+                throw notFound("SDX cluster", sdxId).get();
+            });
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Database polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, userBreakException);
+            sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId, userBreakException), event);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, pollerStoppedException);
+            sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId, pollerStoppedException), event);
         } catch (PollerException exception) {
             LOGGER.info("Database polling failed for sdx: {}", sdxId, exception);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, exception);
+            sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId, exception), event);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in sdx database creation wait phase", anotherException);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, anotherException);
+            sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId, anotherException), event);
         }
-        sendEvent(response, event);
     }
 
     private void validForDatabaseCreation(Long sdxId, DetailedEnvironmentResponse env) {

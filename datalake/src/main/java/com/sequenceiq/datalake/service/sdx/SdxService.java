@@ -168,7 +168,7 @@ public class SdxService {
     }
 
     private void validateDatabaseRequest(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        if (sdxCluster.getCreateDatabase() && !"AWS".equals(environment.getCloudPlatform())) {
+        if (sdxCluster.isCreateDatabase() && !"AWS".equals(environment.getCloudPlatform())) {
             String message = String.format("Cannot create external database for sdx: %s, for now only AWS is supported", sdxCluster.getClusterName());
             LOGGER.debug(message);
             throw new BadRequestException(message);

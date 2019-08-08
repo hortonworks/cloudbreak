@@ -23,7 +23,7 @@ import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionWaitRequest;
-import com.sequenceiq.datalake.flow.delete.event.StackDeletionFailedEvent;
+import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -68,7 +68,7 @@ public class SdxDeleteActions {
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return StackDeletionFailedEvent.from(payload, ex);
+                return SdxDeletionFailedEvent.from(payload, ex);
             }
         };
     }
@@ -97,7 +97,7 @@ public class SdxDeleteActions {
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return StackDeletionFailedEvent.from(payload, ex);
+                return SdxDeletionFailedEvent.from(payload, ex);
             }
         };
     }
@@ -115,13 +115,13 @@ public class SdxDeleteActions {
             protected void doExecute(SdxContext context, StackDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 LOGGER.info("SDX delete remote database of sdx cluster: {}", payload.getResourceId());
-                //
+                notificationService.send(ResourceEvent.SDX_RDS_DELETION_STARTED, context.getUserId());
                 sendEvent(context);
             }
 
             @Override
             protected Object getFailurePayload(StackDeletionSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return StackDeletionFailedEvent.from(payload, ex);
+                return SdxDeletionFailedEvent.from(payload, ex);
             }
 
             @Override
@@ -157,15 +157,15 @@ public class SdxDeleteActions {
 
     @Bean(name = "SDX_DELETION_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractSdxAction<>(StackDeletionFailedEvent.class) {
+        return new AbstractSdxAction<>(SdxDeletionFailedEvent.class) {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    StackDeletionFailedEvent payload) {
+                    SdxDeletionFailedEvent payload) {
                 return SdxContext.from(flowParameters, payload);
             }
 
             @Override
-            protected void doExecute(SdxContext context, StackDeletionFailedEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxDeletionFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 Exception exception = payload.getException();
                 SdxClusterStatus deleteFailedStatus = SdxClusterStatus.DELETE_FAILED;
@@ -180,7 +180,7 @@ public class SdxDeleteActions {
             }
 
             @Override
-            protected Object getFailurePayload(StackDeletionFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(SdxDeletionFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return null;
             }
         };
