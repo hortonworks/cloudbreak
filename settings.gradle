@@ -50,6 +50,7 @@ include 'freeipa-api'
 include 'client-cm'
 include 'freeipa-client'
 include 'usage-collection'
+include 'cluster-proxy'
 
 rootProject.name = 'cloudbreak'
 include 'authorization'

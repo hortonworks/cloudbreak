@@ -1,14 +1,14 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
+package com.sequenceiq.cloudbreak.clusterproxy;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-class ConfigDeleteRequest {
+public class ConfigDeleteRequest {
     @JsonProperty
     private String clusterCrn;
 
     @JsonCreator
-    ConfigDeleteRequest(String clusterCrn) {
+    public ConfigDeleteRequest(String clusterCrn) {
         this.clusterCrn = clusterCrn;
     }
 

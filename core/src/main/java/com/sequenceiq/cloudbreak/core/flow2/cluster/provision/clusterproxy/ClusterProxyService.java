@@ -19,6 +19,12 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceCredential;
+import com.sequenceiq.cloudbreak.clusterproxy.ConfigDeleteRequest;
+import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
+import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
+import com.sequenceiq.cloudbreak.clusterproxy.ConfigUpdateRequest;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
