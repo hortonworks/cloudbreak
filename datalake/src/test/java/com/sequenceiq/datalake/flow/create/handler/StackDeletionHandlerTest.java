@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
-import com.sequenceiq.datalake.flow.delete.event.StackDeletionFailedEvent;
+import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionWaitRequest;
 import com.sequenceiq.datalake.flow.delete.handler.StackDeletionHandler;
@@ -89,9 +89,9 @@ class StackDeletionHandlerTest {
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
         String eventNotified = eventSelector.getValue();
         Event event = sentEvent.getValue();
-        Assertions.assertEquals("StackDeletionFailedEvent", eventNotified);
-        Assertions.assertEquals(StackDeletionFailedEvent.class, event.getData().getClass());
-        Assertions.assertEquals(id, ((StackDeletionFailedEvent) event.getData()).getResourceId());
+        Assertions.assertEquals("SdxDeletionFailedEvent", eventNotified);
+        Assertions.assertEquals(SdxDeletionFailedEvent.class, event.getData().getClass());
+        Assertions.assertEquals(id, ((SdxDeletionFailedEvent) event.getData()).getResourceId());
     }
 
     @Test
@@ -110,9 +110,9 @@ class StackDeletionHandlerTest {
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
         String eventNotified = eventSelector.getValue();
         Event event = sentEvent.getValue();
-        Assertions.assertEquals("StackDeletionFailedEvent", eventNotified);
-        Assertions.assertEquals(StackDeletionFailedEvent.class, event.getData().getClass());
-        Assertions.assertEquals(id, ((StackDeletionFailedEvent) event.getData()).getResourceId());
+        Assertions.assertEquals("SdxDeletionFailedEvent", eventNotified);
+        Assertions.assertEquals(SdxDeletionFailedEvent.class, event.getData().getClass());
+        Assertions.assertEquals(id, ((SdxDeletionFailedEvent) event.getData()).getResourceId());
     }
 
     @Test
@@ -131,8 +131,8 @@ class StackDeletionHandlerTest {
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
         String eventNotified = eventSelector.getValue();
         Event event = sentEvent.getValue();
-        Assertions.assertEquals("StackDeletionFailedEvent", eventNotified);
-        Assertions.assertEquals(StackDeletionFailedEvent.class, event.getData().getClass());
-        Assertions.assertEquals(id, ((StackDeletionFailedEvent) event.getData()).getResourceId());
+        Assertions.assertEquals("SdxDeletionFailedEvent", eventNotified);
+        Assertions.assertEquals(SdxDeletionFailedEvent.class, event.getData().getClass());
+        Assertions.assertEquals(id, ((SdxDeletionFailedEvent) event.getData()).getResourceId());
     }
 }

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.exception.BadRequestException;
+import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent;
@@ -48,7 +48,7 @@ public class RedbeamsTerminationService {
         }
         if (TERMINATION_STATES.contains(dbStack.getStatus())) {
             LOGGER.debug("DatabaseServer with crn {} is already being deleted", dbStack.getResourceCrn());
-            throw new BadRequestException(String.format("DatabaseServer with crn '%s' is already being deleted", dbStack.getResourceCrn()));
+            throw new NotFoundException(String.format("DatabaseServer with crn '%s' is already being deleted", dbStack.getResourceCrn()));
         }
 
         dbStack = dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.DELETE_REQUESTED);

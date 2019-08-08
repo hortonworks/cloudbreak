@@ -13,7 +13,7 @@ import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.datalake.flow.delete.event.StackDeletionFailedEvent;
+import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
@@ -58,13 +58,13 @@ public class StackDeletionHandler implements EventHandler<StackDeletionWaitReque
             response = new StackDeletionSuccessEvent(sdxId, userId, requestId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Deletion polling exited before timeout. Cause: ", userBreakException);
-            response = new StackDeletionFailedEvent(sdxId, userId, requestId, userBreakException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Deletion poller stopped for stack: {}", sdxId);
-            response = new StackDeletionFailedEvent(sdxId, userId, requestId, pollerStoppedException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, pollerStoppedException);
         } catch (PollerException exception) {
             LOGGER.info("Deletion polling failed for stack: {}", sdxId);
-            response = new StackDeletionFailedEvent(sdxId, userId, requestId, exception);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, exception);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

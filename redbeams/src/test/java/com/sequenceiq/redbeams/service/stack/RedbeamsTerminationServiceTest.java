@@ -24,7 +24,7 @@ import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
-import com.sequenceiq.redbeams.exception.BadRequestException;
+import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent;
 
@@ -79,7 +79,7 @@ class RedbeamsTerminationServiceTest {
         when(dbStackService.getByCrn(anyString())).thenReturn(dbStack);
 
         Assertions.assertThrows(
-                BadRequestException.class,
+                NotFoundException.class,
                 () -> underTest.terminateDatabaseServer(DATABASE_SERVER_CRN),
                 "DatabaseServer with crn '" + DATABASE_SERVER_CRN + "' is already being deleted");
 

@@ -19,6 +19,8 @@ repositories {
 
 dependencies {
   compile            group: 'org.yaml',                  name: 'snakeyaml'
+  // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
+  compile            group: 'net.bytebuddy',             name: 'byte-buddy', version: '1.9.12'
   implementation     group: 'com.google.guava',          name: 'guava'
   implementation     group: 'com.google.code.gson',      name: 'gson'
   implementation     group: 'dnsjava',                   name: 'dnsjava'

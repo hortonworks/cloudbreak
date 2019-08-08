@@ -199,6 +199,7 @@ public class SdxCreateActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
+                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, context.getUserId());
                 sdxService.updateSdxStatus(payload.getResourceId(), provisioningFailedStatus, statusReason);
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }
