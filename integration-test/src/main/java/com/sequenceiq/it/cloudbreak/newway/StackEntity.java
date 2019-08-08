@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -250,19 +251,19 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
 
     public String getInstanceId(String hostGroupName) {
         Set<InstanceMetaDataJson> metadata = getInstanceMetaData(hostGroupName);
-        return metadata
+        return Optional.ofNullable(metadata
                 .stream()
                 .findFirst()
-                .get()
-                .getInstanceId();
+                .orElse(new InstanceMetaDataJson())
+                .getInstanceId()).orElse("");
     }
 
     public Set<InstanceMetaDataJson> getInstanceMetaData(String hostGroupName) {
-        return getResponse().getInstanceGroups()
+        return Optional.ofNullable(getResponse().getInstanceGroups()
                 .stream().filter(im -> im.getGroup().equals(hostGroupName))
                 .findFirst()
-                .get()
-                .getMetadata();
+                .orElse(new InstanceGroupResponse())
+                .getMetadata()).orElse(Set.of());
     }
 
     @Override

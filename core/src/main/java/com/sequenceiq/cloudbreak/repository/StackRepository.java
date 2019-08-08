@@ -49,8 +49,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Stack findByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.terminated = null")
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData imd "
+            + "WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.terminated = null "
+            + "AND (imd.instanceStatus <> 'TERMINATED' AND imd.terminationDate = null)")
     Stack findByNameAndWorkspaceIdWithLists(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
