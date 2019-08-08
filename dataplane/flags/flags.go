@@ -101,6 +101,13 @@ var (
 			Usage: "name of resource",
 		},
 	}
+	FlCrnOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "crn",
+			Usage: "crn of the resource",
+		},
+	}
 	FlClusterToUpgrade = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -992,6 +999,13 @@ var (
 			Usage: "crn of an environment",
 		},
 	}
+	FlEnvironmentCrnOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "env-crn",
+			Usage: "crn of an environment",
+		},
+	}
 	FlEnvironmentNameOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
@@ -1287,6 +1301,20 @@ var (
 			Usage: "creates and external database server on the cloud provider",
 		},
 	}
+	FlDatabaseServerCreationFile = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "database-server-creation-file",
+			Usage: "location of the JSON file for database server creation",
+		},
+	}
+	FlDatabaseServerRegistrationFile = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "database-server-registration-file",
+			Usage: "location of the JSON file for database server registration",
+		},
+	}
 )
 
 type RequiredFlag struct {
@@ -1451,6 +1479,13 @@ func (fb *FlagBuilder) AddResourceDefaultFlags() *FlagBuilder {
 
 func (fb *FlagBuilder) AddResourceFlagsWithOptionalName() *FlagBuilder {
 	for _, f := range []cli.Flag{FlNameOptional, FlDescriptionOptional} {
+		fb.flags = append(fb.flags, f)
+	}
+	return fb
+}
+
+func (fb *FlagBuilder) AddResourceAddressingFlags() *FlagBuilder {
+	for _, f := range []cli.Flag{FlCrnOptional, FlNameOptional, FlEnvironmentCrnOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb

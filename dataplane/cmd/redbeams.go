@@ -34,49 +34,51 @@ func init() {
 						},
 					},
 					{
-						Name:   "describe",
-						Usage:  "describe a database server, getting it by CRN",
-						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Name:        "describe",
+						Usage:       "describe a database server",
+						Description: "To specify a database server, either provide its CRN, or both its environment CRN and name.",
+						Before: func(c *cli.Context) error {
+							err := cf.CheckConfigAndCommandFlagsWithoutWorkspace(c)
+							if err != nil {
+								return err
+							}
+							return cf.CheckResourceAddressingFlags(c)
+						},
+						Flags:  fl.NewFlagBuilder().AddResourceAddressingFlags().AddAuthenticationFlags().AddOutputFlag().Build(),
 						Action: redbeams.GetDatabaseServer,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().AddOutputFlag().Build() {
+							for _, f := range fl.NewFlagBuilder().AddResourceAddressingFlags().AddAuthenticationFlags().AddOutputFlag().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
 					},
 					{
-						Name:   "describe-by-name",
-						Usage:  "describe a database server, getting it by name",
-						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
-						Action: redbeams.GetDatabaseServerByName,
-						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
-								fl.PrintFlagCompletion(f)
+						Name:        "get-status",
+						Usage:       "get the status of a database server (stack)",
+						Description: "To specify a database server, either provide its CRN, or both its environment CRN and name.",
+						Before: func(c *cli.Context) error {
+							err := cf.CheckConfigAndCommandFlagsWithoutWorkspace(c)
+							if err != nil {
+								return err
 							}
+							return cf.CheckResourceAddressingFlags(c)
 						},
-					},
-					{
-						Name:   "get-status",
-						Usage:  "get the status of a database server by CRN",
-						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Flags:  fl.NewFlagBuilder().AddResourceAddressingFlags().AddAuthenticationFlags().AddOutputFlag().Build(),
 						Action: redbeams.GetDatabaseServerStatus,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().AddOutputFlag().Build() {
+							for _, f := range fl.NewFlagBuilder().AddResourceAddressingFlags().AddAuthenticationFlags().AddOutputFlag().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
 					},
 					{
-						Name:   "get-status-by-name",
-						Usage:  "get the status of a database server by name",
+						Name:   "create",
+						Usage:  "create a managed database server",
 						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
-						Action: redbeams.GetDatabaseServerStatusByName,
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlDatabaseServerCreationFile).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Action: redbeams.CreateManagedDatabaseServer,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlDatabaseServerCreationFile).AddAuthenticationFlags().AddOutputFlag().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -89,6 +91,18 @@ func init() {
 						Action: redbeams.TerminateManagedDatabaseServer,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().AddOutputFlag().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "register",
+						Usage:  "register a database server",
+						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlDatabaseServerRegistrationFile).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Action: redbeams.RegisterDatabaseServer,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlDatabaseServerRegistrationFile).AddAuthenticationFlags().AddOutputFlag().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},

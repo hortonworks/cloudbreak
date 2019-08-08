@@ -235,3 +235,19 @@ func readConfigToList(configPath string, configList *ConfigList) error {
 	}
 	return nil
 }
+
+func CheckResourceAddressingFlags(c *cli.Context) error {
+	crnPresent := len(c.String(fl.FlCrnOptional.GetName())) != 0
+	envCrnPresent := len(c.String(fl.FlEnvironmentCrnOptional.GetName())) != 0
+	namePresent := len(c.String(fl.FlName.GetName())) != 0
+
+	if crnPresent && !envCrnPresent && !namePresent {
+		return nil
+	}
+
+	if !crnPresent && envCrnPresent && namePresent {
+		return nil
+	}
+
+	return errors.New("Invalid resource addressing: either supply a resource CRN, or an environment CRN and resource name")
+}
