@@ -188,6 +188,7 @@ public class SdxService {
                 LoggingRequest loggingRequest = new LoggingRequest();
                 loggingRequest.setS3(environment.getTelemetry().getLogging().getS3());
                 loggingRequest.setWasb(environment.getTelemetry().getLogging().getWasb());
+                loggingRequest.setStorageLocation(environment.getTelemetry().getLogging().getStorageLocation());
                 telemetryRequest.setLogging(loggingRequest);
                 telemetryRequest.setReportDeploymentLogs(
                         environment.getTelemetry().getReportDeploymentLogs());
