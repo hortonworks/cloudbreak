@@ -35,7 +35,23 @@ public class HdfsConfigProviderTest {
 
     @Test
     public void testGetHdfsServiceConfigsWithoutS3Guard() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(false, false);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(false, false, false);
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+
+        assertEquals(1, serviceConfigs.size());
+        assertEquals("core_site_safety_valve", serviceConfigs.get(0).getName());
+        assertEquals("<property><name>hadoop.http.filter.initializers</name>"
+                +  "<value>org.apache.hadoop.security.HttpCrossOriginFilterInitializer,"
+                +  "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer"
+                +  "</value></property>", serviceConfigs.get(0).getValue());
+    }
+
+    @Test
+    public void testGetHdfsServiceConfigsWithS3FileSystemNoDynamoTable() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false, false);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -51,7 +67,7 @@ public class HdfsConfigProviderTest {
 
     @Test
     public void testGetHdfsServiceConfigsWithS3GuardWithoutAuthoriative() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, false);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -69,7 +85,7 @@ public class HdfsConfigProviderTest {
 
     @Test
     public void testGetHdfsServiceConfigsWithS3GuardWithAuthoriativeWarehousePath() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, true);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -86,7 +102,7 @@ public class HdfsConfigProviderTest {
                 + "<property><name>fs.s3a.authoritative.path</name><value>s3a://bucket/warehouse/managed</value></property>", serviceConfigs.get(0).getValue());
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(boolean useS3FileSystem, boolean includeLocations) {
+    private TemplatePreparationObject getTemplatePreparationObject(boolean useS3FileSystem, boolean fillDynamoTableName, boolean includeLocations) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
@@ -100,7 +116,9 @@ public class HdfsConfigProviderTest {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView;
         if (useS3FileSystem) {
             S3FileSystem s3FileSystem = new S3FileSystem();
-            s3FileSystem.setS3GuardDynamoTableName("dynamoTable");
+            if (fillDynamoTableName) {
+                s3FileSystem.setS3GuardDynamoTableName("dynamoTable");
+            }
             fileSystemConfigurationsView =
                     new S3FileSystemConfigurationsView(s3FileSystem, locations, false);
         } else {
