@@ -2,7 +2,7 @@
 
   "cluster-env": {
     "properties": {
-      "metrics_collector_external_hosts": "ambarifqdn"
+      "metrics_collector_external_hosts": "clustermanagerfqdn"
     }
   }
 

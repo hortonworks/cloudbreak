@@ -37,9 +37,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s from Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.cluster.ambariIp= :ambariIp AND s.terminated = null "
+            + "WHERE s.cluster.clusterManagerIp= :clusterManagerIp AND s.terminated = null "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    Optional<Stack> findByAmbari(@Param("ambariIp") String ambariIp);
+    Optional<Stack> findByAmbari(@Param("clusterManagerIp") String clusterManagerIp);
 
     @CheckPermissionsByWorkspaceId(action = READ)
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
@@ -190,7 +190,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "WHERE instanceGroupType = 'GATEWAY' "
             + "AND instanceMetadataType = 'GATEWAY_PRIMARY' "
             + "AND s.terminated = null "
-            + "AND c.ambariIp IS NOT NULL "
+            + "AND c.clusterManagerIp IS NOT NULL "
             + "AND c.status = 'AVAILABLE' "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<AutoscaleStack> findAliveOnesWithAmbari();

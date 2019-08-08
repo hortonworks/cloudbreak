@@ -419,11 +419,11 @@ public class TestUtil {
 
     public static Cluster cluster(Blueprint blueprint, Stack stack, Long id) {
         Cluster cluster = new Cluster();
-        cluster.setAmbariIp("50.51.52.100");
+        cluster.setClusterManagerIp("50.51.52.100");
         cluster.setStack(stack);
         cluster.setId(id);
         cluster.setName("dummyCluster");
-        cluster.setAmbariIp("10.0.0.1");
+        cluster.setClusterManagerIp("10.0.0.1");
         cluster.setBlueprint(blueprint);
         cluster.setUpSince(new Date().getTime());
         cluster.setStatus(AVAILABLE);

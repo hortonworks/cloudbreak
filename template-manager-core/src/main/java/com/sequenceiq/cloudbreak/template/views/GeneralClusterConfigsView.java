@@ -24,7 +24,7 @@ public class GeneralClusterConfigsView {
 
     private ExecutorType executorType;
 
-    private String ambariIp;
+    private String clusterManagerIp;
 
     private OrchestratorType orchestratorType;
 
@@ -46,7 +46,7 @@ public class GeneralClusterConfigsView {
         userName = generalClusterConfigs.getUserName();
         password = generalClusterConfigs.getPassword();
         executorType = generalClusterConfigs.getExecutorType();
-        ambariIp = generalClusterConfigs.getAmbariIp();
+        clusterManagerIp = generalClusterConfigs.getClusterManagerIp();
         orchestratorType = generalClusterConfigs.getOrchestratorType();
         nodeCount = generalClusterConfigs.getNodeCount();
         containerExecutor = ExecutorType.CONTAINER.equals(generalClusterConfigs.getExecutorType());
@@ -94,8 +94,8 @@ public class GeneralClusterConfigsView {
         this.executorType = executorType;
     }
 
-    public void setAmbariIp(String ambariIp) {
-        this.ambariIp = ambariIp;
+    public void setClusterManagerIp(String clusterManagerIp) {
+        this.clusterManagerIp = clusterManagerIp;
     }
 
     public void setPrimaryGatewayInstanceDiscoveryFQDN(String primaryGatewayInstanceDiscoveryFQDN) {
@@ -134,8 +134,8 @@ public class GeneralClusterConfigsView {
         return executorType;
     }
 
-    public String getAmbariIp() {
-        return ambariIp;
+    public String getClusterManagerIp() {
+        return clusterManagerIp;
     }
 
     public String getPrimaryGatewayInstanceDiscoveryFQDN() {

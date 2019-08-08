@@ -34,7 +34,7 @@ public class AmbariClientFactoryTest {
     @Test
     public void testGetDefaultAmbariClientWhenEverythingWorksFine() {
         Stack stack = TestUtil.stack();
-        HttpClientConfig httpClientConfig = new HttpClientConfig(stack.getAmbariIp());
+        HttpClientConfig httpClientConfig = new HttpClientConfig(stack.getClusterManagerIp());
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 
         when(ambariClientProvider.getDefaultAmbariClient(httpClientConfig, stack.getGatewayPort())).thenReturn(ambariClient);
@@ -51,7 +51,7 @@ public class AmbariClientFactoryTest {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
-        HttpClientConfig httpClientConfig = new HttpClientConfig(stack.getAmbariIp());
+        HttpClientConfig httpClientConfig = new HttpClientConfig(stack.getClusterManagerIp());
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 
         when(ambariClientProvider.getAmbariClient(httpClientConfig, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
@@ -70,7 +70,7 @@ public class AmbariClientFactoryTest {
         stack.setCluster(cluster);
         String userName = "userName";
         String password = "password";
-        HttpClientConfig httpClientConfig = new HttpClientConfig(stack.getAmbariIp());
+        HttpClientConfig httpClientConfig = new HttpClientConfig(stack.getClusterManagerIp());
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 
         when(ambariClientProvider.getAmbariClient(httpClientConfig, stack.getGatewayPort(), userName, password)).thenReturn(ambariClient);

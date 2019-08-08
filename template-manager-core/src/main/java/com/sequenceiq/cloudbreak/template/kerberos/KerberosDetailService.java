@@ -59,11 +59,11 @@ public class KerberosDetailService {
         return Strings.isNullOrEmpty(kerberosConfig.getContainerDn()) ? null : kerberosConfig.getContainerDn();
     }
 
-    public boolean isAmbariManagedKerberosPackages(@Nonnull KerberosConfig kerberosConfig) throws IOException {
+    public boolean areClusterManagerManagedKerberosPackages(@Nonnull KerberosConfig kerberosConfig) throws IOException {
         return getBooleanConfigValue(kerberosConfig.getDescriptor(), new String[] { "kerberos-env", "properties", "install_packages" }, true);
     }
 
-    public boolean isAmbariManagedKrb5Conf(@Nonnull KerberosConfig kerberosConfig) throws IOException {
+    public boolean isClusterManagerManagedKrb5Config(@Nonnull KerberosConfig kerberosConfig) throws IOException {
         return getBooleanConfigValue(kerberosConfig.getKrb5Conf(), new String[] { "krb5-conf", "properties", "manage_krb5_conf" }, false);
     }
 

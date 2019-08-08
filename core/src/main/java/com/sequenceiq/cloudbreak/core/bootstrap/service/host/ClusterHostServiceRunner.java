@@ -283,8 +283,8 @@ public class ClusterHostServiceRunner {
 
     private boolean isKerberosNeeded(KerberosConfig kerberosConfig) throws IOException {
         return kerberosConfig != null
-                && kerberosDetailService.isAmbariManagedKerberosPackages(kerberosConfig)
-                && !kerberosDetailService.isAmbariManagedKrb5Conf(kerberosConfig);
+                && kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)
+                && !kerberosDetailService.isClusterManagerManagedKrb5Config(kerberosConfig);
     }
 
     private void addClouderaManagerConfig(Stack stack, Cluster cluster, Map<String, SaltPillarProperties> servicePillar)

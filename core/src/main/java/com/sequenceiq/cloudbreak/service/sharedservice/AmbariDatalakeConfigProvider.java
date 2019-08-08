@@ -104,9 +104,9 @@ public class AmbariDatalakeConfigProvider {
 
     public DatalakeResources collectDatalakeResources(Stack datalakeStack, Cluster cluster, DatalakeConfigApi connector,
             Map<String, Map<String, String>> serviceSecretParamMap) throws JsonProcessingException {
-        String ambariIp = datalakeStack.getAmbariIp();
+        String ambariIp = datalakeStack.getClusterManagerIp();
         String ambariFqdn = datalakeStack.getGatewayInstanceMetadata().isEmpty()
-                ? datalakeStack.getAmbariIp() : datalakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN();
+                ? datalakeStack.getClusterManagerIp() : datalakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN();
         Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
         return collectDatalakeResources(datalakeStack.getName(), ambariFqdn, ambariIp, ambariFqdn, connector, serviceSecretParamMap, rdsConfigs);
     }
@@ -155,8 +155,8 @@ public class AmbariDatalakeConfigProvider {
                 .get(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY));
         sharedServiceConfigsView.setAttachedCluster(true);
         sharedServiceConfigsView.setDatalakeCluster(false);
-        sharedServiceConfigsView.setDatalakeAmbariIp(datalakeResources.getDatalakeAmbariIp());
-        sharedServiceConfigsView.setDatalakeAmbariFqdn(datalakeResources.getDatalakeAmbariFqdn());
+        sharedServiceConfigsView.setDatalakeClusterManagerIp(datalakeResources.getDatalakeAmbariIp());
+        sharedServiceConfigsView.setDatalakeClusterManagerFqdn(datalakeResources.getDatalakeAmbariFqdn());
         sharedServiceConfigsView.setDatalakeComponents(datalakeResources.getDatalakeComponentSet());
         sharedServiceConfigsView.setRangerAdminPort((String) datalakeResources.getServiceDescriptorMap().get(ServiceDescriptorDefinitionProvider.RANGER_SERVICE)
                 .getBlueprintParams().getMap().getOrDefault(ServiceDescriptorDefinitionProvider.RANGER_HTTPPORT_KEY, DEFAULT_RANGER_PORT));

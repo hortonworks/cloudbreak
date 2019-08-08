@@ -25,7 +25,7 @@ public class GeneralClusterConfigs {
 
     private ExecutorType executorType;
 
-    private String ambariIp;
+    private String clusterManagerIp;
 
     private OrchestratorType orchestratorType = OrchestratorType.HOST;
 
@@ -77,8 +77,8 @@ public class GeneralClusterConfigs {
         this.executorType = executorType;
     }
 
-    public void setAmbariIp(String ambariIp) {
-        this.ambariIp = ambariIp;
+    public void setClusterManagerIp(String clusterManagerIp) {
+        this.clusterManagerIp = clusterManagerIp;
     }
 
     public void setPrimaryGatewayInstanceDiscoveryFQDN(Optional<String> primaryGatewayInstanceDiscoveryFQDN) {
@@ -117,8 +117,8 @@ public class GeneralClusterConfigs {
         return executorType;
     }
 
-    public String getAmbariIp() {
-        return ambariIp;
+    public String getClusterManagerIp() {
+        return clusterManagerIp;
     }
 
     public Optional<String> getPrimaryGatewayInstanceDiscoveryFQDN() {

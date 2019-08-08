@@ -498,8 +498,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         this.network = network;
     }
 
-    public String getAmbariIp() {
-        return cluster == null ? null : cluster.getAmbariIp();
+    public String getClusterManagerIp() {
+        return cluster == null ? null : cluster.getClusterManagerIp();
     }
 
     public boolean isAvailable() {

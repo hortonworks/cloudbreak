@@ -81,7 +81,7 @@ public class ChangePrimaryGatewayService {
                 String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(updatedStack);
 
                 Cluster cluster = updatedStack.getCluster();
-                cluster.setAmbariIp(gatewayIp);
+                cluster.setClusterManagerIp(gatewayIp);
                 clusterService.save(cluster);
                 return null;
             });

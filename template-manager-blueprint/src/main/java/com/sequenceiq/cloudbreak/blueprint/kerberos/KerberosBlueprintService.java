@@ -48,7 +48,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
                 blueprintProcessor.replaceConfiguration("krb5-conf", kerberosConfig.getKrb5Conf());
             }
         } else {
-            extendBlueprintWithKerberos(blueprintProcessor, kerberosConfig, source.getGeneralClusterConfigs().getAmbariIp(), REALM, DOMAIN, null);
+            extendBlueprintWithKerberos(blueprintProcessor, kerberosConfig, source.getGeneralClusterConfigs().getClusterManagerIp(), REALM, DOMAIN, null);
         }
         return blueprintProcessor;
     }

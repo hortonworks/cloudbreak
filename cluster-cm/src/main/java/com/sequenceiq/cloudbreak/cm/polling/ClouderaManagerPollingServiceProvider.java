@@ -85,67 +85,67 @@ public class ClouderaManagerPollingServiceProvider {
     private ClouderaManagerRestartServicesListenerTask restartServicesListenerTask;
 
     public PollingResult clouderaManagerStartupPollerObjectPollingService(Stack stack, ApiClient apiClient) {
-        LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getClusterManagerIp());
         return pollCMWithListener(stack, apiClient, clouderaManagerStartupListenerTask);
     }
 
     public PollingResult hostsPollingService(Stack stack, ApiClient apiClient) {
-        LOGGER.debug("Waiting for Cloudera Manager hosts to connect. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager hosts to connect. [Server address: {}]", stack.getClusterManagerIp());
         return pollCMWithListener(stack, apiClient, clouderaManagerHostStatusChecker);
     }
 
     public PollingResult templateInstallCheckerService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager to install template. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager to install template. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, clouderaManagerTemplateInstallChecker);
     }
 
     public PollingResult parcelRepoRefreshCheckerService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager to refresh parcel repo. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager to refresh parcel repo. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, clouderaManagerParcelRepoChecker);
     }
 
     public PollingResult stopPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager services to stop. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager services to stop. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, clouderaManagerStopListenerTask);
     }
 
     public PollingResult startPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager services to start. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager services to start. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, clouderaManagerServiceStartListenerTask);
     }
 
     public PollingResult kerberosConfigurePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager to configure kerberos. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager to configure kerberos. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, kerberosConfigureListenerTask);
     }
 
     public PollingResult deployClientConfigPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager to deploy client configuratuions. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager to deploy client configuratuions. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, deployClientConfigListenerTask);
     }
 
     public PollingResult applyHostTemplatePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager to apply host template. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager to apply host template. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, applyHostTemplateListenerTask);
     }
 
     public PollingResult decommissionHostPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager to decommission host. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager to decommission host. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, INFINITE_ATTEMPT, decommissionHostListenerTask);
     }
 
     public PollingResult startManagementServicePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager to start management service. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager to start management service. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, startManagementServiceListenerTask);
     }
 
     public PollingResult stopManagementServicePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager to stop management service. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager to stop management service. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, stopManagementServiceListenerTask);
     }
 
     public PollingResult restartServicesPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("Waiting for Cloudera Manager to restart services. [Server address: {}]", stack.getAmbariIp());
+        LOGGER.debug("Waiting for Cloudera Manager to restart services. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, restartServicesListenerTask);
     }
 

@@ -737,7 +737,7 @@ public class HandlebarTemplateTest {
 
     private static Object sSConfigWhenAttachedWLThenShouldReturnWithAttachedWLConfig() {
         SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
-        sharedServiceConfigsView.setDatalakeAmbariFqdn("ambarifqdn");
+        sharedServiceConfigsView.setDatalakeClusterManagerFqdn("clustermanagerfqdn");
 
         return new TemplateModelContextBuilder()
                 .withSharedServiceConfigs(sharedServiceConfigsView)
@@ -757,7 +757,7 @@ public class HandlebarTemplateTest {
         fixInputs.put("ranger.audit.solr.zookeepers", "10.1.1.1:2181/infra-solr");
 
         SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
-        sharedServiceConfigsView.setDatalakeAmbariIp("10.1.1.1");
+        sharedServiceConfigsView.setDatalakeClusterManagerIp("10.1.1.1");
 
         Set<String> objects = new HashSet<>();
         objects.add("KAFKA_BROKER");
@@ -930,7 +930,7 @@ public class HandlebarTemplateTest {
     private static Object logfeederConfigAttachedWlWithCloudStorageWithSolr() {
         SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
         sharedServiceConfigsView.setDatalakeComponents(Set.of("INFRA_SOLR"));
-        sharedServiceConfigsView.setDatalakeAmbariFqdn("dl-ambari-host.example.com");
+        sharedServiceConfigsView.setDatalakeClusterManagerFqdn("dl-ambari-host.example.com");
 
         return new TemplateModelContextBuilder()
                 .withSharedServiceConfigs(sharedServiceConfigsView)
@@ -941,7 +941,7 @@ public class HandlebarTemplateTest {
     private static Object logfeederConfigAttachedWlWithCloudStorageWithSolrKrb() {
         SharedServiceConfigsView sharedServiceConfigsView = attachedClusterSharedServiceConfig().get();
         sharedServiceConfigsView.setDatalakeComponents(Set.of("INFRA_SOLR"));
-        sharedServiceConfigsView.setDatalakeAmbariFqdn("dl-ambari-host.example.com");
+        sharedServiceConfigsView.setDatalakeClusterManagerFqdn("dl-ambari-host.example.com");
 
         return new TemplateModelContextBuilder()
                 .withSharedServiceConfigs(sharedServiceConfigsView)

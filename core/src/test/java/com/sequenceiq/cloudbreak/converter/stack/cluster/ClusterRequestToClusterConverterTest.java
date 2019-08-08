@@ -73,7 +73,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // WHEN
         Cluster result = underTest.convert(request);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
                 "fileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
                 "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn"));
     }
@@ -92,7 +92,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // WHEN
         Cluster result = underTest.convert(request);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
                 "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "extendedBlueprintText",
                 "environmentCrn", "variant", "description", "databaseServerCrn"));
     }
@@ -107,7 +107,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         ClusterV4Request clusterRequest = getRequest("cluster-no-gateway.json");
         Cluster result = underTest.convert(clusterRequest);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
                 "fileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
                 "extendedBlueprintText", "gateway", "environmentCrn", "variant", "description", "databaseServerCrn"));
         assertNull(result.getGateway());

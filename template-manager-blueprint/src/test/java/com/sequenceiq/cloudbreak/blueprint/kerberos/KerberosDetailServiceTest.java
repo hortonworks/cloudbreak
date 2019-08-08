@@ -85,35 +85,35 @@ public class KerberosDetailServiceTest {
 
     @Test
     public void testAmbariManagedKerberosMissing() throws IOException {
-        Assert.assertTrue(underTest.isAmbariManagedKerberosPackages(configBuilder.build()));
+        Assert.assertTrue(underTest.areClusterManagerManagedKerberosPackages(configBuilder.build()));
     }
 
     @Test
     public void testAmbariManagedKerberosTrue() throws IOException {
         configBuilder.withDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":true}}}");
-        Assert.assertTrue(underTest.isAmbariManagedKerberosPackages(configBuilder.build()));
+        Assert.assertTrue(underTest.areClusterManagerManagedKerberosPackages(configBuilder.build()));
     }
 
     @Test
     public void testAmbariManagedKerberosFalse() throws IOException {
         configBuilder.withDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":false}}}");
-        Assert.assertFalse(underTest.isAmbariManagedKerberosPackages(configBuilder.build()));
+        Assert.assertFalse(underTest.areClusterManagerManagedKerberosPackages(configBuilder.build()));
     }
 
     public void testAmbariManagedKrb5ConfMissing() throws IOException {
-        Assert.assertFalse(underTest.isAmbariManagedKrb5Conf(configBuilder.build()));
+        Assert.assertFalse(underTest.isClusterManagerManagedKrb5Config(configBuilder.build()));
     }
 
     @Test
     public void testAmbariManagedKrb5ConfTrue() throws IOException {
         configBuilder.withKrb5Conf("{\"krb5-conf\":{\"properties\":{\"manage_krb5_conf\":true}}}");
-        Assert.assertTrue(underTest.isAmbariManagedKrb5Conf(configBuilder.build()));
+        Assert.assertTrue(underTest.isClusterManagerManagedKrb5Config(configBuilder.build()));
     }
 
     @Test
     public void testAmbariManagedKrb5ConfFalse() throws IOException {
         configBuilder.withKrb5Conf("{\"krb5-conf\":{\"properties\":{\"manage_krb5_conf\":false}}}");
-        Assert.assertFalse(underTest.isAmbariManagedKrb5Conf(configBuilder.build()));
+        Assert.assertFalse(underTest.isClusterManagerManagedKrb5Config(configBuilder.build()));
     }
 
     @Test

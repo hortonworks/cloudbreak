@@ -39,7 +39,7 @@ public class GeneralClusterConfigsProvider {
             instanceMetadataPresented = true;
         }
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setAmbariIp(cluster.getAmbariIp());
+        generalClusterConfigs.setClusterManagerIp(cluster.getClusterManagerIp());
         generalClusterConfigs.setInstanceGroupsPresented(instanceMetadataPresented);
         generalClusterConfigs.setGatewayInstanceMetadataPresented(gatewayInstanceMetadataPresented);
         generalClusterConfigs.setClusterName(cluster.getName());
@@ -67,7 +67,7 @@ public class GeneralClusterConfigsProvider {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setIdentityUserEmail(email);
 
-        generalClusterConfigs.setAmbariIp(PENDING_DEFAULT_VALUE);
+        generalClusterConfigs.setClusterManagerIp(PENDING_DEFAULT_VALUE);
         generalClusterConfigs.setInstanceGroupsPresented(false);
         generalClusterConfigs.setPassword(stack.getCluster().getPassword());
         if (stack.getCluster().getGateway() != null) {
