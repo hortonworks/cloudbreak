@@ -8,6 +8,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
@@ -15,13 +17,17 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 @Component
 public class FlowRegister {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowRegister.class);
+
     @Inject
     private MetricService metricService;
 
     private final Map<String, Pair<Flow, String>> runningFlows = new ConcurrentHashMap<>();
 
     public void put(Flow flow, String chainFlowId) {
+        LOGGER.info("Put flow {} to running flows", flow.getFlowId());
         runningFlows.put(flow.getFlowId(), new ImmutablePair<>(flow, chainFlowId));
+        LOGGER.info("Running flows after put: {}", runningFlows.keySet());
         metricService.submit(FlowMetricType.ACTIVE_FLOWS, runningFlows.size());
     }
 
@@ -36,8 +42,10 @@ public class FlowRegister {
     }
 
     public Flow remove(String flowId) {
+        LOGGER.info("Remove flow {} from running flows", flowId);
         Pair<Flow, String> pair = runningFlows.remove(flowId);
         metricService.submit(FlowMetricType.ACTIVE_FLOWS, runningFlows.size());
+        LOGGER.info("Running flows after removal: {}", runningFlows.keySet());
         return pair == null ? null : pair.getLeft();
     }
 
