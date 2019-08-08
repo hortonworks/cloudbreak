@@ -1,9 +1,9 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
+package com.sequenceiq.cloudbreak.clusterproxy;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-class ClusterServiceCredential {
+public class ClusterServiceCredential {
     @JsonProperty
     private String username;
 
@@ -14,12 +14,12 @@ class ClusterServiceCredential {
     private boolean isDefault;
 
     @JsonCreator
-    ClusterServiceCredential(String username, String credentialRef) {
+    public ClusterServiceCredential(String username, String credentialRef) {
         this(username, credentialRef, false);
     }
 
     @JsonCreator
-    ClusterServiceCredential(String username, String credentialRef, boolean isDefault) {
+    public ClusterServiceCredential(String username, String credentialRef, boolean isDefault) {
         this.username = username;
         this.credentialRef = credentialRef;
         this.isDefault = isDefault;

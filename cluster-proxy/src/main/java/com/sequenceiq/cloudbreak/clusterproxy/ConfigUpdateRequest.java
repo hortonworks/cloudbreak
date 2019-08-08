@@ -1,9 +1,9 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
+package com.sequenceiq.cloudbreak.clusterproxy;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-class ConfigUpdateRequest {
+public class ConfigUpdateRequest {
     @JsonProperty
     private String clusterCrn;
 
@@ -11,7 +11,7 @@ class ConfigUpdateRequest {
     private String uriOfKnox;
 
     @JsonCreator
-    ConfigUpdateRequest(String clusterCrn, String uriOfKnox) {
+    public ConfigUpdateRequest(String clusterCrn, String uriOfKnox) {
         this.clusterCrn = clusterCrn;
         this.uriOfKnox = uriOfKnox;
     }

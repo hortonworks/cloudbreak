@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
+package com.sequenceiq.cloudbreak.clusterproxy;
 
 public class ConfigRegistrationResponse {
     private String result;

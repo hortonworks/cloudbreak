@@ -1,0 +1,42 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = "$repoUrl" }
+    maven { url 'http://repo.spring.io/libs-release' }
+    jcenter()
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+  }
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+dependencyManagement {
+  dependencies {
+    dependencySet(group: 'org.springframework.boot', version: springBootVersion) {
+      entry('spring-boot-starter-web') {
+        exclude group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+      }
+    }
+
+    dependencySet(group: 'org.junit.jupiter', version: '5.2.0') {
+      entry 'junit-jupiter-api'
+      entry 'junit-jupiter-engine'
+      entry 'junit-jupiter-params'
+    }
+    dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonDatabindVersion
+  }
+}
+
+dependencies {
+  compile project(':secret-engine')
+  compile group: 'org.springframework.boot',           name: 'spring-boot-starter-web'
+
+  testCompile group: 'org.mockito',                     name: 'mockito-core', version: mockitoVersion
+}
+
+checkstyle {
+  checkstyleMain.exclude '**/generated/**'
+}

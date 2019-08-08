@@ -233,6 +233,7 @@ dependencies {
   compile project(':datalake-api')
   compile project(':usage-collection')
   compile project(':cluster-dns-connector')
+  compile project(':cluster-proxy')
 
   runtime project(':orchestrator-salt')
   runtime project(':orchestrator-yarn')
