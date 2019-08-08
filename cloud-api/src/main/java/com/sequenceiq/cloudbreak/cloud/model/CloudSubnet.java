@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-public class CloudSubnet {
+import java.io.Serializable;
+
+public class CloudSubnet implements Serializable {
 
     private String id;
 
