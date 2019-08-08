@@ -15,12 +15,12 @@
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 100,
+            "size": 250,
             "type": "StandardSSD_LRS"
           }
         ],
         "rootVolume": {
-          "size": 50
+          "size": 30
         }
       },
       "nodeCount": 2,
@@ -46,12 +46,12 @@
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 100,
+            "size": 250,
             "type": "StandardSSD_LRS"
           }
         ],
         "rootVolume": {
-          "size": 50
+          "size": 30
         }
       },
       "nodeCount": 2,
@@ -82,7 +82,7 @@
           }
         ],
         "rootVolume": {
-          "size": 50
+          "size": 30
         }
       },
       "nodeCount": 1,
@@ -134,7 +134,7 @@
           }
         ],
         "rootVolume": {
-          "size": 50
+          "size": 30
         }
       },
       "nodeCount": 2,
