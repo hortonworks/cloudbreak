@@ -172,7 +172,7 @@ public class ServiceEndpointCollector {
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology) {
         if (gatewayTopology.getExposedServices() != null && gatewayTopology.getExposedServices().getValue() != null) {
             try {
-                return gatewayTopology.getExposedServices().get(ExposedServices.class).getServices().stream();
+                return gatewayTopology.getExposedServices().get(ExposedServices.class).getFullServiceList().stream();
             } catch (IOException e) {
                 LOGGER.debug("Failed to get exposed services from Json.", e);
             }

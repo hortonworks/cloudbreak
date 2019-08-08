@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -7,13 +8,12 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @Component
 public class GatewayTopologyV4RequestToExposedServicesConverter extends AbstractConversionServiceAwareConverter<GatewayTopologyV4Request, ExposedServices> {
@@ -30,11 +30,7 @@ public class GatewayTopologyV4RequestToExposedServicesConverter extends Abstract
             if (validationResult.hasError()) {
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }
-            if (exposedServiceList.contains(ExposedService.ALL.name())) {
-                exposedServices.setServices(ExposedService.getAllKnoxExposed());
-            } else {
-                exposedServices.setServices(exposedServiceList);
-            }
+            exposedServices.setServices(new ArrayList<>(exposedServiceList));
         }
         return exposedServices;
     }

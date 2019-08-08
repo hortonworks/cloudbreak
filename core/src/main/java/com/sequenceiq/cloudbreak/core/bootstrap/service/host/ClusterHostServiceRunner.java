@@ -554,7 +554,7 @@ public class ClusterHostServiceRunner {
         topology.put("name", gt.getTopologyName());
         Json exposedJson = gt.getExposedServices();
         if (exposedJson != null && StringUtils.isNotEmpty(exposedJson.getValue())) {
-            List<String> exposedServices = exposedJson.get(ExposedServices.class).getServices();
+            List<String> exposedServices = exposedJson.get(ExposedServices.class).getFullServiceList();
             topology.put("exposed", exposedServices);
         } else {
             topology.put("exposed", new ArrayList<>());
