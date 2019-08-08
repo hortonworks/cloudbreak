@@ -12,6 +12,7 @@ jar {
 }
 
 dependencies {
+  compile project(':authorization-common-api')
   compile project(':cloud-api')
   compile project(':auth-connector')
   compile project(':common')
