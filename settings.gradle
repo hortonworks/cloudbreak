@@ -50,12 +50,12 @@ include 'freeipa-api'
 include 'client-cm'
 include 'freeipa-client'
 include 'usage-collection'
-
-rootProject.name = 'cloudbreak'
 include 'authorization'
 include 'workspace-authorization-api'
 include 'authorization-common'
 include 'idbmms-connector'
 include 'authorization-common-api'
 include 'cluster-dns-connector'
+
+rootProject.name = 'cloudbreak'
 

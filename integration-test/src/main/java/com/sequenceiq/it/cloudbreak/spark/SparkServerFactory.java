@@ -22,7 +22,7 @@ public class SparkServerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SparkServerFactory.class);
 
-    private static final AtomicInteger NEXT_PORT = new AtomicInteger(9400);
+    private static final AtomicInteger NEXT_PORT = new AtomicInteger(19400);
 
     @Value("${mock.server.address:localhost}")
     private String mockServerAddress;

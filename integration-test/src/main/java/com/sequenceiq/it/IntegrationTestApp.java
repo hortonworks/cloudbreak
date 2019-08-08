@@ -73,10 +73,10 @@ public class IntegrationTestApp implements CommandLineRunner {
     @Value("${integrationtest.outputdir:.}")
     private String outputDirectory;
 
-    @Value("${integrationtest.threadCount:2}")
+    @Value("${integrationtest.threadCount:8}")
     private int threadCount;
 
-    @Value("${integrationtest.parallel:FALSE}")
+    @Value("${integrationtest.parallel:TRUE}")
     private String parallel;
 
     @Inject

@@ -1,6 +1,22 @@
 name: "mock-tests"
+threadCount: 6
+parallel: "tests"
 tests:
-  - name: "newway mock testcases"
+  - name: "info testcases"
     packages:
       - com.sequenceiq.it.cloudbreak.testcase.info.*
-      - com.sequenceiq.it.cloudbreak.testcase.mock.*
+  - name: "api mock testcases"
+    packages:
+      - com.sequenceiq.it.cloudbreak.testcase.mock.api.*
+  - name: "cluster mock testcases"
+    packages:
+      - com.sequenceiq.it.cloudbreak.testcase.mock.cluster.*
+  - name: "environment mock testcases"
+    packages:
+      - com.sequenceiq.it.cloudbreak.testcase.mock.environment.*
+  - name: "freeipa mock testcases"
+    packages:
+      - com.sequenceiq.it.cloudbreak.testcase.mock.freeipa.*
+  - name: "sdx mock testcases"
+    packages:
+      - com.sequenceiq.it.cloudbreak.testcase.mock.sdx.*
