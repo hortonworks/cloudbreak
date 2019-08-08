@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public enum AuthorizationResource {
     DATALAKE("Datalake cluster", "datalake"),
-    ENVIRONMENT("Environment", "environment"),
+    ENVIRONMENT("Environment", "environments"),
     DATAHUB("Datahub cluster", "datahub");
 
     private final String readableName;
