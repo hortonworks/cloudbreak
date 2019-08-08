@@ -15,8 +15,10 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
@@ -40,6 +42,9 @@ import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 public class EnvironmentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
+
+    @Value("${environment.admin.group.default.prefix:}")
+    private String adminGroupNamePrefix;
 
     private final EnvironmentValidatorService validatorService;
 
@@ -249,6 +254,14 @@ public class EnvironmentService {
             environment.setCidr(securityAccess.getCidr());
             environment.setSecurityGroupIdForKnox(securityAccess.getSecurityGroupIdForKnox());
             environment.setDefaultSecurityGroupId(securityAccess.getDefaultSecurityGroupId());
+        }
+    }
+
+    void setAdminGroupName(Environment environment, String adminGroupName) {
+        if (StringUtils.isEmpty(adminGroupName)) {
+            environment.setAdminGroupName(adminGroupNamePrefix + environment.getName());
+        } else {
+            environment.setAdminGroupName(adminGroupName);
         }
     }
 }

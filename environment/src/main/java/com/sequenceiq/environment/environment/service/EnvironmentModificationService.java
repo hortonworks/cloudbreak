@@ -103,6 +103,7 @@ public class EnvironmentModificationService {
         editLocationAndRegionsIfChanged(env, editDto);
         editTelemetryIfChanged(env, editDto);
         editNetworkIfChanged(env, editDto);
+        editAdminGroupNameIfChanged(env, editDto);
         editAuthenticationIfChanged(editDto, env);
         editSecurityAccessIfChanged(editDto, env);
         editIdBrokerMappingSource(editDto, env);
@@ -230,6 +231,12 @@ public class EnvironmentModificationService {
         IdBrokerMappingSource idBrokerMappingSource = editDto.getIdBrokerMappingSource();
         if (idBrokerMappingSource != null) {
             environment.setIdBrokerMappingSource(idBrokerMappingSource);
+        }
+    }
+
+    private void editAdminGroupNameIfChanged(Environment environment, EnvironmentEditDto editDto) {
+        if (editDto.getAdminGroupName() != null) {
+            environmentService.setAdminGroupName(environment, editDto.getAdminGroupName());
         }
     }
 

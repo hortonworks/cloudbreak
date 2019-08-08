@@ -68,6 +68,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource = IdBrokerMappingSource.MOCK;
 
+    @ApiModelProperty(EnvironmentModelDescription.ADMIN_GROUP_NAME)
+    private String adminGroupName;
+
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
@@ -176,6 +179,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         this.idBrokerMappingSource = idBrokerMappingSource;
+    }
+
+    public String getAdminGroupName() {
+        return adminGroupName;
+    }
+
+    public void setAdminGroupName(String adminGroupName) {
+        this.adminGroupName = adminGroupName;
     }
 
     public AwsEnvironmentParameters getAws() {

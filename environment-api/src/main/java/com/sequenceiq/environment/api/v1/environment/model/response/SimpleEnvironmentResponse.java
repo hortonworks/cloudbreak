@@ -45,6 +45,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private Tunnel tunnel;
 
+        private String adminGroupName;
+
         private AwsEnvironmentParameters aws;
 
         private Builder() {
@@ -120,6 +122,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withAdminGroupName(String adminGroupName) {
+            this.adminGroupName = adminGroupName;
+            return this;
+        }
+
         public Builder withAws(AwsEnvironmentParameters aws) {
             this.aws = aws;
             return this;
@@ -142,6 +149,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setTelemetry(telemetry);
             simpleEnvironmentResponse.setTunnel(tunnel);
             simpleEnvironmentResponse.setAws(aws);
+            simpleEnvironmentResponse.setAdminGroupName(adminGroupName);
             return simpleEnvironmentResponse;
         }
     }

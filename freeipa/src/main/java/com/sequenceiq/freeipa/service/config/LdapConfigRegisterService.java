@@ -4,6 +4,7 @@ import java.util.StringJoiner;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -53,10 +54,11 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
     public void register(Long stackId) {
         Stack stack = getStackWithInstanceMetadata(stackId);
         FreeIpa freeIpa = getFreeIpaService().findByStackId(stackId);
+        String adminGroupName = StringUtils.isNotEmpty(freeIpa.getAdminGroupName()) ? freeIpa.getAdminGroupName() : ADMIN_GROUP;
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setName(stack.getName());
         ldapConfig.setEnvironmentCrn(stack.getEnvironmentCrn());
-        ldapConfig.setAdminGroup(ADMIN_GROUP);
+        ldapConfig.setAdminGroup(adminGroupName);
         ldapConfig.setUserGroup(USER_GROUP);
         String domainComponent = generateDomainComponent(freeIpa);
         ldapConfig.setBindDn(BIND_DN + domainComponent);

@@ -67,6 +67,8 @@ public class EnvironmentDto implements Payload {
 
     private IdBrokerMappingSource idBrokerMappingSource;
 
+    private String adminGroupName;
+
     private ParametersDto parameters;
 
     @Override
@@ -263,6 +265,14 @@ public class EnvironmentDto implements Payload {
         this.idBrokerMappingSource = idBrokerMappingSource;
     }
 
+    public String getAdminGroupName() {
+        return adminGroupName;
+    }
+
+    public void setAdminGroupName(String adminGroupName) {
+        this.adminGroupName = adminGroupName;
+    }
+
     public ParametersDto getParameters() {
         return parameters;
     }
@@ -321,6 +331,8 @@ public class EnvironmentDto implements Payload {
         private Tunnel tunnel;
 
         private IdBrokerMappingSource idBrokerMappingSource;
+
+        private String adminGroupName;
 
         private ParametersDto parameters;
 
@@ -442,6 +454,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withAdminGroupName(String adminGroupName) {
+            this.adminGroupName = adminGroupName;
+            return this;
+        }
+
         public Builder withParameters(ParametersDto parameters) {
             this.parameters = parameters;
             return this;
@@ -472,6 +489,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setSecurityAccess(securityAccess);
             environmentDto.setTunnel(tunnel);
             environmentDto.setIdBrokerMappingSource(idBrokerMappingSource);
+            environmentDto.setAdminGroupName(adminGroupName);
             environmentDto.setParameters(parameters);
             return environmentDto;
         }

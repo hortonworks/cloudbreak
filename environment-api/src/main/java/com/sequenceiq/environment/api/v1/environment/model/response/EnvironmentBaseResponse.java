@@ -67,6 +67,9 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource;
 
+    @ApiModelProperty(EnvironmentModelDescription.ADMIN_GROUP_NAME)
+    private String adminGroupName;
+
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
 
@@ -212,6 +215,14 @@ public abstract class EnvironmentBaseResponse {
 
     public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         this.idBrokerMappingSource = idBrokerMappingSource;
+    }
+
+    public String getAdminGroupName() {
+        return adminGroupName;
+    }
+
+    public void setAdminGroupName(String adminGroupName) {
+        this.adminGroupName = adminGroupName;
     }
 
     public AwsEnvironmentParameters getAws() {

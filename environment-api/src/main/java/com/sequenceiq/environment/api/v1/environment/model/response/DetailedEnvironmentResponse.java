@@ -49,6 +49,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private Tunnel tunnel;
 
+        private String adminGroupName;
+
         private IdBrokerMappingSource idBrokerMappingSource;
 
         private AwsEnvironmentParameters aws;
@@ -145,6 +147,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withAdminGroupName(String adminGroupName) {
+            this.adminGroupName = adminGroupName;
+            return this;
+        }
+
         public Builder withAws(AwsEnvironmentParameters aws) {
             this.aws = aws;
             return this;
@@ -169,6 +176,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setSecurityAccess(securityAccess);
             detailedEnvironmentResponse.setTunnel(tunnel);
             detailedEnvironmentResponse.setIdBrokerMappingSource(idBrokerMappingSource);
+            detailedEnvironmentResponse.setAdminGroupName(adminGroupName);
             detailedEnvironmentResponse.setAws(aws);
             return detailedEnvironmentResponse;
         }

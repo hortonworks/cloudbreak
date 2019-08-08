@@ -119,6 +119,9 @@ public class Environment implements AuthResource {
     @Column(name = "idbroker_mapping_source")
     private IdBrokerMappingSource idBrokerMappingSource;
 
+    @Column(name = "admin_group_name")
+    private String adminGroupName;
+
     @OneToOne(mappedBy = "environment", cascade = CascadeType.ALL, orphanRemoval = true)
     private BaseParameters parameters;
 
@@ -360,6 +363,14 @@ public class Environment implements AuthResource {
 
     public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         this.idBrokerMappingSource = idBrokerMappingSource;
+    }
+
+    public String getAdminGroupName() {
+        return adminGroupName;
+    }
+
+    public void setAdminGroupName(String adminGroupName) {
+        this.adminGroupName = adminGroupName;
     }
 
     public BaseParameters getParameters() {

@@ -23,6 +23,10 @@ public abstract class FreeIpaServerBase {
     @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.HOSTNAME)
     private String hostname;
 
+    @NotNull
+    @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.ADMIN_GROUP_NAME)
+    private String adminGroupName;
+
     public String getDomain() {
         return domain;
     }
@@ -37,6 +41,14 @@ public abstract class FreeIpaServerBase {
 
     public void setHostname(String hostname) {
         this.hostname = hostname;
+    }
+
+    public String getAdminGroupName() {
+        return adminGroupName;
+    }
+
+    public void setAdminGroupName(String adminGroupName) {
+        this.adminGroupName = adminGroupName;
     }
 
     @Override

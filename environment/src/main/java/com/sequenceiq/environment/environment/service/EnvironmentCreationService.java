@@ -80,6 +80,7 @@ public class EnvironmentCreationService {
         }
         Environment environment = initializeEnvironment(creationDto, creator);
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
+        environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
         validateCreation(creationDto, environment, cloudRegions);
         Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, creationDto.getNetwork());

@@ -55,7 +55,8 @@ public class EnvironmentDtoConverter {
                 .withStatusReason(environment.getStatusReason())
                 .withTunnel(environment.getTunnel())
                 .withSecurityAccess(environmentToSecurityAccessDto(environment))
-                .withIdBrokerMappingSource(environment.getIdBrokerMappingSource());
+                .withIdBrokerMappingSource(environment.getIdBrokerMappingSource())
+                .withAdminGroupName(environment.getAdminGroupName());
 
         doIfNotNull(environment.getParameters(), parameters -> builder.withParameters(
                 environmentParamsConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform())).convertToDto(parameters)));
@@ -79,6 +80,7 @@ public class EnvironmentDtoConverter {
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
         environment.setCreateFreeIpa(creationDto.isCreateFreeIpa());
         environment.setTunnel(creationDto.getTunnel());
+        environment.setAdminGroupName(creationDto.getAdminGroupName());
         environment.setIdBrokerMappingSource(creationDto.getIdBrokerMappingSource());
         return environment;
     }

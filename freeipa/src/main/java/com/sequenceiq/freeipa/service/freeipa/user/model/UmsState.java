@@ -50,8 +50,6 @@ public class UmsState {
                 .forEach(e -> {
                     FmsUser fmsUser = umsUserToUser(e.getValue());
                     builder.addUser(fmsUser);
-                    // TODO remove `admins` membership once the group mapping is figured out (CB-2003, DISTX-95)
-                    builder.addMemberToGroup("admins", fmsUser.getName());
                     userRightsMap.get(e.getKey()).getGroupCrnList()
                             .forEach(crn -> {
                                 builder.addMemberToGroup(crnToGroup.get(crn).getName(), fmsUser.getName());
