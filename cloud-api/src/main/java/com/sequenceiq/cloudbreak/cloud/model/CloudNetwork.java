@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CloudNetwork {
@@ -39,6 +40,10 @@ public class CloudNetwork {
 
     public Map<String, String> getSubnets() {
         return subnets.stream().collect(Collectors.toMap(s -> s.getId(), s -> s.getName()));
+    }
+
+    public Map<String, CloudSubnet> getSubnetsWithMetadata() {
+        return subnets.stream().collect(Collectors.toMap(CloudSubnet::getId, Function.identity()));
     }
 
     public Set<CloudSubnet> getSubnetsMeta() {

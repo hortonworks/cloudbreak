@@ -27,6 +27,7 @@ public class CloudNetworksToPlatformNetworksV1ResponseConverter extends Abstract
                         cloudNetwork.getName(),
                         cloudNetwork.getId(),
                         cloudNetwork.getSubnets(),
+                        cloudNetwork.getSubnetsWithMetadata(),
                         cloudNetwork.getProperties());
                 networks.add(actual);
             }

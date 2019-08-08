@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 
 import io.swagger.annotations.ApiModel;
 
@@ -17,15 +18,19 @@ public class PlatformNetworkResponse implements Serializable {
 
     private Map<String, String> subnets;
 
+    private Map<String, CloudSubnet> subnetMetadata;
+
     private Map<String, Object> properties;
 
     public PlatformNetworkResponse() {
     }
 
-    public PlatformNetworkResponse(String name, String id, Map<String, String> subnets, Map<String, Object> properties) {
+    public PlatformNetworkResponse(String name, String id, Map<String, String> subnets, Map<String, CloudSubnet> subnetMetadata,
+            Map<String, Object> properties) {
         this.name = name;
         this.id = id;
         this.subnets = subnets;
+        this.subnetMetadata = subnetMetadata;
         this.properties = properties;
     }
 
@@ -51,6 +56,14 @@ public class PlatformNetworkResponse implements Serializable {
 
     public void setSubnets(Map<String, String> subnets) {
         this.subnets = subnets;
+    }
+
+    public Map<String, CloudSubnet> getSubnetMetadata() {
+        return subnetMetadata;
+    }
+
+    public void setSubnetMetadata(Map<String, CloudSubnet> subnetMetadata) {
+        this.subnetMetadata = subnetMetadata;
     }
 
     public Map<String, Object> getProperties() {
