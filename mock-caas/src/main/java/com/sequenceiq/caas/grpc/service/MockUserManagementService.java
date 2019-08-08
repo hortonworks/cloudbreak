@@ -84,6 +84,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final String CDP_PRIVATE_KEY = "cdp_private_key";
 
+    private static final int MOCK_USER_COUNT = 10;
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -144,6 +146,10 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 ofNullable(accountUsers.get(request.getAccountId())).orElse(Set.of()).stream()
                         .map(userName -> createUser(request.getAccountId(), userName))
                         .forEach(userBuilder::addUser);
+                for (int i = 0; i < MOCK_USER_COUNT; i++) {
+                    User user = createUser(request.getAccountId(), "fakeMockUser" + i);
+                    userBuilder.addUser(user);
+                }
             }
             responseObserver.onNext(userBuilder.build());
         } else {
