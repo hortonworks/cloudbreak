@@ -16,13 +16,13 @@ import (
 type TagsV4Response struct {
 
 	// stack related application tags
-	ApplicationTags map[string]string `json:"applicationTags,omitempty"`
+	Application map[string]string `json:"application,omitempty"`
 
 	// stack related default tags
-	DefaultTags map[string]string `json:"defaultTags,omitempty"`
+	Defaults map[string]string `json:"defaults,omitempty"`
 
 	// stack related userdefined tags
-	UserDefinedTags map[string]string `json:"userDefinedTags,omitempty"`
+	UserDefined map[string]string `json:"userDefined,omitempty"`
 }
 
 // Validate validates this tags v4 response

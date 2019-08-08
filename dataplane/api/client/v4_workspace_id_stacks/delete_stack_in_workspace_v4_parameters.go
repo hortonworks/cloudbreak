@@ -23,12 +23,10 @@ import (
 // with the default values initialized.
 func NewDeleteStackInWorkspaceV4Params() *DeleteStackInWorkspaceV4Params {
 	var (
-		deleteDependenciesDefault = bool(false)
-		forcedDefault             = bool(false)
+		forcedDefault = bool(false)
 	)
 	return &DeleteStackInWorkspaceV4Params{
-		DeleteDependencies: &deleteDependenciesDefault,
-		Forced:             &forcedDefault,
+		Forced: &forcedDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -38,12 +36,10 @@ func NewDeleteStackInWorkspaceV4Params() *DeleteStackInWorkspaceV4Params {
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteStackInWorkspaceV4ParamsWithTimeout(timeout time.Duration) *DeleteStackInWorkspaceV4Params {
 	var (
-		deleteDependenciesDefault = bool(false)
-		forcedDefault             = bool(false)
+		forcedDefault = bool(false)
 	)
 	return &DeleteStackInWorkspaceV4Params{
-		DeleteDependencies: &deleteDependenciesDefault,
-		Forced:             &forcedDefault,
+		Forced: &forcedDefault,
 
 		timeout: timeout,
 	}
@@ -53,12 +49,10 @@ func NewDeleteStackInWorkspaceV4ParamsWithTimeout(timeout time.Duration) *Delete
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteStackInWorkspaceV4ParamsWithContext(ctx context.Context) *DeleteStackInWorkspaceV4Params {
 	var (
-		deleteDependenciesDefault = bool(false)
-		forcedDefault             = bool(false)
+		forcedDefault = bool(false)
 	)
 	return &DeleteStackInWorkspaceV4Params{
-		DeleteDependencies: &deleteDependenciesDefault,
-		Forced:             &forcedDefault,
+		Forced: &forcedDefault,
 
 		Context: ctx,
 	}
@@ -68,13 +62,11 @@ func NewDeleteStackInWorkspaceV4ParamsWithContext(ctx context.Context) *DeleteSt
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteStackInWorkspaceV4ParamsWithHTTPClient(client *http.Client) *DeleteStackInWorkspaceV4Params {
 	var (
-		deleteDependenciesDefault = bool(false)
-		forcedDefault             = bool(false)
+		forcedDefault = bool(false)
 	)
 	return &DeleteStackInWorkspaceV4Params{
-		DeleteDependencies: &deleteDependenciesDefault,
-		Forced:             &forcedDefault,
-		HTTPClient:         client,
+		Forced:     &forcedDefault,
+		HTTPClient: client,
 	}
 }
 
@@ -83,8 +75,6 @@ for the delete stack in workspace v4 operation typically these are written to a 
 */
 type DeleteStackInWorkspaceV4Params struct {
 
-	/*DeleteDependencies*/
-	DeleteDependencies *bool
 	/*Forced*/
 	Forced *bool
 	/*Name*/
@@ -130,17 +120,6 @@ func (o *DeleteStackInWorkspaceV4Params) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithDeleteDependencies adds the deleteDependencies to the delete stack in workspace v4 params
-func (o *DeleteStackInWorkspaceV4Params) WithDeleteDependencies(deleteDependencies *bool) *DeleteStackInWorkspaceV4Params {
-	o.SetDeleteDependencies(deleteDependencies)
-	return o
-}
-
-// SetDeleteDependencies adds the deleteDependencies to the delete stack in workspace v4 params
-func (o *DeleteStackInWorkspaceV4Params) SetDeleteDependencies(deleteDependencies *bool) {
-	o.DeleteDependencies = deleteDependencies
-}
-
 // WithForced adds the forced to the delete stack in workspace v4 params
 func (o *DeleteStackInWorkspaceV4Params) WithForced(forced *bool) *DeleteStackInWorkspaceV4Params {
 	o.SetForced(forced)
@@ -181,22 +160,6 @@ func (o *DeleteStackInWorkspaceV4Params) WriteToRequest(r runtime.ClientRequest,
 		return err
 	}
 	var res []error
-
-	if o.DeleteDependencies != nil {
-
-		// query param deleteDependencies
-		var qrDeleteDependencies bool
-		if o.DeleteDependencies != nil {
-			qrDeleteDependencies = *o.DeleteDependencies
-		}
-		qDeleteDependencies := swag.FormatBool(qrDeleteDependencies)
-		if qDeleteDependencies != "" {
-			if err := r.SetQueryParam("deleteDependencies", qDeleteDependencies); err != nil {
-				return err
-			}
-		}
-
-	}
 
 	if o.Forced != nil {
 

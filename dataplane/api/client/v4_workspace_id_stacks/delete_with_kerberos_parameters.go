@@ -23,12 +23,10 @@ import (
 // with the default values initialized.
 func NewDeleteWithKerberosParams() *DeleteWithKerberosParams {
 	var (
-		deleteDependenciesDefault = bool(false)
-		withStackDeleteDefault    = bool(false)
+		withStackDeleteDefault = bool(false)
 	)
 	return &DeleteWithKerberosParams{
-		DeleteDependencies: &deleteDependenciesDefault,
-		WithStackDelete:    &withStackDeleteDefault,
+		WithStackDelete: &withStackDeleteDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -38,12 +36,10 @@ func NewDeleteWithKerberosParams() *DeleteWithKerberosParams {
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteWithKerberosParamsWithTimeout(timeout time.Duration) *DeleteWithKerberosParams {
 	var (
-		deleteDependenciesDefault = bool(false)
-		withStackDeleteDefault    = bool(false)
+		withStackDeleteDefault = bool(false)
 	)
 	return &DeleteWithKerberosParams{
-		DeleteDependencies: &deleteDependenciesDefault,
-		WithStackDelete:    &withStackDeleteDefault,
+		WithStackDelete: &withStackDeleteDefault,
 
 		timeout: timeout,
 	}
@@ -53,12 +49,10 @@ func NewDeleteWithKerberosParamsWithTimeout(timeout time.Duration) *DeleteWithKe
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteWithKerberosParamsWithContext(ctx context.Context) *DeleteWithKerberosParams {
 	var (
-		deleteDependenciesDefault = bool(false)
-		withStackDeleteDefault    = bool(false)
+		withStackDeleteDefault = bool(false)
 	)
 	return &DeleteWithKerberosParams{
-		DeleteDependencies: &deleteDependenciesDefault,
-		WithStackDelete:    &withStackDeleteDefault,
+		WithStackDelete: &withStackDeleteDefault,
 
 		Context: ctx,
 	}
@@ -68,13 +62,11 @@ func NewDeleteWithKerberosParamsWithContext(ctx context.Context) *DeleteWithKerb
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteWithKerberosParamsWithHTTPClient(client *http.Client) *DeleteWithKerberosParams {
 	var (
-		deleteDependenciesDefault = bool(false)
-		withStackDeleteDefault    = bool(false)
+		withStackDeleteDefault = bool(false)
 	)
 	return &DeleteWithKerberosParams{
-		DeleteDependencies: &deleteDependenciesDefault,
-		WithStackDelete:    &withStackDeleteDefault,
-		HTTPClient:         client,
+		WithStackDelete: &withStackDeleteDefault,
+		HTTPClient:      client,
 	}
 }
 
@@ -83,8 +75,6 @@ for the delete with kerberos operation typically these are written to a http.Req
 */
 type DeleteWithKerberosParams struct {
 
-	/*DeleteDependencies*/
-	DeleteDependencies *bool
 	/*Name*/
 	Name string
 	/*WithStackDelete*/
@@ -130,17 +120,6 @@ func (o *DeleteWithKerberosParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithDeleteDependencies adds the deleteDependencies to the delete with kerberos params
-func (o *DeleteWithKerberosParams) WithDeleteDependencies(deleteDependencies *bool) *DeleteWithKerberosParams {
-	o.SetDeleteDependencies(deleteDependencies)
-	return o
-}
-
-// SetDeleteDependencies adds the deleteDependencies to the delete with kerberos params
-func (o *DeleteWithKerberosParams) SetDeleteDependencies(deleteDependencies *bool) {
-	o.DeleteDependencies = deleteDependencies
-}
-
 // WithName adds the name to the delete with kerberos params
 func (o *DeleteWithKerberosParams) WithName(name string) *DeleteWithKerberosParams {
 	o.SetName(name)
@@ -181,22 +160,6 @@ func (o *DeleteWithKerberosParams) WriteToRequest(r runtime.ClientRequest, reg s
 		return err
 	}
 	var res []error
-
-	if o.DeleteDependencies != nil {
-
-		// query param deleteDependencies
-		var qrDeleteDependencies bool
-		if o.DeleteDependencies != nil {
-			qrDeleteDependencies = *o.DeleteDependencies
-		}
-		qDeleteDependencies := swag.FormatBool(qrDeleteDependencies)
-		if qDeleteDependencies != "" {
-			if err := r.SetQueryParam("deleteDependencies", qDeleteDependencies); err != nil {
-				return err
-			}
-		}
-
-	}
 
 	// path param name
 	if err := r.SetPathParam("name", o.Name); err != nil {
