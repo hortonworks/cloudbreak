@@ -30,9 +30,9 @@ public class StackTagsToTagsV4ResponseConverterTest {
         TagsV4Response result = underTest.convert(source);
 
         assertNotNull(result);
-        assertEquals(applicationTags, result.getApplicationTags());
-        assertEquals(defaultTags, result.getDefaultTags());
-        assertEquals(userDefinedTags, result.getUserDefinedTags());
+        assertEquals(applicationTags, result.getApplication());
+        assertEquals(defaultTags, result.getDefaults());
+        assertEquals(userDefinedTags, result.getUserDefined());
     }
 
 }

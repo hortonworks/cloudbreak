@@ -163,9 +163,9 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
             LOGGER.info("Failed to convert dynamic tags.", e);
         }
         TagsV4Response response = new TagsV4Response();
-        response.setApplicationTags(new HashMap<>());
-        response.setDefaultTags(new HashMap<>());
-        response.setUserDefinedTags(new HashMap<>());
+        response.setApplication(new HashMap<>());
+        response.setDefaults(new HashMap<>());
+        response.setUserDefined(new HashMap<>());
         return response;
     }
 
