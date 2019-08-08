@@ -91,10 +91,16 @@ public interface SdxEndpoint {
     @ApiOperation(value = "get SDX cluster detail by crn", produces = "application/json", nickname = "getSdxDetailByCrn")
     SdxClusterDetailResponse getDetailByCrn(@PathParam("clusterCrn") String clusterCrn, @QueryParam("entries") Set<String> entries);
 
+    @GET
+    @Path("{name}/manual_repair")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "repairs an sdxNode ni the specified hostgroup", produces = "application/json", nickname = "repairSdxNode")
+    void repairCluster(@PathParam("name") String name, SdxRepairRequest clusterRepairRequest);
+
     @POST
     @Path("/crn/{crn}/manual_repair")
-    @ApiOperation(value = "repairs an sdxNode ni the specified hostgroup", nickname = "repairSdxNode")
-    void repairCluster(@PathParam("crn") String crn, SdxRepairRequest clusterRepairRequest);
+    @ApiOperation(value = "repairs an sdxNode in the specified hostgroup", nickname = "repairSdxNodeByCrn")
+    void repairClusterCrn(@PathParam("crn") String crn, SdxRepairRequest clusterRepairRequest);
 
     @GET
     @Path("list")
