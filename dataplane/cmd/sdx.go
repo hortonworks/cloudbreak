@@ -66,6 +66,18 @@ func init() {
 					}
 				},
 			},
+			{
+				Name:   "repair",
+				Usage:  "repair SDX cluster",
+				Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlHostGroup).AddResourceDefaultFlags().AddAuthenticationFlags().Build(),
+				Action: sdx.RepairSdx,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlHostGroup).AddResourceDefaultFlags().AddAuthenticationFlags().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
 		},
 	})
 }

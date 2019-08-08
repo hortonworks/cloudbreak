@@ -332,6 +332,62 @@ func (a *Client) RedeploySdxByCrn(params *RedeploySdxByCrnParams) error {
 
 }
 
+/*
+RepairSdxNode repairs an sdx node ni the specified hostgroup
+*/
+func (a *Client) RepairSdxNode(params *RepairSdxNodeParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRepairSdxNodeParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "repairSdxNode",
+		Method:             "GET",
+		PathPattern:        "/sdx/{name}/manual_repair",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &RepairSdxNodeReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+RepairSdxNodeByCrn repairs an sdx node in the specified hostgroup
+*/
+func (a *Client) RepairSdxNodeByCrn(params *RepairSdxNodeByCrnParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRepairSdxNodeByCrnParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "repairSdxNodeByCrn",
+		Method:             "POST",
+		PathPattern:        "/sdx/crn/{crn}/manual_repair",
+		ProducesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &RepairSdxNodeByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

@@ -150,6 +150,23 @@ func DeleteSdx(c *cli.Context) {
 	log.Infof("[deleteSdx] SDX cluster deleted in environment: %s", name)
 }
 
+func RepairSdx(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "delete SDX cluster")
+	name := c.String(fl.FlName.Name)
+	hostGroupToRepair := c.String(fl.FlHostGroup.Name)
+
+	hostGroupToRepairRequest := &sdxModel.SdxRepairRequest{
+		HostGroupName: &hostGroupToRepair,
+	}
+
+	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
+	err := sdxClient.Sdx.RepairSdxNode(sdx.NewRepairSdxNodeParams().WithName(name).WithBody(hostGroupToRepairRequest))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[repairSdx] SDX cluster repair is started for: %s", name)
+}
+
 func ListSdx(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "List sdx clusters in environment")
 	envName := c.String(fl.FlEnvironmentNameOptional.Name)

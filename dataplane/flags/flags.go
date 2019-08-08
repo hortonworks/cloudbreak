@@ -809,6 +809,13 @@ var (
 			Usage: "source cluster to use as datalake",
 		},
 	}
+	FlHostGroup = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "host-group",
+			Usage: "hostgroup where the failed nodes will be repaired",
+		},
+	}
 	FlHostGroups = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
