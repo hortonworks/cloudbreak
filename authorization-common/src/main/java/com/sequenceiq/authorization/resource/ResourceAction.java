@@ -5,9 +5,11 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.sequenceiq.authorization.RightsConstants;
+
 public enum ResourceAction {
-    READ("read"),
-    WRITE("write"),
+    READ(RightsConstants.READ_ACTION),
+    WRITE(RightsConstants.WRITE_ACTION),
     // manage action is obsolete, used only in workspace authz
     MANAGE("manage");
 

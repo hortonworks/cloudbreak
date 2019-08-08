@@ -5,10 +5,12 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.sequenceiq.authorization.RightsConstants;
+
 public enum AuthorizationResource {
-    DATALAKE("Datalake cluster", "datalake"),
-    ENVIRONMENT("Environment", "environments"),
-    DATAHUB("Datahub cluster", "datahub");
+    DATALAKE("Datalake cluster", RightsConstants.DATALAKE_RESOURCE),
+    ENVIRONMENT("Environment", RightsConstants.ENVIRONMENT_RESOURCE),
+    DATAHUB("Datahub cluster", RightsConstants.DATAHUB_RESOURCE);
 
     private final String readableName;
 
