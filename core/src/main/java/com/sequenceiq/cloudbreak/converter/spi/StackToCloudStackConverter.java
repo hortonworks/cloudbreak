@@ -266,7 +266,7 @@ public class StackToCloudStackConverter {
             rules.add(new SecurityRule(securityRule.getCidr(), portDefinitions.toArray(new PortDefinition[portDefinitions.size()]),
                     securityRule.getProtocol()));
         }
-        return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds());
+        return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds(), true);
     }
 
     private CloudInstance buildCloudInstanceSkeleton(StackAuthentication stackAuthentication, InstanceGroup instanceGroup, Template template) {
