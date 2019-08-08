@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreCloudStorageServiceConfigProvider.HMS_METASTORE_DIR;
-import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -35,9 +35,9 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
 
     private static final String S3GUARD_TABLE_CREATE_PARAM = "fs.s3a.s3guard.ddb.table.create";
 
-    private static final String S3GUARD_TABLE_NAME_PARAM = "fs.s3a.s3guard.ddb.table";
-
     private static final String S3GUARD_TABLE_CREATE_VALUE = "true";
+
+    private static final String S3GUARD_TABLE_NAME_PARAM = "fs.s3a.s3guard.ddb.table";
 
     private static final String S3GUARD_AUTHORITATIVE_PATH_PARAM = "fs.s3a.authoritative.path";
 
@@ -51,21 +51,10 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
                             HADOOP_HTTP_FILTER_INITIALIZERS_VALUE));
         }
 
-        if (isS3GuardInitializationNeeded(templateProcessor, templatePreparationObject)) {
-            hdfsCoreSiteSafetyValveValue.append(ConfigUtils
-                    .getSafetyValveProperty(S3GUARD_METADATASTORE_IMPL_PARAM, S3GUARD_METADATASTORE_IMPL_VALUE));
-            hdfsCoreSiteSafetyValveValue.append(ConfigUtils
-                    .getSafetyValveProperty(S3GUARD_TABLE_CREATE_PARAM, S3GUARD_TABLE_CREATE_VALUE));
-
-            S3FileSystemConfigurationsView s3FileSystemConfigurationsView =
-                    (S3FileSystemConfigurationsView) templatePreparationObject.getFileSystemConfigurationView().get();
-            doIfNotNull(s3FileSystemConfigurationsView.getS3GuardDynamoTableName(), table ->
-                    hdfsCoreSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(S3GUARD_TABLE_NAME_PARAM, table)));
-
-            ConfigUtils.getStorageLocationForServiceProperty(templatePreparationObject, HMS_METASTORE_DIR)
-                    .ifPresent(location -> hdfsCoreSiteSafetyValveValue.append(
-                            ConfigUtils.getSafetyValveProperty(S3GUARD_AUTHORITATIVE_PATH_PARAM, location.getValue())));
+        if (isS3FileSystemConfigured(templatePreparationObject)) {
+            configureS3GuardCoreSiteParameters(templatePreparationObject, hdfsCoreSiteSafetyValveValue);
         }
+
         return hdfsCoreSiteSafetyValveValue.toString().isEmpty() ? List.of()
                 : List.of(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
     }
@@ -80,19 +69,41 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
         return List.of(HdfsRoles.NAMENODE, HdfsRoles.DATANODE, HdfsRoles.SECONDARYNAMENODE, HdfsRoles.JOURNALNODE);
     }
 
-    protected boolean isHadoopHttpFilterInitializationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+    @Override
+    public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        return cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
+    }
+
+    private boolean isHadoopHttpFilterInitializationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
                 && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.NAMENODE.getKnoxService());
     }
 
-    protected boolean isS3GuardInitializationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+    private boolean isS3FileSystemConfigured(TemplatePreparationObject source) {
         return source.getFileSystemConfigurationView().isPresent()
                 && source.getFileSystemConfigurationView().get().getType().equals(FileSystemType.S3.name());
     }
 
-    @Override
-    public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
+    private void configureS3GuardCoreSiteParameters(TemplatePreparationObject source, StringBuilder hdfsCoreSiteSafetyValveValue) {
+        S3FileSystemConfigurationsView s3FileSystemConfigurationsView =
+                (S3FileSystemConfigurationsView) source.getFileSystemConfigurationView().get();
+
+        if (isS3GuardTableConfigured(s3FileSystemConfigurationsView)) {
+            hdfsCoreSiteSafetyValveValue.append(ConfigUtils
+                    .getSafetyValveProperty(S3GUARD_METADATASTORE_IMPL_PARAM, S3GUARD_METADATASTORE_IMPL_VALUE));
+            hdfsCoreSiteSafetyValveValue.append(ConfigUtils
+                    .getSafetyValveProperty(S3GUARD_TABLE_CREATE_PARAM, S3GUARD_TABLE_CREATE_VALUE));
+            hdfsCoreSiteSafetyValveValue.append(ConfigUtils
+                    .getSafetyValveProperty(S3GUARD_TABLE_NAME_PARAM, s3FileSystemConfigurationsView.getS3GuardDynamoTableName()));
+
+            ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_DIR)
+                    .ifPresent(location -> hdfsCoreSiteSafetyValveValue.append(
+                            ConfigUtils.getSafetyValveProperty(S3GUARD_AUTHORITATIVE_PATH_PARAM, location.getValue())));
+        }
+    }
+
+    private boolean isS3GuardTableConfigured(S3FileSystemConfigurationsView s3FileSystemConfigurationsView) {
+        return StringUtils.isNotBlank(s3FileSystemConfigurationsView.getS3GuardDynamoTableName());
     }
 }
