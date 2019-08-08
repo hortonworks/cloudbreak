@@ -33,6 +33,8 @@ public class EnvironmentEditDto {
 
     private final IdBrokerMappingSource idBrokerMappingSource;
 
+    private final String adminGroupName;
+
     private final ParametersDto parameters;
 
     public EnvironmentEditDto(
@@ -46,6 +48,7 @@ public class EnvironmentEditDto {
             SecurityAccessDto securityAccess,
             Tunnel tunnel,
             IdBrokerMappingSource idBrokerMappingSource,
+            String adminGroupName,
             ParametersDto parameters) {
         this.description = description;
         this.accountId = accountId;
@@ -61,6 +64,7 @@ public class EnvironmentEditDto {
         this.securityAccess = securityAccess;
         this.tunnel = tunnel;
         this.idBrokerMappingSource = idBrokerMappingSource;
+        this.adminGroupName = adminGroupName;
         this.parameters = parameters;
     }
 
@@ -108,6 +112,10 @@ public class EnvironmentEditDto {
         return idBrokerMappingSource;
     }
 
+    public String getAdminGroupName() {
+        return adminGroupName;
+    }
+
     public ParametersDto getParameters() {
         return parameters;
     }
@@ -132,6 +140,8 @@ public class EnvironmentEditDto {
         private Tunnel tunnel;
 
         private IdBrokerMappingSource idBrokerMappingSource;
+
+        private String adminGroupName;
 
         private ParametersDto parameters;
 
@@ -192,6 +202,11 @@ public class EnvironmentEditDto {
             return this;
         }
 
+        public EnvironmentEditDtoBuilder withAdminGroupName(String adminGroupName) {
+            this.adminGroupName = adminGroupName;
+            return this;
+        }
+
         public EnvironmentEditDtoBuilder withParameters(ParametersDto parameters) {
             this.parameters = parameters;
             return this;
@@ -199,7 +214,7 @@ public class EnvironmentEditDto {
 
         public EnvironmentEditDto build() {
             return new EnvironmentEditDto(description, regions, accountId, location, network,
-                    authentication, telemetry, securityAccess, tunnel, idBrokerMappingSource, parameters);
+                    authentication, telemetry, securityAccess, tunnel, idBrokerMappingSource, adminGroupName, parameters);
         }
     }
 }

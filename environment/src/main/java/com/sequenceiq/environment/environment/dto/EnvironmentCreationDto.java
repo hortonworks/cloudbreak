@@ -46,6 +46,8 @@ public class EnvironmentCreationDto {
 
     private final IdBrokerMappingSource idBrokerMappingSource;
 
+    private final String adminGroupName;
+
     private final ParametersDto parameters;
 
     //CHECKSTYLE:OFF
@@ -53,7 +55,7 @@ public class EnvironmentCreationDto {
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
             Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, Tunnel tunnel, IdBrokerMappingSource idBrokerMappingSource,
-            ParametersDto parameters) {
+            String adminGroupName, ParametersDto parameters) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -79,6 +81,7 @@ public class EnvironmentCreationDto {
         this.telemetry = telemetry;
         this.securityAccess = securityAccess;
         this.idBrokerMappingSource = idBrokerMappingSource;
+        this.adminGroupName = adminGroupName;
         this.parameters = parameters;
     }
 
@@ -146,6 +149,10 @@ public class EnvironmentCreationDto {
         return idBrokerMappingSource;
     }
 
+    public String getAdminGroupName() {
+        return adminGroupName;
+    }
+
     public ParametersDto getParameters() {
         return parameters;
     }
@@ -182,6 +189,8 @@ public class EnvironmentCreationDto {
         private Tunnel tunnel;
 
         private IdBrokerMappingSource idBrokerMappingSource;
+
+        private String adminGroupName;
 
         private ParametersDto parameters;
 
@@ -272,6 +281,11 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withAdminGroupName(String adminGroupName) {
+            this.adminGroupName = adminGroupName;
+            return this;
+        }
+
         public Builder withParameters(ParametersDto parameters) {
             this.parameters = parameters;
             return this;
@@ -280,7 +294,7 @@ public class EnvironmentCreationDto {
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId,
                     location, network, credential, regions, proxyNames, createFreeIpa,
-                    authentication, created, telemetry, securityAccess, tunnel, idBrokerMappingSource, parameters);
+                    authentication, created, telemetry, securityAccess, tunnel, idBrokerMappingSource, adminGroupName, parameters);
         }
     }
 }

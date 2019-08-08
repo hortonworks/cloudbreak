@@ -14,6 +14,7 @@ public class FreeIpaToFreeIpaServerResponseConverter implements Converter<FreeIp
         FreeIpaServerResponse response = new FreeIpaServerResponse();
         response.setDomain(source.getDomain());
         response.setHostname(source.getHostname());
+        response.setAdminGroupName(source.getAdminGroupName());
         return response;
     }
 }

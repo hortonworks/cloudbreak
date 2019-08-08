@@ -81,5 +81,6 @@ public class FreeIpaModelDescriptions {
         public static final String SERVER_IP = "FreeIPA servers IP address";
         public static final String DOMAIN = "Domain name associated to the FreeIPA";
         public static final String HOSTNAME = "Base hostname for FreeIPA servers";
+        public static final String ADMIN_GROUP_NAME = "Name of the admin group to be used for all the services.";
     }
 }
