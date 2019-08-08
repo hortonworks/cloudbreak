@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
@@ -14,6 +15,8 @@ public class ConfigUtils {
     private static final String CM_SAFETY_VALVE_PROPERTY_FORMAT = "<property><name>%s</name><value>%s</value></property>";
 
     private static final String CM_SAFETY_VALVE_CONFIGURATION_FORMAT = "<configuration>%s</configuration>";
+
+    private static final Pattern STORAGE_LOCATION_PATH_PATTERN = Pattern.compile("(\\w+)(://([\\w-@\\.]+))(?:/(.*))?");
 
     private ConfigUtils() { }
 
@@ -68,4 +71,15 @@ public class ConfigUtils {
         return String.format(CM_SAFETY_VALVE_CONFIGURATION_FORMAT, value);
     }
 
+    public static String getBasePathFromStorageLocation(String path) {
+        return STORAGE_LOCATION_PATH_PATTERN.matcher(path).replaceAll("$1$2");
+    }
+
+    public static String getBucketFromStorageLocation(String path) {
+        return STORAGE_LOCATION_PATH_PATTERN.matcher(path).replaceAll("$3");
+    }
+
+    public static String getObjectPathFromStorageLocation(String path) {
+        return STORAGE_LOCATION_PATH_PATTERN.matcher(path).replaceAll("$4");
+    }
 }
