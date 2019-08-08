@@ -2,18 +2,6 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
-
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
@@ -28,6 +16,20 @@ import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
 
 @Component
 public class GrpcUmsClient {
@@ -66,6 +68,28 @@ public class GrpcUmsClient {
             List<Group> groups = client.listGroups(requestId.orElse(UUID.randomUUID().toString()), accountId, groupCrns);
             LOGGER.debug("{} Groups found for account {}", groups.size(), accountId);
             return groups;
+        }
+    }
+
+    /**
+     * Retrieves group Map from UMS for given set of users.
+     *
+     * @param accountId the account Id
+     * @param requestId an optional request Id
+     * @param users the users list for which all groups needs to be populated. if null or empty then returns empty map
+     * @return the map of user to list of groups
+     */
+    public Map<User, List<Group>> getUsersToGroupsMap(String actorCrn, String accountId, List<User> users, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            Map<User, List<Group>> usersToGroupMap = new HashMap<>();
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Listing group information for account {} using request ID {}", accountId, requestId);
+            for (User u : users) {
+                List<Group> groups = client.listGroupsForMembers(requestId.orElse(UUID.randomUUID().toString()), accountId, u.getCrn());
+                usersToGroupMap.put(u, groups);
+                LOGGER.debug("{} Groups found for account {}", groups.size(), accountId);
+            }
+            return usersToGroupMap;
         }
     }
 

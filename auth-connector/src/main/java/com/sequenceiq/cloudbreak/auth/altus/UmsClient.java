@@ -2,17 +2,11 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementBlockingStub;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Actor;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
@@ -22,6 +16,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest;
@@ -37,6 +33,13 @@ import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple wrapper to the GRPC user management service. This handles setting up
@@ -95,6 +98,35 @@ public class UmsClient {
             requestBuilder.setPageToken(response.getNextPageToken());
         } while (response.hasNextPageToken());
         return groups;
+    }
+
+    /**
+     * Wraps calls to ListGroupsForMember with an Account ID.
+     *
+     * @param requestId             the request ID for the request
+     * @param accountId             the account ID
+     * @param userCrn               User CRN for which groups are fetched.
+     * @return the list of groups
+     */
+    public List<Group> listGroupsForMembers(String requestId, String accountId, String userCrn) {
+        checkNotNull(accountId);
+        checkNotNull(userCrn);
+
+        Actor.Builder actor = Actor.newBuilder().setAccountId(accountId).setUserIdOrCrn(userCrn);
+        ListGroupsForMemberRequest.Builder request = ListGroupsForMemberRequest.newBuilder()
+            .setMember(actor.build());
+
+        ListGroupsForMemberResponse response;
+        List<String> grps = new ArrayList<>();
+        do {
+            response = newStub(requestId).listGroupsForMember(request.build());
+            for (int i = 0; i < response.getGroupCrnCount(); i++) {
+                String grpCRN = response.getGroupCrn(i);
+                grps.add(grpCRN);
+            }
+        } while (response.hasNextPageToken());
+
+        return listGroups(requestId, accountId, grps);
     }
 
     /**

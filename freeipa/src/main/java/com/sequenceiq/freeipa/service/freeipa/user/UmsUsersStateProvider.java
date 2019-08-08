@@ -12,10 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Role;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
-import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState;
@@ -70,9 +72,6 @@ public class UmsUsersStateProvider {
         String accountId, String actorCrn, Set<String> environmentsFilter, List<User> users, List<MachineUser> machineUsers, List<Group> groups) {
         UmsState.Builder umsStateBuilder = new UmsState.Builder();
 
-        // TODO: No need of CDP Groups to be sync'ed
-        groups.stream().forEach(g -> umsStateBuilder.addGroup(g));
-
         // process each user and update environmentCRN -> UmsState map
         Map<String, UmsState> envUmsStateMap = new HashMap<>();
 
@@ -80,6 +79,11 @@ public class UmsUsersStateProvider {
             processForEnvironmentRights(umsStateBuilder, actorCrn, envCRN, users, machineUsers);
             envUmsStateMap.put(envCRN, umsStateBuilder.build());
         });
+
+        // get all groups for users
+        Map<User, List<Group>> usersToGroupsMap = umsClient.getUsersToGroupsMap(actorCrn, accountId, users, Optional.empty());
+        umsStateBuilder.addUserToGroupMap(usersToGroupsMap);
+        //groups.stream().forEach(g -> umsStateBuilder.addGroup(g));
 
         return envUmsStateMap;
     }
@@ -89,32 +93,26 @@ public class UmsUsersStateProvider {
         // for all users, check right for the passed envCRN
         for (User u : allUsers) {
 
-            // TODO: Remove commented code
-//            GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, u.getCrn(), envCRN, Optional.empty());
-//            // check if user has right for this env
-//            List<ResourceRoleAssignment> assignedResourceRoles = rights.getResourceRolesAssignmentList();
-//            if (rights.getThunderheadAdmin()) {
-//                umsStateBuilder.addAdminUser(u);
-//                continue;
-//
-//            }
-//
-//            if (assignedResourceRoles == null || assignedResourceRoles.size() == 0) {
-//                continue;
-//            }
+            // TODO: check for power user by getting roles.
+            GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, u.getCrn(), envCRN, Optional.empty());
+            List<RoleAssignment> roles = rights.getRoleAssignmentList();
+            if (roles == null || roles.size() > 0) {
+                for (RoleAssignment roleAssignment : roles) {
+                    Role role = roleAssignment.getRole();
+                    if (role.getCrn().toLowerCase().contains("Power".toLowerCase())) {
+                        // power user
+                        umsStateBuilder.addAdminUser(u);
+                        umsStateBuilder.addUser(u, null);
+                        break;
+                    }
+                }
 
-            // TODO: Optimize, First check if READ is there or not, if not there, there is no point in checking for WRITE.
-            if (umsClient.checkRight(actorCrn, u.getCrn(), ResourceAction.WRITE.getAuthorizationName(), envCRN, Optional.empty())) {
-                // this is admin user having write access
-                umsStateBuilder.addAdminUser(u);
-            } else if (umsClient.checkRight(actorCrn, u.getCrn(), ResourceAction.READ.getAuthorizationName(), envCRN, Optional.empty())) {
-                // This is regular Environment user
-                // TODO: Remove get Rights call, as its not needed anymore.
-                umsStateBuilder.addUser(u, umsClient.getRightsForUser(actorCrn, u.getCrn(), envCRN, Optional.empty()));
+            } else if (umsClient.checkRight(actorCrn, u.getCrn(), "environments/setPassword", envCRN, Optional.empty())) {
+                //            if (true) {
+                umsStateBuilder.addUser(u, null);
             }
-
-            // else no other user is for this environment.
         }
+
 
         // machine users
         for (MachineUser machineUser : allMachineUsers) {
@@ -134,15 +132,10 @@ public class UmsUsersStateProvider {
 //            }
 
             // Machine User can be a power user also
-            if (umsClient.checkRight(actorCrn, machineUser.getCrn(), ResourceAction.WRITE.getAuthorizationName(), envCRN, Optional.empty())) {
+            if (umsClient.checkRight(actorCrn, machineUser.getCrn(), "environments/setPassword", envCRN, Optional.empty())) {
                 // this is admin user having write access
-                umsStateBuilder.addAdminMachineUser(machineUser);
-            } else if (umsClient.checkRight(actorCrn, machineUser.getCrn(), ResourceAction.READ.getAuthorizationName(), envCRN, Optional.empty())) {
-                // This is regular Environment user
-                // TODO: Remove get Rights call, as its not needed anymore.
-                umsStateBuilder.addMachineUser(machineUser, umsClient.getRightsForUser(actorCrn, machineUser.getCrn(), envCRN, Optional.empty()));
+                umsStateBuilder.addMachineUser(machineUser, null);
             }
-            // else no other user is for this environment.
         }
 
     }

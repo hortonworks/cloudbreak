@@ -166,6 +166,11 @@ public class UserService {
             LOGGER.info("Syncing Environment {}", environmentCrn);
             UsersState umsUsersState = umsState.getUsersState(environmentCrn);
             LOGGER.debug("UMS UsersState = {}", umsUsersState);
+            if (umsUsersState.getUsers() == null || umsUsersState.getUsers().size() == 0) {
+                String message = "Failed to synchronize environment " + stack.getEnvironmentCrn() + " No User to sync for this environment";
+                LOGGER.warn(message);
+                return SyncStatusDetail.fail(environmentCrn, message);
+            }
 
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
             UsersState ipaUsersState = userIdFilter.isEmpty() ? freeIpaUsersStateProvider.getUsersState(freeIpaClient)

@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,73 +16,65 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Machi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 
 public class UmsState {
-    private Map<String, Group> groupMap;
+    private Map<User, List<Group>> userToGroupsMap;
 
     // Regular users
     private Map<String, User> userMap;
 
-//    private Map<String, GetRightsResponse> userRightsMap;
-
     // Admin Users for an environment.
     private Map<String, User> adminUserMap;
-
-    private Map<String, GetRightsResponse> adminUserRightsMap = new HashMap<>();
 
     private Map<String, MachineUser> adminMachineUserMap = new HashMap<>();
 
     private Map<String, MachineUser> machineUserMap;
 
-//    private Map<String, GetRightsResponse> machineUserRightsMap;
-
-    public UmsState(Map<String, Group> groupMap, Map<String, User> adminUserMap,
+    public UmsState(Map<User, List<Group>> userToGroupsMap, Map<String, User> adminUserMap,
                     Map<String, MachineUser> adminMachineUserMap, Map<String, User> userMap,
                     Map<String, MachineUser> machineUserMap) {
-        this.groupMap = requireNonNull(groupMap);
+
+        this.userToGroupsMap = userToGroupsMap;
         this.adminUserMap = requireNonNull(adminUserMap);
-        this.adminUserRightsMap = requireNonNull(adminUserRightsMap);
         this.adminMachineUserMap = adminMachineUserMap;
         this.userMap = requireNonNull(userMap);
-//        this.userRightsMap = requireNonNull(userRightsMap);
         this.machineUserMap = requireNonNull(machineUserMap);
-//        this.machineUserRightsMap = requireNonNull(machineUserRightsMap);
     }
 
     public UsersState getUsersState(String environmentCrn) {
+
+        //TODO: parse env and get name of env
+        String adminGrpName = "cpd_env_admin_ap-test-env";
         UsersState.Builder builder = new UsersState.Builder();
 
-        Map<String, FmsGroup> crnToGroup = new HashMap<>(groupMap.size());
+        Map<String, FmsGroup> crnToGroup = new HashMap<>();
 
-        // TODO: No need to sync all the groups - remove below code
-        groupMap.entrySet()
+        userToGroupsMap.entrySet()
                 .forEach(e -> {
-                    FmsGroup fmsGroup = umsGroupToGroup(e.getValue());
-                    crnToGroup.put(e.getKey(), fmsGroup);
-                    builder.addGroup(fmsGroup);
+                    // TODO: list of all groups to be added and also membership
+                    FmsUser user = umsUserToUser(e.getKey());
+                    e.getValue().forEach(g -> {
+                        FmsGroup group = umsGroupToGroup(g);
+                        crnToGroup.put(g.getCrn(), group);
+                        builder.addMemberToGroup(group.getName(), user.getName());
+                        builder.addGroup(group);
+                    });
                 });
-
-        // TODO filter users by environment rights - Note: Now UmsState is for the envCrn.
 
         // Regular Users
         userMap.entrySet()
                 .forEach(e -> {
                     FmsUser fmsUser = umsUserToUser(e.getValue());
                     builder.addUser(fmsUser);
-//                    userRightsMap.get(e.getKey()).getGroupCrnList()
-//                            .forEach(crn -> {
-//                                builder.addMemberToGroup(crnToGroup.get(crn).getName(), user.getName());
-//                            });
                 });
 
 
         // env Admin Users
         adminUserMap.entrySet()
             .forEach(adminUser -> {
-                // Admin users are also regular users but must be added to specific group
+                // Admin users are also regular users but must be added to specific group. Admin Users are already added as regular users
                 FmsUser user = umsUserToUser(adminUser.getValue());
-                builder.addUser(user);
                 // TODO remove `admins` membership once the group mapping is figured out (CB-2003, DISTX-95)
                 // TODO: change admins group to cpd_env_admin_<#env_name>, need to parse env crn and pass that group value.
-                builder.addMemberToGroup("admins", user.getName());
+                builder.addMemberToGroup(adminGrpName, user.getName());
             });
 
         // TODO filter machine users by environment rights
@@ -89,20 +82,15 @@ public class UmsState {
                 .forEach(e -> {
                     FmsUser fmsUser = umsMachineUserToUser(e.getValue());
                     builder.addUser(fmsUser);
-//                    machineUserRightsMap.get(e.getKey()).getGroupCrnList()
-//                            .forEach(crn -> builder.addMemberToGroup(crnToGroup.get(crn).getName(), user.getName()));
                 });
 
         // Machine Admin Users
         adminMachineUserMap.entrySet()
                 .forEach(e -> {
                     FmsUser user = umsMachineUserToUser(e.getValue());
-                    builder.addUser(user);
                     // TODO remove `admins` membership once the group mapping is figured out (CB-2003, DISTX-95)
                     // TODO: change admins group to cpd_env_admin_<#env_name>, need to parse env crn and pass that group value.
-                    builder.addMemberToGroup("admins", user.getName());
-//                    machineUserRightsMap.get(e.getKey()).getGroupCrnList()
-//                            .forEach(crn -> builder.addMemberToGroup(crnToGroup.get(crn).getName(), user.getName()));
+                    builder.addMemberToGroup(adminGrpName, user.getName());
                 });
 
         return builder.build();
@@ -152,10 +140,9 @@ public class UmsState {
     @Override
     public String toString() {
         return "UmsState{"
-                + "groupMap=" + groupMap
+                + "userToGroupsMap=" + userToGroupsMap
                 + ", userMap=" + userMap
                 + ", adminUserMap=" + adminUserMap
-                + ", adminUserRightsMap=" + adminUserRightsMap
                 + ", adminMachineUserMap=" + adminMachineUserMap
                 + ", machineUserMap=" + machineUserMap
                 + '}';
@@ -163,6 +150,8 @@ public class UmsState {
 
     public static class Builder {
         private Map<String, Group> groupMap = new HashMap<>();
+
+        private Map<User, List<Group>> userToGroupsMap = new HashMap<>();
 
         private Map<String, User> userMap = new HashMap<>();
 
@@ -177,6 +166,10 @@ public class UmsState {
         private Map<String, MachineUser> machineUserMap = new HashMap<>();
 
 //        private Map<String, GetRightsResponse> machineUserRightsMap = new HashMap<>();
+
+        public void addUserToGroupMap(Map<User, List<Group>> userToGroupsMap) {
+            this.userToGroupsMap = userToGroupsMap;
+        }
 
         public void addGroup(Group group) {
             groupMap.put(group.getCrn(), group);
@@ -207,7 +200,7 @@ public class UmsState {
         }
 
         public UmsState build() {
-            return new UmsState(groupMap, adminUserMap, adminMachineUserMap, userMap, machineUserMap);
+            return new UmsState(userToGroupsMap, adminUserMap, adminMachineUserMap, userMap, machineUserMap);
         }
     }
 }
