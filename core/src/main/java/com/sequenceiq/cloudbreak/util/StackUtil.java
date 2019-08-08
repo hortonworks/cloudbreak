@@ -156,11 +156,12 @@ public class StackUtil {
 
     public String extractClusterManagerIp(StackView stackView) {
         return extractClusterManagerIp(stackView.getId(), stackView.getOrchestrator().getType(),
-                stackView.getClusterView() != null ? stackView.getClusterView().getAmbariIp() : null);
+                stackView.getClusterView() != null ? stackView.getClusterView().getClusterManagerIp() : null);
     }
 
     public String extractClusterManagerIp(Stack stack) {
-        return extractClusterManagerIp(stack.getId(), stack.getOrchestrator().getType(), stack.getCluster() != null ? stack.getCluster().getAmbariIp() : null);
+        return extractClusterManagerIp(stack.getId(), stack.getOrchestrator().getType(),
+                stack.getCluster() != null ? stack.getCluster().getClusterManagerIp() : null);
     }
 
     private String extractClusterManagerIp(long stackId, String orchestratorName, String ambariIp) {

@@ -15,9 +15,9 @@ public class SharedServiceConfigsView {
 
     private String rangerAdminHost;
 
-    private String datalakeAmbariIp;
+    private String datalakeClusterManagerIp;
 
-    private String datalakeAmbariFqdn;
+    private String datalakeClusterManagerFqdn;
 
     private Set<String> datalakeComponents = new HashSet<>();
 
@@ -53,20 +53,20 @@ public class SharedServiceConfigsView {
         this.rangerAdminPort = rangerAdminPort;
     }
 
-    public String getDatalakeAmbariIp() {
-        return datalakeAmbariIp;
+    public String getDatalakeClusterManagerIp() {
+        return datalakeClusterManagerIp;
     }
 
-    public void setDatalakeAmbariIp(String datalakeAmbariIp) {
-        this.datalakeAmbariIp = datalakeAmbariIp;
+    public void setDatalakeClusterManagerIp(String datalakeClusterManagerIp) {
+        this.datalakeClusterManagerIp = datalakeClusterManagerIp;
     }
 
-    public String getDatalakeAmbariFqdn() {
-        return datalakeAmbariFqdn;
+    public String getDatalakeClusterManagerFqdn() {
+        return datalakeClusterManagerFqdn;
     }
 
-    public void setDatalakeAmbariFqdn(String datalakeAmbariFqdn) {
-        this.datalakeAmbariFqdn = datalakeAmbariFqdn;
+    public void setDatalakeClusterManagerFqdn(String datalakeClusterManagerFqdn) {
+        this.datalakeClusterManagerFqdn = datalakeClusterManagerFqdn;
     }
 
     public Set<String> getDatalakeComponents() {

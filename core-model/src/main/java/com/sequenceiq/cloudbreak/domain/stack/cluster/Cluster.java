@@ -97,7 +97,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String statusReason;
 
-    private String ambariIp;
+    private String clusterManagerIp;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -335,12 +335,12 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         }
     }
 
-    public String getAmbariIp() {
-        return ambariIp;
+    public String getClusterManagerIp() {
+        return clusterManagerIp;
     }
 
-    public void setAmbariIp(String ambariIp) {
-        this.ambariIp = ambariIp;
+    public void setClusterManagerIp(String clusterManagerIp) {
+        this.clusterManagerIp = clusterManagerIp;
     }
 
     public boolean isClusterReadyForStop() {

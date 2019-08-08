@@ -62,7 +62,7 @@ public class AmbariPollingServiceProvider {
     public PollingResult ambariStartupPollerObjectPollingService(Stack stack, AmbariClient defaultAmbariClient, AmbariClient cloudbreakAmbariClient) {
         AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(
                 stack,
-                stack.getAmbariIp(),
+                stack.getClusterManagerIp(),
                 Arrays.asList(defaultAmbariClient, cloudbreakAmbariClient));
         return ambariStartupPollerObjectPollingService
                 .pollWithTimeoutSingleFailure(
@@ -73,7 +73,7 @@ public class AmbariPollingServiceProvider {
     }
 
     public PollingResult hostsPollingService(Stack stack, AmbariClient ambariClient, Set<HostMetadata> hostsInCluster) {
-        LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
+        LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getClusterManagerIp());
         return hostsPollingService.pollWithTimeoutSingleFailure(
                 ambariHostsStatusCheckerTask,
                 new AmbariHostsCheckerContext(stack, ambariClient, hostsInCluster, hostsInCluster.size()),

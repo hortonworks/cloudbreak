@@ -26,7 +26,7 @@ public class DatalakeConfigApiConnector {
     }
 
     public DatalakeConfigApi getConnector(Stack stack) {
-        HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), stack.getAmbariIp());
+        HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), stack.getClusterManagerIp());
         return (DatalakeConfigApi) applicationContext.getBean(DatalakeConfigApi.CUMULUS, stack, httpClientConfig);
     }
 }

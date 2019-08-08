@@ -419,7 +419,7 @@ public class ClusterService {
 
     public Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig) {
         Cluster cluster = getCluster(clusterId);
-        cluster.setAmbariIp(ambariClientConfig.getApiAddress());
+        cluster.setClusterManagerIp(ambariClientConfig.getApiAddress());
         cluster = repository.save(cluster);
         LOGGER.debug("Updated cluster: [ambariIp: '{}'].", ambariClientConfig.getApiAddress());
         return cluster;
@@ -587,7 +587,7 @@ public class ClusterService {
         try {
             transactionService.required(() -> {
                 Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-                if (StringUtils.isEmpty(stack.getCluster().getAmbariIp())) {
+                if (StringUtils.isEmpty(stack.getCluster().getClusterManagerIp())) {
                     LOGGER.debug("Cluster server IP was not set before, cleanup cluster operation can be skipped.");
                 } else {
                     Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);

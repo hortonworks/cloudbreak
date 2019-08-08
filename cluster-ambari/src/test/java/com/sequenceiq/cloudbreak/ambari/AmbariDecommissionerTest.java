@@ -207,7 +207,7 @@ public class AmbariDecommissionerTest {
         blueprint.setStackName(ambariName);
 
         Cluster cluster = new Cluster();
-        cluster.setAmbariIp(ipAddress);
+        cluster.setClusterManagerIp(ipAddress);
         cluster.setBlueprint(blueprint);
 
         Stack stack = new Stack();
@@ -268,7 +268,7 @@ public class AmbariDecommissionerTest {
         blueprint.setStackName(ambariName);
 
         Cluster cluster = new Cluster();
-        cluster.setAmbariIp(ipAddress);
+        cluster.setClusterManagerIp(ipAddress);
         cluster.setBlueprint(blueprint);
 
         Stack stack = new Stack();
@@ -330,7 +330,7 @@ public class AmbariDecommissionerTest {
         blueprint.setStackName(ambariName);
 
         Cluster cluster = new Cluster();
-        cluster.setAmbariIp(ipAddress);
+        cluster.setClusterManagerIp(ipAddress);
         cluster.setBlueprint(blueprint);
 
         Stack stack = new Stack();
@@ -393,7 +393,7 @@ public class AmbariDecommissionerTest {
         blueprint.setStackName(ambariName);
 
         Cluster cluster = new Cluster();
-        cluster.setAmbariIp(ipAddress);
+        cluster.setClusterManagerIp(ipAddress);
         cluster.setBlueprint(blueprint);
 
         Stack stack = new Stack();

@@ -145,13 +145,13 @@ public class RdsView {
         return databaseVendor.displayName();
     }
 
-    public String getAmbariVendor() {
+    public String getClusterManagerVendor() {
         return databaseVendor.databaseType();
     }
 
     // For ambari init backward compatibility
     public String getVendor() {
-        return getAmbariVendor();
+        return getClusterManagerVendor();
     }
 
     // For ambari init backward compatibility

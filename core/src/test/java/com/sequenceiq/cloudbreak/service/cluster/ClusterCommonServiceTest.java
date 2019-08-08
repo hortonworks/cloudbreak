@@ -40,7 +40,7 @@ public class ClusterCommonServiceTest {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         cluster.setName("cl1");
-        cluster.setAmbariIp("gatewayIP");
+        cluster.setClusterManagerIp("gatewayIP");
 
         when(hostMetadataService.findHostsInCluster(1L)).thenReturn(generateHostMetadata());
 
@@ -60,7 +60,7 @@ public class ClusterCommonServiceTest {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         cluster.setName("cl1");
-        cluster.setAmbariIp(null);
+        cluster.setClusterManagerIp(null);
 
         when(hostMetadataService.findHostsInCluster(1L)).thenReturn(new HashSet<>());
         // WHEN

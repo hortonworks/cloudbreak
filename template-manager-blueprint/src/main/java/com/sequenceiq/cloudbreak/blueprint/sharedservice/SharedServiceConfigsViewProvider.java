@@ -33,8 +33,8 @@ public class SharedServiceConfigsViewProvider {
             sharedServiceConfigsView.setRangerAdminPassword(serviceDescriptorDataProvider.getRangerAdminPassword(datalakeResource));
             sharedServiceConfigsView.setAttachedCluster(true);
             sharedServiceConfigsView.setDatalakeCluster(false);
-            sharedServiceConfigsView.setDatalakeAmbariIp(datalakeResource.getDatalakeAmbariIp());
-            sharedServiceConfigsView.setDatalakeAmbariFqdn(datalakeResource.getDatalakeAmbariFqdn());
+            sharedServiceConfigsView.setDatalakeClusterManagerIp(datalakeResource.getDatalakeAmbariIp());
+            sharedServiceConfigsView.setDatalakeClusterManagerFqdn(datalakeResource.getDatalakeAmbariFqdn());
             sharedServiceConfigsView.setDatalakeComponents(datalakeResource.getDatalakeComponentSet());
             sharedServiceConfigsView.setRangerAdminPort(rangerPort);
             sharedServiceConfigsView.setRangerAdminHost(serviceDescriptorDataProvider.getRangerAdminHost(datalakeResource));

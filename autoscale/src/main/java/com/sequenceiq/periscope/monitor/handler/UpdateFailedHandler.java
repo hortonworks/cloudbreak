@@ -73,8 +73,8 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             try {
                 String clusterStatus = stackResponse.getCluster().getStatus().name();
                 if (stackStatus.equals(AVAILABLE) && clusterStatus.equals(AVAILABLE)) {
-                    // Ambari server is unreacheable but the stack and cluster statuses are "AVAILABLE"
-                    reportAmbariServerFailure(cluster, stackResponse);
+                    // Cluster manager server is unreacheable but the stack and cluster statuses are "AVAILABLE"
+                    reportClusterManagerServerFailure(cluster, stackResponse);
                     suspendCluster(cluster);
                     LOGGER.debug("Suspend cluster monitoring for cluster {} due to failing update attempts and Cloudbreak stack status {}",
                             autoscaleClusterId, stackStatus);
@@ -113,7 +113,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         clusterService.setState(cluster, ClusterState.SUSPENDED);
     }
 
-    private void reportAmbariServerFailure(Cluster cluster, StackV4Response stackResponse) {
+    private void reportClusterManagerServerFailure(Cluster cluster, StackV4Response stackResponse) {
         Optional<InstanceMetaDataV4Response> pgw = stackResponseUtils.getNotTerminatedPrimaryGateways(stackResponse);
         if (pgw.isPresent()) {
             FailureReportV4Request failureReport = new FailureReportV4Request();

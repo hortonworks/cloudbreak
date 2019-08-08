@@ -22,7 +22,7 @@ public class ClusterView extends CompactView {
     @OneToOne(fetch = FetchType.LAZY)
     private StackView stack;
 
-    private String ambariIp;
+    private String clusterManagerIp;
 
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -36,8 +36,8 @@ public class ClusterView extends CompactView {
         return AuthorizationResource.DATAHUB;
     }
 
-    public String getAmbariIp() {
-        return ambariIp;
+    public String getClusterManagerIp() {
+        return clusterManagerIp;
     }
 
     public Status getStatus() {

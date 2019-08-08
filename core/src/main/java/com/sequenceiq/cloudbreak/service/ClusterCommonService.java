@@ -225,7 +225,7 @@ public class ClusterCommonService {
     public String getHostNamesAsIniString(Cluster cluster, String loginUser) {
         Long clusterId = cluster.getId();
         String clusterName = cluster.getName();
-        String serverHost = cluster.getAmbariIp();
+        String serverHost = cluster.getClusterManagerIp();
 
         Set<HostMetadata> agentHostsSet = hostMetadataService.findHostsInCluster(clusterId);
         if (agentHostsSet.isEmpty()) {

@@ -22,7 +22,7 @@ public class RecipeTestUtil {
 
     public static GeneralClusterConfigs generalClusterConfigs() {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setAmbariIp("10.1.1.1");
+        generalClusterConfigs.setClusterManagerIp("10.1.1.1");
         generalClusterConfigs.setInstanceGroupsPresented(true);
         generalClusterConfigs.setGatewayInstanceMetadataPresented(false);
         generalClusterConfigs.setClusterName("clustername");
@@ -39,7 +39,7 @@ public class RecipeTestUtil {
 
     public static GeneralClusterConfigs generalClusterConfigs(Cluster cluster) {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setAmbariIp(cluster.getAmbariIp());
+        generalClusterConfigs.setClusterManagerIp(cluster.getClusterManagerIp());
         generalClusterConfigs.setInstanceGroupsPresented(true);
         generalClusterConfigs.setGatewayInstanceMetadataPresented(true);
         generalClusterConfigs.setClusterName(cluster.getName());

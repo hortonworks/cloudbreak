@@ -23,7 +23,7 @@ public class ClusterApiConnectors {
     private TlsSecurityService tlsSecurityService;
 
     public ClusterApi getConnector(Stack stack) {
-        HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), stack.getAmbariIp());
+        HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), stack.getClusterManagerIp());
         return (ClusterApi) applicationContext.getBean(stack.getCluster().getVariant(), stack, httpClientConfig);
     }
 

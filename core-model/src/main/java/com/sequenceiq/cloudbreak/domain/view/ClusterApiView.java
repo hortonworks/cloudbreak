@@ -30,7 +30,7 @@ public class ClusterApiView extends CompactView {
     @ManyToOne(fetch = FetchType.EAGER)
     private BlueprintView blueprint;
 
-    private String ambariIp;
+    private String clusterManagerIp;
 
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -74,12 +74,12 @@ public class ClusterApiView extends CompactView {
         this.blueprint = blueprint;
     }
 
-    public String getAmbariIp() {
-        return ambariIp;
+    public String getClusterManagerIp() {
+        return clusterManagerIp;
     }
 
-    public void setAmbariIp(String ambariIp) {
-        this.ambariIp = ambariIp;
+    public void setClusterManagerIp(String clusterManagerIp) {
+        this.clusterManagerIp = clusterManagerIp;
     }
 
     public Status getStatus() {

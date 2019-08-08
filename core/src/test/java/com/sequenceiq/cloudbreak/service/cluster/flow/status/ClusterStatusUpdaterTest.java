@@ -143,7 +143,7 @@ public class ClusterStatusUpdaterTest {
     private Stack createStack(Status stackStatus, Status clusterStatus) {
         Stack stack = createStack(stackStatus);
         Cluster cluster = new Cluster();
-        cluster.setAmbariIp("10.0.0.1");
+        cluster.setClusterManagerIp("10.0.0.1");
         cluster.setId(TEST_CLUSTER_ID);
         cluster.setStatus(clusterStatus);
         Blueprint blueprint = new Blueprint();

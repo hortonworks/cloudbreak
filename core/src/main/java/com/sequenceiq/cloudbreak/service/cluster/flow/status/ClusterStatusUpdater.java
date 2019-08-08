@@ -46,7 +46,7 @@ public class ClusterStatusUpdater {
                     cluster == null ? "" : cluster.getStatus()));
             LOGGER.warn(msg);
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), msg);
-        } else if (cluster != null && cluster.getAmbariIp() != null) {
+        } else if (cluster != null && cluster.getClusterManagerIp() != null) {
             Long stackId = stack.getId();
             clusterService.updateClusterMetadata(stackId);
             String blueprintName = cluster.getBlueprint().getStackName();

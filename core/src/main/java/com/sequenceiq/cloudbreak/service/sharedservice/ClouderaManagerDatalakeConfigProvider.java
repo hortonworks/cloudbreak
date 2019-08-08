@@ -72,9 +72,9 @@ public class ClouderaManagerDatalakeConfigProvider {
     }
 
     public DatalakeResources collectDatalakeResources(Stack datalakeStack, DatalakeConfigApi connector) {
-        String ambariIp = datalakeStack.getAmbariIp();
+        String ambariIp = datalakeStack.getClusterManagerIp();
         String ambariFqdn = datalakeStack.getGatewayInstanceMetadata().isEmpty()
-                ? datalakeStack.getAmbariIp() : datalakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN();
+                ? datalakeStack.getClusterManagerIp() : datalakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN();
         return collectDatalakeResources(datalakeStack.getName(), ambariFqdn, ambariIp, ambariFqdn, connector);
     }
 
