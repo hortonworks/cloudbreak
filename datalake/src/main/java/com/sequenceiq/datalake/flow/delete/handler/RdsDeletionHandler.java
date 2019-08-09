@@ -55,7 +55,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         Selectable response;
         try {
             sdxClusterRepository.findById(sdxId).ifPresent(sdxCluster -> {
-                if (sdxCluster.isCreateDatabase() && Strings.isEmpty(sdxCluster.getDatabaseCrn())) {
+                if (sdxCluster.isCreateDatabase() && Strings.isNotEmpty(sdxCluster.getDatabaseCrn())) {
                     LOGGER.debug("start polling database termination for sdx: {}", sdxId);
                     databaseService.terminate(sdxCluster, requestId);
                 } else {
