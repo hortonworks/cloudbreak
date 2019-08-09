@@ -182,12 +182,28 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSdx(getIfNotNull(source.getSharedService(), sdxConverter::getSdx));
-        request.setWorkloadAnalytics(getIfNotNull(source.getTelemetry(), telemetry -> telemetry.getWorkloadAnalytics() != null));
+        request.setWorkloadAnalytics(isWorkloadAnalyticsEnabled(source, source.getTelemetry()));
         return request;
     }
 
     private CloudPlatform getCloudPlatform(DetailedEnvironmentResponse environment) {
         return CloudPlatform.valueOf(environment.getCloudPlatform());
+    }
+
+    private boolean isWorkloadAnalyticsEnabled(StackV4Request source, TelemetryRequest telemetryRequest) {
+        boolean waEnabled = false;
+        if (telemetryRequest != null && telemetryRequest.getWorkloadAnalytics() != null) {
+            waEnabled = true;
+        }
+        if (!waEnabled) {
+            TelemetryResponse telemetryResponse =
+                    getIfNotNull(source.getEnvironmentCrn(),
+                            crn -> environmentClientService.getByCrn(crn).getTelemetry());
+            if (telemetryConverter.convert(telemetryResponse, true).getWorkloadAnalytics() != null) {
+                waEnabled = true;
+            }
+        }
+        return waEnabled;
     }
 
     private TagsV4Request getTags(TagsV1Request source) {
