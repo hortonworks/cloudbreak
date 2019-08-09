@@ -14,8 +14,14 @@ public class StatusTest {
 
     @ParameterizedTest
     @EnumSource(value = Status.class, names = {"DELETE_IN_PROGRESS", "PRE_DELETE_IN_PROGRESS", "DELETE_FAILED", "DELETE_REQUESTED"})
-    public void testIsDeleteInProgress(Status deleteStatus) {
-        assertTrue(deleteStatus.isDeleteInProgress());
+    public void testIsDeleteInProgressOrFailed(Status deleteStatus) {
+        assertTrue(deleteStatus.isDeleteInProgressOrFailed());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"DELETE_IN_PROGRESS", "PRE_DELETE_IN_PROGRESS", "DELETE_COMPLETED", "DELETE_REQUESTED"})
+    public void testIsDeleteInProgressOrCompleted(Status deleteStatus) {
+        assertTrue(deleteStatus.isDeleteInProgressOrCompleted());
     }
 
     @Test

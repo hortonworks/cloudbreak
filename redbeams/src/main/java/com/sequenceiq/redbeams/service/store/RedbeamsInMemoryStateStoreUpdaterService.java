@@ -20,7 +20,7 @@ public class RedbeamsInMemoryStateStoreUpdaterService {
         LOGGER.info("Update redbems flow state in the memory state by new status: {}", newStatus);
         if (newStatus.isSuccessfullyDeleted()) {
             redbeamsInMemoryStateStoreService.delete(id);
-        } else if (newStatus.isDeleteInProgress()) {
+        } else if (newStatus.isDeleteInProgressOrFailed()) {
             redbeamsInMemoryStateStoreService.registerCancel(id);
         } else {
             redbeamsInMemoryStateStoreService.registerStart(id);
