@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 
 public class GatewayViewTest {
 
@@ -18,7 +19,7 @@ public class GatewayViewTest {
         Assert.assertEquals("simple", gatewayView.getSsoProvider());
         Assert.assertEquals("tokencert", gatewayView.getTokenCert());
         Assert.assertEquals("topology", gatewayView.getTopologyName());
-        Assert.assertEquals(new Json("{}"), gatewayView.getExposedServices());
+        Assert.assertEquals(new Json(new ExposedServices()), gatewayView.getExposedServices());
         Assert.assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
         Assert.assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
     }
