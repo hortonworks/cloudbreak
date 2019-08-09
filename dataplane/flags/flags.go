@@ -1315,6 +1315,20 @@ var (
 			Usage: "location of the JSON file for database server registration",
 		},
 	}
+	FlDatabaseCreationFile = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "database-creation-file",
+			Usage: "location of the JSON file for database creation",
+		},
+	}
+	FlDatabaseRegistrationFile = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "database-registration-file",
+			Usage: "location of the JSON file for database registration",
+		},
+	}
 )
 
 type RequiredFlag struct {

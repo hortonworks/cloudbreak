@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hortonworks/cb-cli/dataplane/api-redbeams/client/database_servers"
+	"github.com/hortonworks/cb-cli/dataplane/api-redbeams/client/databases"
 	"github.com/hortonworks/cb-cli/dataplane/api-redbeams/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
@@ -252,4 +253,142 @@ func DeleteDatabaseServer(c *cli.Context) {
 		commonutils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteDBServer] Deleted database server with CRN: %s Details: %s", crn, result)
+}
+
+var dbListHeader = []string{"Name", "Description", "Crn", "EnvironmentCrn", "DatabaseVendor", "ConnectionURL"}
+
+type dbDetails struct {
+	Name           string `json:"Name" yaml:"Name"`
+	Description    string `json:"Description" yaml:"Description"`
+	CRN            string `json:"CRN" yaml:"CRN"`
+	EnvironmentCrn string `json:"EnvironmentCrn" yaml:"EnvironmentCrn"`
+	DatabaseEngine string `json:"DatabaseEngine" yaml:"DatabaseEngine"`
+	ConnectionURL  string `json:"ConnectionURL" yaml:"ConnectionURL"`
+	CreationDate   int64  `json:"CreationDate" yaml:"CreationDate"`
+}
+
+func (db *dbDetails) DataAsStringArray() []string {
+	return []string{db.Name, db.Description, db.CRN, db.EnvironmentCrn, db.DatabaseEngine, db.ConnectionURL, string(db.CreationDate)}
+}
+
+func NewDetailsFromDbResponse(r *model.DatabaseV4Response) *dbDetails {
+	details := &dbDetails{
+		Name:           *r.Name,
+		CRN:            r.Crn,
+		EnvironmentCrn: r.EnvironmentCrn,
+		ConnectionURL:  *r.ConnectionURL,
+		CreationDate:   r.CreationDate,
+	}
+
+	if r.Description != nil {
+		details.Description = *r.Description
+	}
+	if r.DatabaseEngine != nil {
+		details.DatabaseEngine = *r.DatabaseEngine
+	}
+
+	return details
+}
+
+func ListDatabases(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "List databases in environment")
+	envCrn := c.String(fl.FlEnvironmentCrn.Name)
+	redbeamsDbClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.Databases
+
+	log.Infof("[ListDBs] Listing databases in environment: %s", envCrn)
+	resp, err := redbeamsDbClient.ListDatabases(databases.NewListDatabasesParams().WithEnvironmentCrn(envCrn), nil)
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+
+	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+
+	var tableRows []commonutils.Row
+
+	for _, response := range resp.Payload.Responses {
+		row := NewDetailsFromDbResponse(response)
+		tableRows = append(tableRows, row)
+	}
+	output.WriteList(dbListHeader, tableRows)
+}
+
+func GetDatabase(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "Get a database")
+	envCrn := c.String(fl.FlEnvironmentCrn.Name)
+	name := c.String(fl.FlName.Name)
+	redbeamsDbClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.Databases
+
+	log.Infof("[GetDB] Getting database with name: %s", name)
+	resp, err := redbeamsDbClient.GetDatabase(databases.NewGetDatabaseParams().WithEnvironmentCrn(envCrn).WithName(name), nil)
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	db := resp.Payload
+
+	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+	row := NewDetailsFromDbResponse(db)
+	output.Write(serverListHeader, row)
+}
+
+func CreateDatabase(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "Create a database")
+	fileLocation := c.String(fl.FlDatabaseCreationFile.Name)
+
+	log.Infof("[CreateDB] Creating database from file: %s", fileLocation)
+	content := commonutils.ReadFile(fileLocation)
+	var req model.CreateDatabaseV4Request
+	err := json.Unmarshal(content, &req)
+	if err != nil {
+		msg := fmt.Sprintf(`Invalid JSON: %s`, err.Error())
+		commonutils.LogErrorMessageAndExit(msg)
+	}
+
+	log.Infof("[CreateDB] JSON read, creating database with name: %s", *req.DatabaseName)
+	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
+	result, err := redbeamsDbServerClient.CreateDatabaseOnServer(database_servers.NewCreateDatabaseOnServerParams().WithBody(&req))
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+
+	log.Infof("[DeleteDBServer] Created database with name: %s Details: %s", *req.DatabaseName, result)
+}
+
+func RegisterDatabase(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "Register database")
+	fileLocation := c.String(fl.FlDatabaseRegistrationFile.Name)
+
+	log.Infof("[RegisterDB] Registering database server from file: %s", fileLocation)
+	content := commonutils.ReadFile(fileLocation)
+	var req model.DatabaseV4Request
+	err := json.Unmarshal(content, &req)
+	if err != nil {
+		msg := fmt.Sprintf(`Invalid JSON: %s`, err.Error())
+		commonutils.LogErrorMessageAndExit(msg)
+	}
+
+	log.Infof("[RegisterDB] JSON read, registering database with name: %s", *req.Name)
+	redbeamsDbClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.Databases
+	resp, err := redbeamsDbClient.RegisterDatabase(databases.NewRegisterDatabaseParams().WithBody(&req), nil)
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	db := resp.Payload
+
+	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+	row := NewDetailsFromDbResponse(db)
+	output.Write(statusListHeader, row)
+}
+
+func DeleteDatabase(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "Delete a registered database")
+	envCrn := c.String(fl.FlEnvironmentCrn.Name)
+	name := c.String(fl.FlName.Name)
+	redbeamsDbClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.Databases
+
+	log.Infof("[DeleteDB] Deleting database with name: %s", name)
+	result, err := redbeamsDbClient.DeleteDatabase(databases.NewDeleteDatabaseParams().WithEnvironmentCrn(envCrn).WithName(name), nil)
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	log.Infof("[DeleteDB] Deleted database with name: %s Details: %s", name, result)
 }

@@ -121,6 +121,72 @@ func init() {
 					},
 				},
 			},
+			{
+				Name:  "db",
+				Usage: "manage redbeams databases",
+				Subcommands: []cli.Command{
+					{
+						Name:   "list",
+						Usage:  "list all databases",
+						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Action: redbeams.ListDatabases,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn).AddAuthenticationFlags().AddOutputFlag().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "describe",
+						Usage:  "describe a database",
+						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Action: redbeams.GetDatabase,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "create",
+						Usage:  "create a database",
+						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlDatabaseCreationFile).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Action: redbeams.CreateDatabase,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlDatabaseCreationFile).AddAuthenticationFlags().AddOutputFlag().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "register",
+						Usage:  "register a database",
+						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlDatabaseRegistrationFile).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Action: redbeams.RegisterDatabase,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlDatabaseRegistrationFile).AddAuthenticationFlags().AddOutputFlag().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:   "delete",
+						Usage:  "delete a database",
+						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().Build(),
+						Action: redbeams.DeleteDatabase,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+				},
+			},
 		},
 	})
 }
