@@ -297,6 +297,7 @@ public class SdxService {
         sdxCluster.setStatus(SdxClusterStatus.DELETE_REQUESTED);
         sdxClusterRepository.save(sdxCluster);
         sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
+        sdxReactorFlowManager.cancelRunningFlows(sdxCluster.getId());
         LOGGER.info("SDX delete triggered: {}", sdxCluster.getClusterName());
     }
 

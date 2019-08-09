@@ -30,6 +30,7 @@ public enum Status {
 
     private static final List<Status> IS_REMOVABLE_STATUS_LIST = Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED,
             ENABLE_SECURITY_FAILED, DELETE_FAILED, DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED);
+
     private static final List<Status> IS_AVAILABLE_LIST = Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED);
 
     public boolean isRemovableStatus() {
@@ -48,7 +49,14 @@ public enum Status {
         return DELETE_COMPLETED.equals(this);
     }
 
-    public boolean isDeleteInProgress() {
+    public boolean isDeleteInProgressOrCompleted() {
+        return PRE_DELETE_IN_PROGRESS.equals(this)
+                || DELETE_IN_PROGRESS.equals(this)
+                || DELETE_COMPLETED.equals(this)
+                || DELETE_REQUESTED.equals(this);
+    }
+
+    public boolean isDeleteInProgressOrFailed() {
         return PRE_DELETE_IN_PROGRESS.equals(this)
                 || DELETE_IN_PROGRESS.equals(this)
                 || DELETE_FAILED.equals(this)

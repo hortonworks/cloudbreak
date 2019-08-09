@@ -6,6 +6,7 @@ import java.util.function.Function;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -48,14 +49,24 @@ public class DatabaseService {
 
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env, String requestId) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
-        DatabaseServerStatusV4Response resp = redbeamsClient
-                .withCrn(threadBasedUserCrnProvider.getUserCrn())
-                .databaseServerV4Endpoint().create(getDatabaseRequest(env));
-            sdxCluster.setDatabaseCrn(resp.getResourceCrn());
-            sdxCluster.setStatus(SdxClusterStatus.EXTERNAL_DATABASE_CREATION_IN_PROGRESS);
-            sdxClusterRepository.save(sdxCluster);
-        return waitAndGetDatabase(sdxCluster, resp.getResourceCrn(),
-                Status::isAvailable, Status.CREATE_FAILED::equals, requestId);
+        String dbResourceCrn;
+        if (dbHasBeenCreatedPreviously(sdxCluster)) {
+            dbResourceCrn = sdxCluster.getDatabaseCrn();
+        } else {
+            dbResourceCrn = redbeamsClient
+                    .withCrn(threadBasedUserCrnProvider.getUserCrn())
+                    .databaseServerV4Endpoint().create(getDatabaseRequest(env))
+                    .getResourceCrn();
+            sdxCluster.setDatabaseCrn(dbResourceCrn);
+        }
+        sdxCluster.setStatus(SdxClusterStatus.EXTERNAL_DATABASE_CREATION_IN_PROGRESS);
+        sdxClusterRepository.save(sdxCluster);
+        return waitAndGetDatabase(sdxCluster, dbResourceCrn,
+                Status::isAvailable, status -> status.isDeleteInProgressOrCompleted() || Status.CREATE_FAILED.equals(status), requestId);
+    }
+
+    private boolean dbHasBeenCreatedPreviously(SdxCluster sdxCluster) {
+        return Strings.isNotEmpty(sdxCluster.getDatabaseCrn());
     }
 
     private void saveStatus(SdxCluster cluster, SdxClusterStatus status) {
