@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class DistroXClusterToClusterConverter {
@@ -30,7 +31,7 @@ public class DistroXClusterToClusterConverter {
     private ClouderaManagerV1ToClouderaManagerV4Converter cmConverter;
 
     @Inject
-    private CloudStorageLocationsToCloudStorageConverter cloudStorageConverter;
+    private CloudStorageDecorator cloudStorageDecorator;
 
     @Inject
     private GatewayV1ToGatewayV4Converter gatewayConverter;
@@ -42,6 +43,10 @@ public class DistroXClusterToClusterConverter {
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     public ClusterV4Request convert(DistroXClusterV1Request source) {
+        return convert(source, null);
+    }
+
+    public ClusterV4Request convert(DistroXClusterV1Request source, DetailedEnvironmentResponse environment) {
         ClusterV4Request response = new ClusterV4Request();
         if (isEmpty(source.getExposedServices())) {
             source.setExposedServices(List.of("ALL"));
@@ -55,7 +60,7 @@ public class DistroXClusterToClusterConverter {
         response.setPassword(source.getPassword());
         response.setProxyConfigCrn(getIfNotNull(source.getProxy(), this::getProxyCrnByName));
         response.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
-        response.setCloudStorage(cloudStorageConverter.convert(source.getCloudStorage(), environment));
+        response.setCloudStorage(cloudStorageDecorator.decorate(source.getCloudStorage(), environment));
         response.setValidateBlueprint(source.getValidateBlueprint());
         response.setExecutorType(ExecutorType.DEFAULT);
         response.setCustomContainer(null);
