@@ -29,6 +29,9 @@ type SdxClusterResponse struct {
 	// crn
 	Crn string `json:"crn,omitempty"`
 
+	// database server crn
+	DatabaseServerCrn string `json:"databaseServerCrn,omitempty"`
+
 	// environment crn
 	EnvironmentCrn string `json:"environmentCrn,omitempty"`
 

@@ -22,17 +22,18 @@ import (
 var sdxClusterHeader = []string{"Crn", "Name", "EnvironmentName", "EnvironmentCrn", "StackCrn", "Status", "StatusReason"}
 
 type sdxClusterOutput struct {
-	Crn            string `json:"Crn" yaml:"Crn"`
-	Name           string `json:"Name" yaml:"Name"`
-	Environment    string `json:"environmentName" yaml:"environmentName"`
-	EnvironmentCrn string `json:"environmentCrn" yaml:"environmentCrn"`
-	StackCrn       string `json:"stackCrn" yaml:"stackCrn"`
-	Status         string `json:"Status" yaml:"Status"`
-	StatusReason   string `json:"StatusReason" yaml:"StatusReason"`
+	Crn               string `json:"Crn" yaml:"Crn"`
+	Name              string `json:"Name" yaml:"Name"`
+	Environment       string `json:"environmentName" yaml:"environmentName"`
+	EnvironmentCrn    string `json:"environmentCrn" yaml:"environmentCrn"`
+	StackCrn          string `json:"stackCrn" yaml:"stackCrn"`
+	DatabaseServerCrn string `json:"databaseServerCrn" yaml:"databaseServerCrn"`
+	Status            string `json:"Status" yaml:"Status"`
+	StatusReason      string `json:"StatusReason" yaml:"StatusReason"`
 }
 
 func (r *sdxClusterOutput) DataAsStringArray() []string {
-	return []string{r.Crn, r.Name, r.Environment, r.EnvironmentCrn, r.StackCrn, r.Status, r.StatusReason}
+	return []string{r.Crn, r.Name, r.Environment, r.EnvironmentCrn, r.StackCrn, r.DatabaseServerCrn, r.Status, r.StatusReason}
 }
 
 type ClientSdx oauth.Sdx
@@ -197,6 +198,7 @@ func listSdxClusterImpl(client clientSdx, envName string, writer func([]string, 
 			sdxCluster.EnvironmentName,
 			sdxCluster.EnvironmentCrn,
 			sdxCluster.StackCrn,
+			sdxCluster.DatabaseServerCrn,
 			sdxCluster.Status,
 			sdxCluster.StatusReason})
 	}
@@ -221,6 +223,7 @@ func DescribeSdx(c *cli.Context) {
 		sdxCluster.EnvironmentName,
 		sdxCluster.EnvironmentCrn,
 		sdxCluster.StackCrn,
+		sdxCluster.DatabaseServerCrn,
 		sdxCluster.Status,
 		sdxCluster.StatusReason})
 	log.Infof("[DescribeSdx] Describe a particular SDX cluster")
