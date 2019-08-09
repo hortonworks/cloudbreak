@@ -9,13 +9,13 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters
 import org.junit.Before;
 import org.junit.Test;
 
-public class NetworkV4BaseTest {
+public class NetworkV4StackBaseTest {
 
-    private NetworkV4Base underTest;
+    private NetworkV4StackBase underTest;
 
     @Before
     public void setUp() throws Exception {
-        underTest = new NetworkV4Base();
+        underTest = new NetworkV4StackBase();
     }
 
     @Test

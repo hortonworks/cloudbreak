@@ -35,9 +35,9 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
@@ -169,7 +169,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return networkParameterAdder.addNetworkParameters(new HashMap<>(), chosenSubnetIds);
     }
 
-    private Network buildNetwork(NetworkV4Request source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
+    private Network buildNetwork(NetworkV4StackRequest source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
         Network network = new Network();
         network.setName(generateNetworkName());
 
@@ -189,7 +189,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return network;
     }
 
-    private DatabaseServer buildDatabaseServer(DatabaseServerV4Request source, String name, Crn ownerCrn, SecurityAccessResponse securityAccessResponse) {
+    private DatabaseServer buildDatabaseServer(DatabaseServerV4StackRequest source, String name, Crn ownerCrn, SecurityAccessResponse securityAccessResponse) {
         DatabaseServer server = new DatabaseServer();
         server.setAccountId(ownerCrn.getAccountId());
         server.setName(generateDatabaseServerName());
@@ -224,7 +224,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
      * @param securityAccessResponse - environment data
      * @return returns the saved security groups. If none is specified, then an empty security gorup is returned.
      */
-    private SecurityGroup buildExistingSecurityGroup(SecurityGroupV4Request source, SecurityAccessResponse securityAccessResponse) {
+    private SecurityGroup buildExistingSecurityGroup(SecurityGroupV4StackRequest source, SecurityAccessResponse securityAccessResponse) {
         SecurityGroup securityGroup = new SecurityGroup();
         if (source != null) {
             securityGroup.setSecurityGroupIds(source.getSecurityGroupIds());

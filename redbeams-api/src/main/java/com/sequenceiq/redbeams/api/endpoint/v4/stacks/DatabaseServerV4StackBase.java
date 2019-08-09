@@ -9,7 +9,7 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescript
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class DatabaseServerV4Base extends ProviderParametersBase {
+public class DatabaseServerV4StackBase extends ProviderParametersBase {
 
     @ApiModelProperty(DatabaseServerModelDescriptions.INSTANCE_TYPE)
     private String instanceType;
