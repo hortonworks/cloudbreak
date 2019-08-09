@@ -336,7 +336,13 @@
             "roleType": "SERVER"
           }
         ],
-        "serviceType": "ZOOKEEPER"
+        "serviceType": "ZOOKEEPER",
+        "serviceConfigs": [
+          {
+            "name": "service_config_suppression_server_count_validator",
+            "value": "true"
+          }
+        ]
       },
       {
         "serviceType": "KNOX",
