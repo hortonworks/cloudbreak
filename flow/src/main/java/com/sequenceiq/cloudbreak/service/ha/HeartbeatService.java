@@ -214,7 +214,7 @@ public class HeartbeatService {
             for (Long resourceId : deletingResourceIds) {
                 if (isStackTerminationExecutedByAnotherNode(resourceId, terminatingStacksByCurrentNode)) {
                     Set<String> runningFlowIds = flowLogService.findAllRunningNonTerminationFlowIdsByStackId(resourceId);
-                    if (hasRunningNonTerminationFlowOnThisNode(runningFlowIds)) {
+                    if (haApplication.isRunningOnThisNode(runningFlowIds)) {
                         LOGGER.info("Found termination flow on a different node for stack: {}", resourceId);
                         cancelRunningFlow(resourceId);
                     } else {
@@ -251,10 +251,6 @@ public class HeartbeatService {
             }
         }
         return Collections.emptyList();
-    }
-
-    private boolean hasRunningNonTerminationFlowOnThisNode(Collection<String> runningFlowIds) {
-        return runningFlowIds.stream().anyMatch(id -> runningFlows.getFlowChainId(id) != null);
     }
 
     private void cancelEveryFlowWithoutDbUpdate() {

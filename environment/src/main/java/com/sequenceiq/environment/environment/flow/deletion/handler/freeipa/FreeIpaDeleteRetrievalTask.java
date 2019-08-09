@@ -34,6 +34,8 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
                 if (!freeIpaResponse.getStatus().isSuccessfullyDeleted()) {
                     return false;
                 }
+            } else {
+                LOGGER.info("Freeipa response is null");
             }
         } catch (NotFoundException nfe) {
             return true;

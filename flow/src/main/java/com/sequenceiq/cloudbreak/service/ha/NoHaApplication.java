@@ -25,4 +25,9 @@ public class NoHaApplication implements HaApplication {
     public void cancelRunningFlow(Long resourceId) {
 
     }
+
+    @Override
+    public boolean isRunningOnThisNode(Set<String> runningFlowIds) {
+        return true;
+    }
 }

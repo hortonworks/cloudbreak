@@ -23,6 +23,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.flow.core.FlowRegister;
 
 @Primary
 @Component
@@ -37,9 +38,12 @@ public class EnvironmentHaApplication implements HaApplication {
 
     private final EnvironmentReactorFlowManager reactorFlowManager;
 
-    public EnvironmentHaApplication(EnvironmentService environmentService, EnvironmentReactorFlowManager reactorFlowManager) {
+    private final FlowRegister runningFlows;
+
+    public EnvironmentHaApplication(EnvironmentService environmentService, EnvironmentReactorFlowManager reactorFlowManager, FlowRegister runningFlows) {
         this.environmentService = environmentService;
         this.reactorFlowManager = reactorFlowManager;
+        this.runningFlows = runningFlows;
     }
 
     @Override
@@ -66,5 +70,10 @@ public class EnvironmentHaApplication implements HaApplication {
             EnvironmentInMemoryStateStore.put(resourceId, PollGroup.CANCELLED);
             reactorFlowManager.cancelRunningFlows(resourceId, environmentDto.getName(), environmentDto.getResourceCrn());
         }, () -> LOGGER.error("Cannot cancel the flow, because the environment does not exist: {}", resourceId));
+    }
+
+    @Override
+    public boolean isRunningOnThisNode(Set<String> runningFlowIds) {
+        return runningFlowIds.stream().anyMatch(id -> runningFlows.get(id) != null);
     }
 }

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryResourceStateStore;
 import com.sequenceiq.cloudbreak.service.ha.HaApplication;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.flow.core.FlowRegister;
 
 @Primary
 @Component
@@ -29,6 +30,9 @@ public class SdxHaApplication implements HaApplication {
 
     @Inject
     private SdxReactorFlowManager reactorFlowManager;
+
+    @Inject
+    private FlowRegister runningFlows;
 
     @Override
     public Set<Long> getDeletingResources(Set<Long> resourceIds) {
@@ -50,5 +54,10 @@ public class SdxHaApplication implements HaApplication {
     public void cancelRunningFlow(Long resourceId) {
         InMemoryResourceStateStore.putResource(RESOURCE_TYPE, resourceId, PollGroup.CANCELLED);
         reactorFlowManager.cancelRunningFlows(resourceId);
+    }
+
+    @Override
+    public boolean isRunningOnThisNode(Set<String> runningFlowIds) {
+        return runningFlowIds.stream().anyMatch(id -> runningFlows.get(id) != null);
     }
 }

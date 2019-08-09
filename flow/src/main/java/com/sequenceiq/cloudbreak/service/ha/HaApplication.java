@@ -10,4 +10,6 @@ public interface HaApplication {
     void cleanupInMemoryStore(Long resourceId);
 
     void cancelRunningFlow(Long resourceId);
+
+    boolean isRunningOnThisNode(Set<String> runningFlowIds);
 }
