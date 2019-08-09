@@ -50,13 +50,7 @@
             "roleType": "SERVER"
           }
         ],
-        "serviceType": "ZOOKEEPER",
-        "serviceConfigs": [
-          {
-            "name": "service_config_suppression_server_count_validator",
-            "value": "true"
-          }
-        ]
+        "serviceType": "ZOOKEEPER"
       },
       {
         "refName": "ranger",
@@ -120,10 +114,6 @@
               {
                 "name": "atlas_kafka_bootstrap_servers",
                 "value": "{{{format-join host_groups.master format='%s:9092' }}}"
-              },
-              {
-                "name": "atlas_authentication_method_file",
-                "value": "false"
               }
             ],
             "refName": "atlas-ATLAS_SERVER-BASE",
@@ -207,13 +197,7 @@
           {
             "base": true,
             "refName": "hdfs-NAMENODE-BASE",
-            "roleType": "NAMENODE",
-            "configs": [
-              {
-                "name": "service_config_suppression_nameservice_namenodes_heap_size_validator",
-                "value": "true"
-              }
-            ]
+            "roleType": "NAMENODE"
           },
           {
             "base": true,
@@ -223,13 +207,7 @@
           {
             "base": true,
             "refName": "hdfs-DATANODE-BASE",
-            "roleType": "DATANODE",
-            "configs": [
-              {
-                 "name": "service_config_suppression_datanode_count_validator",
-                 "value": "true"
-              }
-            ]
+            "roleType": "DATANODE"
           },
           {
             "base": true,
@@ -274,20 +252,8 @@
             "value": "1"
           },
           {
-            "name": "service_config_suppression_offsets.topic.replication.factor",
-            "value": "true"
-          },
-          {
             "name": "transaction.state.log.replication.factor",
             "value": "1"
-          },
-          {
-            "name": "service_config_suppression_transaction.state.log.replication.factor",
-            "value": "true"
-          },
-          {
-            "name": "service_config_suppression_kafka_broker_count_validator",
-            "value": "true"
           },
           {
             "name": "transaction.state.log.min.isr",
