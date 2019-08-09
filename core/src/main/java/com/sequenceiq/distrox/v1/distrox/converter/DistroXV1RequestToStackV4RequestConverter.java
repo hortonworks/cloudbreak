@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Component;
 
@@ -129,7 +128,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
 
     private TelemetryRequest getTelemetryRequest(DistroXV1Request source, DetailedEnvironmentResponse environment) {
         TelemetryResponse envTelemetryResp = environment != null ? environment.getTelemetry() : null;
-        boolean workloadAnalytics = ObjectUtils.defaultIfNull(source.getWorkloadAnalytics(), true);
+        boolean workloadAnalytics = true;
         return telemetryConverter.convert(envTelemetryResp, workloadAnalytics);
     }
 
