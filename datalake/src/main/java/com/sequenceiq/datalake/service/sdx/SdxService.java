@@ -103,7 +103,7 @@ public class SdxService {
         }
     }
 
-    public SdxCluster getByAccountIdAndSdxName(String userCrn, String name) {
+    public SdxCluster getSdxByNameInAccount(String userCrn, String name) {
         LOGGER.info("Searching for SDX cluster by name {}", name);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name);
