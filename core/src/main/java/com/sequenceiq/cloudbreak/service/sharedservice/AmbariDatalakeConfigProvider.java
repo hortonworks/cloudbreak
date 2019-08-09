@@ -161,11 +161,13 @@ public class AmbariDatalakeConfigProvider {
                     .getBlueprintSecretParams()
                     .getMap()
                     .get(RANGER_ADMIN_PWD_KEY));
+
             sharedServiceConfigsView.setRangerAdminPort((String) datalakeResources.getServiceDescriptorMap()
                     .get(RANGER_SERVICE)
                     .getBlueprintParams()
                     .getMap()
                     .getOrDefault(RANGER_HTTPPORT_KEY, DEFAULT_RANGER_PORT));
+
             sharedServiceConfigsView.setRangerAdminHost((String) datalakeResources.getServiceDescriptorMap()
                     .get(RANGER_SERVICE)
                     .getComponentsHosts()
