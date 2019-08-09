@@ -1,5 +1,7 @@
 package com.sequenceiq.sdx.api.model;
 
+import com.sequenceiq.common.model.FileSystemType;
+
 public class SdxClusterResponse {
 
     private String crn;
@@ -20,12 +22,17 @@ public class SdxClusterResponse {
 
     private Long created;
 
+    private String cloudStorageBaseLocation;
+
+    private FileSystemType cloudStorageFileSystemType;
+
     public SdxClusterResponse() {
     }
 
     public SdxClusterResponse(String crn, String name, SdxClusterStatusResponse status,
             String statusReason, String environmentName, String environmentCrn, String stackCrn,
-            SdxClusterShape clusterShape) {
+            SdxClusterShape clusterShape,
+            String cloudStorageBaseLocation, FileSystemType cloudStorageFileSystemType) {
         this.crn = crn;
         this.name = name;
         this.status = status;
@@ -34,6 +41,8 @@ public class SdxClusterResponse {
         this.environmentCrn = environmentCrn;
         this.stackCrn = stackCrn;
         this.clusterShape = clusterShape;
+        this.cloudStorageBaseLocation = cloudStorageBaseLocation;
+        this.cloudStorageFileSystemType = cloudStorageFileSystemType;
     }
 
     public String getCrn() {
@@ -106,5 +115,21 @@ public class SdxClusterResponse {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public String getCloudStorageBaseLocation() {
+        return cloudStorageBaseLocation;
+    }
+
+    public void setCloudStorageBaseLocation(String cloudStorageBaseLocation) {
+        this.cloudStorageBaseLocation = cloudStorageBaseLocation;
+    }
+
+    public FileSystemType getCloudStorageFileSystemType() {
+        return cloudStorageFileSystemType;
+    }
+
+    public void setCloudStorageFileSystemType(FileSystemType cloudStorageFileSystemType) {
+        this.cloudStorageFileSystemType = cloudStorageFileSystemType;
     }
 }

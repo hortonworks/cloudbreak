@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Entity
@@ -82,6 +83,12 @@ public class SdxCluster implements AccountIdAwareResource {
     private boolean createDatabase;
 
     private String databaseCrn;
+
+    @Column(columnDefinition = "TEXT")
+    private String cloudStorageBaseLocation;
+
+    @Enumerated(EnumType.STRING)
+    private FileSystemType cloudStorageFileSystemType;
 
     public Long getId() {
         return id;
@@ -233,5 +240,21 @@ public class SdxCluster implements AccountIdAwareResource {
 
     public void setDatabaseCrn(String databaseCrn) {
         this.databaseCrn = databaseCrn;
+    }
+
+    public String getCloudStorageBaseLocation() {
+        return cloudStorageBaseLocation;
+    }
+
+    public void setCloudStorageBaseLocation(String cloudStorageBaseLocation) {
+        this.cloudStorageBaseLocation = cloudStorageBaseLocation;
+    }
+
+    public FileSystemType getCloudStorageFileSystemType() {
+        return cloudStorageFileSystemType;
+    }
+
+    public void setCloudStorageFileSystemType(FileSystemType cloudStorageFileSystemType) {
+        this.cloudStorageFileSystemType = cloudStorageFileSystemType;
     }
 }
