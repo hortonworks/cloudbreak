@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSyste
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -164,5 +165,27 @@ public class CloudStorageManifesterTest {
                         anyString(),
                         anyString(),
                         anyBoolean(), anyBoolean())).thenReturn(dummyResponses);
+    }
+
+    @Test
+    public void throwErrorWhenS3LocationInvalid() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("AWS baselocation missing protocol. please specify s3a://");
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("cloudbreakbucket/something");
+        S3CloudStorageV1Parameters params = new S3CloudStorageV1Parameters();
+        params.setInstanceProfile("instanceProfile");
+        cloudStorageRequest.setS3(params);
+        underTest.validateCloudStorage(CloudPlatform.AWS.toString(), cloudStorageRequest);
+    }
+
+    @Test
+    public void okWhenS3LocationIsValid() {
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("s3a://cloudbreakbucket/something");
+        S3CloudStorageV1Parameters params = new S3CloudStorageV1Parameters();
+        params.setInstanceProfile("instanceProfile");
+        cloudStorageRequest.setS3(params);
+        underTest.validateCloudStorage(CloudPlatform.AWS.toString(), cloudStorageRequest);
     }
 }

@@ -38,7 +38,7 @@ public class CloudStorageManifester {
     private CloudbreakServiceUserCrnClient cloudbreakClient;
 
     public CloudStorageRequest initCloudStorageRequest(DetailedEnvironmentResponse environment, String blueprint,
-        SdxCluster sdxCluster, SdxClusterRequest clusterRequest) {
+            SdxCluster sdxCluster, SdxClusterRequest clusterRequest) {
         SdxCloudStorageRequest cloudStorage = clusterRequest.getCloudStorage();
         validateCloudStorage(environment.getCloudPlatform(), cloudStorage);
 
@@ -54,6 +54,17 @@ public class CloudStorageManifester {
         setStorageParameters(environment, cloudStorageRequest);
         setIdentities(environment, cloudStorage, cloudStorageRequest);
         return cloudStorageRequest;
+    }
+
+    protected void validateCloudStorage(String cloudPlatform, SdxCloudStorageRequest cloudStorage) {
+        if (CloudPlatform.AWS.name().equalsIgnoreCase(cloudPlatform)) {
+            if (cloudStorage.getS3() == null || StringUtils.isEmpty(cloudStorage.getS3().getInstanceProfile())) {
+                throw new BadRequestException("instance profile must be defined for S3");
+            }
+            if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.S3.getProtocol() + "://")) {
+                throw new BadRequestException("AWS baselocation missing protocol. please specify s3a://");
+            }
+        }
     }
 
     private void setStorageLocations(FileSystemParameterV4Responses fileSystemRecommendations, CloudStorageRequest cloudStorageRequest) {
@@ -83,8 +94,8 @@ public class CloudStorageManifester {
     }
 
     private void setIdentities(DetailedEnvironmentResponse environment,
-        SdxCloudStorageRequest cloudStorage,
-        CloudStorageRequest cloudStorageRequest) {
+            SdxCloudStorageRequest cloudStorage,
+            CloudStorageRequest cloudStorageRequest) {
         addIdBrokerIdentity(cloudStorage, cloudStorageRequest);
         addLogIdentity(environment, cloudStorageRequest);
     }
@@ -123,14 +134,6 @@ public class CloudStorageManifester {
 
     private boolean isLoggingConfigured(DetailedEnvironmentResponse environment) {
         return environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null;
-    }
-
-    private void validateCloudStorage(String cloudPlatform, SdxCloudStorageRequest cloudStorage) {
-        if (CloudPlatform.AWS.name().equalsIgnoreCase(cloudPlatform)) {
-            if (cloudStorage.getS3() == null || StringUtils.isEmpty(cloudStorage.getS3().getInstanceProfile())) {
-                throw new BadRequestException("instance profile must be defined for S3");
-            }
-        }
     }
 
     private FileSystemParameterV4Responses getFileSystemRecommendations(String userCrn, String blueprint,

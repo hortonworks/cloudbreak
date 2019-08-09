@@ -24,6 +24,7 @@ public class SdxClusterConverter {
         sdxClusterResponse.setCreated(sdxCluster.getCreated());
         sdxClusterResponse.setCloudStorageBaseLocation(sdxCluster.getCloudStorageBaseLocation());
         sdxClusterResponse.setCloudStorageFileSystemType(sdxCluster.getCloudStorageFileSystemType());
+        sdxClusterResponse.setDatabaseServerCrn(sdxCluster.getDatabaseCrn());
         return sdxClusterResponse;
     }
 }

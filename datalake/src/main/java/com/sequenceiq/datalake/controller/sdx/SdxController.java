@@ -76,7 +76,7 @@ public class SdxController extends NotificationController implements SdxEndpoint
     @Override
     public SdxClusterResponse get(String name) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByAccountIdAndSdxName(userCrn, name);
+        SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
     }
 
@@ -107,22 +107,20 @@ public class SdxController extends NotificationController implements SdxEndpoint
 
     @Override
     public void repairCluster(String clusterCrn, SdxRepairRequest clusterRepairRequest) {
-        throw new UnsupportedOperationException("Repair is not yet supported for SDX");
-        // String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        //repairService.triggerRepair(userCrn, clusterCrn, clusterRepairRequest);
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        repairService.triggerRepair(userCrn, clusterCrn, clusterRepairRequest);
     }
 
     @Override
     public void repairClusterCrn(String clusterCrn, SdxRepairRequest clusterRepairRequest) {
-        throw new UnsupportedOperationException("Repair is not yet supported for SDX");
-        // String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        //repairService.triggerRepair(userCrn, clusterCrn, clusterRepairRequest);
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        repairService.triggerRepair(userCrn, clusterCrn, clusterRepairRequest);
     }
 
     @Override
     public SdxClusterDetailResponse getDetail(String name, Set<String> entries) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByAccountIdAndSdxName(userCrn, name);
+        SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
         StackV4Response stackV4Response = sdxService.getDetail(userCrn, name, entries);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);

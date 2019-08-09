@@ -18,6 +18,8 @@ public class SdxClusterResponse {
 
     private String environmentCrn;
 
+    private String databaseServerCrn;
+
     private String stackCrn;
 
     private Long created;
@@ -87,6 +89,14 @@ public class SdxClusterResponse {
 
     public String getEnvironmentCrn() {
         return environmentCrn;
+    }
+
+    public String getDatabaseServerCrn() {
+        return databaseServerCrn;
+    }
+
+    public void setDatabaseServerCrn(String databaseServerCrn) {
+        this.databaseServerCrn = databaseServerCrn;
     }
 
     public void setEnvironmentCrn(String environmentCrn) {
