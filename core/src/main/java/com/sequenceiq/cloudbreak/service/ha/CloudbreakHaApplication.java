@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowRegister;
 
 @Primary
 @Component
@@ -27,6 +28,9 @@ public class CloudbreakHaApplication implements HaApplication {
 
     @Inject
     private ReactorFlowManager reactorFlowManager;
+
+    @Inject
+    private FlowRegister runningFlows;
 
     @Override
     public Set<Long> getDeletingResources(Set<Long> resourceIds) {
@@ -54,5 +58,10 @@ public class CloudbreakHaApplication implements HaApplication {
     public void cancelRunningFlow(Long resourceId) {
         InMemoryStateStore.putStack(resourceId, PollGroup.CANCELLED);
         reactorFlowManager.cancelRunningFlows(resourceId);
+    }
+
+    @Override
+    public boolean isRunningOnThisNode(Set<String> runningFlowIds) {
+        return runningFlowIds.stream().anyMatch(id -> runningFlows.getFlowChainId(id) != null);
     }
 }

@@ -23,4 +23,9 @@ public class EnvironmentFlowInformation implements ApplicationFlowInformation {
     public List<String> getAllowedParallelFlows() {
         return List.of(START_FREEIPA_DELETE_EVENT.event());
     }
+
+    @Override
+    public List<Class<? extends FlowConfiguration<?>>> getTerminationFlow() {
+        return List.of(EnvDeleteFlowConfig.class);
+    }
 }

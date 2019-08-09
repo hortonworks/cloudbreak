@@ -11,7 +11,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIp
 
 public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIpaPollerObject> {
 
-    public static final int FREEIPA_RETRYING_INTERVAL = 5000;
+    public static final int FREEIPA_RETRYING_INTERVAL = 25000;
 
     public static final int FREEIPA_RETRYING_COUNT = 900;
 
@@ -43,6 +43,8 @@ public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIp
             } else if (freeIpa.getStatus().isAvailable()) {
                 return true;
             }
+        } catch (FreeIpaOperationFailedException e) {
+            throw e;
         } catch (Exception e) {
             throw new FreeIpaOperationFailedException(e.getMessage(), e);
         }

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.service.ha.HaApplication;
+import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -28,6 +29,9 @@ public class FreeIpaHaApplication implements HaApplication {
 
     @Inject
     private FreeIpaFlowManager reactorFlowManager;
+
+    @Inject
+    private FlowRegister runningFlows;
 
     @Override
     public Set<Long> getDeletingResources(Set<Long> resourceIds) {
@@ -51,5 +55,10 @@ public class FreeIpaHaApplication implements HaApplication {
     public void cancelRunningFlow(Long resourceId) {
         InMemoryStateStore.putStack(resourceId, PollGroup.CANCELLED);
         reactorFlowManager.cancelRunningFlows(resourceId);
+    }
+
+    @Override
+    public boolean isRunningOnThisNode(Set<String> runningFlowIds) {
+        return runningFlowIds.stream().anyMatch(id -> runningFlows.get(id) != null);
     }
 }
