@@ -93,23 +93,26 @@ public class UmsUsersStateProvider {
         // for all users, check right for the passed envCRN
         for (User u : allUsers) {
 
-            // TODO: check for power user by getting roles.
-            GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, u.getCrn(), envCRN, Optional.empty());
-            List<RoleAssignment> roles = rights.getRoleAssignmentList();
-            if (roles == null || roles.size() > 0) {
-                for (RoleAssignment roleAssignment : roles) {
-                    Role role = roleAssignment.getRole();
-                    if (role.getCrn().toLowerCase().contains("Power".toLowerCase())) {
-                        // power user
-                        umsStateBuilder.addAdminUser(u);
-                        umsStateBuilder.addUser(u, null);
-                        break;
-                    }
-                }
-
-            } else if (umsClient.checkRight(actorCrn, u.getCrn(), "environments/setPassword", envCRN, Optional.empty())) {
-                //            if (true) {
+            if (umsClient.checkRight(actorCrn, u.getCrn(), "environments/setPassword", envCRN, Optional.empty())) {
+                // if (true) {
                 umsStateBuilder.addUser(u, null);
+            } else {
+                // TODO: check for power user by getting roles.
+                GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, u.getCrn(), envCRN, Optional.empty());
+                List<RoleAssignment> roles = rights.getRoleAssignmentList();
+                if (roles == null || roles.size() > 0) {
+                    for (RoleAssignment roleAssignment : roles) {
+                        Role role = roleAssignment.getRole();
+                        // TODO: this is hard coded, need to get from ROLES ENUM
+                        if (role.getCrn().toLowerCase().contains("Power".toLowerCase())) {
+                            // power userx
+                            umsStateBuilder.addAdminUser(u);
+                            umsStateBuilder.addUser(u, null);
+                            break;
+                        }
+                    }
+
+                }
             }
         }
 

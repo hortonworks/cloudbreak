@@ -1,11 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -16,6 +10,12 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class FreeIpaClientFactory {
@@ -60,6 +60,8 @@ public class FreeIpaClientFactory {
         try {
             return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
                     httpClientConfig, stack.getGatewayport().toString()).build();
+//            return new FreeIpaClientBuilder(ADMIN_USER, "1rkhav53a44jf7h9bip9c855dq", freeIpa.getDomain().toUpperCase(),
+//                    httpClientConfig, stack.getGatewayport().toString()).build();
         } catch (Exception e) {
             throw new FreeIpaClientException("Couldn't build FreeIPA client. "
                     + "Check if the FreeIPA security rules have not changed and the instance is in running state. " + e.getLocalizedMessage(), e);
