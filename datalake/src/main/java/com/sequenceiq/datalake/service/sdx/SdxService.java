@@ -146,6 +146,10 @@ public class SdxService {
         validateDatabaseRequest(sdxCluster, environment);
         sdxCluster.setEnvName(environment.getName());
         sdxCluster.setEnvCrn(environment.getCrn());
+        if (isCloudStorageConfigured(sdxClusterRequest)) {
+            sdxCluster.setCloudStorageBaseLocation(sdxClusterRequest.getCloudStorage().getBaseLocation());
+            sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
+        }
 
         setTagsSafe(sdxClusterRequest, sdxCluster);
         stackV4Request = prepareStackRequest(sdxClusterRequest, stackV4Request, sdxCluster, environment);
