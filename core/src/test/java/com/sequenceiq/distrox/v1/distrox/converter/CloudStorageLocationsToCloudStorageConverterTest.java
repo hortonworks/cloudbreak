@@ -1,12 +1,10 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +15,6 @@ import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 class CloudStorageLocationsToCloudStorageConverterTest {
@@ -67,7 +63,7 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         telemetry.setLogging(new LoggingResponse());
         environment.setTelemetry(telemetry);
 
-        CloudStorageRequest result = underTest.convert(new HashSet<>(), environment);
+        CloudStorageRequest result = underTest.convert(null, environment);
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
@@ -86,9 +82,11 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         StorageLocationBase storageLocationBase = new StorageLocationBase();
         storageLocationBase.setType(eStorageLocationType);
         storageLocationBase.setValue(eStorageLocationValue);
-        Set<StorageLocationBase> storageLocations = Set.of(storageLocationBase);
+        List<StorageLocationBase> storageLocations = List.of(storageLocationBase);
+        CloudStorageRequest request = new CloudStorageRequest();
+        request.setLocations(storageLocations);
 
-        CloudStorageRequest result = underTest.convert(storageLocations, environment);
+        CloudStorageRequest result = underTest.convert(request, environment);
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
@@ -102,26 +100,13 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         StorageLocationBase storageLocationBase = new StorageLocationBase();
         storageLocationBase.setType(eStorageLocationType);
         storageLocationBase.setValue(eStorageLocationValue);
-        Set<StorageLocationBase> storageLocations = Set.of(storageLocationBase);
+        List<StorageLocationBase> storageLocations = List.of(storageLocationBase);
+        CloudStorageRequest request = new CloudStorageRequest();
+        request.setLocations(storageLocations);
 
-        CloudStorageRequest result = underTest.convert(storageLocations, new DetailedEnvironmentResponse());
+        CloudStorageRequest result = underTest.convert(request, new DetailedEnvironmentResponse());
 
         assertNotNull(result);
         assertTrue(result.getLocations().stream().anyMatch(loc -> eStorageLocationType.equals(loc.getType()) && eStorageLocationValue.equals(loc.getValue())));
-    }
-
-    @Test
-    void testConvertWhenEnvironmentHasS3GuardConfigured() {
-        String expectedDynameTableName = "MYDYNAMODBTABLENAME";
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        AwsEnvironmentParameters awsEnvironmentParameters = AwsEnvironmentParameters.builder().
-                withS3guard(S3GuardRequestParameters.builder().withDynamoDbTableName(expectedDynameTableName).build())
-                .build();
-        environment.setAws(awsEnvironmentParameters);
-
-        CloudStorageRequest result = underTest.convert(null, environment);
-
-        assertNotNull(result);
-        assertEquals(expectedDynameTableName, result.getAws().getS3Guard().getDynamoTableName());
     }
 }
