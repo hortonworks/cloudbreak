@@ -115,7 +115,10 @@ public class ClusterTemplateLoaderService {
             if (defaultTemplate.isPresent()) {
                 defaultTemplate
                         .filter(defaultTmplBase64 -> isTemplatesContentDifferent(templateInDB, defaultTmplBase64))
-                        .ifPresent(defaultTmplBase64 -> outdatedTemplates.add(templateInDB));
+                        .ifPresent(defaultTmplBase64 -> {
+                            templateInDB.setStatus(ResourceStatus.OUTDATED);
+                            outdatedTemplates.add(templateInDB);
+                        });
             } else {
                 templateInDB.setStatus(ResourceStatus.OUTDATED);
                 outdatedTemplates.add(templateInDB);
