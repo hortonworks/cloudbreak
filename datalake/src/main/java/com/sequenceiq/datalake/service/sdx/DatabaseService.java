@@ -22,7 +22,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
@@ -84,8 +84,8 @@ public class DatabaseService {
         return req;
     }
 
-    private DatabaseServerV4Request getDatabaseServerRequest(DetailedEnvironmentResponse env) {
-        DatabaseServerV4Request req = new DatabaseServerV4Request();
+    private DatabaseServerV4StackRequest getDatabaseServerRequest(DetailedEnvironmentResponse env) {
+        DatabaseServerV4StackRequest req = new DatabaseServerV4StackRequest();
         req.setInstanceType("db.m3.medium");
         req.setDatabaseVendor("postgres");
         req.setStorageSize(STORAGE_SIZE);

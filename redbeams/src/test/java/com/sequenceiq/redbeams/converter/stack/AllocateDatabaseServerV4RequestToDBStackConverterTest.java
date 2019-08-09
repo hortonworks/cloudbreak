@@ -49,9 +49,9 @@ import com.sequenceiq.environment.api.v1.environment.model.response.LocationResp
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -110,11 +110,11 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private AllocateDatabaseServerV4Request allocateRequest;
 
-    private NetworkV4Request networkRequest;
+    private NetworkV4StackRequest networkRequest;
 
-    private DatabaseServerV4Request databaseServerRequest;
+    private DatabaseServerV4StackRequest databaseServerRequest;
 
-    private SecurityGroupV4Request securityGroupRequest;
+    private SecurityGroupV4StackRequest securityGroupRequest;
 
     @Before
     public void setUp() throws Exception {
@@ -123,13 +123,13 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         allocateRequest = new AllocateDatabaseServerV4Request();
 
-        networkRequest = new NetworkV4Request();
+        networkRequest = new NetworkV4StackRequest();
         allocateRequest.setNetwork(networkRequest);
 
-        databaseServerRequest = new DatabaseServerV4Request();
+        databaseServerRequest = new DatabaseServerV4StackRequest();
         allocateRequest.setDatabaseServer(databaseServerRequest);
 
-        securityGroupRequest = new SecurityGroupV4Request();
+        securityGroupRequest = new SecurityGroupV4StackRequest();
         databaseServerRequest.setSecurityGroup(securityGroupRequest);
 
         when(clock.getCurrentInstant()).thenReturn(NOW);
