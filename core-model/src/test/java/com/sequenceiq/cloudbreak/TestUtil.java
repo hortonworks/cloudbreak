@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
-import com.sequenceiq.cloudbreak.workspace.authorization.api.WorkspaceRole;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -64,6 +63,7 @@ import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -84,6 +84,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsNotificationDetails;
 import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.cloudbreak.workspace.authorization.api.WorkspaceRole;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -710,9 +711,11 @@ public class TestUtil {
     }
 
     public static Gateway gatewayEnabledWithExposedKnoxServices(String... exposedKnoxServices) {
-        Gateway gateway =  gatewayEnabled();
+        Gateway gateway = gatewayEnabled();
         GatewayTopology gatewayTopology = new GatewayTopology();
-        gatewayTopology.setExposedServices(new Json(exposedKnoxServices));
+        ExposedServices exposedServices = new ExposedServices();
+        exposedServices.setServices(List.of(exposedKnoxServices));
+        gatewayTopology.setExposedServices(new Json(exposedServices));
         gateway.setTopologies(Sets.newHashSet(gatewayTopology));
         return gateway;
     }
