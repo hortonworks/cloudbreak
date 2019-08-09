@@ -17,30 +17,29 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
-class CloudStorageLocationsToCloudStorageConverterTest {
+class CloudStorageDecoratorTest {
 
-    private CloudStorageLocationsToCloudStorageConverter underTest;
+    private CloudStorageDecorator underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new CloudStorageLocationsToCloudStorageConverter();
+        underTest = new CloudStorageDecorator();
     }
 
     @Test
-    void testConvertWhenEnvironmentDoesNotHaveTelemetry() {
-        CloudStorageRequest result = underTest.convert(null, new DetailedEnvironmentResponse());
+    void testConvertWhenEnvironmentAndStorageRequestAreNull() {
+        CloudStorageRequest result = underTest.decorate(null, null);
 
         assertNull(result);
     }
 
     @Test
-    void testConvertWhenEnvironmentsTelemetryDoesNotHaveLogging() {
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setTelemetry(new TelemetryResponse());
+    void testConvertWhenEnvironmentIsNullAndCloudStorageRequestIsNot() {
+        CloudStorageRequest request = new CloudStorageRequest();
 
-        CloudStorageRequest result = underTest.convert(null, environment);
+        CloudStorageRequest result = underTest.decorate(request, null);
 
-        assertNull(result);
+        assertNotNull(result);
     }
 
     @Test
@@ -50,7 +49,7 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         telemetry.setLogging(new LoggingResponse());
         environment.setTelemetry(telemetry);
 
-        CloudStorageRequest result = underTest.convert(null, environment);
+        CloudStorageRequest result = underTest.decorate(null, environment);
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
@@ -63,7 +62,7 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         telemetry.setLogging(new LoggingResponse());
         environment.setTelemetry(telemetry);
 
-        CloudStorageRequest result = underTest.convert(null, environment);
+        CloudStorageRequest result = underTest.decorate(null, environment);
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
@@ -86,7 +85,7 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         CloudStorageRequest request = new CloudStorageRequest();
         request.setLocations(storageLocations);
 
-        CloudStorageRequest result = underTest.convert(request, environment);
+        CloudStorageRequest result = underTest.decorate(request, environment);
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
@@ -104,7 +103,7 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         CloudStorageRequest request = new CloudStorageRequest();
         request.setLocations(storageLocations);
 
-        CloudStorageRequest result = underTest.convert(request, new DetailedEnvironmentResponse());
+        CloudStorageRequest result = underTest.decorate(request, new DetailedEnvironmentResponse());
 
         assertNotNull(result);
         assertTrue(result.getLocations().stream().anyMatch(loc -> eStorageLocationType.equals(loc.getType()) && eStorageLocationValue.equals(loc.getValue())));
