@@ -13,17 +13,17 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// SecurityGroupV4Request security group v4 request
-// swagger:model SecurityGroupV4Request
-type SecurityGroupV4Request struct {
+// SecurityGroupV4StackRequest security group v4 stack request
+// swagger:model SecurityGroupV4StackRequest
+type SecurityGroupV4StackRequest struct {
 
 	// Exisiting security group ID(s) for the database server
 	// Unique: true
 	SecurityGroupIds []string `json:"securityGroupIds"`
 }
 
-// Validate validates this security group v4 request
-func (m *SecurityGroupV4Request) Validate(formats strfmt.Registry) error {
+// Validate validates this security group v4 stack request
+func (m *SecurityGroupV4StackRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateSecurityGroupIds(formats); err != nil {
@@ -36,7 +36,7 @@ func (m *SecurityGroupV4Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SecurityGroupV4Request) validateSecurityGroupIds(formats strfmt.Registry) error {
+func (m *SecurityGroupV4StackRequest) validateSecurityGroupIds(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.SecurityGroupIds) { // not required
 		return nil
@@ -50,7 +50,7 @@ func (m *SecurityGroupV4Request) validateSecurityGroupIds(formats strfmt.Registr
 }
 
 // MarshalBinary interface implementation
-func (m *SecurityGroupV4Request) MarshalBinary() ([]byte, error) {
+func (m *SecurityGroupV4StackRequest) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -58,8 +58,8 @@ func (m *SecurityGroupV4Request) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *SecurityGroupV4Request) UnmarshalBinary(b []byte) error {
-	var res SecurityGroupV4Request
+func (m *SecurityGroupV4StackRequest) UnmarshalBinary(b []byte) error {
+	var res SecurityGroupV4StackRequest
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

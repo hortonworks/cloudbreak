@@ -12,9 +12,9 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NetworkV4Request network v4 request
-// swagger:model NetworkV4Request
-type NetworkV4Request struct {
+// NetworkV4StackRequest network v4 stack request
+// swagger:model NetworkV4StackRequest
+type NetworkV4StackRequest struct {
 
 	// AWS-specific parameters for the network
 	Aws *AwsNetworkV4Parameters `json:"aws,omitempty"`
@@ -23,8 +23,8 @@ type NetworkV4Request struct {
 	Azure *AzureNetworkV4Parameters `json:"azure,omitempty"`
 }
 
-// Validate validates this network v4 request
-func (m *NetworkV4Request) Validate(formats strfmt.Registry) error {
+// Validate validates this network v4 stack request
+func (m *NetworkV4StackRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAws(formats); err != nil {
@@ -41,7 +41,7 @@ func (m *NetworkV4Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *NetworkV4Request) validateAws(formats strfmt.Registry) error {
+func (m *NetworkV4StackRequest) validateAws(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Aws) { // not required
 		return nil
@@ -59,7 +59,7 @@ func (m *NetworkV4Request) validateAws(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *NetworkV4Request) validateAzure(formats strfmt.Registry) error {
+func (m *NetworkV4StackRequest) validateAzure(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Azure) { // not required
 		return nil
@@ -78,7 +78,7 @@ func (m *NetworkV4Request) validateAzure(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *NetworkV4Request) MarshalBinary() ([]byte, error) {
+func (m *NetworkV4StackRequest) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -86,8 +86,8 @@ func (m *NetworkV4Request) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *NetworkV4Request) UnmarshalBinary(b []byte) error {
-	var res NetworkV4Request
+func (m *NetworkV4StackRequest) UnmarshalBinary(b []byte) error {
+	var res NetworkV4StackRequest
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

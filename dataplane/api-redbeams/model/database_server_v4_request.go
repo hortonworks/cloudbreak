@@ -10,56 +10,86 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
-// DatabaseServerV4Request database server v4 request
+// DatabaseServerV4Request Request containing information about a database server to be registered
 // swagger:model DatabaseServerV4Request
 type DatabaseServerV4Request struct {
-
-	// AWS-specific parameters for the database server
-	Aws *AwsDatabaseServerV4Parameters `json:"aws,omitempty"`
-
-	// Azure-specific parameters for the database server
-	Azure *AzureDatabaseServerV4Parameters `json:"azure,omitempty"`
 
 	// Name of the JDBC connection driver (for example: 'org.postgresql.Driver')
 	ConnectionDriver string `json:"connectionDriver,omitempty"`
 
-	// Name of the database vendor (MYSQL, POSTGRES, ...)
-	DatabaseVendor string `json:"databaseVendor,omitempty"`
-
-	// Instance type of the database server
-	InstanceType string `json:"instanceType,omitempty"`
-
-	// Port of the database server
-	Port int32 `json:"port,omitempty"`
+	// Password of the administrative user of the database server
+	// Required: true
+	ConnectionPassword *string `json:"connectionPassword"`
 
 	// Username of the administrative user of the database server
-	RootUserName string `json:"rootUserName,omitempty"`
+	// Required: true
+	ConnectionUserName *string `json:"connectionUserName"`
 
-	// Password of the administrative user of the database server
-	RootUserPassword string `json:"rootUserPassword,omitempty"`
+	// Name of the database vendor (MYSQL, POSTGRES, ...)
+	// Required: true
+	DatabaseVendor *string `json:"databaseVendor"`
 
-	// Security group of the database server
-	SecurityGroup *SecurityGroupV4Request `json:"securityGroup,omitempty"`
+	// Description of the database server
+	// Max Length: 1000000
+	// Min Length: 0
+	Description *string `json:"description,omitempty"`
 
-	// Storage size of the database server, in GB
-	StorageSize int64 `json:"storageSize,omitempty"`
+	// CRN of the environment of the database server
+	// Required: true
+	EnvironmentCrn *string `json:"environmentCrn"`
+
+	// Host of the database server
+	// Required: true
+	Host *string `json:"host"`
+
+	// Name of the database server
+	// Required: true
+	// Max Length: 100
+	// Min Length: 5
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
+	Name *string `json:"name"`
+
+	// Port of the database server
+	// Required: true
+	Port *int32 `json:"port"`
 }
 
 // Validate validates this database server v4 request
 func (m *DatabaseServerV4Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAws(formats); err != nil {
+	if err := m.validateConnectionPassword(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateAzure(formats); err != nil {
+	if err := m.validateConnectionUserName(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateSecurityGroup(formats); err != nil {
+	if err := m.validateDatabaseVendor(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateDescription(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateEnvironmentCrn(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateHost(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePort(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -69,55 +99,93 @@ func (m *DatabaseServerV4Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *DatabaseServerV4Request) validateAws(formats strfmt.Registry) error {
+func (m *DatabaseServerV4Request) validateConnectionPassword(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Aws) { // not required
-		return nil
-	}
-
-	if m.Aws != nil {
-		if err := m.Aws.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("aws")
-			}
-			return err
-		}
+	if err := validate.Required("connectionPassword", "body", m.ConnectionPassword); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (m *DatabaseServerV4Request) validateAzure(formats strfmt.Registry) error {
+func (m *DatabaseServerV4Request) validateConnectionUserName(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Azure) { // not required
-		return nil
-	}
-
-	if m.Azure != nil {
-		if err := m.Azure.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("azure")
-			}
-			return err
-		}
+	if err := validate.Required("connectionUserName", "body", m.ConnectionUserName); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (m *DatabaseServerV4Request) validateSecurityGroup(formats strfmt.Registry) error {
+func (m *DatabaseServerV4Request) validateDatabaseVendor(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.SecurityGroup) { // not required
+	if err := validate.Required("databaseVendor", "body", m.DatabaseVendor); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DatabaseServerV4Request) validateDescription(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Description) { // not required
 		return nil
 	}
 
-	if m.SecurityGroup != nil {
-		if err := m.SecurityGroup.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("securityGroup")
-			}
-			return err
-		}
+	if err := validate.MinLength("description", "body", string(*m.Description), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("description", "body", string(*m.Description), 1000000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DatabaseServerV4Request) validateEnvironmentCrn(formats strfmt.Registry) error {
+
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DatabaseServerV4Request) validateHost(formats strfmt.Registry) error {
+
+	if err := validate.Required("host", "body", m.Host); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DatabaseServerV4Request) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("name", "body", string(*m.Name), 5); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("name", "body", string(*m.Name), 100); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DatabaseServerV4Request) validatePort(formats strfmt.Registry) error {
+
+	if err := validate.Required("port", "body", m.Port); err != nil {
+		return err
 	}
 
 	return nil

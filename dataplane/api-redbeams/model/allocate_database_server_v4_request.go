@@ -22,7 +22,7 @@ type AllocateDatabaseServerV4Request struct {
 
 	// Database server information for the database stack
 	// Required: true
-	DatabaseServer *DatabaseServerV4Request `json:"databaseServer"`
+	DatabaseServer *DatabaseServerV4StackRequest `json:"databaseServer"`
 
 	// CRN of the environment of the database server
 	// Required: true
@@ -35,7 +35,7 @@ type AllocateDatabaseServerV4Request struct {
 	Name string `json:"name,omitempty"`
 
 	// Network information for the database stack
-	Network *NetworkV4Request `json:"network,omitempty"`
+	Network *NetworkV4StackRequest `json:"network,omitempty"`
 }
 
 // Validate validates this allocate database server v4 request
