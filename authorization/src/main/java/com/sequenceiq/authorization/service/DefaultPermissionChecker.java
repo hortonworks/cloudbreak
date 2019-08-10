@@ -1,7 +1,6 @@
 package com.sequenceiq.authorization.service;
 
 import java.lang.annotation.Annotation;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -24,17 +23,8 @@ public class DefaultPermissionChecker implements PermissionChecker<CheckPermissi
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         CheckPermission methodAnnotation = (CheckPermission) rawMethodAnnotation;
         ResourceAction action = methodAnnotation.action();
-        Object proceed = commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
-        if (proceed instanceof Optional<?>) {
-            Optional<?> optionalResult = (Optional<?>) proceed;
-            if (!optionalResult.isPresent()) {
-                return proceed;
-            }
-            commonPermissionCheckingUtils.checkPermissionForUser(resource, action, userCrn);
-        } else {
-            commonPermissionCheckingUtils.checkPermissionForUser(resource, action, userCrn);
-        }
-        return proceed;
+        commonPermissionCheckingUtils.checkPermissionForUser(resource, action, userCrn);
+        return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
     }
 
     @Override
