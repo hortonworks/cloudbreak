@@ -86,7 +86,7 @@ public class TelemetryDecoratorTest {
         assertEquals(results.get("enabled"), true);
         assertEquals(results.get("platform"), CloudPlatform.AWS.name());
         assertEquals(results.get("user"), "root");
-        verify(fluentConfigService, times(1)).createFluentConfigs(anyString(), anyString(), anyString(),
+        verify(fluentConfigService, times(1)).createFluentConfigs(anyString(), anyString(),
                 anyBoolean(), anyBoolean(), any(Telemetry.class));
         verify(meteringConfigService, times(1)).createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
                 anyString());
@@ -203,7 +203,7 @@ public class TelemetryDecoratorTest {
             MeteringConfigView meteringConfigView) {
         given(databusConfigService.createDatabusConfigs(anyString(), any(), isNull(), isNull()))
                 .willReturn(databusConfigView);
-        given(fluentConfigService.createFluentConfigs(anyString(), anyString(), anyString(),
+        given(fluentConfigService.createFluentConfigs(anyString(), anyString(),
                 anyBoolean(), anyBoolean(), any(Telemetry.class)))
                 .willReturn(fluentConfigView);
         given(meteringConfigService.createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
