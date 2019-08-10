@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.service.stack;
 
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -8,6 +9,7 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.repository.DBStackRepository;
@@ -47,7 +49,14 @@ public class DBStackService {
 
     public Optional<DBStack> getByCrn(Crn crn) {
         return dbStackRepository.findByResourceCrn(crn);
+    }
 
+    public Set<Long> findAllDeleting() {
+        return dbStackRepository.findAllByStatusIn(Status.getDeletingStatuses());
+    }
+
+    public Set<Long> findAllDeletingById(Set<Long> dbStackIds) {
+        return dbStackRepository.findAllByIdInAndStatusIn(dbStackIds, Status.getDeletingStatuses());
     }
 
     public DBStack save(DBStack dbStack) {

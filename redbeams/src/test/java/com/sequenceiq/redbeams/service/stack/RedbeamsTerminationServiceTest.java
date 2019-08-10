@@ -68,7 +68,7 @@ class RedbeamsTerminationServiceTest {
 
         verify(dbStackStatusUpdater).updateStatus(DBSTACK_ID, DetailedDBStackStatus.DELETE_REQUESTED);
         InOrder inOrder = Mockito.inOrder(flowManager);
-        inOrder.verify(flowManager).cancelRunningFlowsIfNeeded(DBSTACK_ID);
+        inOrder.verify(flowManager).cancelRunningFlows(DBSTACK_ID);
         inOrder.verify(flowManager).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
     }
 
@@ -84,7 +84,7 @@ class RedbeamsTerminationServiceTest {
                 "DatabaseServer with crn '" + DATABASE_SERVER_CRN + "' is already being deleted");
 
         verify(dbStackStatusUpdater, never()).updateStatus(anyLong(), any());
-        verify(flowManager, never()).cancelRunningFlowsIfNeeded(DBSTACK_ID);
+        verify(flowManager, never()).cancelRunningFlows(DBSTACK_ID);
         verify(flowManager, never()).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
     }
 }

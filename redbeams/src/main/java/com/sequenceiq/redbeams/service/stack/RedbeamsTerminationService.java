@@ -52,7 +52,7 @@ public class RedbeamsTerminationService {
         }
 
         dbStack = dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.DELETE_REQUESTED);
-        flowManager.cancelRunningFlowsIfNeeded(dbStack.getId());
+        flowManager.cancelRunningFlows(dbStack.getId());
         flowManager.notify(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(),
                 new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(), dbStack.getId()));
         return dbStack;
