@@ -9,6 +9,7 @@ import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
+import com.sequenceiq.redbeams.service.store.RedbeamsInMemoryStateStoreUpdaterService;
 
 @Component
 public class DBStackStatusUpdater {
@@ -18,6 +19,9 @@ public class DBStackStatusUpdater {
 
     @Inject
     private Clock clock;
+
+    @Inject
+    private RedbeamsInMemoryStateStoreUpdaterService redbeamsInMemoryStateStoreUpdaterService;
 
     public DBStack updateStatus(Long dbStackId, DetailedDBStackStatus detailedStatus) {
         return updateStatus(dbStackId, detailedStatus, "");
@@ -34,6 +38,7 @@ public class DBStackStatusUpdater {
             updatedStatus.setId(dbStackId);
             dbStack.setDBStackStatus(updatedStatus);
             dbStack = dbStackService.save(dbStack);
+            redbeamsInMemoryStateStoreUpdaterService.update(dbStackId, updatedStatus.getStatus());
         }
         return dbStack;
     }

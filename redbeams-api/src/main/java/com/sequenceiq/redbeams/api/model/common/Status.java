@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.api.model.common;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public enum Status {
     REQUESTED,
@@ -41,5 +42,20 @@ public enum Status {
 
     public boolean isStopPhaseActive() {
         return name().contains("STOP");
+    }
+
+    public boolean isSuccessfullyDeleted() {
+        return DELETE_COMPLETED.equals(this);
+    }
+
+    public boolean isDeleteInProgress() {
+        return PRE_DELETE_IN_PROGRESS.equals(this)
+                || DELETE_IN_PROGRESS.equals(this)
+                || DELETE_FAILED.equals(this)
+                || DELETE_REQUESTED.equals(this);
+    }
+
+    public static Set<Status> getDeletingStatuses() {
+        return Set.of(PRE_DELETE_IN_PROGRESS, DELETE_REQUESTED, DELETE_FAILED, DELETE_IN_PROGRESS, DELETE_COMPLETED);
     }
 }

@@ -1,6 +1,8 @@
 package com.sequenceiq.redbeams.service.stack;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,8 +15,10 @@ import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
+import com.sequenceiq.redbeams.service.store.RedbeamsInMemoryStateStoreUpdaterService;
 
 public class DBStackStatusUpdaterTest {
 
@@ -23,6 +27,9 @@ public class DBStackStatusUpdaterTest {
 
     @Mock
     private Clock clock;
+
+    @Mock
+    private RedbeamsInMemoryStateStoreUpdaterService redbeamsInMemoryStateStoreUpdaterService;
 
     @InjectMocks
     private DBStackStatusUpdater underTest;
@@ -52,6 +59,7 @@ public class DBStackStatusUpdaterTest {
         DBStack savedStack = underTest.updateStatus(1L, DetailedDBStackStatus.PROVISIONED, "because");
 
         verify(dbStackService).save(dbStack);
+        verify(redbeamsInMemoryStateStoreUpdaterService).update(1L, Status.AVAILABLE);
 
         DBStackStatus dbStackStatus = savedStack.getDbStackStatus();
         assertEquals(dbStack, dbStackStatus.getDBStack());
@@ -68,6 +76,7 @@ public class DBStackStatusUpdaterTest {
         underTest.updateStatus(1L, DetailedDBStackStatus.PROVISIONED, "because");
 
         verify(dbStackService, never()).save(dbStack);
+        verify(redbeamsInMemoryStateStoreUpdaterService, never()).update(anyLong(), any());
     }
 
 }
