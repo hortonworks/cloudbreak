@@ -69,7 +69,7 @@ public class ClouderaManagerMgmtTelemetryService {
 
     private static final String TELEMETRY_UPLOAD_LOGS = "telemetry.upload.job.logs";
 
-    private static final String TELEMETRY_WA_DEFAULT_CLUSTER_TYPE = "DISTROX";
+    private static final String TELEMETRY_WA_DEFAULT_CLUSTER_TYPE = "DATALAKE";
 
     @Inject
     private ClouderaManagerExternalAccountService externalAccountService;
