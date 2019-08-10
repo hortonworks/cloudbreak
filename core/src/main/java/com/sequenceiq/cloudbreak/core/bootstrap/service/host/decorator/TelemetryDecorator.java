@@ -9,17 +9,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.service.altus.AltusIAMService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigView;
-import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.service.altus.AltusIAMService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 /**
@@ -49,10 +49,6 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 @Component
 public class TelemetryDecorator {
 
-    private static final String CLUSTER_TYPE_DISTROX = "datahub";
-
-    private static final String CLUSTER_TYPE_SDX = "datalake";
-
     private final String version;
 
     private final DatabusConfigService databusConfigService;
@@ -78,8 +74,9 @@ public class TelemetryDecorator {
     public Map<String, SaltPillarProperties> decoratePillar(Map<String, SaltPillarProperties> servicePillar,
             Stack stack, Telemetry telemetry) {
         Optional<AltusCredential> altusCredential = altusIAMService.generateDatabusMachineUserForFluent(stack, telemetry);
-        String clusterType = StackType.DATALAKE.equals(stack.getType()) ? CLUSTER_TYPE_SDX : CLUSTER_TYPE_DISTROX;
-        String serviceType = StackType.WORKLOAD.equals(stack.getType()) ? CLUSTER_TYPE_DISTROX.toUpperCase() : "";
+        String clusterType = StackType.DATALAKE.equals(stack.getType())
+                ? FluentClusterType.DATALAKE.value() : FluentClusterType.DATAHUB.value();
+        String serviceType = StackType.WORKLOAD.equals(stack.getType()) ? FluentClusterType.DATAHUB.value() : "";
         String accessKey = altusCredential.map(AltusCredential::getAccessKey).orElse(null);
         char[] privateKey = altusCredential.map(AltusCredential::getPrivateKey).orElse(null);
 
@@ -94,11 +91,8 @@ public class TelemetryDecorator {
         // for datalake - metering is not enabled yet
         boolean meteringEnabled = telemetry.isMeteringEnabled() && !StackType.DATALAKE.equals(stack.getType());
 
-        String clusterNameWithUUID = String.format("%s_%s",
-                stack.getCluster().getName(), Crn.fromString(stack.getResourceCrn()).getResource());
-
-        FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterNameWithUUID,
-                clusterType, stack.getCloudPlatform(), databusConfigView.isEnabled(), meteringEnabled, telemetry);
+        FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterType,
+                stack.getCloudPlatform(), databusConfigView.isEnabled(), meteringEnabled, telemetry);
         if (fluentConfigView.isEnabled()) {
             Map<String, Object> fluentConfig = fluentConfigView.toMap();
             servicePillar.put("fluent",

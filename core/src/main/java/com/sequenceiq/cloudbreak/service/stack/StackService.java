@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUE
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +42,8 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
@@ -105,6 +109,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.authorization.resource.ResourceAction;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 
@@ -215,6 +220,9 @@ public class StackService {
 
     @Inject
     private FlowLogService flowLogService;
+
+    @Inject
+    private CloudStorageFolderResolverService cloudStorageFolderResolverService;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -968,10 +976,22 @@ public class StackService {
         try {
             for (Component component : stack.getComponents()) {
                 if (ComponentType.TELEMETRY.equals(component.getComponentType())) {
+                    if (stack.getCluster() != null && StringUtils.isNoneEmpty(
+                            stack.getType().name(), stack.getResourceCrn(), stack.getCluster().getName())) {
+                        LOGGER.debug("Found TELEMETRY component for stack, will enrich that "
+                                + "with cluster data before saving it.");
+                        FluentClusterType fluentClusterType = StackType.DATALAKE.equals(stack.getType())
+                                ? FluentClusterType.DATALAKE : FluentClusterType.DATAHUB;
+                        Telemetry telemetry = component.getAttributes().get(Telemetry.class);
+                        cloudStorageFolderResolverService.updateStorageLocation(telemetry,
+                                fluentClusterType.value(),
+                                stack.getCluster().getName(), stack.getResourceCrn());
+                        component.setAttributes(Json.silent(telemetry));
+                    }
                     componentConfigProviderService.store(component);
                 }
             }
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IOException e) {
             LOGGER.info("Could not create Cloudbreak telemetry component.", e);
         }
     }
