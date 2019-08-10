@@ -6,9 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
@@ -17,18 +22,25 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
+@ExtendWith(MockitoExtension.class)
 class CloudStorageDecoratorTest {
 
-    private CloudStorageDecorator underTest;
+    private static final String BLUEPRINT_NAME = "blueprintName";
 
-    @BeforeEach
-    void setUp() {
-        underTest = new CloudStorageDecorator();
-    }
+    private static final String CLUSTER_NAME = "clusterName";
+
+    @Mock
+    private BlueprintService blueprintService;
+
+    @Mock
+    private SdxClientService sdxClientService;
+
+    @InjectMocks
+    private CloudStorageDecorator underTest;
 
     @Test
     void testConvertWhenEnvironmentAndStorageRequestAreNull() {
-        CloudStorageRequest result = underTest.decorate(null, null);
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, null, null);
 
         assertNull(result);
     }
@@ -37,7 +49,7 @@ class CloudStorageDecoratorTest {
     void testConvertWhenEnvironmentIsNullAndCloudStorageRequestIsNot() {
         CloudStorageRequest request = new CloudStorageRequest();
 
-        CloudStorageRequest result = underTest.decorate(request, null);
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, request, null);
 
         assertNotNull(result);
     }
@@ -49,7 +61,7 @@ class CloudStorageDecoratorTest {
         telemetry.setLogging(new LoggingResponse());
         environment.setTelemetry(telemetry);
 
-        CloudStorageRequest result = underTest.decorate(null, environment);
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, null, environment);
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
@@ -62,7 +74,7 @@ class CloudStorageDecoratorTest {
         telemetry.setLogging(new LoggingResponse());
         environment.setTelemetry(telemetry);
 
-        CloudStorageRequest result = underTest.decorate(null, environment);
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, null, environment);
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
@@ -85,7 +97,7 @@ class CloudStorageDecoratorTest {
         CloudStorageRequest request = new CloudStorageRequest();
         request.setLocations(storageLocations);
 
-        CloudStorageRequest result = underTest.decorate(request, environment);
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, request, environment);
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
@@ -103,7 +115,7 @@ class CloudStorageDecoratorTest {
         CloudStorageRequest request = new CloudStorageRequest();
         request.setLocations(storageLocations);
 
-        CloudStorageRequest result = underTest.decorate(request, new DetailedEnvironmentResponse());
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, request, new DetailedEnvironmentResponse());
 
         assertNotNull(result);
         assertTrue(result.getLocations().stream().anyMatch(loc -> eStorageLocationType.equals(loc.getType()) && eStorageLocationValue.equals(loc.getValue())));

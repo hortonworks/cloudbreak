@@ -68,6 +68,9 @@ import com.sequenceiq.freeipa.api.client.FreeIpaApiClientParams;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClient;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClientBuilder;
 import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
+import com.sequenceiq.sdx.client.SdxApiClientParams;
+import com.sequenceiq.sdx.client.SdxServiceClientBuilder;
+import com.sequenceiq.sdx.client.SdxServiceCrnClient;
 
 @Configuration
 @EnableRetry
@@ -140,6 +143,10 @@ public class AppConfig implements ResourceLoaderAware {
     @Inject
     @Named("redbeamsServerUrl")
     private String redbeamsServerUrl;
+
+    @Inject
+    @Named("sdxServerUrl")
+    private String sdxServerUrl;
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
@@ -266,6 +273,11 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
+    public SdxApiClientParams sdxApiClientParams() {
+        return new SdxApiClientParams(restDebug, certificateValidation, ignorePreValidation, sdxServerUrl);
+    }
+
+    @Bean
     public Client restClient() {
         return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
     }
@@ -273,6 +285,15 @@ public class AppConfig implements ResourceLoaderAware {
     @Bean
     public EnvironmentServiceCrnClient environmentServiceClient() {
         return new EnvironmentServiceClientBuilder(environmentServerUrl)
+                .withCertificateValidation(certificateValidation)
+                .withIgnorePreValidation(ignorePreValidation)
+                .withDebug(restDebug)
+                .build();
+    }
+
+    @Bean
+    public SdxServiceCrnClient sdxServiceClient() {
+        return new SdxServiceClientBuilder(sdxServerUrl)
                 .withCertificateValidation(certificateValidation)
                 .withIgnorePreValidation(ignorePreValidation)
                 .withDebug(restDebug)

@@ -80,7 +80,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setEnvironmentCrn(environment.getCrn());
         request.setAuthentication(getIfNotNull(environment.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
-        request.setCluster(getIfNotNull(source.getCluster(), environment, clusterConverter::convert));
+        request.setCluster(getIfNotNull(source, environment, clusterConverter::convert));
         request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), igs -> instanceGroupConverter.convertTo(igs, environment)));
         request.setNetwork(getNetwork(source.getNetwork(), environment));
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
@@ -109,7 +109,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setName(source.getName());
         request.setType(StackType.WORKLOAD);
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
-        request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
+        request.setCluster(getIfNotNull(source, clusterConverter::convert));
         DetailedEnvironmentResponse environmentRef = environment;
         request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroups -> instanceGroupConverter.convertTo(instanceGroups, environmentRef)));
         if (environment != null) {
