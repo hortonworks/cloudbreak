@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.template.views;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -43,7 +45,7 @@ public class GatewayView {
 
     private final String tokenCert;
 
-    private final Map<String, Json> gatewayTopologies;
+    private final Map<String, Set<String>> gatewayTopologies;
 
     private final String masterSecret;
 
@@ -64,20 +66,22 @@ public class GatewayView {
         this.signKey = signKey;
     }
 
-    private Json convertToFullExposedServices(Json json) {
+    private Set<String> convertToFullExposedServices(Json json) {
         try {
             ExposedServices exposedServices = json.get(ExposedServices.class);
-            ExposedServices e = new ExposedServices();
             if (exposedServices == null || exposedServices.getServices().isEmpty()) {
-                e.setServices(new ArrayList<>());
-            } else {
-                e.setServices(exposedServices.getFullServiceList());
+                return new HashSet<>();
             }
-            return Json.silent(e);
+            return new HashSet<>(exposedServices.getFullServiceList());
         } catch (IOException e) {
-            LOGGER.info("Cannot deserialize the exposed services: {}", json.getValue(), e);
+            LOGGER.info("Cannot deserialize the exposed services: json: {}", json.getValue(), e);
         }
-        return json;
+        try {
+            return Set.of(json.get(String[].class));
+        } catch (IOException e) {
+            LOGGER.info("Cannot deserialize the set of services: {}", json.getValue(), e);
+        }
+        return emptySet();
     }
 
     public GatewayType getGatewayType() {
@@ -92,11 +96,11 @@ public class GatewayView {
         return gatewayTopologies.isEmpty() ? null : getFirstTopology().getKey();
     }
 
-    public Json getExposedServices() {
+    public Set<String> getExposedServices() {
         return gatewayTopologies.isEmpty() ? null : getFirstTopology().getValue();
     }
 
-    private Entry<String, Json> getFirstTopology() {
+    private Entry<String, Set<String>> getFirstTopology() {
         return gatewayTopologies.entrySet().iterator().next();
     }
 
@@ -136,7 +140,7 @@ public class GatewayView {
         return tokenCert;
     }
 
-    public Map<String, Json> getGatewayTopologies() {
+    public Map<String, Set<String>> getGatewayTopologies() {
         return gatewayTopologies;
     }
 
