@@ -52,7 +52,7 @@ public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.RESOURCEMANAGER_WEB.getKnoxService());
+                && source.getGatewayView().getExposedServices().contains(ExposedService.RESOURCEMANAGER_WEB.getKnoxService());
     }
 
     private String getYarnSiteServiceValveValue() {
