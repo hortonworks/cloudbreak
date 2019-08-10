@@ -35,8 +35,8 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         NetworkDto.Builder builder = NetworkDto.Builder.aNetworkDto()
                 .withId(source.getId())
                 .withName(source.getName())
-                .withSubnetIds(source.getSubnetIdsSet())
-                .withSubnetMetas(source.getSubnetMetasMap())
+                .withSubnetIds(source.getSubnetIds())
+                .withSubnetMetas(source.getSubnetMetas())
                 .withNetworkCidr(source.getNetworkCidr())
                 .withResourceCrn(source.getResourceCrn())
                 .withNetworkId(source.getNetworkId());

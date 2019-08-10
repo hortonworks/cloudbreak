@@ -83,7 +83,7 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(VPC_ID, actual.getVpcId());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.EXISTING, actual.getRegistrationType());
-        assertEquals(SUBNET_IDS, actual.getSubnetIdsSet());
+        assertEquals(SUBNET_IDS, actual.getSubnetIds());
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -101,7 +101,7 @@ class AwsEnvironmentNetworkConverterTest {
         assertNull(actual.getVpcId());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
-        assertEquals(SUBNET_IDS, actual.getSubnetIdsSet());
+        assertEquals(SUBNET_IDS, actual.getSubnetIds());
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -133,25 +133,25 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(createdCloudNetwork.getStackName(), actual.getName());
         assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
         assertEquals(VPC_ID, actual.getVpcId());
-        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetIdsSet()));
+        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetIds()));
 
-        assertEquals(SUBNET_1, awsNetwork.getSubnetMetasMap().get(SUBNET_1).getId());
-        assertEquals(SUBNET_1, awsNetwork.getSubnetMetasMap().get(SUBNET_1).getName());
-        assertEquals(AZ_1, awsNetwork.getSubnetMetasMap().get(SUBNET_1).getAvailabilityZone());
-        assertEquals(SUBNET_CIDR_1, awsNetwork.getSubnetMetasMap().get(SUBNET_1).getCidr());
-        assertTrue(awsNetwork.getSubnetMetasMap().get(SUBNET_1).isPrivateSubnet());
+        assertEquals(SUBNET_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getId());
+        assertEquals(SUBNET_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getName());
+        assertEquals(AZ_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getCidr());
+        assertTrue(awsNetwork.getSubnetMetas().get(SUBNET_1).isPrivateSubnet());
 
-        assertEquals(SUBNET_2, awsNetwork.getSubnetMetasMap().get(SUBNET_2).getId());
-        assertEquals(SUBNET_2, awsNetwork.getSubnetMetasMap().get(SUBNET_2).getName());
-        assertEquals(AZ_2, awsNetwork.getSubnetMetasMap().get(SUBNET_2).getAvailabilityZone());
-        assertEquals(SUBNET_CIDR_2, awsNetwork.getSubnetMetasMap().get(SUBNET_2).getCidr());
-        assertTrue(awsNetwork.getSubnetMetasMap().get(SUBNET_2).isPrivateSubnet());
+        assertEquals(SUBNET_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getId());
+        assertEquals(SUBNET_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getName());
+        assertEquals(AZ_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getCidr());
+        assertTrue(awsNetwork.getSubnetMetas().get(SUBNET_2).isPrivateSubnet());
 
-        assertEquals(SUBNET_3, awsNetwork.getSubnetMetasMap().get(SUBNET_3).getId());
-        assertEquals(SUBNET_3, awsNetwork.getSubnetMetasMap().get(SUBNET_3).getName());
-        assertEquals(AZ_3, awsNetwork.getSubnetMetasMap().get(SUBNET_3).getAvailabilityZone());
-        assertEquals(SUBNET_CIDR_3, awsNetwork.getSubnetMetasMap().get(SUBNET_3).getCidr());
-        assertTrue(awsNetwork.getSubnetMetasMap().get(SUBNET_3).isPrivateSubnet());
+        assertEquals(SUBNET_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getId());
+        assertEquals(SUBNET_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getName());
+        assertEquals(AZ_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getCidr());
+        assertTrue(awsNetwork.getSubnetMetas().get(SUBNET_3).isPrivateSubnet());
     }
 
     private Set<CreatedSubnet> createCreatedSubnets() {

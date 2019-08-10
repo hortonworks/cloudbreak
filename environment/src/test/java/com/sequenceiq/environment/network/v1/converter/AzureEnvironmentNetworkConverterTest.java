@@ -92,7 +92,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertTrue(actual.getNoPublicIp());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.EXISTING, actual.getRegistrationType());
-        assertEquals(SUBNET_IDS, actual.getSubnetIdsSet());
+        assertEquals(SUBNET_IDS, actual.getSubnetIds());
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -113,7 +113,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertNull(actual.getNoFirewallRules());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
-        assertEquals(SUBNET_IDS, actual.getSubnetIdsSet());
+        assertEquals(SUBNET_IDS, actual.getSubnetIds());
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -148,25 +148,25 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(NETWORK_ID, actual.getNetworkId());
         assertEquals(RESOURCE_GROUP_NAME, actual.getResourceGroupName());
 
-        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetIdsSet()));
+        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetIds()));
 
-        assertEquals(SUBNET_1, actual.getSubnetMetasMap().get(SUBNET_1).getId());
-        assertEquals(SUBNET_1, actual.getSubnetMetasMap().get(SUBNET_1).getName());
-        assertEquals(AZ_1, actual.getSubnetMetasMap().get(SUBNET_1).getAvailabilityZone());
-        assertEquals(SUBNET_CIDR_1, actual.getSubnetMetasMap().get(SUBNET_1).getCidr());
-        assertTrue(actual.getSubnetMetasMap().get(SUBNET_1).isPrivateSubnet());
+        assertEquals(SUBNET_1, actual.getSubnetMetas().get(SUBNET_1).getId());
+        assertEquals(SUBNET_1, actual.getSubnetMetas().get(SUBNET_1).getName());
+        assertEquals(AZ_1, actual.getSubnetMetas().get(SUBNET_1).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_1, actual.getSubnetMetas().get(SUBNET_1).getCidr());
+        assertTrue(actual.getSubnetMetas().get(SUBNET_1).isPrivateSubnet());
 
-        assertEquals(SUBNET_2, actual.getSubnetMetasMap().get(SUBNET_2).getId());
-        assertEquals(SUBNET_2, actual.getSubnetMetasMap().get(SUBNET_2).getName());
-        assertEquals(AZ_2, actual.getSubnetMetasMap().get(SUBNET_2).getAvailabilityZone());
-        assertEquals(SUBNET_CIDR_2, actual.getSubnetMetasMap().get(SUBNET_2).getCidr());
-        assertTrue(actual.getSubnetMetasMap().get(SUBNET_2).isPrivateSubnet());
+        assertEquals(SUBNET_2, actual.getSubnetMetas().get(SUBNET_2).getId());
+        assertEquals(SUBNET_2, actual.getSubnetMetas().get(SUBNET_2).getName());
+        assertEquals(AZ_2, actual.getSubnetMetas().get(SUBNET_2).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_2, actual.getSubnetMetas().get(SUBNET_2).getCidr());
+        assertTrue(actual.getSubnetMetas().get(SUBNET_2).isPrivateSubnet());
 
-        assertEquals(SUBNET_3, actual.getSubnetMetasMap().get(SUBNET_3).getId());
-        assertEquals(SUBNET_3, actual.getSubnetMetasMap().get(SUBNET_3).getName());
-        assertEquals(AZ_3, actual.getSubnetMetasMap().get(SUBNET_3).getAvailabilityZone());
-        assertEquals(SUBNET_CIDR_3, actual.getSubnetMetasMap().get(SUBNET_3).getCidr());
-        assertTrue(actual.getSubnetMetasMap().get(SUBNET_3).isPrivateSubnet());
+        assertEquals(SUBNET_3, actual.getSubnetMetas().get(SUBNET_3).getId());
+        assertEquals(SUBNET_3, actual.getSubnetMetas().get(SUBNET_3).getName());
+        assertEquals(AZ_3, actual.getSubnetMetas().get(SUBNET_3).getAvailabilityZone());
+        assertEquals(SUBNET_CIDR_3, actual.getSubnetMetas().get(SUBNET_3).getCidr());
+        assertTrue(actual.getSubnetMetas().get(SUBNET_3).isPrivateSubnet());
     }
 
     private Set<CreatedSubnet> createCreatedSubnets() {
