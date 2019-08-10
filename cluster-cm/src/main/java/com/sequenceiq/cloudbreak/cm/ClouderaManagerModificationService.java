@@ -23,6 +23,7 @@ import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
+import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
@@ -30,6 +31,8 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
+import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -54,6 +57,8 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 @Service
 @Scope("prototype")
 public class ClouderaManagerModificationService implements ClusterModificationService {
+
+    private static final String SUMMARY = "SUMMARY";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerModificationService.class);
 
@@ -109,7 +114,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                     .filter(hostname -> !clusterHosts.contains(hostname))
                     .collect(Collectors.toList());
             if (!upscaleHostNames.isEmpty()) {
-                List<ApiHost> hosts = clouderaManagerClientFactory.getHostsResourceApi(client).readHosts("SUMMARY").getItems();
+                List<ApiHost> hosts = clouderaManagerClientFactory.getHostsResourceApi(client).readHosts(SUMMARY).getItems();
                 ApiHostRefList body = createUpscaledHostRefList(upscaleHostNames, hosts);
                 clustersResourceApi.addHosts(clusterName, body);
                 activateParcel(clustersResourceApi);
@@ -157,7 +162,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void restartCMStaleServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
         LOGGER.debug("Restarting stale services and redeploying client configurations in Cloudera Manager.");
-        Optional<ApiCommand> optionalRestartCommand = clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY").getItems().stream()
+        Optional<ApiCommand> optionalRestartCommand = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems().stream()
                 .filter(cmd -> "RestartWaitingForStalenessSuccess".equals(cmd.getName())).findFirst();
         ApiCommand restartServicesCommand;
         if (optionalRestartCommand.isPresent()) {
@@ -173,7 +178,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void restartClouderaManagementServices(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException, CloudbreakException {
         LOGGER.debug("Restarting Cloudera Management Services in Cloudera Manager.");
-        Optional<ApiCommand> optionalRestartCommand = mgmtServiceResourceApi.listActiveCommands("SUMMARY").getItems().stream()
+        Optional<ApiCommand> optionalRestartCommand = mgmtServiceResourceApi.listActiveCommands(SUMMARY).getItems().stream()
                 .filter(cmd -> "Restart".equals(cmd.getName())).findFirst();
         ApiCommand restartCommand;
         if (optionalRestartCommand.isPresent()) {
@@ -247,12 +252,18 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             eventService
                     .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
                             cloudbreakMessagesService.getMessage(ClouderaManagerMessages.CM_CLUSTER_SERVICES_STOPPING.code()));
-            ApiCommand apiCommand = clustersResourceApi.stopCommand(cluster.getName());
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider.stopPollingService(stack, client, apiCommand.getId());
-            if (isExited(pollingResult)) {
-                throw new CancellationException("Cluster was terminated while waiting for Hadoop services to stop");
-            } else if (isTimeout(pollingResult)) {
-                throw new CloudbreakException("Timeout while stopping Cloudera Manager services.");
+            Collection<ApiService> apiServices = readServices(stack);
+            boolean anyServiceNotStopped = apiServices.stream()
+                    .anyMatch(service -> !ApiServiceState.STOPPED.equals(service.getServiceState())
+                            && !ApiServiceState.STOPPING.equals(service.getServiceState()));
+            if (anyServiceNotStopped) {
+                ApiCommand apiCommand = clustersResourceApi.stopCommand(cluster.getName());
+                PollingResult pollingResult = clouderaManagerPollingServiceProvider.stopPollingService(stack, client, apiCommand.getId());
+                if (isExited(pollingResult)) {
+                    throw new CancellationException("Cluster was terminated while waiting for Hadoop services to stop");
+                } else if (isTimeout(pollingResult)) {
+                    throw new CloudbreakException("Timeout while stopping Cloudera Manager services.");
+                }
             }
             eventService
                     .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
@@ -263,12 +274,17 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
+    private Collection<ApiService> readServices(Stack stack) throws ApiException {
+        ServicesResourceApi api = clouderaManagerClientFactory.getServicesResourceApi(client);
+        return api.readServices(stack.getCluster().getName(), SUMMARY).getItems();
+    }
+
     @Override
     public int startCluster(Set<HostMetadata> hostsInCluster) throws CloudbreakException {
         try {
             startClouderaManager(stack, client);
             startAgents(stack, client);
-            return startServices(stack, client).getId().intValue();
+            return startServices(stack, client);
         } catch (ApiException e) {
             LOGGER.info("Couldn't start Cloudera Manager services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
@@ -285,7 +301,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         return null;
     }
 
-    private ApiCommand startServices(Stack stack, ApiClient client) throws ApiException, CloudbreakException {
+    private int startServices(Stack stack, ApiClient client) throws ApiException, CloudbreakException {
         Cluster cluster = stack.getCluster();
         ClustersResourceApi apiInstance = new ClustersResourceApi(client);
         String clusterName = cluster.getName();
@@ -293,17 +309,24 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         eventService
                 .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
                         cloudbreakMessagesService.getMessage(ClouderaManagerMessages.CM_CLUSTER_SERVICES_STARTING.code()));
-        ApiCommand apiCommand = apiInstance.startCommand(clusterName);
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingService(stack, client, apiCommand.getId());
-        if (isExited(pollingResult)) {
-            throw new CancellationException("Cluster was terminated while waiting for Hadoop services to start");
-        } else if (isTimeout(pollingResult)) {
-            throw new CloudbreakException("Timeout while stopping Cloudera Manager services.");
+        Collection<ApiService> apiServices = readServices(stack);
+        boolean anyServiceNotStarted = apiServices.stream()
+                .anyMatch(service -> !ApiServiceState.STARTED.equals(service.getServiceState())
+                        && !ApiServiceState.STARTING.equals(service.getServiceState()));
+        ApiCommand apiCommand = null;
+        if (anyServiceNotStarted) {
+            apiCommand = apiInstance.startCommand(clusterName);
+            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingService(stack, client, apiCommand.getId());
+            if (isExited(pollingResult)) {
+                throw new CancellationException("Cluster was terminated while waiting for Hadoop services to start");
+            } else if (isTimeout(pollingResult)) {
+                throw new CloudbreakException("Timeout while stopping Cloudera Manager services.");
+            }
         }
         eventService
                 .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
                         cloudbreakMessagesService.getMessage(ClouderaManagerMessages.CM_CLUSTER_SERVICES_STARTED.code()));
-        return apiCommand;
+        return apiCommand == null ? 0 : apiCommand.getId().intValue();
     }
 
     private void startAgents(Stack stack, ApiClient client) {
