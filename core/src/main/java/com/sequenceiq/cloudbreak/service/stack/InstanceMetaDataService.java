@@ -47,6 +47,8 @@ public class InstanceMetaDataService {
     public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus,
             Collection<String> candidateAddresses) {
         for (InstanceGroup group : instanceGroup) {
+            LOGGER.debug("Update instancematadatas [{}] for instangroup [{}] to state [{}], filtered by addresses: [{}]",
+                    group.getNotDeletedInstanceMetaDataSet(), group.getGroupName(), newStatus, candidateAddresses);
             for (InstanceMetaData instanceMetaData : group.getNotDeletedInstanceMetaDataSet()) {
                 if (candidateAddresses.contains(instanceMetaData.getDiscoveryFQDN())) {
                     instanceMetaData.setInstanceStatus(newStatus);
@@ -185,4 +187,13 @@ public class InstanceMetaDataService {
         return repository.findRemovableInstances(stackId, groupName);
     }
 
+    public void updateUnregisteredInstanceStatusByInstanceGroupForStack(Long stackId, InstanceGroupType instanceGroupType,
+            com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus instanceStatus) {
+        repository.findNotTerminatedForStack(stackId).stream().filter(im -> instanceGroupType.equals(im.getInstanceGroup().getInstanceGroupType()))
+                .filter(im -> com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.UNREGISTERED.equals(im.getInstanceStatus()))
+                .forEach(instanceMetaData -> {
+                    instanceMetaData.setInstanceStatus(instanceStatus);
+                    repository.save(instanceMetaData);
+                });
+    }
 }
