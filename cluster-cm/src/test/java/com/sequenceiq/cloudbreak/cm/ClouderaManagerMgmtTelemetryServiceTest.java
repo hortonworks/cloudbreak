@@ -134,6 +134,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         ApiConfigList result = underTest.buildTelemetryConfigList(stack, wa, null, null);
         // THEN
         assertEquals(1, result.getItems().size());
+        assertTrue(result.getItems().get(0).getValue().contains("cluster.type=DATALAKE"));
     }
 
     @Test
