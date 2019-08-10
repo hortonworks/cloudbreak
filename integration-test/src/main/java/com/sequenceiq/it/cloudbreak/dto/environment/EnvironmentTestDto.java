@@ -126,7 +126,7 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto withNetwork() {
-        EnvironmentNetworkTestDto environmentNetwork = getCloudProvider().environmentNetwork(given(EnvironmentNetworkTestDto.class));
+        EnvironmentNetworkTestDto environmentNetwork = getCloudProvider().network(given(EnvironmentNetworkTestDto.class));
         if (environmentNetwork == null) {
             throw new IllegalArgumentException("Environment Network does not exist!");
         }

@@ -133,6 +133,18 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
+        return network.withNetworkCIDR(getSubnetCIDR())
+                .withYarn(environmentNetworkParameters());
+    }
+
+    private EnvironmentNetworkYarnParams environmentNetworkParameters() {
+        EnvironmentNetworkYarnParams environmentNetworkYarnParams = new EnvironmentNetworkYarnParams();
+        environmentNetworkYarnParams.setQueue(getQueue());
+        return environmentNetworkYarnParams;
+    }
+
+    @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
         imageCatalog.withUrl(yarnProperties.getImageCatalogUrl());
         return imageCatalog;
@@ -153,18 +165,6 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
         String sshPublicKey = commonCloudProperties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
-    }
-
-    @Override
-    public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
-        return environmentNetwork.withNetworkCIDR(getSubnetCIDR())
-                .withYarn(environmentNetworkParameters());
-    }
-
-    private EnvironmentNetworkYarnParams environmentNetworkParameters() {
-        EnvironmentNetworkYarnParams environmentNetworkYarnParams = new EnvironmentNetworkYarnParams();
-        environmentNetworkYarnParams.setQueue(getQueue());
-        return environmentNetworkYarnParams;
     }
 
     @Override

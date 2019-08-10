@@ -96,6 +96,11 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
+        return network.withNetworkCIDR(getSubnetCIDR());
+    }
+
+    @Override
     public StackTestDtoBase stack(StackTestDtoBase stack) {
         return stack.withGcp(stackParameters());
     }
@@ -151,11 +156,6 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
         String sshPublicKey = commonCloudProperties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
-    }
-
-    @Override
-    public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
-        return environmentNetwork.withNetworkCIDR(getSubnetCIDR());
     }
 
     @Override
