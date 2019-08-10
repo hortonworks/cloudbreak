@@ -55,6 +55,8 @@ public interface CloudProvider {
 
     DistroXNetworkTestDto network(DistroXNetworkTestDto network);
 
+    EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network);
+
     StackTestDtoBase stack(StackTestDtoBase stack);
 
     ClusterTestDto cluster(ClusterTestDto cluster);
@@ -88,8 +90,6 @@ public interface CloudProvider {
     CredentialTestDto credential(CredentialTestDto credential);
 
     EnvironmentTestDto environment(EnvironmentTestDto environment);
-
-    EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork);
 
     PlacementSettingsTestDto placement(PlacementSettingsTestDto placement);
 

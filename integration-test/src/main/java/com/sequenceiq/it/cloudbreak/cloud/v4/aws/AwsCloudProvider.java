@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.aws;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -112,16 +111,16 @@ public class AwsCloudProvider extends AbstractCloudProvider {
                 .withAws(networkParameters());
     }
 
-    @Override
-    public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
-        return network.withAws(distroXNetworkParameters());
-    }
-
     public AwsNetworkV4Parameters networkParameters() {
         AwsNetworkV4Parameters awsNetworkV4Parameters = new AwsNetworkV4Parameters();
         awsNetworkV4Parameters.setVpcId(getVpcId());
         awsNetworkV4Parameters.setSubnetId(getSubnetId());
         return awsNetworkV4Parameters;
+    }
+
+    @Override
+    public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
+        return network.withAws(distroXNetworkParameters());
     }
 
     private AwsNetworkV1Parameters distroXNetworkParameters() {
@@ -130,12 +129,29 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         return awsNetworkV4Parameters;
     }
 
+    @Override
+    public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
+        return network.withSubnetIDs(getSubnetIDs())
+                .withAws(environmentNetworkParameters());
+    }
+
+    private EnvironmentNetworkAwsParams environmentNetworkParameters() {
+        EnvironmentNetworkAwsParams environmentNetworkAwsParams = new EnvironmentNetworkAwsParams();
+        environmentNetworkAwsParams.setVpcId(getVpcId());
+        return environmentNetworkAwsParams;
+    }
+
+    public Set<String> getSubnetIDs() {
+        return awsProperties.getSubnetIds();
+    }
+
     public String getVpcId() {
         return awsProperties.getVpcId();
     }
 
     public String getSubnetId() {
-        return awsProperties.getSubnetId();
+        Set<String> subnetIDs = awsProperties.getSubnetIds();
+        return subnetIDs.iterator().next();
     }
 
     @Override
@@ -178,24 +194,6 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         String publicKeyId = awsProperties.getPublicKeyId();
         stackAuthenticationEntity.withPublicKeyId(publicKeyId);
         return stackAuthenticationEntity;
-    }
-
-    @Override
-    public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
-        return environmentNetwork.withSubnetIDs(getSubnetIDs())
-                .withAws(environmentNetworkParameters());
-    }
-
-    public Set<String> getSubnetIDs() {
-        Set<String> subnetIDAsSet = new HashSet<>();
-        subnetIDAsSet.add(getSubnetId());
-        return subnetIDAsSet;
-    }
-
-    private EnvironmentNetworkAwsParams environmentNetworkParameters() {
-        EnvironmentNetworkAwsParams environmentNetworkAwsParams = new EnvironmentNetworkAwsParams();
-        environmentNetworkAwsParams.setVpcId(getVpcId());
-        return environmentNetworkAwsParams;
     }
 
     @Override

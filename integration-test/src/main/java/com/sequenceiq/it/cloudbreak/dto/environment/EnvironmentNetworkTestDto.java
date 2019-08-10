@@ -28,7 +28,7 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
     }
 
     public EnvironmentNetworkTestDto valid() {
-        return getCloudProvider().environmentNetwork(this);
+        return getCloudProvider().network(this);
     }
 
     public EnvironmentNetworkTestDto withAzure(EnvironmentNetworkAzureParams azure) {

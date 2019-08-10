@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.aws;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +18,7 @@ public class AwsProperties {
 
     private String vpcId;
 
-    private String subnetId;
+    private Set<String> subnetIds;
 
     private String publicKeyId;
 
@@ -63,12 +64,12 @@ public class AwsProperties {
         this.vpcId = vpcId;
     }
 
-    public String getSubnetId() {
-        return subnetId;
+    public Set<String> getSubnetIds() {
+        return subnetIds;
     }
 
-    public void setSubnetId(String subnetId) {
-        this.subnetId = subnetId;
+    public void setSubnetIds(Set<String> subnetIds) {
+        this.subnetIds = subnetIds;
     }
 
     public String getPublicKeyId() {

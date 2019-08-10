@@ -164,6 +164,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
+        return delegate.network(network);
+    }
+
+    @Override
     public String getSubnetCIDR() {
         return delegate.getSubnetCIDR();
     }
@@ -201,11 +206,6 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         return delegate.environment(environment);
-    }
-
-    @Override
-    public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
-        return delegate.environmentNetwork(environmentNetwork);
     }
 
     @Override
