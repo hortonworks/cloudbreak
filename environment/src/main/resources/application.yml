@@ -64,6 +64,7 @@ environment:
     supportedPlatforms: AWS,AZURE
   sdx:
     url: http://localhost:8086
+    contextPath: /dl
   db:
     host: localhost
     port: 5432

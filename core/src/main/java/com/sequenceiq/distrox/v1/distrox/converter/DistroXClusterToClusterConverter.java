@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -42,11 +43,12 @@ public class DistroXClusterToClusterConverter {
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
-    public ClusterV4Request convert(DistroXClusterV1Request source) {
-        return convert(source, null);
+    public ClusterV4Request convert(DistroXV1Request request) {
+        return convert(request, null);
     }
 
-    public ClusterV4Request convert(DistroXClusterV1Request source, DetailedEnvironmentResponse environment) {
+    public ClusterV4Request convert(DistroXV1Request request, DetailedEnvironmentResponse environment) {
+        DistroXClusterV1Request source = request.getCluster();
         ClusterV4Request response = new ClusterV4Request();
         if (isEmpty(source.getExposedServices())) {
             source.setExposedServices(List.of("ALL"));
@@ -60,7 +62,12 @@ public class DistroXClusterToClusterConverter {
         response.setPassword(source.getPassword());
         response.setProxyConfigCrn(getIfNotNull(source.getProxy(), this::getProxyCrnByName));
         response.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
-        response.setCloudStorage(cloudStorageDecorator.decorate(source.getCloudStorage(), environment));
+        response.setCloudStorage(
+                cloudStorageDecorator.decorate(
+                        source.getBlueprintName(),
+                        request.getName(),
+                        source.getCloudStorage(),
+                        environment));
         response.setValidateBlueprint(source.getValidateBlueprint());
         response.setExecutorType(ExecutorType.DEFAULT);
         response.setCustomContainer(null);
