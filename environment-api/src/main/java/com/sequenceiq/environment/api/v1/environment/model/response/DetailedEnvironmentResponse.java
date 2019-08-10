@@ -11,9 +11,9 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel(value = "DetailedEnvironmentV1Response")
-@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@ApiModel(value = "DetailedEnvironmentV1Response")
 public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
     public static final class Builder {

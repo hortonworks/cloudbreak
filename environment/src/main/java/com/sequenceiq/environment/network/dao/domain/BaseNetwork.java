@@ -138,28 +138,20 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
         this.registrationType = registrationType;
     }
 
-    public Json getSubnetMetas() {
-        return subnetMetas;
-    }
-
     public void setSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
         this.subnetMetas = new Json(subnetMetas);
     }
 
-    public Map<String, CloudSubnet> getSubnetMetasMap() {
+    public Map<String, CloudSubnet> getSubnetMetas() {
         return JsonUtil.jsonToType(subnetMetas.getValue(), new TypeReference<>() {
         });
-    }
-
-    public Json getSubnetIds() {
-        return subnetIds;
     }
 
     public void setSubnetIds(Set<String> subnetIds) {
         this.subnetIds = new Json(subnetIds);
     }
 
-    public Set<String> getSubnetIdsSet() {
+    public Set<String> getSubnetIds() {
         return JsonUtil.jsonToType(subnetIds.getValue(), new TypeReference<>() {
         });
     }
