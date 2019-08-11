@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.zeppelin;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,18 +13,20 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
-import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
-import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.adlsgen2.AdlsGen2FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.gcs.GcsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.common.api.filesystem.GcsFileSystem;
+import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ZeppelinCloudStorageRoleConfigProviderTest {
@@ -34,20 +34,19 @@ public class ZeppelinCloudStorageRoleConfigProviderTest {
     private final ZeppelinCloudStorageRoleConfigProvider underTest = new ZeppelinCloudStorageRoleConfigProvider();
 
     @Test
-    public void testGetZeppelinStorageRoleConfigs() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true);
-        String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
-
-        List<ApiClusterTemplateConfig> zeppelinStorageConfigs = roleConfigs.get("zeppelin-ZEPPELIN_SERVER-BASE");
-        assertEquals(1, zeppelinStorageConfigs.size());
-        assertEquals(getZeppelinNotebookStorage().getValue(), zeppelinStorageConfigs.get(0).getValue());
+    public void testGetZeppelinStorageRoleConfigsForCloud() {
+        assertZeppelinStorageValues("s3a://testbucket/test-cluster/zep-pelin");
+        assertZeppelinStorageValues("s3a://testbucket/basepath1/testcluster/zeppelin");
+        assertZeppelinStorageValues("s3a://test.bucket/testcluster/zeppelin");
+        assertZeppelinStorageValues("abfs://storage@test.dfs.core.windows.net/path1");
+        assertZeppelinStorageValues("abfs://storage@test.dfs.core.windows.net/path1/path2/");
+        assertZeppelinStorageValues("gs://storagebucket/path1/");
+        assertZeppelinStorageValues("gs://storagebucket/path1/path2/");
     }
 
     @Test
     public void testGetZeppelinStorageRoleConfigsWhenNoLocationConfigured() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(false, true);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -56,52 +55,43 @@ public class ZeppelinCloudStorageRoleConfigProviderTest {
         assertEquals(0, zeppelinStorageConfigs.size());
     }
 
-    @Test
-    public void testIsConfigurationNeededWhenS3FileSystem() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false);
+    protected void assertZeppelinStorageValues(String storagePath) {
+        List<StorageLocationView> locations = new ArrayList<>();
+        StorageLocation zeppelinNotebookDir = new StorageLocation();
+        zeppelinNotebookDir.setProperty("zeppelin.notebook.dir");
+        zeppelinNotebookDir.setValue(storagePath);
+        locations.add(new StorageLocationView(zeppelinNotebookDir));
+
+        BaseFileSystemConfigurationsView fileSystemConfigurationsView;
+        if (storagePath.startsWith("s3a")) {
+            fileSystemConfigurationsView =
+                    new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
+        } else if (storagePath.startsWith("gcs")) {
+            fileSystemConfigurationsView =
+                    new GcsFileSystemConfigurationsView(new GcsFileSystem(), locations, false);
+        } else {
+            fileSystemConfigurationsView =
+                    new AdlsGen2FileSystemConfigurationsView(new AdlsGen2FileSystem(), locations, false);
+        }
+
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(fileSystemConfigurationsView);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
-        assertFalse(configurationNeeded);
+        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
+
+        List<ApiClusterTemplateConfig> zeppelinStorageConfigs = roleConfigs.get("zeppelin-ZEPPELIN_SERVER-BASE");
+        assertEquals(1, zeppelinStorageConfigs.size());
+
+        assertEquals("zeppelin.notebook.dir", zeppelinStorageConfigs.get(0).getName());
+        assertEquals(storagePath, zeppelinStorageConfigs.get(0).getValue());
     }
 
-    @Test
-    public void testIsConfigurationNeededWhenAzureFileSystem() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true);
-        String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
-        assertTrue(configurationNeeded);
-    }
-
-    private TemplatePreparationObject getTemplatePreparationObject(boolean includeLocation, boolean useAzureFileSystem) {
+    private TemplatePreparationObject getTemplatePreparationObject(BaseFileSystemConfigurationsView fileSystemConfigurationsView) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
-        List<StorageLocationView> locations = new ArrayList<>();
-
-        if (includeLocation) {
-            locations.add(new StorageLocationView(getZeppelinNotebookStorage()));
-        }
-
-        BaseFileSystemConfigurationsView fileSystemConfigurationsView;
-        if (useAzureFileSystem) {
-            fileSystemConfigurationsView =
-                    new AdlsFileSystemConfigurationsView(new AdlsFileSystem(), locations, false);
-        } else {
-            fileSystemConfigurationsView =
-                    new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
-        }
-
         return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker)).build();
-    }
-
-    protected StorageLocation getZeppelinNotebookStorage() {
-        StorageLocation zeppelinNotebookDir = new StorageLocation();
-        zeppelinNotebookDir.setProperty("zeppelin.notebook.dir");
-        zeppelinNotebookDir.setValue("abfs://zeppelin/file");
-        return zeppelinNotebookDir;
     }
 
     private String getBlueprintText(String path) {

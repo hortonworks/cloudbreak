@@ -1,17 +1,6 @@
 {
   "entries": [
     {
-      "type": "ZEPPELIN_NOTEBOOK_S3",
-      "propertyName": "zeppelin.notebook.s3.bucket",
-      "propertyFile": "zeppelin-site",
-      "description": "The directory where Zeppelin notebooks are saved",
-      "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/zeppelin",
-      "propertyDisplayName": "Zeppelin Notebooks Root Directory",
-      "relatedServices": ["ZEPPELIN_SERVER"],
-      "requiredForAttachedCluster": true,
-      "supportedStorages": ["S3"]
-    },
-    {
       "type": "ZEPPELIN_NOTEBOOK",
       "propertyName": "zeppelin.notebook.dir",
       "propertyFile": "zeppelin-site",
@@ -20,7 +9,7 @@
       "propertyDisplayName": "Zeppelin Notebooks Root Directory",
       "relatedServices": ["ZEPPELIN_SERVER"],
       "requiredForAttachedCluster": true,
-      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2"]
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     },
     {
       "type": "YARN_LOG",

@@ -74,12 +74,4 @@ public class ConfigUtils {
     public static String getBasePathFromStorageLocation(String path) {
         return STORAGE_LOCATION_PATH_PATTERN.matcher(path).replaceAll("$1$2");
     }
-
-    public static String getBucketFromStorageLocation(String path) {
-        return STORAGE_LOCATION_PATH_PATTERN.matcher(path).replaceAll("$3");
-    }
-
-    public static String getObjectPathFromStorageLocation(String path) {
-        return STORAGE_LOCATION_PATH_PATTERN.matcher(path).replaceAll("$4");
-    }
 }
