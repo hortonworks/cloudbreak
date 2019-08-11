@@ -93,7 +93,7 @@ public class UmsUsersStateProvider {
         // for all users, check right for the passed envCRN
         for (User u : allUsers) {
 
-            if (umsClient.checkRight(actorCrn, u.getCrn(), "environments/setPassword", envCRN, Optional.empty())) {
+            if (umsClient.checkRight(actorCrn, u.getCrn(), "environments/write", envCRN, Optional.empty())) {
                 // if (true) {
                 umsStateBuilder.addUser(u, null);
             } else {
