@@ -94,7 +94,7 @@ public class CmCloudStorageConfigDetailsTest {
 
         Assert.assertEquals(1, zeppelin.size());
         Assert.assertTrue(zeppelin.stream()
-                .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/bigCluster/zeppelin")));
+                .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/bigCluster/zeppelin/notebook")));
 
         Assert.assertEquals(2, hive.size());
         Assert.assertTrue(hive.stream()
@@ -269,7 +269,7 @@ public class CmCloudStorageConfigDetailsTest {
 
         Assert.assertEquals(1, zeppelin.size());
         Assert.assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
-                .anyMatch("hwx-remote/bigCluster/zeppelin"::equals));
+                .anyMatch("hwx-remote/bigCluster/zeppelin/notebook"::equals));
     }
 
     @Test
@@ -300,7 +300,7 @@ public class CmCloudStorageConfigDetailsTest {
 
         Assert.assertEquals(1, zeppelin.size());
         Assert.assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
-                .anyMatch("hwx-remote/bigCluster/zeppelin"::equals));
+                .anyMatch("hwx-remote/bigCluster/zeppelin/notebook"::equals));
     }
 
     private Set<ConfigQueryEntry> serviceEntry(Set<ConfigQueryEntry> configQueryEntries, String serviceName) {
