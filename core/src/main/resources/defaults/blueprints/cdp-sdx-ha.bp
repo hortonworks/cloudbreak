@@ -235,6 +235,10 @@
                     {
                         "name": "zookeeper_service",
                         "ref": "zookeeper"
+                    },
+	            {
+                        "name": "delegation.token.enable",
+                        "value": "true"
                     }
                 ],
                 "serviceType": "KAFKA"
