@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
@@ -13,9 +17,14 @@ import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.telemetry.response.WorkloadAnalyticsResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class TelemetryConverter {
+
+    private static final String DATABUS_HEADER_SDX_ID = "databus.header.sdx.id";
+
+    private static final String DATABUS_HEADER_SDX_NAME = "databus.header.sdx.name";
 
     private final boolean telemetryPublisherEnabled;
 
@@ -97,7 +106,7 @@ public class TelemetryConverter {
     }
 
     public TelemetryRequest convert(TelemetryResponse response,
-            boolean enableWorkloadAnalytics) {
+            SdxClusterResponse sdxClusterResponse, boolean enableWorkloadAnalytics) {
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         if (response != null) {
             LoggingRequest loggingRequest = null;
@@ -112,27 +121,44 @@ public class TelemetryConverter {
             telemetryRequest.setReportDeploymentLogs(response.getReportDeploymentLogs());
         }
         telemetryRequest.setWorkloadAnalytics(
-                createWorkloadAnalyticsRequest(response, enableWorkloadAnalytics));
+                createWorkloadAnalyticsRequest(response, sdxClusterResponse, enableWorkloadAnalytics));
         return telemetryRequest;
     }
 
     private WorkloadAnalyticsRequest createWorkloadAnalyticsRequest(TelemetryResponse response,
-            boolean enableWorkloadAnalytics) {
+            SdxClusterResponse sdxClusterResponse, boolean enableWorkloadAnalytics) {
         WorkloadAnalyticsRequest workloadAnalyticsRequest = null;
         if (telemetryPublisherEnabled) {
             if (enableWorkloadAnalytics) {
                 workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
                 if (StringUtils.isNotEmpty(databusEndpoint)) {
                     workloadAnalyticsRequest.setDatabusEndpoint(databusEndpoint);
+                    workloadAnalyticsRequest.setAttributes(enrichWithSdxData(new HashMap<>(), sdxClusterResponse));
                 }
             } else if (response != null && response.getWorkloadAnalytics() != null) {
                 WorkloadAnalyticsResponse waResponse = response.getWorkloadAnalytics();
                 workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
-                workloadAnalyticsRequest.setAttributes(waResponse.getAttributes());
+                workloadAnalyticsRequest.setAttributes(
+                        enrichWithSdxData(waResponse.getAttributes(), sdxClusterResponse));
                 workloadAnalyticsRequest.setDatabusEndpoint(waResponse.getDatabusEndpoint());
             }
         }
         return workloadAnalyticsRequest;
+    }
+
+    private Map<String, Object> enrichWithSdxData(Map<String, Object> attributes,
+            SdxClusterResponse sdxClusterResponse) {
+        Map<String, Object> newAttributes = new HashMap<>(attributes);
+        if (sdxClusterResponse != null) {
+            if (StringUtils.isNotEmpty(sdxClusterResponse.getCrn())) {
+                newAttributes.put(DATABUS_HEADER_SDX_ID,
+                        Crn.fromString(sdxClusterResponse.getCrn()).getResource());
+            }
+            if (StringUtils.isNotEmpty(sdxClusterResponse.getName())) {
+                newAttributes.put(DATABUS_HEADER_SDX_NAME, sdxClusterResponse.getName());
+            }
+        }
+        return newAttributes;
     }
 
     public TelemetryRequest convertToRequest(Telemetry telemetry) {
