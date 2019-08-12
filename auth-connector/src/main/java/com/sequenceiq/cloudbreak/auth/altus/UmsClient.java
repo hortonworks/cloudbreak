@@ -592,4 +592,11 @@ public class UmsClient {
         return response.getMetadata();
     }
 
+    public UserManagementProto.ListRolesResponse listRoles(String requestId, String accountId) {
+        checkNotNull(accountId);
+        return newStub(requestId).listRoles(UserManagementProto.ListRolesRequest.newBuilder()
+                .setAccountId(accountId)
+                .build());
+    }
+
 }
