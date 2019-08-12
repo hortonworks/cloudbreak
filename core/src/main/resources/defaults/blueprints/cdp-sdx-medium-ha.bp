@@ -245,6 +245,10 @@
           {
             "name": "offsets.topic.replication.factor",
             "value": "1"
+          },
+	  {
+            "name": "delegation.token.enable",
+            "value": "true"
           }
         ],
         "serviceType": "KAFKA"
