@@ -1,36 +1,20 @@
 {
   "diskTypes": {
-    "AZURE": [
-      "Standard_LRS",
-      "Standard_GRS",
-      "Premium_LRS"
-    ],
-    "OPENSTACK": [
-      "HDD"
-    ],
-    "GCP": [
-      "pd-ssd",
-      "pd-standard"
-    ],
-    "AWS": [
-      "standard",
-      "ephemeral",
-      "gp2",
-      "st1"
-    ],
+    "AZURE": ["Standard_LRS", "Standard_GRS", "Premium_LRS"],
+    "OPENSTACK": ["HDD"],
+    "GCP": ["pd-ssd", "pd-standard"],
     "YARN": [],
-    "MOCK": [
-      "magnetic",
-      "ssd",
-      "ephemeral"
-    ]
+    "CUMULUS_YARN": [],
+    "AWS": ["standard", "ephemeral", "gp2", "st1"],
+    "MOCK": ["magnetic", "ssd", "ephemeral"]
   },
   "defaultDisks": {
     "AZURE": "Standard_LRS",
     "OPENSTACK": "HDD",
     "GCP": "pd-standard",
-    "AWS": "standard",
     "YARN": "",
+    "CUMULUS_YARN": "",
+    "AWS": "standard",
     "MOCK": "magnetic"
   },
   "diskMappings": {
@@ -46,13 +30,14 @@
       "pd-standard": "MAGNETIC",
       "pd-ssd": "SSD"
     },
+    "YARN": {},
+    "CUMULUS_YARN": {},
     "AWS": {
       "standard": "MAGNETIC",
       "st1": "ST1",
       "gp2": "SSD",
       "ephemeral": "EPHEMERAL"
     },
-    "YARN": {},
     "MOCK": {
       "ssd": "SSD",
       "magnetic": "MAGNETIC",
@@ -72,13 +57,14 @@
       "pd-standard": "Standard persistent disks (HDD)",
       "pd-ssd": "Solid-state persistent disks (SSD)"
     },
+    "YARN": {},
+    "CUMULUS_YARN": {},
     "AWS": {
       "standard": "Magnetic",
       "st1": "Throughput Optimized HDD",
       "gp2": "General Purpose (SSD)",
       "ephemeral": "Ephemeral"
     },
-    "YARN": {},
     "MOCK": {}
   }
 }

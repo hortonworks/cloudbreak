@@ -1,0 +1,28 @@
+{
+  "responses": [
+    {
+      "right": "DISTROX_READ",
+      "result": true
+    },
+    {
+      "right": "DISTROX_WRITE",
+      "result": true
+    },
+    {
+      "right": "SDX_READ",
+      "result": true
+    },
+    {
+      "right": "SDX_WRITE",
+      "result": true
+    },
+    {
+      "right": "ENVIRONMENT_READ",
+      "result": true
+    },
+    {
+      "right": "ENVIRONMENT_WRITE",
+      "result": true
+    }
+  ]
+}

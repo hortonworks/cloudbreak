@@ -1,17 +1,83 @@
 {
   "networks": {
-    "RegionOne": [
+    "eu-west-1": [
       {
-        "name": "PROVIDER_NET_172.22.64.0/18",
-        "id": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449",
+        "name": "vpc-name-1",
+        "id": "vpc-id-1",
         "subnets": {
-          "0404bf21-db5f-4987-8576-e65a4a99b14e": "PROVIDER_SUBNET_172.22.64.0/18"
+          "vpc-1-subnet-1": "vpc-1-subnet-1",
+          "vpc-1-subnet-2": "vpc-1-subnet-2"
+        },
+        "subnetMetadata": {
+          "vpc-1-subnet-1": {
+            "name": "vpc-1-subnet-1",
+            "id": "vpc-1-subnet-1",
+            "availabilityZone": "vpc-1-az-1"
+          },
+          "vpc-1-subnet-2": {
+            "name": "vpc-1-subnet-2",
+            "id": "vpc-1-subnet-2",
+            "availabilityZone": "vpc-1-az-2"
+          }
         },
         "properties": {
-          "providerPhyNet": null,
-          "providerSegID": null,
-          "tenantId": "e68fc02fc33c497385a96b3d8b9e8b16",
-          "networkType": null
+          "instanceTenancy": "default",
+          "default": false,
+          "dhcpOptionsId": "vpc-1-dhopt-1",
+          "cidrBlock": "10.0.0.0/16",
+          "state": "available"
+        }
+      },
+      {
+        "name": "vpc-name-2",
+        "id": "vpc-id-2",
+        "subnets": {
+          "vpc-2-subnet-1": "vpc-2-subnet-1",
+          "vpc-2-subnet-2": "vpc-2-subnet-2",
+          "vpc-2-subnet-3": "vpc-2-subnet-3"
+        },
+        "subnetMetadata": {
+          "vpc-2-subnet-1": {
+            "name": "vpc-2-subnet-1",
+            "id": "vpc-2-subnet-1",
+            "availabilityZone": "vpc-2-az-1"
+          },
+          "vpc-2-subnet-2": {
+            "name": "vpc-2-subnet-2",
+            "id": "vpc-2-subnet-2",
+            "availabilityZone": "vpc-2-az-2"
+          },
+          "vpc-2-subnet-3": {
+            "name": "vpc-2-subnet-3",
+            "id": "vpc-2-subnet-3",
+            "availabilityZone": "vpc-2-az-3"
+          }
+        },
+        "properties": {
+          "instanceTenancy": "default",
+          "default": true,
+          "dhcpOptionsId": "vpc-2-dopt-1",
+          "cidrBlock": "172.31.0.0/16",
+          "state": "available"
+        }
+      },
+      {
+        "name": "azure-test-network",
+        "id": "cbdeployerVnet",
+        "subnets": {
+          "azure-test-subnet": "azure-test-subnet"
+        },
+        "properties": {
+          "addressSpaces": ["10.0.0.0/16"],
+          "resourceGroupName": "azure-test",
+          "dnsServerIPs": []
+        },
+        "subnetMetadata": {
+          "azure-test-subnet": {
+            "name": null,
+            "id": "azure-test-subnet",
+            "availabilityZone": null
+          }
         }
       }
     ]

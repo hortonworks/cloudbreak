@@ -217,11 +217,6 @@ linux-test: build-linux
 integration-test: build-docker
 	make -C tests all
 
-# Create then source your local E2E testing environment variables like 'tests/localvars'
-# Execute just one scenario you can start this with: 'CLI_TEST_FILES=spec/e2e/credential.rb make e2e-test'
-e2e-test:
-	make -C tests e2e-test
-
 mod-tidy:
 	@docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/cb-cli -w /go/src/github.com/hortonworks/cb-cli -e GO111MODULE=on golang:1.12 make _mod-tidy
 

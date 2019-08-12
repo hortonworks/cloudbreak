@@ -27,4 +27,4 @@ export PASSWORD_CLI=test
 
 export WORKSPACE=/Users/mhalmy/Work/cb-cli
 export TARGET_CBD_VERSION=2.8.0-dev.85
-export CLI_TEST_FILES=spec/e2e/proxy.rb
+export CLI_TEST_FILES=spec/integration/credential.rb

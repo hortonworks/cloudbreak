@@ -1,0 +1,24 @@
+{
+  "responses": [
+    {
+      "propertyName": "hive.metastore.warehouse.dir",
+      "description": "Hive stores the table data for managed tables in the Hive warehouse directory in HDFS",
+      "defaultPath": "test@test.blob.core.windows.net/apps/hive/warehouse",
+      "relatedService": "HIVE_METASTORE",
+      "propertyFile": "hive-site",
+      "protocol": "s3a",
+      "type": "HIVE_METASTORE",
+      "propertyDisplayName": "Hive Warehouse Directory"
+    },
+    {
+      "propertyName": "hive.metastore.warehouse.dir2",
+      "description": "Hive stores the table data for managed tables in the Hive warehouse directory in HDFS",
+      "defaultPath": "test@test.blob.core.windows.net/apps/hive/warehouse2",
+      "relatedService": "HIVE_METASTORE2",
+      "type": "HIVE_METASTORE2",
+      "propertyFile": "hive-site",
+      "protocol": "s3a",
+      "propertyDisplayName": "Hive Warehouse Directory 2"
+    }
+  ]
+}

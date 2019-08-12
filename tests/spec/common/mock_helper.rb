@@ -185,31 +185,31 @@ class MockHelper
         end
     end
 
-    def self.getRequestDiff(expectedResponse)
-        actualTrace = getTrace()
+    def self.getRequestDiff(service, expectedRequest)
+        actualTrace = getTrace(service)
         prettyJsonActualTrace = JSON.pretty_generate(actualTrace)
-        prettyJsonExpectedResponse = JSON.pretty_generate(expectedResponse)
+        prettyJsonexpectedRequest = JSON.pretty_generate(expectedRequest)
         hashActualTraceValue = JSON.parse(prettyJsonActualTrace)[-1]["params"]["body"]["value"]
         hashActualTraceURL = JSON.parse(prettyJsonActualTrace)[-1]["url"]
-        hashExpectedResponseValue = JSON.parse(prettyJsonExpectedResponse)["sentValue"]
-        hashExpectedResponseURL = JSON.parse(prettyJsonExpectedResponse)["calledEndpoint"]
+        hashexpectedRequestValue = JSON.parse(prettyJsonexpectedRequest)["sentValue"]
+        hashexpectedRequestURL = JSON.parse(prettyJsonexpectedRequest)["calledEndpoint"]
 
         # For debugging purposes
         puts "Pretty JSON Actual Trace: #{prettyJsonActualTrace}"
-        #puts "Pretty JSON Expected Response: #{prettyJsonExpectedResponse}"
+        puts "Pretty JSON Expected Response: #{prettyJsonexpectedRequest}"
 
-        isEndpointCorrect = hashActualTraceURL.include? hashExpectedResponseURL
+        isEndpointCorrect = hashActualTraceURL.include? hashexpectedRequestURL
         if !isEndpointCorrect
             puts "Actual Trace and Expected URL are not equal!"
             puts "Hash Actual Trace URL: #{hashActualTraceURL}"
-            puts "Hash Expected URL: #{hashExpectedResponseURL}"
+            puts "Hash Expected URL: #{hashexpectedRequestURL}"
         end
 
-        isTraceCorrect = (hashActualTraceValue.values - hashExpectedResponseValue.values).empty?
+        isTraceCorrect = (hashActualTraceValue.values - hashexpectedRequestValue.values).empty?
         if !isTraceCorrect
             puts "Actual Trace and Expected Values are not equal!"
             puts "Hash Actual Trace Value: #{hashActualTraceValue.sort_by { |_, trace| -trace }}"
-            puts "Hash Expected Response Value: #{hashExpectedResponseValue.sort_by { |_, response| -response }}"
+            puts "Hash Expected Response Value: #{hashexpectedRequestValue.sort_by { |_, response| -response }}"
         end
         return isEndpointCorrect && isTraceCorrect
     end
@@ -229,7 +229,7 @@ class MockHelper
 
         # For debugging purposes
         puts "Pretty JSON Actual Response: #{prettyJsonActualResponse}"
-        #puts "Pretty JSON Expected Response: #{prettyJsonExpectedResponse}"
+        puts "Pretty JSON Expected Response: #{prettyJsonExpectedResponse}"
 
         isResponseCorrect = (hashActualResponse.values - hashExpectedResponse.values).empty?
         if !isResponseCorrect

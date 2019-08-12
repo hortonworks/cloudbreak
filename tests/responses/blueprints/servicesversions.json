@@ -1,0 +1,49 @@
+{
+  "services": [
+    {
+      "name": "ATLAS",
+      "displayName": "Atlas",
+      "version": "1.0.0"
+    },
+    {
+      "name": "HBASE",
+      "displayName": "HBase",
+      "version": "2.1.2"
+    },
+    {
+      "name": "HDFS",
+      "displayName": "Hdfs",
+      "version": "3.0.0"
+    },
+    {
+      "name": "HIVE",
+      "displayName": "Hive",
+      "version": "2.1.1"
+    },
+    {
+      "name": "KAFKA",
+      "displayName": "Kafka",
+      "version": "2.1.0"
+    },
+    {
+      "name": "KNOX",
+      "displayName": "Knox",
+      "version": "1.0.0"
+    },
+    {
+      "name": "RANGER",
+      "displayName": "Ranger",
+      "version": "1.0.0"
+    },
+    {
+      "name": "SOLR",
+      "displayName": "Solr",
+      "version": "7.4.0"
+    },
+    {
+      "name": "ZOOKEEPER",
+      "displayName": "ZooKeeper",
+      "version": "3.4.5"
+    }
+  ]
+}

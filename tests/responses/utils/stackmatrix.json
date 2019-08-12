@@ -1,0 +1,551 @@
+{
+  "hdp": {
+    "3.1": {
+      "version": "3.1.0.0",
+      "minAmbari": "2.7",
+      "repository": {
+        "stack": {
+          "repoid": "HDP-3.1",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/3.x/updates/3.1.0.0",
+          "debian9": "http://public-repo-1.hortonworks.com/HDP/debian9/3.x/updates/3.1.0.0",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDP/ubuntu16/3.x/updates/3.1.0.0",
+          "ubuntu18": "http://public-repo-1.hortonworks.com/HDP/ubuntu18/3.x/updates/3.1.0.0",
+          "sles12": "http://public-repo-1.hortonworks.com/HDP/sles12/3.x/updates/3.1.0.0",
+          "amazonlinux2": "http://public-repo-1.hortonworks.com/HDP/amazonlinux2/3.x/updates/3.1.0.0",
+          "repository-version": "3.1.0.0-78",
+          "vdf-redhat7":
+          "http://public-repo-1.hortonworks.com/HDP/centos7/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml",
+          "vdf-debian9":
+          "http://public-repo-1.hortonworks.com/HDP/debian9/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml",
+          "vdf-ubuntu16":
+          "http://public-repo-1.hortonworks.com/HDP/ubuntu16/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml",
+          "vdf-ubuntu18":
+          "http://public-repo-1.hortonworks.com/HDP/ubuntu18/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml",
+          "vdf-sles12":
+          "http://public-repo-1.hortonworks.com/HDP/sles12/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml",
+          "vdf-amazonlinux2":
+          "http://public-repo-1.hortonworks.com/HDP/amazonlinux2/3.x/updates/3.1.0.0/HDP-3.1.0.0-78.xml"
+        },
+        "util": {
+          "repoid": "HDP-UTILS-1.1.0.22",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+          "debian9": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16",
+          "ubuntu18": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu18",
+          "sles12": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12",
+          "amazonlinux2": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/amazonlinux2"
+        }
+      },
+      "mpacks": {},
+      "ambari": {
+        "version": "2.7.3.0",
+        "repository": {
+          "amazonlinux2": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.3.0",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "sles12": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.7.3.0",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "ubuntu18": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/ubuntu18/2.x/updates/2.7.3.0"
+          },
+          "debian9": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.7.3.0"
+          },
+          "ubuntu16": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.7.3.0"
+          },
+          "redhat7": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.3.0",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          }
+        }
+      }
+    },
+    "2.5": {
+      "version": "2.5.5.0",
+      "minAmbari": "2.6",
+      "repository": {
+        "stack": {
+          "repoid": "HDP-2.5",
+          "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.5.0",
+          "debian9": "http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.5.5.0",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.5.5.0",
+          "repository-version": "2.5.3.0-37",
+          "vdf-redhat6":
+          "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml",
+          "vdf-redhat7":
+          "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml",
+          "vdf-debian9":
+          "http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml",
+          "vdf-ubuntu16":
+          "http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml"
+        },
+        "util": {
+          "repoid": "HDP-UTILS-1.1.0.21",
+          "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7",
+          "debian9": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/debian9",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu16"
+        }
+      },
+      "mpacks": {},
+      "ambari": {
+        "version": "2.6.2.2",
+        "repository": {
+          "sles12": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.6.2.2",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/sles12/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "debian9": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.6.2.2"
+          },
+          "ubuntu16": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.2.2"
+          },
+          "redhat7": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.2",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "redhat6": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.2",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          }
+        }
+      }
+    },
+    "2.6": {
+      "version": "2.6.5.0",
+      "minAmbari": "2.6",
+      "repository": {
+        "stack": {
+          "repoid": "HDP-2.6",
+          "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0",
+          "debian9": "http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.6.5.0",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.6.5.0",
+          "sles12": "http://public-repo-1.hortonworks.com/HDP/sles12/2.x/updates/2.6.5.0",
+          "repository-version": "2.6.5.0-292",
+          "vdf-redhat6":
+          "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml",
+          "vdf-redhat7":
+          "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml",
+          "vdf-debian9":
+          "http://public-repo-1.hortonworks.com/HDP/debian9/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml",
+          "vdf-ubuntu16":
+          "http://public-repo-1.hortonworks.com/HDP/ubuntu16/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml",
+          "vdf-sles12":
+          "http://public-repo-1.hortonworks.com/HDP/sles12/2.x/updates/2.6.5.0/HDP-2.6.5.0-292.xml"
+        },
+        "util": {
+          "repoid": "HDP-UTILS-1.1.0.22",
+          "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+          "debian9": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16",
+          "sles12": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12"
+        }
+      },
+      "mpacks": {},
+      "ambari": {
+        "version": "2.6.2.2",
+        "repository": {
+          "sles12": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.6.2.2",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/sles12/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "debian9": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.6.2.2"
+          },
+          "ubuntu16": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.2.2"
+          },
+          "redhat7": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.2",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "redhat6": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.2",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          }
+        }
+      }
+    }
+  },
+  "hdf": {
+    "3.1": {
+      "version": "3.1.2.0-7",
+      "minAmbari": "2.6",
+      "repository": {
+        "stack": {
+          "repoid": "HDF-3.1",
+          "redhat6": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.2.0",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0",
+          "debian9": "http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.1.2.0",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.1.2.0",
+          "sles12": "http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.1.2.0",
+          "repository-version": "3.1.2.0-7",
+          "vdf-redhat6":
+          "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml",
+          "vdf-redhat7":
+          "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml",
+          "vdf-debian9":
+          "http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml",
+          "vdf-ubuntu16":
+          "http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml",
+          "vdf-sles12":
+          "http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.1.2.0/HDF-3.1.2.0-7.xml"
+        },
+        "util": {
+          "repoid": "HDP-UTILS-1.1.0.22",
+          "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos6",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+          "debian9": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16",
+          "sles12": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12"
+        }
+      },
+      "mpacks": {
+        "sles12": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz"
+          }
+        ],
+        "debian9": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz"
+          }
+        ],
+        "ubuntu16": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz"
+          }
+        ],
+        "redhat7": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz"
+          }
+        ],
+        "redhat6": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.1.2.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.1.2.0-7.tar.gz"
+          }
+        ]
+      },
+      "ambari": {
+        "version": "2.6.2.2",
+        "repository": {
+          "sles12": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.6.2.2",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/sles12/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "debian9": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.6.2.2"
+          },
+          "ubuntu16": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.6.2.2"
+          },
+          "redhat7": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.2.2",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "redhat6": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.6.2.2",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          }
+        }
+      }
+    },
+    "3.2": {
+      "version": "3.2.0.0-520",
+      "minAmbari": "2.7",
+      "repository": {
+        "stack": {
+          "repoid": "HDF-3.2",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0",
+          "debian9": "http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.2.0.0",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.2.0.0",
+          "sles12": "http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.2.0.0",
+          "amazonlinux2": "http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.2.0.0",
+          "repository-version": "3.2.0.0-520",
+          "vdf-redhat7":
+          "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml",
+          "vdf-debian9":
+          "http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml",
+          "vdf-ubuntu16":
+          "http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml",
+          "vdf-sles12":
+          "http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml",
+          "vdf-amazonlinux2":
+          "http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.2.0.0/HDF-3.2.0.0-520.xml"
+        },
+        "util": {
+          "repoid": "HDP-UTILS-1.1.0.22",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+          "debian9": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16",
+          "sles12": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12",
+          "amazonlinux2": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/amazonlinux2"
+        }
+      },
+      "mpacks": {
+        "amazonlinux2": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz"
+          }
+        ],
+        "sles12": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz"
+          }
+        ],
+        "debian9": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz"
+          }
+        ],
+        "ubuntu16": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz"
+          }
+        ],
+        "redhat7": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz"
+          }
+        ]
+      },
+      "ambari": {
+        "version": "2.7.3.0",
+        "repository": {
+          "amazonlinux2": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.3.0",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "sles12": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.7.3.0",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "ubuntu18": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/ubuntu18/2.x/updates/2.7.3.0"
+          },
+          "debian9": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.7.3.0"
+          },
+          "ubuntu16": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.7.3.0"
+          },
+          "redhat7": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.3.0",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          }
+        }
+      }
+    },
+    "3.3": {
+      "version": "3.3.1.0-10",
+      "minAmbari": "2.7",
+      "repository": {
+        "stack": {
+          "repoid": "HDF-3.3",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.1.0",
+          "debian9": "http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.1.0",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.1.0",
+          "sles12": "http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.1.0",
+          "amazonlinux2": "http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.1.0",
+          "repository-version": "3.3.1.0-10",
+          "vdf-redhat7":
+          "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml",
+          "vdf-debian9":
+          "http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml",
+          "vdf-ubuntu16":
+          "http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml",
+          "vdf-sles12":
+          "http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml",
+          "vdf-amazonlinux2":
+          "http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.1.0/HDF-3.3.1.0-10.xml"
+        },
+        "util": {
+          "repoid": "HDP-UTILS-1.1.0.22",
+          "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/centos7",
+          "debian9": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/debian9",
+          "ubuntu16": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/ubuntu16",
+          "sles12": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/sles12",
+          "amazonlinux2": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.22/repos/amazonlinux2"
+        }
+      },
+      "mpacks": {
+        "amazonlinux2": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz"
+          }
+        ],
+        "sles12": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/sles12/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz"
+          }
+        ],
+        "debian9": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/debian9/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz"
+          }
+        ],
+        "ubuntu16": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/ubuntu16/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz"
+          }
+        ],
+        "redhat7": [
+          {
+            "mpackUrl":
+            "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz"
+          }
+        ]
+      },
+      "ambari": {
+        "version": "2.7.3.0",
+        "repository": {
+          "amazonlinux2": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.3.0",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/amazonlinux2/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "sles12": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.7.3.0",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/sles12/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          },
+          "ubuntu18": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/ubuntu18/2.x/updates/2.7.3.0"
+          },
+          "debian9": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/debian9/2.x/updates/2.7.3.0"
+          },
+          "ubuntu16": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/ubuntu16/2.x/updates/2.7.3.0"
+          },
+          "redhat7": {
+            "baseUrl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.3.0",
+            "gpgKeyUrl":
+            "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.3.0/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+          }
+        }
+      }
+    }
+  },
+  "cdh": {
+    "6.1.1": {
+      "version": "6.1.1-1.cdh6.1.1.p0.875250",
+      "minCM": "6.1",
+      "repository": {
+        "stack": {
+          "repoid": "CDH-6.1.1",
+          "redhat7": "https://archive.cloudera.com/cdh6/6.1.1/parcels/"
+        }
+      },
+      "clouderaManager": {
+        "version": "6.1.1",
+        "repository": {
+          "redhat7": {
+            "baseUrl": "https://archive.cloudera.com/cm6/6.1.1/redhat7/yum/",
+            "gpgKeyUrl": "https://archive.cloudera.com/cm6/6.1.1/redhat7/yum/RPM-GPG-KEY-cloudera"
+          }
+        }
+      }
+    },
+    "6.2.0": {
+      "version": "6.2.0-1.cdh6.2.0.p0.967373",
+      "minCM": "6.2",
+      "repository": {
+        "stack": {
+          "repoid": "CDH-6.2.0",
+          "redhat7": "https://archive.cloudera.com/cdh6/6.2.0/parcels/"
+        }
+      },
+      "clouderaManager": {
+        "version": "6.2.0",
+        "repository": {
+          "redhat7": {
+            "baseUrl": "https://archive.cloudera.com/cm6/6.2.0/redhat7/yum/",
+            "gpgKeyUrl": "https://archive.cloudera.com/cm6/6.2.0/redhat7/yum/RPM-GPG-KEY-cloudera"
+          }
+        }
+      }
+    },
+    "6.1.0": {
+      "version": "6.1.0-1.cdh6.1.0.p0.770702",
+      "minCM": "6.1",
+      "repository": {
+        "stack": {
+          "repoid": "CDH-6.1.0",
+          "redhat7": "https://archive.cloudera.com/cdh6/6.1.0/parcels/"
+        }
+      },
+      "clouderaManager": {
+        "version": "6.1.1",
+        "repository": {
+          "redhat7": {
+            "baseUrl": "https://archive.cloudera.com/cm6/6.1.1/redhat7/yum/",
+            "gpgKeyUrl": "https://archive.cloudera.com/cm6/6.1.1/redhat7/yum/RPM-GPG-KEY-cloudera"
+          }
+        }
+      }
+    },
+    "7.0.0": {
+      "version": "7.0.0-1.cdh7.0.0.p0.1237780",
+      "minCM": "7.0",
+      "repository": {
+        "stack": {
+          "repoid": "CDH-7.0.0",
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1237780/cdh/7.x/parcels/",
+          "centos7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1237780/cdh/7.x/parcels/"
+        }
+      },
+      "clouderaManager": {
+        "version": "7.x.0-1238968",
+        "repository": {
+          "redhat7": {
+            "baseUrl":
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1238968/cm7/7.x.0/redhat7/yum/"
+          },
+          "centos7": {
+            "baseUrl":
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1238968/cm7/7.x.0/redhat7/yum/"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "specifications": {
+    "AZURE": {
+      "maxKeyLength": 512,
+      "maxValueLength": 256,
+      "keyLength": 512,
+      "minKeyLength": 1,
+      "valueLength": 256,
+      "maxAmount": 15,
+      "valueValidator": "^(?!microsoft|azure|windows)[^,]*$",
+      "keyValidator": "^(?!microsoft|azure|windows|\\s)[^,]*$",
+      "minValueLength": 1
+    },
+    "OPENSTACK": {
+      "maxKeyLength": 127,
+      "maxValueLength": 255,
+      "keyLength": 127,
+      "minKeyLength": 1,
+      "valueLength": 255,
+      "maxAmount": 50,
+      "valueValidator": "^([\\w\\d+-=._:/@\\s]+)$",
+      "keyValidator": "^(?!\\s+)([\\w\\d+-=._:/@\\s]+)$",
+      "minValueLength": 1
+    },
+    "GCP": {
+      "maxKeyLength": 63,
+      "maxValueLength": 63,
+      "keyLength": 63,
+      "minKeyLength": 1,
+      "valueLength": 63,
+      "maxAmount": 64,
+      "valueValidator": "^([a-z0-9]+)([a-z\\d-]+)$",
+      "keyValidator": "^([a-z]+)([a-z\\d-]+)$",
+      "minValueLength": 1
+    },
+    "YARN": {},
+    "CUMULUS_YARN": {},
+    "AWS": {
+      "maxKeyLength": 127,
+      "maxValueLength": 255,
+      "keyLength": 127,
+      "minKeyLength": 1,
+      "valueLength": 255,
+      "maxAmount": 50,
+      "valueValidator": "^(?!aws|\\s)([\\w\\d+-=._:/@\\s]+)$",
+      "keyValidator": "^(?!aws)([\\w\\d+-=._:/@\\s]+)$",
+      "minValueLength": 1
+    },
+    "MOCK": {}
+  }
+}

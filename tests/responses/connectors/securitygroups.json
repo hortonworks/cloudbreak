@@ -1,17 +1,34 @@
 {
-  "securityGroups" : {
-    "key" : [ {
-      "groupName" : "groupName",
-      "groupId" : "groupId",
-      "properties" : {
-        "key" : "{}"
+  "securityGroups": {
+    "eu-west-1": [
+      {
+        "groupName": "groupName1",
+        "groupId": "groupId1",
+        "properties": {
+          "vpcId": "vpc-id-1"
+        }
+      },
+      {
+        "groupName": "groupName2",
+        "groupId": "groupId2",
+        "properties": {
+          "vpcId": "vpc-id-1"
+        }
+      },
+      {
+        "groupName": "groupName3",
+        "groupId": "groupId3",
+        "properties": {
+          "vpcId": "vpc-id-2"
+        }
+      },
+      {
+        "groupName": "groupName4",
+        "groupId": "groupId4",
+        "properties": {
+          "vpcId": "vpc-id-2"
+        }
       }
-    }, {
-      "groupName" : "groupName",
-      "groupId" : "groupId",
-      "properties" : {
-        "key" : "{}"
-      }
-    } ]
+    ]
   }
 }

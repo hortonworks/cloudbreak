@@ -1,81 +1,54 @@
 {
   "responses": [
     {
-      "id": 5,
-      "name": "Data Science: Apache Spark 2, Apache Zeppelin",
-      "description": "Useful for data science with Spark and Zeppelin",
-      "stackType": "HDP",
-      "stackVersion": "2.6",
+      "id": 5310,
+      "name": "CDP 1.0 - Data Mart HA: Apache Impala, Hue",
+      "description": "CDP 1.0 (HA) Data Mart template with Apache Impala and Hue",
+      "stackType": "CDH",
+      "stackVersion": "7.0.0",
+      "hostGroupCount": 5,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 5394,
+      "name": "CDP 1.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+      "description":
+      "CDP 1.0 SDX-HA template with Atlas, HMS, Ranger and other services they are dependent on. Services like HDFS, HBASE have HA",
+      "stackType": "CDH",
+      "stackVersion": "7.0.0",
+      "hostGroupCount": 4,
+      "status": "DEFAULT",
+      "tags": {
+        "shared_services_ready": true
+      }
+    },
+    {
+      "id": 5309,
+      "name": "CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie",
+      "description": "CDP 1.0 Data Engineering template",
+      "stackType": "CDH",
+      "stackVersion": "7.0.0",
       "hostGroupCount": 3,
       "status": "DEFAULT",
       "tags": {}
     },
     {
-      "id": 17,
-      "name": "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin",
-      "description": "Useful for data science with Spark and Zeppelin",
-      "stackType": "HDP",
-      "stackVersion": "3.0",
+      "id": 77,
+      "name": "CDH 6.2 - Data Science: Apache Spark, Apache Hive, Impala5",
+      "description": "Useful for data science with Spark and Impala",
+      "stackType": "CDH",
+      "stackVersion": "6.2.0",
       "hostGroupCount": 3,
       "status": "DEFAULT",
       "tags": {}
     },
     {
-      "id": 3,
-      "name": "Flow Management: Apache NiFi, Apache NiFi Registry",
-      "description": "Useful for data-flow management with Apache NiFi and Apache NiFi Registry",
-      "stackType": "HDF",
-      "stackVersion": "3.2",
-      "hostGroupCount": 3,
-      "status": "DEFAULT",
-      "tags": {}
-    },
-    {
-      "id": 9,
-      "name": "Messaging Management: Apache Kafka",
-      "description": "Useful for messaging management with Apache Kafka",
-      "stackType": "HDF",
-      "stackVersion": "3.2",
-      "hostGroupCount": 3,
-      "status": "DEFAULT",
-      "tags": {}
-    },
-    {
-      "id": 1,
-      "name": "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
-      "description": "Useful for EDW analytics using Hive LLAP",
-      "stackType": "HDP",
-      "stackVersion": "2.6",
-      "hostGroupCount": 3,
-      "status": "DEFAULT",
-      "tags": {}
-    },
-    {
-      "id": 13,
-      "name": "HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
-      "description": "Useful for EDW analytics using Hive LLAP",
-      "stackType": "HDP",
-      "stackVersion": "3.0",
-      "hostGroupCount": 3,
-      "status": "DEFAULT",
-      "tags": {}
-    },
-    {
-      "id": 7,
-      "name": "EDW-ETL: Apache Hive, Apache Spark 2",
-      "description": "Useful for ETL data processing with Hive and Spark",
-      "stackType": "HDP",
-      "stackVersion": "2.6",
-      "hostGroupCount": 3,
-      "status": "DEFAULT",
-      "tags": {}
-    },
-    {
-      "id": 11,
-      "name": "Data Lake: Apache Ranger, Apache Hive Metastore HA",
-      "description": "Data Lake: Apache Ranger, Apache Hive Metastore HA",
-      "stackType": "HDP",
-      "stackVersion": "2.6",
+      "id": 5395,
+      "name": "CDP 1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+      "description": "CDP 1.0 SDX template with Atlas, HMS, Ranger and other services they are dependent on",
+      "stackType": "CDH",
+      "stackVersion": "7.0.0",
       "hostGroupCount": 2,
       "status": "DEFAULT",
       "tags": {
@@ -83,28 +56,94 @@
       }
     },
     {
-      "id": 15,
-      "name": "HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore",
-      "description": "HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore",
-      "stackType": "HDP",
-      "stackVersion": "3.0",
-      "hostGroupCount": 1,
+      "id": 253,
+      "name": "CDH 6.2 - Data Science: Apache Spark, Apache Hive, Impala16",
+      "description": "Useful for data science with Spark and Impala",
+      "stackType": "CDH",
+      "stackVersion": "6.2.0",
+      "hostGroupCount": 3,
       "status": "DEFAULT",
-      "tags": {
-        "shared_services_ready": true
-      }
+      "tags": {}
     },
     {
-      "id": 2,
-      "name": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
-      "description": "Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore",
-      "stackType": "HDP",
-      "stackVersion": "2.6",
-      "hostGroupCount": 1,
+      "id": 52,
+      "name": "CDH 6.2 - Data Science: Apache Spark, Apache Hive, Impala4",
+      "description": "Useful for data science with Spark and Impala",
+      "stackType": "CDH",
+      "stackVersion": "6.2.0",
+      "hostGroupCount": 3,
       "status": "DEFAULT",
-      "tags": {
-        "shared_services_ready": true
-      }
+      "tags": {}
+    },
+    {
+      "id": 4771,
+      "name": "CDP 1.0 - Data Engineering HA: Apache Spark, Apache Livy, Apache Zeppelin",
+      "description": "CDP 1.0 (HA) Data Engineering with Spark, Livy and Zeppelin",
+      "stackType": "CDH",
+      "stackVersion": "7.0.0",
+      "hostGroupCount": 5,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 522,
+      "name": "CDH 6.2 - Data Science: Apache Spark, Apache Hive, Impala",
+      "description": "Useful for data science with Spark and Impala",
+      "stackType": "CDH",
+      "stackVersion": "6.2.0",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 969,
+      "name": "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala",
+      "description": "CDP 1.0 Data Science template with Spark, Impala and Hive",
+      "stackType": "CDH",
+      "stackVersion": "6.0.99",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 100,
+      "name": "CDH 6.2 - Data Science: Apache Spark, Apache Hive, Impala6",
+      "description": "Useful for data science with Spark and Impala",
+      "stackType": "CDH",
+      "stackVersion": "6.2.0",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 4915,
+      "name": "CDH 6.2 - Data Science: Apache Spark, Apache Hive",
+      "description": "Useful for data science with Spark",
+      "stackType": "CDH",
+      "stackVersion": "6.2.0",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 5177,
+      "name": "CDP 1.0 - Data Mart: Apache Impala, Hue",
+      "description": "CDP 1.0 Data Mart template with Apache Impala and Hue",
+      "stackType": "CDH",
+      "stackVersion": "7.0.0",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
+    },
+    {
+      "id": 4914,
+      "name": "CDP 1.0 - Data Science: Apache Spark, Apache Hive",
+      "description": "CDP 1.0 Data Science template with Spark and Hive",
+      "stackType": "CDH",
+      "stackVersion": "7.0.0",
+      "hostGroupCount": 3,
+      "status": "DEFAULT",
+      "tags": {}
     }
   ]
 }

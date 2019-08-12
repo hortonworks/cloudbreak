@@ -1,0 +1,20 @@
+{
+  "accessConfigs": [
+    {
+      "name": "instanceProfile1",
+      "id": "instanceProfile1",
+      "properties": {
+        "arn": "instanceProfile1",
+        "creationDate": "Sat Feb 13 22:16:01 UTC 2016"
+      }
+    },
+    {
+      "name": "instanceProfile2",
+      "id": "instanceProfile2",
+      "properties": {
+        "arn": "instanceProfile2",
+        "creationDate": "Wed Jul 06 23:14:25 UTC 2016"
+      }
+    }
+  ]
+}

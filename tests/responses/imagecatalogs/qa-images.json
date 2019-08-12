@@ -1,203 +1,152 @@
 {
-  "baseImages": [
+  "baseImages": [],
+  "hdfImages": [],
+  "hdpImages": [],
+  "cdhImages": [
     {
-      "hdpStacks": [
-        {
-          "version": "2.5.5.0",
-          "repo": {
-            "stack": {
-              "repoid": "HDP-2.5",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.5.0",
-              "repository-version": "2.5.3.0-37",
-              "vdf-redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml",
-              "vdf-redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml"
-            },
-            "util": {
-              "repoid": "HDP-UTILS-1.1.0.21",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7"
-            },
-            "knox": {}
-          }
-        },
-        {
-          "version": "2.6.3.0",
-          "repo": {
-            "stack": {
-              "repoid": "HDP-2.6",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.3.0",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0",
-              "repository-version": "2.6.3.0-235",
-              "vdf-redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.3.0/HDP-2.6.3.0-235.xml",
-              "vdf-redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0/HDP-2.6.3.0-235.xml"
-            },
-            "util": {
-              "repoid": "HDP-UTILS-1.1.0.21",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7"
-            },
-            "knox": {}
-          }
-        }
-      ],
-      "hdfStacks": [
-        {
-          "version": "3.0.0.0-453",
-          "repo": {
-            "stack": {
-              "repoid": "HDF-3.0",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.0.0.0",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.0.0.0",
-              "mpack": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.0.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.0.0.0-453.tar.gz",
-              "repository-version": "3.0.0.0-453",
-              "vdf-redhat6": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.0.0.0/HDF-3.0.0.0-453.xml",
-              "vdf-redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.0.0.0/HDF-3.0.0.0-453.xml"
-            },
-            "util": {
-              "repoid": "HDP-UTILS-1.1.0.21",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7"
-            },
-            "knox": {
-              "repoid": "KNOX-HDP-2.6",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.1.0",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.1.0"
-            }
-          }
-        }
-      ],
-      "date": "2017-10-13",
-      "description": "Cloudbreak official base image",
-      "os": "centos7",
+      "date": "2019-05-23",
+      "description": "Official Cloudbreak image",
+      "os": "redhat7",
       "osType": "redhat7",
-      "uuid": "f6e778fc-7f17-4535-9021-515351df3691",
-      "version": "2.6.0.0",
-      "repo": {
-        "baseurl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.0.0",
-        "gpgkey": "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+      "uuid": "4AE7BA79-21C3-442B-8D7C-1ADC3EA0924E",
+      "version": "7.0.0",
+      "repository": {
+        "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1106313/cm7/7.x.0/redhat7/yum/"
       },
       "images": {
-        "openstack": {
-          "default": "hdc-hdp--1710161226"
-        },
-        "gcp": {
-          "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
-        },
-        "azure": {
-          "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "Central India": "https://hwxcentralindia.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "South India": "https://hwxsouthindia.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "Southeast Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "UK South": "https://hwxsouthuk.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "UK West": "https://hwxwestuk.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "West India": "https://hwxwestindia.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd",
-          "West US 2": "https://hwxwestus2.blob.core.windows.net/images/hdc-hdp--1710161226.vhd"
+        "aws": {
+          "ap-northeast-1": "ami-0b93437e9c9369c32",
+          "ap-northeast-2": "ami-081262bcfcae83430",
+          "ap-south-1": "ami-0ef9f45bd0a8d55d4",
+          "ap-southeast-1": "ami-0e7247c66fd71f532",
+          "ap-southeast-2": "ami-015a92123a0b8801f",
+          "ca-central-1": "ami-0c43c9ddc6c7f8630",
+          "eu-central-1": "ami-006053d8715bc50ae",
+          "eu-north-1": "ami-0bdc8be0a6669907b",
+          "eu-west-1": "ami-07ecf2c7b854731b8",
+          "eu-west-2": "ami-09ebbb25cf3f9df4a",
+          "eu-west-3": "ami-08ff3e39aa71c1a1f",
+          "sa-east-1": "ami-0d6ea37be435dd6dd",
+          "us-east-1": "ami-00eafc4b5f75f5dd8",
+          "us-east-2": "ami-046846adbef0c3767",
+          "us-west-1": "ami-0b80328188644791d",
+          "us-west-2": "ami-0b962f967af66b5b8"
         }
+      },
+      "stackDetails": {
+        "version": "7.0.0",
+        "repository": {
+          "stack": {
+            "repository-version": "7.0.0-1.cdh7.0.0.p0.21",
+            "repoid": "CDH-7.0.0",
+            "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1105963/cdh/7.x/parcels/"
+          }
+        }
+      },
+      "defaultImage": true,
+      "packageVersions": {
+        "cm": "7.0.0",
+        "salt": "2017.7.5",
+        "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+        "stack": "7.0.0"
       }
     },
     {
-      "hdpStacks": [
-        {
-          "version": "2.5.5.0",
-          "repo": {
-            "stack": {
-              "repoid": "HDP-2.5",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.5.0",
-              "repository-version": "2.5.3.0-37",
-              "vdf-redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml",
-              "vdf-redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.3.0/HDP-2.5.3.0-37.xml"
-            },
-            "util": {
-              "repoid": "HDP-UTILS-1.1.0.21",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7"
-            },
-            "knox": {}
-          }
-        },
-        {
-          "version": "2.6.3.0",
-          "repo": {
-            "stack": {
-              "repoid": "HDP-2.6",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.3.0",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0",
-              "repository-version": "2.6.3.0-235",
-              "vdf-redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.3.0/HDP-2.6.3.0-235.xml",
-              "vdf-redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0/HDP-2.6.3.0-235.xml"
-            },
-            "util": {
-              "repoid": "HDP-UTILS-1.1.0.21",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7"
-            },
-            "knox": {}
+      "date": "2019-05-28",
+      "description": "Official Cloudbreak image",
+      "os": "redhat7",
+      "osType": "redhat7",
+      "uuid": "fb47fecc-05d5-4ed9-6ca4-5be2dc089712",
+      "version": "7.x.0",
+      "repository": {
+        "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1123811/cm7/7.x.0/redhat7/yum/"
+      },
+      "images": {
+        "aws": {
+          "ap-northeast-1": "ami-0f10cb5664eb1d273",
+          "ap-northeast-2": "ami-000366911cf9baead",
+          "ap-south-1": "ami-0084a8f683f55208b",
+          "ap-southeast-1": "ami-032f7b04f9d555b97",
+          "ap-southeast-2": "ami-03fd066dd89393b82",
+          "ca-central-1": "ami-09fe5326cec9f4fc3",
+          "eu-central-1": "ami-01adc140789a9d257",
+          "eu-north-1": "ami-06e87ed661af9689b",
+          "eu-west-1": "ami-06793e26c20bac429",
+          "eu-west-2": "ami-07b528b3a1a2a933d",
+          "eu-west-3": "ami-0ca688f8c8501e080",
+          "sa-east-1": "ami-0580659c452d6f700",
+          "us-east-1": "ami-0a62fa64087e933e2",
+          "us-east-2": "ami-06904efa002c157b9",
+          "us-west-1": "ami-07da6783ef2afe079",
+          "us-west-2": "ami-00075306abf7fe92a"
+        }
+      },
+      "stackDetails": {
+        "version": "7.0.0",
+        "repository": {
+          "stack": {
+            "repository-version": "7.0.0-1.cdh7.0.0.p0.21",
+            "repoid": "CDH-7.0.0",
+            "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1105963/cdh/7.x/parcels/"
           }
         }
-      ],
-      "hdfStacks": [
-        {
-          "version": "3.0.0.0-453",
-          "repo": {
-            "stack": {
-              "repoid": "HDF-3.0",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.0.0.0",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.0.0.0",
-              "mpack": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.0.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.0.0.0-453.tar.gz",
-              "repository-version": "3.0.0.0-453",
-              "vdf-redhat6": "http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.0.0.0/HDF-3.0.0.0-453.xml",
-              "vdf-redhat7": "http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.0.0.0/HDF-3.0.0.0-453.xml"
-            },
-            "util": {
-              "repoid": "HDP-UTILS-1.1.0.21",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7"
-            },
-            "knox": {
-              "repoid": "KNOX-HDP-2.6",
-              "redhat6": "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.1.0",
-              "redhat7": "http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.1.0"
-            }
-          }
-        }
-      ],
-      "date": "2017-11-10",
+      },
+      "defaultImage": true,
+      "packageVersions": {
+        "cm": "7.x.0",
+        "salt": "2017.7.5",
+        "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+        "stack": "7.0.0"
+      }
+    },
+    {
+      "date": "2019-07-05",
       "description": "Official Cloudbreak image",
       "os": "centos7",
       "osType": "redhat7",
-      "uuid": "3f66bdad-5f59-4460-6182-0359c2cf7f1b",
-      "version": "2.6.0.0",
-      "repo": {
-        "baseurl": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.0.0",
-        "gpgkey": "http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
+      "uuid": "758b7982-679f-4e9d-7493-8cc070c54823",
+      "version": "7.x.0",
+      "repository": {
+        "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1238968/cm7/7.x.0/redhat7/yum/"
       },
       "images": {
-        "openstack": {
-          "default": "hdc-hdp--1711101841"
+        "aws": {
+          "ap-northeast-1": "ami-026d55508120e8f30",
+          "ap-northeast-2": "ami-0cb7bc334a5c94898",
+          "ap-south-1": "ami-02be1746a0acfc058",
+          "ap-southeast-1": "ami-0d5bef039ce40a349",
+          "ap-southeast-2": "ami-0f1e33a76f5f93ed1",
+          "ca-central-1": "ami-00332471154de5bdc",
+          "eu-central-1": "ami-0203809bb7b821458",
+          "eu-north-1": "ami-04ffa8e704b923483",
+          "eu-west-1": "ami-039ad3465c2b62aeb",
+          "eu-west-2": "ami-08874b974011d9420",
+          "eu-west-3": "ami-0648c9e1c5a35c169",
+          "sa-east-1": "ami-0e470924c9918a583",
+          "us-east-1": "ami-045a6035e1c84c566",
+          "us-east-2": "ami-004e60498af695f0b",
+          "us-west-1": "ami-0270fef5149be23a5",
+          "us-west-2": "ami-0924f5eba345f75ee"
         }
+      },
+      "stackDetails": {
+        "version": "7.0.0.0",
+        "repository": {
+          "stack": {
+            "repository-version": "7.0.0-1.cdh7.0.0.p0.1237780",
+            "repoid": "CDH-7.0.0",
+            "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1237780/cdh/7.x/parcels/"
+          }
+        }
+      },
+      "defaultImage": true,
+      "packageVersions": {
+        "cm": "7.x.0",
+        "salt": "2017.7.5",
+        "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+        "stack": "7.0.0.0"
       }
     }
   ],
-  "hdpImages": [],
-  "hdfImages": []
+  "supportedVersions": ["2.12.0-dev.42"]
 }

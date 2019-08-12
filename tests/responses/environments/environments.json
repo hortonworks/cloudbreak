@@ -1,0 +1,122 @@
+{
+  "responses": [
+    {
+      "crn": "crn:altus:environments:us-west-1:hortonworks:environment:637c2df3-e154-4642-b076-ffe4911205b9",
+      "name": "failed-amazon",
+      "description": "",
+      "cloudPlatform": "AWS",
+      "creator": null,
+      "createFreeIpa": true,
+      "credential": {
+        "name": "amazon",
+        "cloudPlatform": "AWS",
+        "aws": {
+          "keyBased": {},
+          "govCloud": false
+        },
+        "description": "",
+        "attributes": {
+          "enginePath": "secret",
+          "secretPath": "env/shared/credential/attributes/3e572541-c09b-4610-aaad-36d079b1c912-16b6f7d2150"
+        },
+        "crn": "crn:altus:environments:us-west-1:hortonworks:credential:ad2986b4-8abc-44c9-a4e8-e9be9877834a",
+        "creator": "crn:altus:iam:us-west-1:hortonworks:user:mock@hortonworks.com"
+      },
+      "regions": {
+        "names": ["eu-west-1"],
+        "displayNames": {
+          "eu-west-1": "EU (Ireland)"
+        }
+      },
+      "location": {
+        "name": "eu-west-1",
+        "displayName": "EU (Ireland)",
+        "latitude": 53.33306114,
+        "longitude": -6.248905682
+      },
+      "telemetry": null,
+      "network": {
+        "subnetIds": ["subnet-123456789abcdefghi"],
+        "aws": {
+          "vpcId": "vpc-123456789abcdefgh"
+        },
+        "azure": {},
+        "crn": "crn:altus:environments:us-west-1:hortonworks:network:4c150199-4ec8-4510-bb79-02ed1e753d59",
+        "subnetMetas": {
+          "subnet-123456789abcdefghi": {
+            "id": "subnet-123456789abcdefghi",
+            "name": "Cloudbreak-EUW1-S1",
+            "availabilityZone": "eu-west-1a",
+            "cidr": null,
+            "privateSubnet": false
+          }
+        }
+      },
+      "environmentStatus": "DELETE_FAILED",
+      "authentication": null,
+      "statusReason":
+      "com.sequenceiq.environment.exception.FreeIpaOperationFailedException: FreeIpa deletion operation failed: Termination failed: The security token included in the request is invalid. (Service: AmazonCloudFormation; Status Code: 403; Error Code: InvalidClientTokenId; Request ID: 9f77a882-a3b8-11e9-a694-a5e2a1fba380)",
+      "created": 1561377876808,
+      "securityAccess": null
+    },
+    {
+      "crn": "crn:altus:environments:us-west-1:hortonworks:environment:3d216198-5c40-4e10-81d4-0f5607248454",
+      "name": "amazon",
+      "description": "",
+      "cloudPlatform": "AWS",
+      "creator": null,
+      "createFreeIpa": true,
+      "credential": {
+        "name": "amazon",
+        "cloudPlatform": "AWS",
+        "aws": {
+          "keyBased": {},
+          "govCloud": false
+        },
+        "description": "",
+        "attributes": {
+          "enginePath": "secret",
+          "secretPath":
+          "env/shared/hortonworks/credential/attributes/f3e817b0-fc8e-4d69-8ff6-ebfb6fa85cfd-16be0ae829d"
+        },
+        "crn": "crn:altus:environments:us-west-1:hortonworks:credential:60be6586-24ba-42a3-af50-abd2f72d00a7",
+        "creator": "crn:altus:iam:us-west-1:hortonworks:user:mock@hortonworks.com"
+      },
+      "regions": {
+        "names": ["eu-west-1"],
+        "displayNames": {
+          "eu-west-1": "EU (Ireland)"
+        }
+      },
+      "location": {
+        "name": "eu-west-1",
+        "displayName": "EU (Ireland)",
+        "latitude": 53.33306114,
+        "longitude": -6.248905682
+      },
+      "telemetry": null,
+      "network": {
+        "subnetIds": ["subnet-123456789abcdefghi"],
+        "aws": {
+          "vpcId": "vpc-123456789abcdefgh"
+        },
+        "azure": {},
+        "crn": "crn:altus:environments:us-west-1:hortonworks:network:359f186f-a121-454f-8782-8676b7135cf5",
+        "subnetMetas": {
+          "subnet-123456789abcdefghi": {
+            "id": "subnet-123456789abcdefghi",
+            "name": "Cloudbreak-EUW1-S1",
+            "availabilityZone": "eu-west-1a",
+            "cidr": "10.65.64.0/24",
+            "privateSubnet": false
+          }
+        }
+      },
+      "environmentStatus": "AVAILABLE",
+      "authentication": null,
+      "statusReason": null,
+      "created": 1562842928413,
+      "securityAccess": null
+    }
+  ]
+}

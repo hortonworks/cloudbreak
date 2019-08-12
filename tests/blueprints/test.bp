@@ -1,180 +1,289 @@
 {
-  "Blueprints": {
-    "blueprint_name": "hdp26-etl-edw-spark2",
-    "stack_name": "HDP",
-    "stack_version": "2.6"
-  },
-  "settings": [
+  "cdhVersion": "7.0.0",
+  "displayName": "datalake",
+  "hostTemplates": [
     {
-      "recovery_settings": []
+      "cardinality": 1,
+      "refName": "master",
+      "roleConfigGroupsRefNames": [
+        "atlas-ATLAS_SERVER-BASE",
+        "hbase-GATEWAY-BASE",
+        "hbase-HBASETHRIFTSERVER-BASE",
+        "hbase-REGIONSERVER-BASE",
+        "hbase-MASTER-BASE",
+        "hdfs-DATANODE-BASE",
+        "hdfs-BALANCER-BASE",
+        "hdfs-GATEWAY-BASE",
+        "hdfs-NAMENODE-BASE",
+        "hdfs-SECONDARYNAMENODE-BASE",
+        "hive-HIVEMETASTORE-BASE",
+        "kafka-GATEWAY-BASE",
+        "kafka-KAFKA_BROKER-BASE",
+        "knox-KNOX_GATEWAY-BASE",
+        "ranger-RANGER_ADMIN-BASE",
+        "ranger-RANGER_TAGSYNC-BASE",
+        "ranger-RANGER_USERSYNC-BASE",
+        "solr-SOLR_SERVER-BASE",
+        "zookeeper-SERVER-BASE"
+      ]
     },
     {
-      "service_settings": [
+      "cardinality": 1,
+      "refName": "idbroker",
+      "roleConfigGroupsRefNames": [
+        "knox-IDBROKER-BASE"
+      ]
+    }
+  ],
+  "services": [
+    {
+      "refName": "zookeeper",
+      "roleConfigGroups": [
         {
-          "name": "HIVE",
-          "credential_store_enabled": "false"
+          "base": true,
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER"
+        }
+      ],
+      "serviceType": "ZOOKEEPER"
+    },
+    {
+      "refName": "ranger",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "refName": "ranger-RANGER_USERSYNC-BASE",
+          "roleType": "RANGER_USERSYNC"
+        },
+        {
+          "base": true,
+          "refName": "ranger-RANGER_TAGSYNC-BASE",
+          "roleType": "RANGER_TAGSYNC",
+          "configs": [
+            {
+              "name": "ranger.tagsync.source.atlas",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "base": true,
+          "refName": "ranger-RANGER_ADMIN-BASE",
+          "roleType": "RANGER_ADMIN"
+        }
+      ],
+      "serviceConfigs": [
+        {
+          "name": "hdfs_service",
+          "ref": "hdfs"
+        },
+        {
+          "name": "rangeradmin_user_password",
+          "value": "{{{ general.password }}}"
+        },
+        {
+          "name": "rangertagsync_user_password",
+          "value": "{{{ general.password }}}"
+        },
+        {
+          "name": "solr_service",
+          "ref": "solr"
+        },
+        {
+          "name": "rangerusersync_user_password",
+          "value": "{{{ general.password }}}"
+        },
+        {
+          "name": "keyadmin_user_password",
+          "value": "{{{ general.password }}}"
+        }
+      ],
+      "serviceType": "RANGER"
+    },
+    {
+      "refName": "atlas",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "configs": [
+            {
+              "name": "atlas_kafka_bootstrap_servers",
+              "value": "{{{format-join host_groups.master format='%s:9092' }}}"
+            }
+          ],
+          "refName": "atlas-ATLAS_SERVER-BASE",
+          "roleType": "ATLAS_SERVER"
+        }
+      ],
+      "serviceConfigs": [
+        {
+          "name": "solr_service",
+          "ref": "solr"
+        },
+        {
+          "name": "kafka_service",
+          "ref": "kafka"
+        },
+        {
+          "name": "hbase_service",
+          "ref": "hbase"
+        },
+        {
+          "name": "hdfs_service",
+          "ref": "hdfs"
+        }
+      ],
+      "serviceType": "ATLAS"
+    },
+    {
+      "refName": "solr",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "refName": "solr-SOLR_SERVER-BASE",
+          "roleType": "SOLR_SERVER"
+        }
+      ],
+      "serviceConfigs": [
+        {
+          "name": "hdfs_service",
+          "ref": "hdfs"
+        },
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        },
+        {
+          "name": "enable_ranger_authorization",
+          "value": "true"
+        }
+      ],
+      "serviceType": "SOLR"
+    },
+    {
+      "refName": "hbase",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "refName": "hbase-GATEWAY-BASE",
+          "roleType": "GATEWAY"
+        },
+        {
+          "base": true,
+          "refName": "hbase-REGIONSERVER-BASE",
+          "roleType": "REGIONSERVER"
+        },
+        {
+          "base": true,
+          "refName": "hbase-MASTER-BASE",
+          "roleType": "MASTER"
+        },
+        {
+          "base": true,
+          "refName": "hbase-HBASETHRIFTSERVER-BASE",
+          "roleType": "HBASETHRIFTSERVER"
+        }
+      ],
+      "serviceType": "HBASE"
+    },
+    {
+      "refName": "hdfs",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE"
+        },
+        {
+          "base": true,
+          "refName": "hdfs-SECONDARYNAMENODE-BASE",
+          "roleType": "SECONDARYNAMENODE"
+        },
+        {
+          "base": true,
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE"
+        },
+        {
+          "base": true,
+          "refName": "hdfs-BALANCER-BASE",
+          "roleType": "BALANCER"
+        },
+        {
+          "base": true,
+          "refName": "hdfs-GATEWAY-BASE",
+          "roleType": "GATEWAY"
+        }
+      ],
+      "serviceConfigs": [
+        {
+          "name": "enable_ranger_authorization",
+          "value": "true"
+        }
+      ],
+      "serviceType": "HDFS"
+    },
+    {
+      "refName": "kafka",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "refName": "kafka-GATEWAY-BASE",
+          "roleType": "GATEWAY"
+        },
+        {
+          "base": true,
+          "refName": "kafka-KAFKA_BROKER-BASE",
+          "roleType": "KAFKA_BROKER"
+        }
+      ],
+      "serviceConfigs": [
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        },
+        {
+          "name": "offsets.topic.replication.factor",
+          "value": "1"
+        },
+        {
+          "name": "transaction.state.log.replication.factor",
+          "value": "1"
+        },
+        {
+          "name": "transaction.state.log.min.isr",
+          "value": "1"
+        }
+      ],
+      "serviceType": "KAFKA"
+    },
+    {
+      "serviceType": "KNOX",
+      "refName": "knox",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "refName": "knox-KNOX_GATEWAY-BASE",
+          "roleType": "KNOX_GATEWAY"
+        },
+        {
+          "base": true,
+          "refName": "knox-IDBROKER-BASE",
+          "roleType": "IDBROKER"
         }
       ]
     },
     {
-      "component_settings": []
-    }
-  ],
-  "configurations": [
-    {
-      "core-site": {
-        "fs.trash.interval": "4320"
-      }
-    },
-    {
-      "hdfs-site": {
-        "dfs.namenode.safemode.threshold-pct": "0.99"
-      }
-    },
-    {
-      "hive-site": {
-        "hive.exec.compress.output": "true",
-        "hive.merge.mapfiles": "true",
-        "hive.server2.tez.initialize.default.sessions": "true",
-        "hive.server2.transport.mode": "http"
-      }
-    },
-    {
-      "mapred-site": {
-        "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
-        "mapreduce.map.output.compress": "true",
-        "mapreduce.output.fileoutputformat.compress": "true"
-      }
-    },
-    {
-      "yarn-site": {
-        "yarn.acl.enable": "true"
-      }
-    }
-  ],
-  "host_groups": [
-    {
-      "name": "master",
-      "configurations": [],
-      "components": [
+      "refName": "hive",
+      "displayName": "Hive Metastore",
+      "roleConfigGroups": [
         {
-          "name": "APP_TIMELINE_SERVER"
-        },
-        {
-          "name": "HCAT"
-        },
-        {
-          "name": "HDFS_CLIENT"
-        },
-        {
-          "name": "HISTORYSERVER"
-        },
-        {
-          "name": "HIVE_CLIENT"
-        },
-        {
-          "name": "HIVE_METASTORE"
-        },
-        {
-          "name": "HIVE_SERVER"
-        },
-        {
-          "name": "JOURNALNODE"
-        },
-        {
-          "name": "MAPREDUCE2_CLIENT"
-        },
-        {
-          "name": "METRICS_COLLECTOR"
-        },
-        {
-          "name": "METRICS_MONITOR"
-        },
-        {
-          "name": "MYSQL_SERVER"
-        },
-        {
-          "name": "NAMENODE"
-        },
-        {
-          "name": "PIG"
-        },
-        {
-          "name": "RESOURCEMANAGER"
-        },
-        {
-          "name": "SECONDARY_NAMENODE"
-        },
-        {
-          "name": "SPARK2_CLIENT"
-        },
-        {
-          "name": "SPARK2_JOBHISTORYSERVER"
-        },
-        {
-          "name": "TEZ_CLIENT"
-        },
-        {
-          "name": "WEBHCAT_SERVER"
-        },
-        {
-          "name": "YARN_CLIENT"
-        },
-        {
-          "name": "ZOOKEEPER_CLIENT"
-        },
-        {
-          "name": "ZOOKEEPER_SERVER"
+          "base": true,
+          "refName": "hive-HIVEMETASTORE-BASE",
+          "roleType": "HIVEMETASTORE"
         }
       ],
-      "cardinality": "1"
-    },
-    {
-      "name": "worker",
-      "configurations": [],
-      "components": [
-        {
-          "name": "HIVE_CLIENT"
-        },
-        {
-          "name": "TEZ_CLIENT"
-        },
-        {
-          "name": "SPARK2_CLIENT"
-        },
-        {
-          "name": "DATANODE"
-        },
-        {
-          "name": "METRICS_MONITOR"
-        },
-        {
-          "name": "NODEMANAGER"
-        }
-      ],
-      "cardinality": "1+"
-    },
-    {
-      "name": "compute",
-      "configurations": [],
-      "components": [
-        {
-          "name": "HIVE_CLIENT"
-        },
-        {
-          "name": "TEZ_CLIENT"
-        },
-        {
-          "name": "SPARK2_CLIENT"
-        },
-        {
-          "name": "METRICS_MONITOR"
-        },
-        {
-          "name": "NODEMANAGER"
-        }
-      ],
-      "cardinality": "1+"
+      "serviceType": "HIVE"
     }
   ]
 }

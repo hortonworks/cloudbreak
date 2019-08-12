@@ -1,0 +1,55 @@
+{
+  "id": 2,
+  "name": "amazon",
+  "description": "Amazon environment",
+  "regions": {
+    "names": ["eu-west-1"],
+    "displayNames": {
+      "eu-west-1": "EU (London) eu-west-1"
+    }
+  },
+  "cloudPlatform": "AWS",
+  "credential": {
+    "name": "amazon",
+    "cloudPlatform": "AWS",
+    "aws": {
+      "keyBased": {},
+      "govCloud": false
+    },
+    "description": "",
+    "attributes": {
+      "enginePath": "secret",
+      "secretPath":
+      "env/shared/hortonworks/credential/attributes/f3e817b0-fc8e-4d69-8ff6-ebfb6fa85cfd-16be0ae829d"
+    },
+    "crn": "crn:altus:environments:us-west-1:hortonworks:credential:60be6586-24ba-42a3-af50-abd2f72d00a7",
+    "creator": "crn:altus:iam:us-west-1:hortonworks:user:mock@hortonworks.com"
+  },
+  "workspace": {
+    "id": 1,
+    "name": "mock@hortonworks.com"
+  },
+  "location": {
+    "name": "london",
+    "displayName": "EU (London)",
+    "latitude": 50.09997683,
+    "longitude": 8.67501542
+  },
+  "datalakeResourcesName": [],
+  "workloadClusterNames": ["aws-cluster"],
+  "datalakeClusterNames": [],
+  "network": {
+    "aws": {
+      "vpcId": "a5ad7a1d-d3a6-4180-8d61-07a23f6fb449"
+    },
+    "subnetIds": ["0404bf21-db5f-4987-8576-e65a4a99b14e"],
+    "subnetMetas": {
+      "0404bf21-db5f-4987-8576-e65a4a99b14e": {
+        "id": "0404bf21-db5f-4987-8576-e65a4a99b14e",
+        "name": "0404bf21-db5f-4987-8576-e65a4a99b14e",
+        "availabilityZone": "eu-west-1a",
+        "privateSubnet": false
+      }
+    }
+  }
+}

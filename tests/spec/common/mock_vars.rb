@@ -40,7 +40,7 @@ RSpec.shared_context "mock shared vars", :a => :b do
 
     @default_blueprint_name = "'EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin'"
     @blueprint_name_file = "cli-bp-file"
-    @blueprint_url = ENV['CLUSTER_DEFINITION_URL']
+    @blueprint_url = ENV['BLUEPRINT_URL']
     @blueprint_file = "../../blueprints/test.bp"
 
     @recipe_types = Array["pre-cloudera-manager-start", "pre-termination","post-cloudera-manager-start", "post-cluster-install"]

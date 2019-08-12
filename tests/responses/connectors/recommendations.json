@@ -1,840 +1,280 @@
 {
-  "recommendations": {},
+  "recommendations": {
+    "compute": {
+      "value": "m5.xlarge",
+      "vmTypeMetaJson": {
+        "configs": [
+          {
+            "volumeParameterType": "EPHEMERAL",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 1,
+            "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "SSD",
+            "minimumSize": 1,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          }
+        ],
+        "properties": {
+          "recommendedvolumeCount": 1,
+          "recommendedvolumeSizeGB": 100,
+          "Price": "0.224",
+          "recommendedVolumeType": "MAGNETIC",
+          "Memory": 16,
+          "recommendedVolumeName": "standard",
+          "recommendedRootVolumeSize": 50,
+          "Cpu": 4,
+          "recommendedVolumeDisplayName": "Magnetic",
+          "EncryptionSupported": true
+        }
+      }
+    },
+    "worker": {
+      "value": "m5.xlarge",
+      "vmTypeMetaJson": {
+        "configs": [
+          {
+            "volumeParameterType": "EPHEMERAL",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 1,
+            "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "SSD",
+            "minimumSize": 1,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          }
+        ],
+        "properties": {
+          "recommendedvolumeCount": 1,
+          "recommendedvolumeSizeGB": 100,
+          "Price": "0.224",
+          "recommendedVolumeType": "MAGNETIC",
+          "Memory": 16,
+          "recommendedVolumeName": "standard",
+          "recommendedRootVolumeSize": 50,
+          "Cpu": 4,
+          "recommendedVolumeDisplayName": "Magnetic",
+          "EncryptionSupported": true
+        }
+      }
+    },
+    "master": {
+      "value": "m5.2xlarge",
+      "vmTypeMetaJson": {
+        "configs": [
+          {
+            "volumeParameterType": "EPHEMERAL",
+            "minimumSize": 0,
+            "maximumSize": 0,
+            "minimumNumber": 0,
+            "maximumNumber": 0
+          },
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 1,
+            "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "SSD",
+            "minimumSize": 1,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          }
+        ],
+        "properties": {
+          "recommendedvolumeCount": 1,
+          "recommendedvolumeSizeGB": 32,
+          "Price": "0.448",
+          "recommendedVolumeType": "SSD",
+          "Memory": 32,
+          "recommendedVolumeName": "gp2",
+          "recommendedRootVolumeSize": 50,
+          "Cpu": 8,
+          "recommendedVolumeDisplayName": "General Purpose (SSD)",
+          "EncryptionSupported": true
+        }
+      }
+    }
+  },
   "virtualMachines": [
     {
-      "value": "hcube.small",
+      "value": "m5.xlarge",
       "vmTypeMetaJson": {
         "configs": [
           {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
+            "volumeParameterType": "EPHEMERAL",
+            "minimumSize": 0,
+            "maximumSize": 0,
             "minimumNumber": 0,
-            "maximumNumber": 100
+            "maximumNumber": 0
+          },
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 1,
+            "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "SSD",
+            "minimumSize": 1,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
+          {
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
           }
         ],
         "properties": {
-          "Memory": "2048",
-          "Cpu": "1"
+          "recommendedvolumeCount": 1,
+          "recommendedvolumeSizeGB": 100,
+          "Price": "0.224",
+          "recommendedVolumeType": "MAGNETIC",
+          "Memory": 16,
+          "recommendedVolumeName": "standard",
+          "recommendedRootVolumeSize": 50,
+          "Cpu": 4,
+          "recommendedVolumeDisplayName": "Magnetic",
+          "EncryptionSupported": true
         }
       }
     },
     {
-      "value": "re.etcd",
+      "value": "m5.2xlarge",
       "vmTypeMetaJson": {
         "configs": [
           {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
+            "volumeParameterType": "EPHEMERAL",
+            "minimumSize": 0,
+            "maximumSize": 0,
             "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "8192",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "hwqe.logsearch",
-      "vmTypeMetaJson": {
-        "configs": [
+            "maximumNumber": 0
+          },
           {
             "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "65536",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "re.medium",
-      "vmTypeMetaJson": {
-        "configs": [
+            "minimumSize": 1,
+            "maximumSize": 1024,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
           {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "8192",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "m2.xlarge",
-      "vmTypeMetaJson": {
-        "configs": [
+            "volumeParameterType": "SSD",
+            "minimumSize": 1,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          },
           {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
+            "volumeParameterType": "ST1",
+            "minimumSize": 500,
+            "maximumSize": 17592,
+            "minimumNumber": 1,
+            "maximumNumber": 24
           }
         ],
         "properties": {
-          "Memory": "16384",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "m1.medium",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "4096",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "windows.normal",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "2048",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "m1.xxlarge",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "32768",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "hcube.medium",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "8192",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "re.nexus2",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "4"
-        }
-      }
-    },
-    {
-      "value": "hwqe.xxlarge",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "65536",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "re-jenkins-master-2",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "32768",
-          "Cpu": "16"
-        }
-      }
-    },
-    {
-      "value": "hw.perf",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "m1.smaller",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "1024",
-          "Cpu": "1"
-        }
-      }
-    },
-    {
-      "value": "m1.xlarge",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "cloudbreak",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "8192",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "windows-ad",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "4"
-        }
-      }
-    },
-    {
-      "value": "hive.ptest.large",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "4"
-        }
-      }
-    },
-    {
-      "value": "m1.large",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "8192",
-          "Cpu": "4"
-        }
-      }
-    },
-    {
-      "value": "re.protex",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "65536",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "m1.small",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "2048",
-          "Cpu": "1"
-        }
-      }
-    },
-    {
-      "value": "hive.ptest.xlarge",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "24764",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "hive.ptest.medium",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "8192",
-          "Cpu": "4"
-        }
-      }
-    },
-    {
-      "value": "re.jenkins.slave2",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "4"
-        }
-      }
-    },
-    {
-      "value": "m1.tiny",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "512",
-          "Cpu": "1"
-        }
-      }
-    },
-    {
-      "value": "cloudbreak.large",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "solr.cloud",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "32768",
-          "Cpu": "4"
-        }
-      }
-    },
-    {
-      "value": "jpf.test",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "4096",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "testing",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "10",
-          "Cpu": "1"
-        }
-      }
-    },
-    {
-      "value": "re.jenkins.master",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "hive.ptest.x2large",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "32768",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "re.protex2",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "65536",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "hwqe.xlarge.sles",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "hwqe.large.sles",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "nifi.qe.infra",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "32768",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "oracle-12c",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "65536",
-          "Cpu": "16"
-        }
-      }
-    },
-    {
-      "value": "re.jenkins.slave",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "4"
-        }
-      }
-    },
-    {
-      "value": "re.hive.ptest",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "48000",
-          "Cpu": "16"
-        }
-      }
-    },
-    {
-      "value": "hp.code",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "65536",
-          "Cpu": "8"
-        }
-      }
-    },
-    {
-      "value": "m1.micro",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "64",
-          "Cpu": "64"
-        }
-      }
-    },
-    {
-      "value": "hwqe.medium",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "8192",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "hwqe.xlarge",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "hwqe.slave",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "4012",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "hwqe.large",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "20480",
-          "Cpu": "2"
-        }
-      }
-    },
-    {
-      "value": "re.nexus",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "4"
-        }
-      }
-    },
-    {
-      "value": "re.xlarge",
-      "vmTypeMetaJson": {
-        "configs": [
-          {
-            "volumeParameterType": "MAGNETIC",
-            "minimumSize": 10,
-            "maximumSize": 1023,
-            "minimumNumber": 0,
-            "maximumNumber": 100
-          }
-        ],
-        "properties": {
-          "Memory": "16384",
-          "Cpu": "4"
+          "recommendedvolumeCount": 1,
+          "recommendedvolumeSizeGB": 32,
+          "Price": "0.448",
+          "recommendedVolumeType": "SSD",
+          "Memory": 32,
+          "recommendedVolumeName": "gp2",
+          "recommendedRootVolumeSize": 50,
+          "Cpu": 8,
+          "recommendedVolumeDisplayName": "General Purpose (SSD)",
+          "EncryptionSupported": true
         }
       }
     }
   ],
   "diskResponses": [
     {
+      "type": "SSD",
+      "name": "gp2",
+      "displayName": "General Purpose (SSD)"
+    },
+    {
       "type": "MAGNETIC",
-      "name": "HDD",
-      "displayName": "HDD"
+      "name": "standard",
+      "displayName": "Magnetic"
+    },
+    {
+      "type": "ST1",
+      "name": "st1",
+      "displayName": "Throughput Optimized HDD"
+    },
+    {
+      "type": "EPHEMERAL",
+      "name": "ephemeral",
+      "displayName": "Ephemeral"
     }
-  ]
+  ],
+  "instanceCounts": {
+    "compute": {
+      "minimumCount": 0,
+      "maximumCount": 2147483647
+    },
+    "master": {
+      "minimumCount": 1,
+      "maximumCount": 1
+    },
+    "worker": {
+      "minimumCount": 1,
+      "maximumCount": 2147483647
+    }
+  },
+  "gatewayRecommendation": {
+    "hostGroups": ["master"]
+  }
 }

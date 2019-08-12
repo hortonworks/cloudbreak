@@ -9,7 +9,7 @@
 : ${USERNAME_CLI:=admin@example.com}
 : ${PASSWORD_CLI:=cloudbreak}
 : ${CLI_TEST_FILES:=spec/integration/credential.rb}
-: ${CLUSTER_DEFINITION_URL:? required}
+: ${BLUEPRINT_URL:? required}
 : ${IMAGE_UPDATE:=true}
 
 readonly TEST_CONTAINER_NAME=cli-test-runner
@@ -103,7 +103,7 @@ test-regression() {
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYUSER=$INTEGRATIONTEST_PROXYCONFIG_PROXYUSER" \
        -e "INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD=$INTEGRATIONTEST_PROXYCONFIG_PROXYPASSWORD" \
        -e "CLI_TEST_FILES=$CLI_TEST_FILES" \
-       -e "CLUSTER_DEFINITION_URL=$CLUSTER_DEFINITION_URL" \
+       -e "BLUEPRINT_URL=$BLUEPRINT_URL" \
        hortonworks/cloud-cli-e2e
     RESULT=$?
 }

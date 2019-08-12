@@ -1,8 +1,9 @@
 {
   "AZURE": true,
-  "OPENSTACK": true,
-  "GCP": true,
+  "OPENSTACK": false,
+  "GCP": false,
   "AWS": true,
-  "YARN": false,
-  "MOCK": false
+  "YARN": true,
+  "MOCK": false,
+  "CUMULUS_YARN": false
 }

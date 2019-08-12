@@ -39,18 +39,6 @@ rspec -f RspecJunitFormatter -o test-result.xml -f h spec/integration/*.rb | tee
 ## Run tests in Docker container
 Your [Docker Machine](https://docs.docker.com/machine/reference/start/) has to be up and running before step forward.
 
-### E2E testing
-#### Preconditions
-Create your own End to End testing local environment (for example: [localvars](localvars))
-> Source your E2E localvars (`. localvars` or `source localvars`)
-
-You can find the related Make target at [DP-CLI Makefile](../Makefile)
-```
-make e2e-test
-```
-> Or you can use the test project own Make target at [Tests Makefile](Makefile)
-> You can check test results at `tests/out.html`
-
 ### Integration testing
 You can find the related Make target at [DP-CLI Makefile](../Makefile)
 ```

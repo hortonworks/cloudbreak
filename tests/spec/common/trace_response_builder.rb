@@ -18,7 +18,8 @@ class TraceResponseBuilder
     @@create_workspace_endpoint = "#{@@cb_api_base}/v4/workspaces"
     @@get_workspace_endpoint = "#{@@cb_api_base}/v4/workspaces"
     @@get_users_endpoint = "#{@@cb_api_base}/v4/users"
-    @@list_credential_endpoint = "#{@@env_api_base}/v1/credentials"
+    @@base_credential_endpoint = "#{@@env_api_base}/v1/credentials"
+    @@prerequisites_endpoint = "#{@@base_credential_endpoint}/prerequisites"
 
     def self.createWorkspaceRequestFactory(requestBody)
         return {
@@ -57,14 +58,35 @@ class TraceResponseBuilder
 
     def self.listCredentialsResponseFactory(responseBody)
         return {
-            :calledEndpoint => @@list_credential_endpoint,
+            :calledEndpoint => @@base_credential_endpoint,
             :receivedValue => responseBody
         }
     end
 
     def self.getCredentialByNameV1ResponseFactory(responseBody)
         return {
-            :calledEndpoint => "#{@@list_credential_endpoint}/name/cli-aws-key",
+            :calledEndpoint => "#{@@base_credential_endpoint}/name/cli-aws-key",
+            :receivedValue => responseBody
+        }
+    end
+
+    def self.createCredentialRequestFactory(requestBody)
+        return {
+            :calledEndpoint => @@base_credential_endpoint,
+            :sentValue => requestBody
+        }
+    end
+
+    def self.modifyCredentialRequestFactory(requestBody)
+        return {
+            :calledEndpoint => @@base_credential_endpoint,
+            :sentValue => requestBody
+        }
+    end
+
+    def self.getPrerequisitesByCloudPlatformV1ResponseFactory(cloudPlatform, responseBody)
+        return {
+            :calledEndpoint => "#{@@prerequisites_endpoint}/" + cloudPlatform,
             :receivedValue => responseBody
         }
     end
