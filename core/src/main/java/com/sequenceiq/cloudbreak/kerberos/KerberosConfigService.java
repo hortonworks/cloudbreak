@@ -8,11 +8,13 @@ import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.vault.VaultException;
 
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
@@ -23,16 +25,22 @@ import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosCon
 public class KerberosConfigService {
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosConfigService.class);
 
+    private static final int MAX_ATTEMPT = 5;
+
+    private static final int DELAY = 5000;
+
     @Inject
     private KerberosConfigV1Endpoint kerberosConfigV1Endpoint;
 
     @Inject
     private SecretService secretService;
 
+    @Retryable(value = CloudbreakServiceException.class, maxAttempts = MAX_ATTEMPT, backoff = @Backoff(delay = DELAY))
     public boolean isKerberosConfigExistsForEnvironment(String environmentCrn) {
         return describeKerberosConfig(environmentCrn).isPresent();
     }
 
+    @Retryable(value = CloudbreakServiceException.class, maxAttempts = MAX_ATTEMPT, backoff = @Backoff(delay = DELAY))
     public Optional<KerberosConfig> get(String environmentCrn) {
         Optional<DescribeKerberosConfigResponse> describeKerberosConfigResponse = describeKerberosConfig(environmentCrn);
         return describeKerberosConfigResponse.map(this::convert);
