@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import static java.util.Objects.requireNonNull;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
@@ -18,6 +17,8 @@ import java.util.stream.Stream;
 public class UmsState {
     private Map<User, List<Group>> userToGroupsMap;
 
+    private Map<MachineUser, List<Group>> machineUserToGroupsMap = new HashMap<>();
+
     // Regular users
     private Map<String, User> userMap;
 
@@ -28,11 +29,12 @@ public class UmsState {
 
     private Map<String, MachineUser> machineUserMap;
 
-    public UmsState(Map<User, List<Group>> userToGroupsMap, Map<String, User> adminUserMap,
+    public UmsState(Map<User, List<Group>> userToGroupsMap, Map<MachineUser, List<Group>> machineUserToGroupsMap, Map<String, User> adminUserMap,
                     Map<String, MachineUser> adminMachineUserMap, Map<String, User> userMap,
                     Map<String, MachineUser> machineUserMap) {
 
         this.userToGroupsMap = userToGroupsMap;
+        this.machineUserToGroupsMap = machineUserToGroupsMap;
         this.adminUserMap = requireNonNull(adminUserMap);
         this.adminMachineUserMap = adminMachineUserMap;
         this.userMap = requireNonNull(userMap);
@@ -41,10 +43,12 @@ public class UmsState {
 
     public UsersState getUsersState(String environmentCrn) {
 
-        //TODO: parse env and get name of env
+        // TODO: Might not be needed if customer provided groups membership is done. Then we sync all members group.
         String adminGrpName = "cpd_env_admin_ap-test-env";
+
         UsersState.Builder builder = new UsersState.Builder();
 
+        // TODO: Question: Why is this used for.
         Map<String, FmsGroup> crnToGroup = new HashMap<>();
 
         userToGroupsMap.entrySet()
@@ -67,7 +71,7 @@ public class UmsState {
                 });
 
 
-        // env Admin Users
+        // TODO: might not be needed env Admin Users
         adminUserMap.entrySet()
             .forEach(adminUser -> {
                 // Admin users are also regular users but must be added to specific group. Admin Users are already added as regular users
@@ -77,14 +81,24 @@ public class UmsState {
                 builder.addMemberToGroup(adminGrpName, user.getName());
             });
 
-        // TODO filter machine users by environment rights
+        machineUserToGroupsMap.entrySet()
+            .forEach(e -> {
+                FmsUser user = umsMachineUserToUser(e.getKey());
+                e.getValue().forEach(g -> {
+                    FmsGroup group = umsGroupToGroup(g);
+                    crnToGroup.put(g.getCrn(), group);
+                    builder.addMemberToGroup(group.getName(), user.getName());
+                    builder.addGroup(group);
+                });
+
+            });
         machineUserMap.entrySet()
                 .forEach(e -> {
                     FmsUser fmsUser = umsMachineUserToUser(e.getValue());
                     builder.addUser(fmsUser);
                 });
 
-        // Machine Admin Users
+        // TODO: Might not be needed, since all the groups are coming from ums. Machine Admin Users
         adminMachineUserMap.entrySet()
                 .forEach(e -> {
                     FmsUser user = umsMachineUserToUser(e.getValue());
@@ -157,17 +171,11 @@ public class UmsState {
 
         private Map<String, User> userMap = new HashMap<>();
 
-//        private Map<String, GetRightsResponse> userRightsMap = new HashMap<>();
-
         private Map<String, User> adminUserMap = new HashMap<>();
-
-//        private Map<String, GetRightsResponse> adminUserRightsMap = new HashMap<>();
 
         private Map<String, MachineUser> adminMachineUserMap = new HashMap<>();
 
         private Map<String, MachineUser> machineUserMap = new HashMap<>();
-
-//        private Map<String, GetRightsResponse> machineUserRightsMap = new HashMap<>();
 
         public void addUserToGroupMap(Map<User, List<Group>> userToGroupsMap) {
             this.userToGroupsMap = userToGroupsMap;
@@ -183,20 +191,18 @@ public class UmsState {
 
         public void addUsers(List<User> users) {
             for (User u : users) {
-                addUser(u, null);
+                addUser(u);
             }
         }
 
-        public void addUser(User user, GetRightsResponse rights) {
+        public void addUser(User user) {
             String userCrn = user.getCrn();
             userMap.put(userCrn, user);
-//            userRightsMap.put(userCrn, rights);
         }
 
         public void addAdminUser(User user) {
             String userCrn = user.getCrn();
             adminUserMap.put(userCrn, user);
-            //adminUserRightsMap.put(userCrn, rights);
         }
 
         public void addAdminMachineUser(MachineUser machineAdminuser) {
@@ -207,19 +213,17 @@ public class UmsState {
 
         public void addMachineUsers(List<MachineUser> users) {
             for (MachineUser u : users) {
-                addMachineUser(u, null);
+                addMachineUser(u);
             }
         }
 
-
-        public void addMachineUser(MachineUser machineUser, GetRightsResponse rights) {
+        public void addMachineUser(MachineUser machineUser) {
             String machineUserCrn = machineUser.getCrn();
             machineUserMap.put(machineUserCrn, machineUser);
-//            machineUserRightsMap.put(machineUserCrn, rights);
         }
 
         public UmsState build() {
-            return new UmsState(userToGroupsMap, adminUserMap, adminMachineUserMap, userMap, machineUserMap);
+            return new UmsState(userToGroupsMap, machineUserToGroupsMap, adminUserMap, adminMachineUserMap, userMap, machineUserMap);
         }
     }
 }

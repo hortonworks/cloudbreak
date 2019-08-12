@@ -67,7 +67,8 @@ public class UmsUsersStateProvider {
             Map<User, List<Group>> usersToGroupsMap = umsClient.getUsersToGroupsMap(actorCrn, accountId, rightfulUsers, Optional.empty());
             umsStateBuilder.addUserToGroupMap(usersToGroupsMap);
 
-            Map<MachineUser, List<Group>> machineUsersToGroupsMap = umsClient.getMachineUsersToGroupsMap(actorCrn, accountId, rightfulMachineUsers, Optional.empty());
+            Map<MachineUser, List<Group>> machineUsersToGroupsMap =
+                umsClient.getMachineUsersToGroupsMap(actorCrn, accountId, rightfulMachineUsers, Optional.empty());
             umsStateBuilder.addMachineUserToGroupMap(machineUsersToGroupsMap);
 
 
