@@ -69,16 +69,16 @@ public class DistroXClusterToClusterConverter {
     }
 
     public DistroXClusterV1Request convert(ClusterV4Request source) {
-        DistroXClusterV1Request response = new DistroXClusterV1Request();
-        response.setExposedServices(getIfNotNull(source.getGateway(), gatewayConverter::exposedService));
-        response.setDatabases(source.getDatabases());
-        response.setBlueprintName(source.getBlueprintName());
-        response.setUserName(source.getUserName());
-        response.setPassword(source.getPassword());
-        response.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
-        response.setCloudStorage(source.getCloudStorage());
-        response.setProxy(source.getProxyConfigCrn());
-        return response;
+        DistroXClusterV1Request request = new DistroXClusterV1Request();
+        request.setExposedServices(getIfNotNull(source.getGateway(), gatewayConverter::exposedService));
+        request.setDatabases(source.getDatabases());
+        request.setBlueprintName(source.getBlueprintName());
+        request.setUserName(source.getUserName());
+        request.setPassword(source.getPassword());
+        request.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
+        request.setCloudStorage(source.getCloudStorage());
+        request.setProxy(source.getProxyConfigCrn());
+        return request;
     }
 
     private String getProxyCrnByName(String proxyName) {
