@@ -239,24 +239,26 @@ public class SdxService {
     private StackV4Request prepareStackRequest(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request,
             SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         stackV4Request = getStackRequest(stackV4Request, sdxClusterRequest.getClusterShape(), environment.getCloudPlatform());
-        if (isCloudStorageConfigured(sdxClusterRequest)) {
-            CloudStorageRequest cloudStorageRequest =
-                    cloudStorageManifester.initCloudStorageRequest(environment,
-                            stackV4Request.getCluster().getBlueprintName(), sdxCluster, sdxClusterRequest);
-            stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
-            if (environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null) {
-                TelemetryRequest telemetryRequest = new TelemetryRequest();
-                LoggingRequest loggingRequest = new LoggingRequest();
-                loggingRequest.setS3(environment.getTelemetry().getLogging().getS3());
-                loggingRequest.setWasb(environment.getTelemetry().getLogging().getWasb());
-                loggingRequest.setStorageLocation(environment.getTelemetry().getLogging().getStorageLocation());
-                telemetryRequest.setLogging(loggingRequest);
-                telemetryRequest.setReportDeploymentLogs(
-                        environment.getTelemetry().getReportDeploymentLogs());
-                stackV4Request.setTelemetry(telemetryRequest);
-            }
-        }
+        CloudStorageRequest cloudStorageRequest =
+                cloudStorageManifester.initCloudStorageRequest(environment,
+                        stackV4Request.getCluster().getBlueprintName(), sdxCluster, sdxClusterRequest);
+        stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
+        prepareTelemetryForStack(stackV4Request, environment);
         return stackV4Request;
+    }
+
+    private void prepareTelemetryForStack(StackV4Request stackV4Request, DetailedEnvironmentResponse environment) {
+        if (environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null) {
+            TelemetryRequest telemetryRequest = new TelemetryRequest();
+            LoggingRequest loggingRequest = new LoggingRequest();
+            loggingRequest.setS3(environment.getTelemetry().getLogging().getS3());
+            loggingRequest.setWasb(environment.getTelemetry().getLogging().getWasb());
+            loggingRequest.setStorageLocation(environment.getTelemetry().getLogging().getStorageLocation());
+            telemetryRequest.setLogging(loggingRequest);
+            telemetryRequest.setReportDeploymentLogs(
+                    environment.getTelemetry().getReportDeploymentLogs());
+            stackV4Request.setTelemetry(telemetryRequest);
+        }
     }
 
     private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {

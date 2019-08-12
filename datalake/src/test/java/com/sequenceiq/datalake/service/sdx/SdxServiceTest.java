@@ -76,6 +76,9 @@ public class SdxServiceTest {
     @Mock
     private Clock clock;
 
+    @Mock
+    private CloudStorageManifester cloudStorageManifester;
+
     @InjectMocks
     private SdxService sdxService;
 

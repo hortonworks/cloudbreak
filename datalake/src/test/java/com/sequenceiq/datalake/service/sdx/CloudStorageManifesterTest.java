@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -63,7 +64,9 @@ public class CloudStorageManifesterTest {
         thrown.expectMessage("instance profile must be defined for S3");
         SdxCluster sdxCluster = new SdxCluster();
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setCloudStorage(new SdxCloudStorageRequest());
+        SdxCloudStorageRequest sdxCloudStorageRequest = new SdxCloudStorageRequest();
+        sdxCloudStorageRequest.setBaseLocation("s3a://example-path");
+        sdxClusterRequest.setCloudStorage(sdxCloudStorageRequest);
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform("AWS");
         underTest.initCloudStorageRequest(environment, exampleBlueprintName, sdxCluster, sdxClusterRequest);
@@ -77,7 +80,7 @@ public class CloudStorageManifesterTest {
         sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setClusterName("sdx-cluster");
         SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("example-path");
+        cloudStorageRequest.setBaseLocation("s3a://example-path");
         cloudStorageRequest.setFileSystemType(FileSystemType.S3);
         S3CloudStorageV1Parameters s3Params = new S3CloudStorageV1Parameters();
         s3Params.setInstanceProfile("instance:profile");
@@ -103,7 +106,7 @@ public class CloudStorageManifesterTest {
         sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setClusterName("sdx-cluster");
         SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("example-path");
+        cloudStorageRequest.setBaseLocation("s3a://example-path");
         cloudStorageRequest.setFileSystemType(FileSystemType.S3);
         S3CloudStorageV1Parameters s3Params = new S3CloudStorageV1Parameters();
         s3Params.setInstanceProfile("instance:profile");
@@ -139,7 +142,34 @@ public class CloudStorageManifesterTest {
         assertEquals(1, cloudStorageConfigReq.getLocations().size());
         assertEquals(CloudStorageCdpService.RANGER_AUDIT, singleRequest.getType());
         assertEquals("ranger/example-path", singleRequest.getValue());
+    }
 
+    @Test
+    public void whenEnvironmentHasOnlyLoggingEnabledThenShouldApplyAsLogIdentity() {
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("AWS");
+        TelemetryResponse telemetryResponse = new TelemetryResponse();
+        LoggingResponse loggingResponse = new LoggingResponse();
+        S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
+        s3CloudStorageV1Parameters.setInstanceProfile("logprofile");
+        loggingResponse.setS3(s3CloudStorageV1Parameters);
+        telemetryResponse.setLogging(loggingResponse);
+        environment.setTelemetry(telemetryResponse);
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, exampleBlueprintName, null, new SdxClusterRequest());
+
+        assertEquals(1, cloudStorageConfigReq.getIdentities().size());
+        assertEquals(1, cloudStorageConfigReq.getIdentities()
+                .stream()
+                .filter(r -> r.getType().equals(CloudIdentityType.LOG))
+                .collect(Collectors.toSet()).size());
+        assertEquals("logprofile", cloudStorageConfigReq.getIdentities().get(0).getS3().getInstanceProfile());
+    }
+
+    @Test
+    public void whenCloudStorageAndLoggingDisabled() {
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(
+                new DetailedEnvironmentResponse(), exampleBlueprintName, null, new SdxClusterRequest());
+        assertNull(cloudStorageConfigReq);
     }
 
     private void mockFileSystemResponseForCloudbreakClient() {

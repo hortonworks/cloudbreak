@@ -39,20 +39,29 @@ public class CloudStorageManifester {
 
     public CloudStorageRequest initCloudStorageRequest(DetailedEnvironmentResponse environment, String blueprint,
             SdxCluster sdxCluster, SdxClusterRequest clusterRequest) {
-        SdxCloudStorageRequest cloudStorage = clusterRequest.getCloudStorage();
-        validateCloudStorage(environment.getCloudPlatform(), cloudStorage);
+        boolean cloudStorageConfigured = isCloudStorageConfigured(clusterRequest);
+        boolean loggingConfigured = isLoggingConfigured(environment);
+        CloudStorageRequest cloudStorageRequest = null;
+        if (cloudStorageConfigured | loggingConfigured) {
+            cloudStorageRequest = new CloudStorageRequest();
+            setStorageParameters(environment, cloudStorageRequest);
+        }
+        if (cloudStorageConfigured) {
+            SdxCloudStorageRequest cloudStorage = clusterRequest.getCloudStorage();
+            validateCloudStorage(environment.getCloudPlatform(), cloudStorage);
 
-        FileSystemParameterV4Responses fileSystemRecommendations = getFileSystemRecommendations(sdxCluster.getInitiatorUserCrn(),
-                blueprint,
-                sdxCluster.getClusterName(),
-                cloudStorage);
+            FileSystemParameterV4Responses fileSystemRecommendations = getFileSystemRecommendations(sdxCluster.getInitiatorUserCrn(),
+                    blueprint,
+                    sdxCluster.getClusterName(),
+                    cloudStorage);
 
-        LOGGER.info("File recommendations {}", fileSystemRecommendations);
-
-        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
-        setStorageLocations(fileSystemRecommendations, cloudStorageRequest);
-        setStorageParameters(environment, cloudStorageRequest);
-        setIdentities(environment, cloudStorage, cloudStorageRequest);
+            LOGGER.info("File recommendations {}", fileSystemRecommendations);
+            setStorageLocations(fileSystemRecommendations, cloudStorageRequest);
+            addIdBrokerIdentity(cloudStorage, cloudStorageRequest);
+        }
+        if (loggingConfigured) {
+            addLogIdentity(environment, cloudStorageRequest);
+        }
         return cloudStorageRequest;
     }
 
@@ -89,15 +98,18 @@ public class CloudStorageManifester {
         }
     }
 
-    private boolean isS3GuardConfigured(DetailedEnvironmentResponse environment) {
-        return environment.getAws() != null && environment.getAws().getS3guard() != null;
+    private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
+        return clusterRequest.getCloudStorage() != null
+                && StringUtils.isNotEmpty(clusterRequest.getCloudStorage().getBaseLocation());
     }
 
-    private void setIdentities(DetailedEnvironmentResponse environment,
-            SdxCloudStorageRequest cloudStorage,
-            CloudStorageRequest cloudStorageRequest) {
-        addIdBrokerIdentity(cloudStorage, cloudStorageRequest);
-        addLogIdentity(environment, cloudStorageRequest);
+    private boolean isLoggingConfigured(DetailedEnvironmentResponse environment) {
+        return environment.getTelemetry() != null
+                && environment.getTelemetry().getLogging() != null;
+    }
+
+    private boolean isS3GuardConfigured(DetailedEnvironmentResponse environment) {
+        return environment.getAws() != null && environment.getAws().getS3guard() != null;
     }
 
     private void addIdBrokerIdentity(SdxCloudStorageRequest cloudStorage, CloudStorageRequest cloudStorageRequest) {
@@ -121,19 +133,13 @@ public class CloudStorageManifester {
     private void addLogIdentity(DetailedEnvironmentResponse environment, CloudStorageRequest cloudStorageRequest) {
         StorageIdentityBase log = new StorageIdentityBase();
         log.setType(CloudIdentityType.LOG);
-        if (isLoggingConfigured(environment)) {
-            LoggingResponse logging = environment.getTelemetry().getLogging();
-            if (logging.getS3() != null) {
-                log.setS3(logging.getS3());
-            } else if (logging.getWasb() != null) {
-                log.setWasb(logging.getWasb());
-            }
-            cloudStorageRequest.getIdentities().add(log);
+        LoggingResponse logging = environment.getTelemetry().getLogging();
+        if (logging.getS3() != null) {
+            log.setS3(logging.getS3());
+        } else if (logging.getWasb() != null) {
+            log.setWasb(logging.getWasb());
         }
-    }
-
-    private boolean isLoggingConfigured(DetailedEnvironmentResponse environment) {
-        return environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null;
+        cloudStorageRequest.getIdentities().add(log);
     }
 
     private FileSystemParameterV4Responses getFileSystemRecommendations(String userCrn, String blueprint,
