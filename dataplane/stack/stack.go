@@ -3,6 +3,7 @@ package stack
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hortonworks/cb-cli/dataplane/env"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -115,6 +116,13 @@ func assembleStackRequest(c *cli.Context) *model.StackV4Request {
 	}
 	if req.Name == nil || len(*req.Name) == 0 {
 		commonutils.LogErrorMessageAndExit("Name of the cluster must be set either in the template or with the --name command line option.")
+	}
+
+	envName := c.String(fl.FlEnvironmentNameOptional.Name)
+	if (req.EnvironmentCrn == nil || len(*req.EnvironmentCrn) == 0) && len(envName) > 0 {
+		envCrn := env.GetEnvCrnByName(envName, c)
+		log.Debugf("[assembleStackTemplate] env crn is empty in stack request, update with: %s", envCrn)
+		req.EnvironmentCrn = &envCrn
 	}
 
 	ambariUser := c.String(fl.FlCMUserOptional.Name)

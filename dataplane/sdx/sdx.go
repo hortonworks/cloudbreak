@@ -3,6 +3,7 @@ package sdx
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hortonworks/cb-cli/dataplane/env"
 	"os"
 	"time"
 
@@ -122,6 +123,13 @@ func createInternalSdx(envName string, inputJson *sdxModel.StackV4Request, c *cl
 	externalDatabase := &sdxModel.SdxDatabaseRequest{
 		Create: &withExternalDatabase,
 	}
+
+	if inputJson.EnvironmentCrn == nil || len(*inputJson.EnvironmentCrn) == 0 {
+		envCrn := env.GetEnvCrnByName(envName, c)
+		log.Debugf("[createInternalSdx] env crn is empty in stack request, update with: %s", envCrn)
+		inputJson.EnvironmentCrn = &envCrn
+	}
+
 	sdxInternalRequest := &sdxModel.SdxInternalClusterRequest{
 		ClusterShape:     &(&types.S{S: sdxModel.SdxClusterRequestClusterShapeCUSTOM}).S,
 		Environment:      &envName,

@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	AppCommands = append(AppCommands, cli.Command{
+	DataPlaneCommands = append(DataPlaneCommands, cli.Command{
 		Name:   "sdx-internal",
 		Usage:  "create internal SDX clusters",
 		Hidden: true,

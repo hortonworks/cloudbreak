@@ -404,3 +404,15 @@ func getProxyConfigNames(configs []*model.ProxyResponse) []string {
 	}
 	return names
 }
+
+func GetEnvCrnByName(envName string, c *cli.Context) string {
+	defer utils.TimeTrack(time.Now(), "get env crn by name")
+
+	log.Debugf("[getEnvCrnByName] get env crn by name: %s", envName)
+	envClient := oauth.NewEnvironmentClientFromContext(c)
+	envResp, err := envClient.Environment.V1env.GetEnvironmentV1ByName(v1env.NewGetEnvironmentV1ByNameParams().WithName(envName))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	return envResp.Payload.Crn
+}
