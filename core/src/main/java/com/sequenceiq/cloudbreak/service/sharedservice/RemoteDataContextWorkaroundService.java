@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -40,7 +42,7 @@ public class RemoteDataContextWorkaroundService {
         Set<RDSConfig> rdsConfigsWithoutHive = requestedCluster.getRdsConfigs();
         Set<RDSConfig> hiveDbfromSdx = datalakeResources.getRdsConfigs()
                 .stream()
-                .filter(rdsConfig -> isHiveMetastoreDatabaseWhichIsDefault(rdsConfig))
+                .filter(this::isActiveHiveMetastoreDatabase)
                 .collect(toSet());
         if (isHivePresentedInSdx(hiveDbfromSdx)) {
             rdsConfigsWithoutHive = requestedCluster.getRdsConfigs()
@@ -56,8 +58,9 @@ public class RemoteDataContextWorkaroundService {
         return !rdsConfigs.isEmpty();
     }
 
-    private boolean isHiveMetastoreDatabaseWhichIsDefault(RDSConfig rdsConfig) {
-        return ResourceStatus.DEFAULT.equals(rdsConfig.getStatus()) && isHiveMetastoreDatabase(rdsConfig);
+    private boolean isActiveHiveMetastoreDatabase(RDSConfig rdsConfig) {
+        ResourceStatus status = rdsConfig.getStatus();
+        return (DEFAULT.equals(status) || USER_MANAGED.equals(status)) && isHiveMetastoreDatabase(rdsConfig);
     }
 
     private boolean isHiveMetastoreDatabase(RDSConfig rdsConfig) {
