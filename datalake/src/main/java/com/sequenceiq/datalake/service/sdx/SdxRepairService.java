@@ -99,7 +99,7 @@ public class SdxRepairService {
     public void waitCloudbreakClusterRepair(Long id, PollingConfig pollingConfig) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                    .stopIfException(false)
+                    .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> checkClusterStatusDuringRepair(sdxCluster));
             sdxCluster.setStatus(SdxClusterStatus.RUNNING);

@@ -315,9 +315,9 @@ public class SdxService {
     }
 
     public List<SdxCluster> listSdx(String userCrn, String envName) {
-        LOGGER.info("Listing SDX clusters by environment name {}", envName);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         if (envName != null) {
+            LOGGER.info("Listing SDX clusters by environment name {}", envName);
             return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
         } else {
             return sdxClusterRepository.findByAccountIdAndDeletedIsNull(accountIdFromCrn);

@@ -12,6 +12,8 @@ public class PollingConfig {
 
     private TimeUnit durationTimeUnit;
 
+    private Boolean stopPollingIfExceptionOccured = Boolean.FALSE;
+
     public PollingConfig(long sleepTime, TimeUnit sleepTimeUnit, long duration, TimeUnit durationTimeUnit) {
         this.sleepTime = sleepTime;
         this.duration = duration;
@@ -33,5 +35,13 @@ public class PollingConfig {
 
     public TimeUnit getDurationTimeUnit() {
         return durationTimeUnit;
+    }
+
+    public Boolean getStopPollingIfExceptionOccured() {
+        return stopPollingIfExceptionOccured;
+    }
+
+    public void setStopPollingIfExceptionOccured(Boolean stopPollingIfExceptionOccured) {
+        this.stopPollingIfExceptionOccured = stopPollingIfExceptionOccured;
     }
 }
