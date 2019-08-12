@@ -182,7 +182,8 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                 builder.withAccountMappingView(new AccountMappingView(accountMapping.getGroupMappings(), accountMapping.getUserMappings()));
             } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK
                     && source.getCloudPlatform().equals(CloudPlatform.AWS.name())) {
-                Map<String, String> groupMappings = awsMockAccountMappingService.getGroupMappings(source.getRegion(), credential);
+                Map<String, String> groupMappings = awsMockAccountMappingService.getGroupMappings(source.getRegion(), credential,
+                        environment.getAdminGroupName());
                 Map<String, String> userMappings = awsMockAccountMappingService.getUserMappings(source.getRegion(), credential);
                 builder.withAccountMappingView(new AccountMappingView(groupMappings, userMappings));
             }
