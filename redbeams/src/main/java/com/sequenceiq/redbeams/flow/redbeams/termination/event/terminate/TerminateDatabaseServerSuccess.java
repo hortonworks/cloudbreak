@@ -1,13 +1,14 @@
 package com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 import java.util.List;
 
 /**
  * The event that occurs when a database server has been terminated.
  */
-public class TerminateDatabaseServerSuccess extends TerminateDatabaseServerResponse {
+public class TerminateDatabaseServerSuccess extends RedbeamsEvent {
 
     private final List<CloudResourceStatus> results;
 
