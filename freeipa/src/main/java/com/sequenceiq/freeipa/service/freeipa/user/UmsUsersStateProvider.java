@@ -1,5 +1,16 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Role;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState.Builder;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,23 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Role;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UmsState.Builder;
-
 @Service
 public class UmsUsersStateProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsUsersStateProvider.class);
 
     @Inject
     private GrpcUmsClient umsClient;
+
+    private final String environmentWrite = "environments/write";
 
     public Map<String, UmsState> getEnvToUmsStateMap(String accountId, String actorCrn, Set<String> environmentsFilter,
                 Set<String> userCrns, Set<String> machineUserCrns) {
@@ -93,7 +95,7 @@ public class UmsUsersStateProvider {
         // for all users, check right for the passed envCRN
         for (User u : allUsers) {
 
-            if (umsClient.checkRight(actorCrn, u.getCrn(), "environments/write", envCRN, Optional.empty())) {
+            if (umsClient.checkRight(actorCrn, u.getCrn(), environmentWrite, envCRN, Optional.empty())) {
                 // if (true) {
                 umsStateBuilder.addUser(u, null);
             } else {
@@ -120,22 +122,8 @@ public class UmsUsersStateProvider {
         // machine users
         for (MachineUser machineUser : allMachineUsers) {
 
-            // TODO: Remove commented code
-//            GetRightsResponse rights = umsClient.getRightsForUser(actorCrn, machineUser.getCrn(), envCRN, Optional.empty());
-//            // check if user has right for this env
-//            List<ResourceRoleAssignment> assignedResourceRoles = rights.getResourceRolesAssignmentList();
-//            if (rights.getThunderheadAdmin()) {
-//                umsStateBuilder.addAdminUser(u);
-//                continue;
-//
-//            }
-//
-//            if (assignedResourceRoles == null || assignedResourceRoles.size() == 0) {
-//                continue;
-//            }
-
             // Machine User can be a power user also
-            if (umsClient.checkRight(actorCrn, machineUser.getCrn(), "environments/setPassword", envCRN, Optional.empty())) {
+            if (umsClient.checkRight(actorCrn, machineUser.getCrn(), environmentWrite, envCRN, Optional.empty())) {
                 // this is admin user having write access
                 umsStateBuilder.addMachineUser(machineUser, null);
             }
