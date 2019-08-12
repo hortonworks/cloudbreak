@@ -168,8 +168,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Override
     public void getRights(GetRightsRequest request, StreamObserver<GetRightsResponse> responseObserver) {
         String actorCrn = request.getActorCrn();
-        String[] splittedCrn = actorCrn.split(":");
-        String accountId = splittedCrn[4];
+        String accountId = Crn.fromString(actorCrn).getAccountId();
         List<Group> groups = List.copyOf(getOrCreateGroups(accountId));
         Group group = groups.get(RANDOM.nextInt(groups.size()));
         responseObserver.onNext(
@@ -468,6 +467,12 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                     .withCause(e)
                     .asRuntimeException();
         }
+    }
+
+    @Override
+    public void listRoles(UserManagementProto.ListRolesRequest request, StreamObserver<UserManagementProto.ListRolesResponse> responseObserver) {
+        responseObserver.onNext(UserManagementProto.ListRolesResponse.newBuilder().build());
+        responseObserver.onCompleted();
     }
 
     private String getLicense() {
