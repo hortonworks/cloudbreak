@@ -2,6 +2,11 @@ package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import static java.util.Objects.requireNonNull;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -9,11 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 
 public class UmsState {
     private Map<User, List<Group>> userToGroupsMap;
@@ -153,6 +153,8 @@ public class UmsState {
 
         private Map<User, List<Group>> userToGroupsMap = new HashMap<>();
 
+        private Map<MachineUser, List<Group>> machineUserToGroupsMap = new HashMap<>();
+
         private Map<String, User> userMap = new HashMap<>();
 
 //        private Map<String, GetRightsResponse> userRightsMap = new HashMap<>();
@@ -171,8 +173,18 @@ public class UmsState {
             this.userToGroupsMap = userToGroupsMap;
         }
 
+        public void addMachineUserToGroupMap(Map<MachineUser, List<Group>> machineUserToGroupsMap) {
+            this.machineUserToGroupsMap = machineUserToGroupsMap;
+        }
+
         public void addGroup(Group group) {
             groupMap.put(group.getCrn(), group);
+        }
+
+        public void addUsers(List<User> users) {
+            for (User u : users) {
+                addUser(u, null);
+            }
         }
 
         public void addUser(User user, GetRightsResponse rights) {
@@ -192,6 +204,13 @@ public class UmsState {
             String userCrn = machineAdminuser.getCrn();
             adminMachineUserMap.put(userCrn, machineAdminuser);
         }
+
+        public void addMachineUsers(List<MachineUser> users) {
+            for (MachineUser u : users) {
+                addMachineUser(u, null);
+            }
+        }
+
 
         public void addMachineUser(MachineUser machineUser, GetRightsResponse rights) {
             String machineUserCrn = machineUser.getCrn();

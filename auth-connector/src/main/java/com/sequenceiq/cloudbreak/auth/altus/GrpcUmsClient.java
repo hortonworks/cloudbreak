@@ -94,6 +94,28 @@ public class GrpcUmsClient {
     }
 
     /**
+     * Retrieves group Map from UMS for given set of machine users.
+     *
+     * @param accountId    the account Id
+     * @param requestId    an optional request Id
+     * @param machineUsers the machine users list for which all groups needs to be populated. if null or empty then returns empty map
+     * @return the map of machine user to list of groups
+     */
+    public Map<MachineUser, List<Group>> getMachineUsersToGroupsMap(String actorCrn, String accountId, List<MachineUser> machineUsers, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            Map<MachineUser, List<Group>> usersToGroupMap = new HashMap<>();
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Listing group information for account {} using request ID {}", accountId, requestId);
+            for (MachineUser u : machineUsers) {
+                List<Group> groups = client.listGroupsForMembers(requestId.orElse(UUID.randomUUID().toString()), accountId, u.getCrn());
+                usersToGroupMap.put(u, groups);
+                LOGGER.debug("{} Groups found for account {}", groups.size(), accountId);
+            }
+            return usersToGroupMap;
+        }
+    }
+
+    /**
      * Retrieves user details from UMS.
      *
      * @param actorCrn  the CRN of the actor
