@@ -78,7 +78,7 @@ environment:
   enabledplatforms: AWS, AZURE, YARN
   tunnel:
     default: DIRECT
-  admin.group.default.prefix: cpd_env_admin_
+  admin.group.default.prefix: cdp_env_admin_
 
 cb:
   authentication:
