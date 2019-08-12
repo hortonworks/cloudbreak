@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
+import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
@@ -42,6 +43,8 @@ public class CloudStorageValidationUtilTest {
         StorageIdentityBase storageIdentityBase = new StorageIdentityBase();
         storageIdentityBase.setAdls(new AdlsCloudStorageV1Parameters());
         cloudStorageRequest.setIdentities(List.of(storageIdentityBase));
+        cloudStorageRequest.setLocations(List.of(new StorageLocationBase()));
+
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
         Assert.assertTrue(actual);
@@ -53,6 +56,8 @@ public class CloudStorageValidationUtilTest {
         StorageIdentityBase storageIdentityBase = new StorageIdentityBase();
         storageIdentityBase.setWasb(new WasbCloudStorageV1Parameters());
         cloudStorageRequest.setIdentities(List.of(storageIdentityBase));
+        cloudStorageRequest.setLocations(List.of(new StorageLocationBase()));
+
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
         Assert.assertTrue(actual);
@@ -64,6 +69,8 @@ public class CloudStorageValidationUtilTest {
         StorageIdentityBase storageIdentityBase = new StorageIdentityBase();
         storageIdentityBase.setAdlsGen2(new AdlsGen2CloudStorageV1Parameters());
         cloudStorageRequest.setIdentities(List.of(storageIdentityBase));
+        cloudStorageRequest.setLocations(List.of(new StorageLocationBase()));
+
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
         Assert.assertTrue(actual);
@@ -75,6 +82,8 @@ public class CloudStorageValidationUtilTest {
         StorageIdentityBase storageIdentityBase = new StorageIdentityBase();
         storageIdentityBase.setS3(new S3CloudStorageV1Parameters());
         cloudStorageRequest.setIdentities(List.of(storageIdentityBase));
+        cloudStorageRequest.setLocations(List.of(new StorageLocationBase()));
+
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
         Assert.assertTrue(actual);
@@ -86,6 +95,8 @@ public class CloudStorageValidationUtilTest {
         StorageIdentityBase storageIdentityBase = new StorageIdentityBase();
         storageIdentityBase.setGcs(new GcsCloudStorageV1Parameters());
         cloudStorageRequest.setIdentities(List.of(storageIdentityBase));
+        cloudStorageRequest.setLocations(List.of(new StorageLocationBase()));
+
         boolean actual = underTest.isCloudStorageConfigured(cloudStorageRequest);
 
         Assert.assertTrue(actual);
