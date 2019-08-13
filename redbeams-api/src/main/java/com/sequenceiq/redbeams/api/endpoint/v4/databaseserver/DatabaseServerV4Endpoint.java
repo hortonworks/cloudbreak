@@ -56,7 +56,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.GET_BY_CRN, notes = DatabaseServerNotes.GET_BY_CRN,
             nickname = "getDatabaseServerByCrn")
     DatabaseServerV4Response getByCrn(
-            @ValidCrn @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @GET
@@ -83,7 +83,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_CRN, notes = DatabaseServerNotes.GET_STATUS_BY_CRN,
             nickname = "getDatabaseServerStatusByCrn")
     DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByCrn(
-            @ValidCrn @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @GET
@@ -101,7 +101,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.TERMINATE, notes = DatabaseServerNotes.TERMINATE,
             nickname = "terminateManagedDatabaseServer")
     DatabaseServerTerminationOutcomeV4Response terminate(
-            @ValidCrn @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @POST
@@ -118,7 +118,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_CRN, notes = DatabaseServerNotes.DELETE_BY_CRN,
             nickname = "deleteDatabaseServerByCrn")
     DatabaseServerV4Response deleteByCrn(
-            @ValidCrn @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @DELETE

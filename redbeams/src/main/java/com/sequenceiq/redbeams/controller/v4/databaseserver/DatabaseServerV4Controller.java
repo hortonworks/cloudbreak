@@ -133,14 +133,15 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     public DatabaseServerTestV4Response test(DatabaseServerTestV4Request request) {
-        String connectionResult;
-        if (request.getExistingDatabaseServerCrn() != null) {
-            connectionResult = databaseServerConfigService.testConnection(request.getExistingDatabaseServerCrn());
-        } else {
-            DatabaseServerConfig server = converterUtil.convert(request.getDatabaseServer(), DatabaseServerConfig.class);
-            connectionResult = databaseServerConfigService.testConnection(server);
-        }
-        return new DatabaseServerTestV4Response(connectionResult);
+        throw new UnsupportedOperationException("Connection testing is disabled for security reasons until further notice");
+        // String connectionResult;
+        // if (request.getExistingDatabaseServerCrn() != null) {
+        //     connectionResult = databaseServerConfigService.testConnection(request.getExistingDatabaseServerCrn());
+        // } else {
+        //     DatabaseServerConfig server = converterUtil.convert(request.getDatabaseServer(), DatabaseServerConfig.class);
+        //     connectionResult = databaseServerConfigService.testConnection(server);
+        // }
+        // return new DatabaseServerTestV4Response(connectionResult);
     }
 
     @Override

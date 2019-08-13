@@ -9,6 +9,9 @@ public class CrnValidator implements ConstraintValidator<ValidCrn, String> {
 
     @Override
     public boolean isValid(String req, ConstraintValidatorContext constraintValidatorContext) {
+        if (req == null) {
+            return true;
+        }
         if (!Crn.isCrn(req)) {
             constraintValidatorContext
                     .buildConstraintViolationWithTemplate("Invalid crn provided")
