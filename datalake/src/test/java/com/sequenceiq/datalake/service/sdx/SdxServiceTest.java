@@ -45,6 +45,7 @@ import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
@@ -152,7 +153,7 @@ public class SdxServiceTest {
             return sdxWithId;
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
-        mockEnvironmentCall(sdxClusterRequest);
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
         String sdxName = "test-sdx-cluster";
         SdxCluster createdSdxCluster = sdxService.createSdx(USER_CRN, sdxName, sdxClusterRequest, null);
         Assertions.assertEquals(id, createdSdxCluster.getId());
@@ -167,13 +168,71 @@ public class SdxServiceTest {
         Assertions.assertEquals(USER_CRN, capturedSdx.getInitiatorUserCrn());
         Assertions.assertEquals(SdxClusterStatus.REQUESTED, capturedSdx.getStatus());
         Assertions.assertEquals(1L, capturedSdx.getCreated());
+        Assertions.assertFalse(capturedSdx.isCreateDatabase());
         verify(sdxReactorFlowManager).triggerSdxCreation(id);
     }
 
-    private void mockEnvironmentCall(SdxClusterRequest sdxClusterRequest) {
+    @Test
+    void createSdxForAzureWithEnabledDB() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        Map<String, String> tags = new HashMap<>();
+        tags.put("mytag", "tagecske");
+        sdxClusterRequest.setTags(tags);
+        sdxClusterRequest.setEnvironment("envir");
+        SdxDatabaseRequest externalDatabase = new SdxDatabaseRequest();
+        externalDatabase.setCreate(true);
+        sdxClusterRequest.setExternalDatabase(externalDatabase);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        long id = 10L;
+        when(clock.getCurrentTimeMillis()).thenReturn(1L);
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
+        String sdxName = "test-sdx-cluster";
+
+        Assertions.assertThrows(BadRequestException.class,
+                () -> sdxService.createSdx(USER_CRN, sdxName, sdxClusterRequest, null),
+                "Cannot create external database for sdx: test-sdx-cluster, for now only AWS is supported");
+    }
+
+    @Test
+    void createSdxForAwsWithEmptyDB() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        Map<String, String> tags = new HashMap<>();
+        tags.put("mytag", "tagecske");
+        sdxClusterRequest.setTags(tags);
+        sdxClusterRequest.setEnvironment("envir");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        long id = 10L;
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
+            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        when(clock.getCurrentTimeMillis()).thenReturn(1L);
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
+        String sdxName = "test-sdx-cluster";
+        SdxCluster createdSdxCluster = sdxService.createSdx(USER_CRN, sdxName, sdxClusterRequest, null);
+        Assertions.assertEquals(id, createdSdxCluster.getId());
+        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        SdxCluster capturedSdx = captor.getValue();
+        Assertions.assertEquals("tagecske", capturedSdx.getTags().getValue("mytag"));
+        Assertions.assertEquals(sdxName, capturedSdx.getClusterName());
+        Assertions.assertEquals(LIGHT_DUTY, capturedSdx.getClusterShape());
+        Assertions.assertEquals("envir", capturedSdx.getEnvName());
+        Assertions.assertEquals("hortonworks", capturedSdx.getAccountId());
+        Assertions.assertEquals(USER_CRN, capturedSdx.getInitiatorUserCrn());
+        Assertions.assertEquals(SdxClusterStatus.REQUESTED, capturedSdx.getStatus());
+        Assertions.assertEquals(1L, capturedSdx.getCreated());
+        Assertions.assertTrue(capturedSdx.isCreateDatabase());
+        verify(sdxReactorFlowManager).triggerSdxCreation(id);
+    }
+
+    private void mockEnvironmentCall(SdxClusterRequest sdxClusterRequest, CloudPlatform cloudPlatform) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
-        detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
+        detailedEnvironmentResponse.setCloudPlatform(cloudPlatform.name());
         detailedEnvironmentResponse.setCrn(Crn.builder()
                 .setService(Crn.Service.ENVIRONMENTS)
                 .setResourceType(Crn.ResourceType.ENVIRONMENT)
