@@ -3,9 +3,10 @@ package sdx
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hortonworks/cb-cli/dataplane/env"
 	"os"
 	"time"
+
+	"github.com/hortonworks/cb-cli/dataplane/env"
 
 	"github.com/hortonworks/cb-cli/dataplane/api-sdx/client/internalsdx"
 	"github.com/hortonworks/cb-cli/dataplane/api-sdx/client/sdx"
@@ -86,18 +87,24 @@ func CreateSdx(c *cli.Context) {
 }
 
 func createSdx(clusterShape string, envName string, c *cli.Context, name string, cloudStorageBaseLocation string, instanceProfile string, withExternalDatabase bool) {
-	s3CloudStorage := &sdxModel.S3CloudStorageV1Parameters{
-		InstanceProfile: &instanceProfile,
-	}
+	var cloudStorage *sdxModel.SdxCloudStorageRequest
+	var s3CloudStorage *sdxModel.S3CloudStorageV1Parameters
 
-	cloudStorage := &sdxModel.SdxCloudStorageRequest{
-		Adls:           nil,
-		AdlsGen2:       nil,
-		BaseLocation:   cloudStorageBaseLocation,
-		FileSystemType: "S3",
-		Gcs:            nil,
-		S3:             s3CloudStorage,
-		Wasb:           nil,
+	if len(instanceProfile) > 0 {
+		s3CloudStorage = &sdxModel.S3CloudStorageV1Parameters{
+			InstanceProfile: &instanceProfile,
+		}
+	}
+	if len(cloudStorageBaseLocation) > 0 {
+		cloudStorage = &sdxModel.SdxCloudStorageRequest{
+			Adls:           nil,
+			AdlsGen2:       nil,
+			BaseLocation:   cloudStorageBaseLocation,
+			FileSystemType: "S3",
+			Gcs:            nil,
+			S3:             s3CloudStorage,
+			Wasb:           nil,
+		}
 	}
 
 	externalDatabase := &sdxModel.SdxDatabaseRequest{
