@@ -3,18 +3,17 @@ package com.sequenceiq.distrox.api.v1.distrox.model;
 import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
+import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public abstract class DistroXV1Base implements Serializable, CloudPlatformProvider {
 
-    @Size(max = 40, min = 5, message = "The length of the name has to be in range of 5 to 40")
-    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
-            message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+    @ValidStackNameFormat
+    @ValidStackNameLength
     @NotNull
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;

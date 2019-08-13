@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
+import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -40,7 +42,7 @@ public class SdxController extends NotificationController implements SdxEndpoint
     private SdxClusterConverter sdxClusterConverter;
 
     @Override
-    public SdxClusterResponse create(String name, @Valid SdxClusterRequest createSdxClusterRequest) {
+    public SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength String name, @Valid SdxClusterRequest createSdxClusterRequest) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
