@@ -19,6 +19,9 @@ import (
 // swagger:model EnvironmentEditV1Request
 type EnvironmentEditV1Request struct {
 
+	// Name of the admin group to be used for all the services.
+	AdminGroupName string `json:"adminGroupName,omitempty"`
+
 	// SSH key for accessing cluster node instances.
 	Authentication *EnvironmentAuthenticationV1Request `json:"authentication,omitempty"`
 

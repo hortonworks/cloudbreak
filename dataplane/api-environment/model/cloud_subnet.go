@@ -24,6 +24,12 @@ type CloudSubnet struct {
 	// id
 	ID string `json:"id,omitempty"`
 
+	// igw available
+	IgwAvailable bool `json:"igwAvailable,omitempty"`
+
+	// map public Ip on launch
+	MapPublicIPOnLaunch bool `json:"mapPublicIpOnLaunch,omitempty"`
+
 	// name
 	Name string `json:"name,omitempty"`
 

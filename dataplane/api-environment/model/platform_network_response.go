@@ -8,7 +8,9 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // PlatformNetworkResponse platform network response
@@ -24,12 +26,46 @@ type PlatformNetworkResponse struct {
 	// properties
 	Properties map[string]interface{} `json:"properties,omitempty"`
 
+	// subnet metadata
+	SubnetMetadata map[string]CloudSubnet `json:"subnetMetadata,omitempty"`
+
 	// subnets
 	Subnets map[string]string `json:"subnets,omitempty"`
 }
 
 // Validate validates this platform network response
 func (m *PlatformNetworkResponse) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateSubnetMetadata(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *PlatformNetworkResponse) validateSubnetMetadata(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SubnetMetadata) { // not required
+		return nil
+	}
+
+	for k := range m.SubnetMetadata {
+
+		if err := validate.Required("subnetMetadata"+"."+k, "body", m.SubnetMetadata[k]); err != nil {
+			return err
+		}
+		if val, ok := m.SubnetMetadata[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
