@@ -106,15 +106,15 @@ public class SdxController extends NotificationController implements SdxEndpoint
     }
 
     @Override
-    public void repairCluster(String clusterCrn, SdxRepairRequest clusterRepairRequest) {
+    public void repairCluster(String clusterName, SdxRepairRequest clusterRepairRequest) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        repairService.triggerRepair(userCrn, clusterCrn, clusterRepairRequest);
+        repairService.triggerRepairByName(userCrn, clusterName, clusterRepairRequest);
     }
 
     @Override
-    public void repairClusterCrn(String clusterCrn, SdxRepairRequest clusterRepairRequest) {
+    public void repairClusterByCrn(String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        repairService.triggerRepair(userCrn, clusterCrn, clusterRepairRequest);
+        repairService.triggerRepairByCrn(userCrn, clusterCrn, clusterRepairRequest);
     }
 
     @Override
