@@ -58,10 +58,10 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
+    @Column
     private String host;
 
-    @Column(nullable = false)
+    @Column
     private Integer port;
 
     @Column(nullable = false)
@@ -274,9 +274,17 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
      * @param userName     the username for the user associated with the database
      * @param password     the password for the user associated with the database
      * @return a DatabaseConfig
+     * @throws IllegalStateException if this database server config lacks a host or port
      */
     public DatabaseConfig createDatabaseConfig(String databaseName, String type, ResourceStatus status,
         String userName, String password) {
+        if (host == null) {
+            throw new IllegalStateException("Database server config has no host");
+        }
+        if (port == null) {
+            throw new IllegalStateException("Database server config has no port");
+        }
+
         DatabaseConfig databaseConfig = new DatabaseConfig();
 
         databaseConfig.setDatabaseVendor(databaseVendor);

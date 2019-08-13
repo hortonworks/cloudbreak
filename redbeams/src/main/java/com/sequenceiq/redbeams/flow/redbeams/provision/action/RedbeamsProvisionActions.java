@@ -15,8 +15,8 @@ import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionState;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
-import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerRequest;
-import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerSuccess;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationRequest;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationSuccess;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 
 import java.util.List;
@@ -57,8 +57,8 @@ public class RedbeamsProvisionActions {
         };
     }
 
-    @Bean(name = "REGISTER_DATABASE_SERVER_STATE")
-    public Action<?, ?> registerDatabaseServer() {
+    @Bean(name = "UPDATE_DATABASE_SERVER_REGISTRATION_STATE")
+    public Action<?, ?> updateDatabaseServerRegistration() {
         return new AbstractRedbeamsProvisionAction<>(AllocateDatabaseServerSuccess.class) {
 
             private List<CloudResource> dbResources;
@@ -71,17 +71,17 @@ public class RedbeamsProvisionActions {
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
-                return new RegisterDatabaseServerRequest(context.getCloudContext(), context.getDBStack(), dbResources);
+                return new UpdateDatabaseServerRegistrationRequest(context.getCloudContext(), context.getDBStack(), dbResources);
             }
         };
     }
 
     @Bean(name = "REDBEAMS_PROVISION_FINISHED_STATE")
     public Action<?, ?> provisionFinished() {
-        return new AbstractRedbeamsProvisionAction<>(RegisterDatabaseServerSuccess.class) {
+        return new AbstractRedbeamsProvisionAction<>(UpdateDatabaseServerRegistrationSuccess.class) {
 
             @Override
-            protected void prepareExecution(RegisterDatabaseServerSuccess payload, Map<Object, Object> variables) {
+            protected void prepareExecution(UpdateDatabaseServerRegistrationSuccess payload, Map<Object, Object> variables) {
                 dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.AVAILABLE);
             }
 

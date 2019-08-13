@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * A request for registering a database server after allocation.
  */
-public class RegisterDatabaseServerRequest extends RedbeamsEvent {
+public class UpdateDatabaseServerRegistrationRequest extends RedbeamsEvent {
 
     private final CloudContext cloudContext;
 
@@ -19,7 +19,7 @@ public class RegisterDatabaseServerRequest extends RedbeamsEvent {
 
     private final List<CloudResource> dbResources;
 
-    public RegisterDatabaseServerRequest(CloudContext cloudContext, DBStack dbStack,
+    public UpdateDatabaseServerRegistrationRequest(CloudContext cloudContext, DBStack dbStack,
         List<CloudResource> dbResources) {
         super(cloudContext != null ? cloudContext.getId() : null);
         this.cloudContext = cloudContext;
@@ -40,7 +40,7 @@ public class RegisterDatabaseServerRequest extends RedbeamsEvent {
     }
 
     public String toString() {
-        return "RegisterDatabaseServerRequest{"
+        return "UpdateDatabaseServerRegistrationRequest{"
                 + "cloudContext=" + cloudContext
                 + ", dbStack=" + dbStack
                 + ", dbResources=" + dbResources

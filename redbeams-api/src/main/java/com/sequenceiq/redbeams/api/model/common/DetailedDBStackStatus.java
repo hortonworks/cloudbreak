@@ -4,9 +4,7 @@ public enum DetailedDBStackStatus {
     UNKNOWN(null),
     // Provision statuses
     PROVISION_REQUESTED(Status.REQUESTED),
-    PROVISION_SETUP(Status.CREATE_IN_PROGRESS),
     CREATING_INFRASTRUCTURE(Status.CREATE_IN_PROGRESS),
-    METADATA_COLLECTION(Status.CREATE_IN_PROGRESS),
     PROVISIONED(Status.AVAILABLE),
     PROVISION_FAILED(Status.CREATE_FAILED),
     // Termination statuses
