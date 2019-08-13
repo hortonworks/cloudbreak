@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 
 @Service
 public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSConfig> {
@@ -72,7 +71,7 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
         MDCBuilder.buildMdcContext(rdsConfig);
         prepareDeletion(rdsConfig);
         if (!isRdsInUseByOthers(rdsConfig)) {
-            LOGGER.debug("Archiving {} with name: {}", resource().getReadableName(), rdsConfig.getName());
+            LOGGER.debug("Archiving RDS config with name: {}", rdsConfig.getName());
             rdsConfig.setArchived(true);
             rdsConfig.setDeletionTimestamp(System.currentTimeMillis());
             rdsConfig.unsetRelationsToEntitiesToBeDeleted();
@@ -147,11 +146,6 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
 
     public Set<Cluster> getClustersUsingResource(RDSConfig rdsConfig) {
         return clusterService.findByRdsConfig(rdsConfig.getId());
-    }
-
-    @Override
-    public AuthorizationResource resource() {
-        return AuthorizationResource.DATAHUB;
     }
 
     public String testRdsConnection(Long workspaceId, String existingRDSConfigName, RDSConfig existingRds) {

@@ -10,7 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -51,11 +50,6 @@ public class StackView extends CompactView {
         super(id, name);
         this.cloudPlatform = cloudPlatform;
         this.stackStatus = stackStatus;
-    }
-
-    @Override
-    public AuthorizationResource getResource() {
-        return AuthorizationResource.DATAHUB;
     }
 
     public ClusterView getClusterView() {

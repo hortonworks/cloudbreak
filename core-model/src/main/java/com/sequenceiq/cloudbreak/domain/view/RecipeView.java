@@ -7,7 +7,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Where;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 
 @Entity
@@ -27,11 +26,6 @@ public class RecipeView extends CompactView {
 
     public void setRecipeType(RecipeV4Type recipeType) {
         this.recipeType = recipeType;
-    }
-
-    @Override
-    public AuthorizationResource getResource() {
-        return AuthorizationResource.DATAHUB;
     }
 
     public String getResourceCrn() {

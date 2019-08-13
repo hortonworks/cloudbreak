@@ -23,7 +23,7 @@ public abstract class AbstractArchivistService<T extends WorkspaceAwareResource 
     public T delete(T resource) {
         Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
         MDCBuilder.buildMdcContext(resource);
-        LOGGER.debug("Archiving {} with name: {}", resource().getReadableName(), resource.getName());
+        LOGGER.debug("Archiving {} with name: {}", resource.getResourceName(), resource.getName());
         prepareDeletion(resource);
         resource.setArchived(true);
         resource.setDeletionTimestamp(clock.getCurrentTimeMillis());

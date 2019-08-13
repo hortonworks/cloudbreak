@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.workspace.model;
 
 import org.springframework.security.access.AccessDeniedException;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
-
 public interface WorkspaceAwareResource extends TenantAwareResource {
 
     Long getId();
@@ -15,7 +13,9 @@ public interface WorkspaceAwareResource extends TenantAwareResource {
 
     void setWorkspace(Workspace workspace);
 
-    AuthorizationResource getResource();
+    default String getResourceName() {
+        return getClass().getSimpleName().toLowerCase();
+    }
 
     @Override
     default Tenant getTenant() {
