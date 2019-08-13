@@ -17,6 +17,8 @@ import javax.ws.rs.core.MediaType;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
+import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.sdx.api.model.RedeploySdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
@@ -36,7 +38,8 @@ public interface SdxEndpoint {
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "create SDX cluster", produces = "application/json", nickname = "createSdx")
-    SdxClusterResponse create(@PathParam("name") String name, @Valid SdxClusterRequest createSdxClusterRequest);
+    SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength @PathParam("name") String name,
+            @Valid SdxClusterRequest createSdxClusterRequest);
 
     @DELETE
     @Path("{name}")
