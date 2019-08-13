@@ -13,6 +13,7 @@ public enum CloudStorageCdpService {
     YARN_LOG,
     HIVE_METASTORE_WAREHOUSE,
     HIVE_METASTORE_EXTERNAL_WAREHOUSE,
+    HIVE_REPLICA_WAREHOUSE,
     RANGER_AUDIT;
 
     @JsonIgnore

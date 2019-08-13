@@ -37,12 +37,16 @@ public class HiveMetastoreCloudStorageServiceConfigProviderTest {
 
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
-        assertEquals(2, serviceConfigs.size());
+        assertEquals(3, serviceConfigs.size());
         assertEquals("hive_warehouse_directory", serviceConfigs.get(0).getName());
         assertEquals("s3a://bucket/hive/warehouse", serviceConfigs.get(0).getValue());
 
         assertEquals("hive_warehouse_external_directory", serviceConfigs.get(1).getName());
         assertEquals("s3a://bucket/hive/warehouse/external", serviceConfigs.get(1).getValue());
+
+        assertEquals("hive_service_replication_config_safety_valve", serviceConfigs.get(2).getName());
+        assertEquals("<property><name>hive.repl.replica.functions.root.dir</name><value>" +
+                "s3a://bucket/hive/replica</value></property>", serviceConfigs.get(2).getValue());
     }
 
     @Test
@@ -84,6 +88,7 @@ public class HiveMetastoreCloudStorageServiceConfigProviderTest {
         if (includeLocations) {
             locations.add(new StorageLocationView(getHiveWarehouseStorageLocation()));
             locations.add(new StorageLocationView(getHiveWarehouseExternalStorageLocation()));
+            locations.add(new StorageLocationView(getHiveWarehouseReplicaStorageLocation()));
         }
         S3FileSystemConfigurationsView fileSystemConfigurationsView =
                 new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
@@ -104,6 +109,13 @@ public class HiveMetastoreCloudStorageServiceConfigProviderTest {
         StorageLocation hmsExternalWarehouseDir = new StorageLocation();
         hmsExternalWarehouseDir.setProperty("hive.metastore.warehouse.external.dir");
         hmsExternalWarehouseDir.setValue("s3a://bucket/hive/warehouse/external");
+        return hmsExternalWarehouseDir;
+    }
+
+    protected StorageLocation getHiveWarehouseReplicaStorageLocation() {
+        StorageLocation hmsExternalWarehouseDir = new StorageLocation();
+        hmsExternalWarehouseDir.setProperty("hive.repl.replica.functions.root.dir");
+        hmsExternalWarehouseDir.setValue("s3a://bucket/hive/replica");
         return hmsExternalWarehouseDir;
     }
 
