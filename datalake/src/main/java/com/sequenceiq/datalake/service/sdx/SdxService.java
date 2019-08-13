@@ -239,9 +239,8 @@ public class SdxService {
     private StackV4Request prepareStackRequest(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request,
             SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         stackV4Request = getStackRequest(stackV4Request, sdxClusterRequest.getClusterShape(), environment.getCloudPlatform());
-        CloudStorageRequest cloudStorageRequest =
-                cloudStorageManifester.initCloudStorageRequest(environment,
-                        stackV4Request.getCluster().getBlueprintName(), sdxCluster, sdxClusterRequest);
+        CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initCloudStorageRequest(environment,
+                stackV4Request.getCluster(), sdxCluster, sdxClusterRequest);
         stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
         prepareTelemetryForStack(stackV4Request, environment);
         return stackV4Request;
