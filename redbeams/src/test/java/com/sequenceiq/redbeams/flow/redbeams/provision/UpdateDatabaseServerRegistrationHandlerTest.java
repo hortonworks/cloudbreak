@@ -24,20 +24,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.redbeams.TestData;
-import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
-import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerRequest;
-import com.sequenceiq.redbeams.flow.redbeams.provision.handler.RegisterDatabaseServerHandler;
-import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationRequest;
+import com.sequenceiq.redbeams.flow.redbeams.provision.handler.UpdateDatabaseServerRegistrationHandler;
+import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
-public class RegisterDatabaseServerHandlerTest {
-
-    private static final long DEFAULT_WORKSPACE_ID = 0L;
+public class UpdateDatabaseServerRegistrationHandlerTest {
 
     private static final String ACCOUNT_ID = "accountId";
 
@@ -51,7 +48,7 @@ public class RegisterDatabaseServerHandlerTest {
 
     private static final String ROOT_PASSWORD = "rootPassword";
 
-    private static final int PORT = 9753;
+    private static final int PORT = 8642;
 
     private static final String DB_HOST_NAME = "dbHostName";
 
@@ -61,13 +58,13 @@ public class RegisterDatabaseServerHandlerTest {
     private EventBus eventBus;
 
     @Mock
-    private DatabaseServerConfigRepository databaseServerConfigRepository;
+    private DatabaseServerConfigService databaseServerConfigService;
 
     @Mock
     private CloudResourceHelper cloudResourceHelper;
 
     @InjectMocks
-    private RegisterDatabaseServerHandler underTest;
+    private UpdateDatabaseServerRegistrationHandler underTest;
 
     @Before
     public void setup() {
@@ -89,31 +86,24 @@ public class RegisterDatabaseServerHandlerTest {
         databaseServer.setRootPassword(ROOT_PASSWORD);
         databaseServer.setDatabaseVendor(DatabaseVendor.POSTGRES);
         databaseServer.setPort(PORT);
+        UpdateDatabaseServerRegistrationRequest request = getRequest(dbStack);
+        when(event.getData()).thenReturn(request);
+
         setupCloudresourceMocks(DB_HOST_NAME, ResourceType.RDS_HOSTNAME);
-        setupCloudresourceMocks("8642", ResourceType.RDS_PORT);
-        RegisterDatabaseServerRequest registerDatabaseServerRequest = getRegisterDatabaseServerRequest(dbStack);
-        when(event.getData()).thenReturn(registerDatabaseServerRequest);
-        ArgumentCaptor<DatabaseServerConfig> databaseServerConfigCaptor = ArgumentCaptor.forClass(DatabaseServerConfig.class);
+        setupCloudresourceMocks(Integer.toString(PORT), ResourceType.RDS_PORT);
+
+        DatabaseServerConfig originalDatabaseServerConfig = new DatabaseServerConfig();
+        originalDatabaseServerConfig.setHost(null);
+        originalDatabaseServerConfig.setPort(null);
+        when(databaseServerConfigService.getByCrn(CRN)).thenReturn(Optional.of(originalDatabaseServerConfig));
 
         underTest.accept(event);
 
-        verify(databaseServerConfigRepository).save(databaseServerConfigCaptor.capture());
+        ArgumentCaptor<DatabaseServerConfig> databaseServerConfigCaptor = ArgumentCaptor.forClass(DatabaseServerConfig.class);
+        verify(databaseServerConfigService).update(databaseServerConfigCaptor.capture());
         DatabaseServerConfig databaseServerConfig = databaseServerConfigCaptor.getValue();
-        assertEquals(DEFAULT_WORKSPACE_ID, databaseServerConfig.getWorkspaceId().longValue());
-        assertEquals(ResourceStatus.SERVICE_MANAGED, databaseServerConfig.getResourceStatus());
-        assertEquals(ACCOUNT_ID, databaseServerConfig.getAccountId());
-        assertEquals(DB_STACK_NAME, databaseServerConfig.getName());
-        assertEquals(DB_STACK_NAME, databaseServerConfig.getName());
-        assertEquals(ENVIRONMENT_CRN, databaseServerConfig.getEnvironmentId());
-        assertEquals(CONNECTION_DRIVER, databaseServerConfig.getConnectionDriver());
-        assertEquals(ROOT_USER_NAME, databaseServerConfig.getConnectionUserName());
-        assertEquals(ROOT_PASSWORD, databaseServerConfig.getConnectionPassword());
-        assertEquals(DatabaseVendor.POSTGRES, databaseServerConfig.getDatabaseVendor());
-//        assertEquals(PORT, databaseServerConfig.getPort().longValue());
         assertEquals(DB_HOST_NAME, databaseServerConfig.getHost());
-        assertEquals(8642L, databaseServerConfig.getPort().longValue());
-        assertEquals(CRN, databaseServerConfig.getResourceCrn());
-        assertEquals(dbStack, databaseServerConfig.getDbStack().get());
+        assertEquals(PORT, databaseServerConfig.getPort().intValue());
     }
 
     private void setupCloudresourceMocks(String dbHostName2, ResourceType rdsHostname) {
@@ -122,11 +112,11 @@ public class RegisterDatabaseServerHandlerTest {
         when(cloudResourceHelper.getResourceTypeFromList(eq(rdsHostname), any())).thenReturn(Optional.of(dbHostName));
     }
 
-    private RegisterDatabaseServerRequest getRegisterDatabaseServerRequest(DBStack dbStack) {
-        RegisterDatabaseServerRequest registerDatabaseServerRequest = mock(RegisterDatabaseServerRequest.class);
-        when(registerDatabaseServerRequest.getDbResources()).thenReturn(mock(List.class));
-        when(registerDatabaseServerRequest.getDBStack()).thenReturn(dbStack);
-        when(registerDatabaseServerRequest.getCloudContext()).thenReturn(mock(CloudContext.class));
-        return registerDatabaseServerRequest;
+    private UpdateDatabaseServerRegistrationRequest getRequest(DBStack dbStack) {
+        UpdateDatabaseServerRegistrationRequest request = mock(UpdateDatabaseServerRegistrationRequest.class);
+        when(request.getDbResources()).thenReturn(mock(List.class));
+        when(request.getDBStack()).thenReturn(dbStack);
+        when(request.getCloudContext()).thenReturn(mock(CloudContext.class));
+        return request;
     }
 }

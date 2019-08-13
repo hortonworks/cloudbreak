@@ -5,15 +5,15 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
 /**
  * The event that occurs when database server registration has failed.
  */
-public class RegisterDatabaseServerFailed extends RedbeamsFailureEvent {
+public class UpdateDatabaseServerRegistrationFailed extends RedbeamsFailureEvent {
 
-    public RegisterDatabaseServerFailed(Long resourceId, Exception exception) {
+    public UpdateDatabaseServerRegistrationFailed(Long resourceId, Exception exception) {
         super(resourceId, exception);
     }
 
     @Override
     public String toString() {
-        return "RegisterDatabaseServerFailed{"
+        return "UpdateDatabaseServerRegistrationFailed{"
                 + "resourceId=" + getResourceId()
                 + ", exception=" + getException()
                 + '}';

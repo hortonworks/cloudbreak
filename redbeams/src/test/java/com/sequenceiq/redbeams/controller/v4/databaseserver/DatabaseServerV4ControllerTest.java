@@ -28,7 +28,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
@@ -68,9 +67,6 @@ public class DatabaseServerV4ControllerTest {
 
     @Mock
     private ConverterUtil converterUtil;
-
-    @Mock
-    private CrnService crnService;
 
     private DatabaseServerConfig server;
 

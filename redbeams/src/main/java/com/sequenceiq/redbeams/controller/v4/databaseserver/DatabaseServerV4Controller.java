@@ -24,7 +24,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
@@ -57,9 +56,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Inject
     private ConverterUtil converterUtil;
 
-    @Inject
-    private CrnService crnService;
-
     @Override
     public DatabaseServerV4Responses list(String environmentCrn) {
         Set<DatabaseServerConfig> all = databaseServerConfigService.findAll(DEFAULT_WORKSPACE, environmentCrn);
@@ -81,7 +77,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
         DBStack dbStack = dbStackConverter.convert(request, threadBasedUserCrnProvider.getUserCrn());
-        dbStack.setResourceCrn(crnService.createCrn(dbStack));
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack);
         return converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class);
     }

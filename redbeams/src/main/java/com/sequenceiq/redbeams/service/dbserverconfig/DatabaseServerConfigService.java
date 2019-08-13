@@ -107,9 +107,11 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             MDCBuilder.buildMdcContext(resource);
             // prepareCreation(resource);
             resource.setCreationDate(clock.getCurrentTimeMillis());
-            Crn crn = crnService.createCrn(resource);
-            resource.setResourceCrn(crn);
-            resource.setAccountId(crn.getAccountId());
+            if (resource.getResourceCrn() == null) {
+                Crn crn = crnService.createCrn(resource);
+                resource.setResourceCrn(crn);
+                resource.setAccountId(crn.getAccountId());
+            }
             resource.setWorkspaceId(workspaceId);
             return repository.save(resource);
         } catch (AccessDeniedException | DataIntegrityViolationException e) {
@@ -123,6 +125,11 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             }
             throw e;
         }
+    }
+
+    public DatabaseServerConfig update(DatabaseServerConfig resource) {
+        MDCBuilder.buildMdcContext(resource);
+        return repository.save(resource);
     }
 
     public void archive(DatabaseServerConfig resource) {
