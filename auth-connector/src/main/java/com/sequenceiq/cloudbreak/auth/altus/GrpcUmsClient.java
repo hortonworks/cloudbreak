@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -79,17 +78,17 @@ public class GrpcUmsClient {
      * @param users the users list for which all groups needs to be populated. if null or empty then returns empty map
      * @return the map of user to list of groups
      */
-    public Map<User, List<Group>> getUsersToGroupsMap(String actorCrn, String accountId, List<User> users, Optional<String> requestId) {
+    public void getUsersToGroupsMap(
+        Map<String, List<Group>> usersToGroupMap, String actorCrn, String accountId, List<User> users, Optional<String> requestId) {
+
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            Map<User, List<Group>> usersToGroupMap = new HashMap<>();
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Listing group information for account {} using request ID {}", accountId, requestId);
             for (User u : users) {
                 List<Group> groups = client.listGroupsForMembers(requestId.orElse(UUID.randomUUID().toString()), accountId, u.getCrn());
-                usersToGroupMap.put(u, groups);
+                usersToGroupMap.put(u.getCrn(), groups);
                 LOGGER.debug("{} Groups found for account {}", groups.size(), accountId);
             }
-            return usersToGroupMap;
         }
     }
 
@@ -101,17 +100,15 @@ public class GrpcUmsClient {
      * @param machineUsers the machine users list for which all groups needs to be populated. if null or empty then returns empty map
      * @return the map of machine user to list of groups
      */
-    public Map<MachineUser, List<Group>> getMachineUsersToGroupsMap(String actorCrn, String accountId, List<MachineUser> machineUsers, Optional<String> requestId) {
+    public void getMachineUsersToGroupsMap(Map<String, List<Group>> usersToGroupMap, String actorCrn, String accountId, List<MachineUser> machineUsers, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            Map<MachineUser, List<Group>> usersToGroupMap = new HashMap<>();
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Listing group information for account {} using request ID {}", accountId, requestId);
             for (MachineUser u : machineUsers) {
                 List<Group> groups = client.listGroupsForMembers(requestId.orElse(UUID.randomUUID().toString()), accountId, u.getCrn());
-                usersToGroupMap.put(u, groups);
+                usersToGroupMap.put(u.getCrn(), groups);
                 LOGGER.debug("{} Groups found for account {}", groups.size(), accountId);
             }
-            return usersToGroupMap;
         }
     }
 

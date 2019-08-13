@@ -63,13 +63,13 @@ public class UmsUsersStateProvider {
             List<MachineUser> rightfulMachineUsers = getMachineUsersWithEnvironmentRights(actorCrn, envCRN, machineUsers);
             umsStateBuilder.addMachineUsers(rightfulMachineUsers);
 
-            // get all groups for identified users those having rights.
-            Map<User, List<Group>> usersToGroupsMap = umsClient.getUsersToGroupsMap(actorCrn, accountId, rightfulUsers, Optional.empty());
-            umsStateBuilder.addUserToGroupMap(usersToGroupsMap);
+            Map<String, List<Group>> userToGroupsMap = new HashMap<>();
 
-            Map<MachineUser, List<Group>> machineUsersToGroupsMap =
-                umsClient.getMachineUsersToGroupsMap(actorCrn, accountId, rightfulMachineUsers, Optional.empty());
-            umsStateBuilder.addMachineUserToGroupMap(machineUsersToGroupsMap);
+            // get all groups for identified users those having rights.
+            umsClient.getUsersToGroupsMap(userToGroupsMap, actorCrn, accountId, rightfulUsers, Optional.empty());
+            umsClient.getMachineUsersToGroupsMap(userToGroupsMap, actorCrn, accountId, rightfulMachineUsers, Optional.empty());
+
+            umsStateBuilder.addUserToGroupMap(userToGroupsMap);
 
 
             envUmsStateMap.put(envCRN, umsStateBuilder.build());
