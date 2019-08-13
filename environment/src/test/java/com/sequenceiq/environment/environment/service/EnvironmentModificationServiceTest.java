@@ -54,6 +54,8 @@ import com.sequenceiq.environment.parameters.service.ParametersService;
 @ExtendWith(SpringExtension.class)
 class EnvironmentModificationServiceTest {
 
+    private static final String USER_CRN = "USER_CRN";
+
     @Inject
     private EnvironmentModificationService environmentModificationServiceUnderTest;
 
@@ -94,7 +96,7 @@ class EnvironmentModificationServiceTest {
                 .build();
         when(environmentRepository
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.editByName(USER_CRN, ENVIRONMENT_NAME, environmentDto);
         verify(environmentRepository).save(any());
     }
 
@@ -107,7 +109,7 @@ class EnvironmentModificationServiceTest {
                 .build();
         when(environmentRepository
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.editByName(USER_CRN, ENVIRONMENT_NAME, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentRepository).save(environmentArgumentCaptor.capture());
@@ -126,7 +128,7 @@ class EnvironmentModificationServiceTest {
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateRegions(any(), any(), any(), any())).thenReturn(validationResultBuilder);
         when(validationResultBuilder.build()).thenReturn(validationResult);
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.editByName(USER_CRN, ENVIRONMENT_NAME, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentRepository).save(environmentArgumentCaptor.capture());
@@ -152,7 +154,7 @@ class EnvironmentModificationServiceTest {
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateRegions(any(), any(), any(), any())).thenReturn(validationResultBuilder);
         when(validationResultBuilder.build()).thenReturn(validationResult);
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.editByName(USER_CRN, ENVIRONMENT_NAME, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentRepository).save(environmentArgumentCaptor.capture());
@@ -180,7 +182,7 @@ class EnvironmentModificationServiceTest {
         when(validationResultBuilder.build()).thenReturn(validationResult);
         when(validationResult.hasError()).thenReturn(Boolean.TRUE);
         assertThrows(BadRequestException.class,
-                () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
+                () -> environmentModificationServiceUnderTest.editByName(USER_CRN, ENVIRONMENT_NAME, environmentDto));
 
         verify(environmentRepository, never()).save(any());
         verify(environmentService, never()).setRegions(any(), any(), any());
@@ -208,7 +210,7 @@ class EnvironmentModificationServiceTest {
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(validatorService.validateRegions(any(), any(), any(), any())).thenReturn(validationResultBuilder);
         when(validationResultBuilder.build()).thenReturn(validationResult);
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.editByName(USER_CRN, ENVIRONMENT_NAME, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentRepository).save(environmentArgumentCaptor.capture());
@@ -229,7 +231,7 @@ class EnvironmentModificationServiceTest {
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
         when(networkService.findByEnvironment(any())).thenReturn(Optional.empty());
         when(networkService.saveNetwork(any(), any(), anyString(), any())).thenReturn(new AwsNetwork());
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.editByName(USER_CRN, ENVIRONMENT_NAME, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentRepository).save(environmentArgumentCaptor.capture());
@@ -249,7 +251,7 @@ class EnvironmentModificationServiceTest {
         when(environmentRepository
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(envAuthResult);
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.editByName(USER_CRN, ENVIRONMENT_NAME, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentRepository).save(environmentArgumentCaptor.capture());
@@ -267,7 +269,7 @@ class EnvironmentModificationServiceTest {
         Environment value = new Environment();
         when(environmentRepository
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.editByName(USER_CRN, ENVIRONMENT_NAME, environmentDto);
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
         verify(environmentRepository).save(environmentArgumentCaptor.capture());
@@ -281,7 +283,7 @@ class EnvironmentModificationServiceTest {
                 .build();
         when(environmentRepository
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(CRN), eq(ACCOUNT_ID))).thenReturn(Optional.of(new Environment()));
-        environmentModificationServiceUnderTest.editByCrn(CRN, environmentDto);
+        environmentModificationServiceUnderTest.editByCrn(USER_CRN, CRN, environmentDto);
         verify(environmentRepository).save(any());
     }
 
@@ -305,7 +307,7 @@ class EnvironmentModificationServiceTest {
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
         when(parametersService.saveParameters(environment, parameters, ACCOUNT_ID)).thenReturn(baseParameters);
 
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.editByName(USER_CRN, ENVIRONMENT_NAME, environmentDto);
 
         verify(parametersService).saveParameters(environment, parameters, ACCOUNT_ID);
         assertEquals(baseParameters, environment.getParameters());

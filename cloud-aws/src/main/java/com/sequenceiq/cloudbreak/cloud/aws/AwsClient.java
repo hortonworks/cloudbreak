@@ -24,6 +24,8 @@ import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -114,6 +116,13 @@ public class AwsClient {
 
     public AmazonAutoScalingRetryClient createAutoScalingRetryClient(AwsCredentialView awsCredential, String regionName) {
         return new AmazonAutoScalingRetryClient(createAutoScalingClient(awsCredential, regionName), retry);
+    }
+
+    public AmazonS3 createS3Client(AwsCredentialView awsCredential) {
+        return AmazonS3ClientBuilder.standard()
+                .withCredentials(getAwsStaticCredentialsProvider(awsCredential))
+                .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
+                .build();
     }
 
     public String getCbName(String groupName, Long number) {

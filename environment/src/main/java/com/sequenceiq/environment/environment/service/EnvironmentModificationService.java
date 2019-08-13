@@ -70,18 +70,18 @@ public class EnvironmentModificationService {
         this.parametersService = parametersService;
     }
 
-    public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
+    public EnvironmentDto editByName(String userCrn, String environmentName, EnvironmentEditDto editDto) {
         Environment env = environmentRepository
                 .findByNameAndAccountIdAndArchivedIsFalse(environmentName, editDto.getAccountId())
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
-        return edit(editDto, env);
+        return edit(userCrn, editDto, env);
     }
 
-    public EnvironmentDto editByCrn(String crn, EnvironmentEditDto editDto) {
+    public EnvironmentDto editByCrn(String userCrn, String crn, EnvironmentEditDto editDto) {
         Environment env = environmentRepository
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, editDto.getAccountId())
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with crn '%s'", crn)));
-        return edit(editDto, env);
+        return edit(userCrn, editDto, env);
     }
 
     public EnvironmentDto changeCredentialByEnvironmentName(String accountId, String environmentName, EnvironmentChangeCredentialDto dto) {
@@ -98,10 +98,10 @@ public class EnvironmentModificationService {
         return changeCredential(accountId, crn, dto, environment);
     }
 
-    private EnvironmentDto edit(EnvironmentEditDto editDto, Environment env) {
+    private EnvironmentDto edit(String userCrn, EnvironmentEditDto editDto, Environment env) {
         editDescriptionIfChanged(env, editDto);
         editLocationAndRegionsIfChanged(env, editDto);
-        editTelemetryIfChanged(env, editDto);
+        editTelemetryIfChanged(userCrn, env, editDto);
         editNetworkIfChanged(env, editDto);
         editAdminGroupNameIfChanged(env, editDto);
         editAuthenticationIfChanged(editDto, env);
@@ -221,8 +221,12 @@ public class EnvironmentModificationService {
         }
     }
 
-    private void editTelemetryIfChanged(Environment environment, EnvironmentEditDto editDto) {
+    private void editTelemetryIfChanged(String userCrn, Environment environment, EnvironmentEditDto editDto) {
         if (editDto.getTelemetry() != null) {
+            ValidationResult validationResult = environmentService.getValidatorService().validateTelemetryLoggingStorageLocation(userCrn, environment);
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
             environment.setTelemetry(editDto.getTelemetry());
         }
     }

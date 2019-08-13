@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
@@ -107,5 +108,9 @@ public class CloudbreakServiceCrnEndpoints extends AbstractUserCrnServiceEndpoin
 
     public DatalakeV4Endpoint datalakeV4Endpoint() {
         return getEndpoint(DatalakeV4Endpoint.class);
+    }
+
+    public CloudProviderServicesV4Endopint cloudProviderServicesEndpoint() {
+        return getEndpoint(CloudProviderServicesV4Endopint.class);
     }
 }

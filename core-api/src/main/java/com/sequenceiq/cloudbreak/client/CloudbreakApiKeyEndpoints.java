@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.info.CloudbreakInfoV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.ManagementPackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -107,6 +108,11 @@ public class CloudbreakApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint i
 
     public DatalakeV4Endpoint datalakeV4Endpoint() {
         return getEndpoint(DatalakeV4Endpoint.class);
+    }
+
+    @Override
+    public CloudProviderServicesV4Endopint cloudProviderServicesEndpoint() {
+        return getEndpoint(CloudProviderServicesV4Endopint.class);
     }
 
 }

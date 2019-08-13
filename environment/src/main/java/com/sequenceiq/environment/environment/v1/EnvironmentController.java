@@ -112,15 +112,17 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public DetailedEnvironmentResponse editByName(String environmentName, @NotNull EnvironmentEditRequest request) {
+        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
-        EnvironmentDto result = environmentModificationService.editByName(environmentName, editDto);
+        EnvironmentDto result = environmentModificationService.editByName(actualUserCrn, environmentName, editDto);
         return environmentApiConverter.dtoToDetailedResponse(result);
     }
 
     @Override
     public DetailedEnvironmentResponse editByCrn(String crn, @NotNull EnvironmentEditRequest request) {
+        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
-        EnvironmentDto result = environmentModificationService.editByCrn(crn, editDto);
+        EnvironmentDto result = environmentModificationService.editByCrn(actualUserCrn, crn, editDto);
         return environmentApiConverter.dtoToDetailedResponse(result);
     }
 

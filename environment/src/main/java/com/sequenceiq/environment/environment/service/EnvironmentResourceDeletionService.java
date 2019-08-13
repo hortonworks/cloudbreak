@@ -71,7 +71,7 @@ public class EnvironmentResourceDeletionService {
         LOGGER.debug("Get Datalake clusters of the environment: '{}'", environment.getName());
         try {
             Set<String> datalakeClusterNames = cloudbreakClient
-                    .withCrn(environment.getResourceCrn())
+                    .withCrn(environment.getCreator())
                     .datalakeV4Endpoint()
                     .list(environment.getName())
                     .getResponses()
