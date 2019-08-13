@@ -12,12 +12,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -74,7 +74,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final int GROUPS_PER_ACCOUNT = 5;
 
-    private static final Random RANDOM = new Random();
+    private static final int FIRST_GROUP = 0;
 
     private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
 
@@ -170,7 +170,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         String actorCrn = request.getActorCrn();
         String accountId = Crn.fromString(actorCrn).getAccountId();
         List<Group> groups = List.copyOf(getOrCreateGroups(accountId));
-        Group group = groups.get(RANDOM.nextInt(groups.size()));
+        Group group = groups.get(FIRST_GROUP);
         responseObserver.onNext(
                 GetRightsResponse.newBuilder()
                         .addGroupCrn(group.getCrn()).build());
@@ -212,9 +212,11 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         responseObserver.onCompleted();
     }
 
-    private Collection<Group> getOrCreateGroups(String accountId) {
+    private List<Group> getOrCreateGroups(String accountId) {
         accountGroups.computeIfAbsent(accountId, this::createGroups);
-        return accountGroups.get(accountId).values();
+        List<Group> groups = new ArrayList<>(accountGroups.get(accountId).values());
+        groups.sort(Comparator.comparing(Group::getGroupName));
+        return groups;
     }
 
     private Group getOrCreateGroup(String groupCrn) {
