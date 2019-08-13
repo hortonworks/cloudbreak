@@ -19,6 +19,13 @@ import (
 // swagger:model SdxClusterDetailResponse
 type SdxClusterDetailResponse struct {
 
+	// cloud storage base location
+	CloudStorageBaseLocation string `json:"cloudStorageBaseLocation,omitempty"`
+
+	// cloud storage file system type
+	// Enum: [WASB_INTEGRATED GCS WASB ADLS ADLS_GEN_2 S3]
+	CloudStorageFileSystemType string `json:"cloudStorageFileSystemType,omitempty"`
+
 	// cluster shape
 	// Enum: [CUSTOM LIGHT_DUTY MEDIUM_DUTY_HA]
 	ClusterShape string `json:"clusterShape,omitempty"`
@@ -59,6 +66,10 @@ type SdxClusterDetailResponse struct {
 func (m *SdxClusterDetailResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCloudStorageFileSystemType(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateClusterShape(formats); err != nil {
 		res = append(res, err)
 	}
@@ -74,6 +85,61 @@ func (m *SdxClusterDetailResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+var sdxClusterDetailResponseTypeCloudStorageFileSystemTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["WASB_INTEGRATED","GCS","WASB","ADLS","ADLS_GEN_2","S3"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		sdxClusterDetailResponseTypeCloudStorageFileSystemTypePropEnum = append(sdxClusterDetailResponseTypeCloudStorageFileSystemTypePropEnum, v)
+	}
+}
+
+const (
+
+	// SdxClusterDetailResponseCloudStorageFileSystemTypeWASBINTEGRATED captures enum value "WASB_INTEGRATED"
+	SdxClusterDetailResponseCloudStorageFileSystemTypeWASBINTEGRATED string = "WASB_INTEGRATED"
+
+	// SdxClusterDetailResponseCloudStorageFileSystemTypeGCS captures enum value "GCS"
+	SdxClusterDetailResponseCloudStorageFileSystemTypeGCS string = "GCS"
+
+	// SdxClusterDetailResponseCloudStorageFileSystemTypeWASB captures enum value "WASB"
+	SdxClusterDetailResponseCloudStorageFileSystemTypeWASB string = "WASB"
+
+	// SdxClusterDetailResponseCloudStorageFileSystemTypeADLS captures enum value "ADLS"
+	SdxClusterDetailResponseCloudStorageFileSystemTypeADLS string = "ADLS"
+
+	// SdxClusterDetailResponseCloudStorageFileSystemTypeADLSGEN2 captures enum value "ADLS_GEN_2"
+	SdxClusterDetailResponseCloudStorageFileSystemTypeADLSGEN2 string = "ADLS_GEN_2"
+
+	// SdxClusterDetailResponseCloudStorageFileSystemTypeS3 captures enum value "S3"
+	SdxClusterDetailResponseCloudStorageFileSystemTypeS3 string = "S3"
+)
+
+// prop value enum
+func (m *SdxClusterDetailResponse) validateCloudStorageFileSystemTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, sdxClusterDetailResponseTypeCloudStorageFileSystemTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SdxClusterDetailResponse) validateCloudStorageFileSystemType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CloudStorageFileSystemType) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateCloudStorageFileSystemTypeEnum("cloudStorageFileSystemType", "body", m.CloudStorageFileSystemType); err != nil {
+		return err
+	}
+
 	return nil
 }
 

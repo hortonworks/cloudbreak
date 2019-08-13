@@ -333,7 +333,7 @@ func (a *Client) RedeploySdxByCrn(params *RedeploySdxByCrnParams) error {
 }
 
 /*
-RepairSdxNode repairs an sdx node ni the specified hostgroup
+RepairSdxNode repairs an sdx node in the specified hostgroup
 */
 func (a *Client) RepairSdxNode(params *RepairSdxNodeParams) error {
 	// TODO: Validate the params before sending
@@ -343,9 +343,9 @@ func (a *Client) RepairSdxNode(params *RepairSdxNodeParams) error {
 
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "repairSdxNode",
-		Method:             "GET",
+		Method:             "POST",
 		PathPattern:        "/sdx/{name}/manual_repair",
-		ProducesMediaTypes: []string{"application/json"},
+		ProducesMediaTypes: []string{""},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
@@ -361,7 +361,7 @@ func (a *Client) RepairSdxNode(params *RepairSdxNodeParams) error {
 }
 
 /*
-RepairSdxNodeByCrn repairs an sdx node in the specified hostgroup
+RepairSdxNodeByCrn repairs an sdx node in the specified hostgroup by crn
 */
 func (a *Client) RepairSdxNodeByCrn(params *RepairSdxNodeByCrnParams) error {
 	// TODO: Validate the params before sending

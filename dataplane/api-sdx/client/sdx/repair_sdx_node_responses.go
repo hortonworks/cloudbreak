@@ -53,7 +53,7 @@ func (o *RepairSdxNodeDefault) Code() int {
 }
 
 func (o *RepairSdxNodeDefault) Error() string {
-	return fmt.Sprintf("[GET /sdx/{name}/manual_repair][%d] repairSdxNode default ", o._statusCode)
+	return fmt.Sprintf("[POST /sdx/{name}/manual_repair][%d] repairSdxNode default ", o._statusCode)
 }
 
 func (o *RepairSdxNodeDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
