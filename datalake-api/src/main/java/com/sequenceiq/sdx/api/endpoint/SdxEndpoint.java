@@ -53,19 +53,19 @@ public interface SdxEndpoint {
     @POST
     @Path("{name}/redeploy")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "redeploy SDX cluster", produces = "application/json", nickname = "redeploySdx")
+    @ApiOperation(value = "redeploy SDX cluster", produces = MediaType.APPLICATION_JSON, nickname = "redeploySdx")
     void redeploy(@PathParam("name") String name, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
 
     @POST
     @Path("/crn/{clusterCrn}/redeploy")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "redeploy SDX cluster by crn", produces = "application/json", nickname = "redeploySdxByCrn")
+    @ApiOperation(value = "redeploy SDX cluster by crn", produces = MediaType.APPLICATION_JSON, nickname = "redeploySdxByCrn")
     void redeployByCrn(@PathParam("clusterCrn") String clusterCrn, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
 
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "get SDX cluster", produces = "application/json", nickname = "getSdx")
+    @ApiOperation(value = "get SDX cluster", produces = MediaType.APPLICATION_JSON, nickname = "getSdx")
     SdxClusterResponse get(@PathParam("name") String name);
 
     @GET
@@ -83,28 +83,28 @@ public interface SdxEndpoint {
     @GET
     @Path("{name}/detail")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "get SDX cluster detail", produces = "application/json", nickname = "getSdxDetail")
+    @ApiOperation(value = "get SDX cluster detail", produces = MediaType.APPLICATION_JSON, nickname = "getSdxDetail")
     SdxClusterDetailResponse getDetail(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
 
     @GET
     @Path("/crn/{clusterCrn}/detail")
-    @ApiOperation(value = "get SDX cluster detail by crn", produces = "application/json", nickname = "getSdxDetailByCrn")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get SDX cluster detail by crn", produces = MediaType.APPLICATION_JSON, nickname = "getSdxDetailByCrn")
     SdxClusterDetailResponse getDetailByCrn(@PathParam("clusterCrn") String clusterCrn, @QueryParam("entries") Set<String> entries);
 
-    @GET
+    @POST
     @Path("{name}/manual_repair")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "repairs an sdxNode ni the specified hostgroup", produces = "application/json", nickname = "repairSdxNode")
+    @ApiOperation(value = "repairs an sdxNode in the specified hostgroup", nickname = "repairSdxNode")
     void repairCluster(@PathParam("name") String name, SdxRepairRequest clusterRepairRequest);
 
     @POST
     @Path("/crn/{crn}/manual_repair")
-    @ApiOperation(value = "repairs an sdxNode in the specified hostgroup", nickname = "repairSdxNodeByCrn")
-    void repairClusterCrn(@PathParam("crn") String crn, SdxRepairRequest clusterRepairRequest);
+    @ApiOperation(value = "repairs an sdxNode in the specified hostgroup by crn", nickname = "repairSdxNodeByCrn")
+    void repairClusterByCrn(@PathParam("crn") String crn, SdxRepairRequest clusterRepairRequest);
 
     @GET
     @Path("list")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "list SDX clusters", produces = "application/json", nickname = "listSdx")
+    @ApiOperation(value = "list SDX clusters", produces = MediaType.APPLICATION_JSON, nickname = "listSdx")
     List<SdxClusterResponse> list(@QueryParam("envName") String envName);
 }
