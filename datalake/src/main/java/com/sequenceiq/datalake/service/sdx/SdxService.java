@@ -41,6 +41,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.validation.cloudstorage.AwsCloudStorageLocationValidator;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
@@ -69,6 +70,9 @@ public class SdxService {
 
     @Inject
     private Clock clock;
+
+    @Inject
+    private AwsCloudStorageLocationValidator awsCloudStorageLocationValidator;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<SdxClusterStatus> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
@@ -136,7 +140,8 @@ public class SdxService {
         LOGGER.info("Creating SDX cluster with name {}", name);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
         validateInternalSdxRequest(stackV4Request, sdxClusterRequest.getClusterShape());
-        validateCloudStorageRequest(sdxClusterRequest.getCloudStorage());
+        DetailedEnvironmentResponse environment = getEnvironment(userCrn, sdxClusterRequest);
+        validateCloudStorageRequest(sdxClusterRequest.getCloudStorage(), environment);
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setInitiatorUserCrn(userCrn);
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
@@ -147,7 +152,6 @@ public class SdxService {
         sdxCluster.setCreated(clock.getCurrentTimeMillis());
         sdxCluster.setCreateDatabase(sdxClusterRequest.getExternalDatabase() != null && sdxClusterRequest.getExternalDatabase().getCreate());
 
-        DetailedEnvironmentResponse environment = getEnvironment(userCrn, sdxClusterRequest);
         createDatabaseByDefaultForAWS(sdxClusterRequest, sdxCluster, environment);
         validateDatabaseRequest(sdxCluster, environment);
         sdxCluster.setEnvName(environment.getName());
@@ -185,7 +189,7 @@ public class SdxService {
         }
     }
 
-    private void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage) {
+    private void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage, DetailedEnvironmentResponse environment) {
         if (cloudStorage != null) {
             ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
             validationBuilder.ifError(() -> cloudStorage.getFileSystemType() == null, "'fileSystemType' must be set in 'cloudStorage'!");
@@ -197,6 +201,7 @@ public class SdxService {
                     validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.S3.getProtocol()),
                             String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'S3'!", FileSystemType.S3.getProtocol()));
                     validationBuilder.ifError(() -> cloudStorage.getS3() == null, "'s3' must be set if 'fileSystemType' is 'S3'!");
+                    awsCloudStorageLocationValidator.validate(cloudStorage.getBaseLocation(), environment, validationBuilder);
                 }
                 if (FileSystemType.ADLS.equals(cloudStorage.getFileSystemType())) {
                     validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS.getProtocol()),

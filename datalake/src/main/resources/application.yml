@@ -58,6 +58,9 @@ datalake:
       schema: public
       cert.file: database.crt
       ssl: false
+  intermediate.threadpool:
+    core.size: 100
+    capacity.size: 4000
 
 secret:
   application: sdx/shared
@@ -79,3 +82,29 @@ vault:
 cb:
   authentication:
     disabled: false
+
+  aws:
+    spotinstances.enabled: true
+    disabled.instance.types: c5d,f1,i3,m5d,p3dn,r5d,z1d
+    hostkey.verify: false
+    external.id: provision-ambari
+    role.session.name: hadoop-provisioning
+    cf.template.new.path: templates/aws-cf-stack.ftl
+    cf.template.newdb.path: templates/aws-cf-dbstack.ftl
+    default.inbound.security.group:
+    vpc:
+
+  arm:
+    app.creation.template:
+          resource:
+            app.id: 797f4846-ba00-4fd7-ba43-dac1f8f63013
+            access.scope.id: 41094075-9dad-400e-a0bd-54e686782033
+
+  azure:
+    host.name.prefix.length: 255
+
+  etc.config.dir: /etc/cloudbreak
+
+  max:
+    azure.resource.name.length: 120
+    aws.resource.name.length: 50
