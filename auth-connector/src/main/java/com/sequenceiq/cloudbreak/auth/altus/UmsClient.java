@@ -173,7 +173,7 @@ public class UmsClient {
     @Retryable(value = UmsOperationException.class, maxAttempts = 5, backoff = @Backoff(delay = 5000))
     public MachineUser getMachineUserWithRetry(String requestId, String userCrn, String machineUserName) {
         try {
-            return getMachineUserForUser(requestId, userCrn, userCrn);
+            return getMachineUserForUser(requestId, userCrn, machineUserName);
         } catch (StatusRuntimeException ex) {
             if (Status.NOT_FOUND.getCode().equals(ex.getStatus().getCode())) {
                 LOGGER.error("Machine user not found.", ex);
