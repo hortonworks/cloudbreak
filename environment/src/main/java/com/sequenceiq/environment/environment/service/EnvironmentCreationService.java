@@ -35,7 +35,7 @@ import com.sequenceiq.environment.parameters.service.ParametersService;
 @Service
 public class EnvironmentCreationService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentModificationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCreationService.class);
 
     private final EnvironmentService environmentService;
 
@@ -158,6 +158,7 @@ public class EnvironmentCreationService {
 
     private void validateCreation(EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions) {
         ValidationResult validationResult = validatorService.validateCreation(environment, creationDto, cloudRegions);
+        validationResult = validationResult.merge(validatorService.validateTelemetryLoggingStorageLocation(environment));
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }

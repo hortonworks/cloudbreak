@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
+import com.sequenceiq.environment.environment.validation.storagelocation.EnvironmentTelemetryLoggingStorageLocationValidator;
 import com.sequenceiq.environment.logger.MDCContextFilter;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
@@ -34,6 +35,9 @@ public class AppConfig {
 
     @Inject
     private List<EnvironmentSecurityGroupValidator> environmentSecurityGroupValidators;
+
+    @Inject
+    private List<EnvironmentTelemetryLoggingStorageLocationValidator> environmentTelemetryLoggingStorageLocationValidators;
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
@@ -88,6 +92,13 @@ public class AppConfig {
         return environmentSecurityGroupValidators
                 .stream()
                 .collect(Collectors.toMap(EnvironmentSecurityGroupValidator::getCloudPlatform, Function.identity()));
+    }
+
+    @Bean
+    public Map<CloudPlatform, EnvironmentTelemetryLoggingStorageLocationValidator> environmentTelemetryLoggingStorageLocationValidatorByCloudPlatform() {
+        return environmentTelemetryLoggingStorageLocationValidators
+                .stream()
+                .collect(Collectors.toMap(EnvironmentTelemetryLoggingStorageLocationValidator::getCloudPlatform, Function.identity()));
     }
 
     @Bean
