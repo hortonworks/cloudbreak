@@ -14,6 +14,7 @@ public enum CloudStorageCdpService {
     HIVE_METASTORE_WAREHOUSE,
     HIVE_METASTORE_EXTERNAL_WAREHOUSE,
     HIVE_REPLICA_WAREHOUSE,
+    HBASE_ROOT,
     RANGER_AUDIT;
 
     @JsonIgnore
