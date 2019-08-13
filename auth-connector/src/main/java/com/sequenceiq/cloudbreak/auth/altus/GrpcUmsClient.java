@@ -179,7 +179,7 @@ public class GrpcUmsClient {
             String generatedRequestId = requestId.orElse(UUID.randomUUID().toString());
             LOGGER.debug("Creating machine user {} for {} using request ID {}", machineUserName, userCrn, generatedRequestId);
             client.createMachineUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
-            MachineUser machineUser = client.getMachineUserForUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
+            MachineUser machineUser = client.getMachineUserWithRetry(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
             LOGGER.debug("Machine User information retrieved for userCrn: {}", machineUser.getCrn());
             return machineUser;
         }
