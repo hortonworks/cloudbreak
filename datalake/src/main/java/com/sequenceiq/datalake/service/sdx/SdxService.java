@@ -148,6 +148,7 @@ public class SdxService {
         sdxCluster.setCreateDatabase(sdxClusterRequest.getExternalDatabase() != null && sdxClusterRequest.getExternalDatabase().getCreate());
 
         DetailedEnvironmentResponse environment = getEnvironment(userCrn, sdxClusterRequest);
+        createDatabaseByDefaultForAWS(sdxClusterRequest, sdxCluster, environment);
         validateDatabaseRequest(sdxCluster, environment);
         sdxCluster.setEnvName(environment.getName());
         sdxCluster.setEnvCrn(environment.getCrn());
@@ -174,6 +175,14 @@ public class SdxService {
         sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
 
         return sdxCluster;
+    }
+
+    private void createDatabaseByDefaultForAWS(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+        if ("AWS".equals(environment.getCloudPlatform()) &&
+                (sdxClusterRequest.getExternalDatabase() == null ||
+                        sdxClusterRequest.getExternalDatabase().getCreate() == null)) {
+            sdxCluster.setCreateDatabase(true);
+        }
     }
 
     private void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage) {
