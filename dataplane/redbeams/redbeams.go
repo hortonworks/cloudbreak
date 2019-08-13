@@ -95,7 +95,7 @@ func ListDatabaseServers(c *cli.Context) {
 	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
 
 	log.Infof("[ListDBServers] Listing database servers in environment: %s", envCrn)
-	resp, err := redbeamsDbServerClient.ListDatabaseServers(database_servers.NewListDatabaseServersParams().WithEnvironmentCrn(envCrn))
+	resp, err := redbeamsDbServerClient.ListDatabaseServers(database_servers.NewListDatabaseServersParams().WithEnvironmentCrn(envCrn), nil)
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -119,7 +119,7 @@ func GetDatabaseServer(c *cli.Context) {
 	crn := c.String(fl.FlCrn.Name)
 	if len(crn) != 0 {
 		log.Infof("[GetDBServer] Getting database server with CRN: %s", crn)
-		resp, err := redbeamsDbServerClient.GetDatabaseServerByCrn(database_servers.NewGetDatabaseServerByCrnParams().WithCrn(crn))
+		resp, err := redbeamsDbServerClient.GetDatabaseServerByCrn(database_servers.NewGetDatabaseServerByCrnParams().WithCrn(crn), nil)
 		if err != nil {
 			commonutils.LogErrorAndExit(err)
 		}
@@ -128,7 +128,7 @@ func GetDatabaseServer(c *cli.Context) {
 		envCrn := c.String(fl.FlEnvironmentCrn.Name)
 		name := c.String(fl.FlName.Name)
 		log.Infof("[GetDBServer] Getting database server with name: %s", name)
-		resp, err := redbeamsDbServerClient.GetDatabaseServerByName(database_servers.NewGetDatabaseServerByNameParams().WithEnvironmentCrn(envCrn).WithName(name))
+		resp, err := redbeamsDbServerClient.GetDatabaseServerByName(database_servers.NewGetDatabaseServerByNameParams().WithEnvironmentCrn(envCrn).WithName(name), nil)
 		if err != nil {
 			commonutils.LogErrorAndExit(err)
 		}
@@ -148,7 +148,7 @@ func GetDatabaseServerStatus(c *cli.Context) {
 	crn := c.String(fl.FlCrn.Name)
 	if len(crn) != 0 {
 		log.Infof("[GetDBServerStatus] Getting status for database server with CRN: %s", crn)
-		resp, err := redbeamsDbServerClient.GetDatabaseServerStatusByCrn(database_servers.NewGetDatabaseServerStatusByCrnParams().WithCrn(crn))
+		resp, err := redbeamsDbServerClient.GetDatabaseServerStatusByCrn(database_servers.NewGetDatabaseServerStatusByCrnParams().WithCrn(crn), nil)
 		if err != nil {
 			commonutils.LogErrorAndExit(err)
 		}
@@ -157,7 +157,7 @@ func GetDatabaseServerStatus(c *cli.Context) {
 		envCrn := c.String(fl.FlEnvironmentCrn.Name)
 		name := c.String(fl.FlName.Name)
 		log.Infof("[GetDBServerStatus] Getting status for database server with name: %s", name)
-		resp, err := redbeamsDbServerClient.GetDatabaseServerStatusByName(database_servers.NewGetDatabaseServerStatusByNameParams().WithEnvironmentCrn(envCrn).WithName(name))
+		resp, err := redbeamsDbServerClient.GetDatabaseServerStatusByName(database_servers.NewGetDatabaseServerStatusByNameParams().WithEnvironmentCrn(envCrn).WithName(name), nil)
 		if err != nil {
 			commonutils.LogErrorAndExit(err)
 		}
@@ -184,7 +184,7 @@ func CreateManagedDatabaseServer(c *cli.Context) {
 
 	log.Infof("[CreateManagedDBServer] JSON read, creating database server with name: %s", req.Name)
 	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
-	resp, err := redbeamsDbServerClient.CreateDatabaseServer(database_servers.NewCreateDatabaseServerParams().WithBody(&req))
+	resp, err := redbeamsDbServerClient.CreateDatabaseServer(database_servers.NewCreateDatabaseServerParams().WithBody(&req), nil)
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -201,7 +201,7 @@ func TerminateManagedDatabaseServer(c *cli.Context) {
 	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
 
 	log.Infof("[TerminateDBServer] Terminating database server with CRN: %s", crn)
-	resp, err := redbeamsDbServerClient.TerminateManagedDatabaseServer(database_servers.NewTerminateManagedDatabaseServerParams().WithCrn(crn))
+	resp, err := redbeamsDbServerClient.TerminateManagedDatabaseServer(database_servers.NewTerminateManagedDatabaseServerParams().WithCrn(crn), nil)
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -231,7 +231,7 @@ func RegisterDatabaseServer(c *cli.Context) {
 
 	log.Infof("[RegisterDBServer] JSON read, registering database server with name: %s", *req.Name)
 	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
-	resp, err := redbeamsDbServerClient.RegisterDatabaseServer(database_servers.NewRegisterDatabaseServerParams().WithBody(&req))
+	resp, err := redbeamsDbServerClient.RegisterDatabaseServer(database_servers.NewRegisterDatabaseServerParams().WithBody(&req), nil)
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -248,7 +248,7 @@ func DeleteDatabaseServer(c *cli.Context) {
 	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
 
 	log.Infof("[DeleteDBServer] Deleting database server with CRN: %s", crn)
-	result, err := redbeamsDbServerClient.DeleteDatabaseServerByCrn(database_servers.NewDeleteDatabaseServerByCrnParams().WithCrn(crn))
+	result, err := redbeamsDbServerClient.DeleteDatabaseServerByCrn(database_servers.NewDeleteDatabaseServerByCrnParams().WithCrn(crn), nil)
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -345,7 +345,7 @@ func CreateDatabase(c *cli.Context) {
 
 	log.Infof("[CreateDB] JSON read, creating database with name: %s", *req.DatabaseName)
 	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
-	result, err := redbeamsDbServerClient.CreateDatabaseOnServer(database_servers.NewCreateDatabaseOnServerParams().WithBody(&req))
+	result, err := redbeamsDbServerClient.CreateDatabaseOnServer(database_servers.NewCreateDatabaseOnServerParams().WithBody(&req), nil)
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}

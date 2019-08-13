@@ -29,7 +29,7 @@ CreateDatabaseOnServer creates a database on an existing database server
 
 Creates a new database on a database server. The database starts out empty. A new user with credentials separate from the database server's administrative user is also created, with full rights to the new database.
 */
-func (a *Client) CreateDatabaseOnServer(params *CreateDatabaseOnServerParams) (*CreateDatabaseOnServerOK, error) {
+func (a *Client) CreateDatabaseOnServer(params *CreateDatabaseOnServerParams, authInfo runtime.ClientAuthInfoWriter) (*CreateDatabaseOnServerOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewCreateDatabaseOnServerParams()
@@ -44,6 +44,7 @@ func (a *Client) CreateDatabaseOnServer(params *CreateDatabaseOnServerParams) (*
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &CreateDatabaseOnServerReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -59,7 +60,7 @@ CreateDatabaseServer creates and registers a database server in a cloud provider
 
 Creates a new database server. The database server starts out with only default databases.
 */
-func (a *Client) CreateDatabaseServer(params *CreateDatabaseServerParams) (*CreateDatabaseServerOK, error) {
+func (a *Client) CreateDatabaseServer(params *CreateDatabaseServerParams, authInfo runtime.ClientAuthInfoWriter) (*CreateDatabaseServerOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewCreateDatabaseServerParams()
@@ -74,6 +75,7 @@ func (a *Client) CreateDatabaseServer(params *CreateDatabaseServerParams) (*Crea
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &CreateDatabaseServerReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -89,7 +91,7 @@ DeleteDatabaseServerByCrn deregisters a database server by c r n
 
 Deregisters a database server by its CRN.
 */
-func (a *Client) DeleteDatabaseServerByCrn(params *DeleteDatabaseServerByCrnParams) (*DeleteDatabaseServerByCrnOK, error) {
+func (a *Client) DeleteDatabaseServerByCrn(params *DeleteDatabaseServerByCrnParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteDatabaseServerByCrnOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteDatabaseServerByCrnParams()
@@ -104,6 +106,7 @@ func (a *Client) DeleteDatabaseServerByCrn(params *DeleteDatabaseServerByCrnPara
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteDatabaseServerByCrnReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -119,7 +122,7 @@ DeleteDatabaseServerByName deregisters a database server by name
 
 Deregisters a database server by its name.
 */
-func (a *Client) DeleteDatabaseServerByName(params *DeleteDatabaseServerByNameParams) (*DeleteDatabaseServerByNameOK, error) {
+func (a *Client) DeleteDatabaseServerByName(params *DeleteDatabaseServerByNameParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteDatabaseServerByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteDatabaseServerByNameParams()
@@ -134,6 +137,7 @@ func (a *Client) DeleteDatabaseServerByName(params *DeleteDatabaseServerByNamePa
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteDatabaseServerByNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -149,7 +153,7 @@ DeleteMultipleDatabaseServersByCrn deregisters or terminate multiple database se
 
 Deregisters multiple databases servers, each by CRN.
 */
-func (a *Client) DeleteMultipleDatabaseServersByCrn(params *DeleteMultipleDatabaseServersByCrnParams) (*DeleteMultipleDatabaseServersByCrnOK, error) {
+func (a *Client) DeleteMultipleDatabaseServersByCrn(params *DeleteMultipleDatabaseServersByCrnParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteMultipleDatabaseServersByCrnOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDeleteMultipleDatabaseServersByCrnParams()
@@ -164,6 +168,7 @@ func (a *Client) DeleteMultipleDatabaseServersByCrn(params *DeleteMultipleDataba
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteMultipleDatabaseServersByCrnReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -179,7 +184,7 @@ GetDatabaseServerByCrn gets a database server by c r n
 
 Gets information on a database server by its CRN.
 */
-func (a *Client) GetDatabaseServerByCrn(params *GetDatabaseServerByCrnParams) (*GetDatabaseServerByCrnOK, error) {
+func (a *Client) GetDatabaseServerByCrn(params *GetDatabaseServerByCrnParams, authInfo runtime.ClientAuthInfoWriter) (*GetDatabaseServerByCrnOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetDatabaseServerByCrnParams()
@@ -194,6 +199,7 @@ func (a *Client) GetDatabaseServerByCrn(params *GetDatabaseServerByCrnParams) (*
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetDatabaseServerByCrnReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -209,7 +215,7 @@ GetDatabaseServerByName gets a database server by name
 
 Gets information on a database server by its name.
 */
-func (a *Client) GetDatabaseServerByName(params *GetDatabaseServerByNameParams) (*GetDatabaseServerByNameOK, error) {
+func (a *Client) GetDatabaseServerByName(params *GetDatabaseServerByNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetDatabaseServerByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetDatabaseServerByNameParams()
@@ -224,6 +230,7 @@ func (a *Client) GetDatabaseServerByName(params *GetDatabaseServerByNameParams) 
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetDatabaseServerByNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -239,7 +246,7 @@ GetDatabaseServerStatusByCrn gets the status of an allocated database server by 
 
 get the status of an allocated database server by crn
 */
-func (a *Client) GetDatabaseServerStatusByCrn(params *GetDatabaseServerStatusByCrnParams) (*GetDatabaseServerStatusByCrnOK, error) {
+func (a *Client) GetDatabaseServerStatusByCrn(params *GetDatabaseServerStatusByCrnParams, authInfo runtime.ClientAuthInfoWriter) (*GetDatabaseServerStatusByCrnOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetDatabaseServerStatusByCrnParams()
@@ -254,6 +261,7 @@ func (a *Client) GetDatabaseServerStatusByCrn(params *GetDatabaseServerStatusByC
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetDatabaseServerStatusByCrnReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -269,7 +277,7 @@ GetDatabaseServerStatusByName gets the status of an allocated database server by
 
 get the status of an allocated database server by name
 */
-func (a *Client) GetDatabaseServerStatusByName(params *GetDatabaseServerStatusByNameParams) (*GetDatabaseServerStatusByNameOK, error) {
+func (a *Client) GetDatabaseServerStatusByName(params *GetDatabaseServerStatusByNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetDatabaseServerStatusByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetDatabaseServerStatusByNameParams()
@@ -284,6 +292,7 @@ func (a *Client) GetDatabaseServerStatusByName(params *GetDatabaseServerStatusBy
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &GetDatabaseServerStatusByNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -299,7 +308,7 @@ ListDatabaseServers lists database servers
 
 Lists all database servers that are known, either because they were registered or because this service created them.
 */
-func (a *Client) ListDatabaseServers(params *ListDatabaseServersParams) (*ListDatabaseServersOK, error) {
+func (a *Client) ListDatabaseServers(params *ListDatabaseServersParams, authInfo runtime.ClientAuthInfoWriter) (*ListDatabaseServersOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewListDatabaseServersParams()
@@ -314,6 +323,7 @@ func (a *Client) ListDatabaseServers(params *ListDatabaseServersParams) (*ListDa
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &ListDatabaseServersReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -329,7 +339,7 @@ RegisterDatabaseServer registers a database server
 
 Registers an existing database server.
 */
-func (a *Client) RegisterDatabaseServer(params *RegisterDatabaseServerParams) (*RegisterDatabaseServerOK, error) {
+func (a *Client) RegisterDatabaseServer(params *RegisterDatabaseServerParams, authInfo runtime.ClientAuthInfoWriter) (*RegisterDatabaseServerOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewRegisterDatabaseServerParams()
@@ -344,6 +354,7 @@ func (a *Client) RegisterDatabaseServer(params *RegisterDatabaseServerParams) (*
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &RegisterDatabaseServerReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -359,7 +370,7 @@ TerminateManagedDatabaseServer terminates a database server in a cloud provider 
 
 terminates a database server in a cloud provider and deregisters it
 */
-func (a *Client) TerminateManagedDatabaseServer(params *TerminateManagedDatabaseServerParams) (*TerminateManagedDatabaseServerOK, error) {
+func (a *Client) TerminateManagedDatabaseServer(params *TerminateManagedDatabaseServerParams, authInfo runtime.ClientAuthInfoWriter) (*TerminateManagedDatabaseServerOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewTerminateManagedDatabaseServerParams()
@@ -374,6 +385,7 @@ func (a *Client) TerminateManagedDatabaseServer(params *TerminateManagedDatabase
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &TerminateManagedDatabaseServerReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
@@ -389,7 +401,7 @@ TestDatabaseServerConnection tests database server connectivity
 
 Tests connectivity to a database. Use this to verify access to the database server from this service, and also to verify authentication credentials.
 */
-func (a *Client) TestDatabaseServerConnection(params *TestDatabaseServerConnectionParams) (*TestDatabaseServerConnectionOK, error) {
+func (a *Client) TestDatabaseServerConnection(params *TestDatabaseServerConnectionParams, authInfo runtime.ClientAuthInfoWriter) (*TestDatabaseServerConnectionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewTestDatabaseServerConnectionParams()
@@ -404,6 +416,7 @@ func (a *Client) TestDatabaseServerConnection(params *TestDatabaseServerConnecti
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &TestDatabaseServerConnectionReader{formats: a.formats},
+		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
