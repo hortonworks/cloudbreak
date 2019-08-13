@@ -4,12 +4,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplateView;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateViewRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @Service
 public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceService<ClusterTemplateView> {
@@ -30,10 +29,5 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
     @Override
     protected void prepareCreation(ClusterTemplateView resource) {
         throw new BadRequestException("Cluster template creation is not supported from ClusterTemplateViewService");
-    }
-
-    @Override
-    public AuthorizationResource resource() {
-        return AuthorizationResource.DATAHUB;
     }
 }

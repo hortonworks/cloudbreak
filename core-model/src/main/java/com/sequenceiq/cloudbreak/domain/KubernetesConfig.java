@@ -15,7 +15,6 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Where;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -96,11 +95,6 @@ public class KubernetesConfig implements WorkspaceAwareResource, ProvisionEntity
     @Override
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
-    }
-
-    @Override
-    public AuthorizationResource getResource() {
-        return AuthorizationResource.DATAHUB;
     }
 
     @Override

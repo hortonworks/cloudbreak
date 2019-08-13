@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 
 @Service
 public class RecipeService extends AbstractArchivistService<Recipe> {
@@ -90,11 +89,6 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
     @Override
     public WorkspaceResourceRepository<Recipe, Long> repository() {
         return recipeRepository;
-    }
-
-    @Override
-    public AuthorizationResource resource() {
-        return AuthorizationResource.DATAHUB;
     }
 
     @Override

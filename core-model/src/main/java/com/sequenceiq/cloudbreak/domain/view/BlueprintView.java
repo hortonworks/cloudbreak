@@ -7,7 +7,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
@@ -77,10 +76,5 @@ public class BlueprintView extends CompactView {
 
     public void setResoureceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
-    }
-
-    @Override
-    public AuthorizationResource getResource() {
-        return AuthorizationResource.DATAHUB;
     }
 }

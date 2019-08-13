@@ -6,7 +6,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.repository.KubernetesConfigRepository;
@@ -54,11 +53,6 @@ public class KubernetesConfigService extends AbstractWorkspaceAwareResourceServi
     @Override
     protected void prepareCreation(KubernetesConfig resource) {
 
-    }
-
-    @Override
-    public AuthorizationResource resource() {
-        return AuthorizationResource.DATAHUB;
     }
 
 }

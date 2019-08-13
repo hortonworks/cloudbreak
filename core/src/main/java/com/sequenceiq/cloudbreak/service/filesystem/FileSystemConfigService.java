@@ -6,11 +6,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @Service
 public class FileSystemConfigService extends AbstractWorkspaceAwareResourceService<FileSystem> {
@@ -21,11 +20,6 @@ public class FileSystemConfigService extends AbstractWorkspaceAwareResourceServi
     @Override
     public WorkspaceResourceRepository<FileSystem, Long> repository() {
         return fileSystemRepository;
-    }
-
-    @Override
-    public AuthorizationResource resource() {
-        return AuthorizationResource.DATAHUB;
     }
 
     public FileSystem getByIdFromAnyAvailableWorkspace(Long id) {

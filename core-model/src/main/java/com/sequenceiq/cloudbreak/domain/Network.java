@@ -15,7 +15,6 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Where;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
@@ -64,11 +63,6 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource, Archiva
 
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
-    }
-
-    @Override
-    public AuthorizationResource getResource() {
-        return AuthorizationResource.DATAHUB;
     }
 
     public Long getId() {

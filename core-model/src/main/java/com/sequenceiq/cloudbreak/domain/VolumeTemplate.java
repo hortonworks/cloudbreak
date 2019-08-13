@@ -9,7 +9,6 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 
 @Entity
 public class VolumeTemplate implements ProvisionEntity, WorkspaceAwareResource {
@@ -81,10 +80,5 @@ public class VolumeTemplate implements ProvisionEntity, WorkspaceAwareResource {
     @Override
     public void setWorkspace(Workspace workspace) {
         template.setWorkspace(workspace);
-    }
-
-    @Override
-    public AuthorizationResource getResource() {
-        return AuthorizationResource.DATAHUB;
     }
 }
