@@ -35,7 +35,7 @@ import com.sequenceiq.environment.parameters.service.ParametersService;
 @Service
 public class EnvironmentCreationService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentModificationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCreationService.class);
 
     private final EnvironmentService environmentService;
 
@@ -82,7 +82,7 @@ public class EnvironmentCreationService {
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
         environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
-        validateCreation(creationDto, environment, cloudRegions);
+        validateCreation(creator, creationDto, environment, cloudRegions);
         Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, creationDto.getNetwork());
         validateNetworkRequest(environment, creationDto.getNetwork(), subnetMetas);
         environment = environmentService.save(environment);
@@ -156,8 +156,9 @@ public class EnvironmentCreationService {
         return cloudRegions;
     }
 
-    private void validateCreation(EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions) {
+    private void validateCreation(String userCrn, EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions) {
         ValidationResult validationResult = validatorService.validateCreation(environment, creationDto, cloudRegions);
+        validationResult = validationResult.merge(validatorService.validateTelemetryLoggingStorageLocation(userCrn, environment));
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }

@@ -108,6 +108,7 @@ class EnvironmentCreationServiceTest {
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(validatorService.validateCreation(any(), any(), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateTelemetryLoggingStorageLocation(eq(EnvironmentTestData.USER), any())).thenReturn(ValidationResult.builder().build());
         when(environmentService.save(any())).thenReturn(environment);
         environmentCreationServiceUnderTest
                 .create(environmentCreationDto, ACCOUNT_ID, EnvironmentTestData.USER);
@@ -138,6 +139,7 @@ class EnvironmentCreationServiceTest {
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(validatorService.validateCreation(any(), any(), any())).thenReturn(ValidationResult.builder().error("nogood").build());
+        when(validatorService.validateTelemetryLoggingStorageLocation(eq(EnvironmentTestData.USER), any())).thenReturn(ValidationResult.builder().build());
         when(environmentService.save(any())).thenReturn(environment);
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto, ACCOUNT_ID,
                 EnvironmentTestData.USER));
