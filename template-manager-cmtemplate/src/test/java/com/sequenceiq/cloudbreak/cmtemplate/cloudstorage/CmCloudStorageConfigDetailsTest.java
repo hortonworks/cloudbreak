@@ -43,6 +43,8 @@ public class CmCloudStorageConfigDetailsTest {
 
     private static final String HIVE_SERVER = "HIVE_SERVER";
 
+    private static final String HBASE_MASTER = "MASTER";
+
     private static final String CLUSTER_NAME = "bigCluster";
 
     private static final String STORAGE_NAME = "hwx-remote";
@@ -249,7 +251,7 @@ public class CmCloudStorageConfigDetailsTest {
 
     @Test
     public void testStandaloneClusterPaths() {
-        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, ZEPPELIN_SERVER);
+        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, ZEPPELIN_SERVER, HBASE_MASTER);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
@@ -259,10 +261,11 @@ public class CmCloudStorageConfigDetailsTest {
                 .withFileSystemType(FileSystemType.S3.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
-        Assert.assertEquals(2L, bigCluster.size());
+        Assert.assertEquals(3L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
         Set<ConfigQueryEntry> zeppelin = serviceEntry(bigCluster, ZEPPELIN_SERVER);
+        Set<ConfigQueryEntry> hbaseMaster = serviceEntry(bigCluster, HBASE_MASTER);
 
 
         Assert.assertEquals(1, rangerAdmin.size());
@@ -272,11 +275,15 @@ public class CmCloudStorageConfigDetailsTest {
         Assert.assertEquals(1, zeppelin.size());
         Assert.assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/bigCluster/zeppelin/notebook"::equals));
+
+        Assert.assertEquals(1, hbaseMaster.size());
+        Assert.assertTrue(hbaseMaster.stream().map(ConfigQueryEntry::getDefaultPath)
+                .anyMatch("hwx-remote/bigCluster/hbase"::equals));
     }
 
     @Test
     public void testAttachedClusterPaths() {
-        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, RESOURCEMANAGER, ZEPPELIN_SERVER);
+        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, RESOURCEMANAGER, ZEPPELIN_SERVER, HBASE_MASTER);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
@@ -286,11 +293,12 @@ public class CmCloudStorageConfigDetailsTest {
                 .withFileSystemType(FileSystemType.S3.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
-        Assert.assertEquals(3L, bigCluster.size());
+        Assert.assertEquals(4L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
         Set<ConfigQueryEntry> yarnLogs = serviceEntry(bigCluster, RESOURCEMANAGER);
         Set<ConfigQueryEntry> zeppelin = serviceEntry(bigCluster, ZEPPELIN_SERVER);
+        Set<ConfigQueryEntry> hbaseMaster = serviceEntry(bigCluster, HBASE_MASTER);
 
         Assert.assertEquals(1, rangerAdmin.size());
         Assert.assertTrue(rangerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
@@ -303,6 +311,10 @@ public class CmCloudStorageConfigDetailsTest {
         Assert.assertEquals(1, zeppelin.size());
         Assert.assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/bigCluster/zeppelin/notebook"::equals));
+
+        Assert.assertEquals(1, hbaseMaster.size());
+        Assert.assertTrue(hbaseMaster.stream().map(ConfigQueryEntry::getDefaultPath)
+                .anyMatch("hwx-remote/bigCluster/hbase"::equals));
     }
 
     private Set<ConfigQueryEntry> serviceEntry(Set<ConfigQueryEntry> configQueryEntries, String serviceName) {

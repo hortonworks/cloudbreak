@@ -65,6 +65,17 @@
       "relatedServices": ["RANGER_ADMIN"],
       "requiredForAttachedCluster": true,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "type": "HBASE_ROOT",
+      "propertyName": "hbase.rootdir",
+      "propertyFile": "hbase-site",
+      "description": "This is the root director for hbase",
+      "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/hbase",
+      "propertyDisplayName": "HBase Root Directory",
+      "relatedServices": ["MASTER"],
+      "requiredForAttachedCluster": true,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     }
   ]
 }

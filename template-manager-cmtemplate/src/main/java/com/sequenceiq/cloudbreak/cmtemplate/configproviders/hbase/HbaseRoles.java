@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
 public class HbaseRoles {
 
+    public static final String HBASE = "HBASE";
+
     public static final String REGIONSERVER = "REGIONSERVER";
 
     public static final String GATEWAY = "GATEWAY";
