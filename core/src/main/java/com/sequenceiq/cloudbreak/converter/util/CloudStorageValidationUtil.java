@@ -19,8 +19,6 @@ public class CloudStorageValidationUtil {
             }
             validationBuilder.ifError(() -> CollectionUtils.isEmpty(cloudStorageRequest.getLocations()),
                     "'locations' in 'cloudStorage' must not be empty!");
-            validationBuilder.ifError(() -> CollectionUtils.isEmpty(cloudStorageRequest.getIdentities()),
-                    "'identities' in 'cloudStorage' must not be empty!");
             ValidationResult validationResult = validationBuilder.build();
             if (validationResult.hasError()) {
                 throw new BadRequestException(validationResult.getFormattedErrors());
