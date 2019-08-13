@@ -15,9 +15,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UmsState {
-    private Map<User, List<Group>> userToGroupsMap;
-
-    private Map<MachineUser, List<Group>> machineUserToGroupsMap = new HashMap<>();
+    // Also contains machine user's crn
+    private Map<String, List<Group>> userToGroupsMap;
 
     // Regular users
     private Map<String, User> userMap;
@@ -29,12 +28,11 @@ public class UmsState {
 
     private Map<String, MachineUser> machineUserMap;
 
-    public UmsState(Map<User, List<Group>> userToGroupsMap, Map<MachineUser, List<Group>> machineUserToGroupsMap, Map<String, User> adminUserMap,
+    public UmsState(Map<String, List<Group>> userToGroupsMap, Map<String, User> adminUserMap,
                     Map<String, MachineUser> adminMachineUserMap, Map<String, User> userMap,
                     Map<String, MachineUser> machineUserMap) {
 
         this.userToGroupsMap = userToGroupsMap;
-        this.machineUserToGroupsMap = machineUserToGroupsMap;
         this.adminUserMap = requireNonNull(adminUserMap);
         this.adminMachineUserMap = adminMachineUserMap;
         this.userMap = requireNonNull(userMap);
@@ -54,7 +52,7 @@ public class UmsState {
         userToGroupsMap.entrySet()
                 .forEach(e -> {
                     // TODO: list of all groups to be added and also membership
-                    FmsUser user = umsUserToUser(e.getKey());
+                    FmsUser user = umsUserToUser(userMap.get(e.getKey()));
                     e.getValue().forEach(g -> {
                         FmsGroup group = umsGroupToGroup(g);
                         crnToGroup.put(g.getCrn(), group);
@@ -81,17 +79,6 @@ public class UmsState {
                 builder.addMemberToGroup(adminGrpName, user.getName());
             });
 
-        machineUserToGroupsMap.entrySet()
-            .forEach(e -> {
-                FmsUser user = umsMachineUserToUser(e.getKey());
-                e.getValue().forEach(g -> {
-                    FmsGroup group = umsGroupToGroup(g);
-                    crnToGroup.put(g.getCrn(), group);
-                    builder.addMemberToGroup(group.getName(), user.getName());
-                    builder.addGroup(group);
-                });
-
-            });
         machineUserMap.entrySet()
                 .forEach(e -> {
                     FmsUser fmsUser = umsMachineUserToUser(e.getValue());
@@ -165,9 +152,7 @@ public class UmsState {
     public static class Builder {
         private Map<String, Group> groupMap = new HashMap<>();
 
-        private Map<User, List<Group>> userToGroupsMap = new HashMap<>();
-
-        private Map<MachineUser, List<Group>> machineUserToGroupsMap = new HashMap<>();
+        private Map<String, List<Group>> userToGroupsMap = new HashMap<>();
 
         private Map<String, User> userMap = new HashMap<>();
 
@@ -177,12 +162,8 @@ public class UmsState {
 
         private Map<String, MachineUser> machineUserMap = new HashMap<>();
 
-        public void addUserToGroupMap(Map<User, List<Group>> userToGroupsMap) {
+        public void addUserToGroupMap(Map<String, List<Group>> userToGroupsMap) {
             this.userToGroupsMap = userToGroupsMap;
-        }
-
-        public void addMachineUserToGroupMap(Map<MachineUser, List<Group>> machineUserToGroupsMap) {
-            this.machineUserToGroupsMap = machineUserToGroupsMap;
         }
 
         public void addGroup(Group group) {
@@ -223,7 +204,7 @@ public class UmsState {
         }
 
         public UmsState build() {
-            return new UmsState(userToGroupsMap, machineUserToGroupsMap, adminUserMap, adminMachineUserMap, userMap, machineUserMap);
+            return new UmsState(userToGroupsMap, adminUserMap, adminMachineUserMap, userMap, machineUserMap);
         }
     }
 }
