@@ -43,3 +43,48 @@ func TestListSdx(t *testing.T) {
 		}
 	}
 }
+
+func TestIfDatabaseNeeded(t *testing.T) {
+	sdxRequest := &sdxModel.SdxClusterRequest{
+		ClusterShape:     nil,
+		Environment:      nil,
+		Tags:             nil,
+		CloudStorage:     nil,
+		ExternalDatabase: nil,
+	}
+	setupExternalDbIfNeeded(true, false, &sdxRequest.ExternalDatabase)
+
+	if !*sdxRequest.ExternalDatabase.Create {
+		t.Errorf("external database not set")
+	}
+}
+
+func TestIfDatabaseNeededFalse(t *testing.T) {
+	sdxRequest := &sdxModel.SdxClusterRequest{
+		ClusterShape:     nil,
+		Environment:      nil,
+		Tags:             nil,
+		CloudStorage:     nil,
+		ExternalDatabase: nil,
+	}
+	setupExternalDbIfNeeded(false, true, &sdxRequest.ExternalDatabase)
+
+	if *sdxRequest.ExternalDatabase.Create {
+		t.Errorf("external database set and should not be")
+	}
+}
+
+func TestSetupCloudStorageIfNeeded(t *testing.T) {
+	sdxRequest := &sdxModel.SdxClusterRequest{
+		ClusterShape:     nil,
+		Environment:      nil,
+		Tags:             nil,
+		CloudStorage:     nil,
+		ExternalDatabase: nil,
+	}
+	setupCloudStorageIfNeeded("location", "instanceProfiule", sdxRequest)
+
+	if sdxRequest.CloudStorage == nil {
+		t.Errorf("CloudStorage was not set correctly")
+	}
+}

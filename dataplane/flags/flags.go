@@ -1298,7 +1298,14 @@ var (
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
 			Name:  "with-external-database",
-			Usage: "creates and external database server on the cloud provider",
+			Usage: "creates and external database server on the cloud provider(will be removed soon as its the default value)",
+		},
+	}
+	FlWithoutExternalDatabaseOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "without-external-database",
+			Usage: "skips the external database creation ",
 		},
 	}
 	FlDatabaseServerCreationFile = StringFlag{
