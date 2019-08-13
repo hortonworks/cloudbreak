@@ -34,6 +34,17 @@
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
+      "type": "HIVE_REPLICA_WAREHOUSE",
+      "propertyName": "hive.repl.replica.functions.root.dir",
+      "propertyFile": "hive-site",
+      "description": "Root directory on the replica warehouse where the repl sub-system will store jars from the primary warehouse",
+      "defaultPath": "{{{ defaultPath }}}/hive_replica_functions_dir",
+      "propertyDisplayName": "Hive Replica Warehouse Directory",
+      "relatedServices": ["HIVEMETASTORE"],
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
       "type": "HIVE_METASTORE_EXTERNAL_WAREHOUSE",
       "propertyName": "hive.metastore.warehouse.external.dir",
       "propertyFile": "hive-site",
