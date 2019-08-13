@@ -44,6 +44,7 @@ public abstract class DatabaseV4Base implements Serializable {
     private String connectionDriver;
 
     @ValidCrn
+    @NotNull
     @ApiModelProperty(Database.ENVIRONMENT_CRN)
     private String environmentCrn;
 

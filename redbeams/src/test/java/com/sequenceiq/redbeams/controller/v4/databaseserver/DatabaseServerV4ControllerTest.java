@@ -18,11 +18,11 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
+// import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
+// import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
 import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
@@ -226,26 +226,26 @@ public class DatabaseServerV4ControllerTest {
         assertEquals(2, responses.getResponses().size());
     }
 
-    @Test
-    public void testTestWithIdentifiers() {
-        when(service.testConnection(SERVER_CRN)).thenReturn("yeahhh");
-        DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
-        testRequest.setExistingDatabaseServerCrn(SERVER_CRN);
+    // @Test
+    // public void testTestWithIdentifiers() {
+    //     when(service.testConnection(SERVER_CRN)).thenReturn("yeahhh");
+    //     DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
+    //     testRequest.setExistingDatabaseServerCrn(SERVER_CRN);
 
-        DatabaseServerTestV4Response response = underTest.test(testRequest);
+    //     DatabaseServerTestV4Response response = underTest.test(testRequest);
 
-        assertEquals("yeahhh", response.getResult());
-    }
+    //     assertEquals("yeahhh", response.getResult());
+    // }
 
-    @Test
-    public void testTestWithServer() {
-        when(converterUtil.convert(request, DatabaseServerConfig.class)).thenReturn(server);
-        when(service.testConnection(server)).thenReturn("okayyy");
-        DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
-        testRequest.setDatabaseServer(request);
+    // @Test
+    // public void testTestWithServer() {
+    //     when(converterUtil.convert(request, DatabaseServerConfig.class)).thenReturn(server);
+    //     when(service.testConnection(server)).thenReturn("okayyy");
+    //     DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
+    //     testRequest.setDatabaseServer(request);
 
-        DatabaseServerTestV4Response response = underTest.test(testRequest);
+    //     DatabaseServerTestV4Response response = underTest.test(testRequest);
 
-        assertEquals("okayyy", response.getResult());
-    }
+    //     assertEquals("okayyy", response.getResult());
+    // }
 }
