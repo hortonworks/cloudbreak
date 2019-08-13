@@ -94,4 +94,13 @@ public interface CloudConnector<R> extends CloudPlatformAware {
     default IdentityService identityService() {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
+
+    /**
+     * Access to the {@link ObjectStorageConnector} object.
+     *
+     * @return the {@link ObjectStorageConnector} object
+     */
+    default ObjectStorageConnector objectStorage() {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 }

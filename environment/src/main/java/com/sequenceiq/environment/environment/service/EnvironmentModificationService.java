@@ -223,6 +223,10 @@ public class EnvironmentModificationService {
 
     private void editTelemetryIfChanged(Environment environment, EnvironmentEditDto editDto) {
         if (editDto.getTelemetry() != null) {
+            ValidationResult validationResult = environmentService.getValidatorService().validateTelemetryLoggingStorageLocation(environment);
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
             environment.setTelemetry(editDto.getTelemetry());
         }
     }
