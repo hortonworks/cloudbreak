@@ -4,12 +4,14 @@ import java.util.Optional;
 
 import org.springframework.security.core.Authentication;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
 import com.sequenceiq.cloudbreak.auth.security.CrnUser;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -42,13 +44,17 @@ public class UmsAuthenticationService implements AuthenticationService {
         CloudbreakUser cloudbreakUser;
         switch (crn.getResourceType()) {
             case USER:
-                UserManagementProto.User userInfo = umsClient.getUserDetails(userCrn, userCrn, Optional.ofNullable(requestId));
-                String userName = principal != null ? principal : userInfo.getEmail();
-                cloudbreakUser = new CloudbreakUser(userInfo.getUserId(), userCrn,
-                        userName, userInfo.getEmail(), crn.getAccountId());
+                if (InternalCrnBuilder.isInternalCrn(userCrn)) {
+                    return InternalCrnBuilder.createInternalCrnUser(Crn.fromString(userCrn));
+                } else {
+                    User userInfo = umsClient.getUserDetails(userCrn, userCrn, Optional.ofNullable(requestId));
+                    String userName = principal != null ? principal : userInfo.getEmail();
+                    cloudbreakUser = new CloudbreakUser(userInfo.getUserId(), userCrn,
+                            userName, userInfo.getEmail(), crn.getAccountId());
+                }
                 break;
             case MACHINE_USER:
-                UserManagementProto.MachineUser machineUserInfo = umsClient.getMachineUserDetails(userCrn, userCrn, Optional.ofNullable(requestId));
+                MachineUser machineUserInfo = umsClient.getMachineUserDetails(userCrn, userCrn, Optional.ofNullable(requestId));
                 String machineUserName = principal != null ? principal : machineUserInfo.getMachineUserName();
                 cloudbreakUser = new CloudbreakUser(machineUserInfo.getMachineUserId(), userCrn,
                         machineUserName, machineUserInfo.getMachineUserName(), crn.getAccountId());

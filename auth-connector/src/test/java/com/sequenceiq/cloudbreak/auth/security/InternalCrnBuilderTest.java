@@ -1,10 +1,12 @@
-package com.sequenceiq.cloudbreak.auth.altus;
+package com.sequenceiq.cloudbreak.auth.security;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
 public class InternalCrnBuilderTest {
 
