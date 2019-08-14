@@ -9,9 +9,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -62,13 +60,6 @@ public class DatabaseV4Controller extends NotificationController implements Data
         Set<RDSConfig> deleted = databaseService.deleteMultipleByNameFromWorkspace(names, workspaceId);
         notify(ResourceEvent.LDAP_DELETED);
         return new DatabaseV4Responses(converterUtil.convertAllAsSet(deleted, DatabaseV4Response.class));
-    }
-
-    @Override
-    public DatabaseTestV4Response test(Long workspaceId, DatabaseTestV4Request databaseTestV4Request) {
-        RDSConfig rdsConfig = converterUtil.convert(databaseTestV4Request.getDatabase(), RDSConfig.class);
-        String connectionResult = databaseService.testRdsConnection(workspaceId, databaseTestV4Request.getExistingDatabaseName(), rdsConfig);
-        return new DatabaseTestV4Response(connectionResult);
     }
 
     @Override

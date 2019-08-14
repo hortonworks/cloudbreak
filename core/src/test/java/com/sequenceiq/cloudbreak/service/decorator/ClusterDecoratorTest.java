@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
-import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -51,9 +50,6 @@ public class ClusterDecoratorTest {
 
     @Mock
     private ClusterService clusterService;
-
-    @Mock
-    private RdsConnectionValidator rdsConnectionValidator;
 
     @Mock
     private SharedServiceConfigProvider sharedServiceConfigProvider;
