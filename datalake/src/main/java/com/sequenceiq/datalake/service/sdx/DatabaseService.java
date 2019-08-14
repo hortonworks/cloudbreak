@@ -134,10 +134,10 @@ public class DatabaseService {
                             return AttemptResults.finishWith(rdsStatus);
                         } else {
                             if (failurecrit.apply(rdsStatus.getStatus())) {
-                                if (rdsStatus.getStatusReason() != null && rdsStatus.getStatusReason().startsWith("No databaseserver found with crn")) {
+                                if (rdsStatus.getStatusReason() != null && rdsStatus.getStatusReason().contains("does not exist")) {
                                     return AttemptResults.finishWith(null);
                                 }
-                                return AttemptResults.breakFor("Database operation failed " + sdxCluster.getEnvName());
+                                return AttemptResults.breakFor("Database operation failed " + sdxCluster.getEnvName() + " statusReason: " + rdsStatus.getStatusReason());
                             } else {
                                 return AttemptResults.justContinue();
                             }
