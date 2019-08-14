@@ -25,7 +25,7 @@ public class StackDownscaleValidatorServiceTest {
     private static final String INSTANCE_PUBLIC_IP = "2.2.2.2";
 
     private static final String AMBARI_SERVER_HOST_EXCEPTION_MESSAGE = String.format("Downscale for node [public IP: %s] is prohibited because it serves as "
-            + "a host the Ambari server", INSTANCE_PUBLIC_IP);
+            + "a host the Cluster Manager server", INSTANCE_PUBLIC_IP);
 
     private static final String ACCESS_DENIED_EXCEPTION_MESSAGE = String.format("Private stack (%s) is only modifiable by the owner.", STACK_ID);
 
@@ -37,7 +37,7 @@ public class StackDownscaleValidatorServiceTest {
 
     @Test
     public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenInstanceIsCoreTypeThenNoExceptionWouldInvoke() {
-        underTest.checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, CORE);
+        underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, CORE);
     }
 
     @Test
@@ -45,7 +45,7 @@ public class StackDownscaleValidatorServiceTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage(AMBARI_SERVER_HOST_EXCEPTION_MESSAGE);
 
-        underTest.checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY);
+        underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class StackDownscaleValidatorServiceTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage(AMBARI_SERVER_HOST_EXCEPTION_MESSAGE);
 
-        underTest.checkInstanceIsTheAmbariServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY_PRIMARY);
+        underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY_PRIMARY);
     }
 
     @Test
