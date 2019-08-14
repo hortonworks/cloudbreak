@@ -1,6 +1,15 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent.cloud;
 
+import java.nio.file.Paths;
+
+import org.apache.commons.lang3.StringUtils;
+
 public abstract class CloudStorageConfigGenerator<T extends CloudStorageConfig> {
+
+    private static final String CLUSTER_LOG_PREFIX = "cluster-logs";
+
+    public abstract String generateStoredLocation(String location, String clusterType,
+            String clusterName, String clusterId);
 
     public abstract T generateStorageConfig(String location);
 
@@ -14,5 +23,12 @@ public abstract class CloudStorageConfigGenerator<T extends CloudStorageConfig> 
             }
         }
         return input;
+    }
+
+    String resolveLogFolder(CloudStorageConfig cloudStorageConfig, String clusterType,
+            String clusterName, String clusterId) {
+        String folderPrefix = StringUtils.isNotEmpty(cloudStorageConfig.getFolderPrefix())
+                ? cloudStorageConfig.getFolderPrefix() : CLUSTER_LOG_PREFIX;
+        return Paths.get(folderPrefix, clusterType, String.format("%s_%s", clusterName, clusterId)).toString();
     }
 }

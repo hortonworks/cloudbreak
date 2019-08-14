@@ -46,7 +46,7 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.RANGER.getKnoxService());
+                && source.getGatewayView().getExposedServices().contains(ExposedService.RANGER.getKnoxService());
     }
 
 }

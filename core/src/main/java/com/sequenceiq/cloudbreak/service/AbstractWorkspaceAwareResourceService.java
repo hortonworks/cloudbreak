@@ -77,7 +77,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
             ConstraintViolationException cve = ThrowableUtil.getSpecificCauseRecursively(e, ConstraintViolationException.class);
             if (cve != null) {
                 String message = String.format("%s already exists with name '%s' in workspace %s",
-                        resource.getClass().getSimpleName().toLowerCase(), resource.getName(), resource.getWorkspace().getName());
+                        resource.getResourceName(), resource.getName(), resource.getWorkspace().getName());
                 throw new BadRequestException(message, e);
             }
             throw e;
@@ -88,7 +88,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     public T getByNameForWorkspace(String name, Workspace workspace) {
         Optional<T> object = repository().findByNameAndWorkspace(name, workspace);
         if (object.isEmpty()) {
-            throw new NotFoundException(String.format("No %s found with name '%s'", resource().getShortName(), name));
+            throw new NotFoundException(String.format("No resource found with name '%s'", name));
         }
         MDCBuilder.buildMdcContext(object.get());
         return object.get();
@@ -101,7 +101,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
                 results.stream().map(WorkspaceAwareResource::getName).collect(Collectors.toSet()));
 
         if (!notFound.isEmpty()) {
-            throw new NotFoundException(String.format("No %s(s) found with name(s) '%s'", resource().getShortName(),
+            throw new NotFoundException(String.format("No resource(s) found with name(s) '%s'",
                     notFound.stream().map(name -> '\'' + name + '\'').collect(Collectors.joining(", "))));
         }
 
@@ -112,7 +112,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     public T getByNameForWorkspaceId(String name, Long workspaceId) {
         Optional<T> object = repository().findByNameAndWorkspaceId(name, workspaceId);
         if (object.isEmpty()) {
-            throw new NotFoundException(String.format("No %s found with name '%s'", resource().getShortName(), name));
+            throw new NotFoundException(String.format("No resource found with name '%s'", name));
         }
         MDCBuilder.buildMdcContext(object.get());
         return object.get();
@@ -145,7 +145,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
 
     private T deleteInternal(T resource) {
         MDCBuilder.buildMdcContext(resource);
-        LOGGER.debug("Deleting {} with name: {}", resource().getReadableName(), resource.getName());
+        LOGGER.debug("Deleting {} with name: {}", resource.getResourceName(), resource.getName());
         prepareDeletion(resource);
         repository().delete(resource);
         return resource;

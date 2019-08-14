@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -82,7 +83,8 @@ public class ClusterUpscaleService {
     @Inject
     private KerberosConfigService kerberosConfigService;
 
-    public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged) throws CloudbreakException {
+    public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged)
+            throws CloudbreakException, ClusterClientInitException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Start adding cluster containers");
         Orchestrator orchestrator = stack.getOrchestrator();

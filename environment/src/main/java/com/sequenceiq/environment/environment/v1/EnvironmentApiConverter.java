@@ -41,6 +41,7 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 @Component
 public class EnvironmentApiConverter {
@@ -60,16 +61,20 @@ public class EnvironmentApiConverter {
 
     private final TunnelConverter tunnelConverter;
 
+    private final SdxEndpoint sdxEndpoint;
+
     public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
             RegionConverter regionConverter,
             CredentialToCredentialV1ResponseConverter credentialConverter,
             TelemetryApiConverter telemetryApiConverter,
-            TunnelConverter tunnelConverter) {
+            TunnelConverter tunnelConverter,
+            SdxEndpoint sdxEndpoint) {
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.regionConverter = regionConverter;
         this.credentialConverter = credentialConverter;
         this.telemetryApiConverter = telemetryApiConverter;
         this.tunnelConverter = tunnelConverter;
+        this.sdxEndpoint = sdxEndpoint;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -87,6 +92,7 @@ public class EnvironmentApiConverter {
                 .withRegions(request.getRegions())
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
                 .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
+                .withAdminGroupName(request.getAdminGroupName())
                 .withParameters(getIfNotNull(request.getAws(), this::awsParamsToParametersDto));
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
@@ -189,6 +195,7 @@ public class EnvironmentApiConverter {
                 .withTunnel(environmentDto.getTunnel())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
                 .withIdBrokerMappingSource(environmentDto.getIdBrokerMappingSource())
+                .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
@@ -209,6 +216,7 @@ public class EnvironmentApiConverter {
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
                 .withTunnel(environmentDto.getTunnel())
+                .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams));
@@ -267,7 +275,8 @@ public class EnvironmentApiConverter {
                 .withDescription(request.getDescription())
                 .withAccountId(threadBasedUserCrnProvider.getAccountId())
                 .withRegions(request.getRegions())
-                .withIdBrokerMappingSource(request.getIdBrokerMappingSource());
+                .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
+                .withAdminGroupName(request.getAdminGroupName());
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));

@@ -28,7 +28,7 @@ public class FreeIpaCreationTest extends AbstractIntegrationTest {
     @Description(
             given = "environment is present",
             when = "calling a freeipe creation",
-            then = "freeipa sould be available wit kerberos and ldap config")
+            then = "freeipa sould be available with kerberos and ldap config")
     public void testCreateFreeIpa(MockedTestContext testContext) {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
         DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();

@@ -10,9 +10,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-// import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.it.cloudbreak.assertion.database.DatabaseTestAssertion;
-import com.sequenceiq.it.cloudbreak.assertion.database.DatabaseTestTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -20,8 +18,9 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+
+// import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 
 public class DatabaseTest extends AbstractIntegrationTest {
 
@@ -90,26 +89,6 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    // TODO: Update when redbeams service is ready
-    @Test(dataProvider = DB_TYPE_PROVIDER, enabled = false)
-    public void testCreateDatabaseWithTypeAndTestConnection(
-            TestContext testContext,
-            DatabaseType type,
-            @Description TestCaseDescription testCaseDescription) {
-        String databaseName = resourcePropertyProvider().getName();
-        testContext
-                .given(DatabaseTestDto.class)
-                .withType(type.name())
-                .withName(databaseName)
-                .when(databaseTestClient.createV4(), RunningParameter.key(databaseName))
-                .when(databaseTestClient.listV4(), RunningParameter.key(databaseName))
-                .then(DatabaseTestAssertion.containsDatabaseName(databaseName, 1), RunningParameter.key(databaseName))
-                .given(DatabaseTestTestDto.class)
-                .withExistingName(databaseName)
-                .when(databaseTestClient.testV4(), RunningParameter.key(databaseName))
-                .validate();
-    }
-
     /*
     @Test(dataProvider = INVALID_ATTRIBUTE_PROVIDER)
     public void testCreateDatabaseWithInvalidAttribute(
@@ -160,23 +139,6 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .validate();
     }
     */
-
-    // TODO: Update when redbeams service is ready
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "calling test database endpoint with a non-existent database name",
-            then = "the test connection should return access denied")
-    public void testDatabaseTestConnectionWithNonExistingDbName(TestContext testContext) {
-        String generatedKey = resourcePropertyProvider().getName();
-
-        testContext
-                .given(DatabaseTestTestDto.class)
-                .withExistingName("aNonExistentDb")
-                .when(databaseTestClient.testV4(), RunningParameter.key(generatedKey))
-                .then(DatabaseTestTestAssertion.validConnectionTest(), RunningParameter.key(generatedKey))
-                .validate();
-    }
 
     @DataProvider(name = DB_TYPE_PROVIDER)
     public Object[][] provideTypes() {

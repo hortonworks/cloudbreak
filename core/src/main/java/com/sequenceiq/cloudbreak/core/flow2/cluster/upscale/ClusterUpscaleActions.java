@@ -378,7 +378,7 @@ public class ClusterUpscaleActions {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscalePostRecipesResult payload, Map<Object, Object> variables) {
-                clusterUpscaleFlowService.clusterUpscaleFinished(context.getStack(), payload.getHostGroupName());
+                clusterUpscaleFlowService.clusterUpscaleFinished(context.getStack(), payload.getHostGroupName(), context.isSinglePrimaryGateway());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context, FINALIZED_EVENT.event(), payload);
             }

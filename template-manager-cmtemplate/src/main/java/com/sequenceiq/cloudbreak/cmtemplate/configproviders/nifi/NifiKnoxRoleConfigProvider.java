@@ -39,7 +39,7 @@ public class NifiKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.NIFI.getKnoxService());
+                && source.getGatewayView().getExposedServices().contains(ExposedService.NIFI.getKnoxService());
     }
 
 }

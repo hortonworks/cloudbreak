@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
+import static com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider.RANGER_ADMIN_COMPONENT;
+import static com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY;
+import static com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider.RANGER_HTTPPORT_KEY;
+import static com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider.RANGER_SERVICE;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -83,8 +88,8 @@ public class AmbariDatalakeConfigProvider {
                 try {
                     DatalakeResources datalakeResources = datalakeResourcesService.findByDatalakeStackId(datalakeStack.getId()).orElse(null);
                     if (datalakeResources == null) {
-                        Map<String, Map<String, String>> serviceSecretParamMap = Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_SERVICE,
-                                Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY, cluster.getPassword()))));
+                        Map<String, Map<String, String>> serviceSecretParamMap = Map.ofEntries(Map.entry(RANGER_SERVICE,
+                                Map.ofEntries(Map.entry(RANGER_ADMIN_PWD_KEY, cluster.getPassword()))));
                         datalakeResources = collectDatalakeResources(datalakeStack, cluster, connector, serviceSecretParamMap);
                         datalakeResources.setDatalakeStackId(datalakeStack.getId());
                         datalakeResources.setEnvironmentCrn(datalakeStack.getEnvironmentCrn());
@@ -150,18 +155,31 @@ public class AmbariDatalakeConfigProvider {
 
     public SharedServiceConfigsView createSharedServiceConfigView(DatalakeResources datalakeResources) {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
-        sharedServiceConfigsView.setRangerAdminPassword((String) datalakeResources.getServiceDescriptorMap()
-                .get(ServiceDescriptorDefinitionProvider.RANGER_SERVICE).getBlueprintSecretParams().getMap()
-                .get(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY));
+        if (!CollectionUtils.isEmpty(datalakeResources.getServiceDescriptorMap())) {
+            sharedServiceConfigsView.setRangerAdminPassword((String) datalakeResources.getServiceDescriptorMap()
+                    .get(RANGER_SERVICE)
+                    .getBlueprintSecretParams()
+                    .getMap()
+                    .get(RANGER_ADMIN_PWD_KEY));
+
+            sharedServiceConfigsView.setRangerAdminPort((String) datalakeResources.getServiceDescriptorMap()
+                    .get(RANGER_SERVICE)
+                    .getBlueprintParams()
+                    .getMap()
+                    .getOrDefault(RANGER_HTTPPORT_KEY, DEFAULT_RANGER_PORT));
+
+            sharedServiceConfigsView.setRangerAdminHost((String) datalakeResources.getServiceDescriptorMap()
+                    .get(RANGER_SERVICE)
+                    .getComponentsHosts()
+                    .getMap()
+                    .get(RANGER_ADMIN_COMPONENT));
+        }
         sharedServiceConfigsView.setAttachedCluster(true);
         sharedServiceConfigsView.setDatalakeCluster(false);
         sharedServiceConfigsView.setDatalakeClusterManagerIp(datalakeResources.getDatalakeAmbariIp());
         sharedServiceConfigsView.setDatalakeClusterManagerFqdn(datalakeResources.getDatalakeAmbariFqdn());
         sharedServiceConfigsView.setDatalakeComponents(datalakeResources.getDatalakeComponentSet());
-        sharedServiceConfigsView.setRangerAdminPort((String) datalakeResources.getServiceDescriptorMap().get(ServiceDescriptorDefinitionProvider.RANGER_SERVICE)
-                .getBlueprintParams().getMap().getOrDefault(ServiceDescriptorDefinitionProvider.RANGER_HTTPPORT_KEY, DEFAULT_RANGER_PORT));
-        sharedServiceConfigsView.setRangerAdminHost((String) datalakeResources.getServiceDescriptorMap().get(ServiceDescriptorDefinitionProvider.RANGER_SERVICE)
-                .getComponentsHosts().getMap().get(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_COMPONENT));
+
         return sharedServiceConfigsView;
     }
 

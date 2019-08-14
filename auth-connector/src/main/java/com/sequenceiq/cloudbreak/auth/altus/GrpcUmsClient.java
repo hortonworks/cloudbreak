@@ -179,7 +179,7 @@ public class GrpcUmsClient {
             String generatedRequestId = requestId.orElse(UUID.randomUUID().toString());
             LOGGER.debug("Creating machine user {} for {} using request ID {}", machineUserName, userCrn, generatedRequestId);
             client.createMachineUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
-            MachineUser machineUser = client.getMachineUserForUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
+            MachineUser machineUser = client.getMachineUserWithRetry(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
             LOGGER.debug("Machine User information retrieved for userCrn: {}", machineUser.getCrn());
             return machineUser;
         }
@@ -439,6 +439,14 @@ public class GrpcUmsClient {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             client.notifyResourceDeleted(requestId.orElse(UUID.randomUUID().toString()), resourceCrn);
+        }
+    }
+
+    @Cacheable(cacheNames = "umsRolesCache", key = "{ #accountId }")
+    public List<UserManagementProto.Role> listRoles(String actorCrn, String accountId, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            return client.listRoles(requestId.orElse(UUID.randomUUID().toString()), accountId).getRoleList();
         }
     }
 

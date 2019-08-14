@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
@@ -7,6 +8,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 
 import io.swagger.annotations.ApiModel;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(value = "SimpleEnvironmentV1Response")
 public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
@@ -42,6 +44,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
         private Long created;
 
         private Tunnel tunnel;
+
+        private String adminGroupName;
 
         private AwsEnvironmentParameters aws;
 
@@ -118,6 +122,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withAdminGroupName(String adminGroupName) {
+            this.adminGroupName = adminGroupName;
+            return this;
+        }
+
         public Builder withAws(AwsEnvironmentParameters aws) {
             this.aws = aws;
             return this;
@@ -140,6 +149,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setTelemetry(telemetry);
             simpleEnvironmentResponse.setTunnel(tunnel);
             simpleEnvironmentResponse.setAws(aws);
+            simpleEnvironmentResponse.setAdminGroupName(adminGroupName);
             return simpleEnvironmentResponse;
         }
     }

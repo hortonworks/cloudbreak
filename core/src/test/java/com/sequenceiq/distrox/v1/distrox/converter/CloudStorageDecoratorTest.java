@@ -1,50 +1,57 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
-class CloudStorageLocationsToCloudStorageConverterTest {
+@ExtendWith(MockitoExtension.class)
+class CloudStorageDecoratorTest {
 
-    private CloudStorageLocationsToCloudStorageConverter underTest;
+    private static final String BLUEPRINT_NAME = "blueprintName";
 
-    @BeforeEach
-    void setUp() {
-        underTest = new CloudStorageLocationsToCloudStorageConverter();
-    }
+    private static final String CLUSTER_NAME = "clusterName";
+
+    @Mock
+    private BlueprintService blueprintService;
+
+    @Mock
+    private SdxClientService sdxClientService;
+
+    @InjectMocks
+    private CloudStorageDecorator underTest;
 
     @Test
-    void testConvertWhenEnvironmentDoesNotHaveTelemetry() {
-        CloudStorageRequest result = underTest.convert(null, new DetailedEnvironmentResponse());
+    void testConvertWhenEnvironmentAndStorageRequestAreNull() {
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, null, null);
 
         assertNull(result);
     }
 
     @Test
-    void testConvertWhenEnvironmentsTelemetryDoesNotHaveLogging() {
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setTelemetry(new TelemetryResponse());
+    void testConvertWhenEnvironmentIsNullAndCloudStorageRequestIsNot() {
+        CloudStorageRequest request = new CloudStorageRequest();
 
-        CloudStorageRequest result = underTest.convert(null, environment);
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, request, null);
 
-        assertNull(result);
+        assertNotNull(result);
     }
 
     @Test
@@ -54,7 +61,7 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         telemetry.setLogging(new LoggingResponse());
         environment.setTelemetry(telemetry);
 
-        CloudStorageRequest result = underTest.convert(null, environment);
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, null, environment);
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
@@ -67,7 +74,7 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         telemetry.setLogging(new LoggingResponse());
         environment.setTelemetry(telemetry);
 
-        CloudStorageRequest result = underTest.convert(new HashSet<>(), environment);
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, null, environment);
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
@@ -86,9 +93,11 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         StorageLocationBase storageLocationBase = new StorageLocationBase();
         storageLocationBase.setType(eStorageLocationType);
         storageLocationBase.setValue(eStorageLocationValue);
-        Set<StorageLocationBase> storageLocations = Set.of(storageLocationBase);
+        List<StorageLocationBase> storageLocations = List.of(storageLocationBase);
+        CloudStorageRequest request = new CloudStorageRequest();
+        request.setLocations(storageLocations);
 
-        CloudStorageRequest result = underTest.convert(storageLocations, environment);
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, request, environment);
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
@@ -102,26 +111,13 @@ class CloudStorageLocationsToCloudStorageConverterTest {
         StorageLocationBase storageLocationBase = new StorageLocationBase();
         storageLocationBase.setType(eStorageLocationType);
         storageLocationBase.setValue(eStorageLocationValue);
-        Set<StorageLocationBase> storageLocations = Set.of(storageLocationBase);
+        List<StorageLocationBase> storageLocations = List.of(storageLocationBase);
+        CloudStorageRequest request = new CloudStorageRequest();
+        request.setLocations(storageLocations);
 
-        CloudStorageRequest result = underTest.convert(storageLocations, new DetailedEnvironmentResponse());
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, request, new DetailedEnvironmentResponse());
 
         assertNotNull(result);
         assertTrue(result.getLocations().stream().anyMatch(loc -> eStorageLocationType.equals(loc.getType()) && eStorageLocationValue.equals(loc.getValue())));
-    }
-
-    @Test
-    void testConvertWhenEnvironmentHasS3GuardConfigured() {
-        String expectedDynameTableName = "MYDYNAMODBTABLENAME";
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        AwsEnvironmentParameters awsEnvironmentParameters = AwsEnvironmentParameters.builder().
-                withS3guard(S3GuardRequestParameters.builder().withDynamoDbTableName(expectedDynameTableName).build())
-                .build();
-        environment.setAws(awsEnvironmentParameters);
-
-        CloudStorageRequest result = underTest.convert(null, environment);
-
-        assertNotNull(result);
-        assertEquals(expectedDynameTableName, result.getAws().getS3Guard().getDynamoTableName());
     }
 }

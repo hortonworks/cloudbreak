@@ -140,6 +140,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return subnetId == null ? SUBNET_DEFAULT_ID : subnetId;
     }
 
+    public Set<String> getSubnetIDs() {
+        Set<String> subnetIDAsSet = new HashSet<>();
+        subnetIDAsSet.add(getSubnetId());
+        return subnetIDAsSet;
+    }
+
     public String getInternetGatewayId() {
         String gatewayId = getTestParameter().get("mockInternetGatewayId");
         return gatewayId == null ? INTERNET_GATEWAY_ID : gatewayId;
@@ -217,6 +223,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
+        return network.withNetworkCIDR(getSubnetCIDR())
+                .withSubnetIDs(getSubnetIDs());
+    }
+
+    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.MOCK;
     }
@@ -241,12 +253,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
-        return environmentNetwork.withNetworkCIDR(getSubnetCIDR())
-                .withSubnetIDs(getSubnetIDs());
-    }
-
-    @Override
     public Integer gatewayPort(StackTestDtoBase stackEntity) {
         MockedTestContext mockedTestContext = (MockedTestContext) stackEntity.getTestContext();
         return mockedTestContext.getSparkServer().getPort();
@@ -261,12 +267,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public String getBlueprintName() {
         return DEFAULT_CLUSTER_DEFINTION_NAME;
-    }
-
-    public Set<String> getSubnetIDs() {
-        Set<String> subnetIDAsSet = new HashSet<String>();
-        subnetIDAsSet.add(getSubnetId());
-        return subnetIDAsSet;
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -18,12 +19,12 @@ public interface ClusterSetupService {
 
     String BEAN_POST_TAG = "PRE_CLUSTER";
 
-    void waitForServer() throws CloudbreakException;
+    void waitForServer() throws CloudbreakException, ClusterClientInitException;
 
     Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
             Set<HostMetadata> hostsInCluster, String sdxContext, String sdxStackCrn, Telemetry telemetry, KerberosConfig kerberosConfig);
 
-    void waitForHosts(Set<HostMetadata> hostsInCluster);
+    void waitForHosts(Set<HostMetadata> hostsInCluster) throws ClusterClientInitException;
 
     void waitForServices(int requestId) throws CloudbreakException;
 

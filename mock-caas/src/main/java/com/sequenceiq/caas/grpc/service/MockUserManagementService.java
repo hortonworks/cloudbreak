@@ -12,12 +12,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -74,7 +74,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final int GROUPS_PER_ACCOUNT = 5;
 
-    private static final Random RANDOM = new Random();
+    private static final int FIRST_GROUP = 0;
 
     private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
 
@@ -168,10 +168,9 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Override
     public void getRights(GetRightsRequest request, StreamObserver<GetRightsResponse> responseObserver) {
         String actorCrn = request.getActorCrn();
-        String[] splittedCrn = actorCrn.split(":");
-        String accountId = splittedCrn[4];
+        String accountId = Crn.fromString(actorCrn).getAccountId();
         List<Group> groups = List.copyOf(getOrCreateGroups(accountId));
-        Group group = groups.get(RANDOM.nextInt(groups.size()));
+        Group group = groups.get(FIRST_GROUP);
         responseObserver.onNext(
                 GetRightsResponse.newBuilder()
                         .addGroupCrn(group.getCrn()).build());
@@ -213,9 +212,11 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         responseObserver.onCompleted();
     }
 
-    private Collection<Group> getOrCreateGroups(String accountId) {
+    private List<Group> getOrCreateGroups(String accountId) {
         accountGroups.computeIfAbsent(accountId, this::createGroups);
-        return accountGroups.get(accountId).values();
+        List<Group> groups = new ArrayList<>(accountGroups.get(accountId).values());
+        groups.sort(Comparator.comparing(Group::getGroupName));
+        return groups;
     }
 
     private Group getOrCreateGroup(String groupCrn) {
@@ -240,7 +241,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private Group createGroup(String accountId, String groupName) {
         String groupId = UUID.randomUUID().toString();
-        String groupCrn = createCrn(accountId, Crn.Service.IAM, Crn.ResourceType.GROUP, groupId);
+        String groupCrn = createCrn(accountId, Crn.Service.IAM, Crn.ResourceType.GROUP, groupId).toString();
         return Group.newBuilder()
                 .setGroupId(groupId)
                 .setCrn(groupCrn)
@@ -267,18 +268,23 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             String[] splittedCrn = machineUserIdOrCrn.split(":");
             String userName;
             String accountId;
+            String crnString;
             if (splittedCrn.length > 1) {
                 userName = splittedCrn[6];
                 accountId = splittedCrn[4];
+                crnString = machineUserIdOrCrn;
             } else {
                 userName = machineUserIdOrCrn;
                 accountId = UUID.randomUUID().toString();
+                Crn crn = createCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn(), Crn.ResourceType.MACHINE_USER, userName);
+                accountId = crn.getAccountId();
+                crnString = crn.toString();
             }
             responseObserver.onNext(
                     ListMachineUsersResponse.newBuilder()
                             .addMachineUser(MachineUser.newBuilder()
                                     .setMachineUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
-                                    .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
+                                    .setCrn(crnString)
                                     .setWorkloadUsername(sanitizeWorkloadUsername(userName))
                                     .build())
                             .build());
@@ -465,6 +471,12 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         }
     }
 
+    @Override
+    public void listRoles(UserManagementProto.ListRolesRequest request, StreamObserver<UserManagementProto.ListRolesResponse> responseObserver) {
+        responseObserver.onNext(UserManagementProto.ListRolesResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
     private String getLicense() {
         String license = "";
         try {
@@ -503,31 +515,30 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     private UserManagementProto.ResourceAssignee createResourceAssignee(String resourceCrn) {
         return UserManagementProto.ResourceAssignee.newBuilder()
                 .setAssigneeCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
-                .setResourceRoleCrn(createCrn(resourceCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager"))
+                .setResourceRoleCrn(createCrn(resourceCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
                 .build();
     }
 
     private UserManagementProto.ResourceAssignment createResourceAssigment(String assigneeCrn) {
-        String resourceCrn = createCrn(assigneeCrn, Crn.ResourceType.WORKSPACE, Crn.fromString(assigneeCrn).getAccountId());
+        String resourceCrn = createCrn(assigneeCrn, Crn.ResourceType.WORKSPACE, Crn.fromString(assigneeCrn).getAccountId()).toString();
         return UserManagementProto.ResourceAssignment.newBuilder()
                 .setResourceCrn(resourceCrn)
-                .setResourceRoleCrn(createCrn(assigneeCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager"))
+                .setResourceRoleCrn(createCrn(assigneeCrn, Crn.ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
                 .build();
     }
 
-    private String createCrn(String baseCrn, Crn.ResourceType resourceType, String resource) {
+    private Crn createCrn(String baseCrn, Crn.ResourceType resourceType, String resource) {
         Crn crn = Crn.fromString(baseCrn);
         return createCrn(crn.getAccountId(), crn.getService(), resourceType, resource);
     }
 
-    private String createCrn(String accountId, Crn.Service service, Crn.ResourceType resourceType, String resource) {
+    private Crn createCrn(String accountId, Crn.Service service, Crn.ResourceType resourceType, String resource) {
         return Crn.builder()
                 .setAccountId(accountId)
                 .setService(service)
                 .setResourceType(resourceType)
                 .setResource(resource)
-                .build()
-                .toString();
+                .build();
     }
 
     @VisibleForTesting

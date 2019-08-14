@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
-import static java.util.stream.Collectors.toSet;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
@@ -148,12 +145,6 @@ public class SharedServiceConfigProvider {
 
     private void setupRds(Cluster requestedCluster, DatalakeResources datalakeResources) {
         if (requestedCluster.getRdsConfigs().isEmpty() && datalakeResources.getRdsConfigs() != null) {
-            requestedCluster.getRdsConfigs().addAll(
-                    datalakeResources.getRdsConfigs()
-                            .stream()
-                            .filter(rdsConfig -> ResourceStatus.USER_MANAGED == rdsConfig.getStatus())
-                            .collect(toSet()));
-
             requestedCluster.setRdsConfigs(remoteDataContextWorkaroundService.prepareRdsConfigs(requestedCluster, datalakeResources));
         }
     }

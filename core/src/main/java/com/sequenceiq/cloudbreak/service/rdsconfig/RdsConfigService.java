@@ -13,18 +13,14 @@ import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -32,7 +28,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 
 @Service
 public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSConfig> {
@@ -44,9 +39,6 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
 
     @Inject
     private ClusterService clusterService;
-
-    @Inject
-    private RdsConnectionValidator rdsConnectionValidator;
 
     @Inject
     private TransactionService transactionService;
@@ -72,7 +64,7 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
         MDCBuilder.buildMdcContext(rdsConfig);
         prepareDeletion(rdsConfig);
         if (!isRdsInUseByOthers(rdsConfig)) {
-            LOGGER.debug("Archiving {} with name: {}", resource().getReadableName(), rdsConfig.getName());
+            LOGGER.debug("Archiving RDS config with name: {}", rdsConfig.getName());
             rdsConfig.setArchived(true);
             rdsConfig.setDeletionTimestamp(System.currentTimeMillis());
             rdsConfig.unsetRelationsToEntitiesToBeDeleted();
@@ -147,43 +139,6 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
 
     public Set<Cluster> getClustersUsingResource(RDSConfig rdsConfig) {
         return clusterService.findByRdsConfig(rdsConfig.getId());
-    }
-
-    @Override
-    public AuthorizationResource resource() {
-        return AuthorizationResource.DATAHUB;
-    }
-
-    public String testRdsConnection(Long workspaceId, String existingRDSConfigName, RDSConfig existingRds) {
-        if (existingRDSConfigName != null) {
-            return testRdsConnection(existingRDSConfigName, workspaceId);
-        } else if (existingRds != null) {
-            return testRdsConnection(existingRds);
-        }
-        throw new BadRequestException("Either an Database id, name or an Database request needs to be specified in the request. ");
-    }
-
-    private String testRdsConnection(String existingRDSConfigName, Long workspaceId) {
-        User user = getLoggedInUser();
-        Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        try {
-            RDSConfig config = getByNameForWorkspace(existingRDSConfigName, workspace);
-            return testRdsConnection(resolveVaultValues(config));
-        } catch (AccessDeniedException | NotFoundException e) {
-            return "access is denied";
-        }
-    }
-
-    private String testRdsConnection(RDSConfig rdsConfig) {
-        try {
-            if (rdsConfig == null) {
-                return "access is denied";
-            }
-            rdsConnectionValidator.validateRdsConnection(rdsConfig);
-            return "connected";
-        } catch (RuntimeException e) {
-            return e.getMessage();
-        }
     }
 
     public RDSConfig resolveVaultValues(RDSConfig config) {

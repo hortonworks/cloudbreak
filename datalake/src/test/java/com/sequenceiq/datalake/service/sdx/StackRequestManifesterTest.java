@@ -31,6 +31,8 @@ public class StackRequestManifesterTest {
 
     private static final String BAD_ENVIRONMENT_CRN = "crn:myBadEnvironment";
 
+    private static final String STACK_NAME = "myStack";
+
     private static final String CLOUD_PLATFORM_AWS = CloudPlatform.AWS.name();
 
     private static final String CLOUD_PLATFORM_AZURE = CloudPlatform.AZURE.name();
@@ -75,6 +77,7 @@ public class StackRequestManifesterTest {
         MockitoAnnotations.initMocks(this);
         clusterV4Request = new ClusterV4Request();
         when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        when(stackV4Request.getName()).thenReturn(STACK_NAME);
         cloudStorage = new CloudStorageRequest();
         when(idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, ENVIRONMENT_CRN, Optional.empty())).thenReturn(mappingsConfig);
         when(idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, BAD_ENVIRONMENT_CRN, Optional.empty()))

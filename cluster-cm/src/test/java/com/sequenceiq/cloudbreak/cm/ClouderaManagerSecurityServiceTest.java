@@ -23,6 +23,7 @@ import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.util.UsersResourceApiProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -64,7 +65,8 @@ public class ClouderaManagerSecurityServiceTest {
     }
 
     @Test
-    public void testChangeOriginalCredentialsAndCreateCloudbreakUserWhenLdapIsConfiguredAndAdminUserIsProvided() throws CloudbreakException, ApiException {
+    public void testChangeOriginalCredentialsAndCreateCloudbreakUserWhenLdapIsConfiguredAndAdminUserIsProvided()
+            throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
         createUnderTest("admin");
         UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
         ApiUser2List oldUserList = createApiUser2List();
@@ -91,7 +93,7 @@ public class ClouderaManagerSecurityServiceTest {
 
     @Test
     public void testChangeOriginalCredentialsAndCreateCloudbreakUserWhenLdapIsNotConfiguredAndTheGivenUserIsNotAdmin()
-            throws CloudbreakException, ApiException {
+            throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
         createUnderTest("ambariUser");
         UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
         UsersResourceApi newUsersResourceApi = mock(UsersResourceApi.class);
@@ -128,7 +130,8 @@ public class ClouderaManagerSecurityServiceTest {
     }
 
     @Test
-    public void testChangeOriginalCredentialsAndCreateCloudbreakUserWhenLdapIsConfiguredAndTheGivenUserIsNotAdmin() throws CloudbreakException, ApiException {
+    public void testChangeOriginalCredentialsAndCreateCloudbreakUserWhenLdapIsConfiguredAndTheGivenUserIsNotAdmin()
+            throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
         createUnderTest("ambariUser");
         UsersResourceApi usersResourceApi = mock(UsersResourceApi.class);
         UsersResourceApi newUsersResourceApi = mock(UsersResourceApi.class);

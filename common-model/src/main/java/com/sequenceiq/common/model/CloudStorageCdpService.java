@@ -9,11 +9,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public enum CloudStorageCdpService {
 
-    ZEPPELIN_NOTEBOOK_S3,
     ZEPPELIN_NOTEBOOK,
     YARN_LOG,
     HIVE_METASTORE_WAREHOUSE,
     HIVE_METASTORE_EXTERNAL_WAREHOUSE,
+    HIVE_REPLICA_WAREHOUSE,
     RANGER_AUDIT;
 
     @JsonIgnore

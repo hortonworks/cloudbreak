@@ -98,7 +98,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     private static final String TEST_ENVIRONMENT_CRN = "envCrn";
 
-    private static final Map<String, String> MOCK_GROUP_MAPPINGS = Map.of("mockGroup", "mockGroupRole");
+    private static final String ADMIN_GROUP_NAME = "mockAdmins";
+
+    private static final Map<String, String> MOCK_GROUP_MAPPINGS = Map.of(ADMIN_GROUP_NAME, "mockGroupRole");
 
     private static final Map<String, String> MOCK_USER_MAPPINGS = Map.of("mockUser", "mockUserRole");
 
@@ -225,6 +227,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
         when(credentialConverter.convert(credentialResponse)).thenReturn(credential);
         when(environmentResponse.getCredential()).thenReturn(credentialResponse);
+        when(environmentResponse.getAdminGroupName()).thenReturn(ADMIN_GROUP_NAME);
         when(environmentResponse.getIdBrokerMappingSource()).thenReturn(IdBrokerMappingSource.MOCK);
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
@@ -232,7 +235,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(credentialClientService.getByCrn(TEST_CREDENTIAL_NAME)).thenReturn(credential);
         when(credential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(placementSettings.getRegion()).thenReturn(REGION);
-        when(awsMockAccountMappingService.getGroupMappings(REGION, credential)).thenReturn(MOCK_GROUP_MAPPINGS);
+        when(awsMockAccountMappingService.getGroupMappings(REGION, credential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
         when(awsMockAccountMappingService.getUserMappings(REGION, credential)).thenReturn(MOCK_USER_MAPPINGS);
     }
 

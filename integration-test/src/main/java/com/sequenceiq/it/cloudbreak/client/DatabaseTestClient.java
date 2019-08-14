@@ -8,9 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.database.DatabaseCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.DatabaseCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.DatabaseDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.DatabaseListAction;
-import com.sequenceiq.it.cloudbreak.action.v4.database.DatabaseTestConnectionAction;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestTestDto;
 
 @Service
 public class DatabaseTestClient {
@@ -25,10 +23,6 @@ public class DatabaseTestClient {
 
     public Action<DatabaseTestDto, CloudbreakClient> listV4() {
         return new DatabaseListAction();
-    }
-
-    public Action<DatabaseTestTestDto, CloudbreakClient> testV4() {
-        return new DatabaseTestConnectionAction();
     }
 
     public Action<DatabaseTestDto, CloudbreakClient> createIfNotExistV4() {

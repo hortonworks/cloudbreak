@@ -89,7 +89,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     private static final String TEST_CLOUD_PLATFORM = "AWS";
 
-    private static final Map<String, String> MOCK_GROUP_MAPPINGS = Map.of("mockGroup", "mockGroupRole");
+    private static final String ADMIN_GROUP_NAME = "mockAdmins";
+
+    private static final Map<String, String> MOCK_GROUP_MAPPINGS = Map.of(ADMIN_GROUP_NAME, "mockGroupRole");
 
     private static final Map<String, String> MOCK_USER_MAPPINGS = Map.of("mockUser", "mockUserRole");
 
@@ -205,10 +207,11 @@ public class StackToTemplatePreparationObjectConverterTest {
         DetailedEnvironmentResponse environmentResponse = Builder.builder()
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
                 .withCredential(new CredentialResponse())
+                .withAdminGroupName(ADMIN_GROUP_NAME)
                 .build();
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(credentialConverter.convert(any(CredentialResponse.class))).thenReturn(credential);
-        when(awsMockAccountMappingService.getGroupMappings(REGION, credential)).thenReturn(MOCK_GROUP_MAPPINGS);
+        when(awsMockAccountMappingService.getGroupMappings(REGION, credential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
         when(awsMockAccountMappingService.getUserMappings(REGION, credential)).thenReturn(MOCK_USER_MAPPINGS);
         when(ldapConfigService.get(anyString())).thenReturn(Optional.empty());
     }

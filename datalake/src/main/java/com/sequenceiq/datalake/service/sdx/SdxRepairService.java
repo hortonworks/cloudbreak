@@ -53,8 +53,14 @@ public class SdxRepairService {
     @Inject
     private SdxService sdxService;
 
-    public void triggerRepair(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
+    public void triggerRepairByCrn(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
+        MDCBuilder.buildMdcContext(cluster);
+        sdxReactorFlowManager.triggerSdxRepairFlow(cluster.getId(), clusterRepairRequest);
+    }
+
+    public void triggerRepairByName(String userCrn, String clusterName, SdxRepairRequest clusterRepairRequest) {
+        SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
         MDCBuilder.buildMdcContext(cluster);
         sdxReactorFlowManager.triggerSdxRepairFlow(cluster.getId(), clusterRepairRequest);
     }
@@ -93,7 +99,7 @@ public class SdxRepairService {
     public void waitCloudbreakClusterRepair(Long id, PollingConfig pollingConfig) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                    .stopIfException(false)
+                    .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> checkClusterStatusDuringRepair(sdxCluster));
             sdxCluster.setStatus(SdxClusterStatus.RUNNING);

@@ -50,7 +50,7 @@ public class FreeIpaClientFactory {
     }
 
     public FreeIpaClient getFreeIpaClientForStack(Stack stack) throws FreeIpaClientException {
-        LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getId());
+        LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getResourceCrn());
 
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(
@@ -61,7 +61,8 @@ public class FreeIpaClientFactory {
             return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
                     httpClientConfig, stack.getGatewayport().toString()).build();
         } catch (Exception e) {
-            throw new FreeIpaClientException("Couldn't build FreeIPA client: " + e.getLocalizedMessage(), e);
+            throw new FreeIpaClientException("Couldn't build FreeIPA client. "
+                    + "Check if the FreeIPA security rules have not changed and the instance is in running state. " + e.getLocalizedMessage(), e);
         }
     }
 

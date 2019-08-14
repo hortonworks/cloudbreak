@@ -8,7 +8,7 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions.NetworkModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class NetworkV4Base extends ProviderParametersBase {
+public class NetworkV4StackBase extends ProviderParametersBase {
 
     @ApiModelProperty(NetworkModelDescriptions.AWS_PARAMETERS)
     private AwsNetworkV4Parameters aws;

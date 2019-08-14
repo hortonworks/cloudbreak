@@ -9,13 +9,13 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Par
 import org.junit.Before;
 import org.junit.Test;
 
-public class DatabaseServerV4BaseTest {
+public class DatabaseServerV4StackBaseTest {
 
-    private DatabaseServerV4Base underTest;
+    private DatabaseServerV4StackBase underTest;
 
     @Before
     public void setUp() throws Exception {
-        underTest = new DatabaseServerV4Base();
+        underTest = new DatabaseServerV4StackBase();
     }
 
     @Test

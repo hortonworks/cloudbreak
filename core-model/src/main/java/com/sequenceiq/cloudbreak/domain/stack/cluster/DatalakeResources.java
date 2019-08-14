@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 
 @Entity
 public class DatalakeResources implements ProvisionEntity, WorkspaceAwareResource {
@@ -86,11 +85,6 @@ public class DatalakeResources implements ProvisionEntity, WorkspaceAwareResourc
     @Override
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
-    }
-
-    @Override
-    public AuthorizationResource getResource() {
-        return AuthorizationResource.DATAHUB;
     }
 
     public Long getDatalakeStackId() {

@@ -30,9 +30,12 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -40,6 +43,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
+import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
@@ -103,7 +107,7 @@ public class SdxService {
         }
     }
 
-    public SdxCluster getByAccountIdAndSdxName(String userCrn, String name) {
+    public SdxCluster getSdxByNameInAccount(String userCrn, String name) {
         LOGGER.info("Searching for SDX cluster by name {}", name);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name);
@@ -132,6 +136,7 @@ public class SdxService {
         LOGGER.info("Creating SDX cluster with name {}", name);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
         validateInternalSdxRequest(stackV4Request, sdxClusterRequest.getClusterShape());
+        validateCloudStorageRequest(sdxClusterRequest.getCloudStorage());
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setInitiatorUserCrn(userCrn);
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
@@ -143,9 +148,14 @@ public class SdxService {
         sdxCluster.setCreateDatabase(sdxClusterRequest.getExternalDatabase() != null && sdxClusterRequest.getExternalDatabase().getCreate());
 
         DetailedEnvironmentResponse environment = getEnvironment(userCrn, sdxClusterRequest);
+        createDatabaseByDefaultForAWS(sdxClusterRequest, sdxCluster, environment);
         validateDatabaseRequest(sdxCluster, environment);
         sdxCluster.setEnvName(environment.getName());
         sdxCluster.setEnvCrn(environment.getCrn());
+        if (isCloudStorageConfigured(sdxClusterRequest)) {
+            sdxCluster.setCloudStorageBaseLocation(sdxClusterRequest.getCloudStorage().getBaseLocation());
+            sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
+        }
 
         setTagsSafe(sdxClusterRequest, sdxCluster);
         stackV4Request = prepareStackRequest(sdxClusterRequest, stackV4Request, sdxCluster, environment);
@@ -167,6 +177,57 @@ public class SdxService {
         return sdxCluster;
     }
 
+    private void createDatabaseByDefaultForAWS(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
+        if ("AWS".equals(environment.getCloudPlatform()) &&
+                (sdxClusterRequest.getExternalDatabase() == null ||
+                        sdxClusterRequest.getExternalDatabase().getCreate() == null)) {
+            sdxCluster.setCreateDatabase(true);
+        }
+    }
+
+    private void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage) {
+        if (cloudStorage != null) {
+            ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
+            validationBuilder.ifError(() -> cloudStorage.getFileSystemType() == null, "'fileSystemType' must be set in 'cloudStorage'!");
+
+            if (StringUtils.isEmpty(cloudStorage.getBaseLocation())) {
+                validationBuilder.error("'baseLocation' must be set in 'cloudStorage'!");
+            } else {
+                if (FileSystemType.S3.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.S3.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'S3'!", FileSystemType.S3.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getS3() == null, "'s3' must be set if 'fileSystemType' is 'S3'!");
+                }
+                if (FileSystemType.ADLS.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'ADLS'!", FileSystemType.ADLS.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getAdls() == null, "'adls' must be set if 'fileSystemType' is 'ADLS'!");
+                }
+                if (FileSystemType.ADLS_GEN_2.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS_GEN_2.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'ADLS_GEN_2'!",
+                                    FileSystemType.ADLS_GEN_2.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getAdlsGen2() == null, "'adlsGen2' must be set if 'fileSystemType' is 'ADLS_GEN_2'!");
+                }
+                if (FileSystemType.WASB.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.WASB.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'WASB'", FileSystemType.WASB.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getWasb() == null, "'wasb' must be set if 'fileSystemType' is 'WASB'!");
+                }
+                if (FileSystemType.GCS.equals(cloudStorage.getFileSystemType())) {
+                    validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.GCS.getProtocol()),
+                            String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'GCS'!", FileSystemType.GCS.getProtocol()));
+                    validationBuilder.ifError(() -> cloudStorage.getGcs() == null, "'gcs' must be set if 'fileSystemType' is 'GCS'!");
+                }
+            }
+
+            ValidationResult validationResult = validationBuilder.build();
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
+        }
+    }
+
     private void validateDatabaseRequest(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         if (sdxCluster.isCreateDatabase() && !"AWS".equals(environment.getCloudPlatform())) {
             String message = String.format("Cannot create external database for sdx: %s, for now only AWS is supported", sdxCluster.getClusterName());
@@ -178,24 +239,25 @@ public class SdxService {
     private StackV4Request prepareStackRequest(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request,
             SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         stackV4Request = getStackRequest(stackV4Request, sdxClusterRequest.getClusterShape(), environment.getCloudPlatform());
-        if (isCloudStorageConfigured(sdxClusterRequest)) {
-            CloudStorageRequest cloudStorageRequest =
-                    cloudStorageManifester.initCloudStorageRequest(environment,
-                            stackV4Request.getCluster().getBlueprintName(), sdxCluster, sdxClusterRequest);
-            stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
-            if (environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null) {
-                TelemetryRequest telemetryRequest = new TelemetryRequest();
-                LoggingRequest loggingRequest = new LoggingRequest();
-                loggingRequest.setS3(environment.getTelemetry().getLogging().getS3());
-                loggingRequest.setWasb(environment.getTelemetry().getLogging().getWasb());
-                loggingRequest.setStorageLocation(environment.getTelemetry().getLogging().getStorageLocation());
-                telemetryRequest.setLogging(loggingRequest);
-                telemetryRequest.setReportDeploymentLogs(
-                        environment.getTelemetry().getReportDeploymentLogs());
-                stackV4Request.setTelemetry(telemetryRequest);
-            }
-        }
+        CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initCloudStorageRequest(environment,
+                stackV4Request.getCluster(), sdxCluster, sdxClusterRequest);
+        stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
+        prepareTelemetryForStack(stackV4Request, environment);
         return stackV4Request;
+    }
+
+    private void prepareTelemetryForStack(StackV4Request stackV4Request, DetailedEnvironmentResponse environment) {
+        if (environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null) {
+            TelemetryRequest telemetryRequest = new TelemetryRequest();
+            LoggingRequest loggingRequest = new LoggingRequest();
+            loggingRequest.setS3(environment.getTelemetry().getLogging().getS3());
+            loggingRequest.setWasb(environment.getTelemetry().getLogging().getWasb());
+            loggingRequest.setStorageLocation(environment.getTelemetry().getLogging().getStorageLocation());
+            telemetryRequest.setLogging(loggingRequest);
+            telemetryRequest.setReportDeploymentLogs(
+                    environment.getTelemetry().getReportDeploymentLogs());
+            stackV4Request.setTelemetry(telemetryRequest);
+        }
     }
 
     private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
@@ -263,9 +325,9 @@ public class SdxService {
     }
 
     public List<SdxCluster> listSdx(String userCrn, String envName) {
-        LOGGER.info("Listing SDX clusters by environment name {}", envName);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         if (envName != null) {
+            LOGGER.info("Listing SDX clusters by environment name {}", envName);
             return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
         } else {
             return sdxClusterRepository.findByAccountIdAndDeletedIsNull(accountIdFromCrn);
@@ -293,6 +355,7 @@ public class SdxService {
         sdxCluster.setStatus(SdxClusterStatus.DELETE_REQUESTED);
         sdxClusterRepository.save(sdxCluster);
         sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
+        sdxReactorFlowManager.cancelRunningFlows(sdxCluster.getId());
         LOGGER.info("SDX delete triggered: {}", sdxCluster.getClusterName());
     }
 

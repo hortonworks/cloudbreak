@@ -77,7 +77,7 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
     private boolean isHadoopHttpFilterInitializationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.NAMENODE.getKnoxService());
+                && source.getGatewayView().getExposedServices().contains(ExposedService.NAMENODE.getKnoxService());
     }
 
     private boolean isS3FileSystemConfigured(TemplatePreparationObject source) {

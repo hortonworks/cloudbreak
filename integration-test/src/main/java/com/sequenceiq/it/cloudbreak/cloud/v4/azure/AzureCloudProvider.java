@@ -144,6 +144,21 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
+        return network.withNetworkCIDR(getSubnetCIDR())
+                .withSubnetIDs(getSubnetIDs())
+                .withAzure(environmentNetworkParameters());    }
+
+    private EnvironmentNetworkAzureParams environmentNetworkParameters() {
+        EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
+        environmentNetworkAzureParams.setNetworkId(getNetworkId());
+        environmentNetworkAzureParams.setNoFirewallRules(getNoFirewallRules());
+        environmentNetworkAzureParams.setNoPublicIp(getNoPublicIp());
+        environmentNetworkAzureParams.setResourceGroupName(getResourceGroupName());
+        return environmentNetworkAzureParams;
+    }
+
+    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }
@@ -157,21 +172,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
         String sshPublicKey = commonCloudProperties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
-    }
-
-    @Override
-    public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
-        return environmentNetwork.withNetworkCIDR(getSubnetCIDR())
-                .withSubnetIDs(getSubnetIDs())
-                .withAzure(environmentNetworkParameters());    }
-
-    private EnvironmentNetworkAzureParams environmentNetworkParameters() {
-        EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
-        environmentNetworkAzureParams.setNetworkId(getNetworkId());
-        environmentNetworkAzureParams.setNoFirewallRules(getNoFirewallRules());
-        environmentNetworkAzureParams.setNoPublicIp(getNoPublicIp());
-        environmentNetworkAzureParams.setResourceGroupName(getResourceGroupName());
-        return environmentNetworkAzureParams;
     }
 
     public String getNetworkId() {

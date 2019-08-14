@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
@@ -65,7 +66,7 @@ public class ClouderaManagerLdapServiceTest {
     private HttpClientConfig httpClientConfig;
 
     @Before
-    public void init() {
+    public void init() throws ClouderaManagerClientInitException {
         User user = new User();
         stack = new Stack();
         stack.setCreator(user);
@@ -83,7 +84,7 @@ public class ClouderaManagerLdapServiceTest {
     }
 
     @Test
-    public void testSetupLdapWithoutGroupMapping() throws ApiException {
+    public void testSetupLdapWithoutGroupMapping() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
         LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList());
@@ -94,7 +95,7 @@ public class ClouderaManagerLdapServiceTest {
     }
 
     @Test
-    public void testSetupLdapWithGroupMapping() throws ApiException {
+    public void testSetupLdapWithGroupMapping() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
         LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
@@ -112,7 +113,7 @@ public class ClouderaManagerLdapServiceTest {
     }
 
     @Test
-    public void testSetupLdapWithNoRoleAdmin() throws ApiException {
+    public void testSetupLdapWithNoRoleAdmin() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
         LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
@@ -124,7 +125,7 @@ public class ClouderaManagerLdapServiceTest {
     }
 
     @Test
-    public void testSetupLdapWithoutLdap() throws ApiException {
+    public void testSetupLdapWithoutLdap() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig, null);

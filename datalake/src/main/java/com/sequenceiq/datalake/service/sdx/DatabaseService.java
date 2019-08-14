@@ -6,6 +6,7 @@ import java.util.function.Function;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
@@ -48,14 +49,24 @@ public class DatabaseService {
 
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env, String requestId) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
-        DatabaseServerStatusV4Response resp = redbeamsClient
-                .withCrn(threadBasedUserCrnProvider.getUserCrn())
-                .databaseServerV4Endpoint().create(getDatabaseRequest(env));
-            sdxCluster.setDatabaseCrn(resp.getResourceCrn());
-            sdxCluster.setStatus(SdxClusterStatus.EXTERNAL_DATABASE_CREATION_IN_PROGRESS);
-            sdxClusterRepository.save(sdxCluster);
-        return waitAndGetDatabase(sdxCluster, resp.getResourceCrn(),
-                Status::isAvailable, Status.CREATE_FAILED::equals, requestId);
+        String dbResourceCrn;
+        if (dbHasBeenCreatedPreviously(sdxCluster)) {
+            dbResourceCrn = sdxCluster.getDatabaseCrn();
+        } else {
+            dbResourceCrn = redbeamsClient
+                    .withCrn(threadBasedUserCrnProvider.getUserCrn())
+                    .databaseServerV4Endpoint().create(getDatabaseRequest(env))
+                    .getResourceCrn();
+            sdxCluster.setDatabaseCrn(dbResourceCrn);
+        }
+        sdxCluster.setStatus(SdxClusterStatus.EXTERNAL_DATABASE_CREATION_IN_PROGRESS);
+        sdxClusterRepository.save(sdxCluster);
+        return waitAndGetDatabase(sdxCluster, dbResourceCrn,
+                Status::isAvailable, status -> status.isDeleteInProgressOrCompleted() || Status.CREATE_FAILED.equals(status), requestId);
+    }
+
+    private boolean dbHasBeenCreatedPreviously(SdxCluster sdxCluster) {
+        return Strings.isNotEmpty(sdxCluster.getDatabaseCrn());
     }
 
     private void saveStatus(SdxCluster cluster, SdxClusterStatus status) {
@@ -84,8 +95,8 @@ public class DatabaseService {
         return req;
     }
 
-    private DatabaseServerV4Request getDatabaseServerRequest(DetailedEnvironmentResponse env) {
-        DatabaseServerV4Request req = new DatabaseServerV4Request();
+    private DatabaseServerV4StackRequest getDatabaseServerRequest(DetailedEnvironmentResponse env) {
+        DatabaseServerV4StackRequest req = new DatabaseServerV4StackRequest();
         req.setInstanceType("db.m3.medium");
         req.setDatabaseVendor("postgres");
         req.setStorageSize(STORAGE_SIZE);
@@ -110,7 +121,7 @@ public class DatabaseService {
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn, PollingConfig pollingConfig,
             Function<Status, Boolean> exitcrit, Function<Status, Boolean> failurecrit, String requestId) {
         return Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(false)
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> {
                     try {

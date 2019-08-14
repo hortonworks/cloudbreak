@@ -175,7 +175,8 @@
                 <#else>
                 "VPCSecurityGroups": [{ "Ref": "VPCSecurityGroup" }]
                 </#if>
-            }
+            },
+            "DeletionPolicy": "Delete"
         }
   },
   "Outputs" : {

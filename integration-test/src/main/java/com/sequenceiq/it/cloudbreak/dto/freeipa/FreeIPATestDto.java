@@ -62,15 +62,17 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()))
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
+
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
-                .withFreeIPA("ipatest.local", "ipaserver", "admin1234");
+                .withFreeIPA("ipatest.local", "ipaserver", "admin1234", "admins");
     }
 
-    private FreeIPATestDto withFreeIPA(String domain, String hostname, String adminPassword) {
+    private FreeIPATestDto withFreeIPA(String domain, String hostname, String adminPassword, String adminGroupName) {
         FreeIpaServerRequest request = new FreeIpaServerRequest();
         request.setDomain(domain);
         request.setHostname(hostname);
         request.setAdminPassword(adminPassword);
+        request.setAdminGroupName(adminGroupName);
         getRequest().setFreeIpa(request);
         return this;
     }

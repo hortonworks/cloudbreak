@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -35,10 +34,8 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -62,9 +59,6 @@ public class RdsConfigServiceTest {
 
     @Mock
     private RdsConfigRepository rdsConfigRepository;
-
-    @Mock
-    private RdsConnectionValidator rdsConnectionValidator;
 
     @Mock
     private WorkspaceService workspaceService;
@@ -176,54 +170,6 @@ public class RdsConfigServiceTest {
         Cluster cluster2 = new Cluster();
         cluster2.setName("ClusterWithRDS");
         when(clusterService.findByRdsConfig(anyLong())).thenReturn(Sets.newHashSet(cluster1, cluster2));
-    }
-
-    @Test
-    public void testRdsConnectionTestByNullRdsConfig() {
-        doNothing().when(rdsConnectionValidator).validateRdsConnection(any());
-        thrown.expect(BadRequestException.class);
-
-        String result = underTest.testRdsConnection(1L, null, null);
-
-        assertEquals("access is denied", result);
-    }
-
-    @Test
-    public void testRdsConnectionTestByExistingRdsConfig() {
-        doNothing().when(rdsConnectionValidator).validateRdsConnection(any());
-
-        String result = underTest.testRdsConnection(1L, null, testRdsConfig);
-
-        assertEquals("connected", result);
-    }
-
-    @Test
-    public void testRdsConnectionTestWithException() {
-        String testErrorString = "Test error";
-        doThrow(new BadRequestException(testErrorString)).when(rdsConnectionValidator).validateRdsConnection(any());
-
-        String result = underTest.testRdsConnection(1L, null, testRdsConfig);
-
-        assertEquals(testErrorString, result);
-    }
-
-    @Test
-    public void testRdsConnectionTestByName() {
-        when(rdsConfigRepository.findByNameAndWorkspaceId(any(), any())).thenReturn(Optional.ofNullable(testRdsConfig));
-        doNothing().when(rdsConnectionValidator).validateRdsConnection(any());
-
-        String result = underTest.testRdsConnection(1L, TEST_RDS_CONFIG_NAME, null);
-
-        assertEquals("connected", result);
-    }
-
-    @Test
-    public void testRdsConnectionTestByNameWithException() {
-        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(defaultWorkspace.getId()))).thenReturn(Optional.empty());
-
-        String result = underTest.testRdsConnection(1L, TEST_RDS_CONFIG_NAME, null);
-
-        assertEquals("access is denied", result);
     }
 
     @Test

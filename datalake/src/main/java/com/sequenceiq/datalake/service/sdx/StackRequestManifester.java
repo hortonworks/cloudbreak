@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -237,12 +237,13 @@ public class StackRequestManifester {
     }
 
     void setupCloudStorageAccountMapping(StackV4Request stackRequest, String environmentCrn, IdBrokerMappingSource mappingSource, String cloudPlatform) {
+        String stackName = stackRequest.getName();
         CloudStorageRequest cloudStorage = stackRequest.getCluster().getCloudStorage();
         if (cloudStorage != null && cloudStorage.getAccountMapping() == null) {
             // In case of SdxClusterRequest with cloud storage, or SdxInternalClusterRequest with cloud storage but missing "accountMapping" property,
             // getAccountMapping() == null means we need to fetch mappings from IDBMMS.
             if (mappingSource == IdBrokerMappingSource.IDBMMS) {
-                LOGGER.info("Fetching account mappings from IDBMMS for environment {}", environmentCrn);
+                LOGGER.info("Fetching account mappings from IDBMMS associated with environment {} for stack {}.", environmentCrn, stackName);
                 // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
                 MappingsConfig mappingsConfig = idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
                 AccountMappingBase accountMapping = new AccountMappingBase();
@@ -250,13 +251,13 @@ public class StackRequestManifester {
                 accountMapping.setUserMappings(mappingsConfig.getActorMappings());
                 cloudStorage.setAccountMapping(accountMapping);
             } else {
-                LOGGER.info("IDBMMS usage is disabled for environment {}. Proceeding with {} mappings.", environmentCrn,
-                        mappingSource == IdBrokerMappingSource.MOCK && CloudPlatform.AWS.name().equals(cloudPlatform) ? "mock" : "missing");
+                LOGGER.info("IDBMMS usage is disabled for environment {}. Proceeding with {} mappings for stack {}.", environmentCrn,
+                        mappingSource == IdBrokerMappingSource.MOCK && CloudPlatform.AWS.name().equals(cloudPlatform) ? "mock" : "missing", stackName);
             }
         } else {
             // getAccountMapping() != null is possible only in case of SdxInternalClusterRequest, in which case the user-given values will be honored.
-            LOGGER.info("{} for environment {}.", cloudStorage == null ? "Cloud storage is disabled" : "Applying user-provided mappings",
-                    environmentCrn);
+            LOGGER.info("{} for stack {} in environment {}.", cloudStorage == null ? "Cloud storage is disabled" : "Applying user-provided mappings",
+                    stackName, environmentCrn);
         }
     }
 

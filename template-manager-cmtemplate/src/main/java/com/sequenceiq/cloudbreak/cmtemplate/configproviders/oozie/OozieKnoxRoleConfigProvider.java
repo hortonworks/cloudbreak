@@ -45,7 +45,7 @@ public class OozieKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.OOZIE_UI.getKnoxService());
+                && source.getGatewayView().getExposedServices().contains(ExposedService.OOZIE_UI.getKnoxService());
     }
 
 }

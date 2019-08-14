@@ -47,7 +47,7 @@ public class EnvironmentService {
         if (sdxClusterOptional.isPresent()) {
             SdxCluster sdxCluster = sdxClusterOptional.get();
             DetailedEnvironmentResponse environmentResponse = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                    .stopIfException(false)
+                    .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> {
                         MDCBuilder.addRequestIdToMdcContext(requestId);

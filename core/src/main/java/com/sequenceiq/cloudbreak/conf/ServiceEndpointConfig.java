@@ -47,8 +47,17 @@ public class ServiceEndpointConfig {
     @Value("${cb.redbeams.contextPath}")
     private String redbeamsContextPath;
 
-    @Value("${cb.freeipa.serviceid:}")
+    @Value("${cb.redbeams.serviceid:}")
     private String redbeamsServiceId;
+
+    @Value("${cb.sdx.url}")
+    private String sdxServiceUrl;
+
+    @Value("${cb.sdx.contextPath}")
+    private String sdxContextPath;
+
+    @Value("${cb.sdx.serviceid:}")
+    private String sdxServiceId;
 
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
@@ -73,5 +82,10 @@ public class ServiceEndpointConfig {
     @Bean
     public String redbeamsServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveUrl(redbeamsipaServiceUrl + redbeamsContextPath, "http", redbeamsServiceId);
+    }
+
+    @Bean
+    public String sdxServerUrl() throws ServiceAddressResolvingException {
+        return serviceAddressResolver().resolveUrl(sdxServiceUrl + sdxContextPath, "http", sdxServiceId);
     }
 }

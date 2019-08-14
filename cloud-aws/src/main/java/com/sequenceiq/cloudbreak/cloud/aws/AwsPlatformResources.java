@@ -40,6 +40,7 @@ import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.amazonaws.services.ec2.model.DescribeRegionsResult;
+import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
@@ -47,6 +48,7 @@ import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
 import com.amazonaws.services.ec2.model.KeyPairInfo;
+import com.amazonaws.services.ec2.model.RouteTable;
 import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Tag;
@@ -114,6 +116,8 @@ public class AwsPlatformResources implements PlatformResources {
 
     private static final int UNAUTHORIZED = 403;
 
+    private static final String OPEN_CIDR_BLOCK = "0.0.0.0/0";
+
     @Inject
     private AwsClient awsClient;
 
@@ -122,6 +126,9 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Inject
     private AwsDefaultZoneProvider awsDefaultZoneProvider;
+
+    @Inject
+    private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
 
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
@@ -254,9 +261,10 @@ public class AwsPlatformResources implements PlatformResources {
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
         AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), region.value());
 
+        DescribeRouteTablesResult describeRouteTablesResult = ec2Client.describeRouteTables();
+
         //create vpc filter view
         PlatformResourceVpcFilterView filter = new PlatformResourceVpcFilterView(filters);
-
         DescribeVpcsRequest describeVpcsRequest = new DescribeVpcsRequest();
         // If the filtervalue is provided then we should filter only for those vpc
         if (!Strings.isNullOrEmpty(filter.getVpcId())) {
@@ -273,6 +281,7 @@ public class AwsPlatformResources implements PlatformResources {
             properties.put("state", vpc.getState());
 
             for (Subnet subnet : awsSubnets) {
+                boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnet.getSubnetId());
                 Optional<String> subnetName = getName(subnet.getTags());
                 subnets.add(
                         new CloudSubnet(
@@ -280,7 +289,10 @@ public class AwsPlatformResources implements PlatformResources {
                                 subnetName.orElse(subnet.getSubnetId()),
                                 subnet.getAvailabilityZone(),
                                 subnet.getCidrBlock(),
-                                !subnet.isMapPublicIpOnLaunch()));
+                                !subnet.isMapPublicIpOnLaunch(),
+                                subnet.getMapPublicIpOnLaunch(),
+                                hasInternetGateway)
+                );
             }
 
             Optional<String> name = getName(vpc.getTags());
@@ -292,6 +304,17 @@ public class AwsPlatformResources implements PlatformResources {
         }
         result.put(region.value(), cloudNetworks);
         return new CloudNetworks(result);
+    }
+
+    private Optional<RouteTable> getRouteTableForSubnet(DescribeRouteTablesResult describeRouteTablesResult, Subnet subnet) {
+        List<RouteTable> routeTables = describeRouteTablesResult.getRouteTables();
+        return routeTables.stream().filter(rt -> {
+            return rt.getAssociations().stream().anyMatch(rta -> subnet.getSubnetId().equals(rta.getSubnetId()));
+        }).findFirst();
+    }
+
+    private boolean hasInternetGateway(RouteTable rt) {
+        return rt.getRoutes().stream().anyMatch(route -> route.getGatewayId() != null && OPEN_CIDR_BLOCK.equals(route.getDestinationCidrBlock()));
     }
 
     private Optional<String> getName(List<Tag> tags) {

@@ -6,7 +6,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -33,11 +32,6 @@ public class ClusterTemplateView extends CompactView {
 
     @OneToOne
     private StackApiView stackTemplate;
-
-    @Override
-    public AuthorizationResource getResource() {
-        return AuthorizationResource.DATAHUB;
-    }
 
     public ResourceStatus getStatus() {
         return status;

@@ -10,25 +10,23 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 
 public class UsersStateDifference {
     private static final Logger LOGGER = LoggerFactory.getLogger(UsersStateDifference.class);
 
-    private Set<Group> groupsToAdd;
+    private Set<FmsGroup> groupsToAdd;
 
-    private Set<User> usersToAdd;
+    private Set<FmsUser> usersToAdd;
 
-    private Set<Group> groupsToRemove;
+    private Set<FmsGroup> groupsToRemove;
 
-    private Set<User> usersToRemove;
+    private Set<FmsUser> usersToRemove;
 
     private Multimap<String, String> groupMembershipToAdd;
 
     private Multimap<String, String> groupMembershipToRemove;
 
-    public UsersStateDifference(Set<Group> groupsToAdd, Set<User> usersToAdd, Set<Group> groupsToRemove, Set<User> usersToRemove,
+    public UsersStateDifference(Set<FmsGroup> groupsToAdd, Set<FmsUser> usersToAdd, Set<FmsGroup> groupsToRemove, Set<FmsUser> usersToRemove,
             Multimap<String, String> groupMembershipToAdd, Multimap<String, String> groupMembershipToRemove) {
         this.groupsToAdd = requireNonNull(groupsToAdd);
         this.usersToAdd = requireNonNull(usersToAdd);
@@ -38,19 +36,19 @@ public class UsersStateDifference {
         this.groupMembershipToRemove = requireNonNull(groupMembershipToRemove);
     }
 
-    public Set<Group> getGroupsToAdd() {
+    public Set<FmsGroup> getGroupsToAdd() {
         return groupsToAdd;
     }
 
-    public Set<User> getUsersToAdd() {
+    public Set<FmsUser> getUsersToAdd() {
         return usersToAdd;
     }
 
-    public Set<Group> getGroupsToRemove() {
+    public Set<FmsGroup> getGroupsToRemove() {
         return groupsToRemove;
     }
 
-    public Set<User> getUsersToRemove() {
+    public Set<FmsUser> getUsersToRemove() {
         return usersToRemove;
     }
 

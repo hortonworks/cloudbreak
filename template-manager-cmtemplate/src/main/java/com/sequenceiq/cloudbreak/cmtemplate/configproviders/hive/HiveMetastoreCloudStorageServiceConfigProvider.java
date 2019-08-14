@@ -16,13 +16,17 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class HiveMetastoreCloudStorageServiceConfigProvider implements CmTemplateComponentConfigProvider {
 
+    public static final String HIVE_SERVICE_CONFIG_SAFETY_VALVE = "hive_service_replication_config_safety_valve";
+
     public static final String HMS_METASTORE_DIR = "hive.metastore.warehouse.dir";
 
     public static final String HMS_METASTORE_EXTERNAL_DIR = "hive.metastore.warehouse.external.dir";
 
-    private static final String HMS_METASTORE_DIR_TEMPLATE_PARAM = "hive_warehouse_directory";
+    public static final String HMS_METASTORE_REPLICA_DIR = "hive.repl.replica.functions.root.dir";
 
-    private static final String HMS_METASTORE_EXTERNAL_DIR_TEMPLATE_PARAM = "hive_warehouse_external_directory";
+    public static final String HMS_METASTORE_DIR_TEMPLATE_PARAM = "hive_warehouse_directory";
+
+    public static final String HMS_METASTORE_EXTERNAL_DIR_TEMPLATE_PARAM = "hive_warehouse_external_directory";
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
@@ -32,6 +36,11 @@ public class HiveMetastoreCloudStorageServiceConfigProvider implements CmTemplat
 
         ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_EXTERNAL_DIR)
                 .ifPresent(location -> hmsConfigs.add(config(HMS_METASTORE_EXTERNAL_DIR_TEMPLATE_PARAM, location.getValue())));
+
+
+        ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_REPLICA_DIR)
+                .ifPresent(location -> hmsConfigs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE,
+                        ConfigUtils.getSafetyValveProperty(HMS_METASTORE_REPLICA_DIR, location.getValue()))));
 
         return hmsConfigs;
     }

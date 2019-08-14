@@ -1,21 +1,22 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
@@ -23,6 +24,9 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractWorkspaceAwareResourceServiceTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private AbstractWorkspaceAwareResourceService<TestWorkspaceAwareResource> underTest;
@@ -38,7 +42,6 @@ public class AbstractWorkspaceAwareResourceServiceTest {
         // The mock service is the object under test. Mock methods of the abstract
         // class that are not under test here.
         when(underTest.repository()).thenReturn(testRepository);
-        when(underTest.resource()).thenReturn(AuthorizationResource.DATAHUB);
 
         // Have the mock call the real methods in the abstract class that are
         // under test.
@@ -46,6 +49,8 @@ public class AbstractWorkspaceAwareResourceServiceTest {
         when(underTest.delete(any(Set.class))).thenCallRealMethod();
         when(underTest.deleteMultipleByNameFromWorkspace(any(Set.class), any(Long.class))).thenCallRealMethod();
         when(underTest.getByNamesForWorkspaceId(any(Set.class), any(Long.class))).thenCallRealMethod();
+        when(underTest.deleteByNameFromWorkspace(anyString(), any(Long.class))).thenCallRealMethod();
+        when(underTest.getByNameForWorkspaceId(anyString(), any(Long.class))).thenCallRealMethod();
     }
 
     @Test
@@ -73,18 +78,26 @@ public class AbstractWorkspaceAwareResourceServiceTest {
 
     @Test
     public void testMultiDeleteNotFound() {
-        try {
-            TestWorkspaceAwareResource r1 = new TestWorkspaceAwareResource(1L, workspace, "name2");
-            Set<String> names = ImmutableSet.of("badname1", "name2", "badname3");
+        TestWorkspaceAwareResource r1 = new TestWorkspaceAwareResource(1L, workspace, "name2");
+        Set<String> names = ImmutableSet.of("badname1", "name2", "badname3");
 
-            when(testRepository.findByNameInAndWorkspaceId(names, 1L))
-                    .thenReturn(ImmutableSet.of(r1));
-            underTest.deleteMultipleByNameFromWorkspace(names, 1L);
-            fail("Expected a NotFoundException");
-        } catch (NotFoundException e) {
-            assertTrue(e.getMessage().contains("badname1") && e.getMessage().contains("badname3")
-                    && !e.getMessage().contains("name2"));
-        }
+        when(testRepository.findByNameInAndWorkspaceId(names, 1L))
+                .thenReturn(ImmutableSet.of(r1));
+
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("No resource(s) found with name(s) ''badname1', 'badname3''");
+
+        underTest.deleteMultipleByNameFromWorkspace(names, 1L);
+    }
+
+    @Test
+    public void testNotFoundErrorMessage() {
+        when(testRepository.findByNameAndWorkspaceId(anyString(), any())).thenReturn(Optional.empty());
+
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage("No resource found with name 'badname1'");
+
+        underTest.deleteByNameFromWorkspace("badname1", 1L);
     }
 
     private static class TestWorkspaceAwareResource implements WorkspaceAwareResource {
@@ -119,11 +132,6 @@ public class AbstractWorkspaceAwareResourceServiceTest {
         @Override
         public void setWorkspace(Workspace workspace) {
             this.workspace = workspace;
-        }
-
-        @Override
-        public AuthorizationResource getResource() {
-            return AuthorizationResource.DATAHUB;
         }
 
     }

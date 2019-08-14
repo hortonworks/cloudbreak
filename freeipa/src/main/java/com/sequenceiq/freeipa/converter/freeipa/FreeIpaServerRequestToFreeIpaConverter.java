@@ -14,6 +14,7 @@ public class FreeIpaServerRequestToFreeIpaConverter implements Converter<FreeIpa
         freeIpa.setAdminPassword(source.getAdminPassword());
         freeIpa.setDomain(source.getDomain());
         freeIpa.setHostname(source.getHostname());
+        freeIpa.setAdminGroupName(source.getAdminGroupName());
         return freeIpa;
     }
 }

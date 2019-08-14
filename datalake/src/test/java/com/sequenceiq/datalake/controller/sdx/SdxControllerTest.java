@@ -77,7 +77,7 @@ class SdxControllerTest {
     @Test
     void getTest() {
         SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.getByAccountIdAndSdxName(anyString(), anyString())).thenReturn(sdxCluster);
+        when(sdxService.getSdxByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
 
         SdxClusterResponse sdxClusterResponse = sdxController.get("test-sdx-cluster");
         assertEquals("test-sdx-cluster", sdxClusterResponse.getName());

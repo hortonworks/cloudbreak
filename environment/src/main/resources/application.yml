@@ -64,6 +64,7 @@ environment:
     supportedPlatforms: AWS,AZURE
   sdx:
     url: http://localhost:8086
+    contextPath: /dl
   db:
     host: localhost
     port: 5432
@@ -77,6 +78,7 @@ environment:
   enabledplatforms: AWS, AZURE, YARN
   tunnel:
     default: DIRECT
+  admin.group.default.prefix: cdp_env_admin_
 
 cb:
   authentication:

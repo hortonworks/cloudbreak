@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDBStackV4Parameters;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDBStackV4Parameters;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
@@ -37,11 +37,11 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
     @Valid
     @ApiModelProperty(DBStack.NETWORK)
-    private NetworkV4Request network;
+    private NetworkV4StackRequest network;
 
     @Valid
     @ApiModelProperty(value = DBStack.DATABASE_SERVER, required = true)
-    private DatabaseServerV4Request databaseServer;
+    private DatabaseServerV4StackRequest databaseServer;
 
     @ApiModelProperty(DBStack.AWS_PARAMETERS)
     private AwsDBStackV4Parameters aws;
@@ -65,19 +65,19 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
         this.environmentCrn = environmentCrn;
     }
 
-    public NetworkV4Request getNetwork() {
+    public NetworkV4StackRequest getNetwork() {
         return network;
     }
 
-    public void setNetwork(NetworkV4Request network) {
+    public void setNetwork(NetworkV4StackRequest network) {
         this.network = network;
     }
 
-    public DatabaseServerV4Request getDatabaseServer() {
+    public DatabaseServerV4StackRequest getDatabaseServer() {
         return databaseServer;
     }
 
-    public void setDatabaseServer(DatabaseServerV4Request databaseServer) {
+    public void setDatabaseServer(DatabaseServerV4StackRequest databaseServer) {
         this.databaseServer = databaseServer;
     }
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -22,8 +23,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -62,10 +65,14 @@ public class CloudStorageManifesterTest {
         thrown.expectMessage("instance profile must be defined for S3");
         SdxCluster sdxCluster = new SdxCluster();
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setCloudStorage(new SdxCloudStorageRequest());
+        SdxCloudStorageRequest sdxCloudStorageRequest = new SdxCloudStorageRequest();
+        sdxCloudStorageRequest.setBaseLocation("s3a://example-path");
+        sdxClusterRequest.setCloudStorage(sdxCloudStorageRequest);
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        clusterV4Request.setBlueprintName(exampleBlueprintName);
         environment.setCloudPlatform("AWS");
-        underTest.initCloudStorageRequest(environment, exampleBlueprintName, sdxCluster, sdxClusterRequest);
+        underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest);
     }
 
     @Test
@@ -76,7 +83,7 @@ public class CloudStorageManifesterTest {
         sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setClusterName("sdx-cluster");
         SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("example-path");
+        cloudStorageRequest.setBaseLocation("s3a://example-path");
         cloudStorageRequest.setFileSystemType(FileSystemType.S3);
         S3CloudStorageV1Parameters s3Params = new S3CloudStorageV1Parameters();
         s3Params.setInstanceProfile("instance:profile");
@@ -84,7 +91,9 @@ public class CloudStorageManifesterTest {
         sdxClusterRequest.setCloudStorage(cloudStorageRequest);
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform("AWS");
-        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, exampleBlueprintName, sdxCluster, sdxClusterRequest);
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        clusterV4Request.setBlueprintName(exampleBlueprintName);
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest);
         StorageLocationBase singleRequest = cloudStorageConfigReq.getLocations().iterator().next();
 
         assertEquals(1, cloudStorageConfigReq.getIdentities().size());
@@ -102,7 +111,7 @@ public class CloudStorageManifesterTest {
         sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setClusterName("sdx-cluster");
         SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("example-path");
+        cloudStorageRequest.setBaseLocation("s3a://example-path");
         cloudStorageRequest.setFileSystemType(FileSystemType.S3);
         S3CloudStorageV1Parameters s3Params = new S3CloudStorageV1Parameters();
         s3Params.setInstanceProfile("instance:profile");
@@ -122,7 +131,9 @@ public class CloudStorageManifesterTest {
         awsEnvironmentParameters.setS3guard(s3GuardRequestParameters);
         environment.setAws(awsEnvironmentParameters);
         environment.setTelemetry(telemetryResponse);
-        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, exampleBlueprintName, sdxCluster, sdxClusterRequest);
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        clusterV4Request.setBlueprintName(exampleBlueprintName);
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest);
         StorageLocationBase singleRequest = cloudStorageConfigReq.getLocations().iterator().next();
 
         assertEquals(2, cloudStorageConfigReq.getIdentities().size());
@@ -138,7 +149,78 @@ public class CloudStorageManifesterTest {
         assertEquals(1, cloudStorageConfigReq.getLocations().size());
         assertEquals(CloudStorageCdpService.RANGER_AUDIT, singleRequest.getType());
         assertEquals("ranger/example-path", singleRequest.getValue());
+    }
 
+    @Test
+    public void whenEnvironmentHasOnlyLoggingEnabledThenShouldApplyAsLogIdentity() {
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("AWS");
+        TelemetryResponse telemetryResponse = new TelemetryResponse();
+        LoggingResponse loggingResponse = new LoggingResponse();
+        S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
+        s3CloudStorageV1Parameters.setInstanceProfile("logprofile");
+        loggingResponse.setS3(s3CloudStorageV1Parameters);
+        telemetryResponse.setLogging(loggingResponse);
+        environment.setTelemetry(telemetryResponse);
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        clusterV4Request.setBlueprintName(exampleBlueprintName);
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, clusterV4Request, null, new SdxClusterRequest());
+
+        assertEquals(1, cloudStorageConfigReq.getIdentities().size());
+        assertEquals(1, cloudStorageConfigReq.getIdentities()
+                .stream()
+                .filter(r -> r.getType().equals(CloudIdentityType.LOG))
+                .collect(Collectors.toSet()).size());
+        assertEquals("logprofile", cloudStorageConfigReq.getIdentities().get(0).getS3().getInstanceProfile());
+    }
+
+    @Test
+    public void whenCloudStorageAndLoggingDisabled() {
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        clusterV4Request.setBlueprintName(exampleBlueprintName);
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(
+                new DetailedEnvironmentResponse(), clusterV4Request, null, new SdxClusterRequest());
+        assertNull(cloudStorageConfigReq);
+    }
+
+    @Test
+    public void whenCloudStorageEnabledFromInternalRequest() {
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        clusterV4Request.setBlueprintName(exampleBlueprintName);
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
+        StorageLocationBase storageLocationBase = new StorageLocationBase();
+        storageLocationBase.setType(CloudStorageCdpService.RANGER_AUDIT);
+        storageLocationBase.setValue("s3a://ranger-audit");
+        cloudStorageRequest.setLocations(List.of(storageLocationBase));
+        clusterV4Request.setCloudStorage(cloudStorageRequest);
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(
+                new DetailedEnvironmentResponse(), clusterV4Request, null, new SdxClusterRequest());
+        assertEquals(CloudStorageCdpService.RANGER_AUDIT, cloudStorageConfigReq.getLocations().get(0).getType());
+    }
+
+    @Test
+    public void whenCloudStorageEnabledFromInternalRequestWithLogging() {
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        clusterV4Request.setBlueprintName(exampleBlueprintName);
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
+        StorageLocationBase storageLocationBase = new StorageLocationBase();
+        storageLocationBase.setType(CloudStorageCdpService.RANGER_AUDIT);
+        storageLocationBase.setValue("s3a://ranger-audit");
+        cloudStorageRequest.setLocations(List.of(storageLocationBase));
+        clusterV4Request.setCloudStorage(cloudStorageRequest);
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("AWS");
+        TelemetryResponse telemetryResponse = new TelemetryResponse();
+        LoggingResponse loggingResponse = new LoggingResponse();
+        S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
+        s3CloudStorageV1Parameters.setInstanceProfile("logprofile");
+        loggingResponse.setS3(s3CloudStorageV1Parameters);
+        telemetryResponse.setLogging(loggingResponse);
+        environment.setTelemetry(telemetryResponse);
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(
+                environment, clusterV4Request, null, new SdxClusterRequest());
+        assertEquals(CloudStorageCdpService.RANGER_AUDIT, cloudStorageConfigReq.getLocations().get(0).getType());
+        assertEquals(CloudIdentityType.LOG, cloudStorageConfigReq.getIdentities().get(0).getType());
     }
 
     private void mockFileSystemResponseForCloudbreakClient() {
@@ -164,5 +246,27 @@ public class CloudStorageManifesterTest {
                         anyString(),
                         anyString(),
                         anyBoolean(), anyBoolean())).thenReturn(dummyResponses);
+    }
+
+    @Test
+    public void throwErrorWhenS3LocationInvalid() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("AWS baselocation missing protocol. please specify s3a://");
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("cloudbreakbucket/something");
+        S3CloudStorageV1Parameters params = new S3CloudStorageV1Parameters();
+        params.setInstanceProfile("instanceProfile");
+        cloudStorageRequest.setS3(params);
+        underTest.validateCloudStorage(CloudPlatform.AWS.toString(), cloudStorageRequest);
+    }
+
+    @Test
+    public void okWhenS3LocationIsValid() {
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("s3a://cloudbreakbucket/something");
+        S3CloudStorageV1Parameters params = new S3CloudStorageV1Parameters();
+        params.setInstanceProfile("instanceProfile");
+        cloudStorageRequest.setS3(params);
+        underTest.validateCloudStorage(CloudPlatform.AWS.toString(), cloudStorageRequest);
     }
 }

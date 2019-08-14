@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +52,9 @@ public class SyncOperationStatusService {
         }
     }
 
-    public SyncOperation startOperation(String accountId, SyncOperationType syncOperationType, List<String> environments, List<String> users) {
-        SyncOperation syncOperation = requestOperation(accountId, syncOperationType, environments, users);
+    public SyncOperation startOperation(String accountId, SyncOperationType syncOperationType,
+            Collection<String> environmentCrns, Collection<String> userCrns) {
+        SyncOperation syncOperation = requestOperation(accountId, syncOperationType, environmentCrns, userCrns);
         SyncOperationAcceptor acceptor = syncOperationAcceptorMap.get(syncOperationType);
 
         AcceptResult acceptResult = acceptor.accept(syncOperation);
@@ -86,14 +88,15 @@ public class SyncOperationStatusService {
         return syncOperationToSyncOperationStatus.convert(getSyncOperationForOperationId(operationId));
     }
 
-    private SyncOperation requestOperation(String accountId, SyncOperationType syncOperationType, List<String> environments, List<String> users) {
+    private SyncOperation requestOperation(String accountId, SyncOperationType syncOperationType,
+            Collection<String> environmentCrns, Collection<String> userCrns) {
         SyncOperation syncOperation = new SyncOperation();
         syncOperation.setOperationId(UUID.randomUUID().toString());
         syncOperation.setStatus(SynchronizationStatus.REQUESTED);
         syncOperation.setAccountId(accountId);
         syncOperation.setSyncOperationType(syncOperationType);
-        syncOperation.setEnvironmentList(environments);
-        syncOperation.setUserList(users);
+        syncOperation.setEnvironmentList(List.copyOf(environmentCrns));
+        syncOperation.setUserList(List.copyOf(userCrns));
         return syncOperationRepository.save(syncOperation);
     }
 

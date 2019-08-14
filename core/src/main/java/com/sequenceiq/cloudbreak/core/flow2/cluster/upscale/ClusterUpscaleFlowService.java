@@ -19,17 +19,19 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
 class ClusterUpscaleFlowService {
@@ -54,6 +56,9 @@ class ClusterUpscaleFlowService {
 
     @Inject
     private HostMetadataService hostMetadataService;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     void ambariRepairSingleMasterStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Repairing single master of cluster finished.");
@@ -103,8 +108,8 @@ class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, ambariMessage, UPDATE_IN_PROGRESS.name());
     }
 
-    void clusterUpscaleFinished(StackView stackView, String hostgroupName) {
-        int numOfFailedHosts = updateMetadata(stackView, hostgroupName);
+    void clusterUpscaleFinished(StackView stackView, String hostgroupName, Boolean singlePrimaryGateway) {
+        int numOfFailedHosts = updateMetadata(stackView, hostgroupName, singlePrimaryGateway);
         boolean success = numOfFailedHosts == 0;
         if (success) {
             LOGGER.debug("Cluster upscaled successfully");
@@ -126,7 +131,7 @@ class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to", errorDetails);
     }
 
-    private int updateMetadata(StackView stackView, String hostGroupName) {
+    private int updateMetadata(StackView stackView, String hostGroupName, Boolean singlePrimaryGateway) {
         LOGGER.debug("Start update metadata");
         HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stackView.getClusterView().getId(), hostGroupName)
                 .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
@@ -141,6 +146,10 @@ class ClusterUpscaleFlowService {
             if (hostMeta.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
                 failedHosts++;
             }
+        }
+        if (singlePrimaryGateway) {
+            instanceMetaDataService
+                    .updateUnregisteredInstanceStatusByInstanceGroupForStack(stackView.getId(), InstanceGroupType.CORE, InstanceStatus.REGISTERED);
         }
         return failedHosts;
     }

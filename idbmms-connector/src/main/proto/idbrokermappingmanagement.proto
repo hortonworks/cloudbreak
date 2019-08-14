@@ -47,8 +47,10 @@ service IdBrokerMappingManagement {
 }
 
 message GetMappingsRequest {
+  // The account ID.
+  string accountId = 1;
   // The name or CRN of the environment.
-  string environmentNameOrCrn = 1;
+  string environmentNameOrCrn = 2;
 }
 
 message GetMappingsResponse {
@@ -67,18 +69,20 @@ message GetMappingsResponse {
 }
 
 message SetMappingsRequest {
+  // The account ID.
+  string accountId = 1;
   // The name or CRN of the environment.
-  string environmentNameOrCrn = 1;
+  string environmentNameOrCrn = 2;
   // A map of actor and group CRNs to cloud provider roles. Does not include
   // mappings for data access services.
-  map<string, string> mappings = 2;
+  map<string, string> mappings = 3;
   // The cloud provider role to which data access services will be mapped
   // (e.g., an ARN in AWS, a Resource ID in Azure).
-  string dataAccessRole = 3;
+  string dataAccessRole = 4;
   // The cloud provider role associated with the baseline instance identity
   // (e.g., an ARN in AWS, a Resource ID in Azure). Non-data access services
   // that write to cloud storage will be mapped to this role.
-  string baselineRole = 4;
+  string baselineRole = 5;
 }
 
 message SetMappingsResponse {
@@ -97,16 +101,20 @@ message SetMappingsResponse {
 }
 
 message DeleteMappingsRequest {
+  // The account ID.
+  string accountId = 1;
   // The name or CRN of the environment.
-  string environmentNameOrCrn = 1;
+  string environmentNameOrCrn = 2;
 }
 
 message DeleteMappingsResponse {
 }
 
 message SyncMappingsRequest {
+  // The account ID.
+  string accountId = 1;
   // The name or CRN of the environment.
-  string environmentNameOrCrn = 1;
+  string environmentNameOrCrn = 2;
 }
 
 message SyncMappingsResponse {
@@ -115,11 +123,13 @@ message SyncMappingsResponse {
 }
 
 message GetMappingsSyncStatusRequest {
+  // The account ID.
+  string accountId = 1;
   // The name or CRN of the environment.
-  string environmentNameOrCrn = 1;
+  string environmentNameOrCrn = 2;
   // Optional syncId for the sync attempt whose status is desired. If omitted,
   // the status of the most recent sync attempt for the environment is returned.
-  string syncId = 2;
+  string syncId = 3;
 }
 
 message GetMappingsSyncStatusResponse {

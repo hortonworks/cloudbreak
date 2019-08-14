@@ -159,7 +159,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private CreateFreeIpaRequest createFreeIpaRequest(EnvironmentDto environment) {
         CreateFreeIpaRequest createFreeIpaRequest = initFreeIpaRequest(environment);
         createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
-        setFreeIpaServer(createFreeIpaRequest);
+
+        setFreeIpaServer(environment, createFreeIpaRequest);
         setPlacementAndNetwork(environment, createFreeIpaRequest);
         setAuthentication(environment.getAuthentication(), createFreeIpaRequest);
         doIfNotNull(environment.getSecurityAccess(), securityAccess -> setSecurityAccess(securityAccess, createFreeIpaRequest));
@@ -173,11 +174,13 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         return createFreeIpaRequest;
     }
 
-    private void setFreeIpaServer(CreateFreeIpaRequest createFreeIpaRequest) {
+    private void setFreeIpaServer(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
+        String adminGroupName = environment.getAdminGroupName();
         FreeIpaServerRequest freeIpaServerRequest = new FreeIpaServerRequest();
         freeIpaServerRequest.setAdminPassword(PasswordUtil.generatePassword());
         freeIpaServerRequest.setDomain(FREEIPA_DOMAIN);
         freeIpaServerRequest.setHostname(FREEIPA_HOSTNAME);
+        freeIpaServerRequest.setAdminGroupName(adminGroupName);
         createFreeIpaRequest.setFreeIpa(freeIpaServerRequest);
     }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,6 +28,9 @@ public class FreeIpa implements AccountIdAwareResource {
     private String hostname;
 
     private String domain;
+
+    @Column(name = "admin_group_name")
+    private String adminGroupName;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -62,6 +66,14 @@ public class FreeIpa implements AccountIdAwareResource {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public String getAdminGroupName() {
+        return adminGroupName;
+    }
+
+    public void setAdminGroupName(String adminGroupName) {
+        this.adminGroupName = adminGroupName;
     }
 
     public String getAdminPassword() {

@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
+import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -40,7 +42,7 @@ public class SdxController extends NotificationController implements SdxEndpoint
     private SdxClusterConverter sdxClusterConverter;
 
     @Override
-    public SdxClusterResponse create(String name, @Valid SdxClusterRequest createSdxClusterRequest) {
+    public SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength String name, @Valid SdxClusterRequest createSdxClusterRequest) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
@@ -76,7 +78,7 @@ public class SdxController extends NotificationController implements SdxEndpoint
     @Override
     public SdxClusterResponse get(String name) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByAccountIdAndSdxName(userCrn, name);
+        SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
     }
 
@@ -106,23 +108,21 @@ public class SdxController extends NotificationController implements SdxEndpoint
     }
 
     @Override
-    public void repairCluster(String clusterCrn, SdxRepairRequest clusterRepairRequest) {
-        throw new UnsupportedOperationException("Repair is not yet supported for SDX");
-        // String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        //repairService.triggerRepair(userCrn, clusterCrn, clusterRepairRequest);
+    public void repairCluster(String clusterName, SdxRepairRequest clusterRepairRequest) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        repairService.triggerRepairByName(userCrn, clusterName, clusterRepairRequest);
     }
 
     @Override
-    public void repairClusterCrn(String clusterCrn, SdxRepairRequest clusterRepairRequest) {
-        throw new UnsupportedOperationException("Repair is not yet supported for SDX");
-        // String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        //repairService.triggerRepair(userCrn, clusterCrn, clusterRepairRequest);
+    public void repairClusterByCrn(String clusterCrn, SdxRepairRequest clusterRepairRequest) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        repairService.triggerRepairByCrn(userCrn, clusterCrn, clusterRepairRequest);
     }
 
     @Override
     public SdxClusterDetailResponse getDetail(String name, Set<String> entries) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByAccountIdAndSdxName(userCrn, name);
+        SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
         StackV4Response stackV4Response = sdxService.getDetail(userCrn, name, entries);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);

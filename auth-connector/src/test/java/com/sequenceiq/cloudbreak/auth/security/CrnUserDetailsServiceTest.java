@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CrnUserDetailsServiceTest {

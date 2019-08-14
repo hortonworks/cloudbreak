@@ -77,7 +77,7 @@ public class CmCloudStorageConfigDetailsTest {
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(5L, bigCluster.size());
+        Assert.assertEquals(6L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmins = serviceEntry(bigCluster, RANGER_ADMIN);
         Set<ConfigQueryEntry> yarnSite = serviceEntry(bigCluster, RESOURCEMANAGER);
@@ -94,9 +94,9 @@ public class CmCloudStorageConfigDetailsTest {
 
         Assert.assertEquals(1, zeppelin.size());
         Assert.assertTrue(zeppelin.stream()
-                .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/bigCluster/zeppelin")));
+                .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/bigCluster/zeppelin/notebook")));
 
-        Assert.assertEquals(2, hive.size());
+        Assert.assertEquals(3, hive.size());
         Assert.assertTrue(hive.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/warehouse/tablespace/managed/hive")));
         Assert.assertTrue(hive.stream()
@@ -119,7 +119,7 @@ public class CmCloudStorageConfigDetailsTest {
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(3L, bigCluster.size());
+        Assert.assertEquals(4L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmins = serviceEntry(bigCluster, RANGER_ADMIN);
         Set<ConfigQueryEntry> hive = serviceEntry(bigCluster, HIVE_METASTORE);
@@ -128,7 +128,7 @@ public class CmCloudStorageConfigDetailsTest {
         Assert.assertTrue(rangerAdmins.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/ranger/audit")));
 
-        Assert.assertEquals(2, hive.size());
+        Assert.assertEquals(3, hive.size());
         Assert.assertTrue(hive.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/warehouse/tablespace/managed/hive")));
         Assert.assertTrue(hive.stream()
@@ -209,13 +209,15 @@ public class CmCloudStorageConfigDetailsTest {
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(2L, bigCluster.size());
+        Assert.assertEquals(3L, bigCluster.size());
 
         Set<ConfigQueryEntry> hive = serviceEntry(bigCluster, HIVE_METASTORE);
 
-        Assert.assertEquals(2, hive.size());
+        Assert.assertEquals(3, hive.size());
         Assert.assertTrue(hive.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/warehouse/tablespace/managed/hive"::equals));
+        Assert.assertTrue(hive.stream().map(ConfigQueryEntry::getDefaultPath)
+                .anyMatch("hwx-remote/warehouse/tablespace/external/hive"::equals));
         Assert.assertTrue(hive.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/warehouse/tablespace/external/hive"::equals));
     }
@@ -269,7 +271,7 @@ public class CmCloudStorageConfigDetailsTest {
 
         Assert.assertEquals(1, zeppelin.size());
         Assert.assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
-                .anyMatch("hwx-remote/bigCluster/zeppelin"::equals));
+                .anyMatch("hwx-remote/bigCluster/zeppelin/notebook"::equals));
     }
 
     @Test
@@ -300,7 +302,7 @@ public class CmCloudStorageConfigDetailsTest {
 
         Assert.assertEquals(1, zeppelin.size());
         Assert.assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
-                .anyMatch("hwx-remote/bigCluster/zeppelin"::equals));
+                .anyMatch("hwx-remote/bigCluster/zeppelin/notebook"::equals));
     }
 
     private Set<ConfigQueryEntry> serviceEntry(Set<ConfigQueryEntry> configQueryEntries, String serviceName) {

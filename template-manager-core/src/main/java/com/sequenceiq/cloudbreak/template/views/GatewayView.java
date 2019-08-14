@@ -1,21 +1,31 @@
 package com.sequenceiq.cloudbreak.template.views;
 
-import java.util.Collections;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
+
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
 public class GatewayView {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayView.class);
 
     private final GatewayType gatewayType;
 
@@ -35,15 +45,17 @@ public class GatewayView {
 
     private final String tokenCert;
 
-    private final Map<String, Json> gatewayTopologies;
+    private final Map<String, Set<String>> gatewayTopologies;
 
     private final String masterSecret;
 
     public GatewayView(@Nonnull Gateway gateway, String signKey) {
         gatewayType = gateway.getGatewayType();
         path = gateway.getPath();
-        gatewayTopologies = CollectionUtils.isEmpty(gateway.getTopologies()) ? Collections.emptyMap() : gateway.getTopologies().stream()
-                .collect(Collectors.toMap(GatewayTopology::getTopologyName, GatewayTopology::getExposedServices));
+        gatewayTopologies = CollectionUtils.isEmpty(gateway.getTopologies())
+                ? emptyMap()
+                : gateway.getTopologies().stream()
+                .collect(Collectors.toMap(GatewayTopology::getTopologyName, s -> convertToFullExposedServices(s.getExposedServices())));
         ssoType = gateway.getSsoType();
         ssoConfigured = SSOType.SSO_PROVIDER.equals(gateway.getSsoType());
         ssoProvider = gateway.getSsoProvider();
@@ -52,6 +64,24 @@ public class GatewayView {
         tokenCert = gateway.getTokenCert();
         this.masterSecret = gateway.getKnoxMasterSecret();
         this.signKey = signKey;
+    }
+
+    private Set<String> convertToFullExposedServices(Json json) {
+        try {
+            ExposedServices exposedServices = json.get(ExposedServices.class);
+            if (exposedServices == null || exposedServices.getServices().isEmpty()) {
+                return new HashSet<>();
+            }
+            return new HashSet<>(exposedServices.getFullServiceList());
+        } catch (IOException e) {
+            LOGGER.info("Cannot deserialize the exposed services: json: {}", json.getValue(), e);
+        }
+        try {
+            return Set.of(json.get(String[].class));
+        } catch (IOException e) {
+            LOGGER.info("Cannot deserialize the set of services: {}", json.getValue(), e);
+        }
+        return emptySet();
     }
 
     public GatewayType getGatewayType() {
@@ -66,11 +96,11 @@ public class GatewayView {
         return gatewayTopologies.isEmpty() ? null : getFirstTopology().getKey();
     }
 
-    public Json getExposedServices() {
+    public Set<String> getExposedServices() {
         return gatewayTopologies.isEmpty() ? null : getFirstTopology().getValue();
     }
 
-    private Entry<String, Json> getFirstTopology() {
+    private Entry<String, Set<String>> getFirstTopology() {
         return gatewayTopologies.entrySet().iterator().next();
     }
 
@@ -110,7 +140,7 @@ public class GatewayView {
         return tokenCert;
     }
 
-    public Map<String, Json> getGatewayTopologies() {
+    public Map<String, Set<String>> getGatewayTopologies() {
         return gatewayTopologies;
     }
 

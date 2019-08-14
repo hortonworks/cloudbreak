@@ -11,9 +11,9 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel(value = "DetailedEnvironmentV1Response")
-@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@ApiModel(value = "DetailedEnvironmentV1Response")
 public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
     public static final class Builder {
@@ -48,6 +48,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private SecurityAccessResponse securityAccess;
 
         private Tunnel tunnel;
+
+        private String adminGroupName;
 
         private IdBrokerMappingSource idBrokerMappingSource;
 
@@ -145,6 +147,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withAdminGroupName(String adminGroupName) {
+            this.adminGroupName = adminGroupName;
+            return this;
+        }
+
         public Builder withAws(AwsEnvironmentParameters aws) {
             this.aws = aws;
             return this;
@@ -169,6 +176,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setSecurityAccess(securityAccess);
             detailedEnvironmentResponse.setTunnel(tunnel);
             detailedEnvironmentResponse.setIdBrokerMappingSource(idBrokerMappingSource);
+            detailedEnvironmentResponse.setAdminGroupName(adminGroupName);
             detailedEnvironmentResponse.setAws(aws);
             return detailedEnvironmentResponse;
         }

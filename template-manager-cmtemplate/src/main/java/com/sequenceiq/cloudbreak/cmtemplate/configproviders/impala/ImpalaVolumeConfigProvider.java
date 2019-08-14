@@ -43,7 +43,8 @@ public class ImpalaVolumeConfigProvider implements CmHostGroupRoleConfigProvider
                 configs.add(config(IMPALA_SCRATCH_DIRS_PARAM,
                         buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "impala/scratch")));
 
-                if (minAttachedVolumeSize > MIN_ATTACHED_VOLUME_SIZE_TO_ENABLE_CACHE_IN_GB) {
+                if (minAttachedVolumeSize > MIN_ATTACHED_VOLUME_SIZE_TO_ENABLE_CACHE_IN_GB
+                        && hostGroupView.getVolumeCount() > 0) {
                     long dataCacheCapacityInBytes = VolumeUtils
                             .convertGBToBytes(Math.min(minAttachedVolumeSize / 2, MAX_IMPALA_DATA_CACHE_SIZE_IN_GB / hostGroupView.getVolumeCount()));
 

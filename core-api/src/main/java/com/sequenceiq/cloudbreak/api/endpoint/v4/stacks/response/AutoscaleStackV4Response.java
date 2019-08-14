@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
+import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,9 +28,8 @@ public class AutoscaleStackV4Response {
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long stackId;
 
-    @Size(max = 40, min = 5, message = "The length of the name has to be in range of 5 to 40")
-    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
-            message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+    @ValidStackNameFormat
+    @ValidStackNameLength
     @NotNull
     @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;

@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class SecurityGroupV4Request {
+public class SecurityGroupV4StackRequest {
 
     @ApiModelProperty(SecurityGroupModelDescriptions.SECURITY_GROUP_IDS)
     private Set<String> securityGroupIds;

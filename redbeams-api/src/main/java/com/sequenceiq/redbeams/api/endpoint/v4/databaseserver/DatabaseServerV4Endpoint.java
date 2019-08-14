@@ -15,6 +15,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -32,13 +33,15 @@ import com.sequenceiq.redbeams.doc.ParamDescriptions.DatabaseServerParamDescript
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Authorization;
 
 import org.springframework.validation.annotation.Validated;
 
 @Path("/v4/databaseservers")
 @Produces(MediaType.APPLICATION_JSON)
 @Api(tags = {"database servers"},
-        protocols = "http,https")
+        protocols = "http,https",
+        authorizations = { @Authorization(value = RedbeamsApi.CRN_HEADER_API_KEY) })
 @Validated
 public interface DatabaseServerV4Endpoint {
 
@@ -56,7 +59,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.GET_BY_CRN, notes = DatabaseServerNotes.GET_BY_CRN,
             nickname = "getDatabaseServerByCrn")
     DatabaseServerV4Response getByCrn(
-            @ValidCrn @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @GET
@@ -83,7 +86,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_CRN, notes = DatabaseServerNotes.GET_STATUS_BY_CRN,
             nickname = "getDatabaseServerStatusByCrn")
     DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByCrn(
-            @ValidCrn @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @GET
@@ -101,7 +104,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.TERMINATE, notes = DatabaseServerNotes.TERMINATE,
             nickname = "terminateManagedDatabaseServer")
     DatabaseServerTerminationOutcomeV4Response terminate(
-            @ValidCrn @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @POST
@@ -118,7 +121,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_CRN, notes = DatabaseServerNotes.DELETE_BY_CRN,
             nickname = "deleteDatabaseServerByCrn")
     DatabaseServerV4Response deleteByCrn(
-            @ValidCrn @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @DELETE

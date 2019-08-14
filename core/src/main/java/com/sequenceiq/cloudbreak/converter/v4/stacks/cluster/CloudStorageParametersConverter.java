@@ -16,7 +16,6 @@ import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
-import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 import com.sequenceiq.common.model.CloudIdentityType;
 
@@ -86,13 +85,6 @@ public class CloudStorageParametersConverter {
         return cloudGcsView;
     }
 
-    public S3FileSystem s3ToFileSystem(S3CloudStorageV1Parameters source) {
-        S3FileSystem fileSystemConfigurations = new S3FileSystem();
-        fileSystemConfigurations.setInstanceProfile(source.getInstanceProfile());
-        fileSystemConfigurations.setS3GuardDynamoTableName(source.getS3GuardDynamoTableName());
-        return fileSystemConfigurations;
-    }
-
     public CloudS3View s3ToCloudView(StorageIdentityBase source) {
         CloudS3View cloudS3View = new CloudS3View(source.getType());
         cloudS3View.setInstanceProfile(source.getS3().getInstanceProfile());
@@ -102,7 +94,6 @@ public class CloudStorageParametersConverter {
     public CloudS3View s3ToCloudView(S3CloudStorageV1Parameters source) {
         CloudS3View cloudS3View = new CloudS3View(CloudIdentityType.LOG);
         cloudS3View.setInstanceProfile(source.getInstanceProfile());
-        cloudS3View.setInstanceProfile(source.getS3GuardDynamoTableName());
         return cloudS3View;
     }
 

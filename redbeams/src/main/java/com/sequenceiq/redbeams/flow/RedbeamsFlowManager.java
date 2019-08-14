@@ -91,7 +91,7 @@ public class RedbeamsFlowManager {
         }
     }
 
-    public void cancelRunningFlowsIfNeeded(Long dbstackId) {
+    public void cancelRunningFlows(Long dbstackId) {
         RedbeamsEvent cancelEvent = new RedbeamsEvent(Flow2Handler.FLOW_CANCEL, dbstackId);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }

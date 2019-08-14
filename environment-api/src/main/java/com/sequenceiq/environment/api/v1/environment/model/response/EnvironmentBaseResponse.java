@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
@@ -11,6 +12,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
 public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(ModelDescriptions.ID)
@@ -64,6 +66,9 @@ public abstract class EnvironmentBaseResponse {
 
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource;
+
+    @ApiModelProperty(EnvironmentModelDescription.ADMIN_GROUP_NAME)
+    private String adminGroupName;
 
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
     private AwsEnvironmentParameters aws;
@@ -210,6 +215,14 @@ public abstract class EnvironmentBaseResponse {
 
     public void setIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         this.idBrokerMappingSource = idBrokerMappingSource;
+    }
+
+    public String getAdminGroupName() {
+        return adminGroupName;
+    }
+
+    public void setAdminGroupName(String adminGroupName) {
+        this.adminGroupName = adminGroupName;
     }
 
     public AwsEnvironmentParameters getAws() {

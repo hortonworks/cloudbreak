@@ -6,10 +6,13 @@ public class WasbConfig extends CloudStorageConfig {
 
     private final String account;
 
-    public WasbConfig(String folderPrefix, String storageContainer, String account) {
+    private final boolean secure;
+
+    public WasbConfig(String folderPrefix, String storageContainer, String account, boolean secure) {
         super(folderPrefix);
         this.storageContainer = storageContainer;
         this.account = account;
+        this.secure = secure;
     }
 
     public String getStorageContainer() {
@@ -18,5 +21,9 @@ public class WasbConfig extends CloudStorageConfig {
 
     public String getAccount() {
         return account;
+    }
+
+    public boolean isSecure() {
+        return secure;
     }
 }

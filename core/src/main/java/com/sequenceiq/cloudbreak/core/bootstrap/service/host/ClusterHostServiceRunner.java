@@ -232,7 +232,8 @@ public class ClusterHostServiceRunner {
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls",
                 singletonMap("cluster", singletonMap("name", stack.getCluster().getName()))));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
-        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, connector, kerberosConfig);
+        Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
+        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, connector, kerberosConfig, serviceLocations);
 
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
@@ -246,7 +247,7 @@ public class ClusterHostServiceRunner {
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
         saveSssdAdPillar(cluster, servicePillar, kerberosConfig);
-        saveSssdIpaPillar(cluster, servicePillar, kerberosConfig);
+        saveSssdIpaPillar(servicePillar, kerberosConfig, serviceLocations);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
         ldapView.ifPresent(ldap -> saveLdapsAdPillar(ldap, servicePillar, connector));
@@ -260,7 +261,7 @@ public class ClusterHostServiceRunner {
 
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
-        return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
+        return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs, cluster));
     }
 
     private void addKerberosConfig(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) throws IOException {
@@ -348,7 +349,8 @@ public class ClusterHostServiceRunner {
         return parameters;
     }
 
-    private void saveSssdIpaPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
+    private void saveSssdIpaPillar(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig,
+            Map<String, List<String>> serviceLocations) {
         if (kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             Map<String, Object> sssdConnfig = new HashMap<>();
             sssdConnfig.put("principal", kerberosConfig.getPrincipal());
@@ -356,7 +358,6 @@ public class ClusterHostServiceRunner {
             sssdConnfig.put("domain", kerberosConfig.getDomain());
             sssdConnfig.put("password", kerberosConfig.getPassword());
             sssdConnfig.put("server", kerberosConfig.getUrl());
-            Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
             // enumeration has performance impacts so it's only enabled if Ranger is installed on the cluster
             // otherwise the usersync does not work with nss
             sssdConnfig.put("enumerate", !CollectionUtils.isEmpty(serviceLocations.get("RANGER_ADMIN")));
@@ -433,13 +434,17 @@ public class ClusterHostServiceRunner {
         servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariRdsView))));
     }
 
-    private Map<String, Map<String, String>> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs) {
+    private Map<String, Map<String, String>> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs, Cluster cluster) {
         Map<String, Map<String, String>> grainProperties = new HashMap<>();
         for (GatewayConfig gatewayConfig : gatewayConfigs) {
             Map<String, String> hostGrain = new HashMap<>();
             hostGrain.put("gateway-address", gatewayConfig.getPublicAddress());
             grainProperties.put(gatewayConfig.getPrivateAddress(), hostGrain);
         }
+        Map<String, List<String>> serviceLocations =
+                componentLocator.getComponentLocationByPrivateIp(cluster, List.of(ExposedService.NAMENODE.getServiceName()));
+        serviceLocations.getOrDefault(ExposedService.NAMENODE.getServiceName(), List.of())
+                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put("roles", "namenode"));
         return grainProperties;
     }
 
@@ -473,7 +478,7 @@ public class ClusterHostServiceRunner {
     }
 
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
-            ClusterPreCreationApi connector, KerberosConfig kerberosConfig) throws IOException {
+            ClusterPreCreationApi connector, KerberosConfig kerberosConfig, Map<String, List<String>> serviceLocations) throws IOException {
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
@@ -514,7 +519,6 @@ public class ClusterHostServiceRunner {
         }
         gateway.put("kerberos", kerberosConfig != null);
 
-        Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
         List<String> rangerLocations = serviceLocations.get(ExposedService.RANGER.getServiceName());
         if (!CollectionUtils.isEmpty(rangerLocations)) {
             serviceLocations.put(ExposedService.RANGER.getServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));

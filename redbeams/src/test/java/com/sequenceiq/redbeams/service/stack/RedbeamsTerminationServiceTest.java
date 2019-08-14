@@ -24,7 +24,6 @@ import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
-import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent;
 
@@ -68,7 +67,7 @@ class RedbeamsTerminationServiceTest {
 
         verify(dbStackStatusUpdater).updateStatus(DBSTACK_ID, DetailedDBStackStatus.DELETE_REQUESTED);
         InOrder inOrder = Mockito.inOrder(flowManager);
-        inOrder.verify(flowManager).cancelRunningFlowsIfNeeded(DBSTACK_ID);
+        inOrder.verify(flowManager).cancelRunningFlows(DBSTACK_ID);
         inOrder.verify(flowManager).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
     }
 
@@ -78,13 +77,12 @@ class RedbeamsTerminationServiceTest {
         dbStack.getDbStackStatus().setStatus(status);
         when(dbStackService.getByCrn(anyString())).thenReturn(dbStack);
 
-        Assertions.assertThrows(
-                NotFoundException.class,
-                () -> underTest.terminateDatabaseServer(DATABASE_SERVER_CRN),
-                "DatabaseServer with crn '" + DATABASE_SERVER_CRN + "' is already being deleted");
+        DBStack dbStack = underTest.terminateDatabaseServer(DATABASE_SERVER_CRN);
+
+        Assertions.assertEquals(status, dbStack.getStatus());
 
         verify(dbStackStatusUpdater, never()).updateStatus(anyLong(), any());
-        verify(flowManager, never()).cancelRunningFlowsIfNeeded(DBSTACK_ID);
+        verify(flowManager, never()).cancelRunningFlows(DBSTACK_ID);
         verify(flowManager, never()).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
     }
 }

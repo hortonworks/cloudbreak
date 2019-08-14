@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -73,7 +74,7 @@ public class ClouderaManagerClusterStatusServiceTest {
     private ClouderaManagerClusterStatusService subject;
 
     @Before
-    public void init() {
+    public void init() throws ClouderaManagerClientInitException {
         Cluster cluster = new Cluster();
         cluster.setName(CLUSTER_NAME);
         Stack stack = new Stack();

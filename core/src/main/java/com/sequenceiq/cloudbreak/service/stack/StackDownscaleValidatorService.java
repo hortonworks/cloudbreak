@@ -16,10 +16,10 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 @Component
 public class StackDownscaleValidatorService {
 
-    public void checkInstanceIsTheAmbariServerOrNot(String instancePublicIp, InstanceMetadataType metadataType) {
+    public void checkInstanceIsTheClusterManagerServerOrNot(String instancePublicIp, InstanceMetadataType metadataType) {
         if (GATEWAY.equals(metadataType) || GATEWAY_PRIMARY.equals(metadataType)) {
-            throw new BadRequestException(String.format("Downscale for node [public IP: %s] is prohibited because it serves as a host the Ambari server",
-                    instancePublicIp));
+            throw new BadRequestException(String.format("Downscale for node [public IP: %s] is prohibited because it " +
+                            "serves as a host the Cluster Manager server", instancePublicIp));
         }
     }
 

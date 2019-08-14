@@ -8,8 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDBStackV4Parameters;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 
 public class AllocateDatabaseServerV4RequestTest {
 
@@ -28,11 +28,11 @@ public class AllocateDatabaseServerV4RequestTest {
         request.setEnvironmentCrn("myenv");
         assertEquals("myenv", request.getEnvironmentCrn());
 
-        NetworkV4Request network = new NetworkV4Request();
+        NetworkV4StackRequest network = new NetworkV4StackRequest();
         request.setNetwork(network);
         assertEquals(network, request.getNetwork());
 
-        DatabaseServerV4Request server = new DatabaseServerV4Request();
+        DatabaseServerV4StackRequest server = new DatabaseServerV4StackRequest();
         request.setDatabaseServer(server);
         assertEquals(server, request.getDatabaseServer());
     }

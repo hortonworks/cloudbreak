@@ -11,16 +11,16 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class DatabaseServerV4Request extends DatabaseServerV4Base {
+public class DatabaseServerV4StackRequest extends DatabaseServerV4StackBase {
 
     @ApiModelProperty(DatabaseServerModelDescriptions.SECURITY_GROUP)
-    private SecurityGroupV4Request securityGroup;
+    private SecurityGroupV4StackRequest securityGroup;
 
-    public SecurityGroupV4Request getSecurityGroup() {
+    public SecurityGroupV4StackRequest getSecurityGroup() {
         return securityGroup;
     }
 
-    public void setSecurityGroup(SecurityGroupV4Request securityGroup) {
+    public void setSecurityGroup(SecurityGroupV4StackRequest securityGroup) {
         this.securityGroup = securityGroup;
     }
 
