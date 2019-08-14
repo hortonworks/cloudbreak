@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
+import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 
 public class StackOperationTest {
 
@@ -89,6 +90,9 @@ public class StackOperationTest {
 
     @Mock
     private CloudbreakUser cloudbreakUser;
+
+    @Mock
+    private SdxServiceDecorator sdxServiceDecorator;
 
     private Stack stack;
 
