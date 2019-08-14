@@ -49,6 +49,10 @@
                     {
                         "Key": "cb-resource-type",
                         "Value": "NETWORK"
+                    },
+                    {
+                        "Key" : "kubernetes.io/role/elb",
+                        "Value" : "1"
                     }
                 ]
             }
@@ -76,6 +80,10 @@
                     {
                         "Key": "cb-resource-type",
                         "Value": "NETWORK"
+                    },
+                    {
+                        "Key" : "kubernetes.io/role/elb",
+                        "Value" : "1"
                     }
                 ]
             }
