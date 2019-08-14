@@ -269,7 +269,19 @@
             "name": "transaction.state.log.min.isr",
             "value": "1"
           },
-	  {
+          {
+            "name": "service_config_suppression_offsets.topic.replication.factor",
+            "value": "true"
+          },
+          {
+            "name": "service_config_suppression_transaction.state.log.replication.factor",
+            "value": "true"
+          },
+          {
+            "name": "service_config_suppression_kafka_broker_count_validator",
+            "value": "true"
+          },
+	        {
             "name": "delegation.token.enable",
             "value": "true"
           }
