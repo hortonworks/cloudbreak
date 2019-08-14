@@ -35,6 +35,7 @@ import com.amazonaws.services.ec2.model.DescribeRegionsResult;
 import com.amazonaws.services.ec2.model.Region;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
+import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesRequest;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
 import com.amazonaws.services.kms.AWSKMSClient;
 import com.amazonaws.services.kms.model.AliasListEntry;
@@ -120,7 +121,7 @@ public class AwsPlatformResourcesTest {
         amazonServiceException.setStatusCode(403);
 
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
-        when(amazonCFClient.listInstanceProfiles()).thenThrow(amazonServiceException);
+        when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenThrow(amazonServiceException);
 
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage("Could not get instance profile roles because the user does not have enough permission.");
@@ -138,7 +139,7 @@ public class AwsPlatformResourcesTest {
         amazonServiceException.setErrorMessage("Amazon problem.");
 
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
-        when(amazonCFClient.listInstanceProfiles()).thenThrow(amazonServiceException);
+        when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenThrow(amazonServiceException);
 
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage("Could not get instance profile roles from Amazon: Amazon problem.");
@@ -154,7 +155,7 @@ public class AwsPlatformResourcesTest {
         BadRequestException badRequestException = new BadRequestException("BadRequestException problem.");
 
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
-        when(amazonCFClient.listInstanceProfiles()).thenThrow(badRequestException);
+        when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenThrow(badRequestException);
 
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage("Could not get instance profile roles from Amazon: BadRequestException problem.");
@@ -178,7 +179,7 @@ public class AwsPlatformResourcesTest {
         listInstanceProfilesResult.setInstanceProfiles(instanceProfileSet);
 
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
-        when(amazonCFClient.listInstanceProfiles()).thenReturn(listInstanceProfilesResult);
+        when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenReturn(listInstanceProfilesResult);
 
         CloudAccessConfigs cloudAccessConfigs =
                 underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());

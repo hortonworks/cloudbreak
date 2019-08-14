@@ -55,6 +55,7 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
+import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesRequest;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.AliasListEntry;
@@ -117,6 +118,8 @@ public class AwsPlatformResources implements PlatformResources {
     private static final int UNAUTHORIZED = 403;
 
     private static final String OPEN_CIDR_BLOCK = "0.0.0.0/0";
+
+    private static final int MAX_ITEMS = 500;
 
     @Inject
     private AwsClient awsClient;
@@ -557,7 +560,9 @@ public class AwsPlatformResources implements PlatformResources {
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
         AmazonIdentityManagement client = awsClient.createAmazonIdentityManagement(awsCredentialView);
         try {
-            ListInstanceProfilesResult listRolesResult = client.listInstanceProfiles();
+            ListInstanceProfilesRequest listInstanceProfilesRequest = new ListInstanceProfilesRequest();
+            listInstanceProfilesRequest.setMaxItems(MAX_ITEMS);
+            ListInstanceProfilesResult listRolesResult = client.listInstanceProfiles(listInstanceProfilesRequest);
             for (InstanceProfile instanceProfile : listRolesResult.getInstanceProfiles()) {
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("arn", instanceProfile.getArn());
