@@ -998,7 +998,7 @@ public class StackService {
 
     private String createCRN(String accountId) {
         return Crn.builder()
-                .setService(Crn.Service.CLOUDBREAK)
+                .setService(Crn.Service.DATAHUB)
                 .setAccountId(accountId)
                 .setResourceType(Crn.ResourceType.STACK)
                 .setResource(UUID.randomUUID().toString())

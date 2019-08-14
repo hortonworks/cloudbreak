@@ -37,24 +37,19 @@ public class Crn {
     private static final boolean NON_ADMIN_SERVICE = false;
 
     /**
-     * The CDP partition in which the resource resides. A CDP partition is a
-     * namespace for sets of CDP services.
+     * The Altus partition in which the resource resides. An Altus partition is a
+     * namespace for sets of Altus services.
      */
     public enum Partition {
-        /**
-         * @deprecated since CDP project
-         */
-        @Deprecated
         ALTUS("altus", "ccs"),
-
-        CDP("cdp", null);
+        CDP("cdp", "cdp");
 
         private static final ImmutableMap<String, Partition> FROM_STRING;
         static {
             ImmutableMap.Builder<String, Partition> builder = ImmutableMap.builder();
             Arrays.stream(Partition.values()).forEach(partition -> {
                 builder.put(partition.name, partition);
-                if (partition.legacyName != null) {
+                if (!Objects.equal(partition.name, partition.legacyName)) {
                     builder.put(partition.legacyName, partition);
                 }
             });
@@ -144,7 +139,8 @@ public class Crn {
         DSADMIN("dsadmin", ADMIN_SERVICE),
         SAMPLE("sample", NON_ADMIN_SERVICE),
         WORKSPACES("workspaces", NON_ADMIN_SERVICE),
-        FREEIPA("freeipa", NON_ADMIN_SERVICE);
+        FREEIPA("freeipa", NON_ADMIN_SERVICE),
+        DATAHUB("datahub", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
         static {
@@ -427,8 +423,7 @@ public class Crn {
         if (!matcher.matches()) {
             return null;
         }
-        String partition = matcher.group(1);
-        Partition.safeFromString(partition);
+
         String region = matcher.group(3);
         if (!Region.US_WEST_1.name.equals(region)) {
             throw new CrnParseException(String.format("%s is not a supported region", region));

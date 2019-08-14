@@ -225,7 +225,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     private String createCRN(String accountId) {
         return Crn.builder()
-                .setService(Crn.Service.CLOUDBREAK)
+                .setService(Crn.Service.DATAHUB)
                 .setAccountId(accountId)
                 .setResourceType(Crn.ResourceType.CLUSTER_TEMPLATE)
                 .setResource(UUID.randomUUID().toString())
