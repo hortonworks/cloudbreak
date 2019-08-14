@@ -748,7 +748,7 @@ public class StackService {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
                 .orElseThrow(() -> new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId)));
-        downscaleValidatorService.checkInstanceIsTheAmbariServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
+        downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
         downscaleValidatorService.checkClusterInValidStatus(stack.getCluster());
         return metaData;
     }
