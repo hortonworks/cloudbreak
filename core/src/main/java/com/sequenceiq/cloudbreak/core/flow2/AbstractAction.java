@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
 import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
+import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CONTEXTPARAMS_ID;
 import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_ID;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
@@ -127,12 +129,19 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     }
 
     protected void sendEvent(String flowId, String selector, Object payload) {
+        sendEvent(flowId, selector, payload, Map.of());
+    }
+
+    protected void sendEvent(String flowId, String selector, Object payload, Map<Object, Object> contextParameters) {
         LOGGER.info("Triggering event: {}, payload: {}", selector, payload);
         Map<String, Object> headers = new HashMap<>();
         headers.put(FLOW_ID, flowId);
         String flowChainId = runningFlows.getFlowChainId(flowId);
         if (flowChainId != null) {
             headers.put(FLOW_CHAIN_ID, flowChainId);
+        }
+        if (!CollectionUtils.isEmpty(contextParameters)) {
+            headers.put(FLOW_CONTEXTPARAMS_ID, contextParameters);
         }
         eventBus.notify(selector, reactorEventFactory.createEvent(headers, payload));
     }

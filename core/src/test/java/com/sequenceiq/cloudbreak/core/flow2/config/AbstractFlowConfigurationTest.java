@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +78,7 @@ public class AbstractFlowConfigurationTest {
         ((AbstractFlowConfiguration<State, Event>) underTest).init();
         verify(applicationContext, times(8)).getBean(anyString(), any(Class.class));
         flow = underTest.createFlow("flowId", 0L);
-        flow.initialize();
+        flow.initialize(Map.of());
     }
 
     @Test

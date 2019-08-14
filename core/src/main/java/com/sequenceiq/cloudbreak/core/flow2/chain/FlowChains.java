@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
+import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CONTEXTPARAMS_ID;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -58,31 +60,34 @@ public class FlowChains {
         }
     }
 
-    public void triggerNextFlow(String flowChainId) {
+    public void triggerNextFlow(String flowChainId, Map<Object, Object> contextParams) {
         Queue<Selectable> queue = flowChainMap.get(flowChainId);
         if (queue != null) {
             Selectable selectable = queue.poll();
             if (selectable != null) {
-                sendEvent(flowChainId, selectable);
+                sendEvent(flowChainId, selectable, contextParams);
             } else {
                 removeFlowChain(flowChainId);
-                triggerParentFlowChain(flowChainId);
+                triggerParentFlowChain(flowChainId, contextParams);
             }
             flowLogService.saveChain(flowChainId, flowChainParentMap.get(flowChainId), queue);
         }
     }
 
-    protected void sendEvent(String flowChainId, Selectable selectable) {
+    protected void sendEvent(String flowChainId, Selectable selectable, Map<Object, Object> contextParams) {
         LOGGER.info("Triggering event: {}", selectable);
         Map<String, Object> headers = new HashMap<>();
         headers.put(FLOW_CHAIN_ID, flowChainId);
+        if (!CollectionUtils.isEmpty(contextParams)) {
+            headers.put(FLOW_CONTEXTPARAMS_ID, contextParams);
+        }
         eventBus.notify(selectable.selector(), eventFactory.createEvent(headers, selectable));
     }
 
-    private void triggerParentFlowChain(String flowChainId) {
+    private void triggerParentFlowChain(String flowChainId, Map<Object, Object> contextParams) {
         String parentFlowChainId = flowChainId != null ? flowChainParentMap.remove(flowChainId) : null;
         if (parentFlowChainId != null) {
-            triggerNextFlow(parentFlowChainId);
+            triggerNextFlow(parentFlowChainId, contextParams);
         }
     }
 }
