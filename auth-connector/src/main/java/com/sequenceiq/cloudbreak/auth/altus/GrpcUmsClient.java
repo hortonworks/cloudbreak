@@ -2,21 +2,6 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
-import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
-import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
-import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
-import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +13,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
+import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
+import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 
 @Component
 public class GrpcUmsClient {
@@ -263,6 +264,10 @@ public class GrpcUmsClient {
 
     @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
     public boolean checkRight(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
+        if (InternalCrnBuilder.isInternalCrn(actorCrn)) {
+            LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
+            return true;
+        }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.info("Checking right {} for user {}!", right, userCrn);
@@ -344,9 +349,10 @@ public class GrpcUmsClient {
     /**
      * Generate new machine user (if it is needed) and access api key for this user.
      * Also assign built-in dabaus uploader role for the machine user (if the role is not empty).
+     *
      * @param machineUserName machine user name
-     * @param userCrn crn of the actor
-     * @param roleCrn crn of the role
+     * @param userCrn         crn of the actor
+     * @param roleCrn         crn of the role
      * @return credential (access/secret keypair)
      */
     public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String roleCrn) {
@@ -356,10 +362,11 @@ public class GrpcUmsClient {
     /**
      * Generate new machine user (if it is needed) and access api key for this user.
      * Also assign built-in dabaus uploader role for the machine user (if the role is not empty).
+     *
      * @param machineUserName machine user name
-     * @param userCrn crn of the actor
-     * @param roleCrn crn of the role
-     * @param accessKeyType algorithm type used for the access key
+     * @param userCrn         crn of the actor
+     * @param roleCrn         crn of the role
+     * @param accessKeyType   algorithm type used for the access key
      * @return credential (access/secret keypair)
      */
     public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn,
@@ -373,9 +380,10 @@ public class GrpcUmsClient {
 
     /**
      * Cleanup machine user related resources (access keys, role, user)
+     *
      * @param machineUserName machine user name
-     * @param userCrn crn of the actor
-     * @param roleCrn crn of the role
+     * @param userCrn         crn of the actor
+     * @param roleCrn         crn of the role
      */
     public void clearMachineUserWithAccessKeysAndRole(String machineUserName, String userCrn, String roleCrn) {
         if (StringUtils.isNotEmpty(roleCrn)) {
