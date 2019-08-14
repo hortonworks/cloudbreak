@@ -27,6 +27,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentBaseResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -75,7 +76,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
 
     public StackV4Request convert(DistroXV1Request source) {
         DetailedEnvironmentResponse environment = environmentClientService.getByName(source.getEnvironmentName());
-        if (environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
+        if (environment != null && environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
             throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
         }
         SdxClusterResponse sdxClusterResponse = getSdxClusterResponse(environment);
@@ -106,11 +107,13 @@ public class DistroXV1RequestToStackV4RequestConverter {
         DetailedEnvironmentResponse environment = null;
         if (source.getEnvironmentName() != null) {
             environment = environmentClientService.getByName(source.getEnvironmentName());
-            if (environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
-                throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
+            if (environment != null) {
+                if (environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
+                    throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
+                }
+                request.setCloudPlatform(getCloudPlatform(environment));
+                request.setEnvironmentCrn(environment.getCrn());
             }
-            request.setCloudPlatform(getCloudPlatform(environment));
-            request.setEnvironmentCrn(environment.getCrn());
         }
         SdxClusterResponse sdxClusterResponse = getSdxClusterResponse(environment);
         request.setName(source.getName());
@@ -179,7 +182,15 @@ public class DistroXV1RequestToStackV4RequestConverter {
     public DistroXV1Request convert(StackV4Request source) {
         DistroXV1Request request = new DistroXV1Request();
         request.setName(source.getName());
-        request.setEnvironmentName(getIfNotNull(source.getEnvironmentCrn(), crn -> environmentClientService.getByCrn(crn).getName()));
+        DetailedEnvironmentResponse environment = null;
+        if (source.getEnvironmentCrn() != null) {
+            environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
+            if (environment != null && environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
+                throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
+            }
+        }
+        SdxClusterResponse sdxClusterResponse = getSdxClusterResponse(environment);
+        request.setEnvironmentName(getIfNotNull(environment, EnvironmentBaseResponse::getName));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
         request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertFrom));
@@ -190,7 +201,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSdx(getIfNotNull(source.getSharedService(), sdxConverter::getSdx));
-        request.setWorkloadAnalytics(isWorkloadAnalyticsEnabled(source, source.getTelemetry()));
+        request.setWorkloadAnalytics(isWorkloadAnalyticsEnabled(source, source.getTelemetry(), sdxClusterResponse));
         return request;
     }
 
@@ -198,7 +209,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return CloudPlatform.valueOf(environment.getCloudPlatform());
     }
 
-    private boolean isWorkloadAnalyticsEnabled(StackV4Request source, TelemetryRequest telemetryRequest) {
+    private boolean isWorkloadAnalyticsEnabled(StackV4Request source, TelemetryRequest telemetryRequest,
+            SdxClusterResponse sdxClusterResponse) {
         boolean waEnabled = false;
         if (telemetryRequest != null && telemetryRequest.getWorkloadAnalytics() != null) {
             waEnabled = true;
@@ -207,7 +219,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
             TelemetryResponse telemetryResponse =
                     getIfNotNull(source.getEnvironmentCrn(),
                             crn -> environmentClientService.getByCrn(crn).getTelemetry());
-            if (telemetryConverter.convert(telemetryResponse, true).getWorkloadAnalytics() != null) {
+            if (telemetryConverter.convert(telemetryResponse, sdxClusterResponse, true)
+                    .getWorkloadAnalytics() != null) {
                 waEnabled = true;
             }
         }
