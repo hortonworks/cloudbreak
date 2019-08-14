@@ -19,10 +19,6 @@ repositories {
 
 dependencies {
   compile project(':authorization')
-  compile project(':cloud-reactor')
-  compile project(':cloud-reactor-api')
-  compile project(':cloud-aws')
-  compile project(':cloud-azure')
   compile project(':core-api')
   compile project(':common')
   compile project(':flow')
