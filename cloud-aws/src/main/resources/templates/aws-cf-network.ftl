@@ -31,7 +31,8 @@
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
           { "Key" : "Network", "Value" : "Public" },
-          { "Key" : "cb-resource-type", "Value" : "${network_resource}" }
+          { "Key" : "cb-resource-type", "Value" : "${network_resource}" },
+          { "Key" : "kubernetes.io/role/elb", "Value" : "1" }
         ]
       }
     },
