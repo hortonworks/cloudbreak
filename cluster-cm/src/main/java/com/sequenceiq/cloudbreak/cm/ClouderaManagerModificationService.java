@@ -27,6 +27,7 @@ import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
@@ -39,8 +40,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
@@ -168,18 +169,25 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void restartCMStaleServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
         LOGGER.debug("Restarting stale services and redeploying client configurations in Cloudera Manager.");
-        Optional<ApiCommand> optionalRestartCommand = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems().stream()
-                .filter(cmd -> "RestartWaitingForStalenessSuccess".equals(cmd.getName())).findFirst();
-        ApiCommand restartServicesCommand;
-        if (optionalRestartCommand.isPresent()) {
-            restartServicesCommand = optionalRestartCommand.get();
-            LOGGER.debug("Restart for stale services is already running with id: [{}]", restartServicesCommand.getId());
+        ServicesResourceApi servicesResourceApi = clouderaManagerClientFactory.getServicesResourceApi(client);
+        List<ApiService> services = servicesResourceApi.readServices(stack.getName(), SUMMARY).getItems();
+        boolean configStale = services.stream().anyMatch(service -> !ApiConfigStalenessStatus.FRESH.equals(service.getConfigStalenessStatus()));
+        if (configStale) {
+            Optional<ApiCommand> optionalRestartCommand = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems().stream()
+                    .filter(cmd -> "RestartWaitingForStalenessSuccess".equals(cmd.getName())).findFirst();
+            ApiCommand restartServicesCommand;
+            if (optionalRestartCommand.isPresent()) {
+                restartServicesCommand = optionalRestartCommand.get();
+                LOGGER.debug("Restart for stale services is already running with id: [{}]", restartServicesCommand.getId());
+            } else {
+                restartServicesCommand = clustersResourceApi.restartCommand(stack.getName(),
+                        new ApiRestartClusterArgs().redeployClientConfiguration(Boolean.TRUE).restartOnlyStaleServices(Boolean.TRUE));
+            }
+            pollRestart(restartServicesCommand);
+            LOGGER.debug("Restarted stale services in Cloudera Manager.");
         } else {
-            restartServicesCommand = clustersResourceApi.restartCommand(stack.getName(),
-                    new ApiRestartClusterArgs().redeployClientConfiguration(Boolean.TRUE).restartOnlyStaleServices(Boolean.TRUE));
+            LOGGER.debug("No stale services found in Cloudera Manager.");
         }
-        pollRestart(restartServicesCommand);
-        LOGGER.debug("Restarted stale services in Cloudera Manager.");
     }
 
     private void restartClouderaManagementServices(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException, CloudbreakException {

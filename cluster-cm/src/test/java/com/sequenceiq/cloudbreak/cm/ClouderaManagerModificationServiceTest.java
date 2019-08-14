@@ -28,15 +28,19 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
+import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
+import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
+import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -101,6 +105,9 @@ class ClouderaManagerModificationServiceTest {
     @Mock
     private ClouderaManagerRepo clouderaManagerRepo;
 
+    @Mock
+    private ServicesResourceApi servicesResourceApi;
+
     private Cluster cluster;
 
     private HostGroup hostGroup;
@@ -146,6 +153,10 @@ class ClouderaManagerModificationServiceTest {
         when(mgmtServiceResourceApi.listActiveCommands(anyString())).thenReturn(apiCommandList);
         when(clouderaManagerRepo.getPredefined()).thenReturn(Boolean.TRUE);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        ApiService service = new ApiService();
+        service.setConfigStalenessStatus(ApiConfigStalenessStatus.STALE);
+        when(clouderaManagerClientFactory.getServicesResourceApi(eq(apiClientMock))).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices(anyString(), anyString())).thenReturn(new ApiServiceList().items(List.of(service)));
         setUpListClusterHosts();
         setUpRestartServices();
 
@@ -165,6 +176,10 @@ class ClouderaManagerModificationServiceTest {
         when(clustersResourceApi.listActiveCommands(anyString(), anyString())).thenReturn(apiCommandList);
         when(mgmtServiceResourceApi.listActiveCommands(anyString())).thenReturn(apiCommandList);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
+        ApiService service = new ApiService();
+        service.setConfigStalenessStatus(ApiConfigStalenessStatus.STALE);
+        when(clouderaManagerClientFactory.getServicesResourceApi(eq(apiClientMock))).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices(anyString(), anyString())).thenReturn(new ApiServiceList().items(List.of(service)));
         setUpListClusterHosts();
         setUpRestartServices();
 
@@ -232,6 +247,10 @@ class ClouderaManagerModificationServiceTest {
         when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), any(ApiHostRefList.class)))
                 .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
         when(clouderaManagerClientFactory.getHostTemplatesResourceApi(eq(apiClientMock))).thenReturn(hostTemplatesResourceApi);
+        ApiService service = new ApiService();
+        service.setConfigStalenessStatus(ApiConfigStalenessStatus.STALE);
+        when(clouderaManagerClientFactory.getServicesResourceApi(eq(apiClientMock))).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices(anyString(), anyString())).thenReturn(new ApiServiceList().items(List.of(service)));
 
         PollingResult applyTemplatePollingResult = PollingResult.SUCCESS;
         when(clouderaManagerPollingServiceProvider.applyHostTemplatePollingService(eq(stack), eq(apiClientMock), eq(applyHostTemplateCommandId)))
