@@ -145,6 +145,7 @@ public class FreeIpaClient {
         Map<String, Object> params = Map.of(
                 "givenname", firstName,
                 "sn", lastName,
+                "loginshell", "/bin/bash",
                 "random", true,
                 "setattr", "krbPasswordExpiration=20380101000000Z"
         );
