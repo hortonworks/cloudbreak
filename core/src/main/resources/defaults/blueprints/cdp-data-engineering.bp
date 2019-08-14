@@ -44,11 +44,23 @@
       {
         "refName": "yarn",
         "serviceType": "YARN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_admin_acl",
+            "value": "hive"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "yarn-RESOURCEMANAGER-BASE",
             "roleType": "RESOURCEMANAGER",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "yarn_resourcemanager_scheduler_class",
+                "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+              }
+            ]
           },
           {
             "refName": "yarn-NODEMANAGER-WORKER",
