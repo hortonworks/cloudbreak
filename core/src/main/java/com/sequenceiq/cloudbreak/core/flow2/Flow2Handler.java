@@ -65,6 +65,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     public static final String FLOW_CANCEL = "FLOWCANCEL";
 
+    public static final String FLOW_CONTEXTPARAMS_ID = "FLOW_CONTEXTPARAMS_ID";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Flow2Handler.class);
 
     private static final List<String> ALLOWED_PARALLEL_FLOWS = Collections.singletonList(TERMINATION_EVENT.event());
@@ -115,22 +117,22 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         Payload payload = event.getData();
         String flowId = getFlowId(event);
         String flowChainId = getFlowChainId(event);
-
+        Map<Object, Object> contextParams = getContextParams(event);
         try {
-            handle(key, payload, flowId, flowChainId);
+            handle(key, payload, flowId, flowChainId, contextParams);
         } catch (TransactionExecutionException e) {
             LOGGER.error("Failed update last flow log status and save new flow log entry.", e);
             runningFlows.remove(flowId);
         }
     }
 
-    private void handle(String key, Payload payload, String flowId, String flowChainId) throws TransactionExecutionException {
+    private void handle(String key, Payload payload, String flowId, String flowChainId, Map<Object, Object> contextParams) throws TransactionExecutionException {
         switch (key) {
             case FLOW_CANCEL:
                 cancelRunningFlows(payload.getStackId());
                 break;
             case FLOW_FINAL:
-                finalizeFlow(flowId, flowChainId, payload.getStackId());
+                finalizeFlow(flowId, flowChainId, payload.getStackId(), contextParams);
                 break;
             default:
                 if (flowId == null) {
@@ -143,7 +145,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         }
                         flowId = UUID.randomUUID().toString();
                         Flow flow = flowConfig.createFlow(flowId, payload.getStackId());
-                        flow.initialize();
+                        flow.initialize(contextParams);
                         flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
                         acceptFlow(payload);
                         logFlowId(flowId);
@@ -215,7 +217,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private void finalizeFlow(String flowId, String flowChainId, Long stackId) throws TransactionExecutionException {
+    private void finalizeFlow(String flowId, String flowChainId, Long stackId, Map<Object, Object> contextParams) throws TransactionExecutionException {
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
         flowLogService.close(stackId, flowId);
         Flow flow = runningFlows.remove(flowId);
@@ -223,7 +225,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             if (flow.isFlowFailed()) {
                 flowChains.removeFullFlowChain(flowChainId);
             } else {
-                flowChains.triggerNextFlow(flowChainId);
+                flowChains.triggerNextFlow(flowChainId, contextParams);
             }
         }
     }
@@ -264,6 +266,11 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     private String getFlowChainId(Event<?> event) {
         return event.getHeaders().get(FLOW_CHAIN_ID);
+    }
+
+    private Map<Object, Object> getContextParams(Event<?> event) {
+        Map<Object, Object> contextParams = event.getHeaders().get(FLOW_CONTEXTPARAMS_ID);
+        return contextParams == null ? Map.of() : contextParams;
     }
 
     private void logFlowId(String flowId) {

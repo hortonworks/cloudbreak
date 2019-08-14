@@ -5,7 +5,7 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 
 public interface Flow {
-    void initialize();
+    void initialize(Map<Object, Object> variables);
 
     void initialize(String stateRepresentation, Map<Object, Object> variables);
 

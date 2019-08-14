@@ -256,7 +256,7 @@ public class Flow2HandlerTest {
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
         verify(flowChains, never()).removeFlowChain(anyString());
-        verify(flowChains, never()).triggerNextFlow(anyString());
+        verify(flowChains, never()).triggerNextFlow(anyString(), any(Map.class));
     }
 
     @Test
@@ -270,7 +270,7 @@ public class Flow2HandlerTest {
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
         verify(flowChains, never()).removeFlowChain(anyString());
-        verify(flowChains, times(1)).triggerNextFlow(eq(FLOW_CHAIN_ID));
+        verify(flowChains, times(1)).triggerNextFlow(eq(FLOW_CHAIN_ID), any(Map.class));
     }
 
     @Test
@@ -285,7 +285,7 @@ public class Flow2HandlerTest {
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
         verify(flowChains, never()).removeFullFlowChain(anyString());
-        verify(flowChains, never()).triggerNextFlow(anyString());
+        verify(flowChains, never()).triggerNextFlow(anyString(), any(Map.class));
     }
 
     @Test
@@ -301,7 +301,7 @@ public class Flow2HandlerTest {
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
         verify(flowChains, times(1)).removeFullFlowChain(anyString());
-        verify(flowChains, never()).triggerNextFlow(anyString());
+        verify(flowChains, never()).triggerNextFlow(anyString(), any(Map.class));
     }
 
     @Test
