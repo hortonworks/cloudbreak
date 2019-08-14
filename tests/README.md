@@ -33,7 +33,7 @@ rspec spec/integration/*.rb
 
 **Run all tests with formatted HTML test reports:**
 ```
-rspec -f RspecJunitFormatter -o test-result.xml -f h spec/integration/*.rb | tee test-result.html | ruby -n spec/common/integration_formatter.rb
+rspec -f RspecJunitFormatter -o test-results/rspec/test-result.xml -f h spec/integration/*.rb | tee test-results/rspec/test-result.html | ruby -n spec/common/integration_formatter.rb
 ```
 
 ## Run tests in Docker container
@@ -48,7 +48,7 @@ Or you can use the test project own Make target at [Tests Makefile](Makefile)
 ```
 make all
 ```
-> You can check test results at `tests/test-result.html` or `tests/test-result.xml`
+> You can check test results at `tests/test-results/rspec/test-result.html` or `tests/test-results/rspec/test-result.xml`
 
 #### Run a specific test scenario
 ```

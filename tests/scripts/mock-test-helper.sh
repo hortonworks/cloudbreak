@@ -9,7 +9,7 @@ tmp-cleanup() {
     declare desc="Remove old temporary files and test results before new test run"
 
     if [[ $CLEANUP == "true" ]]; then
-        rm -rf {test_log,allure,.dp,tmp} {test-result.html,test-result.xml}
+        rm -rf {test-logs,allure,.dp,tmp,test-results}
     fi
 }
 

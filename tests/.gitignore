@@ -7,4 +7,5 @@ swagger-*.json
 allure
 ruby-uuid
 tmp
-test_log
+test-logs
+test-results

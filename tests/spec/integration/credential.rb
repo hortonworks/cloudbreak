@@ -22,7 +22,6 @@ RSpec.describe 'Credential test cases', :type => :aruba, :feature => "Credential
   it "Credential - List", :story => "Credentials", :severity => :normal, :testId => 1 do
     with_environment 'DEBUG' => '1' do
       responseHash = MockHelper.getResponseHash("../../../responses/credentials/credentials.json")
-
       expectedEndpointResponse = TraceResponseBuilder.listCredentialsResponseFactory(responseHash)
       MockHelper.setupResponse("env", "listCredentialsV1", responseHash)
 
@@ -38,6 +37,7 @@ RSpec.describe 'Credential test cases', :type => :aruba, :feature => "Credential
   it "Credential - AWS Prerequisites AWS", :story => "AWS Credentials", :severity => :normal, :testId => 2 do
     with_environment 'DEBUG' => '1' do
       result = cb.credential.prerequisites.aws.build(false)
+
       expect(result.exit_status).to eql 0
       expect(result.stdout.empty?).to be_falsy
       [JSON.parse(result.stdout)].flatten.each do |s|
@@ -51,12 +51,11 @@ RSpec.describe 'Credential test cases', :type => :aruba, :feature => "Credential
     end
   end
 
-  it "Credential - Create AWS Credential", :story => "AWS Credentials", :severity => :normal, :testId => 1 do
+  it "Credential - Create AWS Credential", :story => "AWS Credentials", :severity => :normal, :testId => 3 do
     with_environment 'DEBUG' => '1' do
       responseHash = MockHelper.getResponseHash("../../../responses/credentials/post-aws-credential-response.json")
       requestHash = MockHelper.getResponseHash("../../../requests/credentials/post-aws-credential-request.json")
       expectedEndpointRequest = TraceResponseBuilder.createCredentialRequestFactory(requestHash)
-
       MockHelper.setupResponse("env", "createCredentialV1", responseHash)
 
       result = cb.credential.create.aws.key_based.name("cli-aws-key").access_key(@aws_access_key).secret_key(@aws_secret_key).build(false)
@@ -68,10 +67,9 @@ RSpec.describe 'Credential test cases', :type => :aruba, :feature => "Credential
     end
   end
 
-  it "Credential - Describe AWS Credential", :story => "AWS Credentials", :severity => :normal, :testId => 2 do
+  it "Credential - Describe AWS Credential", :story => "AWS Credentials", :severity => :normal, :testId => 4 do
     with_environment 'DEBUG' => '1' do
       responseHash = MockHelper.getResponseHash("../../../responses/credentials/post-aws-credential-response.json")
-
       expectedEndpointResponse = TraceResponseBuilder.getCredentialByNameV1ResponseFactory(responseHash)
       MockHelper.setupResponse("env", "getCredentialByNameV1", responseHash)
 
@@ -84,7 +82,7 @@ RSpec.describe 'Credential test cases', :type => :aruba, :feature => "Credential
     end
   end
 
-  it "Credential - Modify AWS Credential", :story => "AWS Credentials", :severity => :normal, :testId => 1 do
+  it "Credential - Modify AWS Credential", :story => "AWS Credentials", :severity => :normal, :testId => 5 do
     with_environment 'DEBUG' => '1' do
       getResponseHash = MockHelper.getResponseHash("../../../responses/credentials/put-aws-credential-response.json")
       getExpectedEndpointResponse = TraceResponseBuilder.getCredentialByNameV1ResponseFactory(getResponseHash)
@@ -104,11 +102,10 @@ RSpec.describe 'Credential test cases', :type => :aruba, :feature => "Credential
     end
   end
 
-  it "Credential - Delete AWS Credential", :story => "AWS Credentials", :severity => :normal, :testId => 1 do
+  it "Credential - Delete AWS Credential", :story => "AWS Credentials", :severity => :normal, :testId => 6 do
     with_environment 'DEBUG' => '1' do
       responseHash = MockHelper.getResponseHash("../../../responses/credentials/delete-aws-credential-response.json")
       expectedEndpointResponse = TraceResponseBuilder.listCredentialsResponseFactory(responseHash)
-
       MockHelper.setupResponse("env", "deleteCredentialsV1", responseHash)
 
       result = cb.credential.delete.names("amazon").build(false)

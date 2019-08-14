@@ -18,17 +18,17 @@ get-cbd() {
 mock-start-logs() {
     declare desc="Gather Cloudbreak Mock start logs"
 
-    mkdir -pv test_log
+    mkdir -pv test-logs
 
     if [[ $(id -u jenkins 2>/dev/null || echo $?) -gt 1 ]]; then
         sudo chown -R jenkins .
-        sudo docker logs cbreak_cloudbreak_1 > test_log/cloudbreak_start.log
-        sudo docker logs cbreak_environment_1 > test_log/environment_start.log
-        sudo docker logs cbreak_datalake_1 > test_log/datalake_start.log
+        sudo docker logs cbreak_cloudbreak_1 > test-logs/cloudbreak_start.log
+        sudo docker logs cbreak_environment_1 > test-logs/environment_start.log
+        sudo docker logs cbreak_datalake_1 > test-logs/datalake_start.log
     else
-        docker logs cbreak_cloudbreak_1 > test_log/cloudbreak_start.log
-        docker logs cbreak_environment_1 > test_log/environment_start.log
-        docker logs cbreak_datalake_1 > test_log/datalake_start.log
+        docker logs cbreak_cloudbreak_1 > test-logs/cloudbreak_start.log
+        docker logs cbreak_environment_1 > test-logs/environment_start.log
+        docker logs cbreak_datalake_1 > test-logs/datalake_start.log
     fi
 }
 

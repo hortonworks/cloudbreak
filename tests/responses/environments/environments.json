@@ -23,7 +23,9 @@
         "creator": "crn:altus:iam:us-west-1:hortonworks:user:mock@hortonworks.com"
       },
       "regions": {
-        "names": ["eu-west-1"],
+        "names": [
+          "eu-west-1"
+        ],
         "displayNames": {
           "eu-west-1": "EU (Ireland)"
         }
@@ -36,7 +38,9 @@
       },
       "telemetry": null,
       "network": {
-        "subnetIds": ["subnet-123456789abcdefghi"],
+        "subnetIds": [
+          "subnet-123456789abcdefghi"
+        ],
         "aws": {
           "vpcId": "vpc-123456789abcdefgh"
         },
@@ -54,8 +58,7 @@
       },
       "environmentStatus": "DELETE_FAILED",
       "authentication": null,
-      "statusReason":
-      "com.sequenceiq.environment.exception.FreeIpaOperationFailedException: FreeIpa deletion operation failed: Termination failed: The security token included in the request is invalid. (Service: AmazonCloudFormation; Status Code: 403; Error Code: InvalidClientTokenId; Request ID: 9f77a882-a3b8-11e9-a694-a5e2a1fba380)",
+      "statusReason": "com.sequenceiq.environment.exception.FreeIpaOperationFailedException: FreeIpa deletion operation failed: Termination failed: The security token included in the request is invalid. (Service: AmazonCloudFormation; Status Code: 403; Error Code: InvalidClientTokenId; Request ID: 9f77a882-a3b8-11e9-a694-a5e2a1fba380)",
       "created": 1561377876808,
       "securityAccess": null
     },
@@ -76,14 +79,15 @@
         "description": "",
         "attributes": {
           "enginePath": "secret",
-          "secretPath":
-          "env/shared/hortonworks/credential/attributes/f3e817b0-fc8e-4d69-8ff6-ebfb6fa85cfd-16be0ae829d"
+          "secretPath": "env/shared/hortonworks/credential/attributes/f3e817b0-fc8e-4d69-8ff6-ebfb6fa85cfd-16be0ae829d"
         },
         "crn": "crn:altus:environments:us-west-1:hortonworks:credential:60be6586-24ba-42a3-af50-abd2f72d00a7",
         "creator": "crn:altus:iam:us-west-1:hortonworks:user:mock@hortonworks.com"
       },
       "regions": {
-        "names": ["eu-west-1"],
+        "names": [
+          "eu-west-1"
+        ],
         "displayNames": {
           "eu-west-1": "EU (Ireland)"
         }
@@ -96,7 +100,9 @@
       },
       "telemetry": null,
       "network": {
-        "subnetIds": ["subnet-123456789abcdefghi"],
+        "subnetIds": [
+          "subnet-123456789abcdefghi"
+        ],
         "aws": {
           "vpcId": "vpc-123456789abcdefgh"
         },

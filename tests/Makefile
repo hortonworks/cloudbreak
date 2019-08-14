@@ -50,11 +50,12 @@ rerun-integration-test:
 #   For custom version apply like: 'GIT_FIRST_PARENT=2.8.0-dev.374 make start-mock'
 # Execute an entire test suite or just one scenario you can start this with: 'CLI_TEST_FILES=spec/integration/credential.rb make integration-test'
 integration-test:
+	rm -rf allure/ test-results/
 	BLUEPRINT_URL=$(BLUEPRINT_URL) tmp/docker-test.sh
 
 clean-after-tests:
 	sudo chmod -Rf 777 tmp/
-	rm -rf test_log/ tmp/ .dp test-result.xml swagger-*.json
+	rm -rf test-logs/ tmp/ .dp swagger-*.json
 
 .PHONY:
 	all

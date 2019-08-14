@@ -8,7 +8,7 @@
 : ${ENV_BASE_URL:=http://127.0.0.1:8088}
 : ${USERNAME_CLI:=admin@example.com}
 : ${PASSWORD_CLI:=cloudbreak}
-: ${CLI_TEST_FILES:=spec/integration/credential.rb}
+: ${CLI_TEST_FILES:=spec/integration/*.rb}
 : ${BLUEPRINT_URL:? required}
 : ${IMAGE_UPDATE:=true}
 
@@ -63,6 +63,8 @@ cbd-version() {
 }
 
 test-regression() {
+    mkdir -pv test-results/rspec
+
     docker run -i \
        --rm \
        --privileged \

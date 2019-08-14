@@ -1,6 +1,6 @@
 # You have to update the values according to your settings
 
-export AWS_ROLE_ARN=arn:aws:iam::test:role/test
+export AWS_ROLE_ARN=arn:aws:iam::1234567890:role/test
 
 export OS_V2_USERNAME=test
 export OS_V2_PASSWORD=test
@@ -27,4 +27,4 @@ export PASSWORD_CLI=test
 
 export WORKSPACE=/Users/mhalmy/Work/cb-cli
 export TARGET_CBD_VERSION=2.8.0-dev.85
-export CLI_TEST_FILES=spec/integration/credential.rb
+export CLI_TEST_FILES=spec/integration/*.rb

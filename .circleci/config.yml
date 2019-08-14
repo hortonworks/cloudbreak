@@ -13,9 +13,9 @@ jobs:
       - run: |
           make integration-test
       - store_test_results:
-          path: tests/
+          path: tests/test-results
       - store_artifacts:
-          path: tests/test-result.html
+          path: tests/test-results/rspec/test-result.html
       - store_artifacts:
           path: tests/allure/
 

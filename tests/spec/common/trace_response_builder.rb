@@ -20,6 +20,7 @@ class TraceResponseBuilder
     @@get_users_endpoint = "#{@@cb_api_base}/v4/users"
     @@base_credential_endpoint = "#{@@env_api_base}/v1/credentials"
     @@prerequisites_endpoint = "#{@@base_credential_endpoint}/prerequisites"
+    @@base_environment_endpoint = "#{@@env_api_base}/v1/env"
 
     def self.createWorkspaceRequestFactory(requestBody)
         return {
@@ -88,6 +89,20 @@ class TraceResponseBuilder
         return {
             :calledEndpoint => "#{@@prerequisites_endpoint}/" + cloudPlatform,
             :receivedValue => responseBody
+        }
+    end
+
+    def self.listEnvironmentsResponseFactory(responseBody)
+        return {
+            :calledEndpoint => @@base_environment_endpoint,
+            :receivedValue => responseBody
+        }
+    end
+
+    def self.createEnvironmentRequestFactory(requestBody)
+        return {
+            :calledEndpoint => @@base_environment_endpoint,
+            :sentValue => requestBody
         }
     end
 end

@@ -21,13 +21,13 @@ DEBUG=1 dp configure --server $BASE_URL --workspace $USERNAME_CLI --apikeyid Y3J
 
 echo "Running RSpec with "$CLI_TEST_FILES
 mkdir -p tmp/aruba
-rspec -f RspecJunitFormatter -o test-result.xml -f h $CLI_TEST_FILES | tee test-result.html | ruby -n spec/common/integration_formatter.rb
+rspec -f RspecJunitFormatter -o test-results/rspec/test-result.xml -f h $CLI_TEST_FILES | tee test-results/rspec/test-result.html | ruby -n spec/common/integration_formatter.rb
 export RESULT=$?
 
 allure generate --clean allure/allure-results -o allure/allure-report
 
 if [[ $RESULT -eq 0 ]]; then
-    cat test-result.html | grep -e ".*script.*totals.*failure" | cut -d ',' -f 2 | grep -e " 0"
+    cat test-results/rspec/test-result.html | grep -e ".*script.*totals.*failure" | cut -d ',' -f 2 | grep -e " 0"
     export RESULT=$?
 fi
 

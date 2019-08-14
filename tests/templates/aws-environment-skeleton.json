@@ -1,0 +1,35 @@
+{
+  "name": "cli-aws-env",
+  "description": "",
+  "location": {
+    "name": "eu-west-1"
+  },
+  "authentication": {
+    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDp3+6YY25frGfFaWDYY5PASJKcC3mmKr9N/mRDsWCxrg+zEw+v0Qi89S/YkJNYUqAlOLPkuFKeCygnUT7L80RBUeChtec3D7ZxvBB8dUJBQOpoDrVWxkd6c2u3cyiba2UD9zeg6cbJLRuH5L+UPm8AcTUWQKqg+/MMCCzlLSH1kQ=="
+  },
+  "credentialName": "amazon",
+  "telemetry": {
+    "logging": {
+      "s3": {
+        "instanceProfile": "arn:aws:iam::1234567890:instance-profile/mock.testing.instance.profile"
+      },
+      "storageLocation": "s3a://mocktest"
+    }
+  },
+  "regions": [
+    "eu-west-1"
+  ],
+  "securityAccess": {
+    "cidr": "0.0.0.0/0"
+  },
+  "network": {
+    "subnetIds": [
+      "subnet-123456789abcdefgh",
+      "subnet-223456789abcdefgh",
+      "subnet-323456789abcdefgh"
+    ],
+    "aws": {
+      "vpcId": "vpc-123456789abcdefgh"
+    }
+  }
+}

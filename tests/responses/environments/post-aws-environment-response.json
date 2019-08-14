@@ -1,0 +1,103 @@
+{
+  "crn": "crn:altus:environments:us-west-1:hortonworks:environment:e93bfea8-0a09-488c-bd4e-2bbacbe0e11c",
+  "name": "cli-aws-env",
+  "description": "",
+  "cloudPlatform": "AWS",
+  "createFreeIpa": true,
+  "credential": {
+    "name": "amazon",
+    "cloudPlatform": "AWS",
+    "aws": {
+      "keyBased": {},
+      "govCloud": false
+    },
+    "description": "",
+    "attributes": {
+      "enginePath": "secret",
+      "secretPath": "env/shared/hortonworks/credential/attributes/3e572541-c09b-4610-aaad-36d079b1c912-16b6f7d2150"
+    },
+    "crn": "crn:altus:environments:us-west-1:hortonworks:credential:ad2986b4-8abc-44c9-a4e8-e9be9877834a",
+    "creator": "crn:altus:iam:us-west-1:hortonworks:user:mock@hortonworks.com"
+  },
+  "regions": {
+    "names": [
+      "eu-west-1"
+    ],
+    "displayNames": {
+      "eu-west-1": "EU (Ireland)"
+    }
+  },
+  "location": {
+    "name": "eu-west-1",
+    "displayName": "EU (Ireland)",
+    "latitude": 53.33306114,
+    "longitude": -6.248905682
+  },
+  "telemetry": {
+    "reportDeploymentLogs": false,
+    "logging": {
+      "storageLocation": "s3a://mocktest",
+      "s3": {
+        "instanceProfile": "arn:aws:iam::1234567890:instance-profile/mock.testing.instance.profile",
+        "s3GuardDynamoTableName": null
+      },
+      "attributes": {}
+    },
+    "workloadAnalytics": null
+  },
+  "network": {
+    "subnetIds": [
+      "subnet-123456789abcdefgh",
+      "subnet-223456789abcdefgh",
+      "subnet-323456789abcdefgh"
+    ],
+    "aws": {
+      "vpcId": "vpc-123456789abcdefgh"
+    },
+    "crn": "crn:altus:environments:us-west-1:hortonworks:network:fbf2c9a1-2132-4df3-b739-9436e0e6fea3",
+    "subnetMetas": {
+      "subnet-123456789abcdefgh": {
+        "id": "subnet-123456789abcdefgh",
+        "name": "Mock-EUW1-S2",
+        "availabilityZone": "eu-west-1b",
+        "cidr": "10.65.65.0/24",
+        "privateSubnet": true,
+        "mapPublicIpOnLaunch": false,
+        "igwAvailable": false
+      },
+      "subnet-223456789abcdefgh": {
+        "id": "subnet-223456789abcdefgh",
+        "name": "Mock-EUW1-S1",
+        "availabilityZone": "eu-west-1a",
+        "cidr": "10.65.64.0/24",
+        "privateSubnet": true,
+        "mapPublicIpOnLaunch": false,
+        "igwAvailable": false
+      },
+      "subnet-323456789abcdefgh": {
+        "id": "subnet-323456789abcdefgh",
+        "name": "Mock-EUW1-S3",
+        "availabilityZone": "eu-west-1c",
+        "cidr": "10.65.66.0/24",
+        "privateSubnet": true,
+        "mapPublicIpOnLaunch": false,
+        "igwAvailable": false
+      }
+    }
+  },
+  "environmentStatus": "CREATION_INITIATED",
+  "authentication": {
+    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDp3+6YY25frGfFaWDYY5PASJKcC3mmKr9N/mRDsWCxrg+zEw+v0Qi89S/YkJNYUqAlOLPkuFKeCygnUT7L80RBUeChtec3D7ZxvBB8dUJBQOpoDrVWxkd6c2u3cyiba2UD9zeg6cbJLRuH5L+UPm8AcTUWQKqg+/MMCCzlLSH1kQ==",
+    "publicKeyId": null,
+    "loginUserName": "cloudbreak"
+  },
+  "created": 1565779617354,
+  "tunnel": "DIRECT",
+  "securityAccess": {
+    "securityGroupIdForKnox": null,
+    "defaultSecurityGroupId": null,
+    "cidr": "0.0.0.0/0"
+  },
+  "idBrokerMappingSource": "MOCK",
+  "adminGroupName": "cdp_env_admin_cli-aws-env"
+}
