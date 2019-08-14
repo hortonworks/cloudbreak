@@ -1,7 +1,8 @@
-package com.sequenceiq.cloudbreak.auth.altus;
+package com.sequenceiq.cloudbreak.auth.security;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.Service;
 
 /**
@@ -51,6 +52,15 @@ public class InternalCrnBuilder {
 
     public String getInternalCrnForServiceAsString() {
         return getInternalCrnForService().toString();
+    }
+
+    public static CrnUser createInternalCrnUser(Crn crn) {
+        return new CrnUser(crn.getResource(),
+                crn.toString(),
+                crn.getResourceType().toString(),
+                crn.getResourceType().toString(),
+                crn.getAccountId(),
+                "ROLE_" + crn.getService().toString().toUpperCase());
     }
 
 }
