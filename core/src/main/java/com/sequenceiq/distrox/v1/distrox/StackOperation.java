@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
+import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 
 @Service
 public class StackOperation {
@@ -78,6 +79,9 @@ public class StackOperation {
     @Inject
     private EnvironmentServiceDecorator environmentServiceDecorator;
 
+    @Inject
+    private SdxServiceDecorator sdxServiceDecorator;
+
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, StackType stackType) {
         Set<StackViewV4Response> stackViewResponses;
         LOGGER.info("List for Stack in workspace {} and environmentName {}.", workspaceId, environmentName);
@@ -86,6 +90,8 @@ public class StackOperation {
                 StackViewV4Response.class);
         LOGGER.info("Adding environment name and credential to the responses.");
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);
+        LOGGER.info("Adding SDX CRN and name to the responses.");
+        sdxServiceDecorator.prepareMultipleSdxAttributes(stackViewResponses);
         return new StackViewV4Responses(stackViewResponses);
     }
 
@@ -97,6 +103,8 @@ public class StackOperation {
                 StackViewV4Response.class);
         LOGGER.info("Adding environment name and credential to the responses.");
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);
+        LOGGER.info("Adding SDX CRN and name to the responses.");
+        sdxServiceDecorator.prepareMultipleSdxAttributes(stackViewResponses);
         return new StackViewV4Responses(stackViewResponses);
     }
 
@@ -107,8 +115,10 @@ public class StackOperation {
         LOGGER.info("Cloudbreak user for the requested stack is {}.", cloudbreakUser);
         Workspace workspace = workspaceService.get(workspaceId, user);
         StackV4Response stackV4Response = stackCommonService.createInWorkspace(request, user, workspace);
-        LOGGER.info("Adding environment name and credential to the responses.");
+        LOGGER.info("Adding environment name and credential to the response.");
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackV4Response);
+        LOGGER.info("Adding SDX CRN and name to the response.");
+        sdxServiceDecorator.prepareSdxAttributes(stackV4Response);
         return stackV4Response;
     }
 
@@ -125,7 +135,10 @@ public class StackOperation {
             LOGGER.info("Query Stack successfully finished with workspace {} crn {}. Decorating environmentname and credential",
                     workspaceId, stackAccessDto.getCrn());
         }
+        LOGGER.info("Adding environment name and credential to the response.");
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackResponse);
+        LOGGER.info("Adding SDX CRN and name to the response.");
+        sdxServiceDecorator.prepareSdxAttributes(stackResponse);
         LOGGER.info("Query Stack successfully decorated.");
         return stackResponse;
     }

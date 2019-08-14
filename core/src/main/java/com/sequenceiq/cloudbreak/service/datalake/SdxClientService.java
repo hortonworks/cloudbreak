@@ -29,4 +29,12 @@ public class SdxClientService {
             return new ArrayList<>();
         }
     }
+
+    public List<SdxClusterResponse> list() {
+        try {
+            return sdxEndpoint.list(null);
+        } catch (WebApplicationException | ProcessingException e) {
+            return new ArrayList<>();
+        }
+    }
 }

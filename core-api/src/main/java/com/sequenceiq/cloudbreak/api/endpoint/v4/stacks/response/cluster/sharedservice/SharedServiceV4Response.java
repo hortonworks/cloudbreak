@@ -19,6 +19,10 @@ public class SharedServiceV4Response implements JsonEntity {
 
     private Long sharedClusterId;
 
+    private String sdxName;
+
+    private String sdxCrn;
+
     private Set<AttachedClusterInfoV4Response> attachedClusters = new HashSet<>();
 
     public String getSharedClusterName() {
@@ -43,5 +47,21 @@ public class SharedServiceV4Response implements JsonEntity {
 
     public void setAttachedClusters(Set<AttachedClusterInfoV4Response> attachedClusters) {
         this.attachedClusters = attachedClusters;
+    }
+
+    public String getSdxName() {
+        return sdxName;
+    }
+
+    public void setSdxName(String sdxName) {
+        this.sdxName = sdxName;
+    }
+
+    public String getSdxCrn() {
+        return sdxCrn;
+    }
+
+    public void setSdxCrn(String sdxCrn) {
+        this.sdxCrn = sdxCrn;
     }
 }
