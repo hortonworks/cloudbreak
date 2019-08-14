@@ -30,15 +30,15 @@ import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
 @RunWith(MockitoJUnitRunner.class)
 public class UmsWorkspaceAuthorizationServiceTest {
 
-    private static final String WORKSPACE_READER_ROLE_CRN = "crn:altus:iam:us-west-1:1234:resourceRole:WorkspaceReader";
+    private static final String WORKSPACE_READER_ROLE_CRN = "crn:cdp:iam:us-west-1:1234:resourceRole:WorkspaceReader";
 
-    private static final String WORKSAPCE_WRITER_ROLE_CRN = "crn:altus:iam:us-west-1:1234:resourceRole:WorkspaceWriter";
+    private static final String WORKSAPCE_WRITER_ROLE_CRN = "crn:cdp:iam:us-west-1:1234:resourceRole:WorkspaceWriter";
 
-    private static final String WORKSPACE_CRN = "crn:altus:iam:us-west-1:1234:workspace:1234";
+    private static final String WORKSPACE_CRN = "crn:cdp:iam:us-west-1:1234:workspace:1234";
 
     private static final String USER_ID = "userId";
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:1234:user:" + USER_ID;
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:" + USER_ID;
 
     @Mock
     private GrpcUmsClient umsClient;
@@ -51,7 +51,7 @@ public class UmsWorkspaceAuthorizationServiceTest {
         User user = createUser();
         when(umsClient.listResourceRoleAssigments(eq(user.getUserCrn()), eq(user.getUserCrn()), any())).thenReturn(Lists.newArrayList(
                 createResourceRoleAssigment(WORKSPACE_READER_ROLE_CRN, WORKSPACE_CRN),
-                createResourceRoleAssigment(WORKSPACE_READER_ROLE_CRN, "crn:altus:iam:us-west-1:1234:other:1234"),
+                createResourceRoleAssigment(WORKSPACE_READER_ROLE_CRN, "crn:cdp:iam:us-west-1:1234:other:1234"),
                 createResourceRoleAssigment(WORKSAPCE_WRITER_ROLE_CRN, WORKSPACE_CRN)
         ));
 

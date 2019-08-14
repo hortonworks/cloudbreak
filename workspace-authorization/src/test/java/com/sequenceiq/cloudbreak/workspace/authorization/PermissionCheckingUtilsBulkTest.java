@@ -35,11 +35,11 @@ public class PermissionCheckingUtilsBulkTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
-    private static final String WORKSPACE_CRN = "crn:altus:iam:us-west-1:1234:workspace:" + WORKSPACE_ID;
+    private static final String WORKSPACE_CRN = "crn:cdp:iam:us-west-1:1234:workspace:" + WORKSPACE_ID;
 
     private static final String USER_ID = "userId";
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:1234:user:" + USER_ID;
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:" + USER_ID;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -80,7 +80,7 @@ public class PermissionCheckingUtilsBulkTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(workspaceAwareResource.getWorkspace()).thenReturn(workspace);
-        when(workspace.getResourceCrn()).thenReturn("crn:altus:iam:us-west-1:1234:workspace:1");
+        when(workspace.getResourceCrn()).thenReturn("crn:cdp:iam:us-west-1:1234:workspace:1");
     }
 
     @Test

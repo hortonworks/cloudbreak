@@ -37,7 +37,7 @@ public class UmsAuthorizationServiceTest {
 
     private static final String USER_ID = "userId";
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:1234:user:" + USER_ID;
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:" + USER_ID;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();

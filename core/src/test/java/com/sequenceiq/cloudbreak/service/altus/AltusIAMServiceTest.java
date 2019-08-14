@@ -22,7 +22,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public class AltusIAMServiceTest {
 
-    private static final String TEST_CRN = "crn:altus:iam:us-west-1:accountId:user:name";
+    private static final String TEST_CRN = "crn:cdp:iam:us-west-1:accountId:user:name";
 
     private AltusIAMService underTest;
 

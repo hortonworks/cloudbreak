@@ -26,7 +26,7 @@ public class MDCFilterTest {
 
     private static final String REQUEST_ID = "requestId1";
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:cloudera:user:bob@cloudera.com";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com";
 
     private MDCFilter underTest;
 

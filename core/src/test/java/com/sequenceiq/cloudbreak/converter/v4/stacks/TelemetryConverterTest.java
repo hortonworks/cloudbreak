@@ -71,7 +71,7 @@ public class TelemetryConverterTest {
         loggingResponse.setS3(s3Params);
         response.setLogging(loggingResponse);
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setCrn("crn:altus:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
+        sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
         sdxClusterResponse.setName("sdxName");
         // WHEN
         TelemetryRequest result = underTest.convert(response, sdxClusterResponse, true);
@@ -95,7 +95,7 @@ public class TelemetryConverterTest {
         waResponse.setDatabusEndpoint("myOtherEndpoint");
         response.setWorkloadAnalytics(waResponse);
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setCrn("crn:altus:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
+        sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
         sdxClusterResponse.setName("sdxName");
         // WHEN
         TelemetryRequest result = underTest.convert(response, sdxClusterResponse, false);

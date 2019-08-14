@@ -163,7 +163,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
         workloadAnalytics.setDatabusEndpoint("customEndpoint");
         // WHEN
-        underTest.enrichWithSdxData("mySdxName", "crn:altus:iam:us-west-1:accountId:user:mySdxId", null, workloadAnalytics, safetyValveMap);
+        underTest.enrichWithSdxData("mySdxName", "crn:cdp:iam:us-west-1:accountId:user:mySdxId", null, workloadAnalytics, safetyValveMap);
         // THEN
         assertTrue(safetyValveMap.containsKey("databus.header.sdx.id"));
         assertTrue(safetyValveMap.containsKey("databus.header.sdx.name"));

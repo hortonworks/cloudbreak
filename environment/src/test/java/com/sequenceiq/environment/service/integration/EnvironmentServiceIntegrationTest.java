@@ -74,7 +74,7 @@ public class EnvironmentServiceIntegrationTest {
 
     private static final String TEST_ACCOUNT_ID = "accid";
 
-    private static final String TEST_CRN = String.format("crn:altus:iam:us-west-1:%s:user:mockuser@cloudera.com", TEST_ACCOUNT_ID);
+    private static final String TEST_CRN = String.format("crn:cdp:iam:us-west-1:%s:user:mockuser@cloudera.com", TEST_ACCOUNT_ID);
 
     private static final String USER_CODE = "1234";
 

@@ -46,7 +46,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudStorageManifesterTest {
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:cloudera:user:bob@cloudera.com";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();

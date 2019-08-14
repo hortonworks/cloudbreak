@@ -54,7 +54,7 @@ public class RestUrlParserTest {
 
     private static final String WORKSPACE_NAME = "some-stupid-workspace-name-34";
 
-    private static final String RESOURCE_CRN = "crn:altus:cloudbreak:us-west:default:stack:440ac57e-9f21-4b9a-bcfd-3034a5738b12";
+    private static final String RESOURCE_CRN = "crn:cdp:cloudbreak:us-west:default:stack:440ac57e-9f21-4b9a-bcfd-3034a5738b12";
 
     private static final String PATH_AUTOSCALE = "autoscale";
 

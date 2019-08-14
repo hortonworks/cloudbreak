@@ -28,7 +28,7 @@ public class CrnHelper {
     }
 
     public static String generateCrn(String tenant, String user) {
-        return "crn:altus:iam:us-west-1:" + tenant + ":user:" + user;
+        return "crn:cdp:iam:us-west-1:" + tenant + ":user:" + user;
     }
 
     public static AltusKey generateAltusApiKey(String tenant, String user) {

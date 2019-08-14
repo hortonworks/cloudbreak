@@ -84,7 +84,7 @@ public class StackServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:1234:user:1";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final String OWNER = "1234567";
 

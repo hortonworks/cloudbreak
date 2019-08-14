@@ -62,7 +62,7 @@ import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 
 public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
-    private static final String OWNER_CRN = "crn:altus:iam:us-west-1:cloudera:user:bob@cloudera.com";
+    private static final String OWNER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com";
 
     private static final String ENVIRONMENT_CRN = "myenv";
 

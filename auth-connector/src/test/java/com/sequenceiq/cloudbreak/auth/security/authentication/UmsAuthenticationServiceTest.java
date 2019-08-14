@@ -63,7 +63,7 @@ public class UmsAuthenticationServiceTest {
     public void testInvalidCrnDueToParse() {
         thrown.expect(UmsAuthenticationException.class);
 
-        String crn = "crn:altus:cookie:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
+        String crn = "crn:cdp:cookie:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
         try {
             underTest.getCloudbreakUser(crn, "principal");
         } catch (UmsAuthenticationException e) {
@@ -76,7 +76,7 @@ public class UmsAuthenticationServiceTest {
     public void testInvalidTypeCrn() {
         thrown.expect(UmsAuthenticationException.class);
 
-        String crn = "crn:altus:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
+        String crn = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
         try {
             underTest.getCloudbreakUser(crn, "principal");
         } catch (UmsAuthenticationException e) {
@@ -87,7 +87,7 @@ public class UmsAuthenticationServiceTest {
 
     @Test
     public void testUserCrn() {
-        String crn = "crn:altus:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
+        String crn = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
         UserManagementProto.User user = UserManagementProto.User.newBuilder()
                 .setUserId("userId")
                 .setEmail("e@mail.com")
@@ -104,7 +104,7 @@ public class UmsAuthenticationServiceTest {
 
     @Test
     public void testMachineUserCrn() {
-        String crn = "crn:altus:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:machineUser:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
+        String crn = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:machineUser:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
         UserManagementProto.MachineUser machineUser = UserManagementProto.MachineUser.newBuilder()
                 .setMachineUserId("machineUserId")
                 .setCrn(crn)

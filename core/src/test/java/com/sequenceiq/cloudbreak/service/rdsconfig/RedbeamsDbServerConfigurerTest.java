@@ -26,7 +26,7 @@ public class RedbeamsDbServerConfigurerTest {
 
     private String exampleJdbcUrl = "jdbc:postgresql://dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/hive";
 
-    private String dbServerCrn = "crn:altus:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
+    private String dbServerCrn = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
 
     private String dbHost = "dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com";
 
