@@ -88,7 +88,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     public T getByNameForWorkspace(String name, Workspace workspace) {
         Optional<T> object = repository().findByNameAndWorkspace(name, workspace);
         if (object.isEmpty()) {
-            throw new NotFoundException(String.format("Not found with name '%s'", name));
+            throw new NotFoundException(String.format("No resource found with name '%s'", name));
         }
         MDCBuilder.buildMdcContext(object.get());
         return object.get();
@@ -101,7 +101,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
                 results.stream().map(WorkspaceAwareResource::getName).collect(Collectors.toSet()));
 
         if (!notFound.isEmpty()) {
-            throw new NotFoundException(String.format("Not found with name(s) '%s'",
+            throw new NotFoundException(String.format("No resource(s) found with name(s) '%s'",
                     notFound.stream().map(name -> '\'' + name + '\'').collect(Collectors.joining(", "))));
         }
 
@@ -112,7 +112,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     public T getByNameForWorkspaceId(String name, Long workspaceId) {
         Optional<T> object = repository().findByNameAndWorkspaceId(name, workspaceId);
         if (object.isEmpty()) {
-            throw new NotFoundException(String.format("Not found with name '%s'", name));
+            throw new NotFoundException(String.format("No resource found with name '%s'", name));
         }
         MDCBuilder.buildMdcContext(object.get());
         return object.get();

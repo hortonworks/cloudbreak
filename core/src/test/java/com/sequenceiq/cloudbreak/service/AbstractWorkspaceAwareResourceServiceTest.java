@@ -85,7 +85,7 @@ public class AbstractWorkspaceAwareResourceServiceTest {
                 .thenReturn(ImmutableSet.of(r1));
 
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found with name(s) ''badname1', 'badname3''");
+        thrown.expectMessage("No resource(s) found with name(s) ''badname1', 'badname3''");
 
         underTest.deleteMultipleByNameFromWorkspace(names, 1L);
     }
@@ -95,7 +95,7 @@ public class AbstractWorkspaceAwareResourceServiceTest {
         when(testRepository.findByNameAndWorkspaceId(anyString(), any())).thenReturn(Optional.empty());
 
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Not found with name 'badname1'");
+        thrown.expectMessage("No resource found with name 'badname1'");
 
         underTest.deleteByNameFromWorkspace("badname1", 1L);
     }
