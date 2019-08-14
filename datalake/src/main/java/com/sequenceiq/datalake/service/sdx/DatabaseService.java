@@ -137,7 +137,8 @@ public class DatabaseService {
                                 if (rdsStatus.getStatusReason() != null && rdsStatus.getStatusReason().contains("does not exist")) {
                                     return AttemptResults.finishWith(null);
                                 }
-                                return AttemptResults.breakFor("Database operation failed " + sdxCluster.getEnvName() + " statusReason: " + rdsStatus.getStatusReason());
+                                return AttemptResults.breakFor("Database operation failed " + sdxCluster.getEnvName()
+                                        + " statusReason: " + rdsStatus.getStatusReason());
                             } else {
                                 return AttemptResults.justContinue();
                             }
