@@ -44,11 +44,27 @@
       {
         "refName": "yarn",
         "serviceType": "YARN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_admin_acl",
+            "value": "yarn,hive"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "yarn-RESOURCEMANAGER-BASE",
             "roleType": "RESOURCEMANAGER",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "yarn_resourcemanager_scheduler_class",
+                "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+              },
+              {
+                "name": "resourcemanager_capacity_scheduler_configuration",
+                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value></value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value></value></property><property><name>yyarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property></configuration>"
+              }
+            ]
           },
           {
             "refName": "yarn-NODEMANAGER-WORKER",
@@ -96,7 +112,13 @@
           {
             "refName": "tez-GATEWAY-BASE",
             "roleType": "GATEWAY",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "tez-conf/tez-site.xml_client_config_safety_valve",
+                "value": "<property><name>tez.am.history.logging.enabled</name><value>false</value></property>"
+              }
+            ]
           }
         ]
       },
@@ -137,6 +159,10 @@
           {
             "name": "mapreduce_yarn_service",
             "ref": "yarn"
+          },
+          {
+            "name": "tez_container_size",
+            "value": "4096"
           }
         ],
         "roleConfigGroups": [
