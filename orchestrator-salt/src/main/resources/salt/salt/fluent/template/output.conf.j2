@@ -7,6 +7,7 @@
     s3_bucket {{fluent.s3LogArchiveBucketName}}
     path "{{fluent.logFolderName}}/{{fluent.serviceLogPathSuffix}}"
     s3_object_key_format %{path}-%{index}.%{file_extension}
+    auto_create_bucket false
 
     <buffer tag,time>
       @type file
@@ -27,6 +28,7 @@
     s3_bucket {{fluent.s3LogArchiveBucketName}}
     path "{{fluent.logFolderName}}/{{fluent.cmCommandLogPathSuffix}}"
     s3_object_key_format %{path}-%{index}.%{file_extension}
+    auto_create_bucket false
 
     <buffer tag,time>
       @type file
@@ -57,6 +59,7 @@
     store_as                 gzip
     path                     "{{fluent.logFolderName}}/{{fluent.serviceLogPathSuffix}}"
     azure_object_key_format  %{path}-%{index}.%{file_extension}
+    auto_create_container    false
 
     <buffer tag,time>
       @type file
@@ -86,6 +89,7 @@
     store_as                 gzip
     path                     "{{fluent.logFolderName}}/{{fluent.cmCommandLogPathSuffix}}"
     azure_object_key_format  %{path}-%{index}.%{file_extension}
+    auto_create_container    false
 
     <buffer tag,time>
       @type file
