@@ -14,9 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -75,10 +73,4 @@ public interface DatabaseV4Endpoint {
             nickname = "getDatabaseRequestFromNameInWorkspace")
     DatabaseV4Request getRequest(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
-    @POST
-    @Path("test")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
-            nickname = "testDatabaseConnectionInWorkspace")
-    DatabaseTestV4Response test(@PathParam("workspaceId") Long workspaceId, @Valid DatabaseTestV4Request databaseTestV4Request);
 }

@@ -4,19 +4,19 @@ import java.util.Date;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
+import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 
 @Component
 public class DatabaseV4RequestToRDSConfigConverter extends AbstractConversionServiceAwareConverter<DatabaseV4Request, RDSConfig> {
@@ -45,7 +45,6 @@ public class DatabaseV4RequestToRDSConfigConverter extends AbstractConversionSer
         rdsConfig.setCreationDate(new Date().getTime());
         rdsConfig.setStatus(ResourceStatus.USER_MANAGED);
         rdsConfig.setType(source.getType());
-
         if (rdsConfig.getDatabaseEngine() != DatabaseVendor.POSTGRES && StringUtils.isEmpty(source.getConnectorJarUrl())) {
             String msg = String.format("The 'connectorJarUrl' field needs to be specified for database engine: '%s'.", rdsConfig.getDatabaseEngine());
             LOGGER.info(msg);

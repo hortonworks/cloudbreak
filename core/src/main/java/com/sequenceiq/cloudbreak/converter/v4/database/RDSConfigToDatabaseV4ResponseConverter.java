@@ -33,7 +33,6 @@ public class RDSConfigToDatabaseV4ResponseConverter extends AbstractConversionSe
         json.setConnectionUserName(getConversionService().convert(source.getConnectionUserNameSecret(), SecretResponse.class));
         json.setConnectionPassword(getConversionService().convert(source.getConnectionPasswordSecret(), SecretResponse.class));
         json.setDatabaseEngineDisplayName(source.getDatabaseEngine().displayName());
-        json.setConnectorJarUrl(source.getConnectorJarUrl());
         json.setCreationDate(source.getCreationDate());
         json.setClusterNames(clusterService.findNamesByRdsConfig(source.getId()));
         json.setType(source.getType());
