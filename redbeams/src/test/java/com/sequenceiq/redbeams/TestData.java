@@ -12,6 +12,6 @@ public final class TestData {
     }
 
     public static Crn getTestCrn(String accountId, String resourceType, String resourceId) {
-        return Crn.safeFromString(String.format("crn:altus:redbeams:us-west-1:%s:%s:%s", accountId, resourceType, resourceId));
+        return Crn.safeFromString(String.format("crn:cdp:redbeams:us-west-1:%s:%s:%s", accountId, resourceType, resourceId));
     }
 }

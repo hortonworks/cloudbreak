@@ -80,7 +80,7 @@ public class DBStackTest {
         dbStack.setTemplate("template");
         assertEquals("template", dbStack.getTemplate());
 
-        Crn ownerCrn = Crn.safeFromString("crn:altus:iam:us-west-1:cloudera:user:bob@cloudera.com");
+        Crn ownerCrn = Crn.safeFromString("crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com");
         dbStack.setOwnerCrn(ownerCrn);
         assertEquals(ownerCrn, dbStack.getOwnerCrn());
 

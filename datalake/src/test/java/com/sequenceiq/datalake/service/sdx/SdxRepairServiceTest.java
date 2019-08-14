@@ -32,7 +32,7 @@ import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 @RunWith(MockitoJUnitRunner.class)
 public class SdxRepairServiceTest {
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:cloudera:user:bob@cloudera.com";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com";
 
     @Mock
     private CloudbreakServiceUserCrnClient cloudbreakClient;

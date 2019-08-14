@@ -29,7 +29,7 @@ public class CloudStorageFolderResolverServiceTest {
         Telemetry telemetry = createTelemetry();
         // WHEN
         underTest.updateStorageLocation(telemetry, FluentClusterType.DATAHUB.value(), "mycluster",
-                "crn:altus:cloudbreak:us-west-1:someone:stack:12345");
+                "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         // THEN
         assertEquals("s3://mybucket/cluster-logs/datahub/mycluster_12345", telemetry.getLogging().getStorageLocation());
     }
@@ -43,7 +43,7 @@ public class CloudStorageFolderResolverServiceTest {
         telemetry.getLogging().setStorageLocation("wasb://mycontainer");
         // WHEN
         underTest.updateStorageLocation(telemetry, FluentClusterType.DATAHUB.value(), "mycluster",
-                "crn:altus:cloudbreak:us-west-1:someone:stack:12345");
+                "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         // THEN
         assertEquals("wasb://mycontainer@null.blob.core.windows.net/cluster-logs/datahub/mycluster_12345", telemetry.getLogging().getStorageLocation());
     }
@@ -57,7 +57,7 @@ public class CloudStorageFolderResolverServiceTest {
         telemetry.getLogging().setStorageLocation("wasb://mycontainer");
         // WHEN
         underTest.updateStorageLocation(telemetry, FluentClusterType.DATAHUB.value(), "mycluster",
-                "crn:altus:cloudbreak:us-west-1:someone:stack:12345");
+                "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         // THEN
         assertEquals("wasb://mycontainer@null.blob.core.windows.net/cluster-logs/datahub/mycluster_12345", telemetry.getLogging().getStorageLocation());
     }
@@ -69,7 +69,7 @@ public class CloudStorageFolderResolverServiceTest {
         telemetry.getLogging().setStorageLocation("mybucket");
         // WHEN
         underTest.updateStorageLocation(telemetry, FluentClusterType.DATAHUB.value(), "mycluster",
-                "crn:altus:cloudbreak:us-west-1:someone:stack:12345");
+                "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         // THEN
         assertEquals("s3://mybucket/cluster-logs/datahub/mycluster_12345", telemetry.getLogging().getStorageLocation());
     }
@@ -90,7 +90,7 @@ public class CloudStorageFolderResolverServiceTest {
         Telemetry telemetry = createTelemetry();
         // WHEN
         underTest.updateStorageLocation(telemetry, FluentClusterType.DATAHUB.value(), "mycluster",
-                "crn:altus:cloudbreak:us-west:someone:stack:12345");
+                "crn:cdp:cloudbreak:us-west:someone:stack:12345");
     }
 
     private Telemetry createTelemetry() {

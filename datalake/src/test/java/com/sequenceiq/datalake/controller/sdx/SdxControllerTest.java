@@ -33,7 +33,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 @ExtendWith(MockitoExtension.class)
 class SdxControllerTest {
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:hortonworks:user:test@test.com";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:test@test.com";
 
     @Mock
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;

@@ -72,7 +72,7 @@ public class AbstractRedbeamsProvisionActionTest {
         dbStack.setCloudPlatform("AWS");
         dbStack.setPlatformVariant("GovCloud");
         dbStack.setEnvironmentId("myenv");
-        dbStack.setOwnerCrn(Crn.safeFromString("crn:altus:iam:us-west-1:cloudera:user:bob@cloudera.com"));
+        dbStack.setOwnerCrn(Crn.safeFromString("crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com"));
 
         credential = new Credential("userId", null, "userCrn");
 

@@ -18,16 +18,16 @@ class UserServiceTest {
 
     private static final String NOT_CRN = "not:a:crn:";
 
-    private static final String OTHER_CRN = "crn:altus:environments:us-west-1:"
+    private static final String OTHER_CRN = "crn:cdp:environments:us-west-1:"
             + ACCOUNT_ID + ":database:" + UUID.randomUUID().toString();
 
-    private static final String ENV_CRN = "crn:altus:environments:us-west-1:"
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:"
             + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:"
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:"
             + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
-    private static final String MACHINE_USER_CRN = "crn:altus:iam:us-west-1:"
+    private static final String MACHINE_USER_CRN = "crn:cdp:iam:us-west-1:"
             + ACCOUNT_ID + ":machineUser:" + UUID.randomUUID().toString();
 
     @InjectMocks

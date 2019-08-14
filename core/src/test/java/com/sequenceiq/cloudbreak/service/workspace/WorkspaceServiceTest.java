@@ -83,13 +83,13 @@ public class WorkspaceServiceTest {
         initiator.setId(1L);
         initiator.setUserId("initiator");
         initiator.setTenant(testTenant);
-        initiator.setUserCrn("crn:altus:iam:us-west-1:1:user:1");
+        initiator.setUserCrn("crn:cdp:iam:us-west-1:1:user:1");
         testTenant.setId(1L);
         testTenant.setName(TENANT_NAME);
         testWorkspace.setName(WORKSPACE_NAME);
         testWorkspace.setId(1L);
         testWorkspace.setTenant(testTenant);
-        testWorkspace.setResourceCrn("crn:altus:iam:us-west-1:1:workspace:1");
+        testWorkspace.setResourceCrn("crn:cdp:iam:us-west-1:1:workspace:1");
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
         when(workspaceRepository.getByName(anyString(), eq(testTenant))).thenReturn(testWorkspace);
     }
@@ -214,9 +214,9 @@ public class WorkspaceServiceTest {
 
     @Test
     public void testChangeUsers() {
-        User userToBeUpdated = TestUtil.user(2L, USER_ID_2, "crn:altus:iam:us-west-1:1234:user:" + USER_ID_2);
-        User userToBeAdded = TestUtil.user(3L, USER_ID_3, "crn:altus:iam:us-west-1:1234:user:" + USER_ID_3);
-        User userToBeDeleted = TestUtil.user(4L, "user4", "crn:altus:iam:us-west-1:1234:user:user4");
+        User userToBeUpdated = TestUtil.user(2L, USER_ID_2, "crn:cdp:iam:us-west-1:1234:user:" + USER_ID_2);
+        User userToBeAdded = TestUtil.user(3L, USER_ID_3, "crn:cdp:iam:us-west-1:1234:user:" + USER_ID_3);
+        User userToBeDeleted = TestUtil.user(4L, "user4", "crn:cdp:iam:us-west-1:1234:user:user4");
 
         when(userService.getByUsersIds(anySet())).thenReturn(Set.of(userToBeUpdated, userToBeAdded));
         doNothing().when(verifierService).authorizeWorkspaceManipulation(any(), any(), any(), anyString());

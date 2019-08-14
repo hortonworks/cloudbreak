@@ -6,7 +6,7 @@ public class DisabledAuthCbUserProvider {
 
     public CloudbreakUser getCloudbreakUser() {
         return new CloudbreakUser("disabledAuth",
-                "crn:altus:iam:us-west-1:cloudera:user:disabledAuth",
+                "crn:cdp:iam:us-west-1:cloudera:user:disabledAuth",
                 "disabledAuth",
                 "disabledAuth@cloudera.com",
                 "cloudera");

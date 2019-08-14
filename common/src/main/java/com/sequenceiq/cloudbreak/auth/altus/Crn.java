@@ -12,38 +12,42 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * A Cloudera Resource Name uniquely identifies an Altus resource. The format is:
+ * A Cloudera Resource Name uniquely identifies a Cloudera Data Platform (CDP) resource.
+ * It also supports the legacy "altus" partition.
+ *
+ * The format is:
  *
  * crn:partition:service:region:account-id:resourcetype:resource
  *
  * An example might be example:
- *
- * crn:altus:drds:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:director:MyDirector
+ * crn:cdp:environments:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:ff186d14-1cfc-461f-a111-466857dd276e
  *
  * See the below for an explanation of the component parts.
  *
  * Note the CRN format and component values are part of our compatibility
  * contract.
  */
-//CHECKSTYLE:OFF
 public class Crn {
 
     private static final Pattern CRN_PATTERN =
             Pattern.compile("^crn:(\\w+):(\\w+):(\\S+):(\\S+):(\\w+):(\\S+)$");
 
     private static final boolean ADMIN_SERVICE = true;
+
     private static final boolean NON_ADMIN_SERVICE = false;
 
     /**
-     * The Altus partition in which the resource resides. An Altus partition is a
-     * namespace for sets of Altus services. At present we plan only the single
-     * Altus partition.
+     * The CDP partition in which the resource resides. A CDP partition is a
+     * namespace for sets of CDP services.
      */
     public enum Partition {
-        ALTUS("altus", "ccs");
+        /**
+         * @deprecated since CDP project
+         */
+        @Deprecated
+        ALTUS("altus", "ccs"),
 
-        final String name;
-        final String legacyName;
+        CDP("cdp", null);
 
         private static final ImmutableMap<String, Partition> FROM_STRING;
         static {
@@ -57,9 +61,21 @@ public class Crn {
             FROM_STRING = builder.build();
         }
 
+        private final String name;
+
+        private final String legacyName;
+
         Partition(String name, String legacyName) {
             this.name = checkNotNull(name);
-            this.legacyName = checkNotNull(legacyName);
+            this.legacyName = legacyName;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getLegacyName() {
+            return legacyName;
         }
 
         @Override
@@ -101,8 +117,9 @@ public class Crn {
      * The Altus service in which the resource resides.
      */
     public enum Service {
-        // DRDS was replaced by DATAENGADMIN and is kept here for backward
-        // compatibility reasons (e.g., dynamodb serialized CRNs).
+        /**
+         * @deprecated DRDS was replaced by DATAENGADMIN and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
+         */
         @Deprecated
         DRDS("drds", ADMIN_SERVICE),
         IAM("iam", NON_ADMIN_SERVICE),
@@ -141,9 +158,11 @@ public class Crn {
             FROM_STRING = builder.build();
         }
 
-        final String name;
-        final String legacyName;
-        final boolean adminService;
+        private final String name;
+
+        private final String legacyName;
+
+        private final boolean adminService;
 
         Service(String name, boolean adminService) {
             this(name, null, adminService);
@@ -153,6 +172,14 @@ public class Crn {
             this.name = checkNotNull(name);
             this.legacyName = legacyName;
             this.adminService = adminService;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getLegacyName() {
+            return legacyName;
         }
 
         @Override
@@ -204,10 +231,14 @@ public class Crn {
     public enum Region {
         US_WEST_1("us-west-1");
 
-        final String name;
+        private final String name;
 
         Region(String name) {
             this.name = checkNotNull(name);
+        }
+
+        public String getName() {
+            return name;
         }
 
         @Override
@@ -258,10 +289,14 @@ public class Crn {
             FROM_STRING = builder.build();
         }
 
-        final String name;
+        private final String name;
 
         ResourceType(String name) {
             this.name = checkNotNull(name);
+        }
+
+        public String getName() {
+            return name;
         }
 
         @Override
@@ -287,10 +322,15 @@ public class Crn {
     }
 
     private final Partition partition;
+
     private final Service service;
+
     private final Region region;
+
     private final String accountId;
+
     private final ResourceType resourceType;
+
     private final String resource;
 
     /**
@@ -379,7 +419,9 @@ public class Crn {
      * @throws NullPointerException if the input string is null
      * @throws CrnParseException if the input string matches the CRN pattern but cannot be parsed
      */
-    public static @Nullable Crn fromString(String input) {
+    //CHECKSTYLE:OFF: checkstyle:magicnumber
+    @Nullable
+    public static Crn fromString(String input) {
         checkNotNull(input);
         Matcher matcher = CRN_PATTERN.matcher(input);
         if (!matcher.matches()) {
@@ -398,6 +440,7 @@ public class Crn {
                 .setResource(matcher.group(6))
                 .build();
     }
+    //CHECKSTYLE:ON: checkstyle:magicnumber
 
     /**
      * Creates a CRN from the input string. This will explode instead of
@@ -456,15 +499,23 @@ public class Crn {
                 && Objects.equal(this.resource, other.resource);
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static class Builder {
         // We hardcode the following for now as we have neither the partitions nor
         // regions yet.
-        private final Partition partition = Partition.ALTUS;
+        private final Partition partition = Partition.CDP;
+
         private final Region region = Region.US_WEST_1;
 
         private Service service;
+
         private String accountId;
+
         private ResourceType resourceType;
+
         private String resource;
 
         public Builder setService(Service service) {
@@ -495,10 +546,6 @@ public class Crn {
                     resourceType,
                     resource);
         }
-    }
 
-    public static Builder builder() {
-        return new Builder();
     }
 }
-//CHECKSTYLE:ON

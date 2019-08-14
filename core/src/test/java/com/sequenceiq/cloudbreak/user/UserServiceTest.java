@@ -79,7 +79,7 @@ public class UserServiceTest {
         user.setTenant(createTenant());
         user.setUserId("userId");
         user.setUserName("userName");
-        user.setUserCrn("crn:altus:iam:us-west-1:tenantName:user:userName");
+        user.setUserCrn("crn:cdp:iam:us-west-1:tenantName:user:userName");
         user.setUserPreferences(createUserPref());
         return user;
     }
@@ -100,7 +100,7 @@ public class UserServiceTest {
     }
 
     private CloudbreakUser createCbUser() {
-        return new CloudbreakUser("userId", "crn:altus:iam:us-west-1:tenantName:user:userName",
+        return new CloudbreakUser("userId", "crn:cdp:iam:us-west-1:tenantName:user:userName",
                 "userName", "email@email.com", "tenantName");
     }
 

@@ -65,7 +65,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 @DisplayName("SDX provisioner service tests")
 class ProvisionerServiceTest {
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
     private static final String REQUEST_ID = "requestId";
 

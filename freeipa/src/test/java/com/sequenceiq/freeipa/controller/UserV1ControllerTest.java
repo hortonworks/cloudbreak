@@ -34,11 +34,11 @@ public class UserV1ControllerTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
-    private static final String MACHINE_USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":machineUser:" + UUID.randomUUID().toString();
+    private static final String MACHINE_USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":machineUser:" + UUID.randomUUID().toString();
 
-    private static final String ENV_CRN = "crn:altus:environment:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
+    private static final String ENV_CRN = "crn:cdp:environment:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
 
     @InjectMocks
     private UserV1Controller underTest;

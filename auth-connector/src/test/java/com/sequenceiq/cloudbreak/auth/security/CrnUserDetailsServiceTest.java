@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 @RunWith(MockitoJUnitRunner.class)
 public class CrnUserDetailsServiceTest {
 
-    private String userCrn = "crn:altus:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
+    private String userCrn = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
 
     @Mock
     private GrpcUmsClient mockedUmsClient;

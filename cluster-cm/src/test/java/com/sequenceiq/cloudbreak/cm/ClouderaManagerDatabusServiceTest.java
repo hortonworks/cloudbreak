@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 
 public class ClouderaManagerDatabusServiceTest {
 
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:accountId:user:name";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:accountId:user:name";
 
     @InjectMocks
     private ClouderaManagerDatabusService underTest;

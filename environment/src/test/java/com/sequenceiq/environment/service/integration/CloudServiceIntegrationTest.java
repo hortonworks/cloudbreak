@@ -27,7 +27,7 @@ public class CloudServiceIntegrationTest {
 
     public static final String SERVICE_ADDRESS = "http://localhost:%d/environmentservice";
 
-    private static final String TEST_CRN = "crn:altus:iam:us-west-1:accid:user:mockuser@cloudera.com";
+    private static final String TEST_CRN = "crn:cdp:iam:us-west-1:accid:user:mockuser@cloudera.com";
 
     @LocalServerPort
     private int port;

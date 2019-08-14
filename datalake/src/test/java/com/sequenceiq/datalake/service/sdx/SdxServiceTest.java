@@ -51,9 +51,9 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 @DisplayName("SDX service tests")
 public class SdxServiceTest {
 
-    public static final String USER_CRN = "crn:altus:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
+    public static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
-    public static final String ENVIRONMENT_CRN = "crn:altus:environments:us-west-1:default:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
+    public static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:default:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
