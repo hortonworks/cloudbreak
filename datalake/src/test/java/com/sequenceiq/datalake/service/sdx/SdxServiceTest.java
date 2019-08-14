@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -29,8 +30,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
@@ -39,6 +45,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
@@ -54,6 +61,8 @@ public class SdxServiceTest {
     public static final String USER_CRN = "crn:altus:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
     public static final String ENVIRONMENT_CRN = "crn:altus:environments:us-west-1:default:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
+
+    private static final Long SDX_ID = 2L;
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
@@ -78,6 +87,15 @@ public class SdxServiceTest {
 
     @Mock
     private CloudStorageManifester cloudStorageManifester;
+
+    @Mock
+    private CloudbreakServiceUserCrnClient cloudbreakServiceUserCrnClient;
+
+    @Mock
+    private CloudbreakServiceCrnEndpoints cloudbreakServiceCrnEndpoints;
+
+    @Mock
+    private DistroXV1Endpoint distroXV1Endpoint;
 
     @InjectMocks
     private SdxService sdxService;
@@ -312,16 +330,44 @@ public class SdxServiceTest {
 
     @Test
     void deleteSdxWhenCorrectNameIsProvided() {
-        SdxCluster sdxCluster = new SdxCluster();
-        long sdxId = 2L;
-        sdxCluster.setId(sdxId);
-        sdxCluster.setClusterName("sdx-cluster-name");
+        SdxCluster sdxCluster = getSdxClusterForDeletionTest();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        sdxService.deleteSdx(USER_CRN, "envir");
-        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxId);
+        mockCBCallForDistroXClusters(Sets.newHashSet());
+        sdxService.deleteSdx(USER_CRN, "sdx-cluster-name");
+        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(SDX_ID);
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxClusterStatus sdxClusterStatus = captor.getValue().getStatus();
         Assertions.assertEquals(SdxClusterStatus.DELETE_REQUESTED, sdxClusterStatus);
+    }
+
+    @Test
+    void testDistroXClustersValidationBeforeDelete() {
+        SdxCluster sdxCluster = getSdxClusterForDeletionTest();
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+
+        StackViewV4Response stackViewV4Response = new StackViewV4Response();
+        stackViewV4Response.setName("existingDistroXCluster");
+        mockCBCallForDistroXClusters(Sets.newHashSet(stackViewV4Response));
+
+        Assertions.assertThrows(BadRequestException.class,
+                () -> sdxService.deleteSdx(USER_CRN, "sdx-cluster-name"),
+                "The following Data Hub cluster(s) must be terminated before SDX deletion [existingDistroXCluster]");
+    }
+
+    private void mockCBCallForDistroXClusters(Set<StackViewV4Response> stackViews) {
+        when(cloudbreakServiceUserCrnClient.withCrn(anyString())).thenReturn(cloudbreakServiceCrnEndpoints);
+        when(cloudbreakServiceCrnEndpoints.distroXV1Endpoint()).thenReturn(distroXV1Endpoint);
+        when(distroXV1Endpoint.list(anyString(), anyString())).thenReturn(new StackViewV4Responses(stackViews));
+    }
+
+    private SdxCluster getSdxClusterForDeletionTest() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(SDX_ID);
+        sdxCluster.setInitiatorUserCrn(USER_CRN);
+        sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
+        sdxCluster.setEnvName("envir");
+        sdxCluster.setClusterName("sdx-cluster-name");
+        return sdxCluster;
     }
 }

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +14,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
@@ -94,6 +98,27 @@ public class SdxService {
             LOGGER.info("Sdx cluster not found on CB side", e);
             return null;
         }
+    }
+
+    private Set<String> getAttachedDistroXClusterNames(String userCrn, String environmentName, String environmentCrn) {
+        Set<String> clusterNames = new HashSet<>();
+        LOGGER.debug("Get DistroX clusters of the environment: '{}'", environmentName);
+        try {
+            Set<String> distroXClusterNames = cloudbreakClient
+                    .withCrn(userCrn)
+                    .distroXV1Endpoint()
+                    .list(environmentName, environmentCrn)
+                    .getResponses()
+                    .stream()
+                    .map(StackViewV4Response::getName)
+                    .collect(Collectors.toSet());
+            clusterNames.addAll(distroXClusterNames);
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to get DistroX clusters from Cloudbreak service due to: '%s' ", e.getMessage());
+            LOGGER.error(message, e);
+            throw e;
+        }
+        return clusterNames;
     }
 
     public SdxCluster getByCrn(String userCrn, String clusterCrn) {
@@ -351,12 +376,22 @@ public class SdxService {
     }
 
     private void deleteSdxCluster(SdxCluster sdxCluster) {
+        checkIfSdxIsDeletable(sdxCluster);
         MDCBuilder.buildMdcContext(sdxCluster);
         sdxCluster.setStatus(SdxClusterStatus.DELETE_REQUESTED);
         sdxClusterRepository.save(sdxCluster);
         sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
         sdxReactorFlowManager.cancelRunningFlows(sdxCluster.getId());
         LOGGER.info("SDX delete triggered: {}", sdxCluster.getClusterName());
+    }
+
+    private void checkIfSdxIsDeletable(SdxCluster sdxCluster) {
+        Set<String> attachedDistroXClusterNames =
+                getAttachedDistroXClusterNames(sdxCluster.getInitiatorUserCrn(), sdxCluster.getEnvName(), sdxCluster.getEnvCrn());
+        if (!attachedDistroXClusterNames.isEmpty()) {
+            throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before SDX deletion [%s]",
+                    String.join(", ", attachedDistroXClusterNames)));
+        }
     }
 
     private String createCrn(@Nonnull String accountId) {
