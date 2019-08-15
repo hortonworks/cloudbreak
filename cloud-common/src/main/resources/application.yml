@@ -25,7 +25,7 @@ management:
 
 info:
   app:
-    capabilities: gov_cloud
+    capabilities: gov_cloud, mock_idbroker_mapping
 
 spring:
   freemarker:
