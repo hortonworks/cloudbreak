@@ -37,7 +37,7 @@ public class BlueprintV4RequestToBlueprintConverter
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintV4RequestToBlueprintConverter.class);
 
-    private static final String JSON_PARSE_EXCEPTION_MESSAGE = "Invalid blueprint: Failed to parse JSON.";
+    private static final String JSON_PARSE_EXCEPTION_MESSAGE = "Invalid cluster template: Failed to parse JSON.";
 
     @Inject
     private JsonHelper jsonHelper;
@@ -61,7 +61,7 @@ public class BlueprintV4RequestToBlueprintConverter
                 jsonHelper.createJsonFromString(urlText);
                 blueprint.setBlueprintText(urlText);
             } catch (IOException | CloudbreakApiException e) {
-                throw new BadRequestException(String.format("Cannot download blueprint from: %s", sourceUrl), e);
+                throw new BadRequestException(String.format("Cannot download cluster template from: %s", sourceUrl), e);
             }
         } else if (!CollectionUtils.isEmpty(json.getServices()) && !Strings.isNullOrEmpty(json.getPlatform())) {
             GeneratedCmTemplate generatedCmTemplate =
@@ -92,7 +92,7 @@ public class BlueprintV4RequestToBlueprintConverter
                 blueprint.setStackVersion(blueprintUtils.getCDHStackVersion(blueprintJson));
                 blueprint.setStackType("CDH");
             } else {
-                throw new BadRequestException("Failed to determine blueprint format");
+                throw new BadRequestException("Failed to determine cluster template format");
             }
         } catch (IOException e) {
             throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);
@@ -120,7 +120,7 @@ public class BlueprintV4RequestToBlueprintConverter
         try {
             return new Json(tags);
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid tag(s) in the blueprint: Unable to parse JSON.", e);
+            throw new BadRequestException("Invalid tag(s) in the cluster template: Unable to parse JSON.", e);
         }
     }
 

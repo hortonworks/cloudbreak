@@ -116,7 +116,7 @@ public class KerberosBlueprintService implements BlueprintComponentConfigProvide
                     .setSecurityType("KERBEROS")
                     .extendBlueprintGlobalConfiguration(configs, forced);
         } catch (IOException e) {
-            throw new BlueprintProcessingException("Failed to extend blueprint with kerberos configurations.", e);
+            throw new BlueprintProcessingException("Failed to extend cluster template with kerberos configurations.", e);
         }
     }
 

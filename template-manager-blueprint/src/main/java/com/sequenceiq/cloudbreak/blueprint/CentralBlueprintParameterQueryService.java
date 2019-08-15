@@ -32,7 +32,7 @@ public class CentralBlueprintParameterQueryService {
                     HandleBarModelKey.DATALAKE,
                     templateProcessor.queryParameters(sourceTemplate));
         } catch (IOException e) {
-            String message = String.format("Unable to query blueprint parameters from blueprint which was: %s", sourceTemplate);
+            String message = String.format("Unable to query cluster template parameters from cluster template which was: %s", sourceTemplate);
             LOGGER.warn(message);
             throw new BlueprintProcessingException(message, e);
         }
@@ -44,7 +44,7 @@ public class CentralBlueprintParameterQueryService {
         try {
             blueprintParameters = templateParameterFilter.queryForCustomParameters(templateProcessor.queryParameters(sourceTemplate));
         } catch (IOException e) {
-            String message = String.format("Unable to query blueprint parameters from blueprint which was: %s", sourceTemplate);
+            String message = String.format("Unable to query cluster template parameters from cluster template which was: %s", sourceTemplate);
             LOGGER.warn(message);
             throw new BlueprintProcessingException(message, e);
         }

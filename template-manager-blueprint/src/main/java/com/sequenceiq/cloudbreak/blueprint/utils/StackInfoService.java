@@ -36,7 +36,7 @@ public class StackInfoService {
             JsonNode root = JsonUtil.readTree(blueprintText);
             return new BlueprintStackInfo(blueprintUtils.getBlueprintStackVersion(root), blueprintUtils.getBlueprintStackName(root));
         } catch (IOException e) {
-            String message = String.format("Unable to detect BlueprintStackInfo from the source blueprint which was: %s.", blueprintText);
+            String message = String.format("Unable to detect ClusterTemplateStackInfo from the source cluster template which was: %s.", blueprintText);
             LOGGER.warn(message);
             throw new BlueprintProcessingException(message, e);
         }
