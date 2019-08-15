@@ -28,6 +28,10 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private static final String HUE_DATABASE_PASSWORD = "hue-hue_database_password";
 
+    private static final String HUE_SAFETY_VALVE = "hue-hue_service_safety_valve";
+
+    private static final String SAFETY_VALVE_VALUE = "[desktop]\napp_blacklist=hive, metastore, pig";
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> result = new ArrayList<>();
@@ -37,6 +41,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         result.add(new ApiClusterTemplateConfig().name("database_type").variable(HUE_HUE_DATABASE_TYPE));
         result.add(new ApiClusterTemplateConfig().name("database_user").variable(HUE_HUE_DATABASE_USER));
         result.add(new ApiClusterTemplateConfig().name("database_password").variable(HUE_DATABASE_PASSWORD));
+        result.add(new ApiClusterTemplateConfig().name("hue_service_safety_valve").variable(HUE_SAFETY_VALVE));
         return result;
     }
 
@@ -50,6 +55,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         result.add(new ApiClusterTemplateVariable().name(HUE_HUE_DATABASE_TYPE).value(hueRdsView.getSubprotocol()));
         result.add(new ApiClusterTemplateVariable().name(HUE_HUE_DATABASE_USER).value(hueRdsView.getConnectionUserName()));
         result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_PASSWORD).value(hueRdsView.getConnectionPassword()));
+        result.add(new ApiClusterTemplateVariable().name(HUE_SAFETY_VALVE).value(SAFETY_VALVE_VALUE));
         return result;
     }
 
