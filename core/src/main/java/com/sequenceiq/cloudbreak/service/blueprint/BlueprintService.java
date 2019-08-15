@@ -206,7 +206,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 return blueprint.get();
             }
         }
-        throw new NotFoundException(String.format("No blueprint found with name '%s'", name));
+        throw new NotFoundException(String.format("No cluster template found with name '%s'", name));
     }
 
     public void updateDefaultBlueprintCollection(Long workspaceId) {
@@ -224,7 +224,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
         Set<Blueprint> updatedBlueprints =
                 blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprintsInDatabase, workspace, this::saveDefaultsWithReadRight);
-        LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
+        LOGGER.debug("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         return updatedBlueprints;
     }
 
@@ -281,11 +281,11 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                         .map(Cluster::getName)
                         .collect(Collectors.joining(", "));
                 throw new BadRequestException(String.format(
-                        "There are clusters associated with blueprint '%s'. Please remove these before deleting the blueprint. "
+                        "There are clusters associated with cluster template '%s'. Please remove these before deleting the cluster template. "
                                 + "The following clusters are using this blueprint: [%s]", blueprint.getName(), clusters));
             }
-            throw new BadRequestException(String.format("There is a cluster ['%s'] which uses blueprint '%s'. Please remove this "
-                    + "cluster before deleting the blueprint", notDeletedClustersWithThisCd.iterator().next().getName(), blueprint.getName()));
+            throw new BadRequestException(String.format("There is a cluster ['%s'] which uses cluster template '%s'. Please remove this "
+                    + "cluster before deleting the custer template", notDeletedClustersWithThisCd.iterator().next().getName(), blueprint.getName()));
         }
     }
 
@@ -361,7 +361,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private Blueprint getByCrnAndWorkspaceIdAndAddToMdc(String crn, Long workspaceId) {
         Blueprint bp = blueprintRepository.findByResourceCrnAndWorkspaceId(crn, workspaceId)
-                .orElseThrow(() -> NotFoundException.notFound("blueprint", crn).get());
+                .orElseThrow(() -> NotFoundException.notFound("cluster template", crn).get());
         MDCBuilder.buildMdcContext(bp);
         return bp;
     }

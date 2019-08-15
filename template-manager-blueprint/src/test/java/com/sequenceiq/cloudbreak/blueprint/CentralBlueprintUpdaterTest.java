@@ -74,7 +74,7 @@ public class CentralBlueprintUpdaterTest {
     public void getBlueprintTextWhenBlueprintTemplateProcessorThrowExceptionThenShouldReturnThrowException() throws IOException {
         when(templateProcessor.process(testBlueprint, object, Maps.newHashMap())).thenThrow(new IOException("failed to read bp"));
 
-        String message = String.format("Unable to update blueprint with default properties which was: %s", testBlueprint);
+        String message = String.format("Unable to update cluster template with default properties which was: %s", testBlueprint);
 
         thrown.expect(BlueprintProcessingException.class);
         thrown.expectMessage(message);

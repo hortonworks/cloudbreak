@@ -50,7 +50,7 @@ public class StackInfoServiceTest {
         String testBlueprint = "not-a-valid-bluepint";
 
         thrown.expect(BlueprintProcessingException.class);
-        thrown.expectMessage("Unable to detect BlueprintStackInfo from the source blueprint which was: not-a-valid-bluepint.");
+        thrown.expectMessage("Unable to detect ClusterTemplateStackInfo from the source cluster template which was: not-a-valid-bluepint.");
 
         stackInfoService.blueprintStackInfo(testBlueprint);
 

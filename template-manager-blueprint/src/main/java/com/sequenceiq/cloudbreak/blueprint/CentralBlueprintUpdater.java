@@ -34,7 +34,7 @@ public class CentralBlueprintUpdater implements BlueprintUpdater {
         try {
             blueprintText = updateBlueprintConfiguration(source, blueprintText);
         } catch (IOException e) {
-            String message = String.format("Unable to update blueprint with default properties which was: %s", blueprintText);
+            String message = String.format("Unable to update cluster template with default properties which was: %s", blueprintText);
             LOGGER.warn(message);
             throw new BlueprintProcessingException(message, e);
         }

@@ -109,7 +109,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         request.setUrl(wrongUrl);
 
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage(String.format("Cannot download blueprint from: %s", wrongUrl));
+        thrown.expectMessage(String.format("Cannot download cluster template from: %s", wrongUrl));
 
         underTest.convert(request);
     }
@@ -159,7 +159,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
             throw new IOException("some message");
         }).when(blueprintUtils).getBlueprintName(any());
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid blueprint: Failed to parse JSON.");
+        thrown.expectMessage("Invalid cluster template: Failed to parse JSON.");
 
         underTest.convert(getRequest("blueprint.json"));
     }
@@ -170,7 +170,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
             throw new IOException("some message");
         }).when(blueprintUtils).countHostGroups(any());
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid blueprint: Failed to parse JSON.");
+        thrown.expectMessage("Invalid cluster template: Failed to parse JSON.");
 
         underTest.convert(getRequest("blueprint.json"));
     }
@@ -181,7 +181,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
             throw new IOException("some message");
         }).when(blueprintUtils).getBlueprintStackName(any());
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid blueprint: Failed to parse JSON.");
+        thrown.expectMessage("Invalid cluster template: Failed to parse JSON.");
 
         underTest.convert(getRequest("blueprint.json"));
     }
@@ -192,7 +192,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
             throw new IOException("some message");
         }).when(blueprintUtils).getBlueprintStackVersion(any());
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid blueprint: Failed to parse JSON.");
+        thrown.expectMessage("Invalid cluster template: Failed to parse JSON.");
 
         underTest.convert(getRequest("blueprint.json"));
     }
@@ -205,7 +205,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         request.setTags(invalidTags);
 
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid tag(s) in the blueprint: Unable to parse JSON.");
+        thrown.expectMessage("Invalid tag(s) in the cluster template: Unable to parse JSON.");
 
         underTest.convert(request);
     }
@@ -279,7 +279,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = new BlueprintV4Request();
         request.setBlueprint("{ \"blueprint\": {}");
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid blueprint: Failed to parse JSON.");
+        thrown.expectMessage("Invalid cluster template: Failed to parse JSON.");
 
         underTest.convert(request);
     }
@@ -289,7 +289,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = new BlueprintV4Request();
         request.setBlueprint("{ \"blueprint\": { \"cdhVersion\": \"7.0.0\", { } }");
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Invalid blueprint: Failed to parse JSON.");
+        thrown.expectMessage("Invalid cluster template: Failed to parse JSON.");
 
         underTest.convert(request);
     }
