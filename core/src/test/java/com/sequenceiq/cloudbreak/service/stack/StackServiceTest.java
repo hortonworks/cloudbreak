@@ -679,7 +679,7 @@ public class StackServiceTest {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(stack).setResourceCrn(crnCaptor.capture());
             String resourceCrn = crnCaptor.getValue();
-            assertTrue(resourceCrn.matches("crn:cdp:datahub:us-west-1:something:stack:.*"));
+            assertTrue(resourceCrn.matches("crn:cdp:datahub:us-west-1:something:cluster:.*"));
             verify(securityConfig, times(1)).setStack(stack);
             verify(securityConfigService, times(1)).save(securityConfig);
 
