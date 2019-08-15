@@ -72,7 +72,7 @@ public class EnvironmentTestDto
     @Override
     public EnvironmentTestDto valid() {
         return getCloudProvider()
-                .environment(withName(resourceProperyProvider().getName())
+                .environment(withName(resourceProperyProvider().getEnvironmentName())
                         .withDescription(resourceProperyProvider().getDescription("environment")))
                         .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
                         .withAuthentication(DUMMY_SSH_KEY);
