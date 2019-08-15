@@ -15,17 +15,23 @@ public class ResourcePropertyProvider {
 
     private static final int MAX_LENGTH = 40;
 
+    private static final int ENVIRONMENT_NAME_MAX_LENGTH = 28;
+
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME;
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
     public String getName() {
-        return trim(prefix() + '-' + uuid());
+        return trim(prefix() + '-' + uuid(), MAX_LENGTH);
+    }
+
+    public String getEnvironmentName() {
+        return trim(prefix() + '-' + uuid(), ENVIRONMENT_NAME_MAX_LENGTH);
     }
 
     public String getInvalidName() {
-        return trim(prefix() + "-?!;" + uuid());
+        return trim(prefix() + "-?!;" + uuid(), MAX_LENGTH);
     }
 
     public String getDescription(String typeName) {
@@ -45,7 +51,7 @@ public class ResourcePropertyProvider {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
-    private String trim(String name) {
-        return (name.length() > MAX_LENGTH) ? name.substring(0, MAX_LENGTH) : name;
+    private String trim(String name, int maxLength) {
+        return (name.length() > maxLength) ? name.substring(0, maxLength) : name;
     }
 }
