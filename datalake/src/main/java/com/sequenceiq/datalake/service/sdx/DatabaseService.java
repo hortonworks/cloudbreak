@@ -9,6 +9,7 @@ import javax.ws.rs.NotFoundException;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
@@ -36,8 +37,6 @@ public class DatabaseService {
 
     private static final int DURATION_IN_MINUTES_FOR_ENV_POLLING = 60;
 
-    private static final long STORAGE_SIZE = 40L;
-
     @Inject
     private SdxClusterRepository sdxClusterRepository;
 
@@ -46,6 +45,15 @@ public class DatabaseService {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
+    @Value("${datalake.db.instancetype:db.m5.large}")
+    private String dbInstanceType;
+
+    @Value("${datalake.db.volumesize:100}")
+    private long dbVolumeSize;
+
+    @Value("${datalake.db.vendor:postgres}")
+    private String dbVendor;
 
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env, String requestId) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
@@ -91,15 +99,15 @@ public class DatabaseService {
     private AllocateDatabaseServerV4Request getDatabaseRequest(DetailedEnvironmentResponse env) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(env.getCrn());
-        req.setDatabaseServer(getDatabaseServerRequest(env));
+        req.setDatabaseServer(getDatabaseServerRequest());
         return req;
     }
 
-    private DatabaseServerV4StackRequest getDatabaseServerRequest(DetailedEnvironmentResponse env) {
+    private DatabaseServerV4StackRequest getDatabaseServerRequest() {
         DatabaseServerV4StackRequest req = new DatabaseServerV4StackRequest();
-        req.setInstanceType("db.m3.medium");
-        req.setDatabaseVendor("postgres");
-        req.setStorageSize(STORAGE_SIZE);
+        req.setInstanceType(dbInstanceType);
+        req.setDatabaseVendor(dbVendor);
+        req.setStorageSize(dbVolumeSize);
         req.setAws(getAwsDatabaseServerParameters());
         return req;
     }
