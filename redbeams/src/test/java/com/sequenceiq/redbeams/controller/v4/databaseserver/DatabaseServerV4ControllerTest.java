@@ -189,7 +189,7 @@ public class DatabaseServerV4ControllerTest {
     @Test
     public void testRegister() {
         when(converterUtil.convert(request, DatabaseServerConfig.class)).thenReturn(server);
-        when(service.create(server, DatabaseServerV4Controller.DEFAULT_WORKSPACE)).thenReturn(server);
+        when(service.create(server, DatabaseServerV4Controller.DEFAULT_WORKSPACE, false)).thenReturn(server);
         when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(response);
 
         DatabaseServerV4Response response = underTest.register(request);

@@ -106,7 +106,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     public DatabaseServerV4Response register(DatabaseServerV4Request request) {
-        DatabaseServerConfig server = databaseServerConfigService.create(converterUtil.convert(request, DatabaseServerConfig.class), DEFAULT_WORKSPACE);
+        DatabaseServerConfig server = databaseServerConfigService.create(converterUtil.convert(request, DatabaseServerConfig.class), DEFAULT_WORKSPACE, false);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_CREATED);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }

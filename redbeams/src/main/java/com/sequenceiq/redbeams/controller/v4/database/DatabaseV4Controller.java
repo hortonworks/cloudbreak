@@ -39,7 +39,7 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
     @Override
     public DatabaseV4Response register(@Valid DatabaseV4Request request) {
         DatabaseConfig databaseConfig = redbeamsConverterUtil.convert(request, DatabaseConfig.class);
-        return redbeamsConverterUtil.convert(databaseConfigService.register(databaseConfig), DatabaseV4Response.class);
+        return redbeamsConverterUtil.convert(databaseConfigService.register(databaseConfig, false), DatabaseV4Response.class);
     }
 
     @Override
