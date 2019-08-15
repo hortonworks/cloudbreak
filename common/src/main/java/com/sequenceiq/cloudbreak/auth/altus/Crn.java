@@ -504,10 +504,9 @@ public class Crn {
     }
 
     public static class Builder {
-        // We hardcode the following for now as we have neither the partitions nor
-        // regions yet.
-        private final Partition partition = Partition.CDP;
+        private Partition partition = Partition.CDP;
 
+        // We hardcode the following for now
         private final Region region = Region.US_WEST_1;
 
         private Service service;
@@ -517,6 +516,11 @@ public class Crn {
         private ResourceType resourceType;
 
         private String resource;
+
+        public Builder setPartition(Partition partition) {
+            this.partition = checkNotNull(partition);
+            return this;
+        }
 
         public Builder setService(Service service) {
             this.service = checkNotNull(service);

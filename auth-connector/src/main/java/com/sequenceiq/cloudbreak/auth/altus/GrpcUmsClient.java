@@ -482,6 +482,7 @@ public class GrpcUmsClient {
      */
     public String getBuiltInDatabusRoleCrn() {
         Crn databusCrn = Crn.builder()
+                .setPartition(Crn.Partition.ALTUS)
                 .setAccountId("altus")
                 .setService(Crn.Service.IAM)
                 .setResourceType(Crn.ResourceType.ROLE)
