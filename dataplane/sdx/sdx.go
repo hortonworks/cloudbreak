@@ -21,21 +21,23 @@ import (
 	"github.com/urfave/cli"
 )
 
-var sdxClusterHeader = []string{"Crn", "Name", "EnvironmentName", "EnvironmentCrn", "StackCrn", "Status", "StatusReason"}
+var sdxClusterHeader = []string{"Crn", "Name", "EnvironmentName", "EnvironmentCrn", "StackCrn", "DatabaseServerCrn", "Status", "StatusReason"}
 
 type sdxClusterOutput struct {
-	Crn               string `json:"Crn" yaml:"Crn"`
-	Name              string `json:"Name" yaml:"Name"`
-	Environment       string `json:"environmentName" yaml:"environmentName"`
-	EnvironmentCrn    string `json:"environmentCrn" yaml:"environmentCrn"`
-	StackCrn          string `json:"stackCrn" yaml:"stackCrn"`
-	DatabaseServerCrn string `json:"databaseServerCrn" yaml:"databaseServerCrn"`
-	Status            string `json:"Status" yaml:"Status"`
-	StatusReason      string `json:"StatusReason" yaml:"StatusReason"`
+	Crn                        string `json:"Crn" yaml:"Crn"`
+	Name                       string `json:"Name" yaml:"Name"`
+	Environment                string `json:"EnvironmentName" yaml:"EnvironmentName"`
+	EnvironmentCrn             string `json:"EnvironmentCrn" yaml:"EnvironmentCrn"`
+	StackCrn                   string `json:"StackCrn" yaml:"StackCrn"`
+	DatabaseServerCrn          string `json:"DatabaseServerCrn" yaml:"DatabaseServerCrn"`
+	CloudStorageBaseLocation   string `json:"CloudStorageBaseLocation" yaml:"CloudStorageBaseLocation"`
+	CloudStorageFileSystemType string `json:"CloudStorageFileSystemType" yaml:"CloudStorageFileSystemType"`
+	Status                     string `json:"Status" yaml:"Status"`
+	StatusReason               string `json:"StatusReason" yaml:"StatusReason"`
 }
 
 func (r *sdxClusterOutput) DataAsStringArray() []string {
-	return []string{r.Crn, r.Name, r.Environment, r.EnvironmentCrn, r.StackCrn, r.DatabaseServerCrn, r.Status, r.StatusReason}
+	return []string{r.Crn, r.Name, r.Environment, r.EnvironmentCrn, r.StackCrn, r.DatabaseServerCrn, r.CloudStorageBaseLocation, r.CloudStorageFileSystemType, r.Status, r.StatusReason}
 }
 
 type ClientSdx oauth.Sdx
@@ -69,7 +71,7 @@ func assembleStackRequest(c *cli.Context) *sdxModel.StackV4Request {
 }
 
 func CreateSdx(c *cli.Context) {
-	defer commonutils.TimeTrack(time.Now(), "create SDX cluster")
+	defer commonutils.TimeTrack(time.Now(), "Create SDX cluster")
 
 	name := c.String(fl.FlName.Name)
 	envName := c.String(fl.FlEnvironmentName.Name)
@@ -89,7 +91,6 @@ func CreateSdx(c *cli.Context) {
 }
 
 func createSdx(clusterShape string, envName string, c *cli.Context, name string, cloudStorageBaseLocation string, instanceProfile string, withoutExternalDatabase bool, withExternalDatabase bool) {
-
 	sdxRequest := createSdxRequest(clusterShape, envName, cloudStorageBaseLocation, instanceProfile, withExternalDatabase, withoutExternalDatabase)
 
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
@@ -98,7 +99,7 @@ func createSdx(clusterShape string, envName string, c *cli.Context, name string,
 		utils.LogErrorAndExit(err)
 	}
 	sdxCluster := resp.Payload
-	log.Infof("[createSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.Name)
+	log.Infof("[CreateSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.Name)
 }
 
 func createSdxRequest(clusterShape string, envName string, cloudStorageBaseLocation string, instanceProfile string, withExternalDatabase bool, withoutExternalDatabase bool) *sdxModel.SdxClusterRequest {
@@ -164,7 +165,7 @@ func createInternalSdx(envName string, inputJson *sdxModel.StackV4Request, c *cl
 
 	if inputJson.EnvironmentCrn == nil || len(*inputJson.EnvironmentCrn) == 0 {
 		envCrn := env.GetEnvCrnByName(envName, c)
-		log.Debugf("[createInternalSdx] env crn § empty in stack request, update with: %s", envCrn)
+		log.Debugf("[CreateInternalSdx] env crn § empty in stack request, update with: %s", envCrn)
 		inputJson.EnvironmentCrn = &envCrn
 	}
 
@@ -174,7 +175,7 @@ func createInternalSdx(envName string, inputJson *sdxModel.StackV4Request, c *cl
 		utils.LogErrorAndExit(err)
 	}
 	sdxCluster := resp.Payload
-	log.Infof("[createInternalSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.Name)
+	log.Infof("[CreateInternalSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.Name)
 }
 
 func DeleteSdx(c *cli.Context) {
@@ -186,11 +187,11 @@ func DeleteSdx(c *cli.Context) {
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Infof("[deleteSdx] SDX cluster deleted in environment: %s", name)
+	log.Infof("[DeleteSdx] SDX cluster deleted in environment: %s", name)
 }
 
 func RepairSdx(c *cli.Context) {
-	defer commonutils.TimeTrack(time.Now(), "delete SDX cluster")
+	defer commonutils.TimeTrack(time.Now(), "Sdx cluster repair")
 	name := c.String(fl.FlName.Name)
 	hostGroupToRepair := c.String(fl.FlHostGroup.Name)
 
@@ -203,7 +204,7 @@ func RepairSdx(c *cli.Context) {
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Infof("[repairSdx] SDX cluster repair is started for: %s", name)
+	log.Infof("[RepairSdx] SDX cluster repair is started for: %s", name)
 }
 
 func ListSdx(c *cli.Context) {
@@ -229,6 +230,8 @@ func listSdxClusterImpl(client clientSdx, envName string, writer func([]string, 
 			sdxCluster.EnvironmentCrn,
 			sdxCluster.StackCrn,
 			sdxCluster.DatabaseServerCrn,
+			sdxCluster.CloudStorageBaseLocation,
+			sdxCluster.CloudStorageFileSystemType,
 			sdxCluster.Status,
 			sdxCluster.StatusReason})
 	}
@@ -241,7 +244,7 @@ func createCloudStorageRequestForSdx() {
 }
 
 func DescribeSdx(c *cli.Context) {
-	defer utils.TimeTrack(time.Now(), "describe sdx cluster")
+	defer utils.TimeTrack(time.Now(), "describe SDX cluster")
 	name := c.String(fl.FlName.Name)
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx.Sdx
 	resp, err := sdxClient.GetSdx(sdx.NewGetSdxParams().WithName(name))
@@ -258,6 +261,8 @@ func DescribeSdx(c *cli.Context) {
 		sdxCluster.EnvironmentCrn,
 		sdxCluster.StackCrn,
 		sdxCluster.DatabaseServerCrn,
+		sdxCluster.CloudStorageBaseLocation,
+		sdxCluster.CloudStorageFileSystemType,
 		sdxCluster.Status,
 		sdxCluster.StatusReason})
 	log.Infof("[DescribeSdx] Describe a particular SDX cluster")
