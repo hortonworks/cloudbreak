@@ -93,6 +93,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
         listRoleTypes();
         listRoles();
         cmConfig();
+        updateCmConfig();
         startManagementService();
         listCommands();
         listActiveCommands();
@@ -193,6 +194,10 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     private void cmConfig() {
         dynamicRouteStack.get(CONFIG, (request, response) -> new ApiConfigList().items(new ArrayList<>()));
+    }
+
+    private void updateCmConfig() {
+        dynamicRouteStack.put(CONFIG, (request, response) -> new ApiConfigList().items(new ArrayList<>()));
     }
 
     private void getHosts() {
