@@ -85,7 +85,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
     }
 
     private void validForDatabaseCreation(Long sdxId, DetailedEnvironmentResponse env) {
-        String message = "";
+        String message;
         if (env.getNetwork().getSubnetMetas().size() < 2) {
             message = String.format("Cannot create external database for sdx: %s, not enough subnets in the vpc", sdxId);
             LOGGER.debug(message);

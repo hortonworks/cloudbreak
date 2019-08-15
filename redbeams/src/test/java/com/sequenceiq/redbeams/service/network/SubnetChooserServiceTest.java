@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.redbeams.exception.RedbeamsException;
+import com.sequenceiq.redbeams.exception.BadRequestException;
 
 public class SubnetChooserServiceTest {
 
@@ -47,7 +48,7 @@ public class SubnetChooserServiceTest {
     @Test
     public void testOneSubnet() {
         List<CloudSubnet> subnets = List.of(new CloudSubnet(SUBNET_1, "", AVAILABILITY_ZONE_A, ""));
-        thrown.expect(RedbeamsException.class);
+        thrown.expect(BadRequestException.class);
         thrown.expectMessage("Insufficient number of subnets");
 
         underTest.chooseSubnetsFromDifferentAzs(subnets);
@@ -56,7 +57,7 @@ public class SubnetChooserServiceTest {
     @Test
     public void testNoSubnets() {
         List<CloudSubnet> subnets = List.of();
-        thrown.expect(RedbeamsException.class);
+        thrown.expect(BadRequestException.class);
         thrown.expectMessage("Insufficient number of subnets");
 
         underTest.chooseSubnetsFromDifferentAzs(subnets);
@@ -68,9 +69,28 @@ public class SubnetChooserServiceTest {
                 new CloudSubnet(SUBNET_1, "", AVAILABILITY_ZONE_A, ""),
                 new CloudSubnet(SUBNET_2, "", AVAILABILITY_ZONE_A, "")
         );
-        thrown.expect(RedbeamsException.class);
+        thrown.expect(BadRequestException.class);
         thrown.expectMessage("All subnets in the same availability zone");
 
         underTest.chooseSubnetsFromDifferentAzs(subnets);
+    }
+
+    @Test
+    public void testSixSubnetsFromSomeDifferentAz() {
+        List<CloudSubnet> subnets = List.of(
+                new CloudSubnet("subnet1", "", "us-west-2c", ""),
+                new CloudSubnet("subnet2", "", "us-west-2c", ""),
+                new CloudSubnet("subnet3", "", "us-west-2b", ""),
+                new CloudSubnet("subnet4", "", "us-west-2a", ""),
+                new CloudSubnet("subnet5", "", "us-west-2a", ""),
+                new CloudSubnet("subnet6", "", "us-west-2b", "")
+        );
+
+        List<CloudSubnet> networks = underTest.chooseSubnetsFromDifferentAzs(subnets);
+
+        assertThat(networks, hasSize(2));
+        String az1 = networks.get(0).getAvailabilityZone();
+        String az2 = networks.get(1).getAvailabilityZone();
+        assertNotEquals(az1, az2);
     }
 }
