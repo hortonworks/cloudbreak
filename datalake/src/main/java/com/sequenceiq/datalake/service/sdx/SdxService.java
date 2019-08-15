@@ -396,9 +396,9 @@ public class SdxService {
 
     private String createCrn(@Nonnull String accountId) {
         return Crn.builder()
-                .setService(Crn.Service.SDX)
+                .setService(Crn.Service.DATALAKE)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.SDX_CLUSTER)
+                .setResourceType(Crn.ResourceType.DATALAKE)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

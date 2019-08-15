@@ -190,6 +190,7 @@ public class SdxServiceTest {
         Assertions.assertEquals(SdxClusterStatus.REQUESTED, capturedSdx.getStatus());
         Assertions.assertEquals(1L, capturedSdx.getCreated());
         Assertions.assertFalse(capturedSdx.isCreateDatabase());
+        Assertions.assertTrue(createdSdxCluster.getCrn().matches("crn:cdp:datalake:us-west-1:hortonworks:datalake:.*"));
         verify(sdxReactorFlowManager).triggerSdxCreation(id);
     }
 

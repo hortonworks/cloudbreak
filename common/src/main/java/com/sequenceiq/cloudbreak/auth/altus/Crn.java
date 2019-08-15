@@ -14,16 +14,16 @@ import com.google.common.collect.ImmutableMap;
 /**
  * A Cloudera Resource Name uniquely identifies a Cloudera Data Platform (CDP) resource.
  * It also supports the legacy "altus" partition.
- *
+ * <p>
  * The format is:
- *
+ * <p>
  * crn:partition:service:region:account-id:resourcetype:resource
- *
+ * <p>
  * An example might be example:
  * crn:cdp:environments:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:ff186d14-1cfc-461f-a111-466857dd276e
- *
+ * <p>
  * See the below for an explanation of the component parts.
- *
+ * <p>
  * Note the CRN format and component values are part of our compatibility
  * contract.
  */
@@ -42,7 +42,7 @@ public class Crn {
      */
     public enum Partition {
         /**
-         * @deprecated since CDP project
+         * @deprecated {@link #ALTUS} was replaced by {@link #CDP} and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
          */
         @Deprecated
         ALTUS("altus", "ccs"),
@@ -50,6 +50,7 @@ public class Crn {
         CDP("cdp", null);
 
         private static final ImmutableMap<String, Partition> FROM_STRING;
+
         static {
             ImmutableMap.Builder<String, Partition> builder = ImmutableMap.builder();
             Arrays.stream(Partition.values()).forEach(partition -> {
@@ -86,6 +87,7 @@ public class Crn {
         /**
          * Get a partition from a string. 'null' if 'input' is not a valid
          * partition name.
+         *
          * @param input the input string
          * @return the partition
          * @throws NullPointerException if 'input' is null
@@ -97,10 +99,11 @@ public class Crn {
 
         /**
          * Get a partition from a string. This will never return null.
+         *
          * @param input the input string
          * @return the partition
          * @throws NullPointerException if 'input' is null
-         * @throws CrnParseException if 'input' is not a valid partition name
+         * @throws CrnParseException    if 'input' is not a valid partition name
          */
         public static Partition safeFromString(String input) {
             checkNotNull(input);
@@ -118,7 +121,7 @@ public class Crn {
      */
     public enum Service {
         /**
-         * @deprecated DRDS was replaced by DATAENGADMIN and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
+         * @deprecated {@link #DRDS} was replaced by {@link #DATAENGADMIN} and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
          */
         @Deprecated
         DRDS("drds", ADMIN_SERVICE),
@@ -128,8 +131,16 @@ public class Crn {
         WA("wa", "sigma", NON_ADMIN_SERVICE),
         NAVOPT("navopt", NON_ADMIN_SERVICE),
         DBUS("dbus", NON_ADMIN_SERVICE),
-        AUTOSCALE("autoscale",  NON_ADMIN_SERVICE),
+        AUTOSCALE("autoscale", NON_ADMIN_SERVICE),
+        /**
+         * @deprecated {@link #CLOUDBREAK} was replaced by {@link #DATAHUB} and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
+         */
+        @Deprecated
         CLOUDBREAK("cloudbreak", NON_ADMIN_SERVICE),
+        /**
+         * @deprecated {@link #SDX} was replaced by {@link #DATALAKE} and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
+         */
+        @Deprecated
         SDX("sdx", NON_ADMIN_SERVICE),
         REDBEAMS("redbeams", NON_ADMIN_SERVICE),
         SDXADMIN("sdxadmin", ADMIN_SERVICE),
@@ -145,9 +156,11 @@ public class Crn {
         SAMPLE("sample", NON_ADMIN_SERVICE),
         WORKSPACES("workspaces", NON_ADMIN_SERVICE),
         FREEIPA("freeipa", NON_ADMIN_SERVICE),
-        DATAHUB("datahub", NON_ADMIN_SERVICE);
+        DATAHUB("datahub", NON_ADMIN_SERVICE),
+        DATALAKE("datalake", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
+
         static {
             ImmutableMap.Builder<String, Service> builder = ImmutableMap.builder();
             Arrays.stream(Service.values()).forEach(service -> {
@@ -191,6 +204,7 @@ public class Crn {
         /**
          * Get a service from a string. 'null' if 'input' is not a valid
          * service name.
+         *
          * @param input the input string
          * @return the service
          * @throws NullPointerException if 'input' is null
@@ -202,10 +216,11 @@ public class Crn {
 
         /**
          * Get a service from a string. This will never return null.
+         *
          * @param input the input string
          * @return the service
          * @throws NullPointerException if 'input' is null
-         * @throws CrnParseException if 'input' is not a valid service name
+         * @throws CrnParseException    if 'input' is not a valid service name
          */
         public static Service safeFromString(String input) {
             checkNotNull(input);
@@ -219,6 +234,7 @@ public class Crn {
 
         /**
          * Returns whether the service is an admin service or not.
+         *
          * @return whether the service is an admin service or not.
          */
         public boolean isAdminService() {
@@ -254,6 +270,11 @@ public class Crn {
     public enum ResourceType {
         ACCESS_KEY("accesskey"),
         CLUSTER("cluster"),
+        /**
+         * @deprecated {@link #SDX_CLUSTER} was replaced by {@link #DATALAKE} and is kept here for backward compatibility reasons (e.g., dynamodb serialized
+         * CRNs).
+         */
+        @Deprecated
         SDX_CLUSTER("sdxcluster"),
         DIRECTOR("director"),
         ENVIRONMENT("environment"),
@@ -271,9 +292,18 @@ public class Crn {
         WORKSPACE("workspace"),
         DATABASE("database"),
         DATABASE_SERVER("databaseServer"),
+        /**
+         * @deprecated {@link #BLUEPRINT} was replaced by {@link #CLUSTER_DEFINITION} and is kept here for backward compatibility reasons (e.g., dynamodb
+         * serialized CRNs).
+         */
+        @Deprecated
         BLUEPRINT("blueprint"),
         CLUSTER_DEFINITION("clusterdefinition"),
         CLUSTER_TEMPLATE("clustertemplate"),
+        /**
+         * @deprecated {@link #STACK} was replaced by {@link #CLUSTER} and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
+         */
+        @Deprecated
         STACK("stack"),
         CREDENTIAL("credential"),
         NETWORK("network"),
@@ -281,9 +311,11 @@ public class Crn {
         IMAGE_CATALOG("imageCatalog"),
         KERBEROS("kerberos"),
         RECIPE("recipe"),
-        FREEIPA("freeipa");
+        FREEIPA("freeipa"),
+        DATALAKE("datalake");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
+
         static {
             ImmutableMap.Builder<String, ResourceType> builder = ImmutableMap.builder();
             Arrays.stream(ResourceType.values()).forEach(
@@ -308,6 +340,7 @@ public class Crn {
 
         /**
          * Get a resource type from a string. This will never return null.
+         *
          * @param input the input string
          * @return the resource type
          * @throws CrnParseException if 'input' is not a valid resource type
@@ -337,12 +370,13 @@ public class Crn {
 
     /**
      * Constructor. Also see the Builder below.
-     * @param partition the Altus partition in which the resource resides
-     * @param service the Altus service in which the resource resides
-     * @param region the Altus region in which the resource resides
-     * @param accountId the Altus account with which the resource is associated
+     *
+     * @param partition    the Altus partition in which the resource resides
+     * @param service      the Altus service in which the resource resides
+     * @param region       the Altus region in which the resource resides
+     * @param accountId    the Altus account with which the resource is associated
      * @param resourceType the type of this Altus resource
-     * @param resource the name of this Altus resource
+     * @param resource     the name of this Altus resource
      */
     public Crn(Partition partition,
             Service service,
@@ -360,6 +394,7 @@ public class Crn {
 
     /**
      * Returns the partition.
+     *
      * @return the partition
      */
     public Partition getPartition() {
@@ -368,6 +403,7 @@ public class Crn {
 
     /**
      * Returns the service.
+     *
      * @return the service
      */
     public Service getService() {
@@ -376,6 +412,7 @@ public class Crn {
 
     /**
      * Returns the region.
+     *
      * @return the region
      */
     public Region getRegion() {
@@ -384,6 +421,7 @@ public class Crn {
 
     /**
      * Returns the account ID.
+     *
      * @return the account ID
      */
     public String getAccountId() {
@@ -392,6 +430,7 @@ public class Crn {
 
     /**
      * Returns the resource type.
+     *
      * @return the resource type
      */
     public ResourceType getResourceType() {
@@ -400,6 +439,7 @@ public class Crn {
 
     /**
      * Returns the resource.
+     *
      * @return the resource
      */
     public String getResource() {
@@ -416,10 +456,11 @@ public class Crn {
      * Creates a CRN from the input string. This will return null if the input
      * string does not match the CRN pattern and throw if the input string does
      * match, but cannot be parsed into a CRN for some reason.
+     *
      * @param input the input string
      * @return the CRN
      * @throws NullPointerException if the input string is null
-     * @throws CrnParseException if the input string matches the CRN pattern but cannot be parsed
+     * @throws CrnParseException    if the input string matches the CRN pattern but cannot be parsed
      */
     //CHECKSTYLE:OFF: checkstyle:magicnumber
     @Nullable
@@ -447,10 +488,11 @@ public class Crn {
     /**
      * Creates a CRN from the input string. This will explode instead of
      * returning null.
+     *
      * @param input the input string
      * @return the CRN
      * @throws NullPointerException if the input string is null
-     * @throws CrnParseException if the input string does not match the CRN pattern or cannot be parsed
+     * @throws CrnParseException    if the input string does not match the CRN pattern or cannot be parsed
      */
     public static Crn safeFromString(String input) {
         Crn crn = fromString(input);
@@ -462,6 +504,7 @@ public class Crn {
 
     /**
      * Returns whether an input string is a CRN.
+     *
      * @param input the input string
      * @return whether the input string is a CRN
      */
