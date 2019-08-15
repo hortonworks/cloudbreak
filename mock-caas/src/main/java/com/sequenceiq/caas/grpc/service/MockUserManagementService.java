@@ -49,6 +49,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListU
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse.Builder;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Role;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -171,9 +173,12 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         String accountId = Crn.fromString(actorCrn).getAccountId();
         List<Group> groups = List.copyOf(getOrCreateGroups(accountId));
         Group group = groups.get(FIRST_GROUP);
+        Role powerUser = Role.newBuilder().setCrn("PowerUser").build();
+        RoleAssignment roleAssignment = RoleAssignment.newBuilder().setRole(powerUser).build();
         responseObserver.onNext(
                 GetRightsResponse.newBuilder()
-                        .addGroupCrn(group.getCrn()).build());
+                        .addGroupCrn(group.getCrn())
+                        .addRoleAssignment(roleAssignment).build());
         responseObserver.onCompleted();
     }
 
