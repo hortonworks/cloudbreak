@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -15,13 +15,15 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ClouderaManagerProductV4Request implements JsonEntity {
 
-    @NotNull
+    @NotEmpty
     @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.NAME)
     private String name;
 
+    @NotEmpty
     @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.VERSION)
     private String version;
 
+    @NotEmpty
     @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.PARCEL)
     private String parcel;
 
