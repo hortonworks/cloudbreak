@@ -41,7 +41,7 @@ class CmMgmtServiceConfigLocationService {
     private void setConfig(ApiRole apiRole, ApiConfig apiConfig) {
         if (apiRole.getConfig() == null) {
             ApiConfigList apiConfigList = new ApiConfigList();
-            apiConfigList.setItems(List.of(apiConfig));
+            apiConfigList.addItemsItem(apiConfig);
             apiRole.setConfig(apiConfigList);
         } else {
             apiRole.getConfig().getItems().add(apiConfig);
