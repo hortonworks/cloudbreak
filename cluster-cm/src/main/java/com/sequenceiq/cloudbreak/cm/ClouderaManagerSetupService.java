@@ -167,9 +167,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.info("Generated Cloudera cluster template: {}", cluster.getExtendedBlueprintText());
             ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
 
+            removeRemoteParcelRepos(clouderaManagerResourceApi);
             boolean prewarmed = isPrewarmed(clusterId);
             if (prewarmed) {
-                removeRemoteParcelRepos(clouderaManagerResourceApi);
                 refreshParcelRepos(clouderaManagerResourceApi);
             }
             installCluster(cluster, apiClusterTemplate, clouderaManagerResourceApi, prewarmed);
