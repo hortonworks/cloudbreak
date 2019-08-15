@@ -27,18 +27,19 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -69,9 +70,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 
@@ -103,6 +104,9 @@ public class StackServiceTest {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
+
+    @Captor
+    public final ArgumentCaptor<String> crnCaptor = ArgumentCaptor.forClass(String.class);
 
     @InjectMocks
     private StackService underTest;
@@ -673,6 +677,9 @@ public class StackServiceTest {
             stack = underTest.create(stack, "AWS", mock(StatedImage.class), user, workspace);
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
+            verify(stack).setResourceCrn(crnCaptor.capture());
+            String resourceCrn = crnCaptor.getValue();
+            assertTrue(resourceCrn.matches("crn:cdp:datahub:us-west-1:something:stack:.*"));
             verify(securityConfig, times(1)).setStack(stack);
             verify(securityConfigService, times(1)).save(securityConfig);
 
