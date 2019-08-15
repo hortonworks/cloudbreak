@@ -136,6 +136,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
                     kerberosDetailService.isAdJoinable(kerberosConfig), kerberosDetailService.isIpaJoinable(kerberosConfig));
             cleanUpFreeIpa(stack.getEnvironmentCrn(), hostsToRemove.keySet());
             decomissionedHostNames.stream().map(hostsToRemove::get).forEach(clusterDecomissionService::deleteHostFromCluster);
+            clusterDecomissionService.restartStaleServices();
 
             List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             PollingResult orchestratorRemovalPollingResult =

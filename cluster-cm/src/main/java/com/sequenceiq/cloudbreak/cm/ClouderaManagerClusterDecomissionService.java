@@ -8,10 +8,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
+import com.cloudera.api.swagger.client.ApiException;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
@@ -23,16 +27,22 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Service
 @Scope("prototype")
 public class ClouderaManagerClusterDecomissionService implements ClusterDecomissionService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterDecomissionService.class);
 
     @Inject
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
     @Inject
     private ClouderaManagerDecomissioner clouderaManagerDecomissioner;
+
+    @Inject
+    private ApplicationContext applicationContext;
 
     private final Stack stack;
 
@@ -88,5 +98,17 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     @Override
     public void deleteHostFromCluster(HostMetadata data) {
         clouderaManagerDecomissioner.deleteHost(stack, data, client);
+    }
+
+    @Override
+    public void restartStaleServices() throws CloudbreakException {
+        try {
+            applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig)
+                    .restartStaleServices(clouderaManagerClientFactory.getMgmtServiceResourceApi(client),
+                            clouderaManagerClientFactory.getClustersResourceApi(client));
+        } catch (ApiException e) {
+            LOGGER.error("Couldn't restart stale services", e);
+            throw new CloudbreakException("Couldn't restart stale services", e);
+        }
     }
 }
