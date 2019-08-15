@@ -38,12 +38,19 @@ EXISTING_USERS_FILE=/tmp/existing_users_file
 HDFS_KEYTAB=/run/cloudera-scm-agent/process/$(ls -t /run/cloudera-scm-agent/process/ | grep hdfs-NAMENODE$ | head -n 1)/hdfs.keytab
 echo "Keytab dir:$HDFS_KEYTAB"
 
-kinit -kt "$HDFS_KEYTAB" hdfs/$(hostname -f)
-if [[ $? -ne 0 ]]; then
-  echo "Couldn't kinit as hdfs"
-  exit 1
-fi
+PATH_PREFIX="/user"
 
+# Check if there's a valid TGT, and kinit if not
+klist -s
+if [[ $? -ne 0 ]]; then
+  kinit -kt "$HDFS_KEYTAB" hdfs/$(hostname -f)
+  if [[ $? -ne 0 ]]; then
+    echo "Couldn't kinit as hdfs"
+    exit 1
+  fi
+else
+  echo "Found a valid keytab."
+fi
 
 mapfile -t users < <((ipa user-find --sizelimit=0 --timelimit=0) | grep 'User login:' | awk '{ print $3}')
 declare -a existingusers
@@ -56,19 +63,31 @@ for existing in "${existingusers[@]}";
 do
   hasharr[$existing]="exist"
 done
-number_of_dirs_created=0
+number_of_dirs=0
+newpaths=""
 for user in "${users[@]}";
 do
   if [[ ${hasharr[$user]} != "exist" ]]; then
-     echo "Trying to create /user/$user directory"
-     (hdfs dfs -mkdir /user/$user) && (hdfs dfs -chown $user /user/$user)
-     if [[ $? -eq 0 ]]; then
-       echo "Home directory created for $user"
-       echo "$user" >> $EXISTING_USERS_FILE
-       number_of_dirs_created=$((number_of_dirs_created + 1))
-     else
-       echo "Directory creation or chown attempt for $user failed. Directory already exists?"
-     fi
+     echo "Will attempt to create HDFS home dir for $user"
+     #the size of newpaths will be capped by `getconf ARG_MAX` most likely.
+     #This is set to 2MB on mow-dev, and so this string concatenation can
+     #easily take 10s of 1000s of meaningful paths. TODO: fix this longer
+     #term to do checks against the limits, etc.
+     newpaths+="$PATH_PREFIX/$user "
   fi
 done
-echo "End time of script $0, PID $$: `date`. Number of HDFS home dirs created $number_of_dirs_created."
+if [ -z "$newpaths" ]; then
+  echo "No home dirs to create in HDFS"
+else
+  hdfs dfs -mkdir -p $newpaths
+  echo "Will chown the created home directories. This may take a while depending on the number of directories."
+  for user in "${users[@]}";
+  do
+    if [[ ${hasharr[$user]} != "exist" ]]; then
+      hdfs dfs -chown $user:$user $PATH_PREFIX/$user
+      echo "$user" >> $EXISTING_USERS_FILE
+      number_of_dirs=$((number_of_dirs + 1))
+    fi
+  done
+fi
+echo "End time of script $0, PID $$: `date`. Number of HDFS home dirs created/touched $number_of_dirs."
