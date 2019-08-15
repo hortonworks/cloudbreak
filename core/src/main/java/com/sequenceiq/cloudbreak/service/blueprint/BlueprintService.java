@@ -370,7 +370,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return Crn.builder()
                 .setService(Crn.Service.DATAHUB)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.BLUEPRINT)
+                .setResourceType(Crn.ResourceType.CLUSTER_DEFINITION)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

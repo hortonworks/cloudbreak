@@ -272,6 +272,7 @@ public class Crn {
         DATABASE("database"),
         DATABASE_SERVER("databaseServer"),
         BLUEPRINT("blueprint"),
+        CLUSTER_DEFINITION("clusterdefinition"),
         CLUSTER_TEMPLATE("clustertemplate"),
         STACK("stack"),
         CREDENTIAL("credential"),
