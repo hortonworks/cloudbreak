@@ -93,4 +93,8 @@ public class AmbariClusterDecomissionService implements ClusterDecomissionServic
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void restartStaleServices() throws CloudbreakException {
+    }
 }

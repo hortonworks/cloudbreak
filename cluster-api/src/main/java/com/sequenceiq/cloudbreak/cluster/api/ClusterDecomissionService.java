@@ -26,4 +26,6 @@ public interface ClusterDecomissionService {
     void removeManagementServices();
 
     void deleteHostFromCluster(HostMetadata data);
+
+    void restartStaleServices() throws CloudbreakException;
 }

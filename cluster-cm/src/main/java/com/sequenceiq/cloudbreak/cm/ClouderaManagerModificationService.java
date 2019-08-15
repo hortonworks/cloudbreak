@@ -161,7 +161,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 .orElse(Boolean.FALSE);
     }
 
-    private void restartStaleServices(MgmtServiceResourceApi mgmtServiceResourceApi, ClustersResourceApi clustersResourceApi)
+    public void restartStaleServices(MgmtServiceResourceApi mgmtServiceResourceApi, ClustersResourceApi clustersResourceApi)
             throws ApiException, CloudbreakException {
         restartClouderaManagementServices(mgmtServiceResourceApi);
         restartCMStaleServices(clustersResourceApi);
