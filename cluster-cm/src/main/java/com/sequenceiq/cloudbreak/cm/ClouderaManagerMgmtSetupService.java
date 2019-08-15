@@ -71,6 +71,9 @@ public class ClouderaManagerMgmtSetupService {
     @Inject
     private CmMgmtServiceConfigLocationService cmMgmtServiceConfigLocationService;
 
+    @Inject
+    private CmMgmtServiceLogConfigService cmMgmtServiceLogConfigService;
+
     /**
      * Sets up the management services using the given Cloudera Manager client.
      *
@@ -108,6 +111,7 @@ public class ClouderaManagerMgmtSetupService {
             }
         }
         cmMgmtServiceConfigLocationService.setConfigLocations(stack, mgmtRoles);
+        cmMgmtServiceLogConfigService.setLogConfig(mgmtRoles);
         telemetryService.setupTelemetryRole(stack, client, cmHostRef, mgmtRoles, telemetry);
         createMgmtRoles(mgmtRolesResourceApi, mgmtRoles);
         telemetryService.updateTelemetryConfigs(stack, client, telemetry, sdxContextName, sdxStackCrn);
