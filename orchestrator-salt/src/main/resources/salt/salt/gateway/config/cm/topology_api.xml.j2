@@ -95,6 +95,12 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
+            {% if 'IMPALA' in exposed and 'IMPALAD' in salt['pillar.get']('gateway:location') -%}
+            <param>
+                <name>IMPALA</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
         </provider>
     </gateway>
 
@@ -211,6 +217,17 @@
         <role>WEBHBASE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HBASERESTSERVER'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['WEBHBASE'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'IMPALAD' in salt['pillar.get']('gateway:location') -%}
+    {% if 'IMPALA' in exposed -%}
+    <service>
+        <role>IMPALA</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['IMPALAD'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['IMPALA'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
