@@ -31,9 +31,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
-import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.RoleRequest;
-import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
 
 import reactor.bus.Event;
@@ -60,13 +57,13 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
     private KerberosDetailService kerberosDetailService;
 
     @Inject
-    private KerberosMgmtV1Endpoint kerberosMgmtV1Endpoint;
-
-    @Inject
     private HostOrchestrator hostOrchestrator;
 
     @Inject
     private SecretService secretService;
+
+    @Inject
+    private KeytabProvider keytabProvider;
 
     @Override
     public String selector() {
@@ -84,7 +81,7 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
             if ((CloudPlatform.AWS.name().equals(stack.cloudPlatform()) || CloudPlatform.AZURE.name().equals(stack.cloudPlatform()))
                     && kerberosConfigOptional.isPresent() && kerberosDetailService.isIpaJoinable(kerberosConfigOptional.get())) {
                 GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-                ServiceKeytabResponse serviceKeytabResponse = getServiceKeytabResponse(stack, primaryGatewayConfig);
+                ServiceKeytabResponse serviceKeytabResponse = keytabProvider.getServiceKeytabResponse(stack, primaryGatewayConfig);
                 KeytabModel keytabModel = buildKeytabModel(serviceKeytabResponse);
                 hostOrchestrator.uploadKeytabs(List.of(primaryGatewayConfig), Set.of(keytabModel),
                         ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, stack.getCluster().getId()));
@@ -103,19 +100,5 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
         byte[] keytab = Base64.getDecoder().decode(keytabInBase64.getBytes(StandardCharsets.UTF_8));
         String principal = secretService.getByResponse(serviceKeytabResponse.getServicePrincipal());
         return new KeytabModel("CM", "/etc/cloudera-scm-server", "cmf.keytab", principal, keytab);
-    }
-
-    private ServiceKeytabResponse getServiceKeytabResponse(Stack stack, GatewayConfig primaryGatewayConfig)
-            throws Exception {
-        ServiceKeytabRequest request = new ServiceKeytabRequest();
-        request.setEnvironmentCrn(stack.getEnvironmentCrn());
-        request.setServerHostName(primaryGatewayConfig.getHostname());
-        request.setServiceName("CM");
-        request.setDoNotRecreateKeytab(Boolean.TRUE);
-        RoleRequest roleRequest = new RoleRequest();
-        roleRequest.setRoleName("hadoopadminrole-" + stack.getName());
-        roleRequest.setPrivileges(Set.of("Service Administrators", "Certificate Administrators", "CA Administrator"));
-        request.setRoleRequest(roleRequest);
-        return kerberosMgmtV1Endpoint.generateServiceKeytab(request);
     }
 }
