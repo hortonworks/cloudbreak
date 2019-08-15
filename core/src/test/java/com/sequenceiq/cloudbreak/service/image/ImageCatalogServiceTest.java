@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.dto.ImageCatalogAccessDto.ImageCatalogAccessDtoBuilder.aImageCatalogAccessDtoBuilder;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -49,14 +51,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -67,7 +68,8 @@ import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogServiceTest {
@@ -572,7 +574,7 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
-    public void  testDeleteByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
+    public void testDeleteByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("ImageCatalogAccessDto should not be null");
 
@@ -615,11 +617,25 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
-    public void  testGetByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
+    public void testGetByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("ImageCatalogAccessDto should not be null");
 
         underTest.get(null, 1L);
+    }
+
+    @Test
+    public void testPopulateCrnCorrectly() {
+        ImageCatalog imageCatalog = getImageCatalog();
+
+        when(userService.getOrCreate(any(CloudbreakUser.class))).thenReturn(user);
+        when(workspaceService.get(1L, user)).thenReturn(imageCatalog.getWorkspace());
+        when(workspaceService.retrieveForUser(user)).thenReturn(Set.of(imageCatalog.getWorkspace()));
+
+        underTest.createForLoggedInUser(imageCatalog, 1L, "account_id", "creator");
+
+        assertThat(imageCatalog.getCreator(), is("creator"));
+        assertTrue(imageCatalog.getResourceCrn().matches("crn:cdp:datahub:us-west-1:account_id:imageCatalog:.*"));
     }
 
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {

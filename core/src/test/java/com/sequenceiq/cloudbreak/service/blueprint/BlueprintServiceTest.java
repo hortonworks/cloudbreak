@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COM
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -54,6 +55,10 @@ public class BlueprintServiceTest {
     private static final String INVALID_DTO_MESSAGE = "One and only one value of the crn and name should be filled!";
 
     private static final String NULL_DTO_EXCEPTION_MESSAGE = "BlueprintAccessDto should not be null";
+
+    private static final String ACCOUNT_ID = "ACCOUNT_ID";
+
+    private static final String CREATOR = "CREATOR";
 
     @Rule
     public final ExpectedException exceptionRule = ExpectedException.none();
@@ -277,6 +282,15 @@ public class BlueprintServiceTest {
         verify(blueprintLoaderService).loadBlueprintsForTheWorkspace(any(), any(), any());
     }
 
+    @Test
+    public void testPopulateCrnCorrectly() {
+        Blueprint blueprint = new Blueprint();
+        underTest.decorateWithCrn(blueprint, ACCOUNT_ID, CREATOR);
+
+        assertThat(blueprint.getCreator(), is(CREATOR));
+        assertTrue(blueprint.getResourceCrn().matches("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":clusterdefinition:.*"));
+    }
+
     private Set<Cluster> getClusterWithStatus(Status... statuses) {
         Set<Cluster> clusters = new HashSet<>();
         long id = 0L;
@@ -304,7 +318,7 @@ public class BlueprintServiceTest {
         blueprint.setName(name);
         blueprint.setWorkspace(getWorkspace());
         blueprint.setStatus(status);
-        blueprint.setCreator("someone");
+        blueprint.setCreator(CREATOR);
         blueprint.setResourceCrn("someCrn");
         return blueprint;
     }

@@ -127,7 +127,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
     private String createCRN(String accountId) {
         throwIfNull(accountId, IllegalArgumentException::new);
         return Crn.builder()
-                .setService(Crn.Service.CLOUDBREAK)
+                .setService(Crn.Service.DATAHUB)
                 .setAccountId(accountId)
                 .setResourceType(Crn.ResourceType.RECIPE)
                 .setResource(UUID.randomUUID().toString())

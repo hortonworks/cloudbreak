@@ -606,7 +606,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private String createCRN(String accountId) {
         return Crn.builder()
-                .setService(Crn.Service.CLOUDBREAK)
+                .setService(Crn.Service.DATAHUB)
                 .setAccountId(accountId)
                 .setResourceType(Crn.ResourceType.IMAGE_CATALOG)
                 .setResource(UUID.randomUUID().toString())

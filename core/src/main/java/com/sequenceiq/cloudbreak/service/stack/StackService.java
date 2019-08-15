@@ -998,9 +998,9 @@ public class StackService {
 
     private String createCRN(String accountId) {
         return Crn.builder()
-                .setService(Crn.Service.CLOUDBREAK)
+                .setService(Crn.Service.DATAHUB)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.STACK)
+                .setResourceType(Crn.ResourceType.CLUSTER)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();
