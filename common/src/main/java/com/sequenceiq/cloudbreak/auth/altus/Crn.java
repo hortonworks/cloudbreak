@@ -37,19 +37,24 @@ public class Crn {
     private static final boolean NON_ADMIN_SERVICE = false;
 
     /**
-     * The Altus partition in which the resource resides. An Altus partition is a
-     * namespace for sets of Altus services.
+     * The CDP partition in which the resource resides. A CDP partition is a
+     * namespace for sets of CDP services.
      */
     public enum Partition {
+        /**
+         * @deprecated since CDP project
+         */
+        @Deprecated
         ALTUS("altus", "ccs"),
-        CDP("cdp", "cdp");
+
+        CDP("cdp", null);
 
         private static final ImmutableMap<String, Partition> FROM_STRING;
         static {
             ImmutableMap.Builder<String, Partition> builder = ImmutableMap.builder();
             Arrays.stream(Partition.values()).forEach(partition -> {
                 builder.put(partition.name, partition);
-                if (!Objects.equal(partition.name, partition.legacyName)) {
+                if (partition.legacyName != null) {
                     builder.put(partition.legacyName, partition);
                 }
             });
@@ -423,7 +428,8 @@ public class Crn {
         if (!matcher.matches()) {
             return null;
         }
-
+        String partition = matcher.group(1);
+        Partition.safeFromString(partition);
         String region = matcher.group(3);
         if (!Region.US_WEST_1.name.equals(region)) {
             throw new CrnParseException(String.format("%s is not a supported region", region));

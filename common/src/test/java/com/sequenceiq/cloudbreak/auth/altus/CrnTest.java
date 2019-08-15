@@ -20,8 +20,6 @@ public class CrnTest {
 
     private String exampleCrn3 = "crn:cdp:iam:us-west-1:default:user:lnardai@cloudera.com";
 
-    private String exampleCrn4 = "crn:cdp:datahub:us-west-1:8d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:s3b8ed82-e712-4f89-bda7-be07183720d3";
-
     private String invalidCrnPattern = "crn:something:chunked21dqw";
 
     private String invalidCrnEmptyParts = ":::::";
@@ -61,17 +59,6 @@ public class CrnTest {
     }
 
     @Test
-    public void testFromStringOnCdpCrn() {
-        Crn crn = Crn.fromString(exampleCrn4);
-        assertEquals(Crn.Partition.CDP, crn.getPartition());
-        assertEquals(Crn.Service.DATAHUB, crn.getService());
-        assertEquals(Crn.Region.US_WEST_1, crn.getRegion());
-        assertEquals("8d74eee4-1cad-45d7-b645-7ccf9edbb73d", crn.getAccountId());
-        assertEquals(Crn.ResourceType.USER, crn.getResourceType());
-        assertEquals("s3b8ed82-e712-4f89-bda7-be07183720d3", crn.getResource());
-    }
-
-    @Test
     public void testFromStringWithInvalidPattern() {
         assertNull(Crn.fromString(invalidCrnPattern));
     }
@@ -87,7 +74,6 @@ public class CrnTest {
         assertTrue(Crn.isCrn(exampleCrn));
         assertTrue(Crn.isCrn(exampleCrn2));
         assertTrue(Crn.isCrn(exampleCrn3));
-        assertTrue(Crn.isCrn(exampleCrn4));
     }
 
     @Test
