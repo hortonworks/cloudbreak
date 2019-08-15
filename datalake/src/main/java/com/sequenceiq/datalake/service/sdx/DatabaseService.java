@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.logging.log4j.util.Strings;
@@ -61,11 +62,16 @@ public class DatabaseService {
         if (dbHasBeenCreatedPreviously(sdxCluster)) {
             dbResourceCrn = sdxCluster.getDatabaseCrn();
         } else {
-            dbResourceCrn = redbeamsClient
-                    .withCrn(threadBasedUserCrnProvider.getUserCrn())
-                    .databaseServerV4Endpoint().create(getDatabaseRequest(env))
-                    .getResourceCrn();
-            sdxCluster.setDatabaseCrn(dbResourceCrn);
+            try {
+                dbResourceCrn = redbeamsClient
+                        .withCrn(threadBasedUserCrnProvider.getUserCrn())
+                        .databaseServerV4Endpoint().create(getDatabaseRequest(env))
+                        .getResourceCrn();
+                sdxCluster.setDatabaseCrn(dbResourceCrn);
+            } catch (BadRequestException badRequestException) {
+                LOGGER.error("Redbeams create request failed, bad request", badRequestException);
+                throw badRequestException;
+            }
         }
         sdxCluster.setStatus(SdxClusterStatus.EXTERNAL_DATABASE_CREATION_IN_PROGRESS);
         sdxClusterRepository.save(sdxCluster);
