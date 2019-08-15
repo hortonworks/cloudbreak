@@ -71,7 +71,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         return repository.findByEnvironmentId(environmentCrn);
     }
 
-    public DatabaseConfig register(DatabaseConfig configToSave) {
+    public DatabaseConfig register(DatabaseConfig configToSave, boolean test) {
 
         if (configToSave.getConnectionDriver() == null) {
             configToSave.setConnectionDriver(configToSave.getDatabaseVendor().connectionDriver());
@@ -79,10 +79,12 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
                 configToSave.getConnectionDriver());
         }
 
-        String testResults = testConnection(configToSave);
+        if (test) {
+            String testResults = testConnection(configToSave);
 
-        if (!testResults.equals(DATABASE_TEST_RESULT_SUCCESS)) {
-            throw new IllegalArgumentException(testResults);
+            if (!testResults.equals(DATABASE_TEST_RESULT_SUCCESS)) {
+                throw new IllegalArgumentException(testResults);
+            }
         }
 
         try {

@@ -150,7 +150,7 @@ public class DatabaseServerConfigServiceTest {
         when(crnService.createCrn(server)).thenReturn(serverCrn);
         when(repository.save(server)).thenReturn(server);
 
-        DatabaseServerConfig createdServer = underTest.create(server, 0L);
+        DatabaseServerConfig createdServer = underTest.create(server, 0L, false);
 
         assertEquals(server, createdServer);
         assertEquals(0L, createdServer.getWorkspaceId().longValue());
@@ -170,7 +170,7 @@ public class DatabaseServerConfigServiceTest {
         when(crnService.createCrn(server)).thenReturn(serverCrn);
         when(repository.save(server)).thenReturn(server);
 
-        DatabaseServerConfig createdServer = underTest.create(server, 0L);
+        DatabaseServerConfig createdServer = underTest.create(server, 0L, false);
 
         assertEquals(DatabaseVendor.POSTGRES.connectionDriver(), createdServer.getConnectionDriver());
     }
@@ -185,7 +185,7 @@ public class DatabaseServerConfigServiceTest {
         AccessDeniedException e = new AccessDeniedException("no way", mock(ConstraintViolationException.class));
         when(repository.save(server)).thenThrow(e);
 
-        underTest.create(server, 0L);
+        underTest.create(server, 0L, false);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class DatabaseServerConfigServiceTest {
         AccessDeniedException e = new AccessDeniedException("no way");
         when(repository.save(server)).thenThrow(e);
 
-        underTest.create(server, 0L);
+        underTest.create(server, 0L, false);
     }
 
     @Test
@@ -215,7 +215,7 @@ public class DatabaseServerConfigServiceTest {
             }
         }).when(connectionValidator).validate(eq(server), any(Errors.class));
 
-        underTest.create(server, 0L);
+        underTest.create(server, 0L, true);
     }
 
     @Test
@@ -406,7 +406,7 @@ public class DatabaseServerConfigServiceTest {
     @Test
     public void testCreateDatabaseOnServer() {
         when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.of(server));
-        when(databaseConfigService.register(any(DatabaseConfig.class)))
+        when(databaseConfigService.register(any(DatabaseConfig.class), eq(false)))
                 .thenAnswer((Answer<DatabaseConfig>) invocation -> {
                     return invocation.getArgument(0, DatabaseConfig.class);
                 });
@@ -424,7 +424,7 @@ public class DatabaseServerConfigServiceTest {
         assertEquals("created", result);
         verify(driverFunctions).execWithDatabaseDriver(eq(server), any());
         ArgumentCaptor<DatabaseConfig> captor = ArgumentCaptor.forClass(DatabaseConfig.class);
-        verify(databaseConfigService).register(captor.capture());
+        verify(databaseConfigService).register(captor.capture(), eq(false));
         DatabaseConfig db = captor.getValue();
         assertEquals(databaseName, db.getName());
         assertEquals(databaseType, db.getType());

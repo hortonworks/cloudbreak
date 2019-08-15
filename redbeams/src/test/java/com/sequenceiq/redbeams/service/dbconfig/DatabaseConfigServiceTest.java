@@ -120,7 +120,7 @@ public class DatabaseConfigServiceTest {
         when(crnService.createCrn(configToRegister)).thenReturn(dbCrn);
         when(repository.save(configToRegister)).thenReturn(configToRegister);
 
-        DatabaseConfig createdConfig = underTest.register(configToRegister);
+        DatabaseConfig createdConfig = underTest.register(configToRegister, false);
 
         assertEquals(configToRegister, createdConfig);
         verify(repository).save(configToRegister);
@@ -140,7 +140,7 @@ public class DatabaseConfigServiceTest {
         when(crnService.createCrn(configToRegister)).thenReturn(dbCrn);
         when(repository.save(configToRegister)).thenReturn(configToRegister);
 
-        DatabaseConfig createdConfig = underTest.register(configToRegister);
+        DatabaseConfig createdConfig = underTest.register(configToRegister, false);
 
         assertEquals(DatabaseVendor.POSTGRES.connectionDriver(), createdConfig.getConnectionDriver());
     }
@@ -156,7 +156,7 @@ public class DatabaseConfigServiceTest {
             return null;
         }).when(connectionValidator).validate(any(), any());
 
-        underTest.register(configToRegister);
+        underTest.register(configToRegister, true);
 
     }
 
@@ -233,7 +233,7 @@ public class DatabaseConfigServiceTest {
         when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
         when(repository.save(configToRegister)).thenThrow(getDataIntegrityException());
 
-        underTest.register(configToRegister);
+        underTest.register(configToRegister, false);
     }
 
     private DatabaseConfig getDatabaseConfig(ResourceStatus resourceStatus, String name) {
@@ -257,7 +257,7 @@ public class DatabaseConfigServiceTest {
         when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
         when(repository.save(configToRegister)).thenThrow(new AccessDeniedException("User has no right to access resource"));
 
-        underTest.register(configToRegister);
+        underTest.register(configToRegister, false);
     }
 
     @Test

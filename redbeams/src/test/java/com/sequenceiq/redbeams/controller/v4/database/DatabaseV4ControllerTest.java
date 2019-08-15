@@ -92,7 +92,7 @@ public class DatabaseV4ControllerTest {
     @Test
     public void testRegister() {
         when(converterUtil.convert(request, DatabaseConfig.class)).thenReturn(db);
-        when(service.register(db)).thenReturn(db);
+        when(service.register(db, false)).thenReturn(db);
         when(converterUtil.convert(db, DatabaseV4Response.class)).thenReturn(response);
 
         DatabaseV4Response response = underTest.register(request);

@@ -85,7 +85,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return repository.findByWorkspaceIdAndEnvironmentId(workspaceId, environmentCrn);
     }
 
-    public DatabaseServerConfig create(DatabaseServerConfig resource, Long workspaceId) {
+    public DatabaseServerConfig create(DatabaseServerConfig resource, Long workspaceId, boolean test) {
 
         if (resource.getConnectionDriver() == null) {
             resource.setConnectionDriver(resource.getDatabaseVendor().connectionDriver());
@@ -93,12 +93,14 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                     resource.getConnectionDriver());
         }
 
-        // FIXME? Currently no checks if logged-in user has access to workspace
-        // Compare with AbstractWorkspaceAwareResourceService
-        String testResults = testConnection(resource);
+        if (test) {
+            // FIXME? Currently no checks if logged-in user has access to workspace
+            // Compare with AbstractWorkspaceAwareResourceService
+            String testResults = testConnection(resource);
 
-        if (!testResults.equals(DATABASE_TEST_RESULT_SUCCESS)) {
-            throw new IllegalArgumentException(testResults);
+            if (!testResults.equals(DATABASE_TEST_RESULT_SUCCESS)) {
+                throw new IllegalArgumentException(testResults);
+            }
         }
 
         try {
@@ -274,7 +276,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         DatabaseConfig newDatabaseConfig =
                 databaseServerConfig.createDatabaseConfig(databaseName, databaseType, ResourceStatus.SERVICE_MANAGED,
                         databaseUserName, databasePassword);
-        databaseConfigService.register(newDatabaseConfig);
+        databaseConfigService.register(newDatabaseConfig, false);
 
         return "created";
     }
