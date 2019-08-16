@@ -174,6 +174,61 @@
       "name": "US Gov Texas",
       "latitude": "29.41087791",
       "longitude": "-94.96276717"
+    },
+    {
+      "name": "Canada Central",
+      "latitude": "43.653",
+      "longitude": "-79.383"
+    },
+    {
+      "name": "France Central",
+      "latitude": "46.3772",
+      "longitude": "2.3730"
+    },
+    {
+      "name": "France South",
+      "latitude": "43.8345",
+      "longitude": "2.1972"
+    },
+    {
+      "name": "Australia Central",
+      "latitude": "-35.3075",
+      "longitude": "149.1244"
+    },
+    {
+      "name": "Australia Central 2",
+      "latitude": "-35.3075",
+      "longitude": "149.1244"
+    },
+    {
+      "name": "UAE Central",
+      "latitude": "24.466667",
+      "longitude": "54.366669"
+    },
+    {
+      "name": "UAE North",
+      "latitude": "25.266666",
+      "longitude": "55.316666"
+    },
+    {
+      "name": "South Africa North",
+      "latitude": "-25.731340",
+      "longitude": "28.218370"
+    },
+    {
+      "name": "South Africa West",
+      "latitude": "-34.075691",
+      "longitude": "18.843266"
+    },
+    {
+      "name": "China North 2",
+      "latitude": "39.92889223",
+      "longitude": "116.3882857"
+    },
+    {
+      "name": "China East 2",
+      "latitude": "31.21645245",
+      "longitude": "121.4365047"
     }
   ]
 }
