@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
@@ -29,11 +30,14 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -44,6 +48,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
 @Component
@@ -70,6 +75,9 @@ public class InstanceMetadataUpdater {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
+    @Inject
+    private HostGroupService hostGroupService;
+
     public void updatePackageVersionsOnAllInstances(Stack stack) throws Exception {
         Boolean enableKnox = stack.getCluster().getGateway() != null;
         GatewayConfig gatewayConfig = getGatewayConfig(stack, enableKnox);
@@ -77,7 +85,12 @@ public class InstanceMetadataUpdater {
 
         Map<String, Map<String, String>> packageVersionsByNameByHost = getPackageVersionByNameByHost(gatewayConfig, hostOrchestrator);
 
-        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        List<String> failedVersionQueriesByHost =
+                updateInstanceMetaDataIfVersionQueryFailed(packageVersionsByNameByHost, stack);
+        notifyIfVersionsCannotBeQueried(stack, failedVersionQueriesByHost);
+
+        Set<InstanceMetaData> instanceMetaDataSet = stack.getRunningInstanceMetaDataSet();
+
         Map<String, Multimap<String, String>> changedVersionsByHost =
                 updateInstanceMetaDataWithPackageVersions(packageVersionsByNameByHost, instanceMetaDataSet);
         notifyIfPackagesHaveChangedVersions(stack, changedVersionsByHost);
@@ -97,6 +110,26 @@ public class InstanceMetadataUpdater {
             }
         }
         return gatewayConfig;
+    }
+
+    private List<String> updateInstanceMetaDataIfVersionQueryFailed(Map<String, Map<String, String>> packageVersionsByNameByHost,
+            Stack stack) throws IOException {
+        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+
+        List<String> failedVersionQueriesByHost = Lists.newArrayList();
+        for (InstanceMetaData im : instanceMetaDataSet) {
+            Map<String, String> packageVersionsOnHost = packageVersionsByNameByHost.get(im.getDiscoveryFQDN());
+            if (CollectionUtils.isEmpty(packageVersionsOnHost)) {
+                failedVersionQueriesByHost.add(im.getDiscoveryFQDN());
+                Image image = im.getImage().get(Image.class);
+                image.getPackageVersions().clear();
+                im.setImage(new Json(image));
+                im.setInstanceStatus(InstanceStatus.ORCHESTRATION_FAILED);
+                instanceMetaDataRepository.save(im);
+                hostGroupService.updateHostMetaDataStatus(stack.getCluster(), im.getDiscoveryFQDN(), HostMetadataState.UNHEALTHY);
+            }
+        }
+        return failedVersionQueriesByHost;
     }
 
     private Map<String, Multimap<String, String>> updateInstanceMetaDataWithPackageVersions(Map<String, Map<String, String>> packageVersionsByNameByHost,
@@ -120,6 +153,15 @@ public class InstanceMetadataUpdater {
             }
         }
         return changedVersionsByHost;
+    }
+
+    private void notifyIfVersionsCannotBeQueried(Stack stack, List<String> failedVersionQueryByHost) {
+        if (!failedVersionQueryByHost.isEmpty()) {
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_FAILED.name(),
+                    cloudbreakMessagesService.getMessage(Msg.PACKAGE_VERSION_CANNOT_BE_QUERIED.code(),
+                            Collections.singletonList(failedVersionQueryByHost.stream()
+                                    .collect(Collectors.joining("\r\n")))));
+        }
     }
 
     private void notifyIfPackagesHaveChangedVersions(Stack stack, Map<String, Multimap<String, String>> changedVersionsByHost) {
@@ -166,8 +208,11 @@ public class InstanceMetadataUpdater {
         for (Package packageWithCommand : packagesWithCommand) {
             Map<String, String> versionsByHost = hostOrchestrator.runCommandOnAllHosts(gatewayConfig, packageWithCommand.getCommand());
             for (Entry<String, String> entry : versionsByHost.entrySet()) {
-                packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>())
-                        .put(packageWithCommand.getName(), parseSaltBootstrapVersion(entry.getValue()));
+                String saltBootstrapVersion = parseSaltBootstrapVersion(entry.getValue());
+                if (!StringUtils.equalsAny(saltBootstrapVersion, "false", "null", null)) {
+                    packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>())
+                            .put(packageWithCommand.getName(), saltBootstrapVersion);
+                }
             }
         }
     }
@@ -178,8 +223,11 @@ public class InstanceMetadataUpdater {
         for (Package packageWithGrain : packagesWithGrain) {
             Map<String, JsonNode> versionsByHost = hostOrchestrator.getGrainOnAllHosts(gatewayConfig, packageWithGrain.getGrain());
             for (Entry<String, JsonNode> entry : versionsByHost.entrySet()) {
-                packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>())
-                        .put(packageWithGrain.getName(), entry.getValue().textValue());
+                String entryValue = entry.getValue().textValue();
+                if (!StringUtils.equalsAny(entryValue, "false", "null", null)) {
+                    packageVersionsByNameByHost.computeIfAbsent(entry.getKey(), s -> new HashMap<>())
+                            .put(packageWithGrain.getName(), entryValue);
+                }
             }
         }
     }
@@ -202,7 +250,7 @@ public class InstanceMetadataUpdater {
         for (Entry<String, Map<String, String>> entry : packageVersionsByPkgNameByHost.entrySet()) {
             Map<String, String> versionByName =
                     entry.getValue().entrySet().stream()
-                            .filter(e -> StringUtils.isNotBlank(e.getValue()))
+                            .filter(e -> StringUtils.isNotBlank(e.getValue()) && !StringUtils.equalsAny(e.getValue(), "false", "null", null))
                             .collect(Collectors.toMap(e -> pkgNames.get(e.getKey()), Entry::getValue));
             packageVersionsByNameByHost.put(entry.getKey(), versionByName);
         }
@@ -294,7 +342,8 @@ public class InstanceMetadataUpdater {
     public enum Msg {
         PACKAGES_ON_INSTANCES_ARE_DIFFERENT("ambari.cluster.sync.instance.different.packages"),
         PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING("ambari.cluster.sync.instance.missing.package.versions"),
-        PACKAGE_VERSIONS_ARE_CHANGED("ambari.cluster.sync.instance.changed.packages");
+        PACKAGE_VERSIONS_ARE_CHANGED("ambari.cluster.sync.instance.changed.packages"),
+        PACKAGE_VERSION_CANNOT_BE_QUERIED("ambari.cluster.sync.instance.failedquery.packages");
 
         private final String code;
 

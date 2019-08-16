@@ -38,6 +38,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
@@ -48,7 +49,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.CommandExecutionResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
@@ -235,7 +235,6 @@ public class SaltStatesTest {
     @Test
     public void testGetPackageVersionsWithMorePackages() {
         // GIVEN
-        List<Map<String, Map<String, String>>> pkgVersionsList = new ArrayList<>();
         Map<String, Map<String, String>> pkgVersionsOnHosts = new HashMap<>();
         Map<String, String> pkgVersionsOnHost1 = new HashMap<>();
         pkgVersionsOnHost1.put("package1", "1.0");
@@ -245,10 +244,19 @@ public class SaltStatesTest {
         pkgVersionsOnHost2.put("package1", "2.0");
         pkgVersionsOnHost2.put("package2", "3.0");
         pkgVersionsOnHosts.put("host2", pkgVersionsOnHost2);
-        pkgVersionsList.add(pkgVersionsOnHosts);
-        PackageVersionsResponse resp = new PackageVersionsResponse();
-        resp.setResult(pkgVersionsList);
-        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionsResponse.class, "package1", "package2")).thenReturn(resp);
+
+        Map<String, String> pkgVersionsOnHost1Resp = new HashMap<>();
+        pkgVersionsOnHost1Resp.put("host1", "1.0");
+        pkgVersionsOnHost1Resp.put("host2", "2.0");
+        Map<String, String> pkgVersionsOnHost2Resp = new HashMap<>();
+        pkgVersionsOnHost2Resp.put("host1", "2.0");
+        pkgVersionsOnHost2Resp.put("host2", "3.0");
+        PackageVersionResponse resp1 = new PackageVersionResponse();
+        resp1.setResult(Lists.newArrayList(pkgVersionsOnHost1Resp));
+        PackageVersionResponse resp2 = new PackageVersionResponse();
+        resp2.setResult(Lists.newArrayList(pkgVersionsOnHost2Resp));
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package1")).thenReturn(resp1);
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package2")).thenReturn(resp2);
         // WHEN
         Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, "package1", "package2");
         // THEN
@@ -258,10 +266,9 @@ public class SaltStatesTest {
     @Test
     public void testGetPackageVersionWithMorePackagesShouldReturnEmptyMapWhenTheListIsEmptyInResponse() {
         // GIVEN
-        List<Map<String, Map<String, String>>> pkgVersionsList = new ArrayList<>();
-        PackageVersionsResponse resp = new PackageVersionsResponse();
-        resp.setResult(pkgVersionsList);
-        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionsResponse.class, "package1", "package2")).thenReturn(resp);
+        PackageVersionResponse resp = new PackageVersionResponse();
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package1")).thenReturn(resp);
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package2")).thenReturn(resp);
         // WHEN
         Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, "package1", "package2");
         // THEN
@@ -272,7 +279,7 @@ public class SaltStatesTest {
     public void testGetPackageVersionsThrowsRuntimeException() {
         // GIVEN
         RuntimeException exception = new RuntimeException();
-        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionsResponse.class, "package1", "package2")).thenThrow(exception);
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package1")).thenThrow(exception);
         // WHEN
         try {
             SaltStates.getPackageVersions(saltConnector, "package1", "package2");

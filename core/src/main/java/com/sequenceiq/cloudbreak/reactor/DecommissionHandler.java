@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.reactor;
 
-import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
+import static com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult.DECOMMISSION_ERROR_PHASE;
+import static com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult.UNKNOWN_ERROR_PHASE;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
+import com.sequenceiq.cloudbreak.service.cluster.ambari.DecommissionException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -63,24 +63,23 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         DecommissionRequest request = event.getData();
         DecommissionResult result;
         String hostGroupName = request.getHostGroupName();
+        Set<String> hostNames = Collections.emptySet();
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
-            Set<String> hostNames = getHostNamesForPrivateIds(request, stack);
+            hostNames = getHostNamesForPrivateIds(request, stack);
             Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames);
-            Set<String> decomissionedHostNames;
+            Set<String> decommissionedHostNames;
             if (skipAmbariDecomission(request, hostsToRemove)) {
-                decomissionedHostNames = hostNames;
+                decommissionedHostNames = hostNames;
             } else {
                 executePreTerminationRecipes(stack, request.getHostGroupName(), hostsToRemove.keySet());
-                decomissionedHostNames = ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove);
+                decommissionedHostNames = ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove);
             }
-            PollingResult orchestratorRemovalPollingResult = ambariDecommissioner.removeHostsFromOrchestrator(stack, new ArrayList<>(decomissionedHostNames));
-            if (!isSuccess(orchestratorRemovalPollingResult)) {
-                LOGGER.warn("Can not remove hosts from orchestrator: {}", decomissionedHostNames);
-            }
-            result = new DecommissionResult(request, decomissionedHostNames);
+            result = new DecommissionResult(request, decommissionedHostNames);
+        } catch (DecommissionException e) {
+            result = new DecommissionResult(e.getMessage(), e, request, hostNames, DECOMMISSION_ERROR_PHASE);
         } catch (Exception e) {
-            result = new DecommissionResult(e.getMessage(), e, request);
+            result = new DecommissionResult(e.getMessage(), e, request, hostNames, UNKNOWN_ERROR_PHASE);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
@@ -91,9 +90,9 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
 
     private Set<String> getHostNamesForPrivateIds(DecommissionRequest request, Stack stack) {
         return request.getPrivateIds().stream().map(privateId -> {
-                    Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
-            return instanceMetadata.isPresent() ? instanceMetadata.get().getDiscoveryFQDN() : null;
-                }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
+            Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
+            return instanceMetadata.map(InstanceMetaData::getDiscoveryFQDN).orElse(null);
+        }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
     }
 
     private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {

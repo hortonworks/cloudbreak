@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import static com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus.ORCHESTRATION_FAILED;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -15,6 +17,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,10 +26,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -41,6 +46,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
 public class InstanceMetadataUpdaterTest {
@@ -66,14 +72,11 @@ public class InstanceMetadataUpdaterTest {
     @Mock
     private GatewayConfig gatewayConfig;
 
+    @Mock
+    private HostGroupService hostGroupService;
+
     @InjectMocks
     private InstanceMetadataUpdater underTest;
-
-    private Stack stack;
-
-    private String packageByName;
-
-    private String packageByCmd;
 
     @Before
     public void setUp() throws CloudbreakException, JsonProcessingException, CloudbreakOrchestratorFailedException {
@@ -83,95 +86,127 @@ public class InstanceMetadataUpdaterTest {
         when(cloudbreakMessagesService.getMessage(anyString(), anyCollection())).thenReturn("message");
 
         InstanceMetadataUpdater.Package packageByName = new InstanceMetadataUpdater.Package();
-        this.packageByName = "packageByName";
-        packageByName.setName(this.packageByName);
-        packageByName.setPkgName(Collections.singletonList("packageByName"));
+        packageByName.setName("packageByName");
+        packageByName.setPkgName(Lists.newArrayList("packageByName"));
         InstanceMetadataUpdater.Package packageByCmd = new InstanceMetadataUpdater.Package();
-        this.packageByCmd = "packageByCmd";
-        packageByCmd.setName(this.packageByCmd);
-        packageByCmd.setCommand("packageByCmd");
+        packageByCmd.setName("packageByCmd");
+        packageByCmd.setPkgName(Lists.newArrayList("packageByCmd"));
 
-        stack = new Stack();
+        underTest.setPackages(Lists.newArrayList(packageByCmd, packageByName));
+
+        Map<String, Map<String, String>> hostPackageMap = Maps.newHashMap();
+        hostPackageMap.put("instanceId", packageMap());
+        hostPackageMap.put("hostByCmd", packageMap());
+        when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any())).thenReturn(hostPackageMap);
+    }
+
+    private Stack createStack() throws JsonProcessingException {
+        Stack stack = new Stack();
         stack.setId(1L);
         stack.setCluster(new Cluster());
         Orchestrator orchestrator = new Orchestrator();
         orchestrator.setType("salt");
         stack.setOrchestrator(orchestrator);
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setInstanceStatus(InstanceStatus.CREATED);
-        instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-        Image image = new Image("imagename", null, "os", "ostype", "catalogurl",
-                "catalogname", "iamgeid", Map.of(packageByName.getName(), "1", packageByCmd.getName(), "1"));
-        instanceMetaData.setImage(new Json(image));
-        instanceMetaData.setInstanceId("instanceId");
-        instanceGroup.setInstanceMetaData(Collections.singleton(instanceMetaData));
         Set<InstanceGroup> instanceGroups = new HashSet<>();
-        instanceGroups.add(instanceGroup);
+        instanceGroups.add(createInstanceGroup("instanceId", InstanceGroupType.GATEWAY));
+        instanceGroups.add(createInstanceGroup("hostByCmd", InstanceGroupType.CORE));
         stack.setInstanceGroups(instanceGroups);
-
-        when(hostOrchestrator.runCommandOnAllHosts(any(GatewayConfig.class), anyString())).thenReturn(Collections.singletonMap("hostByCmd", "1"));
-        when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any()))
-                .thenReturn(Collections.singletonMap("instanceId", Collections.singletonMap("packageByName", "1")));
-
-        underTest.setPackages(Lists.newArrayList(packageByName, packageByCmd));
+        return stack;
     }
 
     @Test
     public void updatePackageVersionsOnAllInstances() throws Exception {
-        underTest.updatePackageVersionsOnAllInstances(stack);
+        underTest.updatePackageVersionsOnAllInstances(createStack());
 
         verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
     }
 
     @Test
-    public void updatePackageVersionsOnAllInstancesInstanceMissingPackageversion() throws Exception {
-        Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setInstanceStatus(InstanceStatus.CREATED);
-        instanceMetaData.setInstanceMetadataType(InstanceMetadataType.CORE);
-        Image image = new Image("imagename", null, "os", "ostype", "catalogurl",
-                "catalogname", "iamgeid", Collections.emptyMap());
-        instanceMetaData.setImage(new Json(image));
-        instanceGroup.setInstanceMetaData(Collections.singleton(instanceMetaData));
-        instanceGroups.add(instanceGroup);
+    public void updatePackageVersionsOnAllInstancesInstancePkgQueryFailed() throws Exception {
+        Stack stack = createStack();
+
+        Map<String, Map<String, String>> hostPackageMap = Maps.newHashMap();
+        hostPackageMap.put("instanceId", packageMap());
+        hostPackageMap.put("hostByCmd", falsePackageMap());
+        when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any())).thenReturn(hostPackageMap);
 
         underTest.updatePackageVersionsOnAllInstances(stack);
 
+        verify(hostGroupService, times(1)).updateHostMetaDataStatus(any(), anyString(), eq(HostMetadataState.UNHEALTHY));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         verify(cloudbreakMessagesService, times(1))
+                .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSION_CANNOT_BE_QUERIED.code()), anyCollection());
+        assertEquals(ORCHESTRATION_FAILED, stack.getInstanceGroups().stream()
+            .filter(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream()
+                .filter(instanceMetaData -> StringUtils.equals(instanceMetaData.getDiscoveryFQDN(), "hostByCmd"))
+                .findFirst()
+                .isPresent())
+            .findFirst()
+            .get().getInstanceMetaDataSet().iterator().next().getInstanceStatus());
+    }
+
+    @Test
+    public void updatePackageVersionsOnAllInstancesInstanceMissingPackageVersion() throws Exception {
+        Map<String, Map<String, String>> hostPackageMap = Maps.newHashMap();
+        hostPackageMap.put("instanceId", packageMap());
+        Map<String, String> packageMap = packageMap();
+        packageMap.remove("packageByName");
+        hostPackageMap.put("hostByCmd", packageMap);
+        when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any())).thenReturn(hostPackageMap);
+
+        underTest.updatePackageVersionsOnAllInstances(createStack());
+
+        verify(cloudbreakEventService, times(2)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        verify(cloudbreakMessagesService, times(1))
                 .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.code()), anyCollection());
+        verify(cloudbreakMessagesService, times(1))
+                .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSIONS_ARE_CHANGED.code()), anyCollection());
     }
 
     @Test
     public void updatePackageVersionsOnAllInstancesDifferentVersion() throws Exception {
-        Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setInstanceStatus(InstanceStatus.CREATED);
-        instanceMetaData.setInstanceMetadataType(InstanceMetadataType.CORE);
-        Image image = new Image("imagename", null, "os", "ostype", "catalogurl",
-                "catalogname", "iamgeid", Map.of(packageByName, "2", packageByCmd, "2"));
-        instanceMetaData.setImage(new Json(image));
-        instanceGroup.setInstanceMetaData(Collections.singleton(instanceMetaData));
-        instanceGroups.add(instanceGroup);
+        Map<String, Map<String, String>> hostPackageMap = Maps.newHashMap();
+        hostPackageMap.put("instanceId", packageMap());
+        Map<String, String> packageMap = packageMap();
+        packageMap.put("packageByName", "2");
+        hostPackageMap.put("hostByCmd", packageMap);
+        when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any())).thenReturn(hostPackageMap);
 
-        underTest.updatePackageVersionsOnAllInstances(stack);
+        underTest.updatePackageVersionsOnAllInstances(createStack());
 
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        verify(cloudbreakEventService, times(2)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         verify(cloudbreakMessagesService, times(1))
                 .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code()), anyCollection());
+        verify(cloudbreakMessagesService, times(1))
+                .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSIONS_ARE_CHANGED.code()), anyCollection());
     }
 
-    @Test
-    public void collectPackagesWithMultipleVersions() {
+    private Map<String, String> packageMap() {
+        Map<String, String> packageMap = Maps.newHashMap();
+        packageMap.put("packageByName", "1");
+        packageMap.put("packageByCmd", "1");
+        return packageMap;
     }
 
-    @Test
-    public void collectInstancesWithMissingPackageVersions() {
+    private Map<String, String> falsePackageMap() {
+        Map<String, String> packageMap = Maps.newHashMap();
+        packageMap.put("packageByName", "false");
+        packageMap.put("packageByCmd", "false");
+        return packageMap;
+    }
+
+    private InstanceGroup createInstanceGroup(String instanceId, InstanceGroupType instanceGroupType) throws JsonProcessingException {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setInstanceGroupType(instanceGroupType);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
+        instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+        Image image = new Image("imagename", null, "os", "ostype", "catalogurl",
+                "catalogname", "iamgeid", packageMap());
+        instanceMetaData.setImage(new Json(image));
+        instanceMetaData.setInstanceId(instanceId);
+        instanceMetaData.setDiscoveryFQDN(instanceId);
+        instanceGroup.setInstanceMetaData(Collections.singleton(instanceMetaData));
+        return instanceGroup;
     }
 }
