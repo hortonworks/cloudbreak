@@ -23,10 +23,11 @@ import (
 	"github.com/urfave/cli"
 )
 
-var stackHeader = []string{"Name", "CloudPlatform", "Environment", "DistroXStatus", "ClusterStatus"}
+var stackHeader = []string{"Name", "Crn", "CloudPlatform", "Environment", "DistroXStatus", "ClusterStatus"}
 
 type dxOut struct {
 	common.CloudResourceOut
+	Crn           string `json:"Crn" yaml:"Crn"`
 	Environment   string `json:"Environment" yaml:"Environment"`
 	DistroXStatus string `json:"DistroXStatus" yaml:"DistroXStatus"`
 	ClusterStatus string `json:"ClusterStatus" yaml:"ClusterStatus"`
@@ -40,6 +41,7 @@ type stackOutDescribe struct {
 
 func (s *dxOut) DataAsStringArray() []string {
 	arr := []string{s.Name, s.CloudPlatform}
+	arr = append(arr, s.Crn)
 	arr = append(arr, s.Environment)
 	arr = append(arr, s.DistroXStatus)
 	arr = append(arr, s.ClusterStatus)
@@ -60,6 +62,7 @@ func convertResponseToDx(s *stackOutDescribe) *dxOut {
 			Description:   utils.SafeClusterDescriptionConvert(&s.Stack),
 			CloudPlatform: s.Environment.CloudPlatform,
 		},
+		Crn:           s.Crn,
 		Environment:   s.Environment.Name,
 		DistroXStatus: s.Stack.Status,
 		ClusterStatus: utils.SafeClusterStatusConvert(&s.Stack),
@@ -72,6 +75,7 @@ func convertViewResponseToStack(s *model.StackViewV4Response) *dxOut {
 			Name:          *s.Name,
 			CloudPlatform: s.CloudPlatform,
 		},
+		Crn:           s.Crn,
 		Environment:   s.EnvironmentName,
 		DistroXStatus: s.Status,
 		ClusterStatus: utils.SafeClusterViewStatusConvert(s),
