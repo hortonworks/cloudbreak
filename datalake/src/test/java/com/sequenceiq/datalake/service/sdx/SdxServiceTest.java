@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -96,6 +97,9 @@ public class SdxServiceTest {
 
     @Mock
     private DistroXV1Endpoint distroXV1Endpoint;
+
+    @Mock
+    private SdxNotificationService notificationService;
 
     @InjectMocks
     private SdxService sdxService;
@@ -192,6 +196,7 @@ public class SdxServiceTest {
         Assertions.assertFalse(capturedSdx.isCreateDatabase());
         Assertions.assertTrue(createdSdxCluster.getCrn().matches("crn:cdp:datalake:us-west-1:hortonworks:datalake:.*"));
         verify(sdxReactorFlowManager).triggerSdxCreation(id, createdSdxCluster.getCrn());
+        verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_CREATED), any());
     }
 
     @Test

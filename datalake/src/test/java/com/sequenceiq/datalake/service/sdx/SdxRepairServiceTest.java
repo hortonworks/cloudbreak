@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
@@ -42,6 +43,9 @@ public class SdxRepairServiceTest {
 
     @Mock
     private SdxService sdxService;
+
+    @Mock
+    private SdxNotificationService notificationService;
 
     @Captor
     private ArgumentCaptor<ClusterRepairV4Request> captor;
@@ -63,6 +67,7 @@ public class SdxRepairServiceTest {
         underTest.startRepairInCb(cluster, sdxRepairRequest);
         verify(mockedStackV4Endpoint).repairCluster(eq(0L), eq("dummyCluster"), captor.capture());
         assertEquals("master", captor.getValue().getHostGroups().get(0));
+        verify(notificationService).send(eq(ResourceEvent.SDX_REPAIR_STARTED), any());
     }
 
     @Test
@@ -79,5 +84,6 @@ public class SdxRepairServiceTest {
         when(mockedStackV4Endpoint.get(eq(0L), eq("dummyCluster"), any())).thenReturn(resp);
         AttemptResult<StackV4Response> attempt = underTest.checkClusterStatusDuringRepair(cluster);
         assertEquals(AttemptState.BREAK, attempt.getState());
+        verify(notificationService).send(eq(ResourceEvent.SDX_REPAIR_FAILED), any());
     }
 }

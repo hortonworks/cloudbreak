@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -52,6 +53,9 @@ public class SdxRepairService {
 
     @Inject
     private SdxService sdxService;
+
+    @Inject
+    private SdxNotificationService notificationService;
 
     public void triggerRepairByCrn(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
@@ -81,6 +85,7 @@ public class SdxRepairService {
                     .repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
             sdxCluster.setStatus(SdxClusterStatus.REPAIR_IN_PROGRESS);
             sdxClusterRepository.save(sdxCluster);
+            notificationService.send(ResourceEvent.SDX_REPAIR_STARTED, sdxCluster);
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {
@@ -104,6 +109,7 @@ public class SdxRepairService {
                     .run(() -> checkClusterStatusDuringRepair(sdxCluster));
             sdxCluster.setStatus(SdxClusterStatus.RUNNING);
             sdxClusterRepository.save(sdxCluster);
+            notificationService.send(ResourceEvent.SDX_REPAIR_FINISHED, sdxCluster);
         }, () -> {
             throw notFound("SDX cluster", id).get();
         });
@@ -139,6 +145,7 @@ public class SdxRepairService {
 
     private AttemptResult<StackV4Response> sdxRepairFailed(SdxCluster sdxCluster, String statusReason) {
         LOGGER.info("SDX repair failed, statusReason: " + statusReason);
+        notificationService.send(ResourceEvent.SDX_REPAIR_FAILED, sdxCluster);
         return AttemptResults.breakFor("SDX repair failed '" + sdxCluster.getClusterName() + "', " + statusReason);
     }
 

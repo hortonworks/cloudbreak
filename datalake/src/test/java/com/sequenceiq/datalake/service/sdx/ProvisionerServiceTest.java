@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -93,6 +94,9 @@ class ProvisionerServiceTest {
     @Mock
     private GatewayManifester gatewayManifester;
 
+    @Mock
+    private SdxNotificationService notificationService;
+
     @InjectMocks
     private ProvisionerService provisionerService;
 
@@ -118,6 +122,7 @@ class ProvisionerServiceTest {
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster postedSdxCluster = captor.getValue();
         Assertions.assertEquals(SdxClusterStatus.STACK_CREATION_IN_PROGRESS, postedSdxCluster.getStatus());
+        verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED), any());
     }
 
     @Test
@@ -171,6 +176,7 @@ class ProvisionerServiceTest {
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
         Assertions.assertThrows(UserBreakException.class, () -> provisionerService
                 .waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID), "Stack creation failed");
+        verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_CREATION_FAILED), any());
     }
 
     @Test
@@ -202,6 +208,7 @@ class ProvisionerServiceTest {
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster savedSdxCluster = captor.getValue();
         Assertions.assertEquals(SdxClusterStatus.RUNNING, savedSdxCluster.getStatus());
+        verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED), any());
     }
 
     @Test
@@ -312,6 +319,7 @@ class ProvisionerServiceTest {
 
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
         Assertions.assertThrows(UserBreakException.class, () -> provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig, REQUEST_ID));
+        verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_DELETION_FAILED), any());
     }
 
     @Test
@@ -336,6 +344,7 @@ class ProvisionerServiceTest {
         SdxCluster postedSdxCluster = captor.getValue();
 
         Assertions.assertEquals(SdxClusterStatus.STACK_DELETED, postedSdxCluster.getStatus());
+        verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_DELETION_FINISHED), any());
     }
 
     private DatabaseServerStatusV4Response getDatabaseServerResponse() {

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -36,6 +37,9 @@ public class EnvironmentService {
     @Inject
     private EnvironmentServiceCrnClient environmentServiceCrnClient;
 
+    @Inject
+    private SdxNotificationService notificationService;
+
     public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, String requestId) {
         PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
                 DURATION_IN_MINUTES_FOR_ENV_POLLING, TimeUnit.MINUTES);
@@ -46,6 +50,7 @@ public class EnvironmentService {
         Optional<SdxCluster> sdxClusterOptional = sdxClusterRepository.findById(sdxId);
         if (sdxClusterOptional.isPresent()) {
             SdxCluster sdxCluster = sdxClusterOptional.get();
+            notificationService.send(ResourceEvent.SDX_WAITING_FOR_ENVIRONMENT, sdxCluster);
             DetailedEnvironmentResponse environmentResponse = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
@@ -68,6 +73,7 @@ public class EnvironmentService {
                     });
             sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
             sdxClusterRepository.save(sdxCluster);
+            notificationService.send(ResourceEvent.SDX_ENVIRONMENT_FINISHED, sdxCluster);
             return environmentResponse;
         } else {
             throw notFound("SDX cluster", sdxId).get();

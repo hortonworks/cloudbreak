@@ -34,8 +34,6 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.notification.NotificationService;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Configuration
 public class SdxCreateActions {
@@ -48,9 +46,6 @@ public class SdxCreateActions {
     @Inject
     private SdxService sdxService;
 
-    @Inject
-    private NotificationService notificationService;
-
     @Bean(name = "SDX_CREATION_WAIT_ENV_STATE")
     public Action<?, ?> envWaitInProgress() {
         return new AbstractSdxAction<>(SdxEvent.class) {
@@ -62,7 +57,6 @@ public class SdxCreateActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
-                notificationService.send(ResourceEvent.SDX_WAITING_FOR_ENVIRONMENT, payload, context.getUserId());
                 sendEvent(context);
             }
 
@@ -114,10 +108,8 @@ public class SdxCreateActions {
             @Override
             protected void doExecute(SdxContext context, RdsWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
-                notificationService.send(ResourceEvent.SDX_ENVIRONMENT_FINISHED, payload.getDetailedEnvironmentResponse(), context.getUserId());
                 provisionerService.startStackProvisioning(payload.getResourceId(),
                         payload.getDetailedEnvironmentResponse(), payload.getDatabaseServerResponse());
-                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, payload, context.getUserId());
 
                 sendEvent(context, SDX_STACK_CREATION_IN_PROGRESS_EVENT.event(), payload);
             }
@@ -168,7 +160,6 @@ public class SdxCreateActions {
             @Override
             protected void doExecute(SdxContext context, StackCreationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
-                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED, payload, context.getUserId());
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -185,7 +176,6 @@ public class SdxCreateActions {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     SdxCreateFailedEvent payload) {
-                notificationService.send(ResourceEvent.SDX_CLUSTER_CREATION_FAILED, payload, payload.getUserId());
                 return SdxContext.from(flowParameters, payload);
             }
 
@@ -199,7 +189,6 @@ public class SdxCreateActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, payload, context.getUserId());
                 sdxService.updateSdxStatus(payload.getResourceId(), provisioningFailedStatus, statusReason);
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }

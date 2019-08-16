@@ -12,6 +12,7 @@ import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -21,6 +22,7 @@ import com.sequenceiq.datalake.flow.delete.event.RdsDeletionWaitRequest;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.DatabaseService;
+import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
 
 @Component
 public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletionWaitRequest> {
@@ -34,6 +36,9 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
 
     @Inject
     private Clock clock;
+
+    @Inject
+    private SdxNotificationService notificationService;
 
     @Override
     public String selector() {
@@ -85,5 +90,6 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         cluster.setStatus(SdxClusterStatus.DELETED);
         cluster.setDeleted(clock.getCurrentTimeMillis());
         sdxClusterRepository.save(cluster);
+        notificationService.send(ResourceEvent.SDX_CLUSTER_DELETED, cluster);
     }
 }
