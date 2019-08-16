@@ -111,6 +111,12 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
                 .collect(Collectors.toSet());
     }
 
+    public Set<InstanceMetaData> getRunningInstanceMetaDataSet() {
+        return instanceMetaData.stream()
+                .filter(metaData -> metaData.isRunning())
+                .collect(Collectors.toSet());
+    }
+
     public Set<InstanceMetaData> getInstanceMetaDataSet() {
         return instanceMetaData;
     }

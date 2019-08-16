@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL_ASYNC;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.RUNNER;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,9 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
@@ -28,7 +31,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo.DurationComparator;
@@ -154,22 +156,36 @@ public class SaltStates {
 
     public static Map<String, Map<String, String>> getPackageVersions(SaltConnector sc, String... packages) {
         if (packages.length == 1) {
-            PackageVersionResponse packageVersionResponse = sc.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, packages);
-            Map<String, String> packageVersionsMap =
-                    CollectionUtils.isEmpty(packageVersionResponse.getResult()) ? new HashMap<>() : packageVersionResponse.getResult().get(0);
-            Map<String, Map<String, String>> result = new HashMap<>();
-            for (Entry<String, String> e : packageVersionsMap.entrySet()) {
-                Map<String, String> versionMap = new HashMap<>();
-                versionMap.put(packages[0], e.getValue());
-                result.put(e.getKey(), versionMap);
-            }
-            return result;
+            return getSinglePackageVersion(sc, packages[0]);
         } else if (packages.length > 1) {
-            PackageVersionsResponse packageVersionsResponse = sc.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionsResponse.class, packages);
-            return CollectionUtils.isEmpty(packageVersionsResponse.getResult()) ? new HashMap<>() : packageVersionsResponse.getResult().get(0);
+            // Table<host, packageName, version>
+            Table<String, String, String> packageTable = HashBasedTable.create();
+            Arrays.stream(packages).forEach(singlePackage -> {
+                Map<String, Map<String, String>> singlePackageVersionByHost = getSinglePackageVersion(sc, singlePackage);
+                singlePackageVersionByHost.entrySet()
+                        .stream()
+                        .forEach(singlePackageVersionByHostEntry -> singlePackageVersionByHostEntry.getValue().entrySet()
+                                .stream()
+                                .forEach(singlePackageVersion -> packageTable.put(singlePackageVersionByHostEntry.getKey(),
+                                        singlePackageVersion.getKey(), singlePackageVersion.getValue())));
+            });
+            return packageTable.rowMap();
         } else {
             return Collections.emptyMap();
         }
+    }
+
+    private static Map<String, Map<String, String>> getSinglePackageVersion(SaltConnector sc, String singlePackage) {
+        PackageVersionResponse packageVersionResponse = sc.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, singlePackage);
+        Map<String, String> packageVersionsMap =
+                CollectionUtils.isEmpty(packageVersionResponse.getResult()) ? new HashMap<>() : packageVersionResponse.getResult().get(0);
+        Map<String, Map<String, String>> result = new HashMap<>();
+        for (Entry<String, String> e : packageVersionsMap.entrySet()) {
+            Map<String, String> versionMap = new HashMap<>();
+            versionMap.put(singlePackage, e.getValue());
+            result.put(e.getKey(), versionMap);
+        }
+        return result;
     }
 
     public static Map<String, String> runCommand(SaltConnector sc, String command) {

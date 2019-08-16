@@ -213,7 +213,7 @@ public class AmbariDecommissionerTest {
         Map<String, Long> selectedNodes = underTest.selectNodes(ascendingNodes, nodes, 1);
 
         assertEquals(1L, selectedNodes.size());
-        Assert.assertTrue(selectedNodes.keySet().contains(hostname2));
+        Assert.assertTrue(selectedNodes.keySet().contains(hostname1));
     }
 
     @Test

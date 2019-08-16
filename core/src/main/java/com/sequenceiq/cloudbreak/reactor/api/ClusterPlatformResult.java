@@ -22,6 +22,10 @@ public abstract class ClusterPlatformResult<R extends ClusterPlatformRequest> im
         init(EventStatus.FAILED, statusReason, errorDetails, request);
     }
 
+    protected ClusterPlatformResult(EventStatus status, String statusReason, Exception errorDetails, R request) {
+        init(status, statusReason, errorDetails, request);
+    }
+
     protected void init(EventStatus status, String statusReason, Exception errorDetails, R request) {
         this.status = status;
         this.statusReason = statusReason;

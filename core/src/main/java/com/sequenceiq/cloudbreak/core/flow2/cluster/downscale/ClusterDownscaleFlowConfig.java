@@ -8,11 +8,16 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDown
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.REMOVE_HOSTS_FROM_ORCHESTRATOR_FAILED;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.REMOVE_HOSTS_FROM_ORCHESTRATOR_FINISHED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState.CLUSTER_DOWNSCALE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState.COLLECT_CANDIDATES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState.DECOMISSION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState.DECOMMISSION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState.REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState.REMOVE_HOSTS_FROM_ORCHESTRATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState.UPDATE_INSTANCE_METADATA_STATE;
 
 import java.util.List;
@@ -30,8 +35,12 @@ public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<Cluste
                     .from(INIT_STATE).to(COLLECT_CANDIDATES_STATE).event(DECOMMISSION_EVENT).noFailureEvent()
                     .from(COLLECT_CANDIDATES_STATE).to(DECOMMISSION_STATE).event(COLLECT_CANDIDATES_FINISHED_EVENT)
                         .failureEvent(COLLECT_CANDIDATES_FAILED_EVENT)
-                    .from(DECOMMISSION_STATE).to(UPDATE_INSTANCE_METADATA_STATE).event(DECOMMISSION_FINISHED_EVENT)
-                        .failureEvent(DECOMMISSION_FAILED_EVENT)
+                    .from(DECOMMISSION_STATE).to(REMOVE_HOSTS_FROM_ORCHESTRATION_STATE).event(DECOMMISSION_FINISHED_EVENT)
+                        .failureState(DECOMISSION_FAILED_STATE).failureEvent(DECOMMISSION_FAILED_EVENT)
+                    .from(REMOVE_HOSTS_FROM_ORCHESTRATION_STATE).to(UPDATE_INSTANCE_METADATA_STATE).event(REMOVE_HOSTS_FROM_ORCHESTRATOR_FINISHED)
+                        .failureState(REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_STATE).failureEvent(REMOVE_HOSTS_FROM_ORCHESTRATOR_FAILED)
+                    .from(DECOMISSION_FAILED_STATE).to(CLUSTER_DOWNSCALE_FAILED_STATE).event(FAILURE_EVENT).defaultFailureEvent()
+                    .from(REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_STATE).to(CLUSTER_DOWNSCALE_FAILED_STATE).event(FAILURE_EVENT).defaultFailureEvent()
                     .from(UPDATE_INSTANCE_METADATA_STATE).to(FINAL_STATE).event(FINALIZED_EVENT).defaultFailureEvent()
                     .build();
 

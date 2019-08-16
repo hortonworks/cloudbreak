@@ -76,6 +76,14 @@ public class HostGroupService {
         return hostMetadataRepository.save(hostMetadata);
     }
 
+    public void updateHostMetaDataStatus(Cluster cluster, String hostName, HostMetadataState status) {
+        HostMetadata hostMetadata = getHostMetadataByClusterAndHostName(cluster, hostName);
+        if (hostMetadata != null) {
+            hostMetadata.setHostMetadataState(status);
+            hostMetadataRepository.save(hostMetadata);
+        }
+    }
+
     public Set<HostGroup> saveOrUpdateWithMetadata(Collection<HostGroup> hostGroups, Cluster cluster) throws TransactionExecutionException {
         Set<HostGroup> result = new HashSet<>(hostGroups.size());
         return transactionService.required(() -> {
