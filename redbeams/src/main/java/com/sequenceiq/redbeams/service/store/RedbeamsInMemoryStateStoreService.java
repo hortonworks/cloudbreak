@@ -13,10 +13,10 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryResourceStateStore;
  */
 @Service
 public class RedbeamsInMemoryStateStoreService {
-    private static final String REDBEAMS_RESOUERCE_TYPE = "redbeams";
+    private static final String REDBEAMS_RESOURCE_TYPE = "redbeams";
 
     public Set<Long> getAll() {
-        return InMemoryResourceStateStore.getAllResourceId(REDBEAMS_RESOUERCE_TYPE);
+        return InMemoryResourceStateStore.getAllResourceId(REDBEAMS_RESOURCE_TYPE);
     }
 
     public void registerStart(Long key) {
@@ -28,11 +28,11 @@ public class RedbeamsInMemoryStateStoreService {
     }
 
     public void delete(Long key) {
-        InMemoryResourceStateStore.deleteResource(REDBEAMS_RESOUERCE_TYPE, key);
+        InMemoryResourceStateStore.deleteResource(REDBEAMS_RESOURCE_TYPE, key);
     }
 
     private void put(Long key, PollGroup value) {
-        InMemoryResourceStateStore.putResource(REDBEAMS_RESOUERCE_TYPE, key, value);
+        InMemoryResourceStateStore.putResource(REDBEAMS_RESOURCE_TYPE, key, value);
     }
 
 }

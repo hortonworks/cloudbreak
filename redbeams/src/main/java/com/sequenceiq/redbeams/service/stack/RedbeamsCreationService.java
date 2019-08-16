@@ -97,6 +97,7 @@ public class RedbeamsCreationService {
         dbServerConfig.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
         dbServerConfig.setAccountId(databaseServer.getAccountId());
         dbServerConfig.setName(dbStack.getName());
+        dbServerConfig.setDescription(dbStack.getDescription());
         dbServerConfig.setEnvironmentId(dbStack.getEnvironmentId());
         dbServerConfig.setConnectionDriver(dbStack.getDatabaseServer().getConnectionDriver());
         // username and password are set during conversion to DBStack
@@ -104,9 +105,7 @@ public class RedbeamsCreationService {
         dbServerConfig.setConnectionPassword(dbStack.getDatabaseServer().getRootPassword());
         dbServerConfig.setDatabaseVendor(dbStack.getDatabaseServer().getDatabaseVendor());
         dbServerConfig.setDbStack(dbStack);
-        // host and port are set after allocation is complete
-        dbServerConfig.setHost(null);
-        dbServerConfig.setPort(null);
+        // host and port are set after allocation is complete, so leave as null
         dbServerConfig.setResourceCrn(dbStack.getResourceCrn());
 
         databaseServerConfigService.create(dbServerConfig, DEFAULT_WORKSPACE, false);

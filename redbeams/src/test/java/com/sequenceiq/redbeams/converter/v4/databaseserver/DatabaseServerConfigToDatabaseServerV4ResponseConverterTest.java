@@ -102,7 +102,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
         verify(conversionService, times(2)).convert(any(), any());
         assertEquals(server.getResourceStatus(), response.getResourceStatus());
-        assertNull(response.getStatus());
+        assertEquals(Status.AVAILABLE, response.getStatus());
         assertNull(response.getStatusReason());
     }
 }
