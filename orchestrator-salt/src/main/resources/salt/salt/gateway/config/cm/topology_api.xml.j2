@@ -187,6 +187,15 @@
         {%- endfor %}
     </service>
     {%- endif %}
+
+    {% if 'JOBTRACKER' in exposed -%}
+    <service>
+        <role>JOBTRACKER</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
+        <url>rpc://{{ hostloc }}:{{ ports['JOBTRACKER'] }}/ws</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
     {%- endif %}
 
     {% if 'SOLR_SERVER' in salt['pillar.get']('gateway:location') -%}
@@ -206,6 +215,15 @@
         <role>WEBHDFS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['WEBHDFS'] }}/webhdfs</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+
+    {% if 'NAMENODE_HDFS' in exposed -%}
+    <service>
+        <role>NAMENODE</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
+        <url>hdfs://{{ hostloc }}:{{ ports['NAMENODE_HDFS'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
