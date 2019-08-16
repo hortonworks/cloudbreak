@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.reactor;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
+import static com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult.DECOMMISSION_ERROR_PHASE;
+import static com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult.UNKNOWN_ERROR_PHASE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,10 +112,11 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
         DecommissionRequest request = event.getData();
         DecommissionResult result;
         String hostGroupName = request.getHostGroupName();
+        Set<String> hostNames = Collections.emptySet();
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             ClusterDecomissionService clusterDecomissionService = clusterApiConnectors.getConnector(stack).clusterDecomissionService();
-            Set<String> hostNames = getHostNamesForPrivateIds(request, stack);
+            hostNames = getHostNamesForPrivateIds(request, stack);
             Cluster cluster = stack.getCluster();
             HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(cluster.getId(), hostGroupName)
                     .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
@@ -145,10 +148,34 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
                 LOGGER.debug("Can not remove hosts from orchestrator: {}", decomissionedHostNames);
             }
             result = new DecommissionResult(request, decomissionedHostNames);
+        } catch (DecommissionException e) {
+            result = new DecommissionResult(e.getMessage(), e, request, hostNames, DECOMMISSION_ERROR_PHASE);
         } catch (Exception e) {
             LOGGER.info("Exception occurred during decommissioning.", e);
-            result = new DecommissionResult(e.getMessage(), e, request);
+            result = new DecommissionResult(e.getMessage(), e, request, hostNames, UNKNOWN_ERROR_PHASE);
         }
+//        catch (Exception e) {
+//            LOGGER.info("Exception occurred during decommissioning.", e);
+//            result = new DecommissionResult(e.getMessage(), e, request);
+//        }
+//=======
+//            Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
+//            hostNames = getHostNamesForPrivateIds(request, stack);
+//            Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames);
+//            Set<String> decommissionedHostNames;
+//            if (skipAmbariDecomission(request, hostsToRemove)) {
+//                decommissionedHostNames = hostNames;
+//            } else {
+//                executePreTerminationRecipes(stack, request.getHostGroupName(), hostsToRemove.keySet());
+//                decommissionedHostNames = ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove);
+//            }
+//            result = new DecommissionResult(request, decommissionedHostNames);
+//        } catch (DecommissionException e) {
+//            result = new DecommissionResult(e.getMessage(), e, request, hostNames, DECOMMISSION_ERROR_PHASE);
+//        } catch (Exception e) {
+//            result = new DecommissionResult(e.getMessage(), e, request, hostNames, UNKNOWN_ERROR_PHASE);
+//>>>>>>> cb52cd1... CB-3015 Handle deleteHostFromAmbari failures during decommission, CB-3013 Sync gather package info only from healthy nodes
+//        }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 

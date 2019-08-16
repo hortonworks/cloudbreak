@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 
 @Service
 public class HostGroupService {
-
     @Inject
     private HostGroupRepository hostGroupRepository;
 
@@ -62,5 +61,4 @@ public class HostGroupService {
     public Set<HostGroup> findAllHostGroupsByRecipe(Long recipeId) {
         return hostGroupRepository.findAllHostGroupsByRecipe(recipeId);
     }
-
 }

@@ -7,6 +7,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 
@@ -52,4 +54,15 @@ public class HostMetadataService {
         repository.delete(hostMetadata);
     }
 
+    public Optional<HostMetadata> getHostMetadataByClusterAndHostName(Cluster cluster, String hostName) {
+        return repository.findHostInClusterByName(cluster.getId(), hostName);
+    }
+
+    public void updateHostMetaDataStatus(Cluster cluster, String hostName, HostMetadataState status) {
+        Optional<HostMetadata> hostMetadata = getHostMetadataByClusterAndHostName(cluster, hostName);
+        hostMetadata.ifPresent(hmd -> {
+            hmd.setHostMetadataState(status);
+            repository.save(hmd);
+        });
+    }
 }

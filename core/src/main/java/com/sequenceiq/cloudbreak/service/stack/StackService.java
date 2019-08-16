@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -76,6 +77,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -598,36 +600,6 @@ public class StackService {
         }
     }
 
-    public void updateNodeCount(Stack stack1, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        try {
-            transactionService.required(() -> {
-                Stack stackWithLists = getByIdWithLists(stack1.getId());
-                validateStackStatus(stackWithLists);
-                validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
-                validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
-                if (withClusterEvent) {
-                    validateClusterStatus(stackWithLists);
-                    validateHostGroupAdjustment(instanceGroupAdjustmentJson, stackWithLists, instanceGroupAdjustmentJson.getScalingAdjustment());
-                }
-                if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
-                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED);
-                    flowManager.triggerStackUpscale(stackWithLists.getId(), instanceGroupAdjustmentJson, withClusterEvent);
-                } else {
-                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED);
-                    flowManager.triggerStackDownscale(stackWithLists.getId(), instanceGroupAdjustmentJson);
-                }
-                return null;
-            });
-        } catch (TransactionExecutionException e) {
-            if (e.getCause() instanceof BadRequestException) {
-                throw e.getCause();
-            }
-            throw new TransactionRuntimeExecutionException(e);
-        }
-
-    }
-
     public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status) {
         Optional<InstanceMetaData> metaData = instanceMetaDataService.findHostInStack(id, hostName);
         if (metaData.isEmpty()) {
@@ -638,29 +610,11 @@ public class StackService {
         }
     }
 
-    public List<String> getHostNamesForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
-        return getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds).stream()
-                .map(InstanceMetaData::getInstanceId)
-                .collect(Collectors.toList());
-    }
-
-    public List<String> getInstanceIdsForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
-        List<InstanceMetaData> instanceMetaDataForPrivateIds = getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds);
-        return instanceMetaDataForPrivateIds.stream()
-                .map(InstanceMetaData::getInstanceId)
-                .collect(Collectors.toList());
-    }
-
     public List<InstanceMetaData> getInstanceMetaDataForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
         return instanceMetaDataList.stream()
                 .filter(instanceMetaData -> privateIds.contains(instanceMetaData.getPrivateId()))
                 .filter(instanceMetaData -> !instanceMetaData.isTerminated())
                 .collect(Collectors.toList());
-    }
-
-    public Set<Long> getPrivateIdsForHostNames(List<InstanceMetaData> instanceMetaDataList, Collection<String> hostNames) {
-        return getInstanceMetadatasForHostNames(instanceMetaDataList, hostNames).stream()
-                .map(InstanceMetaData::getPrivateId).collect(Collectors.toSet());
     }
 
     public Optional<InstanceMetaData> getInstanceMetadata(List<InstanceMetaData> instanceMetaDataList, Long privateId) {
@@ -856,6 +810,55 @@ public class StackService {
         }
     }
 
+    public void updateNodeCount(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
+        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
+        try {
+            transactionService.required(() -> {
+                Stack stackWithLists = getByIdWithLists(stack.getId());
+                validateStackStatus(stackWithLists);
+                validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
+                validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
+                validataInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
+                if (withClusterEvent) {
+                    validateClusterStatus(stackWithLists);
+                    validateHostGroupAdjustment(instanceGroupAdjustmentJson, stackWithLists, instanceGroupAdjustmentJson.getScalingAdjustment());
+                    validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
+                }
+                if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
+                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED);
+                    flowManager.triggerStackUpscale(stackWithLists.getId(), instanceGroupAdjustmentJson, withClusterEvent);
+                } else {
+                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED);
+                    flowManager.triggerStackDownscale(stackWithLists.getId(), instanceGroupAdjustmentJson);
+                }
+                return null;
+            });
+        } catch (TransactionExecutionException e) {
+            if (e.getCause() instanceof BadRequestException) {
+                throw e.getCause();
+            }
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public List<String> getHostNamesForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
+        return getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds).stream()
+                .map(InstanceMetaData::getInstanceId)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getInstanceIdsForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
+        List<InstanceMetaData> instanceMetaDataForPrivateIds = getInstanceMetaDataForPrivateIds(instanceMetaDataList, privateIds);
+        return instanceMetaDataForPrivateIds.stream()
+                .map(InstanceMetaData::getInstanceId)
+                .collect(Collectors.toList());
+    }
+
+    public Set<Long> getPrivateIdsForHostNames(List<InstanceMetaData> instanceMetaDataList, Collection<String> hostNames) {
+        return getInstanceMetadatasForHostNames(instanceMetaDataList, hostNames).stream()
+                .map(InstanceMetaData::getPrivateId).collect(Collectors.toSet());
+    }
+
     private Set<InstanceMetaData> getInstanceMetadatasForHostNames(List<InstanceMetaData> instanceMetaDataList, Collection<String> hostNames) {
         return instanceMetaDataList.stream()
                 .filter(instanceMetaData -> hostNames.contains(instanceMetaData.getDiscoveryFQDN()))
@@ -878,6 +881,30 @@ public class StackService {
                 throw new BadRequestException(
                         String.format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",
                                 removableHosts, instanceGroup.getGroupName(), instanceGroupAdjustmentJson.getScalingAdjustment() * -1));
+            }
+        }
+    }
+
+    private void validataInstanceStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
+        if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
+            List<InstanceMetaData> instanceMetaDataList =
+                    stack.getInstanceMetaDataAsList().stream().filter(im -> !im.isTerminated() && !im.isRunning()).collect(Collectors.toList());
+            if (!instanceMetaDataList.isEmpty()) {
+                String ims = instanceMetaDataList.stream().map(im -> im.getInstanceId() + ": " + im.getInstanceStatus()).collect(Collectors.joining(","));
+                throw new BadRequestException(
+                        String.format("Upscale is not allowed because the following instances are not in running state: %s. Please remove them first!", ims));
+            }
+        }
+    }
+
+    private void validataHostMetadataStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
+        if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
+            List<HostMetadata> hostMetadataList = stack.getCluster().getHostGroups().stream().flatMap(hg -> hg.getHostMetadata().stream())
+                    .filter(hm -> hm.getHostMetadataState() != HostMetadataState.HEALTHY).collect(Collectors.toList());
+            if (!hostMetadataList.isEmpty()) {
+                String hms = hostMetadataList.stream().map(hm -> hm.getHostName() + ": " + hm.getHostMetadataState()).collect(Collectors.joining(","));
+                throw new BadRequestException(
+                        String.format("Upscale is not allowed because the following hosts are not healthy: %s. Please remove them first!", hms));
             }
         }
     }
