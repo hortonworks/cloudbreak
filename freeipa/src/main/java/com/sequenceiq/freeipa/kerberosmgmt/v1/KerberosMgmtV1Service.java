@@ -46,7 +46,11 @@ public class KerberosMgmtV1Service {
 
     private static final String HOST_CREATION_FAILED = "Failed to create host.";
 
+    private static final String HOST_DELETION_FAILED = "Failed to delete host.";
+
     private static final String SERVICE_PRINCIPAL_CREATION_FAILED = "Failed to create service principal.";
+
+    private static final String SERVICE_PRINCIPAL_DELETION_FAILED = "Failed to delete service principal.";
 
     private static final String SERVICE_ALLOW_FAILURE = "Request to allow the service to retrieve keytab failed.";
 
@@ -65,6 +69,8 @@ public class KerberosMgmtV1Service {
     private static final String KEYTAB_SUB_TYPE = "keytab";
 
     private static final String PRINCIPAL_SUB_TYPE = "serviceprincipal";
+
+    private static final int NOT_FOUND_ERROR_CODE = 4001;
 
     private static final int DUPLICATE_ENTRY_ERROR_CODE = 4002;
 
@@ -90,7 +96,7 @@ public class KerberosMgmtV1Service {
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
-        hostAdd(request.getServerHostName(), ipaClient);
+        addHost(request.getServerHostName(), ipaClient);
         com.sequenceiq.freeipa.client.model.Service service = serviceAdd(request, realm, ipaClient);
         String serviceKeytab;
         if (service.getHasKeytab() && request.getDoNotRecreateKeytab()) {
@@ -116,12 +122,12 @@ public class KerberosMgmtV1Service {
         return response;
     }
 
-    public void deleteServicePrincipal(ServicePrincipalRequest request, String accountId) throws FreeIpaClientException {
+    public void deleteServicePrincipal(ServicePrincipalRequest request, String accountId) throws FreeIpaClientException, DeleteException {
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
         String canonicalPrincipal = constructCanonicalPrincipal(request.getServiceName(), request.getServerHostName(), realm);
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
-        ipaClient.deleteService(canonicalPrincipal);
+        delService(canonicalPrincipal, ipaClient);
         VaultPathBuilder b = new VaultPathBuilder()
                 .withOptionalClusterCrn()
                 .withAccountId(accountId)
@@ -133,7 +139,7 @@ public class KerberosMgmtV1Service {
         recursivelyCleanupVault(b.withSubType(KEYTAB_SUB_TYPE).build());
     }
 
-    public void deleteHost(HostRequest request, String accountId) throws FreeIpaClientException {
+    public void deleteHost(HostRequest request, String accountId) throws FreeIpaClientException, DeleteException {
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
 
@@ -142,9 +148,9 @@ public class KerberosMgmtV1Service {
                 .map(f -> f.getKrbcanonicalname()).collect(Collectors.toSet());
         LOGGER.debug("Services count on the given host: {}", services.size());
         for (String service : services) {
-            ipaClient.deleteService(service);
+            delService(service, ipaClient);
         }
-        ipaClient.deleteHost(request.getServerHostName());
+        delHost(request.getServerHostName(), ipaClient);
         VaultPathBuilder b = new VaultPathBuilder()
                 .withOptionalClusterCrn()
                 .withAccountId(accountId)
@@ -210,13 +216,24 @@ public class KerberosMgmtV1Service {
         throw new KeytabCreationException(EMPTY_REALM);
     }
 
-    private void hostAdd(String hostname, FreeIpaClient ipaClient) throws KeytabCreationException {
+    private void addHost(String hostname, FreeIpaClient ipaClient) throws KeytabCreationException {
         try {
             ipaClient.addHost(hostname);
         } catch (FreeIpaClientException e) {
             if (!isDuplicateEntryException(e)) {
                 LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
                 throw new KeytabCreationException(HOST_CREATION_FAILED);
+            }
+        }
+    }
+
+    private void delHost(String hostname, FreeIpaClient ipaClient) throws DeleteException {
+        try {
+            ipaClient.deleteHost(hostname);
+        } catch (FreeIpaClientException e) {
+            if (!isNotFoundException(e)) {
+                LOGGER.error(HOST_DELETION_FAILED + " " + e.getLocalizedMessage(), e);
+                throw new DeleteException(HOST_DELETION_FAILED);
             }
         }
     }
@@ -241,6 +258,17 @@ public class KerberosMgmtV1Service {
             throw new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED);
         }
         return service;
+    }
+
+    private void delService(String canonicalPrincipal, FreeIpaClient ipaClient) throws DeleteException {
+        try {
+            ipaClient.deleteService(canonicalPrincipal);
+        } catch (FreeIpaClientException e) {
+            if (!isNotFoundException(e)) {
+                LOGGER.error(SERVICE_PRINCIPAL_DELETION_FAILED + " " + e.getLocalizedMessage(), e);
+                throw new DeleteException(SERVICE_PRINCIPAL_DELETION_FAILED);
+            }
+        }
     }
 
     private void addRoleAndPrivileges(com.sequenceiq.freeipa.client.model.Service service, RoleRequest roleRequest, FreeIpaClient ipaClient)
@@ -302,6 +330,15 @@ public class KerberosMgmtV1Service {
             LOGGER.error(KEYTAB_FETCH_FAILED + " " + e.getLocalizedMessage(), e);
             throw new KeytabCreationException(KEYTAB_FETCH_FAILED);
         }
+    }
+
+    private boolean isNotFoundException(FreeIpaClientException e) {
+        return Optional.ofNullable(e.getCause())
+                .filter(JsonRpcClientException.class::isInstance)
+                .map(JsonRpcClientException.class::cast)
+                .map(JsonRpcClientException::getCode)
+                .filter(c -> c == NOT_FOUND_ERROR_CODE)
+                .isPresent();
     }
 
     private boolean isDuplicateEntryException(FreeIpaClientException e) {
