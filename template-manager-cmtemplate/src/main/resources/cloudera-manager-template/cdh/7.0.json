@@ -79,6 +79,14 @@
     {
       "name": "ATLAS",
       "version": "1.0.0"
+    },
+    {
+      "name": "NIFI",
+      "version": "0.7.0"
+    },
+    {
+      "name": "NIFIREGISTRY",
+      "version": "0.4.0"
     }
   ],
   "version": "7.0.0",
