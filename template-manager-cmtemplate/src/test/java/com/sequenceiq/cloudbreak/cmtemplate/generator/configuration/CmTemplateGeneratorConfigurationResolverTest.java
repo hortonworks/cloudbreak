@@ -34,6 +34,6 @@ public class CmTemplateGeneratorConfigurationResolverTest {
         Set<ServiceConfig> serviceConfigs = underTest.serviceConfigs();
 
         Assert.assertEquals(4L, stackVersionSetMap.size());
-        Assert.assertEquals(21L, serviceConfigs.size());
+        Assert.assertEquals(23L, serviceConfigs.size());
     }
 }

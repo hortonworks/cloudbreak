@@ -371,6 +371,30 @@
         }
       ],
       "dependencies": ["ZOOKEEPER","HDFS", "YARN", "HIVE"]
+    },
+    {
+      "name": "NIFI",
+      "displayName": "Nifi",
+      "components": [
+        {
+          "name": "NIFI_NODE",
+          "groups": ["nifi"],
+          "base": true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER"]
+    },
+    {
+      "name": "NIFIREGISTRY",
+      "displayName": "Nifi Registry",
+      "components": [
+        {
+          "name": "NIFI_REGISTRY_SERVER",
+          "groups": ["nifiregistry"],
+          "base": true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER", "NIFI"]
     }
   ]
 }

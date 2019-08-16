@@ -67,6 +67,14 @@
     {
       "name": "ZEPPELIN",
       "version": "0.8.0"
+    },
+    {
+      "name": "NIFI",
+      "version": "0.7.0"
+    },
+    {
+      "name": "NIFIREGISTRY",
+      "version": "0.4.0"
     }
   ],
   "version": "6.1.1",
