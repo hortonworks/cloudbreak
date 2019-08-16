@@ -43,21 +43,22 @@ public class SdxServiceDecorator {
     }
 
     public void prepareSdxAttributes(StackV4Response stackResponse) {
-        SdxClusterResponse sdx = getSdxForStack(stackResponse);
-        stackResponse.getSharedService().setSdxCrn(sdx.getCrn());
-        stackResponse.getSharedService().setSdxName(sdx.getName());
+        getSdxForStack(stackResponse).ifPresent(sdx -> {
+            stackResponse.getSharedService().setSdxCrn(sdx.getCrn());
+            stackResponse.getSharedService().setSdxName(sdx.getName());
+        });
     }
 
-    private SdxClusterResponse getSdxForStack(StackV4Response stack) {
+    private Optional<SdxClusterResponse> getSdxForStack(StackV4Response stack) {
         List<SdxClusterResponse> sdxClusters = sdxClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         if (sdxClusters.size() > 1) {
             LOGGER.warn("More than 1 SDX cluster found for stack {}.", stack.getCrn());
             throw new BadRequestException("Environment should have only one datalake.");
         }
         if (sdxClusters.size() == 1) {
-            return sdxClusters.get(0);
+            return Optional.of(sdxClusters.get(0));
         }
         LOGGER.info("No SDX cluster found for stack {}.", stack.getCrn());
-        return new SdxClusterResponse();
+        return Optional.empty();
     }
 }
