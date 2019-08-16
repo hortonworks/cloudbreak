@@ -32,8 +32,6 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.notification.NotificationService;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Configuration
 public class SdxDeleteActions {
@@ -45,9 +43,6 @@ public class SdxDeleteActions {
 
     @Inject
     private ProvisionerService provisionerService;
-
-    @Inject
-    private NotificationService notificationService;
 
     @Bean(name = "SDX_DELETION_START_STATE")
     public Action<?, ?> sdxDeletion() {
@@ -86,7 +81,6 @@ public class SdxDeleteActions {
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 LOGGER.info("SDX stack deletion in progress: {}", payload.getResourceId());
-                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_STARTED, payload, context.getUserId());
                 sendEvent(context);
             }
 
@@ -115,7 +109,6 @@ public class SdxDeleteActions {
             protected void doExecute(SdxContext context, StackDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 LOGGER.info("SDX delete remote database of sdx cluster: {}", payload.getResourceId());
-                notificationService.send(ResourceEvent.SDX_RDS_DELETION_STARTED, payload, context.getUserId());
                 sendEvent(context);
             }
 
@@ -144,7 +137,6 @@ public class SdxDeleteActions {
             protected void doExecute(SdxContext context, RdsDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 LOGGER.info("SDX delete finalized: {}", payload.getResourceId());
-                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_FINISHED, payload, context.getUserId());
                 sendEvent(context, SDX_DELETE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -175,7 +167,6 @@ public class SdxDeleteActions {
                     statusReason = exception.getMessage();
                 }
                 sdxService.updateSdxStatus(payload.getResourceId(), deleteFailedStatus, statusReason);
-                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_FAILED, payload, context.getUserId());
                 sendEvent(context, SDX_DELETE_FAILED_HANDLED_EVENT.event(), payload);
             }
 

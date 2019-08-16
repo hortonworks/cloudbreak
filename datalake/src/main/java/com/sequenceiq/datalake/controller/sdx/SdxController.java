@@ -11,7 +11,6 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
@@ -47,7 +46,6 @@ public class SdxController extends NotificationController implements SdxEndpoint
         SdxCluster sdxCluster = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         sdxClusterResponse.setName(sdxCluster.getClusterName());
-        notify(ResourceEvent.SDX_CLUSTER_CREATED, sdxClusterResponse);
         return sdxClusterResponse;
     }
 
@@ -55,14 +53,12 @@ public class SdxController extends NotificationController implements SdxEndpoint
     public void delete(String name) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         sdxService.deleteSdx(userCrn, name);
-        notify(ResourceEvent.SDX_CLUSTER_DELETED, name);
     }
 
     @Override
     public void deleteByCrn(String clusterCrn) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         sdxService.deleteSdxByClusterCrn(userCrn, clusterCrn);
-        notify(ResourceEvent.SDX_CLUSTER_DELETED, clusterCrn);
     }
 
     @Override

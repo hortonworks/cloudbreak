@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -17,6 +16,7 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -27,7 +27,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
-import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
 
 @Service
@@ -46,6 +45,9 @@ public class DatabaseService {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
+    @Inject
+    private SdxNotificationService notificationService;
 
     @Value("${datalake.db.instancetype:db.m5.large}")
     private String dbInstanceType;
@@ -75,8 +77,8 @@ public class DatabaseService {
         }
         sdxCluster.setStatus(SdxClusterStatus.EXTERNAL_DATABASE_CREATION_IN_PROGRESS);
         sdxClusterRepository.save(sdxCluster);
-        return waitAndGetDatabase(sdxCluster, dbResourceCrn,
-                Status::isAvailable, status -> status.isDeleteInProgressOrCompleted() || Status.CREATE_FAILED.equals(status), requestId);
+        notificationService.send(ResourceEvent.SDX_RDS_CREATION_STARTED, sdxCluster);
+        return waitAndGetDatabase(sdxCluster, dbResourceCrn, SdxDatabaseOperation.CREATION, requestId);
     }
 
     private boolean dbHasBeenCreatedPreviously(SdxCluster sdxCluster) {
@@ -95,8 +97,8 @@ public class DatabaseService {
                     .withCrn(threadBasedUserCrnProvider.getUserCrn())
                     .databaseServerV4Endpoint().terminate(sdxCluster.getDatabaseCrn());
             saveStatus(sdxCluster, SdxClusterStatus.EXTERNAL_DATABASE_DELETION_IN_PROGRESS);
-            waitAndGetDatabase(sdxCluster, resp.getResourceCrn(), Status.DELETE_COMPLETED::equals,
-                    Status.DELETE_FAILED::equals, requestId);
+            notificationService.send(ResourceEvent.SDX_RDS_DELETION_STARTED, sdxCluster);
+            waitAndGetDatabase(sdxCluster, resp.getResourceCrn(), SdxDatabaseOperation.DELETION, requestId);
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server is deleted on redbeams side {}", sdxCluster.getDatabaseCrn());
         }
@@ -126,14 +128,14 @@ public class DatabaseService {
     }
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn,
-            Function<Status, Boolean> exitcrit, Function<Status, Boolean> failurecrit, String requestId) {
+            SdxDatabaseOperation sdxDatabaseOperation, String requestId) {
         PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
                 DURATION_IN_MINUTES_FOR_ENV_POLLING, TimeUnit.MINUTES);
-        return waitAndGetDatabase(sdxCluster, databaseCrn, pollingConfig, exitcrit, failurecrit, requestId);
+        return waitAndGetDatabase(sdxCluster, databaseCrn, pollingConfig, sdxDatabaseOperation, requestId);
     }
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn, PollingConfig pollingConfig,
-            Function<Status, Boolean> exitcrit, Function<Status, Boolean> failurecrit, String requestId) {
+            SdxDatabaseOperation sdxDatabaseOperation, String requestId) {
         return Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
@@ -144,10 +146,12 @@ public class DatabaseService {
                                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         DatabaseServerStatusV4Response rdsStatus = getDatabaseStatus(databaseCrn);
                         LOGGER.info("Response from redbeams: {}", JsonUtil.writeValueAsString(rdsStatus));
-                        if (exitcrit.apply(rdsStatus.getStatus())) {
+                        if (sdxDatabaseOperation.getExitCriteria().apply(rdsStatus.getStatus())) {
+                            notificationService.send(sdxDatabaseOperation.getFinishedEvent(), sdxCluster);
                             return AttemptResults.finishWith(rdsStatus);
                         } else {
-                            if (failurecrit.apply(rdsStatus.getStatus())) {
+                            if (sdxDatabaseOperation.getFailureCriteria().apply(rdsStatus.getStatus())) {
+                                notificationService.send(sdxDatabaseOperation.getFailedEvent(), sdxCluster);
                                 if (rdsStatus.getStatusReason() != null && rdsStatus.getStatusReason().contains("does not exist")) {
                                     return AttemptResults.finishWith(null);
                                 }

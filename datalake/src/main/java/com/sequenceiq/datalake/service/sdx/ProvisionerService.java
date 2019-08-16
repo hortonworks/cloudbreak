@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -46,6 +47,9 @@ public class ProvisionerService {
     @Inject
     private StackRequestManifester stackRequestManifester;
 
+    @Inject
+    private SdxNotificationService notificationService;
+
     public void startStackDeletion(Long id) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             try {
@@ -54,6 +58,7 @@ public class ProvisionerService {
                         .delete(0L, sdxCluster.getClusterName(), false);
                 sdxCluster.setStatus(SdxClusterStatus.STACK_DELETION_IN_PROGRESS);
                 sdxClusterRepository.save(sdxCluster);
+                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_STARTED, sdxCluster);
             } catch (NotFoundException e) {
                 LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
             } catch (ClientErrorException e) {
@@ -85,6 +90,7 @@ public class ProvisionerService {
                                     stackV4Response.getStatus().name());
                             LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
                             if (Status.DELETE_FAILED.equals(stackV4Response.getStatus())) {
+                                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_FAILED, sdxCluster);
                                 return AttemptResults.breakFor(
                                         "Stack deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
                                 );
@@ -97,6 +103,7 @@ public class ProvisionerService {
                     });
             sdxCluster.setStatus(SdxClusterStatus.STACK_DELETED);
             sdxClusterRepository.save(sdxCluster);
+            notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_FINISHED, sdxCluster);
         }, () -> {
             throw notFound("SDX cluster", id).get();
         });
@@ -119,6 +126,7 @@ public class ProvisionerService {
                 sdxCluster.setStackCrn(stackV4Response.getCrn());
                 sdxCluster.setStatus(SdxClusterStatus.STACK_CREATION_IN_PROGRESS);
                 sdxClusterRepository.save(sdxCluster);
+                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, sdxCluster);
                 LOGGER.info("Sdx cluster updated");
             } catch (ClientErrorException e) {
                 String errorMessage = ClientErrorExceptionHandler.getErrorMessage(e);
@@ -169,6 +177,7 @@ public class ProvisionerService {
                     });
             sdxCluster.setStatus(SdxClusterStatus.RUNNING);
             sdxClusterRepository.save(sdxCluster);
+            notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED, sdxCluster);
         }, () -> {
             throw notFound("SDX cluster", id).get();
         });
@@ -176,6 +185,7 @@ public class ProvisionerService {
 
     private AttemptResult<StackV4Response> sdxCreationFailed(SdxCluster sdxCluster, String statusReason) {
         LOGGER.info("SDX creation failed, statusReason: " + statusReason);
+        notificationService.send(ResourceEvent.SDX_CLUSTER_CREATION_FAILED, sdxCluster);
         return AttemptResults.breakFor("SDX creation failed '" + sdxCluster.getClusterName() + "', " + statusReason);
     }
 

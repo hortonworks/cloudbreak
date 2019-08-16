@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -73,6 +74,9 @@ public class SdxService {
 
     @Inject
     private Clock clock;
+
+    @Inject
+    private SdxNotificationService notificationService;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<SdxClusterStatus> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
@@ -195,6 +199,8 @@ public class SdxService {
         MDCBuilder.buildMdcContext(sdxCluster);
 
         sdxCluster = sdxClusterRepository.save(sdxCluster);
+
+        notificationService.send(ResourceEvent.SDX_CLUSTER_CREATED, sdxCluster);
 
         LOGGER.info("trigger SDX creation: {}", sdxCluster);
         sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId(), sdxCluster.getCrn());

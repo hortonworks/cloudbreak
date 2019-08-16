@@ -17,7 +17,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -32,7 +31,6 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.notification.NotificationService;
 
 @Configuration
 public class SdxRepairActions {
@@ -44,9 +42,6 @@ public class SdxRepairActions {
 
     @Inject
     private SdxRepairService repairService;
-
-    @Inject
-    private NotificationService notificationService;
 
     @Bean(name = "SDX_REPAIR_START_STATE")
     public Action<?, ?> sdxDeletion() {
@@ -85,7 +80,6 @@ public class SdxRepairActions {
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 LOGGER.info("SDX repair in progress: {}", payload.getResourceId());
-                notificationService.send(ResourceEvent.SDX_REPAIR_STARTED, payload, context.getUserId());
                 sendEvent(context);
             }
 
@@ -114,7 +108,6 @@ public class SdxRepairActions {
             protected void doExecute(SdxContext context, SdxRepairSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 LOGGER.info("SDX repair finalized: {}", payload.getResourceId());
-                notificationService.send(ResourceEvent.SDX_REPAIR_FINISHED, payload, context.getUserId());
                 sdxService.updateSdxStatus(payload.getResourceId(), SdxClusterStatus.RUNNING);
                 sendEvent(context, SDX_REPAIR_FINALIZED_EVENT.event(), payload);
             }
@@ -146,7 +139,6 @@ public class SdxRepairActions {
                     statusReason = exception.getMessage();
                 }
                 sdxService.updateSdxStatus(payload.getResourceId(), repairFailedStatus, statusReason);
-                notificationService.send(ResourceEvent.SDX_REPAIR_FAILED, payload, context.getUserId());
                 sendEvent(context, SDX_REPAIR_FAILED_HANDLED_EVENT.event(), payload);
             }
 
