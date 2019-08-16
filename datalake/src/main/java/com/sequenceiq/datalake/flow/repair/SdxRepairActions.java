@@ -85,7 +85,7 @@ public class SdxRepairActions {
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 LOGGER.info("SDX repair in progress: {}", payload.getResourceId());
-                notificationService.send(ResourceEvent.SDX_REPAIR_STARTED, context.getUserId());
+                notificationService.send(ResourceEvent.SDX_REPAIR_STARTED, payload, context.getUserId());
                 sendEvent(context);
             }
 

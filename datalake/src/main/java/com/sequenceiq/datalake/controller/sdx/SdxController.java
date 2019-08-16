@@ -55,14 +55,14 @@ public class SdxController extends NotificationController implements SdxEndpoint
     public void delete(String name) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         sdxService.deleteSdx(userCrn, name);
-        notify(ResourceEvent.SDX_CLUSTER_DELETED);
+        notify(ResourceEvent.SDX_CLUSTER_DELETED, name);
     }
 
     @Override
     public void deleteByCrn(String clusterCrn) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         sdxService.deleteSdxByClusterCrn(userCrn, clusterCrn);
-        notify(ResourceEvent.SDX_CLUSTER_DELETED);
+        notify(ResourceEvent.SDX_CLUSTER_DELETED, clusterCrn);
     }
 
     @Override

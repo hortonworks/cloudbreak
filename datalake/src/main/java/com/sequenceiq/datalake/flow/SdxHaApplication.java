@@ -53,7 +53,7 @@ public class SdxHaApplication implements HaApplication {
     @Override
     public void cancelRunningFlow(Long resourceId) {
         InMemoryResourceStateStore.putResource(RESOURCE_TYPE, resourceId, PollGroup.CANCELLED);
-        reactorFlowManager.cancelRunningFlows(resourceId);
+        reactorFlowManager.cancelRunningFlows(resourceId, null);
     }
 
     @Override

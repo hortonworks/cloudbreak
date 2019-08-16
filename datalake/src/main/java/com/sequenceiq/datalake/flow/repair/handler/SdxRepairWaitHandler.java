@@ -45,26 +45,27 @@ public class SdxRepairWaitHandler implements EventHandler<SdxRepairWaitRequest> 
 
     @Override
     public void accept(Event<SdxRepairWaitRequest> event) {
-        SdxRepairWaitRequest stackDeletionWaitRequest = event.getData();
-        Long sdxId = stackDeletionWaitRequest.getResourceId();
-        String userId = stackDeletionWaitRequest.getUserId();
-        String requestId = stackDeletionWaitRequest.getRequestId();
+        SdxRepairWaitRequest sdxRepairWaitRequest = event.getData();
+        Long sdxId = sdxRepairWaitRequest.getResourceId();
+        String userId = sdxRepairWaitRequest.getUserId();
+        String requestId = sdxRepairWaitRequest.getRequestId();
+        String sdxCrn = sdxRepairWaitRequest.getSdxCrn();
         MDCBuilder.addRequestIdToMdcContext(requestId);
         Selectable response;
         try {
             LOGGER.debug("Start polling stack deletion process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             repairService.waitCloudbreakClusterRepair(sdxId, pollingConfig);
-            response = new SdxRepairSuccessEvent(sdxId, userId, requestId);
+            response = new SdxRepairSuccessEvent(sdxId, userId, requestId, sdxCrn);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Repair polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxRepairFailedEvent(sdxId, userId, requestId, userBreakException);
+            response = new SdxRepairFailedEvent(sdxId, userId, requestId, sdxCrn, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Repair poller stopped for stack: {}", sdxId);
-            response = new SdxRepairFailedEvent(sdxId, userId, requestId, pollerStoppedException);
+            response = new SdxRepairFailedEvent(sdxId, userId, requestId, sdxCrn, pollerStoppedException);
         } catch (PollerException exception) {
             LOGGER.info("Repair polling failed for stack: {}", sdxId);
-            response = new SdxRepairFailedEvent(sdxId, userId, requestId, exception);
+            response = new SdxRepairFailedEvent(sdxId, userId, requestId, sdxCrn, exception);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

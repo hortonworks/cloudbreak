@@ -86,7 +86,7 @@ public class SdxDeleteActions {
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 LOGGER.info("SDX stack deletion in progress: {}", payload.getResourceId());
-                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_STARTED, context.getUserId());
+                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_STARTED, payload, context.getUserId());
                 sendEvent(context);
             }
 
@@ -115,7 +115,7 @@ public class SdxDeleteActions {
             protected void doExecute(SdxContext context, StackDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 LOGGER.info("SDX delete remote database of sdx cluster: {}", payload.getResourceId());
-                notificationService.send(ResourceEvent.SDX_RDS_DELETION_STARTED, context.getUserId());
+                notificationService.send(ResourceEvent.SDX_RDS_DELETION_STARTED, payload, context.getUserId());
                 sendEvent(context);
             }
 

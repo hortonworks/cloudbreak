@@ -47,31 +47,31 @@ public class SdxReactorFlowManager {
     @Inject
     private ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
 
-    public void triggerSdxCreation(Long sdxId) {
+    public void triggerSdxCreation(Long sdxId, String sdxCrn) {
         String selector = ENV_WAIT_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
         String requestId = threadBasedRequestIdProvider.getRequestId();
-        notify(selector, new SdxEvent(selector, sdxId, userId, requestId));
+        notify(selector, new SdxEvent(selector, sdxId, userId, requestId, sdxCrn));
     }
 
-    public void triggerSdxDeletion(Long sdxId) {
+    public void triggerSdxDeletion(Long sdxId, String sdxCrn) {
         String selector = SDX_DELETE_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
         String requestId = threadBasedRequestIdProvider.getRequestId();
-        notify(selector, new SdxEvent(selector, sdxId, userId, requestId));
+        notify(selector, new SdxEvent(selector, sdxId, userId, requestId, sdxCrn));
     }
 
-    public void triggerSdxRepairFlow(Long sdxId, SdxRepairRequest repairRequest) {
+    public void triggerSdxRepairFlow(Long sdxId, String sdxCrn, SdxRepairRequest repairRequest) {
         String selector = SDX_REPAIR_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
         String requestId = threadBasedRequestIdProvider.getRequestId();
-        notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, requestId, repairRequest));
+        notify(selector, new SdxRepairStartEvent(selector, sdxId, userId, requestId, sdxCrn, repairRequest));
     }
 
-    public void cancelRunningFlows(Long sdxId) {
+    public void cancelRunningFlows(Long sdxId, String sdxCrn) {
         String userId = threadBasedUserCrnProvider.getUserCrn();
         String requestId = threadBasedRequestIdProvider.getRequestId();
-        SdxEvent cancelEvent = new SdxEvent(Flow2Handler.FLOW_CANCEL, sdxId, userId, requestId);
+        SdxEvent cancelEvent = new SdxEvent(Flow2Handler.FLOW_CANCEL, sdxId, userId, requestId, sdxCrn);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }
 
