@@ -181,7 +181,8 @@ public class InstanceMetaData implements ProvisionEntity {
     }
 
     public boolean isFailed() {
-        return InstanceStatus.FAILED.equals(instanceStatus);
+        return instanceStatus == InstanceStatus.FAILED || instanceStatus == InstanceStatus.DECOMMISSION_FAILED
+                || instanceStatus == InstanceStatus.ORCHESTRATION_FAILED;
     }
 
     public boolean isDecommissioned() {

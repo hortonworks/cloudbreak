@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.FAILURE_EVENT;
+
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -19,6 +21,9 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
@@ -56,18 +61,53 @@ public class ClusterDownscaleActions {
         };
     }
 
-    @Bean(name = "UPDATE_INSTANCE_METADATA_STATE")
-    public Action<?, ?> updateInstanceMetadataAction() {
+    @Bean(name = "REMOVE_HOSTS_FROM_ORCHESTRATION_STATE")
+    public Action<?, ?> removeHostsFromOrchestrationAction() {
         return new AbstractClusterAction<>(DecommissionResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, DecommissionResult payload, Map<Object, Object> variables) {
-                clusterDownscaleService.updateMetadata(context.getStackId(), payload.getHostNames(), payload.getRequest().getHostGroupName());
+                RemoveHostsRequest request = new RemoveHostsRequest(context.getStackId(), payload.getHostGroupName(), payload.getHostNames());
+                sendEvent(context.getFlowParameters(), request.selector(), request);
+            }
+        };
+    }
+
+    @Bean(name = "UPDATE_INSTANCE_METADATA_STATE")
+    public Action<?, ?> updateInstanceMetadataAction() {
+        return new AbstractClusterAction<>(RemoveHostsSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, RemoveHostsSuccess payload, Map<Object, Object> variables) {
+                clusterDownscaleService.updateMetadata(context.getStackId(), payload.getHostNames(), payload.getHostGroupName());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(ClusterViewContext context) {
                 return new StackEvent(ClusterDownscaleEvent.FINALIZED_EVENT.event(), context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "DECOMISSION_FAILED_STATE")
+    public Action<?, ?> updateInstanceMetadataDecomissionFailedAction() {
+        return new AbstractClusterAction<>(DecommissionResult.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, DecommissionResult payload, Map<Object, Object> variables) {
+                if (payload.getErrorDetails() != null) {
+                    clusterDownscaleService.updateMetadataStatus(payload);
+                    sendEvent(context.getFlowParameters(), FAILURE_EVENT.event(), new StackFailureEvent(payload.getResourceId() , payload.getErrorDetails()));
+                }
+            }
+        };
+    }
+
+    @Bean(name = "REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_STATE")
+    public Action<?, ?> updateInstanceMetadataOrchestrationFailedAction() {
+        return new AbstractClusterAction<>(RemoveHostsFailed.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, RemoveHostsFailed payload, Map<Object, Object> variables) {
+                clusterDownscaleService.updateMetadataStatus(payload);
+                sendEvent(context.getFlowParameters(), FAILURE_EVENT.event(), new StackFailureEvent(payload.getResourceId(), payload.getException()));
             }
         };
     }
