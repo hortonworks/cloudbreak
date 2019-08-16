@@ -43,9 +43,11 @@ import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.entity.SdxClusterStatus;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
@@ -73,15 +75,18 @@ public class SdxService {
     private CloudStorageManifester cloudStorageManifester;
 
     @Inject
+    private SdxStatusService sdxStatusService;
+
+    @Inject
     private Clock clock;
 
     @Inject
     private SdxNotificationService notificationService;
 
-    public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<SdxClusterStatus> statuses) {
+    public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
-        List<SdxCluster> sdxClusters = sdxClusterRepository.findByIdInAndStatusIn(resourceIds, statuses);
-        return sdxClusters.stream().map(SdxCluster::getId).collect(Collectors.toSet());
+        List<SdxStatusEntity> sdxStatusEntities = sdxStatusService.findDistinctFirstByStatusInAndDatalakeIdOrderByIdDesc(statuses, resourceIds);
+        return sdxStatusEntities.stream().map(sdxStatusEntity -> sdxStatusEntity.getDatalake().getId()).collect(Collectors.toSet());
     }
 
     public SdxCluster getById(Long id) {
@@ -147,20 +152,6 @@ public class SdxService {
         }
     }
 
-    public void updateSdxStatus(Long id, SdxClusterStatus sdxClusterStatus) {
-        updateSdxStatus(id, sdxClusterStatus, null);
-    }
-
-    public void updateSdxStatus(Long id, SdxClusterStatus sdxClusterStatus, String statusReason) {
-        LOGGER.info("Updating status of SDX cluster {} to {}", id, sdxClusterStatus.name());
-        Optional<SdxCluster> sdxCluster = sdxClusterRepository.findById(id);
-        sdxCluster.ifPresentOrElse(sdx -> {
-            sdx.setStatus(sdxClusterStatus);
-            sdx.setStatusReason(statusReason);
-            sdxClusterRepository.save(sdx);
-        }, () -> LOGGER.info("Can not update sdx {} to {} status", id, sdxClusterStatus));
-    }
-
     public SdxCluster createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request) {
         LOGGER.info("Creating SDX cluster with name {}", name);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
@@ -171,7 +162,6 @@ public class SdxService {
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         sdxCluster.setClusterName(name);
         sdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
         sdxCluster.setCreated(clock.getCurrentTimeMillis());
         sdxCluster.setCreateDatabase(sdxClusterRequest.getExternalDatabase() != null && sdxClusterRequest.getExternalDatabase().getCreate());
@@ -199,11 +189,12 @@ public class SdxService {
         MDCBuilder.buildMdcContext(sdxCluster);
 
         sdxCluster = sdxClusterRepository.save(sdxCluster);
+        sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.REQUESTED, "Datalake requested", sdxCluster);
 
         notificationService.send(ResourceEvent.SDX_CLUSTER_CREATED, sdxCluster);
 
         LOGGER.info("trigger SDX creation: {}", sdxCluster);
-        sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId(), sdxCluster.getCrn());
+        sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
 
         return sdxCluster;
     }
@@ -384,10 +375,10 @@ public class SdxService {
     private void deleteSdxCluster(SdxCluster sdxCluster) {
         checkIfSdxIsDeletable(sdxCluster);
         MDCBuilder.buildMdcContext(sdxCluster);
-        sdxCluster.setStatus(SdxClusterStatus.DELETE_REQUESTED);
         sdxClusterRepository.save(sdxCluster);
-        sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId(), sdxCluster.getCrn());
-        sdxReactorFlowManager.cancelRunningFlows(sdxCluster.getId(), sdxCluster.getCrn());
+        sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+        sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
+        sdxReactorFlowManager.cancelRunningFlows(sdxCluster.getId());
         LOGGER.info("SDX delete triggered: {}", sdxCluster.getClusterName());
     }
 

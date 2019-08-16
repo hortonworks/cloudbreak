@@ -5,12 +5,12 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class RdsDeletionWaitRequest extends SdxEvent {
 
-    public RdsDeletionWaitRequest(Long sdxId, String userId, String requestId, String sdxCrn) {
-        super(sdxId, userId, requestId, sdxCrn);
+    public RdsDeletionWaitRequest(Long sdxId, String userId, String requestId) {
+        super(sdxId, userId, requestId);
     }
 
     public static RdsDeletionWaitRequest from(SdxContext context) {
-        return new RdsDeletionWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId(), context.getSdxCrn());
+        return new RdsDeletionWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId());
     }
 
     @Override

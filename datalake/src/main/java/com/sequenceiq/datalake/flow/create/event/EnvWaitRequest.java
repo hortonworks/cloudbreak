@@ -5,12 +5,12 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class EnvWaitRequest extends SdxEvent {
 
-    public EnvWaitRequest(Long sdxId, String userId, String requestId, String sdxCrn) {
-        super(sdxId, userId, requestId, sdxCrn);
+    public EnvWaitRequest(Long sdxId, String userId, String requestId) {
+        super(sdxId, userId, requestId);
     }
 
     public static EnvWaitRequest from(SdxContext context) {
-        return new EnvWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId(), context.getSdxCrn());
+        return new EnvWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId());
     }
 
     @Override

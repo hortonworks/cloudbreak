@@ -4,8 +4,8 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxRepairSuccessEvent extends SdxEvent {
 
-    public SdxRepairSuccessEvent(Long sdxId, String userId, String requestId, String sdxCrn) {
-        super(sdxId, userId, requestId, sdxCrn);
+    public SdxRepairSuccessEvent(Long sdxId, String userId, String requestId) {
+        super(sdxId, userId, requestId);
     }
 
     @Override

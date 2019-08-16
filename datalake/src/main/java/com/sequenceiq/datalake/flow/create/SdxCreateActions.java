@@ -18,7 +18,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.datalake.entity.SdxClusterStatus;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitRequest;
@@ -30,7 +30,7 @@ import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
-import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -44,7 +44,7 @@ public class SdxCreateActions {
     private ProvisionerService provisionerService;
 
     @Inject
-    private SdxService sdxService;
+    private SdxStatusService sdxStatusService;
 
     @Bean(name = "SDX_CREATION_WAIT_ENV_STATE")
     public Action<?, ?> envWaitInProgress() {
@@ -183,13 +183,13 @@ public class SdxCreateActions {
             protected void doExecute(SdxContext context, SdxCreateFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 Exception exception = payload.getException();
-                SdxClusterStatus provisioningFailedStatus = SdxClusterStatus.PROVISIONING_FAILED;
+                DatalakeStatusEnum provisioningFailedStatus = DatalakeStatusEnum.PROVISIONING_FAILED;
                 LOGGER.info("Update SDX status to {} for resource: {}", provisioningFailedStatus.name(), payload.getResourceId(), exception);
                 String statusReason = "SDX creation failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                sdxService.updateSdxStatus(payload.getResourceId(), provisioningFailedStatus, statusReason);
+                sdxStatusService.setStatusForDatalake(provisioningFailedStatus, statusReason, payload.getResourceId());
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }
 

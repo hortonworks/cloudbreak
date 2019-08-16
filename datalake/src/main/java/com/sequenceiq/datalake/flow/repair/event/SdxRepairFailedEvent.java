@@ -6,13 +6,13 @@ public class SdxRepairFailedEvent extends SdxEvent {
 
     private Exception exception;
 
-    public SdxRepairFailedEvent(Long sdxId, String userId, String requestId, String sdxCrn, Exception exception) {
-        super(sdxId, userId, requestId, sdxCrn);
+    public SdxRepairFailedEvent(Long sdxId, String userId, String requestId, Exception exception) {
+        super(sdxId, userId, requestId);
         this.exception = exception;
     }
 
     public static SdxRepairFailedEvent from(SdxEvent event, Exception exception) {
-        return new SdxRepairFailedEvent(event.getResourceId(), event.getUserId(), event.getRequestId(), event.getSdxCrn(), exception);
+        return new SdxRepairFailedEvent(event.getResourceId(), event.getUserId(), event.getRequestId(), exception);
     }
 
     @Override

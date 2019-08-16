@@ -5,12 +5,12 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxRepairWaitRequest extends SdxEvent {
 
-    public SdxRepairWaitRequest(Long sdxId, String userId, String requestId, String sdxCrn) {
-        super(sdxId, userId, requestId, sdxCrn);
+    public SdxRepairWaitRequest(Long sdxId, String userId, String requestId) {
+        super(sdxId, userId, requestId);
     }
 
     public static SdxRepairWaitRequest from(SdxContext context) {
-        return new SdxRepairWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId(), context.getSdxCrn());
+        return new SdxRepairWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId());
     }
 
     @Override

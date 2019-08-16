@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,8 +27,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,6 +50,9 @@ public class SdxRepairServiceTest {
     @Mock
     private SdxNotificationService notificationService;
 
+    @Mock
+    private SdxStatusService sdxStatusService;
+
     @Captor
     private ArgumentCaptor<ClusterRepairV4Request> captor;
 
@@ -54,7 +60,7 @@ public class SdxRepairServiceTest {
     private SdxRepairService underTest;
 
     @Test
-    public void triggerCloudbreakRepair() throws JsonProcessingException {
+    public void triggerCloudbreakRepair() {
         SdxCluster cluster = new SdxCluster();
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName("dummyCluster");
@@ -67,6 +73,8 @@ public class SdxRepairServiceTest {
         underTest.startRepairInCb(cluster, sdxRepairRequest);
         verify(mockedStackV4Endpoint).repairCluster(eq(0L), eq("dummyCluster"), captor.capture());
         assertEquals("master", captor.getValue().getHostGroups().get(0));
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalake(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", cluster);
         verify(notificationService).send(eq(ResourceEvent.SDX_REPAIR_STARTED), any());
     }
 

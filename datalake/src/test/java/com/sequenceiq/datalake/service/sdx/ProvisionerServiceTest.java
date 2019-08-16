@@ -48,8 +48,9 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.entity.SdxClusterStatus;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
@@ -92,6 +93,9 @@ class ProvisionerServiceTest {
     private StackRequestManifester stackRequestManifester;
 
     @Mock
+    private SdxStatusService sdxStatusService;
+
+    @Mock
     private GatewayManifester gatewayManifester;
 
     @Mock
@@ -118,10 +122,9 @@ class ProvisionerServiceTest {
         when(cloudbreakClient.withCrn(anyString())).thenReturn(cbEndpointMock);
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
         provisionerService.startStackProvisioning(id, getEnvironmentResponse(), getDatabaseServerResponse());
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
-        verify(sdxClusterRepository, times(1)).save(captor.capture());
-        SdxCluster postedSdxCluster = captor.getValue();
-        Assertions.assertEquals(SdxClusterStatus.STACK_CREATION_IN_PROGRESS, postedSdxCluster.getStatus());
+        verify(sdxClusterRepository, times(1)).save(any(SdxCluster.class));
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
         verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED), any());
     }
 
@@ -140,7 +143,6 @@ class ProvisionerServiceTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(id);
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setAccountId("hortonworks");
@@ -207,7 +209,8 @@ class ProvisionerServiceTest {
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster savedSdxCluster = captor.getValue();
-        Assertions.assertEquals(SdxClusterStatus.RUNNING, savedSdxCluster.getStatus());
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalake(DatalakeStatusEnum.RUNNING, "Datalake is running", savedSdxCluster);
         verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED), any());
     }
 
@@ -343,7 +346,8 @@ class ProvisionerServiceTest {
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster postedSdxCluster = captor.getValue();
 
-        Assertions.assertEquals(SdxClusterStatus.STACK_DELETED, postedSdxCluster.getStatus());
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalake(DatalakeStatusEnum.STACK_DELETED, "Datalake deleted", postedSdxCluster);
         verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_DELETION_FINISHED), any());
     }
 
@@ -393,7 +397,6 @@ class ProvisionerServiceTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(id);
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setEnvName("envir");
         sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setAccountId("hortonworks");

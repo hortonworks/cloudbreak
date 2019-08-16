@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.entity.SdxClusterStatus;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.create.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionWaitRequest;
@@ -23,6 +23,7 @@ import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 
 @Component
 public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletionWaitRequest> {
@@ -33,6 +34,9 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
 
     @Inject
     private DatabaseService databaseService;
+
+    @Inject
+    private SdxStatusService sdxStatusService;
 
     @Inject
     private Clock clock;
@@ -47,7 +51,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new SdxDeletionFailedEvent(resourceId, null, null, null, e);
+        return new SdxDeletionFailedEvent(resourceId, null, null, e);
     }
 
     @Override
@@ -56,7 +60,6 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();
         String requestId = rdsWaitRequest.getRequestId();
-        String sdxCrn = rdsWaitRequest.getSdxCrn();
         MDCBuilder.addRequestIdToMdcContext(requestId);
         Selectable response;
         try {
@@ -69,25 +72,25 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
                 }
                 setDeletedStatus(sdxCluster);
             });
-            response = new RdsDeletionSuccessEvent(sdxId, userId, requestId, sdxCrn);
+            response = new RdsDeletionSuccessEvent(sdxId, userId, requestId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Database polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, sdxCrn, userBreakException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, sdxCrn, pollerStoppedException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, pollerStoppedException);
         } catch (PollerException exception) {
             LOGGER.info("Database polling failed for sdx: {}", sdxId, exception);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, sdxCrn, exception);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, exception);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in sdx database deletion wait phase", anotherException);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, sdxCrn, anotherException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, anotherException);
         }
         sendEvent(response, event);
     }
 
     private void setDeletedStatus(SdxCluster cluster) {
-        cluster.setStatus(SdxClusterStatus.DELETED);
+        sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.DELETED, "Datalake deleted", cluster);
         cluster.setDeleted(clock.getCurrentTimeMillis());
         sdxClusterRepository.save(cluster);
         notificationService.send(ResourceEvent.SDX_CLUSTER_DELETED, cluster);

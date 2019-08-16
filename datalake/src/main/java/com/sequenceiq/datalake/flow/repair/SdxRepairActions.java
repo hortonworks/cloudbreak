@@ -18,7 +18,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.datalake.entity.SdxClusterStatus;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairFailedEvent;
@@ -27,7 +27,7 @@ import com.sequenceiq.datalake.flow.repair.event.SdxRepairSuccessEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
-import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -38,7 +38,7 @@ public class SdxRepairActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxRepairActions.class);
 
     @Inject
-    private SdxService sdxService;
+    private SdxStatusService sdxStatusService;
 
     @Inject
     private SdxRepairService repairService;
@@ -108,7 +108,7 @@ public class SdxRepairActions {
             protected void doExecute(SdxContext context, SdxRepairSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 LOGGER.info("SDX repair finalized: {}", payload.getResourceId());
-                sdxService.updateSdxStatus(payload.getResourceId(), SdxClusterStatus.RUNNING);
+                sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.RUNNING, "Datalake is running", payload.getResourceId());
                 sendEvent(context, SDX_REPAIR_FINALIZED_EVENT.event(), payload);
             }
 
@@ -132,13 +132,13 @@ public class SdxRepairActions {
             protected void doExecute(SdxContext context, SdxRepairFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 Exception exception = payload.getException();
-                SdxClusterStatus repairFailedStatus = SdxClusterStatus.REPAIR_FAILED;
+                DatalakeStatusEnum repairFailedStatus = DatalakeStatusEnum.REPAIR_FAILED;
                 LOGGER.info("Update SDX status to {} for resource: {}", repairFailedStatus, payload.getResourceId(), exception);
                 String statusReason = "SDX repair failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                sdxService.updateSdxStatus(payload.getResourceId(), repairFailedStatus, statusReason);
+                sdxStatusService.setStatusForDatalake(repairFailedStatus, statusReason, payload.getResourceId());
                 sendEvent(context, SDX_REPAIR_FAILED_HANDLED_EVENT.event(), payload);
             }
 

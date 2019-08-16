@@ -27,7 +27,7 @@ public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteStat
             .event(SdxDeleteEvent.SDX_STACK_DELETION_IN_PROGRESS_EVENT).defaultFailureEvent()
             .from(SDX_STACK_DELETION_IN_PROGRESS_STATE)
             .to(SDX_DELETION_WAIT_RDS_STATE)
-            .event(SdxDeleteEvent.SDX_STACK_DELETION_SUCCESS_EVENT).failureEvent(SdxDeleteEvent.SDX_STACK_DELETION_FAILED_EVENT)
+            .event(SdxDeleteEvent.SDX_STACK_DELETION_SUCCESS_EVENT).defaultFailureEvent()
 
             .from(SDX_DELETION_WAIT_RDS_STATE)
             .to(SDX_DELETION_FINISHED_STATE)

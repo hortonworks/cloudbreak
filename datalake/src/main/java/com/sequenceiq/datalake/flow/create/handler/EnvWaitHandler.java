@@ -32,7 +32,7 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new SdxCreateFailedEvent(resourceId, null, null, null, e);
+        return new SdxCreateFailedEvent(resourceId, null, null, e);
     }
 
     @Override
@@ -41,25 +41,24 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
         Long sdxId = envWaitRequest.getResourceId();
         String userId = envWaitRequest.getUserId();
         String requestId = envWaitRequest.getRequestId();
-        String sdxCrn = envWaitRequest.getSdxCrn();
         MDCBuilder.addRequestIdToMdcContext(requestId);
         Selectable response;
         try {
             LOGGER.debug("start polling env for sdx: {}", sdxId);
             DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.waitAndGetEnvironment(sdxId, requestId);
-            response = new EnvWaitSuccessEvent(sdxId, userId, requestId, sdxCrn, detailedEnvironmentResponse);
+            response = new EnvWaitSuccessEvent(sdxId, userId, requestId, detailedEnvironmentResponse);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Env polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, sdxCrn, userBreakException);
+            response = new SdxCreateFailedEvent(sdxId, userId, requestId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Env poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, sdxCrn, pollerStoppedException);
+            response = new SdxCreateFailedEvent(sdxId, userId, requestId, pollerStoppedException);
         } catch (PollerException exception) {
             LOGGER.info("Env polling failed for sdx: {}", sdxId, exception);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, sdxCrn, exception);
+            response = new SdxCreateFailedEvent(sdxId, userId, requestId, exception);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in sdx creation wait phase", anotherException);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, sdxCrn, anotherException);
+            response = new SdxCreateFailedEvent(sdxId, userId, requestId, anotherException);
         }
         sendEvent(response, event);
     }

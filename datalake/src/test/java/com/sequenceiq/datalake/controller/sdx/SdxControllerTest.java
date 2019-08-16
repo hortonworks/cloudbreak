@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,13 +18,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.entity.SdxClusterStatus;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.notification.NotificationService;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -37,6 +41,9 @@ class SdxControllerTest {
 
     @Mock
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
+    @Mock
+    private SdxStatusService sdxStatusService;
 
     @Spy
     private SdxClusterConverter sdxClusterConverter;
@@ -56,7 +63,7 @@ class SdxControllerTest {
     }
 
     @Test
-    void createTest() {
+    void createTest() throws NoSuchFieldException {
         SdxCluster sdxCluster = getValidSdxCluster();
         when(sdxService.createSdx(anyString(), anyString(), any(SdxClusterRequest.class), nullable(StackV4Request.class))).thenReturn(sdxCluster);
 
@@ -66,24 +73,40 @@ class SdxControllerTest {
         Map<String, String> tags = new HashMap<>();
         tags.put("tag1", "value1");
         createSdxClusterRequest.setTags(tags);
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.REQUESTED);
+        sdxStatusEntity.setStatusReason("statusreason");
+        sdxStatusEntity.setCreated(1L);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+        FieldSetter.setField(sdxClusterConverter, SdxClusterConverter.class.getDeclaredField("sdxStatusService"), sdxStatusService);
         SdxClusterResponse sdxClusterResponse = sdxController.create("test-sdx-cluster", createSdxClusterRequest);
         verify(sdxService).createSdx(eq(USER_CRN), eq("test-sdx-cluster"), eq(createSdxClusterRequest), nullable(StackV4Request.class));
+        verify(sdxStatusService, times(1)).getActualStatusForSdx(sdxCluster);
         assertEquals("test-sdx-cluster", sdxClusterResponse.getName());
         assertEquals("test-env", sdxClusterResponse.getEnvironmentName());
         assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
+        assertEquals("statusreason", sdxClusterResponse.getStatusReason());
     }
 
     @Test
-    void getTest() {
+    void getTest() throws NoSuchFieldException {
         SdxCluster sdxCluster = getValidSdxCluster();
         when(sdxService.getSdxByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
+
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.REQUESTED);
+        sdxStatusEntity.setStatusReason("statusreason");
+        sdxStatusEntity.setCreated(1L);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+        FieldSetter.setField(sdxClusterConverter, SdxClusterConverter.class.getDeclaredField("sdxStatusService"), sdxStatusService);
 
         SdxClusterResponse sdxClusterResponse = sdxController.get("test-sdx-cluster");
         assertEquals("test-sdx-cluster", sdxClusterResponse.getName());
         assertEquals("test-env", sdxClusterResponse.getEnvironmentName());
         assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
+        assertEquals("statusreason", sdxClusterResponse.getStatusReason());
     }
 
     private SdxCluster getValidSdxCluster() {
@@ -92,7 +115,6 @@ class SdxControllerTest {
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");
-        sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         return sdxCluster;
     }
 
