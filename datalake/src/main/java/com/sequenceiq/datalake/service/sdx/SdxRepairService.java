@@ -56,13 +56,13 @@ public class SdxRepairService {
     public void triggerRepairByCrn(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(cluster);
-        sdxReactorFlowManager.triggerSdxRepairFlow(cluster.getId(), clusterRepairRequest);
+        sdxReactorFlowManager.triggerSdxRepairFlow(cluster.getId(), cluster.getCrn(), clusterRepairRequest);
     }
 
     public void triggerRepairByName(String userCrn, String clusterName, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
         MDCBuilder.buildMdcContext(cluster);
-        sdxReactorFlowManager.triggerSdxRepairFlow(cluster.getId(), clusterRepairRequest);
+        sdxReactorFlowManager.triggerSdxRepairFlow(cluster.getId(), cluster.getCrn(), clusterRepairRequest);
     }
 
     public void startSdxRepair(Long id, SdxRepairRequest repairRequest) {

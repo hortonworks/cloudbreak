@@ -49,22 +49,23 @@ public class StackDeletionHandler implements EventHandler<StackDeletionWaitReque
         Long sdxId = stackDeletionWaitRequest.getResourceId();
         String userId = stackDeletionWaitRequest.getUserId();
         String requestId = stackDeletionWaitRequest.getRequestId();
+        String sdxCrn = stackDeletionWaitRequest.getSdxCrn();
         MDCBuilder.addRequestIdToMdcContext(requestId);
         Selectable response;
         try {
             LOGGER.debug("Start polling stack deletion process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             provisionerService.waitCloudbreakClusterDeletion(sdxId, pollingConfig, requestId);
-            response = new StackDeletionSuccessEvent(sdxId, userId, requestId);
+            response = new StackDeletionSuccessEvent(sdxId, userId, requestId, sdxCrn);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Deletion polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, userBreakException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, sdxCrn, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Deletion poller stopped for stack: {}", sdxId);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, pollerStoppedException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, sdxCrn, pollerStoppedException);
         } catch (PollerException exception) {
             LOGGER.info("Deletion polling failed for stack: {}", sdxId);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, exception);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, sdxCrn, exception);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

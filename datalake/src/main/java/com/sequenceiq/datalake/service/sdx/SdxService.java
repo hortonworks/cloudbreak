@@ -197,7 +197,7 @@ public class SdxService {
         sdxCluster = sdxClusterRepository.save(sdxCluster);
 
         LOGGER.info("trigger SDX creation: {}", sdxCluster);
-        sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
+        sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId(), sdxCluster.getCrn());
 
         return sdxCluster;
     }
@@ -380,8 +380,8 @@ public class SdxService {
         MDCBuilder.buildMdcContext(sdxCluster);
         sdxCluster.setStatus(SdxClusterStatus.DELETE_REQUESTED);
         sdxClusterRepository.save(sdxCluster);
-        sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
-        sdxReactorFlowManager.cancelRunningFlows(sdxCluster.getId());
+        sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId(), sdxCluster.getCrn());
+        sdxReactorFlowManager.cancelRunningFlows(sdxCluster.getId(), sdxCluster.getCrn());
         LOGGER.info("SDX delete triggered: {}", sdxCluster.getClusterName());
     }
 

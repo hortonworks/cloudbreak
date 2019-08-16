@@ -62,7 +62,7 @@ public class SdxCreateActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
-                notificationService.send(ResourceEvent.SDX_WAITING_FOR_ENVIRONMENT, context.getUserId());
+                notificationService.send(ResourceEvent.SDX_WAITING_FOR_ENVIRONMENT, payload, context.getUserId());
                 sendEvent(context);
             }
 
@@ -117,7 +117,7 @@ public class SdxCreateActions {
                 notificationService.send(ResourceEvent.SDX_ENVIRONMENT_FINISHED, payload.getDetailedEnvironmentResponse(), context.getUserId());
                 provisionerService.startStackProvisioning(payload.getResourceId(),
                         payload.getDetailedEnvironmentResponse(), payload.getDatabaseServerResponse());
-                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, context.getUserId());
+                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, payload, context.getUserId());
 
                 sendEvent(context, SDX_STACK_CREATION_IN_PROGRESS_EVENT.event(), payload);
             }
@@ -168,7 +168,7 @@ public class SdxCreateActions {
             @Override
             protected void doExecute(SdxContext context, StackCreationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
-                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED, context.getUserId());
+                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED, payload, context.getUserId());
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -199,7 +199,7 @@ public class SdxCreateActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, context.getUserId());
+                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, payload, context.getUserId());
                 sdxService.updateSdxStatus(payload.getResourceId(), provisioningFailedStatus, statusReason);
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }

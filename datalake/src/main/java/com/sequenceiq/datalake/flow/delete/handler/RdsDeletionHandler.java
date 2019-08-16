@@ -42,7 +42,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new SdxDeletionFailedEvent(resourceId, null, null, e);
+        return new SdxDeletionFailedEvent(resourceId, null, null, null, e);
     }
 
     @Override
@@ -51,6 +51,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();
         String requestId = rdsWaitRequest.getRequestId();
+        String sdxCrn = rdsWaitRequest.getSdxCrn();
         MDCBuilder.addRequestIdToMdcContext(requestId);
         Selectable response;
         try {
@@ -63,19 +64,19 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
                 }
                 setDeletedStatus(sdxCluster);
             });
-            response = new RdsDeletionSuccessEvent(sdxId, userId, requestId);
+            response = new RdsDeletionSuccessEvent(sdxId, userId, requestId, sdxCrn);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Database polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, userBreakException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, sdxCrn, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, pollerStoppedException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, sdxCrn, pollerStoppedException);
         } catch (PollerException exception) {
             LOGGER.info("Database polling failed for sdx: {}", sdxId, exception);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, exception);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, sdxCrn, exception);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in sdx database deletion wait phase", anotherException);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, anotherException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, sdxCrn, anotherException);
         }
         sendEvent(response, event);
     }
