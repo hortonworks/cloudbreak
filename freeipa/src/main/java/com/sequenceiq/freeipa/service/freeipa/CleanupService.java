@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupResponse;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Cert;
@@ -25,6 +26,8 @@ import com.sequenceiq.freeipa.client.model.Role;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
+import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Controller;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -41,6 +44,9 @@ public class CleanupService {
     @Inject
     private FreeIpaService freeIpaService;
 
+    @Inject
+    private KerberosMgmtV1Controller kerberosMgmtV1Controller;
+
     public CleanupResponse cleanup(String accountId, CleanupRequest request) throws FreeIpaClientException {
         Optional<Stack> optionalStack = stackService.findByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
         CleanupResponse cleanupResponse = new CleanupResponse();
@@ -52,6 +58,7 @@ public class CleanupService {
                 revokeCerts(client, request, cleanupResponse);
                 removeHosts(client, request, cleanupResponse);
                 removeDnsEntries(client, request, cleanupResponse, freeIpa.getDomain());
+                removeVaultEntries(client, request, cleanupResponse, stack.getEnvironmentCrn());
             }
             if (!CollectionUtils.isEmpty(request.getUsers())) {
                 removeUsers(client, request, cleanupResponse);
@@ -168,4 +175,24 @@ public class CleanupService {
             }
         });
     }
+
+    private void removeVaultEntries(FreeIpaClient client, CleanupRequest request, CleanupResponse response, String environmentCrn)
+            throws FreeIpaClientException {
+        for (String host : request.getHosts()) {
+            if (!response.getHostCleanupFailed().containsKey(host)) {
+                try {
+                    HostRequest hostRequst = new HostRequest();
+                    hostRequst.setEnvironmentCrn(environmentCrn);
+                    hostRequst.setServerHostName(host);
+                    kerberosMgmtV1Controller.deleteHost(hostRequst);
+                    response.getHostCleanupSuccess().add(host);
+                } catch (DeleteException | FreeIpaClientException e) {
+                    LOGGER.info("Vault secret cleanup failed for host: {}", host, e);
+                    response.getHostCleanupFailed().put(host, e.getMessage());
+                    response.getHostCleanupSuccess().remove(host);
+                }
+            }
+        }
+    }
+
 }

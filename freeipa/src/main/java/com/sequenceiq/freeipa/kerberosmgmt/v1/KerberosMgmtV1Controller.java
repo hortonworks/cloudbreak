@@ -35,12 +35,12 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         return kerberosMgmtV1Service.getExistingServiceKeytab(request, accountId);
     }
 
-    public void deleteServicePrincipal(@Valid ServicePrincipalRequest request) throws FreeIpaClientException {
+    public void deleteServicePrincipal(@Valid ServicePrincipalRequest request) throws FreeIpaClientException, DeleteException {
         String accountId = crnService.getCurrentAccountId();
         kerberosMgmtV1Service.deleteServicePrincipal(request, accountId);
     }
 
-    public void deleteHost(@Valid HostRequest request) throws FreeIpaClientException {
+    public void deleteHost(@Valid HostRequest request) throws FreeIpaClientException, DeleteException {
         String accountId = crnService.getCurrentAccountId();
         kerberosMgmtV1Service.deleteHost(request, accountId);
     }
