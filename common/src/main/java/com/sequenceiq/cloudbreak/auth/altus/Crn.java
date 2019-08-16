@@ -470,13 +470,12 @@ public class Crn {
         if (!matcher.matches()) {
             return null;
         }
-        String partition = matcher.group(1);
-        Partition.safeFromString(partition);
         String region = matcher.group(3);
         if (!Region.US_WEST_1.name.equals(region)) {
             throw new CrnParseException(String.format("%s is not a supported region", region));
         }
         return new Crn.Builder()
+                .setPartition(Partition.safeFromString(matcher.group(1)))
                 .setService(Service.safeFromString(matcher.group(2)))
                 .setAccountId(matcher.group(4))
                 .setResourceType(ResourceType.fromString(matcher.group(5)))
