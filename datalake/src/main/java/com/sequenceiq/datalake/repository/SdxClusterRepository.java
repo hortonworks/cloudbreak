@@ -12,7 +12,6 @@ import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.entity.SdxClusterStatus;
 
 @Repository
 @AuthorizationResourceType(resource = AuthorizationResource.DATALAKE)
@@ -38,6 +37,6 @@ public interface SdxClusterRepository extends BaseCrudRepository<SdxCluster, Lon
     List<SdxCluster> findByAccountIdAndEnvNameAndDeletedIsNull(String accountId, String envName);
 
     @CheckPermission(action = ResourceAction.READ)
-    List<SdxCluster> findByIdInAndStatusIn(Set<Long> resourceIds, Set<SdxClusterStatus> statuses);
+    List<SdxCluster> findByIdIn(Set<Long> resourceIds);
 
 }

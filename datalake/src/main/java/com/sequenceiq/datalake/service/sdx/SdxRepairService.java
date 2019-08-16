@@ -25,15 +25,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.entity.SdxClusterStatus;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
@@ -57,16 +60,19 @@ public class SdxRepairService {
     @Inject
     private SdxNotificationService notificationService;
 
+    @Inject
+    private SdxStatusService sdxStatusService;
+
     public void triggerRepairByCrn(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(cluster);
-        sdxReactorFlowManager.triggerSdxRepairFlow(cluster.getId(), cluster.getCrn(), clusterRepairRequest);
+        sdxReactorFlowManager.triggerSdxRepairFlow(cluster.getId(), clusterRepairRequest);
     }
 
     public void triggerRepairByName(String userCrn, String clusterName, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getSdxByNameInAccount(userCrn, clusterName);
         MDCBuilder.buildMdcContext(cluster);
-        sdxReactorFlowManager.triggerSdxRepairFlow(cluster.getId(), cluster.getCrn(), clusterRepairRequest);
+        sdxReactorFlowManager.triggerSdxRepairFlow(cluster.getId(), clusterRepairRequest);
     }
 
     public void startSdxRepair(Long id, SdxRepairRequest repairRequest) {
@@ -83,9 +89,10 @@ public class SdxRepairService {
             cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
                     .stackV4Endpoint()
                     .repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
-            sdxCluster.setStatus(SdxClusterStatus.REPAIR_IN_PROGRESS);
             sdxClusterRepository.save(sdxCluster);
             notificationService.send(ResourceEvent.SDX_REPAIR_STARTED, sdxCluster);
+            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.REPAIR_IN_PROGRESS,
+                    "Datalake repair in progress", sdxCluster);
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {
@@ -107,7 +114,7 @@ public class SdxRepairService {
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> checkClusterStatusDuringRepair(sdxCluster));
-            sdxCluster.setStatus(SdxClusterStatus.RUNNING);
+            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.RUNNING, "Datalake is running", sdxCluster);
             sdxClusterRepository.save(sdxCluster);
             notificationService.send(ResourceEvent.SDX_REPAIR_FINISHED, sdxCluster);
         }, () -> {
@@ -118,6 +125,10 @@ public class SdxRepairService {
     protected AttemptResult<StackV4Response> checkClusterStatusDuringRepair(SdxCluster sdxCluster) throws JsonProcessingException {
         LOGGER.info("Repair polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
         try {
+            if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
+                LOGGER.info("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
+                return AttemptResults.breakFor("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
+            }
             StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
                     .stackV4Endpoint()
                     .get(0L, sdxCluster.getClusterName(), Collections.emptySet());

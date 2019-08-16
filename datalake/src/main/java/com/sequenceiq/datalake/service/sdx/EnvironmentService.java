@@ -13,12 +13,15 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.entity.SdxClusterStatus;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 
@@ -33,6 +36,9 @@ public class EnvironmentService {
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
+
+    @Inject
+    private SdxStatusService sdxStatusService;
 
     @Inject
     private EnvironmentServiceCrnClient environmentServiceCrnClient;
@@ -51,10 +57,16 @@ public class EnvironmentService {
         if (sdxClusterOptional.isPresent()) {
             SdxCluster sdxCluster = sdxClusterOptional.get();
             notificationService.send(ResourceEvent.SDX_WAITING_FOR_ENVIRONMENT, sdxCluster);
+            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.WAIT_FOR_ENVIRONMENT,
+                    "Waiting for environment creation", sdxCluster);
             DetailedEnvironmentResponse environmentResponse = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> {
+                        if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
+                            LOGGER.info("Environment wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
+                            return AttemptResults.breakFor("Environment wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
+                        }
                         MDCBuilder.addRequestIdToMdcContext(requestId);
                         LOGGER.info("Creation polling environment for environment status: '{}' in '{}' env",
                                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
@@ -71,7 +83,7 @@ public class EnvironmentService {
                             }
                         }
                     });
-            sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
+            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.ENVIRONMENT_CREATED, "Environment created", sdxCluster);
             sdxClusterRepository.save(sdxCluster);
             notificationService.send(ResourceEvent.SDX_ENVIRONMENT_FINISHED, sdxCluster);
             return environmentResponse;

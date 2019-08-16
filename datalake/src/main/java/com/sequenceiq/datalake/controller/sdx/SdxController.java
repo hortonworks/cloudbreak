@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.notification.NotificationController;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.RedeploySdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -26,7 +25,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Controller
-public class SdxController extends NotificationController implements SdxEndpoint {
+public class SdxController implements SdxEndpoint {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;

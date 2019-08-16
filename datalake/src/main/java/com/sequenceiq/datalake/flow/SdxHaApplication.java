@@ -1,5 +1,11 @@
 package com.sequenceiq.datalake.flow;
 
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETE_REQUESTED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.EXTERNAL_DATABASE_DELETION_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STACK_DELETED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,9 +16,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.cloud.store.InMemoryResourceStateStore;
 import com.sequenceiq.cloudbreak.service.ha.HaApplication;
-import com.sequenceiq.datalake.entity.SdxClusterStatus;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.FlowRegister;
 
@@ -20,10 +26,12 @@ import com.sequenceiq.flow.core.FlowRegister;
 @Component
 public class SdxHaApplication implements HaApplication {
 
-    public static final String RESOURCE_TYPE = "SDX";
-
-    private static final Set<SdxClusterStatus> DELETE_STATUSES =
-            new HashSet<>(Arrays.asList(SdxClusterStatus.DELETE_REQUESTED, SdxClusterStatus.DELETED, SdxClusterStatus.DELETE_FAILED));
+    private static final Set<DatalakeStatusEnum> DELETE_STATUSES =
+            new HashSet<>(Arrays.asList(DELETE_REQUESTED,
+                    DELETED,
+                    STACK_DELETED,
+                    STACK_DELETION_IN_PROGRESS,
+                    EXTERNAL_DATABASE_DELETION_IN_PROGRESS));
 
     @Inject
     private SdxService sdxService;
@@ -41,19 +49,19 @@ public class SdxHaApplication implements HaApplication {
 
     @Override
     public Set<Long> getAllDeletingResources() {
-        Set<Long> sdxIds = InMemoryResourceStateStore.getAllResourceId(RESOURCE_TYPE);
+        Set<Long> sdxIds = DatalakeInMemoryStateStore.getAll();
         return sdxService.findByResourceIdsAndStatuses(sdxIds, DELETE_STATUSES);
     }
 
     @Override
     public void cleanupInMemoryStore(Long resourceId) {
-        InMemoryResourceStateStore.deleteResource(RESOURCE_TYPE, resourceId);
+        DatalakeInMemoryStateStore.delete(resourceId);
     }
 
     @Override
     public void cancelRunningFlow(Long resourceId) {
-        InMemoryResourceStateStore.putResource(RESOURCE_TYPE, resourceId, PollGroup.CANCELLED);
-        reactorFlowManager.cancelRunningFlows(resourceId, null);
+        DatalakeInMemoryStateStore.put(resourceId, PollGroup.CANCELLED);
+        reactorFlowManager.cancelRunningFlows(resourceId);
     }
 
     @Override

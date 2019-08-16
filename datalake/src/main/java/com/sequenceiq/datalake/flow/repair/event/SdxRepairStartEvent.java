@@ -7,8 +7,8 @@ public class SdxRepairStartEvent extends SdxEvent {
 
     private SdxRepairRequest repairRequest;
 
-    public SdxRepairStartEvent(String selector, Long sdxId, String userId, String requestId, String sdxCrn, SdxRepairRequest repairRequest) {
-        super(selector, sdxId, userId, requestId, sdxCrn);
+    public SdxRepairStartEvent(String selector, Long sdxId, String userId, String requestId, SdxRepairRequest repairRequest) {
+        super(selector, sdxId, userId, requestId);
         this.repairRequest = repairRequest;
     }
 

@@ -10,9 +10,9 @@ public class RdsWaitSuccessEvent extends SdxEvent {
 
     private DatabaseServerStatusV4Response databaseServerResponse;
 
-    public RdsWaitSuccessEvent(Long sdxId, String userId, String requestId, String sdxCrn, DetailedEnvironmentResponse detailedEnvironmentResponse,
+    public RdsWaitSuccessEvent(Long sdxId, String userId, String requestId, DetailedEnvironmentResponse detailedEnvironmentResponse,
             DatabaseServerStatusV4Response databaseServerResponse) {
-        super(sdxId, userId, requestId, sdxCrn);
+        super(sdxId, userId, requestId);
         this.detailedEnvironmentResponse = detailedEnvironmentResponse;
         this.databaseServerResponse = databaseServerResponse;
     }

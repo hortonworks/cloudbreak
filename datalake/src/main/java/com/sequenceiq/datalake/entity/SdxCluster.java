@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.entity;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -60,12 +62,6 @@ public class SdxCluster implements AccountIdAwareResource {
     private Json tags;
 
     private Long stackId;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private SdxClusterStatus status;
-
-    private String statusReason;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -128,14 +124,6 @@ public class SdxCluster implements AccountIdAwareResource {
 
     public void setStackId(Long stackId) {
         this.stackId = stackId;
-    }
-
-    public SdxClusterStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(SdxClusterStatus status) {
-        this.status = status;
     }
 
     public String getInitiatorUserCrn() {
@@ -202,14 +190,6 @@ public class SdxCluster implements AccountIdAwareResource {
         this.stackRequestToCloudbreak = new Secret(stackRequestToCloudbreak);
     }
 
-    public String getStatusReason() {
-        return statusReason;
-    }
-
-    public void setStatusReason(String statusReason) {
-        this.statusReason = statusReason;
-    }
-
     public String getStackCrn() {
         return stackCrn;
     }
@@ -257,4 +237,38 @@ public class SdxCluster implements AccountIdAwareResource {
     public void setCloudStorageFileSystemType(FileSystemType cloudStorageFileSystemType) {
         this.cloudStorageFileSystemType = cloudStorageFileSystemType;
     }
+
+    //CHECKSTYLE:OFF
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SdxCluster that = (SdxCluster) o;
+        return createDatabase == that.createDatabase &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(accountId, that.accountId) &&
+                Objects.equals(crn, that.crn) &&
+                Objects.equals(clusterName, that.clusterName) &&
+                Objects.equals(initiatorUserCrn, that.initiatorUserCrn) &&
+                Objects.equals(envName, that.envName) &&
+                Objects.equals(envCrn, that.envCrn) &&
+                Objects.equals(stackCrn, that.stackCrn) &&
+                clusterShape == that.clusterShape &&
+                Objects.equals(tags, that.tags) &&
+                Objects.equals(stackId, that.stackId) &&
+                Objects.equals(stackRequest, that.stackRequest) &&
+                Objects.equals(stackRequestToCloudbreak, that.stackRequestToCloudbreak) &&
+                Objects.equals(deleted, that.deleted) &&
+                Objects.equals(created, that.created) &&
+                Objects.equals(databaseCrn, that.databaseCrn) &&
+                Objects.equals(cloudStorageBaseLocation, that.cloudStorageBaseLocation) &&
+                cloudStorageFileSystemType == that.cloudStorageFileSystemType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, accountId, crn, clusterName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
+                stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType);
+    }
+    //CHECKSTYLE:ON
 }

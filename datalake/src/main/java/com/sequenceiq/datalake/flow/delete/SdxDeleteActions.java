@@ -18,7 +18,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.datalake.entity.SdxClusterStatus;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
@@ -28,7 +28,7 @@ import com.sequenceiq.datalake.flow.delete.event.StackDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
-import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -39,7 +39,7 @@ public class SdxDeleteActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxDeleteActions.class);
 
     @Inject
-    private SdxService sdxService;
+    private SdxStatusService sdxStatusService;
 
     @Inject
     private ProvisionerService provisionerService;
@@ -160,13 +160,13 @@ public class SdxDeleteActions {
             protected void doExecute(SdxContext context, SdxDeletionFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
                 Exception exception = payload.getException();
-                SdxClusterStatus deleteFailedStatus = SdxClusterStatus.DELETE_FAILED;
+                DatalakeStatusEnum deleteFailedStatus = DatalakeStatusEnum.DELETE_FAILED;
                 LOGGER.info("Update SDX status to {} for resource: {}", deleteFailedStatus, payload.getResourceId(), exception);
                 String statusReason = "SDX deletion failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                sdxService.updateSdxStatus(payload.getResourceId(), deleteFailedStatus, statusReason);
+                sdxStatusService.setStatusForDatalake(deleteFailedStatus, statusReason, payload.getResourceId());
                 sendEvent(context, SDX_DELETE_FAILED_HANDLED_EVENT.event(), payload);
             }
 

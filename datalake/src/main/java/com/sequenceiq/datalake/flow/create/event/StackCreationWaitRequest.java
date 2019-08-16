@@ -5,12 +5,12 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class StackCreationWaitRequest extends SdxEvent {
 
-    public StackCreationWaitRequest(Long sdxId, String userId, String requestId, String sdxCrn) {
-        super(sdxId, userId, requestId, sdxCrn);
+    public StackCreationWaitRequest(Long sdxId, String userId, String requestId) {
+        super(sdxId, userId, requestId);
     }
 
     public static StackCreationWaitRequest from(SdxContext context) {
-        return new StackCreationWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId(), context.getSdxCrn());
+        return new StackCreationWaitRequest(context.getSdxId(), context.getUserId(), context.getRequestId());
     }
 
     @Override

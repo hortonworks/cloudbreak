@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.repair;
 
+import com.sequenceiq.datalake.flow.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
@@ -13,7 +14,7 @@ public enum SdxRepairState implements FlowState {
     SDX_REPAIR_FINISHED_STATE,
     FINAL_STATE;
 
-    private Class<? extends DefaultRestartAction> restartAction = DefaultRestartAction.class;
+    private Class<? extends DefaultRestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
     SdxRepairState() {
     }
