@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -9,7 +10,6 @@ import javax.ws.rs.NotFoundException;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
@@ -27,11 +27,12 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
 public class DatabaseService {
@@ -56,14 +57,8 @@ public class DatabaseService {
     @Inject
     private SdxStatusService sdxStatusService;
 
-    @Value("${datalake.db.instancetype:db.m5.large}")
-    private String dbInstanceType;
-
-    @Value("${datalake.db.volumesize:100}")
-    private long dbVolumeSize;
-
-    @Value("${datalake.db.vendor:postgres}")
-    private String dbVendor;
+    @Inject
+    private Map<SdxClusterShape, DatabaseConfig> dbConfigs;
 
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env, String requestId) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
@@ -74,7 +69,7 @@ public class DatabaseService {
             try {
                 dbResourceCrn = redbeamsClient
                         .withCrn(threadBasedUserCrnProvider.getUserCrn())
-                        .databaseServerV4Endpoint().create(getDatabaseRequest(env))
+                        .databaseServerV4Endpoint().create(getDatabaseRequest(sdxCluster.getClusterShape(), env))
                         .getResourceCrn();
                 sdxCluster.setDatabaseCrn(dbResourceCrn);
                 sdxClusterRepository.save(sdxCluster);
@@ -108,18 +103,22 @@ public class DatabaseService {
         }
     }
 
-    private AllocateDatabaseServerV4Request getDatabaseRequest(DetailedEnvironmentResponse env) {
+    private AllocateDatabaseServerV4Request getDatabaseRequest(SdxClusterShape clusterShape, DetailedEnvironmentResponse env) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(env.getCrn());
-        req.setDatabaseServer(getDatabaseServerRequest());
+        req.setDatabaseServer(getDatabaseServerRequest(clusterShape));
         return req;
     }
 
-    private DatabaseServerV4StackRequest getDatabaseServerRequest() {
+    private DatabaseServerV4StackRequest getDatabaseServerRequest(SdxClusterShape clusterShape) {
+        DatabaseConfig databaseConfig = dbConfigs.get(clusterShape);
+        if (databaseConfig == null) {
+            throw new BadRequestException("Not found database config for " + clusterShape);
+        }
         DatabaseServerV4StackRequest req = new DatabaseServerV4StackRequest();
-        req.setInstanceType(dbInstanceType);
-        req.setDatabaseVendor(dbVendor);
-        req.setStorageSize(dbVolumeSize);
+        req.setInstanceType(databaseConfig.getInstanceType());
+        req.setDatabaseVendor(databaseConfig.getVendor());
+        req.setStorageSize(databaseConfig.getVolumeSize());
         req.setAws(getAwsDatabaseServerParameters());
         return req;
     }
