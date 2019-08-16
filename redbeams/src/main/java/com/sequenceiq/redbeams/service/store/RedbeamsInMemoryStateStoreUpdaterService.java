@@ -17,7 +17,7 @@ public class RedbeamsInMemoryStateStoreUpdaterService {
     private RedbeamsInMemoryStateStoreService redbeamsInMemoryStateStoreService;
 
     public void update(Long id, Status newStatus) {
-        LOGGER.info("Update redbems flow state in the memory state by new status: {}", newStatus);
+        LOGGER.info("Update redbeams in-memory flow state with new status: {}", newStatus);
         if (newStatus.isSuccessfullyDeleted()) {
             redbeamsInMemoryStateStoreService.delete(id);
         } else if (newStatus.isDeleteInProgressOrFailed()) {

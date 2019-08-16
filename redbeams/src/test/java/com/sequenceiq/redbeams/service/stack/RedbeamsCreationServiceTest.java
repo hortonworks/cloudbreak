@@ -42,6 +42,8 @@ class RedbeamsCreationServiceTest {
 
     private static final String DB_STACK_NAME = "dbStackName";
 
+    private static final String DB_STACK_DESCRIPTION = "dbStackDescription";
+
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
     private static final String CLOUD_PLATFORM = "cloudPlatform";
@@ -90,6 +92,7 @@ class RedbeamsCreationServiceTest {
         // this wouldn't really be set before launchDatabaseServer is called
         dbStack.setId(DB_STACK_ID);
         dbStack.setName(DB_STACK_NAME);
+        dbStack.setDescription(DB_STACK_DESCRIPTION);
         dbStack.setEnvironmentId(ENVIRONMENT_CRN);
         dbStack.setResourceCrn(null);
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
@@ -127,6 +130,7 @@ class RedbeamsCreationServiceTest {
         assertEquals(ResourceStatus.SERVICE_MANAGED, databaseServerConfig.getResourceStatus());
         assertEquals(ACCOUNT_ID, databaseServerConfig.getAccountId());
         assertEquals(DB_STACK_NAME, databaseServerConfig.getName());
+        assertEquals(DB_STACK_DESCRIPTION, databaseServerConfig.getDescription());
         assertEquals(ENVIRONMENT_CRN, databaseServerConfig.getEnvironmentId());
         assertEquals(CONNECTION_DRIVER, databaseServerConfig.getConnectionDriver());
         assertEquals(ROOT_USER_NAME, databaseServerConfig.getConnectionUserName());

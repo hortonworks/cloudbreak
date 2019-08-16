@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 
@@ -37,6 +38,10 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter
             DBStack dbStack = source.getDbStack().get();
             response.setStatus(dbStack.getStatus());
             response.setStatusReason(dbStack.getStatusReason());
+        } else if (source.getHost() != null && source.getPort() != null) {
+            response.setStatus(Status.AVAILABLE);
+        } else {
+            response.setStatus(Status.UNKNOWN);
         }
 
         return response;
