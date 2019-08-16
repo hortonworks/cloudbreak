@@ -18,11 +18,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -150,7 +147,7 @@ public class ServiceEndpointCollectorTest {
         Cluster cluster = createClusterWithComponents(new ExposedService[]{ATLAS},
                 new ExposedService[]{HIVE_SERVER, WEBHDFS}, GatewayType.INDIVIDUAL);
 
-        mockBlueprintTextProcessor(Sets.newHashSet("NAMENODE", "SPARK_JOBHISTORYSERVER", "HIVE_SERVER"), "HDP", "2.6");
+        mockBlueprintTextProcessor();
         mockComponentLocator(Lists.newArrayList("10.0.0.1"));
 
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
@@ -194,17 +191,17 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetKnoxServices() {
-        mockBlueprintTextProcessor(Sets.newHashSet("HIVE", "PIG"), "HDF", "3.1");
+        mockBlueprintTextProcessor();
 
         Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
         assertEquals(2L, exposedServiceResponses.size());
 
-        mockBlueprintTextProcessor(Sets.newHashSet("HIVE", "PIG"), "HDF", "3.2");
+        mockBlueprintTextProcessor();
 
         exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
         assertEquals(2L, exposedServiceResponses.size());
 
-        mockBlueprintTextProcessor(Sets.newHashSet("HIVE", "PIG"), "HDP", "2.6");
+        mockBlueprintTextProcessor();
 
         exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
         assertEquals(2L, exposedServiceResponses.size());
@@ -212,25 +209,18 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetKnoxServicesWithLivyServer() {
-        mockBlueprintTextProcessor(Sets.newHashSet("LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER"), "HDP", "2.6");
+        mockBlueprintTextProcessor();
 
         Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
         assertEquals(2L, exposedServiceResponses.size());
 
-        mockBlueprintTextProcessor(Sets.newHashSet("LIVY2_SERVER", "SPARK2_JOBHISTORYSERVER"), "HDP", "3.0");
+        mockBlueprintTextProcessor();
 
         exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
         assertEquals(2L, exposedServiceResponses.size());
     }
 
-    private Stream<ExposedServiceV4Response> createExposedServiceFilteredStream(Collection<ExposedServiceV4Response> exposedServiceV4Respons) {
-        return exposedServiceV4Respons
-                .stream()
-                .filter(exposedServiceResponse -> StringUtils.equals(exposedServiceResponse.getKnoxService(), "LIVYSERVER")
-                        || StringUtils.equals(exposedServiceResponse.getKnoxService(), "LOGSEARCH_SERVER"));
-    }
-
-    private void mockBlueprintTextProcessor(Set<String> components, String stackName, String stackVersion) {
+    private void mockBlueprintTextProcessor() {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{\"Blueprints\":{}}");
         when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
@@ -239,9 +229,6 @@ public class ServiceEndpointCollectorTest {
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(ambariBlueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        when(blueprintTextProcessor.getAllComponents()).thenReturn(components);
-        when(blueprintTextProcessor.getStackName()).thenReturn(stackName);
-        when(blueprintTextProcessor.getStackVersion()).thenReturn(stackVersion);
     }
 
     private void mockComponentLocator(List<String> privateIps) {

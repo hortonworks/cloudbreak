@@ -74,7 +74,8 @@ public class ServiceEndpointCollector {
                 if (gateway != null) {
                     ExposedService exposedService = ExposedService.CLOUDERA_MANAGER_UI;
                     Optional<GatewayTopology> gatewayTopology = getGatewayTopologyForService(gateway, exposedService);
-                    Optional<String> managerUrl = gatewayTopology.map(t -> getExposedServiceUrl(managerIp, gateway, t.getTopologyName(), exposedService, false));
+                    Optional<String> managerUrl = gatewayTopology
+                            .map(t -> getExposedServiceUrl(managerIp, gateway, t.getTopologyName(), exposedService, false));
                     // when knox gateway is enabled, but cm is not exposed, use the default url
                     return managerUrl.orElse(String.format("https://%s/", managerIp));
                 }
@@ -190,24 +191,19 @@ public class ServiceEndpointCollector {
                     getHiveJdbcUrl(gateway, managerIp).ifPresent(urls::add);
                     break;
                 case NAMENODE:
-                    List<String> hdfsUrls = privateIps.get(ExposedService.NAMENODE.getServiceName())
-                            .stream()
-                            .map(namenodeIp -> getHdfsUIUrl(gateway, managerIp, namenodeIp, autoTlsEnabled))
-                            .flatMap(Optional::stream)
-                            .collect(Collectors.toList());
-                    urls.addAll(hdfsUrls);
+                    addNameNodeUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
                     break;
                 case HBASE_UI:
-                    List<String> hbaseUrls = privateIps.get(ExposedService.HBASE_UI.getServiceName())
-                            .stream()
-                            .map(hbaseIp -> getHBaseServiceUrl(gateway, managerIp, hbaseIp))
-                            .flatMap(Optional::stream)
-                            .collect(Collectors.toList());
-                    urls.addAll(hbaseUrls);
+                    addHbaseUrl(managerIp, gateway, privateIps, urls);
                     break;
                 case RESOURCEMANAGER_WEB:
-                    String knoxUrl = api ? "/resourcemanager/" : exposedService.getKnoxUrl();
-                    urls.add(getExposedServiceUrl(managerIp, gateway, topologyName, knoxUrl, api));
+                    addResourceManagerUrl(exposedService, managerIp, gateway, topologyName, api, urls);
+                    break;
+                case NAMENODE_HDFS:
+                    urls.add(buildKnoxUrlWithProtocol("hdfs", managerIp, exposedService, autoTlsEnabled));
+                    break;
+                case JOBTRACKER:
+                    urls.add(buildKnoxUrlWithProtocol("rpc", managerIp, exposedService, autoTlsEnabled));
                     break;
                 default:
                     urls.add(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService, api));
@@ -219,6 +215,30 @@ public class ServiceEndpointCollector {
 
     private boolean hasKnoxUrl(ExposedService exposedService) {
         return isNotEmpty(exposedService.getKnoxUrl());
+    }
+
+    private void addNameNodeUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {
+        List<String> hdfsUrls = privateIps.get(ExposedService.NAMENODE.getServiceName())
+                .stream()
+                .map(namenodeIp -> getHdfsUIUrl(gateway, managerIp, namenodeIp, autoTlsEnabled))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
+        urls.addAll(hdfsUrls);
+    }
+
+    private void addHbaseUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, List<String> urls) {
+        List<String> hbaseUrls = privateIps.get(ExposedService.HBASE_UI.getServiceName())
+                .stream()
+                .map(hbaseIp -> getHBaseServiceUrl(gateway, managerIp, hbaseIp))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
+        urls.addAll(hbaseUrls);
+    }
+
+    private void addResourceManagerUrl(ExposedService exposedService, String managerIp, Gateway gateway, String topologyName, boolean api, List<String> urls) {
+        String knoxUrl = api ? "/resourcemanager/" : exposedService.getKnoxUrl();
+        String topology = api ? topologyName + API_TOPOLOGY_POSTFIX : topologyName;
+        urls.add(buildKnoxUrl(managerIp, gateway, knoxUrl, topology));
     }
 
     private boolean isExposed(ExposedService exposedService, Collection<String> exposedServices) {
@@ -246,12 +266,23 @@ public class ServiceEndpointCollector {
                 .findFirst();
     }
 
-    private String getExposedServiceUrl(String managerIp, Gateway gateway, String topologyName, ExposedService exposedService, boolean api) {
-        return getExposedServiceUrl(managerIp, gateway, topologyName, exposedService.getKnoxUrl(), api);
+    private String getExposedServiceUrl(String managerIp, Gateway gateway, String topologyName,
+            ExposedService exposedService, boolean api) {
+        String topology = api ? topologyName + API_TOPOLOGY_POSTFIX : topologyName;
+        return buildKnoxUrl(managerIp, gateway, exposedService.getKnoxUrl(), topology);
     }
 
-    private String getExposedServiceUrl(String managerIp, Gateway gateway, String topologyName, String knoxUrl, boolean api) {
-        String topology = api ? topologyName + API_TOPOLOGY_POSTFIX : topologyName;
+    private String buildKnoxUrlWithProtocol(String protocol, String managerIp, ExposedService exposedService, boolean autoTlsEnabled) {
+        Integer port;
+        if (autoTlsEnabled) {
+            port = exposedService.getTlsPort();
+        } else {
+            port = exposedService.getPort();
+        }
+        return String.format("%s://%s:%s", protocol, managerIp, port);
+    }
+
+    private String buildKnoxUrl(String managerIp, Gateway gateway, String knoxUrl, String topology) {
         return GatewayType.CENTRAL == gateway.getGatewayType()
                 ? String.format("/%s/%s%s", gateway.getPath(), topology, knoxUrl)
                 : String.format("https://%s:%s/%s/%s%s", managerIp, knoxPort, gateway.getPath(), topology, knoxUrl);
