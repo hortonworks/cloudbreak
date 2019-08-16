@@ -201,28 +201,32 @@ public class StackToCloudStackConverter {
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
         Cluster cluster = stack.getCluster();
-        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(cluster.getBlueprint().getBlueprintText());
-        Map<String, Set<String>> componentsByHostGroup = cmTemplateProcessor.getComponentsByHostGroup();
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            if (instanceGroup.getTemplate() != null) {
-                Template template = instanceGroup.getTemplate();
-                InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
-                Optional<CloudFileSystemView> cloudFileSystemView
-                        = cloudFileSystemViewBuilder.build(cluster.getFileSystem(), componentsByHostGroup, instanceGroup);
-                groups.add(
-                        new Group(instanceGroup.getGroupName(),
-                                instanceGroup.getInstanceGroupType(),
-                                buildCloudInstances(stackAuthentication, deleteRequests, instanceGroup, template),
-                                buildSecurity(instanceGroup),
-                                buildCloudInstanceSkeleton(stackAuthentication, instanceGroup, template),
-                                getFields(instanceGroup),
-                                instanceAuthentication,
-                                instanceAuthentication.getLoginUserName(),
-                                instanceAuthentication.getPublicKey(),
-                                getRootVolumeSize(instanceGroup),
-                                cloudFileSystemView)
-                );
+        if (cluster != null) {
+            CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(cluster.getBlueprint().getBlueprintText());
+            Map<String, Set<String>> componentsByHostGroup = cmTemplateProcessor.getComponentsByHostGroup();
+            for (InstanceGroup instanceGroup : instanceGroups) {
+                if (instanceGroup.getTemplate() != null) {
+                    Template template = instanceGroup.getTemplate();
+                    InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
+                    Optional<CloudFileSystemView> cloudFileSystemView
+                            = cloudFileSystemViewBuilder.build(cluster.getFileSystem(), componentsByHostGroup, instanceGroup);
+                    groups.add(
+                            new Group(instanceGroup.getGroupName(),
+                                    instanceGroup.getInstanceGroupType(),
+                                    buildCloudInstances(stackAuthentication, deleteRequests, instanceGroup, template),
+                                    buildSecurity(instanceGroup),
+                                    buildCloudInstanceSkeleton(stackAuthentication, instanceGroup, template),
+                                    getFields(instanceGroup),
+                                    instanceAuthentication,
+                                    instanceAuthentication.getLoginUserName(),
+                                    instanceAuthentication.getPublicKey(),
+                                    getRootVolumeSize(instanceGroup),
+                                    cloudFileSystemView)
+                    );
+                }
             }
+        } else {
+            LOGGER.warn("Cluster is null for stack id:[{}] name:[{}]", stack.getId(), stack.getName());
         }
         return groups;
     }
