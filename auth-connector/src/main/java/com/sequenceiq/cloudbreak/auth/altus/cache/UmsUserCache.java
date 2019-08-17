@@ -1,9 +1,11 @@
-package com.sequenceiq.cloudbreak.cache.common;
+package com.sequenceiq.cloudbreak.auth.altus.cache;
 
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.cache.common.AbstractCacheDefinition;
 
 @Service
 public class UmsUserCache extends AbstractCacheDefinition {
