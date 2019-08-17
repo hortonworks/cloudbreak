@@ -1,6 +1,8 @@
-package com.sequenceiq.cloudbreak.cache.common;
+package com.sequenceiq.cloudbreak.service.secret.cache;
 
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.cache.common.AbstractCacheDefinition;
 
 @Service
 public class VaultCache extends AbstractCacheDefinition {
