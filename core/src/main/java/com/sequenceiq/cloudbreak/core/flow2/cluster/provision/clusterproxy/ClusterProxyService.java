@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -59,13 +60,19 @@ public class ClusterProxyService {
     }
 
     private ConfigRegistrationResponse registerCluster(Stack stack, String clusterIdentifier) throws JsonProcessingException {
-        ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack, clusterIdentifier);
-        LOGGER.debug("Cluster Proxy config request: {}", proxyConfigRequest);
-        ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(clusterProxyUrl + registerConfigPath,
-                requestEntity(proxyConfigRequest), ConfigRegistrationResponse.class);
+        try {
+            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack, clusterIdentifier);
+            LOGGER.debug("Cluster Proxy config request: {}", proxyConfigRequest);
+            ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(clusterProxyUrl + registerConfigPath,
+                    requestEntity(proxyConfigRequest), ConfigRegistrationResponse.class);
 
-        LOGGER.debug("Cluster Proxy config response: {}", response);
-        return response.getBody();
+            LOGGER.debug("Cluster Proxy config response: {}", response);
+            return response.getBody();
+        } catch (RestClientException e) {
+            LOGGER.error("Error registering proxy configuration for cluster with stack crn {} and id {} with Cluster Proxy. URL: {}",
+                    stack.getResourceCrn(), clusterId(stack.getCluster()), clusterProxyUrl + registerConfigPath, e);
+            throw e;
+        }
     }
 
     public void registerGatewayConfiguration(Long stackId) throws JsonProcessingException {
@@ -79,16 +86,21 @@ public class ClusterProxyService {
         // for backwards compatibility. Will remove this after all consumers start using Stack CRN instead of Cluster Id.
         registerGateway(stack, clusterId(stack.getCluster()));
         registerGateway(stack, stack.getResourceCrn());
-
     }
 
     private void registerGateway(Stack stack, String clusterIdentifier) throws JsonProcessingException {
-        ConfigUpdateRequest request = createProxyConfigUpdateRequest(stack, clusterIdentifier);
-        LOGGER.debug("Cluster Proxy config update request: {}", request);
-        ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(clusterProxyUrl + updateConfigPath,
-                requestEntity(request), ConfigRegistrationResponse.class);
+        try {
+            ConfigUpdateRequest request = createProxyConfigUpdateRequest(stack, clusterIdentifier);
+            LOGGER.debug("Cluster Proxy config update request: {}", request);
+            ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(clusterProxyUrl + updateConfigPath,
+                    requestEntity(request), ConfigRegistrationResponse.class);
 
-        LOGGER.debug("Cluster Proxy config update response: {}", response);
+            LOGGER.debug("Cluster Proxy config update response: {}", response);
+        } catch (RestClientException e) {
+            LOGGER.error("Error registering gateway configuration for cluster with stack crn {} and id {} with Cluster Proxy. URL: {}",
+                    stack.getResourceCrn(), clusterId(stack.getCluster()), clusterProxyUrl + updateConfigPath, e);
+            throw e;
+        }
     }
 
     public void deregisterCluster(Stack stack) throws JsonProcessingException {
@@ -99,10 +111,16 @@ public class ClusterProxyService {
     }
 
     private void deregister(Stack stack, String clusterIdentifier) throws JsonProcessingException {
-        LOGGER.debug("Removing cluster proxy configuration for cluster with crn: {} and cluster identifier: {}", stack.getResourceCrn(), clusterIdentifier);
-        restTemplate.postForEntity(clusterProxyUrl + removeConfigPath,
-                requestEntity(new ConfigDeleteRequest(clusterIdentifier)), ConfigRegistrationResponse.class);
-        LOGGER.debug("Removed cluster proxy configuration for cluster with crn: {} and cluster identifier: {}", stack.getResourceCrn(), clusterIdentifier);
+        try {
+            LOGGER.debug("Removing cluster proxy configuration for cluster with crn: {} and cluster identifier: {}", stack.getResourceCrn(), clusterIdentifier);
+            restTemplate.postForEntity(clusterProxyUrl + removeConfigPath,
+                    requestEntity(new ConfigDeleteRequest(clusterIdentifier)), ConfigRegistrationResponse.class);
+            LOGGER.debug("Removed cluster proxy configuration for cluster with crn: {} and cluster identifier: {}", stack.getResourceCrn(), clusterIdentifier);
+        } catch (RestClientException e) {
+            LOGGER.error("Error de-registering proxy configuration for cluster with stack crn {} and id {} from Cluster Proxy. URL: {}",
+                    stack.getResourceCrn(), clusterId(stack.getCluster()), clusterProxyUrl + removeConfigPath, e);
+            throw e;
+        }
     }
 
     private HttpEntity<String> requestEntity(ConfigRegistrationRequest proxyConfigRequest) throws JsonProcessingException {
