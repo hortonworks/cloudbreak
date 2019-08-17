@@ -162,6 +162,7 @@ cb:
                 CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-710;
                 CDP 1.1 - Data Engineering HA: Apache Spark, Apache Livy, Apache Zeppelin=cdp-data-engineering-ha-710;
                 CDP 1.1 - Data Mart: Apache Impala, Hue=cdp-data-mart-710;
+                CDP 1.1 - Operations Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-op-data-mart-710;
                 CDP 1.1 - Operational Database: Apache HBase=cdp-opdb-710;
                 CDP 1.1 - Operational Database: Apache HBase (Custom)=cdp-opdb-custom-710;
                 CDP 1.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-710;
