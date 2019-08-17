@@ -139,7 +139,7 @@ public class DatabaseService {
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn, PollingConfig pollingConfig,
             SdxDatabaseOperation sdxDatabaseOperation, String requestId, boolean cancellable) {
-        return Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+        DatabaseServerStatusV4Response response = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> {
@@ -154,7 +154,6 @@ public class DatabaseService {
                         DatabaseServerStatusV4Response rdsStatus = getDatabaseStatus(databaseCrn);
                         LOGGER.info("Response from redbeams: {}", JsonUtil.writeValueAsString(rdsStatus));
                         if (sdxDatabaseOperation.getExitCriteria().apply(rdsStatus.getStatus())) {
-                            notificationService.send(sdxDatabaseOperation.getFinishedEvent(), sdxCluster);
                             return AttemptResults.finishWith(rdsStatus);
                         } else {
                             if (sdxDatabaseOperation.getFailureCriteria().apply(rdsStatus.getStatus())) {
@@ -172,6 +171,8 @@ public class DatabaseService {
                         return AttemptResults.finishWith(null);
                     }
                 });
+        notificationService.send(sdxDatabaseOperation.getFinishedEvent(), sdxCluster);
+        return response;
     }
 
     private DatabaseServerStatusV4Response getDatabaseStatus(String databaseCrn) {
