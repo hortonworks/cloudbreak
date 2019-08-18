@@ -62,7 +62,7 @@
               },
               {
                 "name": "resourcemanager_capacity_scheduler_configuration",
-                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value>hive</value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value>hive</value></property></configuration>"
+                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value></value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value></value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property></configuration>"
               }
             ]
           },
