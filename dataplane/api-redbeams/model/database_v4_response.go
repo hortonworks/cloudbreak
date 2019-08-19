@@ -51,7 +51,8 @@ type DatabaseV4Response struct {
 	Description *string `json:"description,omitempty"`
 
 	// CRN of the environment of the database
-	EnvironmentCrn string `json:"environmentCrn,omitempty"`
+	// Required: true
+	EnvironmentCrn *string `json:"environmentCrn"`
 
 	// Name of the database
 	// Required: true
@@ -97,6 +98,10 @@ func (m *DatabaseV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDescription(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -197,6 +202,15 @@ func (m *DatabaseV4Response) validateDescription(formats strfmt.Registry) error 
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DatabaseV4Response) validateEnvironmentCrn(formats strfmt.Registry) error {
+
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
 	}
 

@@ -275,7 +275,7 @@ func NewDetailsFromDbResponse(r *model.DatabaseV4Response) *dbDetails {
 	details := &dbDetails{
 		Name:           *r.Name,
 		CRN:            r.Crn,
-		EnvironmentCrn: r.EnvironmentCrn,
+		EnvironmentCrn: *r.EnvironmentCrn,
 		ConnectionURL:  *r.ConnectionURL,
 		CreationDate:   r.CreationDate,
 	}
