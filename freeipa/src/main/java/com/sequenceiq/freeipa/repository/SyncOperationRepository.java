@@ -20,10 +20,12 @@ import com.sequenceiq.freeipa.entity.SyncOperation;
 @AuthorizationResourceType(resource = AuthorizationResource.ENVIRONMENT)
 public interface SyncOperationRepository extends BaseJpaRepository<SyncOperation, Long> {
 
+    // TODO restrict this permission. Set Password and User sync should have more
+    // restrictive permissions than READ but more permissive than WRITE
+    // TODO override other BaseJpaRepository methods for consistent behavior
     @CheckPermission(action = ResourceAction.READ)
     @Override
-    @Query("SELECT s FROM SyncOperation s WHERE s.id = :id")
-    Optional<SyncOperation> findById(@Param("id") Long id);
+    SyncOperation save(SyncOperation entity);
 
     @CheckPermission(action = ResourceAction.READ)
     @Query("SELECT s FROM SyncOperation s WHERE s.operationId = :operationId")
