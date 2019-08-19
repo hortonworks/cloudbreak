@@ -27,6 +27,7 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
@@ -176,7 +177,14 @@ public class DatabaseService {
     }
 
     private DatabaseServerStatusV4Response getDatabaseStatus(String databaseCrn) {
-        return redbeamsClient.withCrn(threadBasedUserCrnProvider.getUserCrn())
-                .databaseServerV4Endpoint().getStatusOfManagedDatabaseServerByCrn(databaseCrn);
+        DatabaseServerV4Response response = redbeamsClient.withCrn(threadBasedUserCrnProvider.getUserCrn())
+                .databaseServerV4Endpoint().getByCrn(databaseCrn);
+        DatabaseServerStatusV4Response statusResponse = new DatabaseServerStatusV4Response();
+        statusResponse.setEnvironmentCrn(response.getEnvironmentCrn());
+        statusResponse.setName(response.getName());
+        statusResponse.setResourceCrn(response.getCrn());
+        statusResponse.setStatus(response.getStatus());
+        statusResponse.setStatusReason(response.getStatusReason());
+        return statusResponse;
     }
 }
