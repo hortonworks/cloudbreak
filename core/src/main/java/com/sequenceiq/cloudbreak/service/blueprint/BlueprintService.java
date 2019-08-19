@@ -1,9 +1,6 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
@@ -30,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.dto.BlueprintAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
@@ -40,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -63,9 +60,6 @@ import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintService.class);
-
-    private static final Set<Status> DELETED_CLUSTER_STATUSES
-            = Set.of(PRE_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS, DELETE_FAILED, DELETE_COMPLETED);
 
     private static final String SHARED_SERVICES_READY = "shared_services_ready";
 
@@ -292,7 +286,10 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     private Set<Cluster> getNotDeletedClustersWithBlueprint(Blueprint blueprint) {
         Set<Cluster> clustersWithThisBlueprint = clusterService.findByBlueprint(blueprint);
         Set<Cluster> deletedClustersWithThisBp = clustersWithThisBlueprint.stream()
-                .filter(cluster -> DELETED_CLUSTER_STATUSES.contains(cluster.getStatus()))
+                .filter(cluster -> {
+                    Stack stack = cluster.getStack();
+                    return DELETE_COMPLETED.equals(stack.getStatus());
+                })
                 .collect(Collectors.toSet());
         deletedClustersWithThisBp.forEach(cluster -> cluster.setBlueprint(null));
         clusterService.saveAll(deletedClustersWithThisBp);

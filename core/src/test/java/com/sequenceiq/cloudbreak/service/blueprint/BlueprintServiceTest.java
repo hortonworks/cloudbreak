@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
 import static org.hamcrest.Matchers.is;
@@ -41,6 +40,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
@@ -128,7 +129,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void  testDeleteByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
+    public void testDeleteByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
         exceptionRule.expect(IllegalArgumentException.class);
         exceptionRule.expectMessage(NULL_DTO_EXCEPTION_MESSAGE);
 
@@ -177,7 +178,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void  testGetByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
+    public void testGetByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
         exceptionRule.expect(IllegalArgumentException.class);
         exceptionRule.expectMessage(NULL_DTO_EXCEPTION_MESSAGE);
 
@@ -194,8 +195,8 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testDeletionWithNonTerminatedCluster() {
-        Cluster cluster = getCluster("c1", 1L, blueprint, AVAILABLE);
+    public void testDeletionWithNonTerminatedClusterAndStack() {
+        Cluster cluster = getCluster("c1", 1L, blueprint, AVAILABLE, AVAILABLE);
         exceptionRule.expect(BadRequestException.class);
         exceptionRule.expectMessage("c1");
         when(clusterService.findByBlueprint(any())).thenReturn(Set.of(cluster));
@@ -204,21 +205,24 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testDeletionWithTerminatedClusters() {
-        Set<Cluster> clusters = getClusterWithStatus(PRE_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS, DELETE_COMPLETED, DELETE_FAILED);
+    public void testDeletionWithTerminatedClustersNonTerminatedStacks() {
+        Set<Cluster> clusters = new HashSet<>();
+        clusters.add(getCluster("c1", 1L, blueprint, PRE_DELETE_IN_PROGRESS, AVAILABLE));
+        clusters.add(getCluster("c2", 1L, blueprint, DELETE_COMPLETED, DELETE_IN_PROGRESS));
+        clusters.add(getCluster("c3", 1L, blueprint, DELETE_COMPLETED, DELETE_COMPLETED));
 
         when(clusterService.findByBlueprint(any())).thenReturn(clusters);
+        exceptionRule.expect(BadRequestException.class);
+        exceptionRule.expectMessage("c1");
 
-        Blueprint deleted = underTest.delete(blueprint);
-
-        assertNotNull(deleted);
-        verify(clusterService, times(1)).saveAll(anyCollection());
+        underTest.delete(blueprint);
     }
 
     @Test
     public void testDeletionWithTerminatedAndNonTerminatedClusters() {
-        Set<Cluster> clusters = getClusterWithStatus(AVAILABLE, DELETE_IN_PROGRESS);
-
+        Set<Cluster> clusters = new HashSet<>();
+        clusters.add(getCluster("c1", 1L, blueprint, PRE_DELETE_IN_PROGRESS, AVAILABLE));
+        clusters.add(getCluster("c2", 1L, blueprint, DELETE_COMPLETED, DELETE_COMPLETED));
         when(clusterService.findByBlueprint(any())).thenReturn(clusters);
 
         try {
@@ -291,26 +295,22 @@ public class BlueprintServiceTest {
         assertTrue(blueprint.getResourceCrn().matches("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":clusterdefinition:.*"));
     }
 
-    private Set<Cluster> getClusterWithStatus(Status... statuses) {
-        Set<Cluster> clusters = new HashSet<>();
-        long id = 0L;
-        for (Status status : statuses) {
-            clusters.add(getCluster(++id, status));
-        }
-        return clusters;
-    }
-
-    private Cluster getCluster(Long id, Status status) {
-        return getCluster("c" + id, id, blueprint, status);
-    }
-
-    private Cluster getCluster(String name, Long id, Blueprint blueprint, Status status) {
+    private Cluster getCluster(String name, Long id, Blueprint blueprint, Status clusterStatus, Status stackStatus) {
         Cluster cluster1 = new Cluster();
         cluster1.setName(name);
         cluster1.setId(id);
         cluster1.setBlueprint(blueprint);
-        cluster1.setStatus(status);
+        cluster1.setStatus(clusterStatus);
+        patchWithStackStatus(cluster1, stackStatus);
         return cluster1;
+    }
+
+    private void patchWithStackStatus(Cluster cluster1, Status status) {
+        Stack stack = new Stack();
+        StackStatus ss = new StackStatus();
+        ss.setStatus(status);
+        stack.setStackStatus(ss);
+        cluster1.setStack(stack);
     }
 
     private Blueprint getBlueprint(String name, ResourceStatus status) {
