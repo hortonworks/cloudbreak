@@ -22,7 +22,7 @@ public interface SdxStatusRepository extends CrudRepository<SdxStatusEntity, Lon
     SdxStatusEntity findFirstByDatalakeIsOrderByIdDesc(SdxCluster sdxCluster);
 
     @CheckPermission(action = ResourceAction.READ)
-    List<SdxStatusEntity> findDistinctFirstByStatusInAndDatalakeIdOrderByIdDesc(Collection<DatalakeStatusEnum> datalakeStatusEnums,
+    List<SdxStatusEntity> findDistinctFirstByStatusInAndDatalakeIdInOrderByIdDesc(Collection<DatalakeStatusEnum> datalakeStatusEnums,
             Collection<Long> datalakeId);
 
 }
