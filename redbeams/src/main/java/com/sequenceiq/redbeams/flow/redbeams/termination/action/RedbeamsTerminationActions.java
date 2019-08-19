@@ -43,11 +43,11 @@ public class RedbeamsTerminationActions {
 
     @Bean(name = "DEREGISTER_DATABASE_SERVER_STATE")
     public Action<?, ?> deregisterDatabaseServer() {
-        return new AbstractRedbeamsTerminationAction<>(RedbeamsEvent.class) {
+        return new AbstractRedbeamsTerminationAction<>(TerminateDatabaseServerSuccess.class) {
 
             @Override
-            protected void prepareExecution(RedbeamsEvent payload, Map<Object, Object> variables) {
-                dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.PRE_DELETE_IN_PROGRESS);
+            protected void prepareExecution(TerminateDatabaseServerSuccess payload, Map<Object, Object> variables) {
+                dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.DEREGISTERING);
             }
 
             @Override
@@ -60,10 +60,10 @@ public class RedbeamsTerminationActions {
 
     @Bean(name = "TERMINATE_DATABASE_SERVER_STATE")
     public Action<?, ?> terminateDatabaseServer() {
-        return new AbstractRedbeamsTerminationAction<>(DeregisterDatabaseServerSuccess.class) {
+        return new AbstractRedbeamsTerminationAction<>(RedbeamsEvent.class) {
 
             @Override
-            protected void prepareExecution(DeregisterDatabaseServerSuccess payload, Map<Object, Object> variables) {
+            protected void prepareExecution(RedbeamsEvent payload, Map<Object, Object> variables) {
                 dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.DELETE_IN_PROGRESS);
             }
 
@@ -77,10 +77,10 @@ public class RedbeamsTerminationActions {
 
     @Bean(name = "REDBEAMS_TERMINATION_FINISHED_STATE")
     public Action<?, ?> terminationFinished() {
-        return new AbstractRedbeamsTerminationAction<>(TerminateDatabaseServerSuccess.class) {
+        return new AbstractRedbeamsTerminationAction<>(DeregisterDatabaseServerSuccess.class) {
 
             @Override
-            protected void prepareExecution(TerminateDatabaseServerSuccess payload, Map<Object, Object> variables) {
+            protected void prepareExecution(DeregisterDatabaseServerSuccess payload, Map<Object, Object> variables) {
                 dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.DELETE_COMPLETED);
             }
 
@@ -105,7 +105,7 @@ public class RedbeamsTerminationActions {
             protected void prepareExecution(RedbeamsFailureEvent payload, Map<Object, Object> variables) {
 
                 Exception failureException = payload.getException();
-                LOGGER.info("Error during database stack creation flow:", failureException);
+                LOGGER.info("Error during database stack termination flow:", failureException);
 
                 if (failureException instanceof CancellationException || ExceptionUtils.getRootCause(failureException) instanceof CancellationException) {
                     LOGGER.debug("The flow has been cancelled");
