@@ -53,25 +53,6 @@ func init() {
 						},
 					},
 					{
-						Name:        "get-status",
-						Usage:       "get the status of a database server (stack)",
-						Description: "To specify a database server, either provide its CRN, or both its environment CRN and name.",
-						Before: func(c *cli.Context) error {
-							err := cf.CheckConfigAndCommandFlagsWithoutWorkspace(c)
-							if err != nil {
-								return err
-							}
-							return cf.CheckResourceAddressingFlags(c)
-						},
-						Flags:  fl.NewFlagBuilder().AddResourceAddressingFlags().AddAuthenticationFlags().AddOutputFlag().Build(),
-						Action: redbeams.GetDatabaseServerStatus,
-						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddResourceAddressingFlags().AddAuthenticationFlags().AddOutputFlag().Build() {
-								fl.PrintFlagCompletion(f)
-							}
-						},
-					},
-					{
 						Name:   "create",
 						Usage:  "create a managed database server",
 						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,

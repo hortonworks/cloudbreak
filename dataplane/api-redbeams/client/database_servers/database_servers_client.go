@@ -242,68 +242,6 @@ func (a *Client) GetDatabaseServerByName(params *GetDatabaseServerByNameParams, 
 }
 
 /*
-GetDatabaseServerStatusByCrn gets the status of an allocated database server by c r n
-
-get the status of an allocated database server by crn
-*/
-func (a *Client) GetDatabaseServerStatusByCrn(params *GetDatabaseServerStatusByCrnParams, authInfo runtime.ClientAuthInfoWriter) (*GetDatabaseServerStatusByCrnOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetDatabaseServerStatusByCrnParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getDatabaseServerStatusByCrn",
-		Method:             "GET",
-		PathPattern:        "/v4/databaseservers/managed/status/{crn}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetDatabaseServerStatusByCrnReader{formats: a.formats},
-		AuthInfo:           authInfo,
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetDatabaseServerStatusByCrnOK), nil
-
-}
-
-/*
-GetDatabaseServerStatusByName gets the status of an allocated database server by name
-
-get the status of an allocated database server by name
-*/
-func (a *Client) GetDatabaseServerStatusByName(params *GetDatabaseServerStatusByNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetDatabaseServerStatusByNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetDatabaseServerStatusByNameParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getDatabaseServerStatusByName",
-		Method:             "GET",
-		PathPattern:        "/v4/databaseservers/managed/status/name/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetDatabaseServerStatusByNameReader{formats: a.formats},
-		AuthInfo:           authInfo,
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetDatabaseServerStatusByNameOK), nil
-
-}
-
-/*
 ListDatabaseServers lists database servers
 
 Lists all database servers that are known, either because they were registered or because this service created them.

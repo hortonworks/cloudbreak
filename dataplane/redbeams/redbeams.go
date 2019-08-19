@@ -140,35 +140,6 @@ func GetDatabaseServer(c *cli.Context) {
 	output.Write(serverListHeader, row)
 }
 
-func GetDatabaseServerStatus(c *cli.Context) {
-	defer commonutils.TimeTrack(time.Now(), "Get the status of a database server")
-	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
-
-	var status *model.DatabaseServerStatusV4Response
-	crn := c.String(fl.FlCrn.Name)
-	if len(crn) != 0 {
-		log.Infof("[GetDBServerStatus] Getting status for database server with CRN: %s", crn)
-		resp, err := redbeamsDbServerClient.GetDatabaseServerStatusByCrn(database_servers.NewGetDatabaseServerStatusByCrnParams().WithCrn(crn), nil)
-		if err != nil {
-			commonutils.LogErrorAndExit(err)
-		}
-		status = resp.Payload
-	} else {
-		envCrn := c.String(fl.FlEnvironmentCrn.Name)
-		name := c.String(fl.FlName.Name)
-		log.Infof("[GetDBServerStatus] Getting status for database server with name: %s", name)
-		resp, err := redbeamsDbServerClient.GetDatabaseServerStatusByName(database_servers.NewGetDatabaseServerStatusByNameParams().WithEnvironmentCrn(envCrn).WithName(name), nil)
-		if err != nil {
-			commonutils.LogErrorAndExit(err)
-		}
-		status = resp.Payload
-	}
-
-	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	row := NewDetailsFromStatusResponse(status)
-	output.Write(statusListHeader, row)
-}
-
 func CreateManagedDatabaseServer(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "Create a managed database server")
 	fileLocation := c.String(fl.FlDatabaseServerCreationFile.Name)
