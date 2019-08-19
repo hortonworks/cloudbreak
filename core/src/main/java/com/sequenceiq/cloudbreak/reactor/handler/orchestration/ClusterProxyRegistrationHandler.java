@@ -4,9 +4,9 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
@@ -28,8 +28,8 @@ import reactor.bus.EventBus;
 public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProxyRegistrationRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyRegistrationHandler.class);
 
-    @Value("${clusterProxy.enabled:false}")
-    private boolean clusterProxyIntegrationEnabled;
+    @Inject
+    private ClusterProxyConfiguration clusterProxyConfiguration;
 
     @Inject
     private EventBus eventBus;
@@ -58,7 +58,7 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
     private Selectable registerCluster(ClusterProxyRegistrationRequest request) {
         Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
         try {
-            if (!clusterProxyIntegrationEnabled) {
+            if (!clusterProxyConfiguration.isClusterProxyIntegrationEnabled()) {
                 return new ClusterProxyRegistrationSuccess(request.getResourceId());
             }
             ConfigRegistrationResponse registerResponse = clusterProxyService.registerCluster(stack);

@@ -132,6 +132,11 @@ public class StackProvisionService {
         }
     }
 
+    public void registerClusterProxy(StackContext context) {
+        stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.REGISTERING_WITH_CLUSTER_PROXY,
+                "Registering stack with cluster proxy.");
+    }
+
     public void stackCreationFinished(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STACK_PROVISIONED, "Stack provisioned.");
     }

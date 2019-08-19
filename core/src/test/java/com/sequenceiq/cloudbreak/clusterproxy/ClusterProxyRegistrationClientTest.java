@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.clusterproxy;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.spy;
 import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -43,6 +44,8 @@ public class ClusterProxyRegistrationClientTest {
 
     private static final String REMOVE_CONFIG_PATH = "/rpc/removeConfig";
 
+    private static final List<String> CERTIFICATES = asList("certificate1", "certificate2");
+
     private MockRestServiceServer mockServer;
 
     private ClusterProxyRegistrationClient service;
@@ -52,16 +55,20 @@ public class ClusterProxyRegistrationClientTest {
         RestTemplate restTemplate = new RestTemplate();
         mockServer = MockRestServiceServer.createServer(restTemplate);
         service = new ClusterProxyRegistrationClient(restTemplate);
-        ReflectionTestUtils.setField(service, "clusterProxyUrl", CLUSTER_PROXY_URL);
-        ReflectionTestUtils.setField(service, "registerConfigPath", REGISTER_CONFIG_PATH);
-        ReflectionTestUtils.setField(service, "updateConfigPath", UPDATE_CONFIG_PATH);
-        ReflectionTestUtils.setField(service, "removeConfigPath", REMOVE_CONFIG_PATH);
+
+        ClusterProxyConfiguration proxyConfig = spy(ClusterProxyConfiguration.class);
+        ReflectionTestUtils.setField(proxyConfig, "clusterProxyUrl", CLUSTER_PROXY_URL);
+        ReflectionTestUtils.setField(proxyConfig, "registerConfigPath", REGISTER_CONFIG_PATH);
+        ReflectionTestUtils.setField(proxyConfig, "updateConfigPath", UPDATE_CONFIG_PATH);
+        ReflectionTestUtils.setField(proxyConfig, "removeConfigPath", REMOVE_CONFIG_PATH);
+
+        ReflectionTestUtils.setField(service, "clusterProxyConfiguration", proxyConfig);
     }
 
     @Test
     public void shouldRegisterProxyConfigurationWithClusterProxy() throws URISyntaxException, JsonProcessingException {
         ClusterServiceConfig clusterServiceConfig = clusterServiceConfig();
-        ConfigRegistrationRequest request = configRegistrationRequest(STACK_CRN, CLUSTER_ID, clusterServiceConfig);
+        ConfigRegistrationRequest request = configRegistrationRequest(STACK_CRN, CLUSTER_ID, clusterServiceConfig, CERTIFICATES);
 
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setX509Unwrapped("X509PublicKey");
@@ -102,11 +109,12 @@ public class ClusterProxyRegistrationClientTest {
         ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
         return new ClusterServiceConfig("cloudera-manager",
-                List.of("https://10.10.10.10/clouderamanager"), asList(cloudbreakUser, dpUser));
+                List.of("https://10.10.10.10/clouderamanager"), asList(cloudbreakUser, dpUser), null, null);
     }
 
-    private ConfigRegistrationRequest configRegistrationRequest(String stackCrn, String clusterId, ClusterServiceConfig serviceConfig) {
-        return new ConfigRegistrationRequest(stackCrn, List.of(clusterId), List.of(serviceConfig));
+    private ConfigRegistrationRequest configRegistrationRequest(String stackCrn, String clusterId,
+                                                                ClusterServiceConfig serviceConfig, List<String> certificates) {
+        return new ConfigRegistrationRequest(stackCrn, List.of(clusterId), List.of(serviceConfig), certificates);
     }
 
     private ConfigUpdateRequest configUpdateRequest(String stackCrn, String knoxUri) {

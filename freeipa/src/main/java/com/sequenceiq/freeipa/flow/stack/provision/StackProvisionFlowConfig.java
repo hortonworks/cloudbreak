@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.provision;
 
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.COLLECT_METADATA_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.COLLECT_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.CREATE_CREDENTIAL_FAILED_EVENT;
@@ -23,6 +24,7 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.ST
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.TLS_SETUP_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.VALIDATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.VALIDATION_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.CLUSTERPROXY_REGISTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.COLLECTMETADATA_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.CREATE_CREDENTIAL_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.FINAL_STATE;
@@ -62,7 +64,9 @@ public class StackProvisionFlowConfig extends AbstractFlowConfiguration<StackPro
             .from(PROVISIONING_FINISHED_STATE).to(COLLECTMETADATA_STATE).event(COLLECT_METADATA_FINISHED_EVENT).failureEvent(COLLECT_METADATA_FAILED_EVENT)
             .from(COLLECTMETADATA_STATE).to(GET_TLS_INFO_STATE).event(GET_TLS_INFO_FINISHED_EVENT).failureEvent(GET_TLS_INFO_FAILED_EVENT)
             .from(GET_TLS_INFO_STATE).to(TLS_SETUP_STATE).event(SETUP_TLS_EVENT).defaultFailureEvent()
-            .from(TLS_SETUP_STATE).to(STACK_CREATION_FINISHED_STATE).event(TLS_SETUP_FINISHED_EVENT).defaultFailureEvent()
+            .from(TLS_SETUP_STATE).to(CLUSTERPROXY_REGISTRATION_STATE).event(TLS_SETUP_FINISHED_EVENT).defaultFailureEvent()
+            .from(CLUSTERPROXY_REGISTRATION_STATE).to(STACK_CREATION_FINISHED_STATE)
+                .event(CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT).defaultFailureEvent()
             .from(STACK_CREATION_FINISHED_STATE).to(FINAL_STATE).event(STACK_CREATION_FINISHED_EVENT).defaultFailureEvent()
             .build();
 

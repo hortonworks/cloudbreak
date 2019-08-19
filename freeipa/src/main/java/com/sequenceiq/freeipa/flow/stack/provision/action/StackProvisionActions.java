@@ -48,6 +48,7 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
+import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationRequest;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -221,6 +222,22 @@ public class StackProvisionActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 stackProvisionService.setupTls(context);
                 sendEvent(context, new StackEvent(StackProvisionEvent.TLS_SETUP_FINISHED_EVENT.event(), context.getStack().getId()));
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTERPROXY_REGISTRATION_STATE")
+    public Action<?, ?> registerClusterProxyAction() {
+        return new AbstractStackProvisionAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                stackProvisionService.registerClusterProxy(context);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new ClusterProxyRegistrationRequest(context.getStack().getId());
             }
         };
     }

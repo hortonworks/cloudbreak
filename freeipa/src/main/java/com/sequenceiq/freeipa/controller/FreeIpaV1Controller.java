@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaRespons
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.service.freeipa.CleanupService;
+import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
@@ -65,6 +66,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaStopService freeIpaStopService;
+
+    @Inject
+    private ClusterProxyService clusterProxyService;
 
     @Override
     public DescribeFreeIpaResponse create(@Valid CreateFreeIpaRequest request) {
@@ -121,5 +125,17 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public void stop(@NotEmpty String environmentCrn) throws Exception {
         String accountId = crnService.getCurrentAccountId();
         freeIpaStopService.stop(environmentCrn, accountId);
+    }
+
+    @Override
+    public String registerWithClusterProxy(@NotEmpty String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return clusterProxyService.registerFreeIpa(accountId, environmentCrn).toString();
+    }
+
+    @Override
+    public void deregisterWithClusterProxy(@NotEmpty String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        clusterProxyService.deregisterFreeIpa(accountId, environmentCrn);
     }
 }

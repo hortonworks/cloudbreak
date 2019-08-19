@@ -30,10 +30,15 @@ public class StackUpdater {
         return doUpdateStackStatus(stack, detailedStatus, statusReason);
     }
 
-    public void updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {
+    public Stack updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {
         securityConfig = securityConfigService.save(securityConfig);
         stack.setSecurityConfig(securityConfig);
-        stackService.save(stack);
+        return stackService.save(stack);
+    }
+
+    public Stack updateClusterProxyRegisteredFlag(Stack stack, boolean registered) {
+        stack.setClusterProxyRegistered(registered);
+        return stackService.save(stack);
     }
 
     private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
@@ -55,5 +60,4 @@ public class StackUpdater {
         }
         return stack;
     }
-
 }

@@ -93,6 +93,7 @@ dependencies {
   implementation project(':secret-engine')
   implementation project(':notification-sender')
   implementation project(':environment-api')
+  implementation project(':cluster-proxy')
   testCompile project(path: ':secret-engine', configuration: 'tests')
   runtime project(':orchestrator-salt')
   runtime project(':cloud-openstack')
