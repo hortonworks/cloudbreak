@@ -81,24 +81,6 @@ public interface DatabaseServerV4Endpoint {
             @Valid @ApiParam(DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request
     );
 
-    @GET
-    @Path("managed/status/{crn}")
-    @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_CRN, notes = DatabaseServerNotes.GET_STATUS_BY_CRN,
-            nickname = "getDatabaseServerStatusByCrn")
-    DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByCrn(
-            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
-    );
-
-    @GET
-    @Path("managed/status/name/{name}")
-    @ApiOperation(value = DatabaseServerOpDescription.GET_STATUS_BY_NAME, notes = DatabaseServerNotes.GET_STATUS_BY_NAME,
-            nickname = "getDatabaseServerStatusByName")
-    DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByName(
-            @ValidCrn @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
-            @QueryParam("environmentCrn") String environmentCrn,
-            @NotNull @ApiParam(DatabaseServerParamDescriptions.NAME) @PathParam("name") String name
-    );
-
     @DELETE
     @Path("managed/{crn}")
     @ApiOperation(value = DatabaseServerOpDescription.TERMINATE, notes = DatabaseServerNotes.TERMINATE,

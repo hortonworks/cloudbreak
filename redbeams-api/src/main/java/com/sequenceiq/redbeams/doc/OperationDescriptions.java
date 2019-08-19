@@ -19,8 +19,6 @@ public final class OperationDescriptions {
         public static final String LIST = "list database servers";
         public static final String GET_BY_NAME = "get a database server by name";
         public static final String GET_BY_CRN = "get a database server by CRN";
-        public static final String GET_STATUS_BY_CRN = "get the status of an allocated database server by CRN";
-        public static final String GET_STATUS_BY_NAME = "get the status of an allocated database server by name";
         public static final String CREATE = "creates and registers a database server in a cloud provider";
         public static final String TERMINATE = "terminates a database server in a cloud provider and deregisters it";
         public static final String REGISTER = "register a database server";
