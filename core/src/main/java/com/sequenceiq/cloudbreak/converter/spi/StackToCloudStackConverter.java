@@ -201,7 +201,7 @@ public class StackToCloudStackConverter {
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
         Cluster cluster = stack.getCluster();
-        if (cluster != null) {
+        if (cluster != null && cluster.getBlueprint() != null) {
             CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(cluster.getBlueprint().getBlueprintText());
             Map<String, Set<String>> componentsByHostGroup = cmTemplateProcessor.getComponentsByHostGroup();
             for (InstanceGroup instanceGroup : instanceGroups) {
@@ -226,7 +226,7 @@ public class StackToCloudStackConverter {
                 }
             }
         } else {
-            LOGGER.warn("Cluster is null for stack id:[{}] name:[{}]", stack.getId(), stack.getName());
+            LOGGER.warn("Cluster or blueprint is null for stack id:[{}] name:[{}]", stack.getId(), stack.getName());
         }
         return groups;
     }
