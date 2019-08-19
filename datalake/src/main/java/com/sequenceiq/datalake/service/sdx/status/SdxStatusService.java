@@ -60,7 +60,7 @@ public class SdxStatusService {
 
     public List<SdxStatusEntity> findDistinctFirstByStatusInAndDatalakeIdOrderByIdDesc(Collection<DatalakeStatusEnum> datalakeStatusEnums,
             Collection<Long> datalakeIds) {
-        return sdxStatusRepository.findDistinctFirstByStatusInAndDatalakeIdOrderByIdDesc(datalakeStatusEnums, datalakeIds);
+        return sdxStatusRepository.findDistinctFirstByStatusInAndDatalakeIdInOrderByIdDesc(datalakeStatusEnums, datalakeIds);
     }
 
     public SdxStatusEntity getActualStatusForSdx(SdxCluster sdxCluster) {
