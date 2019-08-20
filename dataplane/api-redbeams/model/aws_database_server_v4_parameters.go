@@ -20,6 +20,12 @@ type AwsDatabaseServerV4Parameters struct {
 
 	// Version of the database engine (vendor)
 	EngineVersion string `json:"engineVersion,omitempty"`
+
+	// Whether to use a multi-AZ deployment
+	MultiAZ string `json:"multiAZ,omitempty"`
+
+	// Storage type
+	StorageType string `json:"storageType,omitempty"`
 }
 
 // Validate validates this aws database server v4 parameters
