@@ -10,9 +10,11 @@ import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Paramete
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.validation.ValidCloudStorage;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@ValidCloudStorage
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class CloudStorageV1Base implements Serializable {
 
