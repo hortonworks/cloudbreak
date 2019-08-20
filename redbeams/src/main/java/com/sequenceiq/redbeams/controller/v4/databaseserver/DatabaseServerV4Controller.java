@@ -25,7 +25,6 @@ import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestTo
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
-import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 
@@ -49,9 +48,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
-
-    @Inject
-    private DBStackService dbStackService;
 
     @Inject
     private ConverterUtil converterUtil;
@@ -79,18 +75,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         DBStack dbStack = dbStackConverter.convert(request, threadBasedUserCrnProvider.getUserCrn());
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack);
         return converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class);
-    }
-
-    @Override
-    public DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByCrn(String crn) {
-        DBStack dbStack = dbStackService.getByCrn(crn);
-        return converterUtil.convert(dbStack, DatabaseServerStatusV4Response.class);
-    }
-
-    @Override
-    public DatabaseServerStatusV4Response getStatusOfManagedDatabaseServerByName(String environmentCrn, String name) {
-        DBStack dbStack = dbStackService.getByNameAndEnvironmentCrn(name, environmentCrn);
-        return converterUtil.convert(dbStack, DatabaseServerStatusV4Response.class);
     }
 
     @Override

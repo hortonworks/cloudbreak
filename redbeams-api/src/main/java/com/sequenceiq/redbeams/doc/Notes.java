@@ -40,10 +40,6 @@ public final class Notes {
             "Gets information on a database server by its name.";
         public static final String GET_BY_CRN =
             "Gets information on a database server by its CRN.";
-        public static final String GET_STATUS_BY_CRN =
-            "get the status of an allocated database server by crn";
-        public static final String GET_STATUS_BY_NAME =
-            "get the status of an allocated database server by name";
         public static final String CREATE =
             "Creates a new database server. The database server starts out with only default databases.";
         public static final String TERMINATE =

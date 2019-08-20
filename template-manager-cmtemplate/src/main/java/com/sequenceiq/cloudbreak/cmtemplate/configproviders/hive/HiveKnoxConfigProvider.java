@@ -30,7 +30,7 @@ public class HiveKnoxConfigProvider implements CmTemplateComponentConfigProvider
 
     @Override
     public String getServiceType() {
-        return HiveRoles.HIVE;
+        return HiveRoles.HIVE_ON_TEZ;
     }
 
     @Override
