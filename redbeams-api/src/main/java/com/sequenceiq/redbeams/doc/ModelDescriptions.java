@@ -108,6 +108,8 @@ public final class ModelDescriptions {
     public static class AwsDatabaseServerModelDescriptions {
         public static final String BACKUP_RETENTION_PERIOD = "Time to retain backups, in days";
         public static final String ENGINE_VERSION = "Version of the database engine (vendor)";
+        public static final String MULTI_AZ = "Whether to use a multi-AZ deployment";
+        public static final String STORAGE_TYPE = "Storage type";
     }
 
     public static class AzureDatabaseServerModelDescriptions {

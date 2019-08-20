@@ -13,6 +13,12 @@ public class AwsRdsInstanceView {
     @VisibleForTesting
     static final String ENGINE_VERSION = "engineVersion";
 
+    @VisibleForTesting
+    static final String MULTI_AZ = "multiAZ";
+
+    @VisibleForTesting
+    static final String STORAGE_TYPE = "storageType";
+
     private final DatabaseServer databaseServer;
 
     public AwsRdsInstanceView(DatabaseServer databaseServer) {
@@ -57,6 +63,14 @@ public class AwsRdsInstanceView {
 
     public String getMasterUserPassword() {
         return databaseServer.getRootPassword();
+    }
+
+    public String getMultiAZ() {
+        return databaseServer.getStringParameter(MULTI_AZ);
+    }
+
+    public String getStorageType() {
+        return databaseServer.getStringParameter(STORAGE_TYPE);
     }
 
     public List<String> getVPCSecurityGroups() {

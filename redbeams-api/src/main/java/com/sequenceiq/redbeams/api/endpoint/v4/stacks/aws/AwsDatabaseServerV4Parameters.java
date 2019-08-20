@@ -24,6 +24,13 @@ public class AwsDatabaseServerV4Parameters extends MappableBase {
     @ApiModelProperty(AwsDatabaseServerModelDescriptions.ENGINE_VERSION)
     private String engineVersion;
 
+    // This is a String because of https://github.com/swagger-api/swagger-codegen/issues/7391
+    @ApiModelProperty(AwsDatabaseServerModelDescriptions.MULTI_AZ)
+    private String multiAZ;
+
+    @ApiModelProperty(AwsDatabaseServerModelDescriptions.STORAGE_TYPE)
+    private String storageType;
+
     public Integer getBackupRetentionPeriod() {
         return backupRetentionPeriod;
     }
@@ -40,11 +47,29 @@ public class AwsDatabaseServerV4Parameters extends MappableBase {
         this.engineVersion = engineVersion;
     }
 
+    public String getMultiAZ() {
+        return multiAZ;
+    }
+
+    public void setMultiAZ(String multiAZ) {
+        this.multiAZ = multiAZ;
+    }
+
+    public String getStorageType() {
+        return storageType;
+    }
+
+    public void setStorageType(String storageType) {
+        this.storageType = storageType;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "backupRetentionPeriod", backupRetentionPeriod);
         putIfValueNotNull(map, "engineVersion", engineVersion);
+        putIfValueNotNull(map, "multiAZ", multiAZ);
+        putIfValueNotNull(map, "storageType", storageType);
         return map;
     }
 
@@ -59,5 +84,7 @@ public class AwsDatabaseServerV4Parameters extends MappableBase {
     public void parse(Map<String, Object> parameters) {
         backupRetentionPeriod = getInt(parameters, "backupRetentionPeriod");
         engineVersion = getParameterOrNull(parameters, "engineVersion");
+        multiAZ = getParameterOrNull(parameters, "multiAZ");
+        storageType = getParameterOrNull(parameters, "storageType");
     }
 }

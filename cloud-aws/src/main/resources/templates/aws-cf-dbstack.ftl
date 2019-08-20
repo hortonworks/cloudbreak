@@ -65,6 +65,18 @@
         "MinLength": 8,
         "MaxLength": 30
     },
+    "MultiAZParameter": {
+        "Type": "String",
+        "Default": "true",
+        "Description": "Whether to use a multi-AZ deployment",
+        "AllowedValues": [ "true", "false" ]
+    },
+    "StorageTypeParameter": {
+        "Type": "String",
+        "Default": "gp2",
+        "Description": "Storage type",
+        "AllowedValues": [ "standard", "gp2", "io1" ]
+    },
     <#if hasPort>
     "PortParameter": {
         "Type": "Number",
@@ -98,6 +110,10 @@
       "MinLength": "1",
       "MaxLength": "200"
     }
+  },
+
+  "Conditions" : {
+    "UseMultiAZ" : { "Fn::Equals" : [{ "Ref": "MultiAZParameter" }, "true"] }
   },
 
   "Resources" : {
@@ -160,11 +176,12 @@
                 "EngineVersion": { "Ref": "EngineVersionParameter" },
                 "MasterUserPassword": { "Ref": "MasterUserPasswordParameter" },
                 "MasterUsername": { "Ref": "MasterUsernameParameter" },
-                "MultiAZ": true,
+                "MultiAZ": { "Fn::If" : [ "UseMultiAZ", true, false ] },
                 <#if hasPort>
                 "Port": { "Ref": "PortParameter" },
                 </#if>
                 "StorageEncrypted": true,
+                "StorageType": { "Ref": "StorageTypeParameter" },
                 "Tags": [
                     { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
                     { "Key" : "cb-resource-type", "Value" : "${database_resource}" },

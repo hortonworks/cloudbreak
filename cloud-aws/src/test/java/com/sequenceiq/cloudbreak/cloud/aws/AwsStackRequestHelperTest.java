@@ -140,6 +140,8 @@ public class AwsStackRequestHelperTest {
         when(databaseServer.getServerId()).thenReturn("myserver");
         when(databaseServer.getEngine()).thenReturn(DatabaseEngine.POSTGRESQL);
         when(databaseServer.getStringParameter("engineVersion")).thenReturn("10.6");
+        when(databaseServer.getStringParameter("multiAZ")).thenReturn("true");
+        when(databaseServer.getStringParameter("storageType")).thenReturn("gp2");
         when(databaseServer.getPort()).thenReturn(Integer.valueOf(5432));
         when(databaseServer.getRootUserName()).thenReturn("root");
         when(databaseServer.getRootPassword()).thenReturn("cloudera");
@@ -159,7 +161,9 @@ public class AwsStackRequestHelperTest {
         assertContainsParameter(parameters, "EngineVersionParameter", "10.6");
         assertContainsParameter(parameters, "MasterUsernameParameter", "root");
         assertContainsParameter(parameters, "MasterUserPasswordParameter", "cloudera");
+        assertContainsParameter(parameters, "MultiAZParameter", "true");
         assertContainsParameter(parameters, "PortParameter", "5432");
+        assertContainsParameter(parameters, "StorageTypeParameter", "gp2");
         assertContainsParameter(parameters, "VPCSecurityGroupsParameter", "sg-1234,sg-5678");
         assertContainsParameter(parameters, "StackOwner", "bob@cloudera.com");
     }
@@ -174,6 +178,8 @@ public class AwsStackRequestHelperTest {
         when(databaseServer.getServerId()).thenReturn("myserver");
         when(databaseServer.getEngine()).thenReturn(DatabaseEngine.POSTGRESQL);
         when(databaseServer.getStringParameter("engineVersion")).thenReturn(null);
+        when(databaseServer.getStringParameter("multiAZ")).thenReturn(null);
+        when(databaseServer.getStringParameter("storageType")).thenReturn(null);
         when(databaseServer.getPort()).thenReturn(null);
         when(databaseServer.getRootUserName()).thenReturn("root");
         when(databaseServer.getRootPassword()).thenReturn("cloudera");
@@ -186,6 +192,8 @@ public class AwsStackRequestHelperTest {
         assertDoesNotContainParameter(parameters, "AllocatedStorageParameter");
         assertDoesNotContainParameter(parameters, "BackupRetentionPeriodParameter");
         assertDoesNotContainParameter(parameters, "EngineVersionParameter");
+        assertDoesNotContainParameter(parameters, "MultiAZParameter");
+        assertDoesNotContainParameter(parameters, "StorageTypeParameter");
         assertDoesNotContainParameter(parameters, "PortParameter");
     }
 

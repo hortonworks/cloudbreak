@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView.BACKUP_RETENTION_PERIOD;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView.ENGINE_VERSION;
+import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView.MULTI_AZ;
+import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView.STORAGE_TYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
@@ -119,6 +121,30 @@ public class AwsRdsInstanceViewTest {
     public void testNoMasterUserPassword() {
         when(server.getRootPassword()).thenReturn(null);
         assertNull(underTest.getMasterUserPassword());
+    }
+
+    @Test
+    public void testMultiAZ() {
+        when(server.getStringParameter(MULTI_AZ)).thenReturn("true");
+        assertEquals("true", underTest.getMultiAZ());
+    }
+
+    @Test
+    public void testNoMultiAZ() {
+        when(server.getStringParameter(MULTI_AZ)).thenReturn(null);
+        assertNull(underTest.getMultiAZ());
+    }
+
+    @Test
+    public void testStorageType() {
+        when(server.getStringParameter(STORAGE_TYPE)).thenReturn("gp2");
+        assertEquals("gp2", underTest.getStorageType());
+    }
+
+    @Test
+    public void testNoStorageType() {
+        when(server.getStringParameter(STORAGE_TYPE)).thenReturn(null);
+        assertNull(underTest.getStorageType());
     }
 
     @Test
