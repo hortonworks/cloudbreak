@@ -38,7 +38,7 @@ public class HueConfigProviderTest {
 
     private static final String PASSWORD = "password";
 
-    private static final String SAFETY_VALVE_VALUE = "[desktop]\napp_blacklist=hive, metastore, pig";
+    private static final String SAFETY_VALVE_VALUE = "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,hive,metastore,pig";
 
     private HueConfigProvider underTest;
 
