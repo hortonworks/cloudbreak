@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.cloudstorage.doc.CloudStorageModelDescription;
@@ -20,7 +22,7 @@ public abstract class CloudStorageBase implements Serializable {
 
     private List<StorageLocationBase> locations = new ArrayList<>();
 
-    private List<StorageIdentityBase> identities = new ArrayList<>();
+    private List<@Valid StorageIdentityBase> identities = new ArrayList<>();
 
     @ApiModelProperty(CloudStorageModelDescription.ACCOUNT_MAPPING)
     private AccountMappingBase accountMapping;
