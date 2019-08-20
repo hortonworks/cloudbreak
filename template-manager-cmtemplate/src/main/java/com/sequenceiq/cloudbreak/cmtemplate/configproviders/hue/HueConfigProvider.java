@@ -30,7 +30,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private static final String HUE_SAFETY_VALVE = "hue-hue_service_safety_valve";
 
-    private static final String SAFETY_VALVE_VALUE = "[desktop]\napp_blacklist=hive, metastore, pig";
+    private static final String SAFETY_VALVE_VALUE = "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,hive,metastore,pig";
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
