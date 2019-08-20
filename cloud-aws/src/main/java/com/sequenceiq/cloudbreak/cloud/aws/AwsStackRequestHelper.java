@@ -139,6 +139,8 @@ public class AwsStackRequestHelper {
         addParameterIfNotNull(parameters, "AllocatedStorageParameter", awsRdsInstanceView.getAllocatedStorage());
         addParameterIfNotNull(parameters, "BackupRetentionPeriodParameter", awsRdsInstanceView.getBackupRetentionPeriod());
         addParameterIfNotNull(parameters, "EngineVersionParameter", awsRdsInstanceView.getEngineVersion());
+        addParameterIfNotNull(parameters, "MultiAZParameter", awsRdsInstanceView.getMultiAZ());
+        addParameterIfNotNull(parameters, "StorageTypeParameter", awsRdsInstanceView.getStorageType());
         addParameterIfNotNull(parameters, "PortParameter", stack.getDatabaseServer().getPort());
 
         if (awsRdsInstanceView.getVPCSecurityGroups().isEmpty()) {
