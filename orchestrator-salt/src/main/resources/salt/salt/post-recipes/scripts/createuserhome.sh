@@ -4,6 +4,9 @@
 # This script is for creating hdfs home directories for all the workload cluster users.
 # Script gets the list of users from IPA Server. If the user's directory is not present on hdfs then
 # it creates one for that user and change ownership also to that user.
+# Any hdfs errors seen are assumed as to do with kerberos, and a 'kinit' is attempted after which the 
+# hdfs operation is repeated. Since the operation is done as 'hdfs' principal, normally the operation
+# shouldn't fail....
 # Currently doesn't do anything to do with deletion of users
 
 ### HEADER ###
@@ -25,6 +28,15 @@ exlock()            { _lock x; }   # obtain an exclusive lock
 shlock()            { _lock s; }   # obtain a shared lock
 unlock()            { _lock u; }   # drop a lock
 
+kinit_as_hdfs()     {
+    echo "kinit as hdfs using Keytab: $HDFS_KEYTAB"
+    kinit -kt "$HDFS_KEYTAB" hdfs/$(hostname -f)
+    if [[ $? -ne 0 ]]; then
+      echo "Couldn't kinit as hdfs"
+      exit 1
+    fi
+}
+
 ### BEGIN OF SCRIPT ###
 echo "Start time of script $0, PID $$: `date`"
 
@@ -34,22 +46,12 @@ exlock_now || exit 1
 # the file where all known users yet would be stored. We don't want to unnecessarily invoke namenode ops
 # for users we already created dirs for
 EXISTING_USERS_FILE=/tmp/existing_users_file
-
 HDFS_KEYTAB=/run/cloudera-scm-agent/process/$(ls -t /run/cloudera-scm-agent/process/ | grep hdfs-NAMENODE$ | head -n 1)/hdfs.keytab
-echo "Keytab dir:$HDFS_KEYTAB"
-
 PATH_PREFIX="/user"
 
-# Check if there's a valid TGT, and kinit if not
 klist -s
 if [[ $? -ne 0 ]]; then
-  kinit -kt "$HDFS_KEYTAB" hdfs/$(hostname -f)
-  if [[ $? -ne 0 ]]; then
-    echo "Couldn't kinit as hdfs"
-    exit 1
-  fi
-else
-  echo "Found a valid keytab."
+  kinit_as_hdfs
 fi
 
 mapfile -t users < <((ipa user-find --sizelimit=0 --timelimit=0) | grep 'User login:' | awk '{ print $3}')
@@ -80,11 +82,36 @@ if [ -z "$newpaths" ]; then
   echo "No home dirs to create in HDFS"
 else
   hdfs dfs -mkdir -p $newpaths
+  # Check if there's an error, and kinit if so, and then repeat mkdir
+  if [[ $? -ne 0 ]]; then
+    kinit_as_hdfs
+    hdfs dfs -mkdir -p $newpaths
+    if [[ $? -ne 0 ]]; then
+      echo "mkdir failed for user home dirs even after a kinit as hdfs user.."
+      exit 1
+    else
+      echo "Created the home dirs.."
+    fi
+  else
+    echo "Created the home dirs.."
+  fi
   echo "Will chown the created home directories. This may take a while depending on the number of directories."
   for user in "${users[@]}";
   do
     if [[ ${hasharr[$user]} != "exist" ]]; then
       hdfs dfs -chown $user:$user $PATH_PREFIX/$user
+      if [[ $? -ne 0 ]]; then
+        kinit_as_hdfs
+        hdfs dfs -chown $user:$user $PATH_PREFIX/$user
+        if [[ $? -ne 0 ]]; then
+          echo "chown failed for user home dirs even after a kinit as hdfs user.."
+          exit 1
+        else
+          echo "chown'ed the home dir $PATH_PREFIX/$user"
+        fi
+      else
+        echo "chown'ed the home dir $PATH_PREFIX/$user"
+      fi
       echo "$user" >> $EXISTING_USERS_FILE
       number_of_dirs=$((number_of_dirs + 1))
     fi
