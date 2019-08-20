@@ -28,6 +28,7 @@ public class AwsMockAccountMappingService {
             Map.entry("ams", FIXED_IAM_ROLE),
             Map.entry("atlas", FIXED_IAM_ROLE),
             Map.entry("docker", FIXED_IAM_ROLE),
+            Map.entry("dpprofiler", FIXED_IAM_ROLE),
             Map.entry("falcon", FIXED_IAM_ROLE),
             Map.entry("flume", FIXED_IAM_ROLE),
             Map.entry("hbase", FIXED_IAM_ROLE),
