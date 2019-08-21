@@ -268,6 +268,10 @@ public class GrpcUmsClient {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
+        if (isReadRight(right)) {
+            LOGGER.info("Letting read operation through for right {} for user {}!", right, userCrn);
+            return true;
+        }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.info("Checking right {} for user {}!", right, userCrn);
@@ -489,5 +493,16 @@ public class GrpcUmsClient {
                 .setResource("DbusUploader")
                 .build();
         return databusCrn.toString();
+    }
+
+    protected boolean isReadRight(String action) {
+        if (action == null) {
+            return false;
+        }
+        String[] parts = action.split("/");
+        if (parts.length == 2 && parts[1] != null && parts[1].equals("read")) {
+            return true;
+        }
+        return false;
     }
 }

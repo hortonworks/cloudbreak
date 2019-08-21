@@ -51,10 +51,9 @@ public class UmsAuthorizationServiceTest {
     @Test
     public void testCheckReadRight() {
         when(umsClient.checkRight(anyString(), anyString(), anyString(), any())).thenReturn(false);
-        when(umsClient.listRoles(anyString(), anyString(), any())).thenReturn(getRoles());
 
         thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("You have no right to perform datalake/write. This requires one of these roles: EnvironmentAdmin. "
+        thrown.expectMessage("You have no right to perform datalake/write. This requires one of these roles: PowerUser. "
                 + "You can request access through IAM service from an administrator.");
 
         underTest.checkRightOfUserForResource(USER_CRN, AuthorizationResource.DATALAKE, ResourceAction.WRITE);
@@ -63,10 +62,9 @@ public class UmsAuthorizationServiceTest {
     @Test
     public void testCheckWriteRight() {
         when(umsClient.checkRight(anyString(), anyString(), anyString(), any())).thenReturn(false);
-        when(umsClient.listRoles(anyString(), anyString(), any())).thenReturn(getRoles());
 
         thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("You have no right to perform datalake/read. This requires one of these roles: EnvironmentAdmin, EnvironmentUser. "
+        thrown.expectMessage("You have no right to perform datalake/read. This requires one of these roles: PowerUser. "
                 + "You can request access through IAM service from an administrator.");
 
         underTest.checkRightOfUserForResource(USER_CRN, AuthorizationResource.DATALAKE, ResourceAction.READ);

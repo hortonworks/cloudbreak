@@ -50,7 +50,7 @@ public class UmsAuthorizationService {
         String right = RightUtils.getRight(resource, action);
         String unauthorizedMessage = String.format("You have no right to perform %s. This requires one of these roles: %s. "
                         + "You can request access through IAM service from an administrator.",
-                right, getRolesByRights(userCrn).get(right));
+                right, "PowerUser");
         checkRightOfUserForResource(userCrn, resource, action, unauthorizedMessage);
     }
 
