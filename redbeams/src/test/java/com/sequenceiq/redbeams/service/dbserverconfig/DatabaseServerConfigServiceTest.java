@@ -418,8 +418,9 @@ public class DatabaseServerConfigServiceTest {
         server.setConnectionPassword("rootpassword");
         String databaseName = "mydb";
         String databaseType = "hive";
+        Optional<String> databaseDescription = Optional.of("mine not yours");
 
-        String result = underTest.createDatabaseOnServer(SERVER_CRN.toString(), databaseName, databaseType);
+        String result = underTest.createDatabaseOnServer(SERVER_CRN.toString(), databaseName, databaseType, databaseDescription);
 
         assertEquals("created", result);
         verify(driverFunctions).execWithDatabaseDriver(eq(server), any());
@@ -428,6 +429,7 @@ public class DatabaseServerConfigServiceTest {
         DatabaseConfig db = captor.getValue();
         assertEquals(databaseName, db.getName());
         assertEquals(databaseType, db.getType());
+        assertEquals(databaseDescription.get(), db.getDescription());
         String databaseUserName = db.getConnectionUserName().getRaw();
         assertEquals(USERNAME, databaseUserName);
         assertNotEquals(server.getConnectionUserName(), databaseUserName);

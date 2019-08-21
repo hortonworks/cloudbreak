@@ -4,8 +4,9 @@ public final class ParamDescriptions {
 
     public static final class DatabaseParamDescriptions {
 
+        public static final String CRN = "CRN of the database";
+        public static final String CRNS = "CRNs of the databases";
         public static final String NAME = "Name of the database";
-        public static final String NAMES = "Names of the databases";
         public static final String ENVIRONMENT_CRN = "CRN of the environment of the database(s)";
 
         public static final String DATABASE_REQUEST = ModelDescriptions.DATABASE_REQUEST;

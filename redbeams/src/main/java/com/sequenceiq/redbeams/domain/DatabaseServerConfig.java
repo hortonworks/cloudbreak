@@ -268,15 +268,16 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
     /**
      * Creates a database based on this database server config.
      *
-     * @param databaseName the name of the database
-     * @param type         the type of the database
-     * @param status       the resource status of the database
-     * @param userName     the username for the user associated with the database
-     * @param password     the password for the user associated with the database
+     * @param databaseName         the name of the database
+     * @param type                 the type of the database
+     * @param databaseDescription  the description of the database
+     * @param status               the resource status of the database
+     * @param userName             the username for the user associated with the database
+     * @param password             the password for the user associated with the database
      * @return a DatabaseConfig
      * @throws IllegalStateException if this database server config lacks a host or port
      */
-    public DatabaseConfig createDatabaseConfig(String databaseName, String type, ResourceStatus status,
+    public DatabaseConfig createDatabaseConfig(String databaseName, String type, Optional<String> databaseDescription, ResourceStatus status,
         String userName, String password) {
         if (host == null) {
             throw new IllegalStateException("Database server config has no host");
@@ -289,7 +290,7 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
 
         databaseConfig.setDatabaseVendor(databaseVendor);
         databaseConfig.setName(databaseName);
-        databaseConfig.setDescription(description);
+        databaseConfig.setDescription(databaseDescription.orElse(description));
         databaseConfig.setConnectionURL(new DatabaseCommon().getJdbcConnectionUrl(databaseVendor.jdbcUrlDriverId(),
             host, port, Optional.of(databaseName)));
         databaseConfig.setConnectionDriver(connectionDriver);

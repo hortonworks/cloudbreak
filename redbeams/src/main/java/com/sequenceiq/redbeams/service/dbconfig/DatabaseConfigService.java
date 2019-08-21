@@ -36,7 +36,6 @@ import com.sequenceiq.redbeams.exception.BadRequestException;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.repository.DatabaseConfigRepository;
-import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 import com.sequenceiq.redbeams.service.validation.DatabaseConnectionValidator;
@@ -48,9 +47,6 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
 
     @Inject
     private DatabaseConfigRepository repository;
-
-    @Inject
-    private DatabaseServerConfigRepository serverRepository;
 
     @Inject
     private DriverFunctions driverFunctions;
@@ -116,7 +112,17 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         repository.save(databaseConfig);
     }
 
-    public DatabaseConfig get(String name, String environmentCrn) {
+    public DatabaseConfig getByCrn(String resourceCrn) {
+        Crn crn = Crn.safeFromString(resourceCrn);
+        Optional<DatabaseConfig> resourceOpt = repository.findByResourceCrn(crn);
+        if (resourceOpt.isEmpty()) {
+            throw new NotFoundException(String.format("No database found with crn '%s'", resourceCrn));
+        }
+        MDCBuilder.buildMdcContext(resourceOpt.get());
+        return resourceOpt.get();
+    }
+
+    public DatabaseConfig getByName(String name, String environmentCrn) {
         Optional<DatabaseConfig> resourceOpt =
                 repository.findByEnvironmentIdAndName(environmentCrn, name);
         if (resourceOpt.isEmpty()) {
@@ -127,27 +133,38 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         return resourceOpt.get();
     }
 
-    public Set<DatabaseConfig> delete(Set<String> names, String environmentCrn) {
-        // TODO return a MUTLI-STATUS if some of the deletes won't succeed.
-        // TODO crn validation, maybe as a validator
-        Set<DatabaseConfig> foundDatabaseConfigs = repository.findAllByEnvironmentIdAndNameIn(environmentCrn, names);
-        if (names.size() != foundDatabaseConfigs.size()) {
-            Set<String> notFoundDatabaseConfigs = Sets.difference(names, foundDatabaseConfigs.stream().map(DatabaseConfig::getName).collect(Collectors.toSet()));
+    public Set<DatabaseConfig> deleteMultipleByCrn(Set<String> resourceCrns) {
+        // TODO return a MUTLI-STATUS if some of the deletes don't succeed.
+        Set<Crn> parsedCrns = resourceCrns.stream()
+                .map(Crn::safeFromString)
+                .collect(Collectors.toSet());
+        Set<DatabaseConfig> foundDatabaseConfigs = repository.findByResourceCrnIn(parsedCrns);
+        if (resourceCrns.size() != foundDatabaseConfigs.size()) {
+            Set<String> notFoundDatabaseConfigs = Sets.difference(resourceCrns,
+                foundDatabaseConfigs.stream()
+                    .map(DatabaseConfig::getResourceCrn)
+                    .map(Object::toString)
+                    .collect(Collectors.toSet()));
             throw new NotFoundException(
-                    String.format("Database(s) for %s not found in environment '%s'", String.join(", ", notFoundDatabaseConfigs), environmentCrn));
+                    String.format("Database(s) not found: %s", String.join(", ", notFoundDatabaseConfigs)));
         }
         return foundDatabaseConfigs.stream()
                 .map(this::deleteOne)
                 .collect(Collectors.toSet());
     }
 
-    public DatabaseConfig delete(String name, String environmentCrn) {
-        DatabaseConfig resource = get(name, environmentCrn);
+    public DatabaseConfig deleteByCrn(String resourceCrn) {
+        DatabaseConfig resource = getByCrn(resourceCrn);
+        return deleteOne(resource);
+    }
+
+    public DatabaseConfig deleteByName(String name, String environmentCrn) {
+        DatabaseConfig resource = getByName(name, environmentCrn);
         return deleteOne(resource);
     }
 
     public String testConnection(String databaseConfigName, String environmentCrn) {
-        DatabaseConfig databaseConfig = get(databaseConfigName, environmentCrn);
+        DatabaseConfig databaseConfig = getByName(databaseConfigName, environmentCrn);
         return testConnection(databaseConfig);
     }
 

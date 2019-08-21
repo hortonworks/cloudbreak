@@ -25,37 +25,48 @@ import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 public class DatabaseV4Controller implements DatabaseV4Endpoint {
 
     @Inject
-    private ConverterUtil redbeamsConverterUtil;
+    private ConverterUtil converterUtil;
 
     @Inject
     private DatabaseConfigService databaseConfigService;
 
     @Override
     public DatabaseV4Responses list(String environmentCrn) {
-        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.findAll(environmentCrn),
+        return new DatabaseV4Responses(converterUtil.convertAllAsSet(databaseConfigService.findAll(environmentCrn),
                 DatabaseV4Response.class));
     }
 
     @Override
     public DatabaseV4Response register(@Valid DatabaseV4Request request) {
-        DatabaseConfig databaseConfig = redbeamsConverterUtil.convert(request, DatabaseConfig.class);
-        return redbeamsConverterUtil.convert(databaseConfigService.register(databaseConfig, false), DatabaseV4Response.class);
+        DatabaseConfig databaseConfig = converterUtil.convert(request, DatabaseConfig.class);
+        return converterUtil.convert(databaseConfigService.register(databaseConfig, false), DatabaseV4Response.class);
     }
 
     @Override
-    public DatabaseV4Response get(String environmentCrn, String name) {
-        DatabaseConfig databaseConfig = databaseConfigService.get(name, environmentCrn);
-        return redbeamsConverterUtil.convert(databaseConfig, DatabaseV4Response.class);
+    public DatabaseV4Response getByCrn(String crn) {
+        DatabaseConfig databaseConfig = databaseConfigService.getByCrn(crn);
+        return converterUtil.convert(databaseConfig, DatabaseV4Response.class);
     }
 
     @Override
-    public DatabaseV4Response delete(String environmentCrn, String name) {
-        return redbeamsConverterUtil.convert(databaseConfigService.delete(name, environmentCrn), DatabaseV4Response.class);
+    public DatabaseV4Response getByName(String environmentCrn, String name) {
+        DatabaseConfig databaseConfig = databaseConfigService.getByName(name, environmentCrn);
+        return converterUtil.convert(databaseConfig, DatabaseV4Response.class);
     }
 
     @Override
-    public DatabaseV4Responses deleteMultiple(String environmentCrn, Set<String> names) {
-        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.delete(names, environmentCrn), DatabaseV4Response.class));
+    public DatabaseV4Response deleteByCrn(String crn) {
+        return converterUtil.convert(databaseConfigService.deleteByCrn(crn), DatabaseV4Response.class);
+    }
+
+    @Override
+    public DatabaseV4Response deleteByName(String environmentCrn, String name) {
+        return converterUtil.convert(databaseConfigService.deleteByName(name, environmentCrn), DatabaseV4Response.class);
+    }
+
+    @Override
+    public DatabaseV4Responses deleteMultiple(Set<String> crns) {
+        return new DatabaseV4Responses(converterUtil.convertAllAsSet(databaseConfigService.deleteMultipleByCrn(crns), DatabaseV4Response.class));
     }
 
     @Override
@@ -68,7 +79,7 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
         //             databaseTestV4Request.getExistingDatabase().getEnvironmentCrn()
         //     );
         // } else {
-        //     DatabaseConfig databaseConfig = redbeamsConverterUtil.convert(databaseTestV4Request.getDatabase(), DatabaseConfig.class);
+        //     DatabaseConfig databaseConfig = converterUtil.convert(databaseTestV4Request.getDatabase(), DatabaseConfig.class);
         //     result = databaseConfigService.testConnection(databaseConfig);
         // }
         // return new DatabaseTestV4Response(result);

@@ -13,7 +13,6 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerSuccess;
-import com.sequenceiq.redbeams.repository.DatabaseConfigRepository;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 
 import reactor.bus.Event;
@@ -28,9 +27,6 @@ public class DeregisterDatabaseServerHandler implements EventHandler<DeregisterD
 
     @Inject
     private EventBus eventBus;
-
-    @Inject
-    private DatabaseConfigRepository databaseConfigRepository;
 
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;

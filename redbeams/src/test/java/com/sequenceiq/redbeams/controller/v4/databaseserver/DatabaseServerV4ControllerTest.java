@@ -7,6 +7,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -17,6 +18,8 @@ import org.mockito.Mock;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 // import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
@@ -41,7 +44,9 @@ public class DatabaseServerV4ControllerTest {
             .setResource("resource")
             .build();
 
-    private static final String SERVER_CRN = "myserver";
+    private static final String SERVER_CRN = CRN.toString();
+
+    private static final String SERVER_NAME = "myserver";
 
     private static final String ENVIRONMENT_CRN = "myenv";
 
@@ -92,7 +97,7 @@ public class DatabaseServerV4ControllerTest {
 
         server = new DatabaseServerConfig();
         server.setId(1L);
-        server.setName(SERVER_CRN);
+        server.setName(SERVER_NAME);
         server.setEnvironmentId(ENVIRONMENT_CRN);
         server.setResourceCrn(CRN);
 
@@ -102,11 +107,11 @@ public class DatabaseServerV4ControllerTest {
         server2.setEnvironmentId(ENVIRONMENT_CRN);
 
         request = new DatabaseServerV4Request();
-        request.setName(SERVER_CRN);
+        request.setName(SERVER_NAME);
 
         response = new DatabaseServerV4Response();
         response.setId(1L);
-        response.setName(SERVER_CRN);
+        response.setName(SERVER_NAME);
 
         response2 = new DatabaseServerV4Response();
         response2.setId(2L);
@@ -136,10 +141,10 @@ public class DatabaseServerV4ControllerTest {
 
     @Test
     public void testGetByName() {
-        when(service.getByName(DatabaseServerV4Controller.DEFAULT_WORKSPACE, ENVIRONMENT_CRN, SERVER_CRN)).thenReturn(server);
+        when(service.getByName(DatabaseServerV4Controller.DEFAULT_WORKSPACE, ENVIRONMENT_CRN, SERVER_NAME)).thenReturn(server);
         when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(response);
 
-        DatabaseServerV4Response response = underTest.getByName(ENVIRONMENT_CRN, SERVER_CRN);
+        DatabaseServerV4Response response = underTest.getByName(ENVIRONMENT_CRN, SERVER_NAME);
 
         assertEquals(1L, response.getId().longValue());
     }
@@ -244,4 +249,18 @@ public class DatabaseServerV4ControllerTest {
 
     //     assertEquals("okayyy", response.getResult());
     // }
+
+    @Test
+    public void testCreateDatabase() {
+        CreateDatabaseV4Request createRequest = new CreateDatabaseV4Request();
+        createRequest.setExistingDatabaseServerCrn(SERVER_CRN);
+        createRequest.setDatabaseName("mydb");
+        createRequest.setType("hive");
+        createRequest.setDatabaseDescription("mine not yours");
+        when(service.createDatabaseOnServer(SERVER_CRN, "mydb", "hive", Optional.of("mine not yours"))).thenReturn("ok");
+
+        CreateDatabaseV4Response createResponse = underTest.createDatabase(createRequest);
+
+        assertEquals("ok", createResponse.getResult());
+    }
 }

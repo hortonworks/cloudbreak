@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -32,6 +33,10 @@ public class CreateDatabaseV4Request implements Serializable {
     @NotNull
     @ApiModelProperty(Database.TYPE)
     private String type;
+
+    @Size(max = 1000000)
+    @ApiModelProperty(Database.DESCRIPTION)
+    private String databaseDescription;
 
     /**
      * Gets the crn of the existing database on which to create the schema.
@@ -85,5 +90,23 @@ public class CreateDatabaseV4Request implements Serializable {
      */
     public void setType(String type) {
         this.type = type;
+    }
+
+    /**
+     * Gets the database description.
+     *
+     * @return the database description
+     */
+    public String getDatabaseDescription() {
+        return databaseDescription;
+    }
+
+    /**
+     * Sets the database description.
+     *
+     * @param databaseDescription the database description
+     */
+    public void setDatabaseDescription(String databaseDescription) {
+        this.databaseDescription = databaseDescription;
     }
 }
