@@ -37,18 +37,7 @@
       "nodeCount": 1,
       "type": "CORE",
       "recoveryMode": "MANUAL",
-      "recipeNames": [],
-      "securityGroup": {
-        "securityRules": [
-          {
-            "subnet": "0.0.0.0/0",
-            "ports": [
-              "22"
-            ],
-            "protocol": "tcp"
-          }
-        ]
-      }
+      "recipeNames": []
     },
     {
       "name": "master",
@@ -68,39 +57,7 @@
       "nodeCount": 1,
       "type": "GATEWAY",
       "recoveryMode": "MANUAL",
-      "recipeNames": [],
-      "securityGroup": {
-        "securityRules": [
-          {
-            "subnet": "0.0.0.0/0",
-            "ports": [
-              "9443"
-            ],
-            "protocol": "tcp"
-          },
-          {
-            "subnet": "0.0.0.0/0",
-            "ports": [
-              "8443"
-            ],
-            "protocol": "tcp"
-          },
-          {
-            "subnet": "0.0.0.0/0",
-            "ports": [
-              "443"
-            ],
-            "protocol": "tcp"
-          },
-          {
-            "subnet": "0.0.0.0/0",
-            "ports": [
-              "22"
-            ],
-            "protocol": "tcp"
-          }
-        ]
-      }
+      "recipeNames": []
     }
   ]
 }
