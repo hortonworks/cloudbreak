@@ -19,6 +19,7 @@
     credential_file_reload_interval  60
     debug                            false
     endpoint                         "{{ databus.endpoint }}"
+    event_message_field              message
     headers                          app:{{ fluent.dbusAppName }}
     stream_name                      Metering
     partition_key                    "#{Socket.gethostname}"
