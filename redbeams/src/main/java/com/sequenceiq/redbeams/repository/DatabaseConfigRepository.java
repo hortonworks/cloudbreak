@@ -5,14 +5,12 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
 import com.sequenceiq.authorization.repository.BaseJpaRepository;
 import com.sequenceiq.authorization.repository.CheckPermission;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.ResourceAction;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 
@@ -22,15 +20,16 @@ import com.sequenceiq.redbeams.domain.DatabaseConfig;
 public interface DatabaseConfigRepository extends BaseJpaRepository<DatabaseConfig, Long> {
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT d FROM DatabaseConfig d WHERE d.environmentId = :environmentId "
-            + "AND (d.name = :name OR d.resourceCrn = :name)")
-    Optional<DatabaseConfig> findByEnvironmentIdAndName(@Param("environmentId") String environmentId, @Param("name") String name);
+    Optional<DatabaseConfig> findByEnvironmentIdAndName(String environmentId, String name);
+
+    @CheckPermission(action = ResourceAction.READ)
+    Optional<DatabaseConfig> findByResourceCrn(Crn crn);
 
     @CheckPermission(action = ResourceAction.READ)
     Set<DatabaseConfig> findByEnvironmentId(String environmentId);
 
     @CheckPermission(action = ResourceAction.READ)
-    @Query("SELECT d FROM DatabaseConfig d WHERE d.environmentId = :environmentId "
-            + "AND (d.name IN :names OR d.resourceCrn IN :names)")
-    Set<DatabaseConfig> findAllByEnvironmentIdAndNameIn(@Param("environmentId") String environmentId, @Param("names") Set<String> names);
+    Set<DatabaseConfig> findByResourceCrnIn(Set<Crn> resourceCrns);
+
+    // save does not require a permission check
 }

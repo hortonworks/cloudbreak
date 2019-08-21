@@ -248,7 +248,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                 .collect(Collectors.joining("; "));
     }
 
-    public String createDatabaseOnServer(String serverCrn, String databaseName, String databaseType) {
+    public String createDatabaseOnServer(String serverCrn, String databaseName, String databaseType, Optional<String> databaseDescription) {
         // Prepared statements cannot be used for DDL statements, so we have to scrub the databaseName ourselves.
         // This is a subset of valid SQL identifiers, but I believe it's a sane constraint to put on database name
         // identifiers that protects us from SQL injections
@@ -281,7 +281,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
         // Only record database on server if successfully created on server
         DatabaseConfig newDatabaseConfig =
-                databaseServerConfig.createDatabaseConfig(databaseName, databaseType, ResourceStatus.SERVICE_MANAGED,
+                databaseServerConfig.createDatabaseConfig(databaseName, databaseType, databaseDescription, ResourceStatus.SERVICE_MANAGED,
                         databaseUserName, databasePassword);
         databaseConfigService.register(newDatabaseConfig, false);
 

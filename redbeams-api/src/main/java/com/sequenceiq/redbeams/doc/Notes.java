@@ -10,6 +10,8 @@ public final class Notes {
         public static final String LIST =
             "Lists all databases that are known, either because they were registered or because this service created "
             + "them.";
+        public static final String GET_BY_CRN =
+            "Gets information on a database by its CRN.";
         public static final String GET_BY_NAME =
             "Gets information on a database by its name.";
         public static final String CREATE =
@@ -17,12 +19,16 @@ public final class Notes {
             + "separate from the database server's administrative user is also created, with full rights to the new database.";
         public static final String REGISTER =
             "Registers an existing database, residing on some database server.";
+        public static final String DELETE_BY_CRN =
+            "Deletes a database by its CRN. If the database was registered with this service, then this operation "
+            + "merely deregisters it. Otherwise, this operation deletes the database from the database server, along "
+            + "with its corresponding user.";
         public static final String DELETE_BY_NAME =
             "Deletes a database by its name. If the database was registered with this service, then this operation "
             + "merely deregisters it. Otherwise, this operation deletes the database from the database server, along "
             + "with its corresponding user.";
-        public static final String DELETE_MULTIPLE_BY_NAME =
-            "Deletes multiple databases, each by name. See the notes on the single delete operation for details.";
+        public static final String DELETE_MULTIPLE_BY_CRN =
+            "Deletes multiple databases, each by CRN. See the notes on the single delete operation for details.";
 
         private DatabaseNotes() {
         }

@@ -118,7 +118,7 @@ public class DatabaseServerConfigTest {
         config.setArchived(true);
         config.setEnvironmentId("myenvironment");
 
-        DatabaseConfig db = config.createDatabaseConfig("mydb", "hive", ResourceStatus.USER_MANAGED, "dbuser", "dbpass");
+        DatabaseConfig db = config.createDatabaseConfig("mydb", "hive", Optional.empty(), ResourceStatus.USER_MANAGED, "dbuser", "dbpass");
 
         assertEquals(config.getDatabaseVendor(), db.getDatabaseVendor());
         assertEquals("mydb", db.getName());

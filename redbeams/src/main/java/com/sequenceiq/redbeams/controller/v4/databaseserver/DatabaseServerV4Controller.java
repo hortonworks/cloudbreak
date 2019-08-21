@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.controller.v4.databaseserver;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -128,7 +129,8 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         String result = databaseServerConfigService.createDatabaseOnServer(
                 request.getExistingDatabaseServerCrn(),
                 request.getDatabaseName(),
-                request.getType());
+                request.getType(),
+                Optional.ofNullable(request.getDatabaseDescription()));
         return new CreateDatabaseV4Response(result);
     }
 }

@@ -52,7 +52,23 @@ public class DatabaseConfigServiceTest {
 
     private static final long CURRENT_TIME_MILLIS = 1000L;
 
-    private static final String CRN = "crn";
+    private static final Crn DB_CRN = Crn.builder()
+            .setService(Crn.Service.IAM)
+            .setAccountId("accountId")
+            .setResourceType(Crn.ResourceType.DATABASE)
+            .setResource("resource")
+            .build();
+
+    private static final String DB_CRN_STRING = DB_CRN.toString();
+
+    private static final Crn DB2_CRN = Crn.builder()
+            .setService(Crn.Service.IAM)
+            .setAccountId("accountId")
+            .setResourceType(Crn.ResourceType.DATABASE)
+            .setResource("resource2")
+            .build();
+
+    private static final String DB2_CRN_STRING = DB2_CRN.toString();
 
     private static final String DATABASE_NAME = "databaseName";
 
@@ -161,26 +177,26 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteRegisteredDatabase() {
+    public void testDeleteByNameRegisteredDatabase() {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME);
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));
 
-        underTest.delete(DATABASE_NAME, ENVIRONMENT_CRN);
+        underTest.deleteByName(DATABASE_NAME, ENVIRONMENT_CRN);
 
         assertTrue(databaseConfig.isArchived());
         verify(repository).save(databaseConfig);
     }
 
     @Test
-    public void testDeleteNotFound() {
+    public void testDeleteByNameNotFound() {
         thrown.expect(NotFoundException.class);
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.empty());
 
-        underTest.delete(DATABASE_NAME, ENVIRONMENT_CRN);
+        underTest.deleteByName(DATABASE_NAME, ENVIRONMENT_CRN);
     }
 
     @Test
-    public void testDeleteCreatedDatabase() {
+    public void testDeleteByNameCreatedDatabase() {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setId(1L);
         server.setName("myserver");
@@ -189,7 +205,7 @@ public class DatabaseConfigServiceTest {
         databaseConfig.setServer(server);
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));
 
-        underTest.delete(DATABASE_NAME, ENVIRONMENT_CRN);
+        underTest.deleteByName(DATABASE_NAME, ENVIRONMENT_CRN);
 
         assertTrue(databaseConfig.isArchived());
         verify(repository).save(databaseConfig);
@@ -198,27 +214,65 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteMultiple() {
+    public void testDeleteByCrnRegisteredDatabase() {
+        DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME);
+        when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.of(databaseConfig));
+
+        underTest.deleteByCrn(DB_CRN_STRING);
+
+        assertTrue(databaseConfig.isArchived());
+        verify(repository).save(databaseConfig);
+    }
+
+    @Test
+    public void testDeleteByCrnNotFound() {
+        thrown.expect(NotFoundException.class);
+        when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.empty());
+
+        underTest.deleteByCrn(DB_CRN_STRING);
+    }
+
+    @Test
+    public void testDeleteByCrnCreatedDatabase() {
+        DatabaseServerConfig server = new DatabaseServerConfig();
+        server.setId(1L);
+        server.setName("myserver");
+
+        DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
+        databaseConfig.setServer(server);
+        when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.of(databaseConfig));
+
+        underTest.deleteByCrn(DB_CRN_STRING);
+
+        assertTrue(databaseConfig.isArchived());
+        verify(repository).save(databaseConfig);
+
+        verify(driverFunctions).execWithDatabaseDriver(eq(server), any());
+    }
+
+    @Test
+    public void testDeleteMultipleByCrn() {
         Set<DatabaseConfig> databaseConfigs = new HashSet<>();
         databaseConfigs.add(getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME));
         databaseConfigs.add(getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME2));
-        Set<String> databasesToDelete = Set.of(DATABASE_NAME, DATABASE_NAME2);
-        when(repository.findAllByEnvironmentIdAndNameIn(ENVIRONMENT_CRN, databasesToDelete)).thenReturn(databaseConfigs);
+        Set<Crn> databasesToDelete = Set.of(DB_CRN, DB2_CRN);
+        when(repository.findByResourceCrnIn(databasesToDelete)).thenReturn(databaseConfigs);
 
-        underTest.delete(databasesToDelete, ENVIRONMENT_CRN);
+        underTest.deleteMultipleByCrn(Set.of(DB_CRN_STRING, DB2_CRN_STRING));
 
         assertThat(databaseConfigs, Every.everyItem(hasProperty("archived", is(true))));
     }
 
     @Test
-    public void testDeleteMultipleWhenNotFound() {
+    public void testDeleteMultipleByCrnWhenNotFound() {
         thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format("Database(s) for %s not found", DATABASE_NAME2));
+        thrown.expectMessage(String.format("Database(s) not found: %s", DB2_CRN_STRING));
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
-        Set<String> databasesToDelete = Set.of(DATABASE_NAME, DATABASE_NAME2);
-        when(repository.findAllByEnvironmentIdAndNameIn(ENVIRONMENT_CRN, databasesToDelete)).thenReturn(Set.of(databaseConfig));
+        databaseConfig.setResourceCrn(DB_CRN);
+        Set<Crn> databasesToDelete = Set.of(DB_CRN, DB2_CRN);
+        when(repository.findByResourceCrnIn(databasesToDelete)).thenReturn(Set.of(databaseConfig));
 
-        underTest.delete(databasesToDelete, ENVIRONMENT_CRN);
+        underTest.deleteMultipleByCrn(Set.of(DB_CRN_STRING, DB2_CRN_STRING));
 
         assertFalse(databaseConfig.isArchived());
     }
@@ -313,21 +367,39 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testGetFound() {
-        when(repository.findByEnvironmentIdAndName("id", db.getName())).thenReturn(Optional.of(db));
+    public void testGetByCrnFound() {
+        when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.of(db));
 
-        DatabaseConfig foundDb = underTest.get(db.getName(), "id");
+        DatabaseConfig foundDb = underTest.getByCrn(DB_CRN_STRING);
 
         assertEquals(db, foundDb);
     }
 
     @Test
-    public void testGetNotFound() {
+    public void testGetByCrnNotFound() {
+        thrown.expect(NotFoundException.class);
+
+        when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.empty());
+
+        underTest.getByCrn(DB_CRN_STRING);
+    }
+
+    @Test
+    public void testGetByNameFound() {
+        when(repository.findByEnvironmentIdAndName("id", db.getName())).thenReturn(Optional.of(db));
+
+        DatabaseConfig foundDb = underTest.getByName(db.getName(), "id");
+
+        assertEquals(db, foundDb);
+    }
+
+    @Test
+    public void testGetByNameNotFound() {
         thrown.expect(NotFoundException.class);
 
         when(repository.findByEnvironmentIdAndName("id", db.getName())).thenReturn(Optional.empty());
 
-        underTest.get(db.getName(), "id");
+        underTest.getByName(db.getName(), "id");
     }
 
 }

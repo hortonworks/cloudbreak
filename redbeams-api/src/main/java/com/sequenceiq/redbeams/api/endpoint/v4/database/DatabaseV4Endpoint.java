@@ -59,20 +59,36 @@ public interface DatabaseV4Endpoint {
     );
 
     @GET
-    @Path("/{name}")
+    @Path("/{crn}")
+    @ApiOperation(value = DatabaseOpDescription.GET_BY_CRN, notes = DatabaseNotes.GET_BY_CRN,
+            nickname = "getDatabaseByCrn")
+    DatabaseV4Response getByCrn(
+        @ValidCrn @NotNull @ApiParam(DatabaseParamDescriptions.CRN) @PathParam("crn") String crn
+    );
+
+    @GET
+    @Path("/name/{name}")
     @ApiOperation(value = DatabaseOpDescription.GET_BY_NAME, notes = DatabaseNotes.GET_BY_NAME,
-            nickname = "getDatabase")
-    DatabaseV4Response get(
+            nickname = "getDatabaseByName")
+    DatabaseV4Response getByName(
         @ValidCrn @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
         @QueryParam("environmentCrn") String environmentCrn,
         @ApiParam(DatabaseParamDescriptions.NAME) @PathParam("name") String name
     );
 
     @DELETE
-    @Path("/{name}")
+    @Path("/{crn}")
+    @ApiOperation(value = DatabaseOpDescription.DELETE_BY_CRN, notes = DatabaseNotes.DELETE_BY_CRN,
+            nickname = "deleteDatabaseByCrn")
+    DatabaseV4Response deleteByCrn(
+        @ValidCrn @NotNull @ApiParam(DatabaseParamDescriptions.CRN) @PathParam("crn") String crn
+    );
+
+    @DELETE
+    @Path("/name/{name}")
     @ApiOperation(value = DatabaseOpDescription.DELETE_BY_NAME, notes = DatabaseNotes.DELETE_BY_NAME,
-            nickname = "deleteDatabase")
-    DatabaseV4Response delete(
+            nickname = "deleteDatabaseByName")
+    DatabaseV4Response deleteByName(
         @ValidCrn @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
         @QueryParam("environmentCrn") String environmentCrn,
         @ApiParam(DatabaseParamDescriptions.NAME) @PathParam("name") String name
@@ -81,12 +97,10 @@ public interface DatabaseV4Endpoint {
     @DELETE
     @Path("")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.DELETE_MULTIPLE_BY_NAME, notes = DatabaseNotes.DELETE_MULTIPLE_BY_NAME,
-            nickname = "deleteMultipleDatabases")
+    @ApiOperation(value = DatabaseOpDescription.DELETE_MULTIPLE_BY_CRN, notes = DatabaseNotes.DELETE_MULTIPLE_BY_CRN,
+            nickname = "deleteMultipleDatabasesByCrn")
     DatabaseV4Responses deleteMultiple(
-        @ValidCrn @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
-        @QueryParam("environmentCrn") String environmentCrn,
-        @ApiParam(DatabaseParamDescriptions.NAMES) Set<String> names
+        @ApiParam(DatabaseParamDescriptions.CRNS) Set<@ValidCrn String> crns
     );
 
     @POST
