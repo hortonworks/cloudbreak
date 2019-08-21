@@ -18,6 +18,8 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.TerminationFailedException;
+import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
+import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Service;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -48,6 +50,9 @@ public class TerminationService {
     @Inject
     private Clock clock;
 
+    @Inject
+    private KerberosMgmtV1Service kerberosMgmtV1Service;
+
     public void finalizeTermination(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Date now = new Date();
@@ -58,6 +63,7 @@ public class TerminationService {
                 stack.setTerminated(clock.getCurrentTimeMillis());
                 terminateInstanceGroups(stack);
                 terminateMetaDataInstances(stack);
+                cleanupVault(stack);
                 stackService.save(stack);
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
                 return null;
@@ -84,6 +90,10 @@ public class TerminationService {
             instanceMetaDatas.add(metaData);
         }
         instanceMetaDataService.saveAll(instanceMetaDatas);
+    }
+
+    private void cleanupVault(Stack stack) throws DeleteException {
+        kerberosMgmtV1Service.cleanupByEnvironment(stack.getEnvironmentCrn(), stack.getAccountId());
     }
 
 }
