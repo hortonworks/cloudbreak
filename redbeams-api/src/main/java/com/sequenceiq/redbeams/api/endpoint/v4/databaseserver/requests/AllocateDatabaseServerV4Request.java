@@ -24,7 +24,9 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
-    @Size(max = 40, min = 5, message = "The length of the name must be between 5 to 40 inclusive")
+    public static final int RDS_NAME_MAX_LENGTH = 40;
+
+    @Size(max = RDS_NAME_MAX_LENGTH, min = 5, message = "The length of the name must be between 5 to " + RDS_NAME_MAX_LENGTH + " inclusive")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and must start with an alphanumeric character")
     @ApiModelProperty(value = DBStack.STACK_NAME)

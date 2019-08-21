@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_CRE
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_USER_NAME;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.CB_VERSION;
 import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
+import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request.RDS_NAME_MAX_LENGTH;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
+import com.sequenceiq.redbeams.service.uuid.UuidGeneratorService;
 
 @Component
 public class AllocateDatabaseServerV4RequestToDBStackConverter {
@@ -58,6 +60,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private static final DBStackStatus NEW_STATUS = new DBStackStatus();
 
     private static final List<CloudPlatform> SUPPORTED_CLOUD_PLATFORMS = List.of(CloudPlatform.AWS, CloudPlatform.AZURE);
+
+    private static final String DBSTACK_NAME_PREFIX = "dbstck-";
 
     @Value("${info.app.version:}")
     private String version;
@@ -78,6 +82,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private UserGeneratorService userGeneratorService;
 
     @Inject
+    private UuidGeneratorService uuidGeneratorService;
+
+    @Inject
     private NetworkParameterAdder networkParameterAdder;
 
     public DBStack convert(AllocateDatabaseServerV4Request source, String ownerCrnString) {
@@ -87,7 +94,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
         DBStack dbStack = new DBStack();
         CloudPlatform cloudPlatform = updateCloudPlatformAndRelatedFields(source, dbStack, environment.getCloudPlatform());
-        dbStack.setName(source.getName() != null ? source.getName() : generateDatabaseServerStackName());
+        dbStack.setName(source.getName() != null ? source.getName() : generateDatabaseServerStackName(environment.getName()));
         dbStack.setEnvironmentId(source.getEnvironmentCrn());
         setRegion(dbStack, environment);
         dbStack.setNetwork(buildNetwork(source.getNetwork(), environment, cloudPlatform));
@@ -268,8 +275,12 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return String.format("dbsvr-%s", UUID.randomUUID().toString());
     }
 
-    private static String generateDatabaseServerStackName() {
-        return String.format("dbstck-%s", UUID.randomUUID().toString());
+    private String generateDatabaseServerStackName(String environmentName) {
+        return String.format("%s%s-%s",
+                DBSTACK_NAME_PREFIX,
+                environmentName,
+                uuidGeneratorService.uuidVariableParts(RDS_NAME_MAX_LENGTH - DBSTACK_NAME_PREFIX.length() - environmentName.length() - 1)
+        );
     }
 }
 

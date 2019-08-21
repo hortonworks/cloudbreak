@@ -48,10 +48,10 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -59,6 +59,7 @@ import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
+import com.sequenceiq.redbeams.service.uuid.UuidGeneratorService;
 
 public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
@@ -104,6 +105,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     @Mock
     private NetworkParameterAdder networkParameterAdder;
+
+    @Mock
+    private UuidGeneratorService uuidGeneratorService;
 
     @InjectMocks
     private AllocateDatabaseServerV4RequestToDBStackConverter underTest;
@@ -200,6 +204,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         );
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
                 .withCloudPlatform(CloudPlatform.AWS.name())
+                .withName("envName")
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName("myRegion").build())
                 .withSecurityAccess(SecurityAccessResponse.builder().withDefaultSecurityGroupId(DEFAULT_SECURITY_GROUP_ID).build())
                 .withNetwork(EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
