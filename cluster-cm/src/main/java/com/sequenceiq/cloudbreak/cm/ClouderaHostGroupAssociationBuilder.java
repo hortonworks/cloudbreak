@@ -14,13 +14,13 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Service
-public class ClouderaHostGroupAssociationBuilder {
+class ClouderaHostGroupAssociationBuilder {
 
-    public static final String FQDN = "fqdn";
+    private static final String FQDN = "fqdn";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaHostGroupAssociationBuilder.class);
 
-    public Map<String, List<Map<String, String>>> buildHostGroupAssociations(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup) {
+    Map<String, List<Map<String, String>>> buildHostGroupAssociations(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup) {
         Map<String, List<Map<String, String>>> hostGroupMappings = new HashMap<>();
         LOGGER.debug("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
         for (Entry<HostGroup, List<InstanceMetaData>> hostGroupListEntry : instanceMetaDataByHostGroup.entrySet()) {
@@ -31,7 +31,7 @@ public class ClouderaHostGroupAssociationBuilder {
         return hostGroupMappings;
     }
 
-    public List<Map<String, String>> buildHostGroupAssociation(List<InstanceMetaData> instanceMetadataList) {
+    private List<Map<String, String>> buildHostGroupAssociation(List<InstanceMetaData> instanceMetadataList) {
         List<Map<String, String>> hostInfoForHostGroup = new ArrayList<>();
         for (InstanceMetaData metaData : instanceMetadataList) {
             Map<String, String> hostInfo = new HashMap<>();
