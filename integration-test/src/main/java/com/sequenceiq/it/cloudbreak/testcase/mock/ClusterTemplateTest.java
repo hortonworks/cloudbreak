@@ -1,11 +1,16 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.ClusterTemplateTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
@@ -65,29 +70,6 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 //                .then(ClusterTemplateTestAssertion.getResponse(), RunningParameter.key(generatedKey))
 //                .then(ClusterTemplateTestAssertion.checkStackTemplateAfterClusterTemplateCreation(), RunningParameter.key(generatedKey))
 //                .when(clusterTemplateTestClient.deleteV4(), RunningParameter.key(generatedKey))
-//                .validate();
-//    }
-
-//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-//    @Description(
-//            given = "a prepared environment",
-//            when = "a valid cluster template create request with spark type is sent",
-//            then = "the new cluster template with spark type is listed in the list cluster templates response"
-//    )
-//    public void testClusterTemplateWithType(TestContext testContext) {
-//        String generatedKey = resourcePropertyProvider().getName();
-//        String stackTemplate = resourcePropertyProvider().getName();
-//
-//        testContext
-//                .given(stackTemplate, StackTemplateTestDto.class)
-//                .withEnvironment(EnvironmentTestDto.class)
-//                .given(ClusterTemplateTestDto.class)
-//                .withName(resourcePropertyProvider().getName())
-//                .withType(SPARK)
-//                .capture(ClusterTemplateTestDto::count, RunningParameter.key(generatedKey))
-//                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-//                .when(clusterTemplateTestClient.listV4(), RunningParameter.key(generatedKey))
-//                .then(ClusterTemplateTestAssertion.containsType(SPARK), RunningParameter.key(generatedKey))
 //                .validate();
 //    }
 
@@ -202,6 +184,21 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 //                .await(STACK_DELETED, RunningParameter.force())
 //                .validate();
 //    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a prepared environment",
+            when = "a create cluster template request is sent with too long description",
+            then = "the a cluster template should not be created"
+    )
+    public void testListDefaultClusterTemplate(TestContext testContext) {
+        String generatedKey = resourcePropertyProvider().getName();
+        testContext
+                .given(ClusterTemplateTestDto.class)
+                .when(clusterTemplateTestClient.listV4(), RunningParameter.key(generatedKey))
+                .then(this::validateDefaultCount)
+                .validate();
+    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -343,4 +340,13 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                         .withExpectedMessage("The length of the cluster's name has to be in range of 5 to 40"))
                 .validate();
     }
+
+    private ClusterTemplateTestDto validateDefaultCount(TestContext tc, ClusterTemplateTestDto entity, CloudbreakClient cc) {
+        assertNotNull(entity);
+        assertNotNull(entity.getResponses());
+        long defaultCount = entity.getResponses().stream().filter(template -> ResourceStatus.DEFAULT.equals(template.getStatus())).count();
+        assertEquals("Should have 5 of default cluster templates", 5, defaultCount);
+        return entity;
+    }
+
 }
