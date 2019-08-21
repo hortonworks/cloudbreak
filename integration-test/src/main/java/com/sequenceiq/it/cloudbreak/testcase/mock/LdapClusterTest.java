@@ -41,7 +41,7 @@ public class LdapClusterTest extends AbstractIntegrationTest {
     public void testCreateClusterWithLdap(MockedTestContext testContext) {
         DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
         dynamicRouteStack.get(ClouderaManagerMock.READ_AUTH_ROLES,
-                (request, response) -> new ApiAuthRoleMetadataList().items(List.of(new ApiAuthRoleMetadata().role("ROLE_ADMIN"))));
+                (request, response) -> new ApiAuthRoleMetadataList().items(List.of(new ApiAuthRoleMetadata().role("ROLE_CONFIGURATOR"))));
         dynamicRouteStack.post(ClouderaManagerMock.API_ROOT + "/externalUserMappings",
                 (request, response) -> new ApiExternalUserMappingList());
 

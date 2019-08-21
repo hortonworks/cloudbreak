@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -46,14 +47,14 @@ public class ClouderaManagerLdapService {
             AuthRolesResourceApi authRolesResourceApi = clouderaManagerClientFactory.getAuthRolesResourceApi(client);
             ApiAuthRoleMetadataList roleMetadataList = authRolesResourceApi.readAuthRolesMetadata(null);
             if (roleMetadataList.getItems() != null) {
-                Optional<ApiAuthRoleMetadata> adminMetadata = roleMetadataList.getItems().stream().filter(rm -> "ROLE_ADMIN".equals(rm.getRole())).findFirst();
+                Optional<ApiAuthRoleMetadata> adminMetadata = roleMetadataList.getItems().stream().filter(toRole("ROLE_CONFIGURATOR")).findFirst();
                 if (adminMetadata.isPresent() && StringUtils.isNotBlank(ldapView.getAdminGroup())) {
                     addGroupMapping(ldapView, externalUserMappingsResourceApi, adminMetadata.get(), ldapView.getAdminGroup());
                 } else {
                     LOGGER.info("Cannot setup admin group mapping. Admin metadata present: [{}] Admin group: [{}]",
                             adminMetadata.isPresent(), ldapView.getAdminGroup());
                 }
-                Optional<ApiAuthRoleMetadata> userMetadata = roleMetadataList.getItems().stream().filter(rm -> "ROLE_USER".equals(rm.getRole())).findFirst();
+                Optional<ApiAuthRoleMetadata> userMetadata = roleMetadataList.getItems().stream().filter(toRole("ROLE_USER")).findFirst();
                 if (userMetadata.isPresent() && StringUtils.isNotBlank(ldapView.getUserGroup())) {
                     addGroupMapping(ldapView, externalUserMappingsResourceApi, userMetadata.get(), ldapView.getUserGroup());
                 } else {
@@ -62,6 +63,10 @@ public class ClouderaManagerLdapService {
                 }
             }
         }
+    }
+
+    private Predicate<ApiAuthRoleMetadata> toRole(String role) {
+        return rm -> role.equals(rm.getRole());
     }
 
     private void addGroupMapping(LdapView ldapView, ExternalUserMappingsResourceApi cmApi, ApiAuthRoleMetadata role, String ldapGroup) throws ApiException {

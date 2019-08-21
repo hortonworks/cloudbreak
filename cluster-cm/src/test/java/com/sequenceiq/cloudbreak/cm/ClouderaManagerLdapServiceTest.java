@@ -99,7 +99,7 @@ public class ClouderaManagerLdapServiceTest {
         // GIVEN
         LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
-                new ApiAuthRoleMetadata().displayName("role").uuid("uuid").role("ROLE_ADMIN")));
+                new ApiAuthRoleMetadata().displayName("role").uuid("uuid").role("ROLE_CONFIGURATOR")));
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig);
         // THEN
