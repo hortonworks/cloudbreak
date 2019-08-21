@@ -1,16 +1,14 @@
-package com.sequenceiq.datalake.controller.mapper;
+package com.sequenceiq.cloudbreak.controller.mapper;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.ext.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-@Provider
 @Component
 public class JaxRsNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundException> {
 

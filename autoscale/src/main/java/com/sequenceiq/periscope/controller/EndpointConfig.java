@@ -18,6 +18,7 @@ import com.sequenceiq.periscope.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.HttpMediaTypeNotSupportedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.HttpMessageNotReadableExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.HttpRequestMethodNotSupportedExceptionMapper;
+import com.sequenceiq.periscope.controller.mapper.JaxRsNotFoundExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.NotFoundExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.ParseExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.RuntimeExceptionMapper;
@@ -74,6 +75,7 @@ public class EndpointConfig extends ResourceConfig {
         register(WebApplicaitonExceptionMapper.class);
         register(ParseExceptionMapper.class);
         register(ConstraintViolationExceptionMapper.class);
+        register(JaxRsNotFoundExceptionMapper.class);
 
         register(RuntimeExceptionMapper.class);
         register(DefaultExceptionMapper.class);
