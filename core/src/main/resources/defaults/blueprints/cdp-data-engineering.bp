@@ -187,6 +187,12 @@
       {
         "refName": "hue",
         "serviceType": "HUE",
+        "serviceConfigs": [
+          {
+            "name": "hue_service_safety_valve",
+            "value": "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,hive,metastore,pig"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "hue-HUE_SERVER-BASE",

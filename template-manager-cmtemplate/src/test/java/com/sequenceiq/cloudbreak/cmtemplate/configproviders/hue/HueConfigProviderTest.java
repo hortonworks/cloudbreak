@@ -38,8 +38,6 @@ public class HueConfigProviderTest {
 
     private static final String PASSWORD = "password";
 
-    private static final String SAFETY_VALVE_VALUE = "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,hive,metastore,pig";
-
     private HueConfigProvider underTest;
 
     @Before
@@ -59,8 +57,7 @@ public class HueConfigProviderTest {
                 new SimpleEntry<>("database_name", "hue-hue_database_name"),
                 new SimpleEntry<>("database_type", "hue-hue_database_type"),
                 new SimpleEntry<>("database_user", "hue-hue_database_user"),
-                new SimpleEntry<>("database_password", "hue-hue_database_password"),
-                new SimpleEntry<>("hue_service_safety_valve", "hue-hue_service_safety_valve")
+                new SimpleEntry<>("database_password", "hue-hue_database_password")
         );
     }
 
@@ -82,8 +79,7 @@ public class HueConfigProviderTest {
                 new SimpleEntry<>("hue-hue_database_name", DB_NAME),
                 new SimpleEntry<>("hue-hue_database_type", DB_PROVIDER),
                 new SimpleEntry<>("hue-hue_database_user", USER_NAME),
-                new SimpleEntry<>("hue-hue_database_password", PASSWORD),
-                new SimpleEntry<>("hue-hue_service_safety_valve", SAFETY_VALVE_VALUE));
+                new SimpleEntry<>("hue-hue_database_password", PASSWORD));
     }
 
     @Test
