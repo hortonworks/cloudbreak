@@ -239,7 +239,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     private Json getTags(Crn ownerCrn, CloudPlatform cloudPlatform, long now) {
         // freeipa currently uses account ID for username / owner
-        String user = ownerCrn.getResource().toString();
+        String user = ownerCrn.getUserId();
 
         Map<String, String> defaultTags = new HashMap<>();
         defaultTags.put(safeTagString(CB_USER_NAME.key(), cloudPlatform), safeTagString(user, cloudPlatform));

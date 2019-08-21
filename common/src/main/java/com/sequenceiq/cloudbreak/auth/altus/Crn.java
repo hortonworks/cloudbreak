@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -444,6 +445,21 @@ public class Crn {
      */
     public String getResource() {
         return resource;
+    }
+
+    /**
+     * Returns the user ID for this CRN. A type 0 user CRN is composed of an
+     * external ID and the user ID separated by a slash; a type 1 user CRN has
+     * only the user ID.
+     *
+     * @return the user ID
+     * @throws IllegalStateException if this is not a user CRN
+     */
+    public String getUserId() {
+        checkState(resourceType == ResourceType.USER,
+            String.format("CRN %s has no user ID because it is of type %s", toString(), resourceType));
+        int idx = resource.indexOf('/');
+        return idx == -1 ? resource : resource.substring(idx + 1);
     }
 
     @Override
