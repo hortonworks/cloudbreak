@@ -94,7 +94,7 @@ public class AbstractRedbeamsProvisionActionTest {
         assertEquals(Variant.variant(dbStack.getPlatformVariant()), ctx.getCloudContext().getVariant());
         assertEquals(Location.location(Region.region(dbStack.getRegion()), AvailabilityZone.availabilityZone(dbStack.getAvailabilityZone())),
             ctx.getCloudContext().getLocation());
-        assertEquals(dbStack.getOwnerCrn().getResource(), ctx.getCloudContext().getUserId());
+        assertEquals(dbStack.getOwnerCrn().getUserId(), ctx.getCloudContext().getUserId());
         assertEquals(dbStack.getOwnerCrn().getAccountId(), ctx.getCloudContext().getAccountId());
 
         assertEquals(cloudCredential, ctx.getCloudCredential());

@@ -96,7 +96,7 @@
       "Description" : "The instances will have this parameter as an Owner tag.",
       "Type" : "String",
       "MinLength": "1",
-      "MaxLength": "50"
+      "MaxLength": "200"
     }
   },
 

@@ -35,6 +35,26 @@ kinit_as_hdfs()     {
       echo "Couldn't kinit as hdfs"
       exit 1
     fi
+    # If we got an authentication error, maybe our cookie was somehow bad as well,
+    # so make sure we get a new one on the next attempt.
+    rm -f $WEBHDFS_COOKIE_JAR
+}
+
+webhdfs_command()   {
+    local method=$1
+    local path=$2
+    local query=$3
+    exec {out_fd}>&1
+    local http_code=$(curl --cookie-jar $WEBHDFS_COOKIE_JAR --cookie $WEBHDFS_COOKIE_JAR \
+      -o >(cat >&${out_fd}) \
+      --silent \
+      -w "%{http_code}" \
+      -X $method --negotiate -u : \
+      "$WEBHDFS_URL$path?$query")
+    exec {out_fd}>&-
+    if [ "$http_code" -ne 200 ]; then
+      return $http_code
+    fi
 }
 
 ### BEGIN OF SCRIPT ###
@@ -48,6 +68,12 @@ exlock_now || exit 1
 EXISTING_USERS_FILE=/tmp/existing_users_file
 HDFS_KEYTAB=/run/cloudera-scm-agent/process/$(ls -t /run/cloudera-scm-agent/process/ | grep hdfs-NAMENODE$ | head -n 1)/hdfs.keytab
 PATH_PREFIX="/user"
+
+export KRB5CCNAME=/tmp/krb5cc_cloudbreak_$EUID
+
+NAMENODE_HTTP_ADDRESS=$(hdfs getconf -confkey dfs.namenode.http-address)
+WEBHDFS_URL=http://$NAMENODE_HTTP_ADDRESS/webhdfs/v1
+WEBHDFS_COOKIE_JAR=/tmp/cloudbreak-webhdfs.cookies
 
 klist -s
 if [[ $? -ne 0 ]]; then
@@ -98,17 +124,21 @@ else
   echo "Will chown the created home directories. This may take a while depending on the number of directories."
   for user in "${users[@]}";
   do
+    # Use WebHDFS to do the 'chown' commands, since the HDFS CLI doesn't offer a batch chown, and webhdfs
+    # is hundreds or thousands of times faster than launching a JVM.
     if [[ ${hasharr[$user]} != "exist" ]]; then
-      hdfs dfs -chown $user:$user $PATH_PREFIX/$user
-      if [[ $? -ne 0 ]]; then
+      chown_output=$(webhdfs_command PUT $PATH_PREFIX/$user "op=SETOWNER&owner=$user&group=$user")
+      chown_status=$?
+      if [[ $chown_status -eq 401 ]]; then
+        echo 'Negotiation failed, retrying after a kinit...'
         kinit_as_hdfs
-        hdfs dfs -chown $user:$user $PATH_PREFIX/$user
-        if [[ $? -ne 0 ]]; then
-          echo "chown failed for user home dirs even after a kinit as hdfs user.."
-          exit 1
-        else
-          echo "chown'ed the home dir $PATH_PREFIX/$user"
-        fi
+        chown_output=$(webhdfs_command PUT $PATH_PREFIX/$user "op=SETOWNER&owner=$user&group=$user")
+	chown_status=$?
+      fi
+      if [[ $chown_status -ne 0 ]]; then
+        echo "chown failed for user home dirs even after a kinit as hdfs user.."
+        echo $chown_output
+        exit 1
       else
         echo "chown'ed the home dir $PATH_PREFIX/$user"
       fi
