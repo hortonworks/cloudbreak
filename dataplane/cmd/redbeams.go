@@ -119,13 +119,20 @@ func init() {
 						},
 					},
 					{
-						Name:   "describe",
-						Usage:  "describe a database",
-						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Name:        "describe",
+						Usage:       "describe a database",
+						Description: "To specify a database, either provide its CRN, or both its environment CRN and name.",
+						Before: func(c *cli.Context) error {
+							err := cf.CheckConfigAndCommandFlagsWithoutWorkspace(c)
+							if err != nil {
+								return err
+							}
+							return cf.CheckResourceAddressingFlags(c)
+						},
+						Flags:  fl.NewFlagBuilder().AddResourceAddressingFlags().AddAuthenticationFlags().AddOutputFlag().Build(),
 						Action: redbeams.GetDatabase,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+							for _, f := range fl.NewFlagBuilder().AddResourceAddressingFlags().AddAuthenticationFlags().AddOutputFlag().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -155,13 +162,20 @@ func init() {
 						},
 					},
 					{
-						Name:   "delete",
-						Usage:  "delete a database",
-						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().Build(),
+						Name:        "delete",
+						Usage:       "delete a database",
+						Description: "To specify a database, either provide its CRN, or both its environment CRN and name.",
+						Before: func(c *cli.Context) error {
+							err := cf.CheckConfigAndCommandFlagsWithoutWorkspace(c)
+							if err != nil {
+								return err
+							}
+							return cf.CheckResourceAddressingFlags(c)
+						},
+						Flags:  fl.NewFlagBuilder().AddResourceAddressingFlags().AddAuthenticationFlags().Build(),
 						Action: redbeams.DeleteDatabase,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCrn, fl.FlName).AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddResourceAddressingFlags().AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},

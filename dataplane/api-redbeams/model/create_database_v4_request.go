@@ -17,6 +17,11 @@ import (
 // swagger:model CreateDatabaseV4Request
 type CreateDatabaseV4Request struct {
 
+	// Description of the database
+	// Max Length: 1000000
+	// Min Length: 0
+	DatabaseDescription *string `json:"databaseDescription,omitempty"`
+
 	// Name of the database
 	// Required: true
 	DatabaseName *string `json:"databaseName"`
@@ -34,6 +39,10 @@ type CreateDatabaseV4Request struct {
 func (m *CreateDatabaseV4Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateDatabaseDescription(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateDatabaseName(formats); err != nil {
 		res = append(res, err)
 	}
@@ -49,6 +58,23 @@ func (m *CreateDatabaseV4Request) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *CreateDatabaseV4Request) validateDatabaseDescription(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DatabaseDescription) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("databaseDescription", "body", string(*m.DatabaseDescription), 0); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("databaseDescription", "body", string(*m.DatabaseDescription), 1000000); err != nil {
+		return err
+	}
+
 	return nil
 }
 

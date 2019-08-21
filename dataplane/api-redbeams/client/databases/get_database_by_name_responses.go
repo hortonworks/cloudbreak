@@ -16,17 +16,17 @@ import (
 	model "github.com/hortonworks/cb-cli/dataplane/api-redbeams/model"
 )
 
-// DeleteDatabaseReader is a Reader for the DeleteDatabase structure.
-type DeleteDatabaseReader struct {
+// GetDatabaseByNameReader is a Reader for the GetDatabaseByName structure.
+type GetDatabaseByNameReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *DeleteDatabaseReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetDatabaseByNameReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewDeleteDatabaseOK()
+		result := NewGetDatabaseByNameOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *DeleteDatabaseReader) ReadResponse(response runtime.ClientResponse, con
 	}
 }
 
-// NewDeleteDatabaseOK creates a DeleteDatabaseOK with default headers values
-func NewDeleteDatabaseOK() *DeleteDatabaseOK {
-	return &DeleteDatabaseOK{}
+// NewGetDatabaseByNameOK creates a GetDatabaseByNameOK with default headers values
+func NewGetDatabaseByNameOK() *GetDatabaseByNameOK {
+	return &GetDatabaseByNameOK{}
 }
 
-/*DeleteDatabaseOK handles this case with default header values.
+/*GetDatabaseByNameOK handles this case with default header values.
 
 successful operation
 */
-type DeleteDatabaseOK struct {
+type GetDatabaseByNameOK struct {
 	Payload *model.DatabaseV4Response
 }
 
-func (o *DeleteDatabaseOK) Error() string {
-	return fmt.Sprintf("[DELETE /v4/databases/{name}][%d] deleteDatabaseOK  %+v", 200, o.Payload)
+func (o *GetDatabaseByNameOK) Error() string {
+	return fmt.Sprintf("[GET /v4/databases/name/{name}][%d] getDatabaseByNameOK  %+v", 200, o.Payload)
 }
 
-func (o *DeleteDatabaseOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetDatabaseByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.DatabaseV4Response)
 

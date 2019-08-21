@@ -285,20 +285,31 @@ func ListDatabases(c *cli.Context) {
 
 func GetDatabase(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "Get a database")
-	envCrn := c.String(fl.FlEnvironmentCrn.Name)
-	name := c.String(fl.FlName.Name)
 	redbeamsDbClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.Databases
 
-	log.Infof("[GetDB] Getting database with name: %s", name)
-	resp, err := redbeamsDbClient.GetDatabase(databases.NewGetDatabaseParams().WithEnvironmentCrn(envCrn).WithName(name), nil)
-	if err != nil {
-		commonutils.LogErrorAndExit(err)
+	var db *model.DatabaseV4Response
+	crn := c.String(fl.FlCrn.Name)
+	if len(crn) != 0 {
+		log.Infof("[GetDB] Getting database with CRN: %s", crn)
+		resp, err := redbeamsDbClient.GetDatabaseByCrn(databases.NewGetDatabaseByCrnParams().WithCrn(crn), nil)
+		if err != nil {
+			commonutils.LogErrorAndExit(err)
+		}
+		db = resp.Payload
+	} else {
+		envCrn := c.String(fl.FlEnvironmentCrn.Name)
+		name := c.String(fl.FlName.Name)
+		log.Infof("[GetDB] Getting database with name: %s", name)
+		resp, err := redbeamsDbClient.GetDatabaseByName(databases.NewGetDatabaseByNameParams().WithEnvironmentCrn(envCrn).WithName(name), nil)
+		if err != nil {
+			commonutils.LogErrorAndExit(err)
+		}
+		db = resp.Payload
 	}
-	db := resp.Payload
 
 	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	row := NewDetailsFromDbResponse(db)
-	output.Write(serverListHeader, row)
+	output.Write(dbListHeader, row)
 }
 
 func CreateDatabase(c *cli.Context) {
@@ -352,14 +363,23 @@ func RegisterDatabase(c *cli.Context) {
 
 func DeleteDatabase(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "Delete a registered database")
-	envCrn := c.String(fl.FlEnvironmentCrn.Name)
-	name := c.String(fl.FlName.Name)
 	redbeamsDbClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.Databases
-
-	log.Infof("[DeleteDB] Deleting database with name: %s", name)
-	result, err := redbeamsDbClient.DeleteDatabase(databases.NewDeleteDatabaseParams().WithEnvironmentCrn(envCrn).WithName(name), nil)
-	if err != nil {
-		commonutils.LogErrorAndExit(err)
+	crn := c.String(fl.FlCrn.Name)
+	if len(crn) != 0 {
+		log.Infof("[DeleteDB] Deleting database with CRN: %s", crn)
+		result, err := redbeamsDbClient.DeleteDatabaseByCrn(databases.NewDeleteDatabaseByCrnParams().WithCrn(crn), nil)
+		if err != nil {
+			commonutils.LogErrorAndExit(err)
+		}
+		log.Infof("[DeleteDB] Deleted database with CRN: %s Details: %s", crn, result)
+	} else {
+		envCrn := c.String(fl.FlEnvironmentCrn.Name)
+		name := c.String(fl.FlName.Name)
+		log.Infof("[DeleteDB] Deleting database with name: %s", name)
+		result, err := redbeamsDbClient.DeleteDatabaseByName(databases.NewDeleteDatabaseByNameParams().WithEnvironmentCrn(envCrn).WithName(name), nil)
+		if err != nil {
+			commonutils.LogErrorAndExit(err)
+		}
+		log.Infof("[DeleteDB] Deleted database with name: %s Details: %s", name, result)
 	}
-	log.Infof("[DeleteDB] Deleted database with name: %s Details: %s", name, result)
 }

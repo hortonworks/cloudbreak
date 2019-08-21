@@ -25,25 +25,25 @@ type Client struct {
 }
 
 /*
-DeleteDatabase deletes database config by name
+DeleteDatabaseByCrn deletes a database config by c r n
 
-Deletes a database by its name. If the database was registered with this service, then this operation merely deregisters it. Otherwise, this operation deletes the database from the database server, along with its corresponding user.
+Deletes a database by its CRN. If the database was registered with this service, then this operation merely deregisters it. Otherwise, this operation deletes the database from the database server, along with its corresponding user.
 */
-func (a *Client) DeleteDatabase(params *DeleteDatabaseParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteDatabaseOK, error) {
+func (a *Client) DeleteDatabaseByCrn(params *DeleteDatabaseByCrnParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteDatabaseByCrnOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteDatabaseParams()
+		params = NewDeleteDatabaseByCrnParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "deleteDatabase",
+		ID:                 "deleteDatabaseByCrn",
 		Method:             "DELETE",
-		PathPattern:        "/v4/databases/{name}",
+		PathPattern:        "/v4/databases/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteDatabaseReader{formats: a.formats},
+		Reader:             &DeleteDatabaseByCrnReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -51,30 +51,61 @@ func (a *Client) DeleteDatabase(params *DeleteDatabaseParams, authInfo runtime.C
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteDatabaseOK), nil
+	return result.(*DeleteDatabaseByCrnOK), nil
 
 }
 
 /*
-DeleteMultipleDatabases deletes multiple database configs by name
+DeleteDatabaseByName deletes a database config by name
 
-Deletes multiple databases, each by name. See the notes on the single delete operation for details.
+Deletes a database by its name. If the database was registered with this service, then this operation merely deregisters it. Otherwise, this operation deletes the database from the database server, along with its corresponding user.
 */
-func (a *Client) DeleteMultipleDatabases(params *DeleteMultipleDatabasesParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteMultipleDatabasesOK, error) {
+func (a *Client) DeleteDatabaseByName(params *DeleteDatabaseByNameParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteDatabaseByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteMultipleDatabasesParams()
+		params = NewDeleteDatabaseByNameParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "deleteMultipleDatabases",
+		ID:                 "deleteDatabaseByName",
+		Method:             "DELETE",
+		PathPattern:        "/v4/databases/name/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteDatabaseByNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteDatabaseByNameOK), nil
+
+}
+
+/*
+DeleteMultipleDatabasesByCrn deletes multiple database configs by c r n
+
+Deletes multiple databases, each by CRN. See the notes on the single delete operation for details.
+*/
+func (a *Client) DeleteMultipleDatabasesByCrn(params *DeleteMultipleDatabasesByCrnParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteMultipleDatabasesByCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteMultipleDatabasesByCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteMultipleDatabasesByCrn",
 		Method:             "DELETE",
 		PathPattern:        "/v4/databases",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteMultipleDatabasesReader{formats: a.formats},
+		Reader:             &DeleteMultipleDatabasesByCrnReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -82,30 +113,30 @@ func (a *Client) DeleteMultipleDatabases(params *DeleteMultipleDatabasesParams, 
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteMultipleDatabasesOK), nil
+	return result.(*DeleteMultipleDatabasesByCrnOK), nil
 
 }
 
 /*
-GetDatabase gets database config by name
+GetDatabaseByCrn gets a database config by c r n
 
-Gets information on a database by its name.
+Gets information on a database by its CRN.
 */
-func (a *Client) GetDatabase(params *GetDatabaseParams, authInfo runtime.ClientAuthInfoWriter) (*GetDatabaseOK, error) {
+func (a *Client) GetDatabaseByCrn(params *GetDatabaseByCrnParams, authInfo runtime.ClientAuthInfoWriter) (*GetDatabaseByCrnOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetDatabaseParams()
+		params = NewGetDatabaseByCrnParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getDatabase",
+		ID:                 "getDatabaseByCrn",
 		Method:             "GET",
-		PathPattern:        "/v4/databases/{name}",
+		PathPattern:        "/v4/databases/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{""},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetDatabaseReader{formats: a.formats},
+		Reader:             &GetDatabaseByCrnReader{formats: a.formats},
 		AuthInfo:           authInfo,
 		Context:            params.Context,
 		Client:             params.HTTPClient,
@@ -113,7 +144,38 @@ func (a *Client) GetDatabase(params *GetDatabaseParams, authInfo runtime.ClientA
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetDatabaseOK), nil
+	return result.(*GetDatabaseByCrnOK), nil
+
+}
+
+/*
+GetDatabaseByName gets a database config by name
+
+Gets information on a database by its name.
+*/
+func (a *Client) GetDatabaseByName(params *GetDatabaseByNameParams, authInfo runtime.ClientAuthInfoWriter) (*GetDatabaseByNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetDatabaseByNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getDatabaseByName",
+		Method:             "GET",
+		PathPattern:        "/v4/databases/name/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetDatabaseByNameReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetDatabaseByNameOK), nil
 
 }
 
