@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -64,8 +63,6 @@ public class KerberosMgmtV1Service {
 
     private static final String IPA_STACK_NOT_FOUND = "Stack for IPA server not found.";
 
-    private static final String VAULT_SECRET_TYPE = "ServiceKeytab";
-
     private static final String KEYTAB_SUB_TYPE = "keytab";
 
     private static final String PRINCIPAL_SUB_TYPE = "serviceprincipal";
@@ -90,8 +87,7 @@ public class KerberosMgmtV1Service {
     private StringToSecretResponseConverter stringToSecretResponseConverter;
 
     public ServiceKeytabResponse generateServiceKeytab(ServiceKeytabRequest request, String accountId) throws FreeIpaClientException {
-        LOGGER.debug("Request to generate keytab for Service:{} Host:{} in Environment:{}", request.getServiceName(), request.getServerHostName(),
-                request.getEnvironmentCrn());
+        LOGGER.debug("Request to generate keytab: {}", request);
         ServiceKeytabResponse response = new ServiceKeytabResponse();
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
@@ -110,6 +106,7 @@ public class KerberosMgmtV1Service {
     }
 
     public ServiceKeytabResponse getExistingServiceKeytab(ServiceKeytabRequest request, String accountId) throws FreeIpaClientException {
+        LOGGER.debug("Request to get keytab for account {}: {}", accountId, request);
         ServiceKeytabResponse response = new ServiceKeytabResponse();
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
@@ -123,23 +120,25 @@ public class KerberosMgmtV1Service {
     }
 
     public void deleteServicePrincipal(ServicePrincipalRequest request, String accountId) throws FreeIpaClientException, DeleteException {
+        LOGGER.debug("Request to delete service principal for account {}: {}", accountId, request);
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
         String canonicalPrincipal = constructCanonicalPrincipal(request.getServiceName(), request.getServerHostName(), realm);
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
         delService(canonicalPrincipal, ipaClient);
-        VaultPathBuilder b = new VaultPathBuilder()
-                .withOptionalClusterCrn()
+        VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
+                .enableGeneratingClusterCrnIfNotPresent()
                 .withAccountId(accountId)
                 .withEnvironmentCrn(request.getEnvironmentCrn())
                 .withClusterCrn(request.getClusterCrn())
                 .withServerHostName(request.getServerHostName())
                 .withServiceName(request.getServiceName());
-        recursivelyCleanupVault(b.withSubType(PRINCIPAL_SUB_TYPE).build());
-        recursivelyCleanupVault(b.withSubType(KEYTAB_SUB_TYPE).build());
+        recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
+        recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
     }
 
     public void deleteHost(HostRequest request, String accountId) throws FreeIpaClientException, DeleteException {
+        LOGGER.debug("Request to delete host for account {}: {}", accountId, request);
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
 
@@ -151,17 +150,18 @@ public class KerberosMgmtV1Service {
             delService(service, ipaClient);
         }
         delHost(request.getServerHostName(), ipaClient);
-        VaultPathBuilder b = new VaultPathBuilder()
-                .withOptionalClusterCrn()
+        VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
+                .enableGeneratingClusterCrnIfNotPresent()
                 .withAccountId(accountId)
                 .withEnvironmentCrn(request.getEnvironmentCrn())
                 .withClusterCrn(request.getClusterCrn())
                 .withServerHostName(request.getServerHostName());
-        recursivelyCleanupVault(b.withSubType(PRINCIPAL_SUB_TYPE).build());
-        recursivelyCleanupVault(b.withSubType(KEYTAB_SUB_TYPE).build());
+        recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
+        recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
     }
 
     public void cleanupByCluster(VaultCleanupRequest request, String accountId) throws DeleteException {
+        LOGGER.debug("Request to cleanup vault for a cluster for account {}: {}", accountId, request);
         try {
             MDCBuilder.addEnvToMdcContext(request.getEnvironmentCrn());
             MDCBuilder.addAccountToMdcContext(accountId);
@@ -170,18 +170,34 @@ public class KerberosMgmtV1Service {
                 throw new DeleteException("Cluster CRN is required");
             }
             MDCBuilder.addResourceCrnToMdcContext(request.getClusterCrn());
-            VaultPathBuilder b = new VaultPathBuilder()
-                    .withAccountId(accountId)
-                    .withEnvironmentCrn(request.getEnvironmentCrn())
-                    .withClusterCrn(request.getClusterCrn());
-            recursivelyCleanupVault(b.withSubType(PRINCIPAL_SUB_TYPE).build());
-            recursivelyCleanupVault(b.withSubType(KEYTAB_SUB_TYPE).build());
+            cleanupSecrets(request.getEnvironmentCrn(), request.getClusterCrn(), accountId);
         } catch (DeleteException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Cleanup cluster failed " + e.getLocalizedMessage(), e);
-            throw new DeleteException("Failed to cleanup");
+            throw new DeleteException("Failed to cleanup " + e.getLocalizedMessage());
         }
+    }
+
+    public void cleanupByEnvironment(String environmentCrn, String accountId) throws DeleteException {
+        LOGGER.debug("Request to cleanup vault for an environment for account {}: {}", accountId, environmentCrn);
+        try {
+            MDCBuilder.addEnvToMdcContext(environmentCrn);
+            MDCBuilder.addAccountToMdcContext(accountId);
+            cleanupSecrets(environmentCrn, null, accountId);
+        } catch (Exception e) {
+            LOGGER.error("Cleanup cluster failed " + e.getLocalizedMessage(), e);
+            throw new DeleteException("Failed to cleanup " + e.getLocalizedMessage());
+        }
+    }
+
+    private void cleanupSecrets(String environmentCrn, String clusterCrn, String accountId) {
+        VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
+                .withAccountId(accountId)
+                .withEnvironmentCrn(environmentCrn)
+                .withClusterCrn(clusterCrn);
+        recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
+        recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
     }
 
     private void recursivelyCleanupVault(String path) {
@@ -353,7 +369,7 @@ public class KerberosMgmtV1Service {
     private SecretResponse getSecretResponseForPrincipal(ServiceKeytabRequest request, String accountId, String principal) {
         try {
             String path = new VaultPathBuilder()
-                    .withOptionalClusterCrn()
+                    .enableGeneratingClusterCrnIfNotPresent()
                     .withAccountId(accountId)
                     .withSubType(PRINCIPAL_SUB_TYPE)
                     .withEnvironmentCrn(request.getEnvironmentCrn())
@@ -372,7 +388,7 @@ public class KerberosMgmtV1Service {
     private SecretResponse getSecretResponseForKeytab(ServiceKeytabRequest request, String accountId, String keytab) {
         try {
             String path = new VaultPathBuilder()
-                    .withOptionalClusterCrn()
+                    .enableGeneratingClusterCrnIfNotPresent()
                     .withAccountId(accountId)
                     .withSubType(KEYTAB_SUB_TYPE)
                     .withEnvironmentCrn(request.getEnvironmentCrn())
@@ -390,98 +406,6 @@ public class KerberosMgmtV1Service {
 
     private static String constructCanonicalPrincipal(String serviceName, String hostName, String realm) {
         return serviceName + "/" + hostName + "@" + realm;
-    }
-
-    private static class VaultPathBuilder {
-
-        private boolean optionalClusterCrn;
-
-        private Optional<String> accountId = Optional.empty();
-
-        private Optional<String> subType = Optional.empty();
-
-        private Optional<String> environmentCrn = Optional.empty();
-
-        private Optional<String> clusterCrn = Optional.empty();
-
-        private Optional<String> serverHostName = Optional.empty();
-
-        private Optional<String> serviceName = Optional.empty();
-
-        public VaultPathBuilder withOptionalClusterCrn() {
-            optionalClusterCrn = true;
-            return this;
-        }
-
-        public VaultPathBuilder withAccountId(String accountId) {
-            this.accountId = Optional.ofNullable(accountId);
-            return this;
-        }
-
-        public VaultPathBuilder withSubType(String subType) {
-            this.subType = Optional.ofNullable(subType);
-            return this;
-        }
-
-        public VaultPathBuilder withEnvironmentCrn(String environmentCrn) {
-            String envCrn = StringUtils.substringAfterLast(environmentCrn, ":");
-            this.environmentCrn = Optional.ofNullable(envCrn);
-            return this;
-        }
-
-        public VaultPathBuilder withClusterCrn(String clusterCrn) {
-            String crn = StringUtils.substringAfterLast(clusterCrn, ":");
-            this.clusterCrn = Optional.ofNullable(crn);
-            return this;
-        }
-
-        public VaultPathBuilder withServerHostName(String serverHostName) {
-            this.serverHostName = Optional.ofNullable(serverHostName);
-            return this;
-        }
-
-        public VaultPathBuilder withServiceName(String serviceName) {
-            this.serviceName = Optional.ofNullable(serviceName);
-            return this;
-        }
-
-        public String build() {
-            // Sample Vault Path "/enginePath/appPath/account-id/Type/SubType/envCrn/clusterCrn/hostname/serviceName"
-            StringBuilder ret = new StringBuilder();
-            List<Optional<String>> requiredEntries = Arrays.asList(
-                    accountId,
-                    Optional.of(VAULT_SECRET_TYPE),
-                    subType,
-                    environmentCrn
-            );
-
-            requiredEntries.stream().forEachOrdered(entry -> {
-                ret.append(entry.orElseThrow(() -> new IllegalStateException("Missing required vault path entry.")));
-                ret.append("/");
-            });
-
-            ret.append(clusterCrn.orElseGet(() -> {
-                if (optionalClusterCrn) {
-                    LOGGER.debug("Cluster CRN not provided. Auto-generating one");
-                    return generateClusterCrn(accountId.get(), environmentCrn.get());
-                }
-                throw new IllegalStateException("Missing the cluster CRN");
-            }));
-            ret.append("/");
-
-            if (serverHostName.isPresent()) {
-                ret.append(serverHostName.get());
-                ret.append("/");
-                ret.append(serviceName.orElse(""));
-            }
-
-            LOGGER.debug("Generated vault path: [{}]", ret);
-            return ret.toString();
-        }
-
-        private String generateClusterCrn(String accountId, String envCrn) {
-            return accountId + "-" + envCrn;
-        }
     }
 
 }

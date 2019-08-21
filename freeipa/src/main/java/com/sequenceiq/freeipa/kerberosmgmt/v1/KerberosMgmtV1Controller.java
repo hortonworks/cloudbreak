@@ -49,4 +49,9 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         String accountId = crnService.getCurrentAccountId();
         kerberosMgmtV1Service.cleanupByCluster(request, accountId);
     }
+
+    public void cleanupEnvironmentSecrets(String environmentCrn) throws DeleteException {
+        String accountId = crnService.getCurrentAccountId();
+        kerberosMgmtV1Service.cleanupByEnvironment(environmentCrn, accountId);
+    }
 }
