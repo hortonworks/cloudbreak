@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @Service
-public class ClouderaManagerLicenseService {
+class ClouderaManagerLicenseService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerLicenseService.class);
 
@@ -27,7 +27,7 @@ public class ClouderaManagerLicenseService {
     @Inject
     private GrpcUmsClient umsClient;
 
-    public void beginTrialIfNeeded(User user, ApiClient apiClient) throws ApiException {
+    void beginTrialIfNeeded(User user, ApiClient apiClient) throws ApiException {
         // Begin the Cloudera Manager trial only if UMS is not enabled. Otherwise, we'll be using a
         // license from UMS.
         if (needTrialLicense(user.getUserCrn())) {
