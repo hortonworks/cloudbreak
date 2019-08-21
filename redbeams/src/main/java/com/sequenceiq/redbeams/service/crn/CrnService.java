@@ -34,7 +34,7 @@ public class CrnService {
             throw new CrnParseException("Current user CRN is not set");
         }
         Crn crn = Crn.safeFromString(userCrn);
-        return crn.getResource();
+        return crn.getUserId();
     }
 
     public Crn createCrn(DatabaseConfig resource) {

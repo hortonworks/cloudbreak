@@ -72,7 +72,7 @@ public abstract class AbstractRedbeamsTerminationAction<P extends Payload>
             dbStack = optionalDBStack.get();
             MDCBuilder.buildMdcContext(dbStack);
             Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
-            String userName = dbStack.getOwnerCrn().getResource();
+            String userName = dbStack.getOwnerCrn().getUserId();
             String accountId = dbStack.getOwnerCrn().getAccountId();
             cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getCloudPlatform(), dbStack.getPlatformVariant(),
                     location, userName, accountId);
