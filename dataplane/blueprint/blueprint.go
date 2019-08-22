@@ -21,23 +21,23 @@ import (
 var blueprintHeader = []string{"Name", "Description", "StackName", "StackVersion", "Hostgroup Count", "Tags"}
 
 type blueprintOut struct {
-	Name           string `json:"Name" yaml:"Name"`
-	Description    string `json:"Description" yaml:"Description"`
-	StackName      string `json:"StackName" yaml:"StackName"`
-	StackVersion   string `json:"StackVersion" yaml:"StackVersion"`
-	HostgroupCount string `json:"HostgroupCount" yaml:"HostgroupCount"`
-	Tags           string `json:"Tags" yaml:"Tags"`
+	Name           string `json:"name" yaml:"name"`
+	Description    string `json:"description" yaml:"description"`
+	StackName      string `json:"stackName" yaml:"stackName"`
+	StackVersion   string `json:"stackVersion" yaml:"stackVersion"`
+	HostgroupCount string `json:"hostgroupCount" yaml:"hostgroupCount"`
+	Tags           string `json:"tags" yaml:"tags"`
 }
 
 type blueprintOutJsonDescribe struct {
 	*blueprintOut
-	Content string `json:"BlueprintTextAsBase64" yaml:"BlueprintTextAsBase64"`
-	Crn     string `json:"Crn" yaml:"Crn"`
+	Content string `json:"blueprintTextAsBase64" yaml:"blueprintTextAsBase64"`
+	Crn     string `json:"crn" yaml:"crn"`
 }
 
 type blueprintOutTableDescribe struct {
 	*blueprintOut
-	Crn string `json:"Crn" yaml:"Crn"`
+	Crn string `json:"crn" yaml:"crn"`
 }
 
 func (b *blueprintOut) DataAsStringArray() []string {

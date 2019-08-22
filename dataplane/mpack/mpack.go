@@ -21,12 +21,12 @@ type mpackClient interface {
 var mpackHeader = []string{"Name", "Description", "URL", "Purge", "PurgeList", "Force"}
 
 type mpack struct {
-	Name        string `json:"Name" yaml:"Name"`
-	Description string `json:"Description" yaml:"Description"`
-	URL         string `json:"URL" yaml:"URL"`
-	Purge       string `json:"Purge" yaml:"Purge"`
-	PurgeList   string `json:"PurgeList" yaml:"PurgeList"`
-	Force       string `json:"Force" yaml:"Force"`
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description" yaml:"description"`
+	URL         string `json:"url" yaml:"url"`
+	Purge       string `json:"purge" yaml:"purge"`
+	PurgeList   string `json:"purgeList" yaml:"purgeList"`
+	Force       string `json:"force" yaml:"force"`
 }
 
 func (m *mpack) DataAsStringArray() []string {

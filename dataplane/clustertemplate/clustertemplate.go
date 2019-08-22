@@ -21,23 +21,23 @@ import (
 var clusterTemplateHeader = []string{"Name", "Description", "StackName", "StackVersion", "Hostgroup Count", "Tags"}
 
 type clusterTemplateOut struct {
-	Name           string `json:"Name" yaml:"Name"`
-	Description    string `json:"Description" yaml:"Description"`
-	StackName      string `json:"StackName" yaml:"StackName"`
-	StackVersion   string `json:"StackVersion" yaml:"StackVersion"`
-	HostgroupCount string `json:"HostgroupCount" yaml:"HostgroupCount"`
-	Tags           string `json:"Tags" yaml:"Tags"`
+	Name           string `json:"name" yaml:"name"`
+	Description    string `json:"description" yaml:"description"`
+	StackName      string `json:"stackName" yaml:"stackName"`
+	StackVersion   string `json:"stackVersion" yaml:"stackVersion"`
+	HostgroupCount string `json:"hostgroupCount" yaml:"hostgroupCount"`
+	Tags           string `json:"tags" yaml:"tags"`
 }
 
 type clusterTemplateOutJsonDescribe struct {
 	*clusterTemplateOut
-	Content string `json:"ClusterTemplateTextAsBase64" yaml:"ClusterTemplateTextAsBase64"`
-	Crn     string `json:"Crn" yaml:"Crn"`
+	Content string `json:"clusterTemplateTextAsBase64" yaml:"clusterTemplateTextAsBase64"`
+	Crn     string `json:"crn" yaml:"crn"`
 }
 
 type clusterTemplateOutTableDescribe struct {
 	*clusterTemplateOut
-	Crn string `json:"Crn" yaml:"Crn"`
+	Crn string `json:"crn" yaml:"crn"`
 }
 
 func (b *clusterTemplateOut) DataAsStringArray() []string {

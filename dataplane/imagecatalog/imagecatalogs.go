@@ -19,15 +19,15 @@ import (
 var imagecatalogHeader = []string{"Name", "Description", "Default", "URL"}
 
 type imagecatalogOut struct {
-	Name        string `json:"Name" yaml:"Name"`
-	Description string `json:"Description" yaml:"Description"`
-	Default     bool   `json:"Default" yaml:"Default"`
-	URL         string `json:"URL" yaml:"URL"`
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description" yaml:"description"`
+	Default     bool   `json:"default" yaml:"default"`
+	URL         string `json:"url" yaml:"url"`
 }
 
 type imagecatalogOutDescribe struct {
 	*imagecatalogOut
-	CRN string `json:"CRN" yaml:"CRN"`
+	CRN string `json:"crn" yaml:"crn"`
 }
 
 func (r *imagecatalogOut) DataAsStringArray() []string {
@@ -41,10 +41,10 @@ func (b *imagecatalogOutDescribe) DataAsStringArray() []string {
 var imageHeader = []string{"Date", "Description", "Version", "ImageID"}
 
 type imageOut struct {
-	Date        string `json:"Date" yaml:"Date"`
-	Description string `json:"Description" yaml:"Description"`
-	Version     string `json:"Version" yaml:"Version"`
-	ImageID     string `json:"ImageID" yaml:"ImageID"`
+	Date        string `json:"date" yaml:"date"`
+	Description string `json:"description" yaml:"description"`
+	Version     string `json:"version" yaml:"version"`
+	ImageID     string `json:"imageID" yaml:"imageID"`
 }
 
 func (r *imageOut) DataAsStringArray() []string {
@@ -54,14 +54,14 @@ func (r *imageOut) DataAsStringArray() []string {
 var imageDetailsHeader = []string{"Date", "Description", "Ambari Version", "ImageID", "OS", "OS Type", "Images", "Package Versions"}
 
 type imageDetailsOut struct {
-	Date            string                       `json:"Date" yaml:"Date"`
-	Description     string                       `json:"Description" yaml:"Description"`
-	Version         string                       `json:"Version" yaml:"Version"`
-	ImageID         string                       `json:"ImageID" yaml:"ImageID"`
-	Os              string                       `json:"OS" yaml:"OS"`
-	OsType          string                       `json:"OSType" yaml:"OSType"`
-	Images          map[string]map[string]string `json:"Images" yaml:"Images"`
-	PackageVersions map[string]string            `json:"PackageVersions" yaml:"PackageVersions"`
+	Date            string                       `json:"date" yaml:"date"`
+	Description     string                       `json:"description" yaml:"description"`
+	Version         string                       `json:"version" yaml:"version"`
+	ImageID         string                       `json:"imageID" yaml:"imageID"`
+	Os              string                       `json:"os" yaml:"os"`
+	OsType          string                       `json:"osType" yaml:"osType"`
+	Images          map[string]map[string]string `json:"images" yaml:"images"`
+	PackageVersions map[string]string            `json:"packageVersions" yaml:"packageVersions"`
 }
 
 func (r *imageDetailsOut) DataAsStringArray() []string {

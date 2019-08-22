@@ -19,13 +19,13 @@ import (
 var kubernetesHeader = []string{"Name", "Description", "Environments"}
 
 type kubernetes struct {
-	Name        string `json:"Name" yaml:"Name"`
-	Description string `json:"Description" yaml:"Description"`
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description" yaml:"description"`
 }
 
 type kubernetesOutDescribe struct {
 	*kubernetes
-	ID string `json:"ID" yaml:"ID"`
+	ID string `json:"id" yaml:"id"`
 }
 
 func (k *kubernetes) DataAsStringArray() []string {

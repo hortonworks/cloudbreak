@@ -21,16 +21,16 @@ import (
 var EnvironmentHeader = []string{"Name", "Description", "CloudPlatform", "Status", "Credential", "Regions", "LocationName", "Longitude", "Latitude", "Crn"}
 
 type environment struct {
-	Name          string   `json:"Name" yaml:"Name"`
-	Description   string   `json:"Description" yaml:"Description"`
-	CloudPlatform string   `json:"CloudPlatform" yaml:"CloudPlatform"`
-	Status        string   `json:"Status" yaml:"Status"`
-	Credential    string   `json:"Credential" yaml:"Credential"`
-	Regions       []string `json:"Regions" yaml:"Regions"`
-	LocationName  string   `json:"LocationName" yaml:"LocationName"`
-	Longitude     float64  `json:"Longitude" yaml:"Longitude"`
-	Latitude      float64  `json:"Latitude" yaml:"Latitude"`
-	Crn           string   `json:"Crn" yaml:"Crn"`
+	Name          string   `json:"name" yaml:"name"`
+	Description   string   `json:"description" yaml:"description"`
+	CloudPlatform string   `json:"cloudPlatform" yaml:"cloudPlatform"`
+	Status        string   `json:"status" yaml:"status"`
+	Credential    string   `json:"credential" yaml:"credential"`
+	Regions       []string `json:"regions" yaml:"regions"`
+	LocationName  string   `json:"locationName" yaml:"locationName"`
+	Longitude     float64  `json:"longitude" yaml:"longitude"`
+	Latitude      float64  `json:"latitude" yaml:"latitude"`
+	Crn           string   `json:"crn" yaml:"crn"`
 }
 
 type environmentOutTableDescribe struct {
@@ -39,16 +39,16 @@ type environmentOutTableDescribe struct {
 
 type environmentOutJsonDescribe struct {
 	*environment
-	ProxyConfigs   []string                                  `json:"ProxyConfigs" yaml:"ProxyConfigs"`
-	Network        model.EnvironmentNetworkV1Response        `json:"Network" yaml:"Network"`
-	Telemetry      model.TelemetryResponse                   `json:"Telemetry" yaml:"Telemetry"`
-	Authentication model.EnvironmentAuthenticationV1Response `json:"Authentication" yaml:"Authentication"`
+	ProxyConfigs   []string                                  `json:"proxyConfigs" yaml:"proxyConfigs"`
+	Network        model.EnvironmentNetworkV1Response        `json:"network" yaml:"network"`
+	Telemetry      model.TelemetryResponse                   `json:"telemetry" yaml:"telemetry"`
+	Authentication model.EnvironmentAuthenticationV1Response `json:"authentication" yaml:"authentication"`
 }
 
 type environmentListJsonDescribe struct {
 	*environment
-	Network   model.EnvironmentNetworkV1Response `json:"Network" yaml:"Network"`
-	Telemetry model.TelemetryResponse            `json:"Telemetry" yaml:"Telemetry"`
+	Network   model.EnvironmentNetworkV1Response `json:"network" yaml:"network"`
+	Telemetry model.TelemetryResponse            `json:"telemetry" yaml:"telemetry"`
 }
 
 type environmentClient interface {

@@ -20,17 +20,17 @@ type ClientRedbeams oauth.Redbeams
 var serverListHeader = []string{"Name", "Description", "Crn", "EnvironmentCrn", "Status", "ResourceStatus", "DatabaseVendor", "Host", "Port"}
 
 type serverDetails struct {
-	Name           string `json:"Name" yaml:"Name"`
-	Description    string `json:"Description" yaml:"Description"`
-	CRN            string `json:"CRN" yaml:"CRN"`
-	EnvironmentCrn string `json:"EnvironmentCrn" yaml:"EnvironmentCrn"`
-	Status         string `json:"Status" yaml:"Status"`
-	StatusReason   string `json:"StatusReason" yaml:"StatusReason"`
-	ResourceStatus string `json:"ResourceStatus" yaml:"ResourceStatus"`
-	DatabaseVendor string `json:"DatabaseVendor" yaml:"DatabaseVendor"`
-	Host           string `json:"Host" yaml:"Host"`
-	Port           int32  `json:"Port" yaml:"Port"`
-	CreationDate   int64  `json:"CreationDate" yaml:"CreationDate"`
+	Name           string `json:"name" yaml:"name"`
+	Description    string `json:"description" yaml:"description"`
+	CRN            string `json:"crn" yaml:"crn"`
+	EnvironmentCrn string `json:"environmentCrn" yaml:"environmentCrn"`
+	Status         string `json:"status" yaml:"status"`
+	StatusReason   string `json:"statusReason" yaml:"statusReason"`
+	ResourceStatus string `json:"resourceStatus" yaml:"resourceStatus"`
+	DatabaseVendor string `json:"databaseVendor" yaml:"databaseVendor"`
+	Host           string `json:"host" yaml:"host"`
+	Port           int32  `json:"port" yaml:"port"`
+	CreationDate   int64  `json:"creationDate" yaml:"creationDate"`
 }
 
 func (server *serverDetails) DataAsStringArray() []string {
@@ -68,10 +68,10 @@ func NewDetailsFromResponse(r *model.DatabaseServerV4Response) *serverDetails {
 var statusListHeader = []string{"Name", "Crn", "EnvironmentCrn", "Status"}
 
 type serverStatusDetails struct {
-	Name           string `json:"Name" yaml:"Name"`
-	CRN            string `json:"CRN" yaml:"CRN"`
-	EnvironmentCrn string `json:"EnvironmentCrn" yaml:"EnvironmentCrn"`
-	Status         string `json:"Status" yaml:"Status"`
+	Name           string `json:"name" yaml:"name"`
+	CRN            string `json:"crn" yaml:"crn"`
+	EnvironmentCrn string `json:"environmentCrn" yaml:"environmentCrn"`
+	Status         string `json:"status" yaml:"status"`
 }
 
 func (status *serverStatusDetails) DataAsStringArray() []string {
@@ -229,13 +229,13 @@ func DeleteDatabaseServer(c *cli.Context) {
 var dbListHeader = []string{"Name", "Description", "Crn", "EnvironmentCrn", "DatabaseVendor", "ConnectionURL"}
 
 type dbDetails struct {
-	Name           string `json:"Name" yaml:"Name"`
-	Description    string `json:"Description" yaml:"Description"`
-	CRN            string `json:"CRN" yaml:"CRN"`
-	EnvironmentCrn string `json:"EnvironmentCrn" yaml:"EnvironmentCrn"`
-	DatabaseEngine string `json:"DatabaseEngine" yaml:"DatabaseEngine"`
-	ConnectionURL  string `json:"ConnectionURL" yaml:"ConnectionURL"`
-	CreationDate   int64  `json:"CreationDate" yaml:"CreationDate"`
+	Name           string `json:"name" yaml:"name"`
+	Description    string `json:"description" yaml:"description"`
+	CRN            string `json:"crn" yaml:"crn"`
+	EnvironmentCrn string `json:"environmentCrn" yaml:"environmentCrn"`
+	DatabaseEngine string `json:"databaseEngine" yaml:"databaseEngine"`
+	ConnectionURL  string `json:"connectionURL" yaml:"connectionURL"`
+	CreationDate   int64  `json:"creationDate" yaml:"creationDate"`
 }
 
 func (db *dbDetails) DataAsStringArray() []string {

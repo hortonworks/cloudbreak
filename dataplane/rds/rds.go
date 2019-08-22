@@ -19,17 +19,17 @@ import (
 var rdsHeader = []string{"Name", "Description", "ConnectionURL", "DatabaseEngine", "Type", "Driver"}
 
 type rds struct {
-	Name           string `json:"Name" yaml:"Name"`
-	Description    string `json:"Description" yaml:"Description"`
-	URL            string `json:"ConnectionURL" yaml:"ConnectionURL"`
-	DatabaseEngine string `json:"DatabaseEngine" yaml:"DatabaseEngine"`
-	Type           string `json:"Type" yaml:"Type"`
-	Driver         string `json:"Driver" yaml:"Driver"`
+	Name           string `json:"name" yaml:"name"`
+	Description    string `json:"description" yaml:"description"`
+	URL            string `json:"connectionURL" yaml:"connectionURL"`
+	DatabaseEngine string `json:"databaseEngine" yaml:"databaseEngine"`
+	Type           string `json:"type" yaml:"type"`
+	Driver         string `json:"driver" yaml:"driver"`
 }
 
 type rdsOutDescribe struct {
 	*rds
-	ID string `json:"ID" yaml:"ID"`
+	ID string `json:"id" yaml:"id"`
 }
 
 func (r *rds) DataAsStringArray() []string {

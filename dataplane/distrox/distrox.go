@@ -27,10 +27,10 @@ var stackHeader = []string{"Name", "Crn", "CloudPlatform", "Environment", "Distr
 
 type dxOut struct {
 	common.CloudResourceOut
-	Crn           string `json:"Crn" yaml:"Crn"`
-	Environment   string `json:"Environment" yaml:"Environment"`
-	DistroXStatus string `json:"DistroXStatus" yaml:"DistroXStatus"`
-	ClusterStatus string `json:"ClusterStatus" yaml:"ClusterStatus"`
+	Crn           string `json:"crn" yaml:"crn"`
+	Environment   string `json:"environment" yaml:"environment"`
+	DistroXStatus string `json:"distroXStatus" yaml:"distroXStatus"`
+	ClusterStatus string `json:"clusterStatus" yaml:"clusterStatus"`
 }
 
 type stackOutDescribe struct {

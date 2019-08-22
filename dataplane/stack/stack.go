@@ -28,9 +28,9 @@ var stackHeader = []string{"Name", "CloudPlatform", "EnvironmentCrn", "StackStat
 
 type stackOut struct {
 	common.CloudResourceOut
-	EnvironmentCrn string `json:"EnvironmentCrn" yaml:"EnvironmentCrn"`
-	StackStatus    string `json:"StackStatus" yaml:"StackStatus"`
-	ClusterStatus  string `json:"ClusterStatus" yaml:"ClusterStatus"`
+	EnvironmentCrn string `json:"environmentCrn" yaml:"environmentCrn"`
+	StackStatus    string `json:"stackStatus" yaml:"stackStatus"`
+	ClusterStatus  string `json:"clusterStatus" yaml:"clusterStatus"`
 }
 
 type stackOutDescribe struct {

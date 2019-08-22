@@ -17,12 +17,12 @@ import (
 var workspaceListHeader = []string{"Name", "Description", "Permissions"}
 
 type workspaceListOut struct {
-	Workspace *model.WorkspaceV4Response `json:"Workspace" yaml:"Workspace"`
+	Workspace *model.WorkspaceV4Response `json:"workspace" yaml:"workspace"`
 }
 
 type workspaceListOutDescribe struct {
 	*workspaceListOut
-	ID string `json:"ID" yaml:"ID"`
+	ID string `json:"id" yaml:"id"`
 }
 
 func (o *workspaceListOut) DataAsStringArray() []string {

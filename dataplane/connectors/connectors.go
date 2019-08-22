@@ -20,24 +20,24 @@ var availabilityZonesHeader = []string{"Name"}
 var instanceHeader = []string{"Name", "Cpu", "Memory", "AvailabilityZone"}
 
 type regionsOut struct {
-	Name        string `json:"Name" yaml:"Name"`
-	Description string `json:"Description" yaml:"Description"`
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description" yaml:"description"`
 }
 
 type diskOut struct {
-	Name        string `json:"Name" yaml:"Name"`
-	Description string `json:"Description" yaml:"Description"`
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description" yaml:"description"`
 }
 
 type availabilityZonesOut struct {
-	Name string `json:"Name" yaml:"Name"`
+	Name string `json:"name" yaml:"name"`
 }
 
 type instanceOut struct {
-	Name             string `json:"Name" yaml:"Name"`
-	Cpu              string `json:"Cpu" yaml:"Cpu"`
-	Memory           string `json:"Memory" yaml:"Memory"`
-	AvailabilityZone string `json:"AvailabilityZone" yaml:"AvailabilityZone"`
+	Name             string `json:"name" yaml:"name"`
+	Cpu              string `json:"cpu" yaml:"cpu"`
+	Memory           string `json:"memory" yaml:"memory"`
+	AvailabilityZone string `json:"availabilityZone" yaml:"availabilityZone"`
 }
 
 type hasName interface {

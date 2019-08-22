@@ -26,10 +26,10 @@ import (
 var AwsPrerequisiteOutputHeader = []string{"Account Id", "CloudPlatform", "External Id", "Policy JSON"}
 
 type awsPrerequisiteOutput struct {
-	AccountId     string `json:"AccountId" yaml:"AccountId"`
-	CloudPlatform string `json:"CloudPlatform" yaml:"CloudPlatform"`
-	ExternalId    string `json:"ExternalId" yaml:"ExternalId"`
-	PolicyJSON    string `json:"PolicyJSON" yaml:"PolicyJSON"`
+	AccountId     string `json:"accountId" yaml:"accountId"`
+	CloudPlatform string `json:"cloudPlatform" yaml:"cloudPlatform"`
+	ExternalId    string `json:"externalId" yaml:"externalId"`
+	PolicyJSON    string `json:"policyJSON" yaml:"policyJSON"`
 }
 
 func (p *awsPrerequisiteOutput) DataAsStringArray() []string {
@@ -243,7 +243,7 @@ func postCredential(client createCredentialClient, credReq *model.CredentialV1Re
 
 type credentialOutDescribe struct {
 	*common.CloudResourceOut
-	CRN string `json:"CRN" yaml:"CRN"`
+	CRN string `json:"crn" yaml:"crn"`
 }
 
 func (c *credentialOutDescribe) DataAsStringArray() []string {

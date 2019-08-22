@@ -29,27 +29,27 @@ var Header = []string{"Name", "Description", "Server", "Domain", "DirectoryType"
 	"GroupMemberAttribute", "GroupNameAttribute", "GroupObjectClass", "GroupSearchBase", "Certificate", "Environments"}
 
 type ldap struct {
-	Name                 string `json:"Name" yaml:"Name"`
-	Description          string `json:"Description" yaml:"Description"`
-	Server               string `json:"Server" yaml:"Server"`
-	Domain               string `json:"Domain,omitempty" yaml:"Domain,omitempty"`
-	DirectoryType        string `json:"DirectoryType" yaml:"DirectoryType"`
-	UserSearchBase       string `json:"UserSearchBase" yaml:"UserSearchBase"`
-	UserDnPattern        string `json:"UserDnPattern" yaml:"UserDnPattern"`
-	UserNameAttribute    string `json:"UserNameAttribute,omitempty" yaml:"UserNameAttribute,omitempty"`
-	UserObjectClass      string `json:"UserObjectClass,omitempty" yaml:"UserObjectClass,omitempty"`
-	GroupMemberAttribute string `json:"GroupMemberAttribute,omitempty" yaml:"GroupMemberAttribute,omitempty"`
-	GroupNameAttribute   string `json:"GroupNameAttribute,omitempty" yaml:"GroupNameAttribute,omitempty"`
-	GroupObjectClass     string `json:"GroupObjectClass,omitempty" yaml:"GroupObjectClass,omitempty"`
-	GroupSearchBase      string `json:"GroupSearchBase,omitempty" yaml:"GroupSearchBase,omitempty"`
-	AdminGroup           string `json:"AdminGroup,omitempty" yaml:"AdminGroup,omitempty"`
-	Certificate          string `json:"Certificate,omitempty" yaml:"Certificate,omitempty"`
+	Name                 string `json:"name" yaml:"name"`
+	Description          string `json:"description" yaml:"description"`
+	Server               string `json:"server" yaml:"server"`
+	Domain               string `json:"domain,omitempty" yaml:"domain,omitempty"`
+	DirectoryType        string `json:"directoryType" yaml:"directoryType"`
+	UserSearchBase       string `json:"userSearchBase" yaml:"userSearchBase"`
+	UserDnPattern        string `json:"userDnPattern" yaml:"userDnPattern"`
+	UserNameAttribute    string `json:"userNameAttribute,omitempty" yaml:"userNameAttribute,omitempty"`
+	UserObjectClass      string `json:"userObjectClass,omitempty" yaml:"userObjectClass,omitempty"`
+	GroupMemberAttribute string `json:"groupMemberAttribute,omitempty" yaml:"groupMemberAttribute,omitempty"`
+	GroupNameAttribute   string `json:"groupNameAttribute,omitempty" yaml:"groupNameAttribute,omitempty"`
+	GroupObjectClass     string `json:"groupObjectClass,omitempty" yaml:"groupObjectClass,omitempty"`
+	GroupSearchBase      string `json:"groupSearchBase,omitempty" yaml:"groupSearchBase,omitempty"`
+	AdminGroup           string `json:"adminGroup,omitempty" yaml:"ddminGroup,omitempty"`
+	Certificate          string `json:"certificate,omitempty" yaml:"certificate,omitempty"`
 	EnvironmentCrn       string
 }
 
 type ldapOutDescribe struct {
 	*ldap
-	Crn string `json:"Crn" yaml:"Crn"`
+	Crn string `json:"crn" yaml:"crn"`
 }
 
 func (l *ldap) DataAsStringArray() []string {
@@ -64,9 +64,9 @@ func (l *ldapOutDescribe) DataAsStringArray() []string {
 var Users = []string{"Distinguished Names", "Email", "Member of Group"}
 
 type ldapUserSearchResult struct {
-	Name     string `json:"Name" yaml:"Name"`
-	Email    string `json:"Email" yaml:"Email"`
-	MemberOf string `json:"MemberOf" yaml:"MemberOf"`
+	Name     string `json:"name" yaml:"name"`
+	Email    string `json:"email" yaml:"email"`
+	MemberOf string `json:"memberOf" yaml:"memberOf"`
 }
 
 func (l *ldapUserSearchResult) DataAsStringArray() []string {
@@ -76,7 +76,7 @@ func (l *ldapUserSearchResult) DataAsStringArray() []string {
 var Groups = []string{"Distinguished Names"}
 
 type ldapGroupSearchResult struct {
-	Name string `json:"Name" yaml:"Name"`
+	Name string `json:"name" yaml:"name"`
 }
 
 func (l *ldapGroupSearchResult) DataAsStringArray() []string {

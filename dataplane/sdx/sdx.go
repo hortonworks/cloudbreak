@@ -24,16 +24,16 @@ import (
 var sdxClusterHeader = []string{"Crn", "Name", "EnvironmentName", "EnvironmentCrn", "StackCrn", "DatabaseServerCrn", "Status", "StatusReason"}
 
 type sdxClusterOutput struct {
-	Crn                        string `json:"Crn" yaml:"Crn"`
-	Name                       string `json:"Name" yaml:"Name"`
-	Environment                string `json:"EnvironmentName" yaml:"EnvironmentName"`
-	EnvironmentCrn             string `json:"EnvironmentCrn" yaml:"EnvironmentCrn"`
-	StackCrn                   string `json:"StackCrn" yaml:"StackCrn"`
-	DatabaseServerCrn          string `json:"DatabaseServerCrn" yaml:"DatabaseServerCrn"`
-	CloudStorageBaseLocation   string `json:"CloudStorageBaseLocation" yaml:"CloudStorageBaseLocation"`
-	CloudStorageFileSystemType string `json:"CloudStorageFileSystemType" yaml:"CloudStorageFileSystemType"`
-	Status                     string `json:"Status" yaml:"Status"`
-	StatusReason               string `json:"StatusReason" yaml:"StatusReason"`
+	Crn                        string `json:"crn" yaml:"crn"`
+	Name                       string `json:"name" yaml:"Name"`
+	Environment                string `json:"environmentName" yaml:"environmentName"`
+	EnvironmentCrn             string `json:"environmentCrn" yaml:"environmentCrn"`
+	StackCrn                   string `json:"stackCrn" yaml:"stackCrn"`
+	DatabaseServerCrn          string `json:"databaseServerCrn" yaml:"databaseServerCrn"`
+	CloudStorageBaseLocation   string `json:"cloudStorageBaseLocation" yaml:"cloudStorageBaseLocation"`
+	CloudStorageFileSystemType string `json:"cloudStorageFileSystemType" yaml:"cloudStorageFileSystemType"`
+	Status                     string `json:"status" yaml:"status"`
+	StatusReason               string `json:"statusReason" yaml:"statusReason"`
 }
 
 func (r *sdxClusterOutput) DataAsStringArray() []string {

@@ -19,20 +19,20 @@ import (
 var recipeHeader = []string{"Name", "Description", "Execution Type"}
 
 type recipeOut struct {
-	Name          string `json:"Name" yaml:"Name"`
-	Description   string `json:"Description" yaml:"Description"`
-	ExecutionType string `json:"ExecutionType" yaml:"ExecutionType"`
+	Name          string `json:"name" yaml:"name"`
+	Description   string `json:"description" yaml:"description"`
+	ExecutionType string `json:"executionType" yaml:"executionType"`
 }
 
 type recipeOutJsonDescribe struct {
 	*recipeOut
-	Content string `json:"RecipeTextAsBase64" yaml:"RecipeTextAsBase64"`
-	Crn     string `json:"CRN" yaml:"CRN"`
+	Content string `json:"recipeTextAsBase64" yaml:"recipeTextAsBase64"`
+	Crn     string `json:"crn" yaml:"crn"`
 }
 
 type recipeOutTableDescribe struct {
 	*recipeOut
-	Crn string `json:"CRN" yaml:"CRN"`
+	Crn string `json:"crn" yaml:"crn"`
 }
 
 func (r *recipeOut) DataAsStringArray() []string {

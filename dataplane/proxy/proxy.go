@@ -22,11 +22,11 @@ type proxyClient interface {
 var Header = []string{"Name", "Host", "Port", "Protocol", "Crn"}
 
 type proxy struct {
-	Name     string `json:"Name" yaml:"Name"`
-	Host     string `json:"Host" yaml:"Host"`
-	Port     string `json:"Port" yaml:"Port"`
-	Protocol string `json:"Protocol" yaml:"Protocol"`
-	Crn      string `json:"Crn" yaml:"Crn"`
+	Name     string `json:"name" yaml:"name"`
+	Host     string `json:"host" yaml:"host"`
+	Port     string `json:"port" yaml:"port"`
+	Protocol string `json:"protocol" yaml:"protocol"`
+	Crn      string `json:"crn" yaml:"crn"`
 }
 
 func (p *proxy) DataAsStringArray() []string {

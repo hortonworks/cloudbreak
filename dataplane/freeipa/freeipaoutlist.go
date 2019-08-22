@@ -3,10 +3,10 @@ package freeipa
 var listHeader = []string{"Name", "Crn", "EnvironmentCrn", "Status"}
 
 type freeIpaDetails struct {
-	Name           string `json:"Name" yaml:"Name"`
-	CRN            string `json:"CRN" yaml:"CRN"`
-	EnvironmentCrn string `json:"EnvironmentCrn" yaml:"EnvironmentCrn"`
-	Status         string `json:"Status" yaml:"Status"`
+	Name           string `json:"name" yaml:"name"`
+	CRN            string `json:"crn" yaml:"crn"`
+	EnvironmentCrn string `json:"environmentCrn" yaml:"environmentCrn"`
+	Status         string `json:"status" yaml:"status"`
 }
 
 func (ipa *freeIpaDetails) DataAsStringArray() []string {

@@ -16,15 +16,15 @@ import (
 var Header = []string{"Name", "Description", "Type", "Environments", "Crn"}
 
 type kerberos struct {
-	Name           string `json:"Name" yaml:"Name"`
-	Description    string `json:"Description" yaml:"Description"`
-	Type           string `json:"Type" yaml:"Type"`
+	Name           string `json:"name" yaml:"name"`
+	Description    string `json:"description" yaml:"description"`
+	Type           string `json:"type" yaml:"type"`
 	EnvironmentCrn string
 }
 
 type kerberosOutDescribe struct {
 	*kerberos
-	Crn string `json:"Crn" yaml:"Crn"`
+	Crn string `json:"crn" yaml:"crn"`
 }
 
 type freeIpaKerberosClient interface {
