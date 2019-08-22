@@ -3,21 +3,28 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.makeApiConfig;
 import static java.util.Objects.requireNonNull;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.MgmtRoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.MgmtRolesResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRole;
@@ -29,18 +36,20 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cm.database.DatabaseProperties;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 /**
  * Sets up management services for the given Cloudera Manager server.
  */
 @Service
 public class ClouderaManagerMgmtSetupService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerMgmtSetupService.class);
 
     private static final String MGMT_SERVICE = "MGMT";
 
@@ -55,6 +64,8 @@ public class ClouderaManagerMgmtSetupService {
 
     private static final List<String> BLACKLISTED_ROLE_TYPES = ImmutableList.of(
             ClouderaManagerMgmtTelemetryService.TELEMETRYPUBLISHER, "NAVIGATOR", "NAVIGATORMETASERVER");
+
+    private static final String GENERATE_CREDENTIALS_COMMAND_NAME = "GenerateCredentials";
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
@@ -89,6 +100,7 @@ public class ClouderaManagerMgmtSetupService {
     public void setupMgmtServices(Stack stack, ApiClient client, ApiHostRef cmHostRef,
             Set<RDSConfig> rdsConfigs, Telemetry telemetry, String sdxContextName, String sdxStackCrn)
             throws ApiException {
+        LOGGER.debug("Setting up Cloudera Management Services.");
         licenseService.beginTrialIfNeeded(stack.getCreator(), client);
         MgmtServiceResourceApi mgmtServiceResourceApi = new MgmtServiceResourceApi(client);
         MgmtRolesResourceApi mgmtRolesResourceApi = new MgmtRolesResourceApi(client);
@@ -103,6 +115,7 @@ public class ClouderaManagerMgmtSetupService {
         List<String> roleTypes = mgmtServiceResourceApi.listRoleTypes().getItems();
         for (String roleType : roleTypes) {
             if (!BLACKLISTED_ROLE_TYPES.contains(roleType)) {
+                LOGGER.debug("Role type {} is not on black list. Adding it to management roles for host {}.", roleType, cmHostRef.getHostname());
                 ApiRole apiRole = new ApiRole();
                 apiRole.setName(roleType);
                 apiRole.setType(roleType);
@@ -116,10 +129,32 @@ public class ClouderaManagerMgmtSetupService {
         createMgmtRoles(mgmtRolesResourceApi, mgmtRoles);
         telemetryService.updateTelemetryConfigs(stack, client, telemetry, sdxContextName, sdxStackCrn);
         createMgmtDatabases(client, rdsConfigs);
+        waitForGenerateCredentialsToFinish(stack, client);
         startMgmtServices(stack, client, mgmtServiceResourceApi);
     }
 
+    private void waitForGenerateCredentialsToFinish(Stack stack, ApiClient client) throws ApiException {
+        LOGGER.debug("Wait if Generate Credentials command is still active.");
+        ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
+        ApiCommandList apiCommandList = clouderaManagerResourceApi.listActiveCommands(DataView.SUMMARY.name());
+        Optional<BigDecimal> generateCredentialsCommandId = apiCommandList.getItems().stream()
+                .filter(toGenerateCredentialsCommand()).map(ApiCommand::getId).findFirst();
+        generateCredentialsCommandId.ifPresent(pollCredentialGeneration(stack, client));
+    }
+
+    private Consumer<BigDecimal> pollCredentialGeneration(Stack stack, ApiClient client) {
+        return id -> {
+            LOGGER.debug("Generate Credentials command is still active.");
+            clouderaManagerPollingServiceProvider.generateCredentialsPollingService(stack, client, id);
+        };
+    }
+
+    private Predicate<ApiCommand> toGenerateCredentialsCommand() {
+        return apiCommand -> GENERATE_CREDENTIALS_COMMAND_NAME.equals(apiCommand.getName());
+    }
+
     private void createMgmtRoles(MgmtRolesResourceApi mgmtRolesResourceApi, ApiRoleList mgmtRoles) throws ApiException {
+        LOGGER.debug("Creating management roles.");
         try {
             mgmtRolesResourceApi.createRoles(mgmtRoles);
         } catch (ApiException ex) {
@@ -130,11 +165,11 @@ public class ClouderaManagerMgmtSetupService {
     }
 
     private void startMgmtServices(Stack stack, ApiClient client, MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException {
-        ApiService mgmtService = mgmtServiceResourceApi.readService("SUMMARY");
+        ApiService mgmtService = mgmtServiceResourceApi.readService(DataView.SUMMARY.name());
         Optional<ApiCommand> startCommand = Optional.empty();
         if (mgmtService.getServiceState() == ApiServiceState.STARTING) {
-            startCommand = mgmtServiceResourceApi.listActiveCommands("SUMMARY").getItems()
-                    .stream().filter(c -> c.getName().equals("Start")).findFirst();
+            startCommand = mgmtServiceResourceApi.listActiveCommands(DataView.SUMMARY.name()).getItems()
+                    .stream().filter(c -> "Start".equals(c.getName())).findFirst();
         } else if (mgmtService.getServiceState() != ApiServiceState.STARTED) {
             startCommand = Optional.of(mgmtServiceResourceApi.startCommand());
         }
