@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -12,8 +13,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -95,6 +98,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setYarn(getYarnProperties(source, environment));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
+        request.setPlacement(preparePlacement(environment));
         request.setSharedService(sdxConverter.getSharedService(source.getSdx(), environment.getCrn()));
         request.setCustomDomain(null);
         request.setTimeToLive(source.getTimeToLive());
@@ -252,5 +256,33 @@ public class DistroXV1RequestToStackV4RequestConverter {
                     .orElse(null);
         }
         return null;
+    }
+
+    private PlacementSettingsV4Request preparePlacement(DetailedEnvironmentResponse environment) {
+        if (!CloudPlatform.YARN.name().equals(environment.getCloudPlatform())) {
+            PlacementSettingsV4Request ret = new PlacementSettingsV4Request();
+            ret.setRegion(getRegionFromEnv(environment));
+            ret.setAvailabilityZone(getAvailabilityZoneFromEnv(environment));
+            return ret;
+        }
+        return null;
+    }
+
+    private String getRegionFromEnv(DetailedEnvironmentResponse environment) {
+        return environment.getRegions().getNames().stream()
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String getAvailabilityZoneFromEnv(DetailedEnvironmentResponse environment) {
+        if (environment.getNetwork() != null && environment.getNetwork().getSubnetMetas() != null) {
+            return environment.getNetwork().getSubnetMetas().entrySet().stream()
+                    .findFirst()
+                    .map(Map.Entry::getValue)
+                    .map(CloudSubnet::getAvailabilityZone)
+                    .orElse(null);
+        } else {
+            return null;
+        }
     }
 }
