@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
@@ -68,7 +69,12 @@ public class FileSystemConverter {
 
     private CloudS3View cloudIdentityToS3View(CloudIdentity cloudIdentity) {
         CloudS3View cloudS3View = new CloudS3View(cloudIdentity.getIdentityType());
-        cloudS3View.setInstanceProfile(cloudIdentity.getS3Identity().getInstanceProfile());
+        S3Identity s3Identity = cloudIdentity.getS3Identity();
+        if (Objects.isNull(s3Identity)) {
+            LOGGER.warn("S3 identity is null. Identity type is {}", cloudIdentity.getIdentityType());
+            return null;
+        }
+        cloudS3View.setInstanceProfile(s3Identity.getInstanceProfile());
         return cloudS3View;
     }
 

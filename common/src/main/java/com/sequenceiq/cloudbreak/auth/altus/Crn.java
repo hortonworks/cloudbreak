@@ -456,7 +456,7 @@ public class Crn {
      * @throws IllegalStateException if this is not a user CRN
      */
     public String getUserId() {
-        checkState(resourceType == ResourceType.USER,
+        checkState(resourceType == ResourceType.USER || resourceType == ResourceType.MACHINE_USER,
             String.format("CRN %s has no user ID because it is of type %s", toString(), resourceType));
         int idx = resource.indexOf('/');
         return idx == -1 ? resource : resource.substring(idx + 1);

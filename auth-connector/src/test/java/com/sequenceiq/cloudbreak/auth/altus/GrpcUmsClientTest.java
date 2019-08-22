@@ -1,17 +1,14 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import java.util.Optional;
-
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -24,15 +21,23 @@ public class GrpcUmsClientTest {
     private GrpcUmsClient testedClass = new GrpcUmsClient();
 
     @Test
-    @Ignore
-    public void getUserDetails() {
+    public void checkIfReadRightCorrect() {
+        assertTrue(testedClass.isReadRight("environment/read"));
+    }
 
-        when(umsConfigMock.getEndpoint()).thenReturn("ums.thunderhead-dev.cloudera.com");
-        when(umsConfigMock.getPort()).thenReturn(8982);
+    @Test
+    public void checkIfReadRightInvalid() {
+        assertFalse(testedClass.isReadRight("environmentsinvalidread"));
+    }
 
-        String exampleCrn = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
+    @Test
+    public void checkIfReadRightRight() {
+        assertFalse(testedClass.isReadRight("datalake/write"));
+        assertFalse(testedClass.isReadRight("datahub/write"));
+    }
 
-        UserManagementProto.User user = testedClass.getUserDetails(exampleCrn, exampleCrn, Optional.of("uuid"));
-        user.getCrn();
+    @Test
+    public void checkIfReadRightNull() {
+        assertFalse(testedClass.isReadRight(null));
     }
 }

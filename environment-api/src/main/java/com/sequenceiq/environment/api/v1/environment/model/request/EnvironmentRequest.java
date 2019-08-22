@@ -69,7 +69,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     private Tunnel tunnel;
 
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
-    private IdBrokerMappingSource idBrokerMappingSource = IdBrokerMappingSource.MOCK;
+    private IdBrokerMappingSource idBrokerMappingSource = IdBrokerMappingSource.IDBMMS;
 
     @ApiModelProperty(EnvironmentModelDescription.ADMIN_GROUP_NAME)
     private String adminGroupName;
