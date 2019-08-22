@@ -58,7 +58,7 @@ public class VaultConfig extends AbstractVaultConfiguration {
 
     private static final String AUTH_TYPE_K8S = "kubernetes";
 
-    @Value("${vault.addr:}")
+    @Value("${vault.addr:localhost}")
     private String address;
 
     @Value("${vault.port:}")
