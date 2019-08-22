@@ -40,8 +40,9 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetIdsRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneNetwork;
+import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
+import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
+import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
@@ -76,6 +77,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
+    private final DnsV1Endpoint dnsV1Endpoint;
+
     private final SupportedPlatforms supportedPlatforms;
 
     private final Map<CloudPlatform, FreeIpaNetworkProvider> freeIpaNetworkProviderMapByCloudPlatform;
@@ -86,12 +89,14 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             EventSender eventSender,
             EnvironmentService environmentService,
             FreeIpaV1Endpoint freeIpaV1Endpoint,
+            DnsV1Endpoint dnsV1Endpoint,
             SupportedPlatforms supportedPlatforms,
             Map<CloudPlatform, FreeIpaNetworkProvider> freeIpaNetworkProviderMapByCloudPlatform,
             PollingService<FreeIpaPollerObject> freeIpaPollingService) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
+        this.dnsV1Endpoint = dnsV1Endpoint;
         this.supportedPlatforms = supportedPlatforms;
         this.freeIpaNetworkProviderMapByCloudPlatform = freeIpaNetworkProviderMapByCloudPlatform;
         this.freeIpaPollingService = freeIpaPollingService;
@@ -130,7 +135,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
             AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(createFreeIpaRequest, environmentDto);
             if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
-                freeIpaV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
+                dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
             }
         } catch (ClientErrorException e) {
             String errorMessage = ClientErrorExceptionHandler.getErrorMessage(e);

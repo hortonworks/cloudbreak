@@ -14,6 +14,7 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.controller.ClientTestV1Controller;
+import com.sequenceiq.freeipa.controller.DnsV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaV1Controller;
 import com.sequenceiq.freeipa.controller.UserV1Controller;
 import com.sequenceiq.freeipa.controller.mapper.DefaultExceptionMapper;
@@ -32,7 +33,7 @@ public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = List.of(
             UserV1Controller.class, ClientTestV1Controller.class, FreeIpaV1Controller.class, LdapConfigV1Controller.class,
-            KerberosConfigV1Controller.class, KerberosMgmtV1Controller.class);
+            KerberosConfigV1Controller.class, KerberosMgmtV1Controller.class, DnsV1Controller.class);
 
     private static final String VERSION_UNAVAILABLE = "unspecified";
 

@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 
 @Service
 public class StackDownscaleService {
@@ -44,6 +46,9 @@ public class StackDownscaleService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private DnsV1Endpoint dnsV1Endpoint;
 
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         LOGGER.debug("Downscaling of stack {}", context.getStack().getId());
@@ -63,15 +68,26 @@ public class StackDownscaleService {
         Stack stack = context.getStack();
         InstanceGroup g = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         stackScalingService.updateRemovedResourcesState(stack, instanceIds, g);
-        List<String> fqdns = stack.getInstanceGroups()
+        List<InstanceMetaData> instanceMetaDatas = stack.getInstanceGroups()
                 .stream().filter(ig -> ig.getGroupName().equals(instanceGroupName))
                 .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
-                .map(InstanceMetaData::getInstanceId)
-                .filter(instanceIds::contains)
+                .filter(im -> instanceIds.contains(im.getInstanceId()))
                 .collect(toList());
+        List<String> fqdns = instanceMetaDatas.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
+        cleanupDnsRecords(stack, fqdns);
+        List<String> deletedInstanceIds = instanceMetaDatas.stream().map(InstanceMetaData::getInstanceId).collect(Collectors.toList());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_COMPLETED,
-                String.format("Downscale of the cluster infrastructure finished successfully. Terminated node(s): %s", fqdns));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name(), fqdns);
+                String.format("Downscale of the cluster infrastructure finished successfully. Terminated node(s): %s", deletedInstanceIds));
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name(), deletedInstanceIds);
+    }
+
+    private void cleanupDnsRecords(Stack stack, List<String> fqdns) {
+        try {
+            LOGGER.info("Cleanup DNS records for FQDNS: [{}]", fqdns);
+            dnsV1Endpoint.deleteDnsRecordsByFqdn(stack.getEnvironmentCrn(), fqdns);
+        } catch (Exception e) {
+            LOGGER.error("Failed to delete dns records for FQDNS: [{}]", fqdns, e);
+        }
     }
 
     public void handleStackDownscaleError(StackFailureContext context, Exception errorDetails) {
