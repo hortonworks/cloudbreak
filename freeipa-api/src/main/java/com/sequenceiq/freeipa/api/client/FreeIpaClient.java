@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.api.client;
 
+import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
@@ -21,4 +22,5 @@ public interface FreeIpaClient {
 
     KerberosMgmtV1Endpoint getKerberosMgmtV1Endpoint();
 
+    DnsV1Endpoint getDnsV1Endpoint();
 }

@@ -70,4 +70,14 @@ public class DnsRecord {
     public boolean isPtrRecord() {
         return ptrrecord != null && !ptrrecord.isEmpty();
     }
+
+    @Override
+    public String toString() {
+        return "DnsRecord{"
+                + "idnsname='" + idnsname + '\''
+                + ", arecord=" + arecord
+                + ", sshfprecord=" + sshfprecord
+                + ", ptrrecord=" + ptrrecord
+                + '}';
+    }
 }

@@ -1,11 +1,9 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -17,9 +15,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetIdsRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetsRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.dns.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
@@ -67,45 +62,6 @@ public interface FreeIpaV1Endpoint {
     @ApiOperation(value = FreeIpaOperationDescriptions.DELETE_BY_ENVID, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "deleteFreeIpaByEnvironmentV1")
     void delete(@QueryParam("environment") @NotEmpty String environmentCrn);
-
-    @POST
-    @Path("dns/zone/cidr")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNETS, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "addDnsZoneForSubnetsV1")
-    AddDnsZoneForSubnetsResponse addDnsZoneForSubnets(@Valid AddDnsZoneForSubnetsRequest request) throws Exception;
-
-    @POST
-    @Path("dns/zone/id")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.ADD_DNS_ZONE_FOR_SUBNET_IDS, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "addDnsZoneForSubnetIdsV1")
-    AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@Valid AddDnsZoneForSubnetIdsRequest request) throws Exception;
-
-    @GET
-    @Path("dns/zone")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.LIST_DNS_ZONES, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "listDnsZonesV1")
-    Set<String> listDnsZones(@QueryParam("environment") @NotEmpty String environmentCrn) throws Exception;
-
-    @DELETE
-    @Path("dns/zone/cidr")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "deleteDnsZoneBySubnetV1")
-    void deleteDnsZoneBySubnet(@QueryParam("environment") @NotEmpty String environmentCrn,
-            @QueryParam("subnet") @NotEmpty
-            @Pattern(regexp = "(^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\/([0-9]|[1-2][0-9]|3[0-2]))$)",
-                    message = "Must be in valid CIDR format eg. 192.168.1.0/24") String subnet) throws Exception;
-
-    @DELETE
-    @Path("dns/zone/id")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = FreeIpaOperationDescriptions.DELETE_DNS_ZONE_BY_SUBNET_ID, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "deleteDnsZoneBySubnetIdV1")
-    void deleteDnsZoneBySubnetId(@QueryParam("environment") @NotEmpty String environmentCrn, @QueryParam("networkId") @NotEmpty String networkId,
-            @QueryParam("subnetId") @NotEmpty String subnetId) throws Exception;
 
     @POST
     @Path("cleanup")

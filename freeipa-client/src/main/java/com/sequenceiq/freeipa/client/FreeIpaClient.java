@@ -413,7 +413,7 @@ public class FreeIpaClient {
 
     public RPCResponse<Object> deleteDnsRecord(String recordName, String dnsZoneName) throws FreeIpaClientException {
         List<String> flags = List.of(dnsZoneName, recordName);
-        Map<String, Object> params = Map.of();
+        Map<String, Object> params = Map.of("del_all", true);
         return invoke("dnsrecord_del", flags, params, Object.class);
     }
 
