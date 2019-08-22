@@ -16,8 +16,8 @@ public class TerminateDatabaseServerRequest extends RedbeamsEvent {
 
     private final DatabaseStack databaseStack;
 
-    public TerminateDatabaseServerRequest(CloudContext cloudContext, CloudCredential cloudCredential, DatabaseStack databaseStack) {
-        super(cloudContext != null ? cloudContext.getId() : null);
+    public TerminateDatabaseServerRequest(CloudContext cloudContext, CloudCredential cloudCredential, DatabaseStack databaseStack, boolean forced) {
+        super(cloudContext != null ? cloudContext.getId() : null, forced);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
         this.databaseStack = databaseStack;

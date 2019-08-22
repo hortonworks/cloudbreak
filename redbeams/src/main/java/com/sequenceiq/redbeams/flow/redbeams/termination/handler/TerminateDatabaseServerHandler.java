@@ -61,7 +61,7 @@ public class TerminateDatabaseServerHandler implements EventHandler<TerminateDat
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudResourceStatus> resourceStatuses =
-                connector.resources().terminateDatabaseServer(ac, request.getDatabaseStack());
+                connector.resources().terminateDatabaseServer(ac, request.getDatabaseStack(), request.isForced());
             List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
 
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);

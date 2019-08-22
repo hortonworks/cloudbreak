@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -86,7 +87,8 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.TERMINATE, notes = DatabaseServerNotes.TERMINATE,
             nickname = "terminateManagedDatabaseServer")
     DatabaseServerTerminationOutcomeV4Response terminate(
-            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
+            @QueryParam("force") @DefaultValue("false") boolean force
     );
 
     @POST

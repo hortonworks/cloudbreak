@@ -21,6 +21,8 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -51,8 +53,21 @@ public class AwsRdsTerminateService {
     @Inject
     private AwsResourceConnector awsResourceConnector;
 
-    public List<CloudResourceStatus> terminate(AuthenticatedContext ac, DatabaseStack stack)
-            throws Exception {
+    /**
+     * Terminates a database server (stack).
+     *
+     * @param  ac                      authenticated cloud context
+     * @param  stack                   database stack to delete
+     * @param  force                   whether to continue even if stack termination fails in AWS
+     * @return                         list of affected cloud resources (not yet implemented)
+     * @throws AmazonServiceException  if the search for the stack fails
+     * @throws ExecutionException      if stack deletion fails (and force is false)
+     * @throws TimeoutException        if stack deletion times out
+     * @throws InterruptedException    if the wait for stack deletion is interrupted
+     * @throws CloudConnectorException if stack deletion fails due to a runtime exception
+     */
+    public List<CloudResourceStatus> terminate(AuthenticatedContext ac, DatabaseStack stack, boolean force)
+            throws ExecutionException, TimeoutException, InterruptedException {
         // CloudResource stackResource = cfStackUtil.getCloudFormationStackResource(resources); get name from this?
         String cFStackName = cfStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
@@ -77,8 +92,16 @@ public class AwsRdsTerminateService {
                 cFStackName);
         try {
             awsBackoffSyncPollingScheduler.schedule(task);
-        } catch (RuntimeException e) {
-            throw new CloudConnectorException(e.getMessage(), e);
+        } catch (ExecutionException | TimeoutException | RuntimeException e) {
+            if (force) {
+                LOGGER.warn("Stack deletion for '{}' failed, continuing because termination is forced", cFStackName, e);
+            } else {
+                if (e instanceof RuntimeException) {
+                    throw new CloudConnectorException(e.getMessage(), e);
+                } else {
+                    throw e;
+                }
+            }
         }
 
         // FIXME

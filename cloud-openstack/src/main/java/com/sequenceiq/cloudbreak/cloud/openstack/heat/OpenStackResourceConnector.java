@@ -278,7 +278,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, boolean force) {
         throw new UnsupportedOperationException("Database server termination is not supported for " + getClass().getName());
     }
 

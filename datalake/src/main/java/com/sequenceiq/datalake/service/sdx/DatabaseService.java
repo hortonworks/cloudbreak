@@ -89,7 +89,7 @@ public class DatabaseService {
     public void terminate(SdxCluster sdxCluster, String requestId) {
         LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
         try {
-            DatabaseServerTerminationOutcomeV4Response resp = databaseServerV4Endpoint.terminate(sdxCluster.getDatabaseCrn());
+            DatabaseServerTerminationOutcomeV4Response resp = databaseServerV4Endpoint.terminate(sdxCluster.getDatabaseCrn(), true);
             sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
                     "External database deletion in progress", sdxCluster);
             notificationService.send(ResourceEvent.SDX_RDS_DELETION_STARTED, sdxCluster);
