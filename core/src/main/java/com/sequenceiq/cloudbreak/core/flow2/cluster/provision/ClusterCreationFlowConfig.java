@@ -7,7 +7,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_INSTALL_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_PROXY_GATEWAY_REGISTRATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_PROXY_GATEWAY_REGISTRATION_SUCCEEDED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_PROXY_REGISTRATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_PROXY_REGISTRATION_SUCCEEDED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.HOST_METADATASETUP_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.HOST_METADATASETUP_FINISHED_EVENT;
@@ -55,7 +57,8 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
     private static final List<Transition<ClusterCreationState, ClusterCreationEvent>> TRANSITIONS =
             new Builder<ClusterCreationState, ClusterCreationEvent>().defaultFailureEvent(CLUSTER_CREATION_FAILED_EVENT)
             .from(INIT_STATE).to(CLUSTER_PROXY_REGISTRATION_STATE).event(CLUSTER_CREATION_EVENT).noFailureEvent()
-            .from(CLUSTER_PROXY_REGISTRATION_STATE).to(BOOTSTRAPPING_MACHINES_STATE).event(CLUSTER_PROXY_REGISTRATION_SUCCEEDED_EVENT).noFailureEvent()
+            .from(CLUSTER_PROXY_REGISTRATION_STATE).to(BOOTSTRAPPING_MACHINES_STATE).event(CLUSTER_PROXY_REGISTRATION_SUCCEEDED_EVENT)
+                    .failureEvent(CLUSTER_PROXY_REGISTRATION_FAILED_EVENT)
             .from(INIT_STATE).to(INSTALLING_CLUSTER_STATE).event(CLUSTER_INSTALL_EVENT).noFailureEvent()
             .from(BOOTSTRAPPING_MACHINES_STATE).to(COLLECTING_HOST_METADATA_STATE).event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
                     .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
@@ -76,7 +79,7 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
             .from(INSTALLING_CLUSTER_STATE).to(CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE).event(INSTALL_CLUSTER_FINISHED_EVENT)
                     .failureEvent(INSTALL_CLUSTER_FAILED_EVENT)
             .from(CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE).to(CLUSTER_CREATION_FINISHED_STATE).event(CLUSTER_PROXY_GATEWAY_REGISTRATION_SUCCEEDED_EVENT)
-                    .defaultFailureEvent()
+                    .failureEvent(CLUSTER_PROXY_GATEWAY_REGISTRATION_FAILED_EVENT)
             .from(CLUSTER_CREATION_FINISHED_STATE).to(FINAL_STATE).event(CLUSTER_CREATION_FINISHED_EVENT).defaultFailureEvent()
             .build();
 
