@@ -220,7 +220,7 @@
 <source>
   @type tail
   format none
-  path {{fluent.serviceLogFolderPrefix}}/knox/gateway.log*
+  path {{fluent.serviceLogFolderPrefix}}/knox/gateway/gateway.log*
   pos_file /var/log/td-agent/pos/{{providerPrefix}}-knox-gateway.log.pos
   tag {{providerPrefix}}.KNOX-GATEWAY
   read_from_head true
@@ -228,7 +228,7 @@
 <source>
   @type tail
   format none
-  path {{fluent.serviceLogFolderPrefix}}/knox/gateway-audit.log*
+  path {{fluent.serviceLogFolderPrefix}}/knox/gateway/gateway-audit.log*
   pos_file /var/log/td-agent/pos/{{providerPrefix}}-knox-gateway-audit.log.pos
   tag {{providerPrefix}}.KNOX-GATEWAY_AUDIT
   read_from_head true
