@@ -79,6 +79,8 @@ public class StackToCloudStackConverterTest {
 
     private static final String[] EMPTY_STRING = new String[0];
 
+    private static final String BLUEPRINT_TEXT = "blueprintText";
+
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
@@ -139,7 +141,8 @@ public class StackToCloudStackConverterTest {
         when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
         when(stack.getCluster()).thenReturn(cluster);
         when(cluster.getBlueprint()).thenReturn(blueprint);
-        when(blueprint.getBlueprintText()).thenReturn("blueprintText");
+        when(blueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
+        when(cluster.getExtendedBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getComponentsByHostGroup()).thenReturn(Mockito.mock(Map.class));
         when(cloudFileSystemViewBuilder.build(any(), any(), any())).thenReturn(Optional.empty());

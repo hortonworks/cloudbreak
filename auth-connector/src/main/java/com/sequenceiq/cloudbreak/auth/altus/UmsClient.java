@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementBlockingStub;
@@ -37,7 +35,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Machi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
-import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 
 import io.grpc.ManagedChannel;
@@ -200,20 +197,6 @@ public class UmsClient {
             requestBuilder.setPageToken(response.getNextPageToken());
         } while (response.hasNextPageToken());
         return users;
-    }
-
-    @Retryable(value = UmsOperationException.class, maxAttempts = 5, backoff = @Backoff(delay = 5000))
-    public MachineUser getMachineUserWithRetry(String requestId, String userCrn, String machineUserName) {
-        try {
-            return getMachineUserForUser(requestId, userCrn, machineUserName);
-        } catch (StatusRuntimeException ex) {
-            if (Status.NOT_FOUND.getCode().equals(ex.getStatus().getCode())) {
-                LOGGER.error("Machine user not found.", ex);
-                throw new UmsOperationException(String.format("Machine user with name %s is not found yet", machineUserName), ex);
-            } else {
-                throw ex;
-            }
-        }
     }
 
     public MachineUser getMachineUser(String requestId, String userCrn) {
