@@ -7,23 +7,23 @@ import (
 var syncStatusHeader = []string{"ID", "Status", "SyncType", "Success", "Failure", "Error", "StartTime", "EndTime"}
 
 type freeIpaOutSyncOperation struct {
-	ID        string          `json:"id" yaml:"id"`
-	Status    string          `json:"status" yaml:"status"`
-	SyncType  string          `json:"syncType" yaml:"syncType"`
-	Success   []successDetail `json:"success" yaml:"success"`
-	Failure   []failureDetail `json:"failure" yaml:"failure"`
-	Error     string          `json:"error,omitempty" yaml:"error,omitempty"`
-	StartTime string          `json:"startTime" yaml:"startTime"`
-	EndTime   string          `json:"endTime,omitempty" yaml:"endTime,omitempty"`
+	ID        string          `json:"ID" yaml:"ID"`
+	Status    string          `json:"Status" yaml:"Status"`
+	SyncType  string          `json:"SyncType" yaml:"SyncType"`
+	Success   []successDetail `json:"Success" yaml:"Success"`
+	Failure   []failureDetail `json:"Failure" yaml:"Failure"`
+	Error     string          `json:"Error,omitempty" yaml:"Error,omitempty"`
+	StartTime string          `json:"StartTime" yaml:"StartTime"`
+	EndTime   string          `json:"EndTime,omitempty" yaml:"EndTime,omitempty"`
 }
 
 type successDetail struct {
-	Environment string `json:"environment" yaml:"environment"`
+	Environment string `json:"Environment" yaml:"Environment"`
 }
 
 type failureDetail struct {
-	Environment string `json:"environment" yaml:"environment"`
-	Details     string `json:"details" yaml:"details"`
+	Environment string `json:"Environment" yaml:"Environment"`
+	Details     string `json:"Details" yaml:"Details"`
 }
 
 func (f *freeIpaOutSyncOperation) DataAsStringArray() []string {

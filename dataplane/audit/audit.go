@@ -18,7 +18,7 @@ import (
 var auditListHeader = []string{"AuditID", "EventType", "TimeStamp", "ResourceId", "ResourceName", "ResourceType", "UserName", "Status", "Duration"}
 
 type auditListOut struct {
-	Audit *model.AuditEventV4Response `json:"audit" yaml:"audit"`
+	Audit *model.AuditEventV4Response `json:"Audit" yaml:"Audit"`
 }
 
 func (a *auditListOut) DataAsStringArray() []string {
@@ -33,7 +33,7 @@ func convertToDateTimeString(t int64) string {
 var auditHeader = []string{"Audit"}
 
 type auditOut struct {
-	Audit *model.AuditEventV4Response `json:"audit" yaml:"audit"`
+	Audit *model.AuditEventV4Response `json:"Audit" yaml:"Audit"`
 }
 
 type auditClient interface {

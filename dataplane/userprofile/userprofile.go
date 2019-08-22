@@ -16,11 +16,11 @@ import (
 var showClustersPreferencesHeader = []string{"Show terminated clusters", "Source of config", "Timeout (days)", "Timeout (hours)", "Timeout (minutes)"}
 
 type showClustersPreferencesOut struct {
-	ShowTerminatedClustersActive bool   `json:"show terminated clusters" yaml:"show terminated clusters"`
-	Source                       string `json:"source of config" yaml:"source of config"`
-	TimeoutDays                  int32  `json:"show terminated clusters timeout (days)" yaml:"show terminated clusters timeout (days)"`
-	TimeoutHours                 int32  `json:"show terminated clusters timeout (hours)" yaml:"show terminated clusters timeout (hours)"`
-	TimeoutMinutes               int32  `json:"show terminated clusters timeout (minutes)" yaml:"show terminated clusters timeout (minutes)"`
+	ShowTerminatedClustersActive bool   `json:"Show terminated clusters" yaml:"Show terminated clusters"`
+	Source                       string `json:"Source of config" yaml:"Source of config"`
+	TimeoutDays                  int32  `json:"Show terminated clusters timeout (days)" yaml:"Show terminated clusters timeout (days)"`
+	TimeoutHours                 int32  `json:"Show terminated clusters timeout (hours)" yaml:"Show terminated clusters timeout (hours)"`
+	TimeoutMinutes               int32  `json:"Show terminated clusters timeout (minutes)" yaml:"Show terminated clusters timeout (minutes)"`
 }
 
 func (r *showClustersPreferencesOut) DataAsStringArray() []string {

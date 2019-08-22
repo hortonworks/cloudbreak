@@ -3,9 +3,9 @@ package common
 var CloudResourceHeader = []string{"Name", "Description", "CloudPlatform"}
 
 type CloudResourceOut struct {
-	Name          string `json:"name" yaml:"name"`
-	Description   string `json:"description" yaml:"description"`
-	CloudPlatform string `json:"cloudPlatform" yaml:"cloudPlatform"`
+	Name          string `json:"Name" yaml:"Name"`
+	Description   string `json:"Description" yaml:"Description"`
+	CloudPlatform string `json:"CloudPlatform" yaml:"CloudPlatform"`
 }
 
 func (c *CloudResourceOut) DataAsStringArray() []string {

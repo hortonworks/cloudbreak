@@ -42,10 +42,10 @@ RSpec.describe 'Credential test cases', :type => :aruba, :feature => "Credential
       expect(result.stdout.empty?).to be_falsy
       [JSON.parse(result.stdout)].flatten.each do |s|
             expect(s).to include_json(
-              accountId: /.*/,
-              cloudPlatform: /.*/,
-              externalId: /.*/,
-              policyJSON: /.*/
+              AccountId: /.*/,
+              CloudPlatform: /.*/,
+              ExternalId: /.*/,
+              PolicyJSON: /.*/
           )
       end
     end
