@@ -15,18 +15,29 @@ public class RedbeamsEvent implements Selectable, Acceptable {
 
     private final Promise<Boolean> accepted;
 
+    private final boolean forced;
+
     public RedbeamsEvent(Long resourceId) {
         this(null, resourceId);
     }
 
-    public RedbeamsEvent(String selector, Long resourceId) {
-        this(selector, resourceId, new Promise<>());
+    public RedbeamsEvent(Long resourceId, boolean forced) {
+        this(null, resourceId, forced);
     }
 
-    public RedbeamsEvent(String selector, Long resourceId, Promise<Boolean> accepted) {
+    public RedbeamsEvent(String selector, Long resourceId) {
+        this(selector, resourceId, new Promise<>(), false);
+    }
+
+    public RedbeamsEvent(String selector, Long resourceId, boolean forced) {
+        this(selector, resourceId, new Promise<>(), forced);
+    }
+
+    public RedbeamsEvent(String selector, Long resourceId, Promise<Boolean> accepted, boolean forced) {
         this.selector = selector;
         this.resourceId = resourceId;
         this.accepted = accepted;
+        this.forced = forced;
     }
 
     @Override
@@ -42,6 +53,10 @@ public class RedbeamsEvent implements Selectable, Acceptable {
     @Override
     public Promise<Boolean> accepted() {
         return accepted;
+    }
+
+    public boolean isForced() {
+        return forced;
     }
 
     public String toString() {

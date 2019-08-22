@@ -31,10 +31,10 @@ public class RedbeamsTerminationService {
 
     private final Random random = new SecureRandom();
 
-    public DBStack terminateDatabaseServer(String crn) {
+    public DBStack terminateDatabaseServer(String crn, boolean force) {
         DBStack dbStack = dbStackService.getByCrn(crn);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Terminate called for: {}", dbStack);
+            LOGGER.debug("Terminate called for: {} with force: {}", dbStack, force);
         }
         if (dbStack.getStatus().isDeleteInProgressOrCompleted()) {
             LOGGER.debug("DatabaseServer with crn {} is already being deleted", dbStack.getResourceCrn());
@@ -44,7 +44,7 @@ public class RedbeamsTerminationService {
         dbStack = dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.DELETE_REQUESTED);
         flowManager.cancelRunningFlows(dbStack.getId());
         flowManager.notify(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(),
-                new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(), dbStack.getId()));
+                new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(), dbStack.getId(), force));
         return dbStack;
     }
 }

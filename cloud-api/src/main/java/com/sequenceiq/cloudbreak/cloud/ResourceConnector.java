@@ -111,10 +111,11 @@ public interface ResourceConnector<R> {
      *
      * @param authenticatedContext the authenticated context which holds the client object
      * @param stack                contains the full description of infrastructure
+     * @param force                whether to continue termination even if infrastructure deletion fails
      * @return the status of resources terminated on the cloud platform
      * @throws Exception in case of any error
      */
-    List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
+    List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, boolean force) throws Exception;
 
     /**
      * Update of infrastructure on Cloud platform. (e.g change Security groups). It does not need to wait/block until the infrastructure update is

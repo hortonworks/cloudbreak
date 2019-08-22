@@ -79,8 +79,8 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    public DatabaseServerTerminationOutcomeV4Response terminate(String crn) {
-        DBStack dbStack = redbeamsTerminationService.terminateDatabaseServer(crn);
+    public DatabaseServerTerminationOutcomeV4Response terminate(String crn, boolean force) {
+        DBStack dbStack = redbeamsTerminationService.terminateDatabaseServer(crn, force);
         return converterUtil.convert(dbStack, DatabaseServerTerminationOutcomeV4Response.class);
     }
 

@@ -62,15 +62,18 @@ public class RedbeamsTerminationActions {
     public Action<?, ?> terminateDatabaseServer() {
         return new AbstractRedbeamsTerminationAction<>(RedbeamsEvent.class) {
 
+            private boolean force;
+
             @Override
             protected void prepareExecution(RedbeamsEvent payload, Map<Object, Object> variables) {
                 dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.DELETE_IN_PROGRESS);
+                force = payload.isForced();
             }
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
                 return new TerminateDatabaseServerRequest(context.getCloudContext(), context.getCloudCredential(),
-                        context.getDatabaseStack());
+                        context.getDatabaseStack(), force);
             }
         };
     }

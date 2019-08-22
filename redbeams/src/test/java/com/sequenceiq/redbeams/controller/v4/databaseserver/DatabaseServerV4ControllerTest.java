@@ -177,14 +177,14 @@ public class DatabaseServerV4ControllerTest {
 
     @Test
     public void testTerminate() {
-        when(terminationService.terminateDatabaseServer(server.getResourceCrn().toString())).thenReturn(dbStack);
+        when(terminationService.terminateDatabaseServer(server.getResourceCrn().toString(), true)).thenReturn(dbStack);
         when(converterUtil.convert(dbStack, DatabaseServerTerminationOutcomeV4Response.class))
             .thenReturn(terminateResponse);
 
-        DatabaseServerTerminationOutcomeV4Response response = underTest.terminate(server.getResourceCrn().toString());
+        DatabaseServerTerminationOutcomeV4Response response = underTest.terminate(server.getResourceCrn().toString(), true);
 
         assertEquals(terminateResponse, response);
-        verify(terminationService).terminateDatabaseServer(server.getResourceCrn().toString());
+        verify(terminationService).terminateDatabaseServer(server.getResourceCrn().toString(), true);
     }
 
     @Test

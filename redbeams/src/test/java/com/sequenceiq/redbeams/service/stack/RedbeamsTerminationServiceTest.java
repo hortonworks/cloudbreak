@@ -63,7 +63,7 @@ class RedbeamsTerminationServiceTest {
         when(dbStackService.getByCrn(anyString())).thenReturn(dbStack);
         when(dbStackStatusUpdater.updateStatus(DBSTACK_ID, DetailedDBStackStatus.DELETE_REQUESTED)).thenReturn(dbStack);
 
-        underTest.terminateDatabaseServer(DATABASE_SERVER_CRN);
+        underTest.terminateDatabaseServer(DATABASE_SERVER_CRN, true);
 
         verify(dbStackStatusUpdater).updateStatus(DBSTACK_ID, DetailedDBStackStatus.DELETE_REQUESTED);
         InOrder inOrder = Mockito.inOrder(flowManager);
@@ -77,7 +77,7 @@ class RedbeamsTerminationServiceTest {
         dbStack.getDbStackStatus().setStatus(status);
         when(dbStackService.getByCrn(anyString())).thenReturn(dbStack);
 
-        DBStack dbStack = underTest.terminateDatabaseServer(DATABASE_SERVER_CRN);
+        DBStack dbStack = underTest.terminateDatabaseServer(DATABASE_SERVER_CRN, true);
 
         Assertions.assertEquals(status, dbStack.getStatus());
 
