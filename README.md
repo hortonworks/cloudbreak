@@ -144,10 +144,8 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 ```
 -Dcb.db.port.5432.tcp.addr=localhost
 -Dcb.db.port.5432.tcp.port=5432
--Dspring.cloud.consul.host=YOUR_IP
 -Dserver.port=9091
 -Daltus.ums.host=localhost
--Dvault.addr=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 ```
 
@@ -177,7 +175,6 @@ After importing the cloudbreak repo root, launch the Periscope application by ex
 -Dperiscope.cloudbreak.url=http://localhost:8080
 -Dserver.port=8085
 -Daltus.ums.host=localhost
--Dvault.addr=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 ````
 
@@ -192,6 +189,20 @@ After importing the cloudbreak repo root, launch the Datalake application by exe
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 ````
 
+Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
+
+### Running FreeIPA in IDEA
+
+After importing the cloudbreak repo root, launch the FreeIPA application by executing the com.sequenceiq.freeipa.FreeIpaApplication class with the following JVM options:
+
+````
+-Dfreeipa.db.addr=localhost
+-Dserver.port=8090
+-Dvault.root.token=<VAULT_ROOT_TOKEN>
+````
+
+Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
+
 ### Running Redbeams in IDEA
 
 After importing the cloudbreak repo root, launch the Redbeams application by executing the com.sequenceiq.redbeams.RedbeamsApplication class with the following JVM options:
@@ -202,7 +213,6 @@ After importing the cloudbreak repo root, launch the Redbeams application by exe
 -Dredbeams.cloudbreak.url=http://localhost:8080
 -Dserver.port=8087
 -Daltus.ums.host=localhost
--Dvault.addr=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 ```
 
@@ -229,7 +239,6 @@ To run Cloudbreak from the command line, run the following Gradle command:
 -Dcb.schema.scripts.location=$(pwd)/core/src/main/resources/schema
 -Dserver.port=9091 \
 -Daltus.ums.host=localhost
--Dvault.addr=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Dspring.config.location=$(pwd)/cloud-common/src/main/resources/application.yml,$(pwd)/core/build/resources/main/application.properties"
 ```
@@ -248,7 +257,6 @@ To run Periscope from the command line, run the following Gradle command:
 -Dperiscope.schema.scripts.location=$(pwd)/autoscale/src/main/resources/schema
 -Dserver.port=8085 \
 -Daltus.ums.host=localhost \
--Dvault.addr=localhost \
 -Dvault.root.token=<VAULT_ROOT_TOKEN> \
 -Dspring.config.location=$(pwd)/autoscale/src/main/resources/application.yml,$(pwd)/autoscale/build/resources/main/application.properties"
 ````
@@ -270,7 +278,6 @@ To run the FreeIPA management service from the command line, run the following G
 ````
 ./gradlew :freeipa:bootRun -PjvmArgs="-Dfreeipa.db.addr=localhost \
 -Dserver.port=8090 \
--Dvault.addr=localhost \
 -Dvault.root.token=<VAULT_ROOT_TOKEN> \
 -Dspring.config.location=$(pwd)/freeipa/src/main/resources/application.yml,$(pwd)/freeipa/build/resources/main/application.properties"
 ````
@@ -287,7 +294,6 @@ To run Redbeams from the command line, run the following Gradle command:
 -Dredbeams.schema.scripts.location=$(pwd)/redbeams/src/main/resources/schema \
 -Dserver.port=8087 \
 -Daltus.ums.host=localhost \
--Dvault.addr=localhost \
 -Dvault.root.token=<VAULT_ROOT_TOKEN> \
 -Dspring.config.location=$(pwd)/redbeams/src/main/resources/application.yml,$(pwd)/redbeams/build/resources/main/application.properties"
 ```
