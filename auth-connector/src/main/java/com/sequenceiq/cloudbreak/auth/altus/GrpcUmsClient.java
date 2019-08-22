@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
@@ -23,12 +25,15 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Machi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
+import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 @Component
 public class GrpcUmsClient {
@@ -192,15 +197,24 @@ public class GrpcUmsClient {
      * @param requestId       an optional request Id
      * @return the user associated with this user CRN
      */
+    @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public MachineUser createMachineUser(String machineUserName, String userCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             String generatedRequestId = requestId.orElse(UUID.randomUUID().toString());
             LOGGER.debug("Creating machine user {} for {} using request ID {}", machineUserName, userCrn, generatedRequestId);
             client.createMachineUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
-            MachineUser machineUser = client.getMachineUserWithRetry(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
+            MachineUser machineUser = client.getMachineUserForUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
             LOGGER.debug("Machine User information retrieved for userCrn: {}", machineUser.getCrn());
             return machineUser;
+        } catch (StatusRuntimeException ex) {
+            if (Status.NOT_FOUND.getCode().equals(ex.getStatus().getCode())) {
+                String errMessage = String.format("Machine user with name %s is not found yet", machineUserName);
+                LOGGER.debug(errMessage, ex);
+                throw new UmsOperationException(errMessage, ex);
+            } else {
+                throw ex;
+            }
         }
     }
 
@@ -373,6 +387,7 @@ public class GrpcUmsClient {
      * @param accessKeyType   algorithm type used for the access key
      * @return credential (access/secret keypair)
      */
+    @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn,
             String roleCrn, UserManagementProto.AccessKeyType.Value accessKeyType) {
         UserManagementProto.MachineUser machineUser = createMachineUser(machineUserName, userCrn, Optional.empty());
