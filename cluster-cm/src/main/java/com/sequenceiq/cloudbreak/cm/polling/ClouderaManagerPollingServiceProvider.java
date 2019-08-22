@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandC
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerApplyHostTemplateListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDecommissionHostListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDeployClientConfigListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerGenerateCredentialsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerKerberosConfigureListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelRepoChecker;
@@ -84,6 +85,9 @@ public class ClouderaManagerPollingServiceProvider {
     @Inject
     private ClouderaManagerRestartServicesListenerTask restartServicesListenerTask;
 
+    @Inject
+    private ClouderaManagerGenerateCredentialsListenerTask generateCredentialsListenerTask;
+
     public PollingResult clouderaManagerStartupPollerObjectPollingService(Stack stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getClusterManagerIp());
         return pollCMWithListener(stack, apiClient, clouderaManagerStartupListenerTask);
@@ -147,6 +151,11 @@ public class ClouderaManagerPollingServiceProvider {
     public PollingResult restartServicesPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to restart services. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, restartServicesListenerTask);
+    }
+
+    public PollingResult generateCredentialsPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+        LOGGER.debug("Waiting for Cloudera Manager to finish generate credentials. [Server address: {}]", stack.getClusterManagerIp());
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, generateCredentialsListenerTask);
     }
 
     private PollingResult pollCMWithListener(Stack stack, ApiClient apiClient, StatusCheckerTask<ClouderaManagerPollerObject> listenerTask) {
