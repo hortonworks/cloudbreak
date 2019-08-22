@@ -64,7 +64,9 @@ public class AwsRdsTerminateService {
             if (!e.getErrorMessage().contains(cFStackName + " does not exist")) {
                 throw e;
             }
-            throw new CloudConnectorException(cFStackName + " does not exist", e);
+            LOGGER.warn("Stack " + cFStackName + " does not exist, assuming that it has already been deleted");
+            // FIXME
+            return List.of();
         }
 
         cfRetryClient.deleteStack(awsStackRequestHelper.createDeleteStackRequest(cFStackName));
