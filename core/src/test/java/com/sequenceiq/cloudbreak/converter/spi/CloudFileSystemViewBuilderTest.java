@@ -61,7 +61,46 @@ public class CloudFileSystemViewBuilderTest {
     private final CloudFileSystemViewBuilder cloudFileSystemViewBuilder = new CloudFileSystemViewBuilder();
 
     @Test
-    public void build() {
+    public void testBuild() {
+        List<CloudIdentity> cloudIdentities = getCloudIdentities();
+        CloudStorage cloudStorage = getCloudStorage(cloudIdentities);
+        FileSystem fileSystem = getFileSystem(cloudStorage);
+        Map<String, Set<String>> componentsByHostGroup = new HashMap<>();
+
+        InstanceGroup idBrokerGroup = getIdBrokerGroup(componentsByHostGroup);
+
+        InstanceGroup computeGroup = new InstanceGroup();
+        computeGroup.setGroupName(COMPUTE_INSTANCE_GROUP_NAME);
+        componentsByHostGroup.put(COMPUTE_INSTANCE_GROUP_NAME, new HashSet<>());
+
+        Optional<CloudFileSystemView> idBrokerGroupResult = cloudFileSystemViewBuilder.build(fileSystem, componentsByHostGroup, idBrokerGroup);
+        Assertions.assertEquals(idBrokerGroupResult.get().getCloudIdentityType(), CloudIdentityType.ID_BROKER);
+
+        Optional<CloudFileSystemView> computeGroupResult = cloudFileSystemViewBuilder.build(fileSystem, componentsByHostGroup, computeGroup);
+        Assertions.assertEquals(computeGroupResult.get().getCloudIdentityType(), CloudIdentityType.LOG);
+    }
+
+    @Test
+    public void testBuildWithNullComponents() {
+        List<CloudIdentity> cloudIdentities = getCloudIdentities();
+        CloudStorage cloudStorage = getCloudStorage(cloudIdentities);
+        FileSystem fileSystem = getFileSystem(cloudStorage);
+        Map<String, Set<String>> componentsByHostGroup = new HashMap<>();
+
+        InstanceGroup idBrokerGroup = getIdBrokerGroup(componentsByHostGroup);
+
+        InstanceGroup computeGroup = new InstanceGroup();
+        computeGroup.setGroupName(COMPUTE_INSTANCE_GROUP_NAME);
+        componentsByHostGroup.put(COMPUTE_INSTANCE_GROUP_NAME, null);
+
+        Optional<CloudFileSystemView> idBrokerGroupResult = cloudFileSystemViewBuilder.build(fileSystem, componentsByHostGroup, idBrokerGroup);
+        Assertions.assertEquals(idBrokerGroupResult.get().getCloudIdentityType(), CloudIdentityType.ID_BROKER);
+
+        Optional<CloudFileSystemView> computeGroupResult = cloudFileSystemViewBuilder.build(fileSystem, componentsByHostGroup, computeGroup);
+        Assertions.assertEquals(computeGroupResult.get().getCloudIdentityType(), CloudIdentityType.LOG);
+    }
+
+    private List<CloudIdentity> getCloudIdentities() {
         List<CloudIdentity> cloudIdentities = new ArrayList<>();
         CloudIdentity idBroker = new CloudIdentity();
         idBroker.setIdentityType(CloudIdentityType.ID_BROKER);
@@ -76,7 +115,10 @@ public class CloudFileSystemViewBuilderTest {
         logS3Identity.setInstanceProfile(LOG_INSTANCE_PROFILE);
         log.setS3Identity(logS3Identity);
         cloudIdentities.add(log);
+        return cloudIdentities;
+    }
 
+    private CloudStorage getCloudStorage(List<CloudIdentity> cloudIdentities) {
         List<StorageLocation> storageLocations = new ArrayList<>();
 
         StorageLocation storageLocation1 = new StorageLocation();
@@ -102,30 +144,22 @@ public class CloudFileSystemViewBuilderTest {
         CloudStorage cloudStorage = new CloudStorage();
         cloudStorage.setCloudIdentities(cloudIdentities);
         cloudStorage.setLocations(storageLocations);
+        return cloudStorage;
+    }
 
+    private FileSystem getFileSystem(CloudStorage cloudStorage) {
         FileSystem fileSystem = new FileSystem();
         fileSystem.setType(FileSystemType.S3);
         fileSystem.setCloudStorage(cloudStorage);
-        Map<String, Set<String>> componentsByHostGroup = new HashMap<>();
+        return fileSystem;
+    }
 
-
+    private InstanceGroup getIdBrokerGroup(Map<String, Set<String>> componentsByHostGroup) {
         InstanceGroup idBrokerGroup = new InstanceGroup();
         idBrokerGroup.setGroupName(ID_BROKER_INSTANCE_GROUP_NAME);
         Set<String> idBrokerComponents = new HashSet<>();
         idBrokerComponents.add(KnoxRoles.IDBROKER);
         componentsByHostGroup.put(ID_BROKER_INSTANCE_GROUP_NAME, idBrokerComponents);
-
-        InstanceGroup computeGroup = new InstanceGroup();
-        computeGroup.setGroupName(COMPUTE_INSTANCE_GROUP_NAME);
-        componentsByHostGroup.put(COMPUTE_INSTANCE_GROUP_NAME, new HashSet<>());
-
-
-        Optional<CloudFileSystemView> idBrokerGroupResult = cloudFileSystemViewBuilder.build(fileSystem, componentsByHostGroup, idBrokerGroup);
-        Assertions.assertEquals(idBrokerGroupResult.get().getCloudIdentityType(), CloudIdentityType.ID_BROKER);
-
-
-        Optional<CloudFileSystemView> computeGroupResult = cloudFileSystemViewBuilder.build(fileSystem, componentsByHostGroup, computeGroup);
-        Assertions.assertEquals(computeGroupResult.get().getCloudIdentityType(), CloudIdentityType.LOG);
-
+        return idBrokerGroup;
     }
 }
