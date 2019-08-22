@@ -105,10 +105,6 @@
               {
                 "name": "hs2_execution_engine",
                 "value": "spark"
-              },
-              {
-                 "name": "hive_server2_transport_mode",
-                 "value": "http"
               }
             ],
             "base": true
