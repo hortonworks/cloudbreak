@@ -32,6 +32,8 @@ public class CrnTest {
 
     private String invalidCrnResourceType = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cookie:f3b8ed82-e712-4f89-bda7-be07183720d3";
 
+    private String machineUserBaby = "crn:altus:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:machineUser:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
+
     @Test
     public void testBuilder() {
         Crn crn = Crn.builder()
@@ -117,5 +119,11 @@ public class CrnTest {
             .setResource("externalId/userId")
             .build();
         assertEquals("userId", crn.getUserId());
+    }
+
+    @Test
+    public void testMachineUser() {
+        Crn crn = Crn.fromString(machineUserBaby);
+        assertEquals("b8a64902-7765-4ddd-a4f3-df81ae585e10", crn.getUserId());
     }
 }
