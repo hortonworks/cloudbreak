@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Before;
@@ -42,10 +43,12 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.BadRequestException;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
@@ -53,6 +56,7 @@ import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 public class DatabaseServerConfigServiceTest {
@@ -92,6 +96,9 @@ public class DatabaseServerConfigServiceTest {
     private DatabaseConfigService databaseConfigService;
 
     @Mock
+    private DBStackService dbStackService;
+
+    @Mock
     private DriverFunctions driverFunctions;
 
     @Mock
@@ -104,6 +111,9 @@ public class DatabaseServerConfigServiceTest {
     private Clock clock;
 
     @Mock
+    private TransactionService transactionService;
+
+    @Mock
     private CrnService crnService;
 
     @Mock
@@ -114,7 +124,7 @@ public class DatabaseServerConfigServiceTest {
     private DatabaseServerConfig server2;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         initMocks(this);
 
         server = new DatabaseServerConfig();
@@ -127,6 +137,10 @@ public class DatabaseServerConfigServiceTest {
         server2.setId(2L);
         server2.setName("myotherserver");
         server2.setResourceCrn(SERVER_2_CRN);
+
+        when(transactionService.required(any(Supplier.class))).thenAnswer((Answer) invocation -> {
+            return ((Supplier) invocation.getArguments()[0]).get();
+        });
     }
 
     @Test
@@ -216,6 +230,24 @@ public class DatabaseServerConfigServiceTest {
         }).when(connectionValidator).validate(eq(server), any(Errors.class));
 
         underTest.create(server, 0L, true);
+    }
+
+    @Test
+    public void testRelease() {
+        server.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
+        DBStack dbStack = new DBStack();
+        server.setDbStack(dbStack);
+
+        when(repository.findByResourceCrn(any())).thenReturn(Optional.of(server));
+        when(repository.save(server)).thenReturn(server);
+
+        DatabaseServerConfig releasedServer = underTest.release(SERVER_CRN.toString());
+
+        assertEquals(ResourceStatus.USER_MANAGED, releasedServer.getResourceStatus());
+        assertFalse(releasedServer.getDbStack().isPresent());
+
+        verify(dbStackService).delete(dbStack);
+        verify(repository).save(server);
     }
 
     @Test
