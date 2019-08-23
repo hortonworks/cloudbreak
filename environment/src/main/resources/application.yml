@@ -133,6 +133,8 @@ cb:
     host.name.prefix.length: 255
 
 spring:
+  application:
+    name: EnvironmentService
   freemarker:
     template-loader-path: file:/etc/cloudbreak,classpath:/
     prefer-file-system-access: false

@@ -28,6 +28,8 @@ info:
     capabilities: gov_cloud, mock_idbroker_mapping
 
 spring:
+  application:
+    name: CloudbreakService
   freemarker:
     template-loader-path: file:/etc/cloudbreak,classpath:/
     prefer-file-system-access: false

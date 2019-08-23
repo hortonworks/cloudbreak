@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -51,7 +52,6 @@ import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
@@ -61,9 +61,10 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.client.EnvironmentApiClientParams;
-import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
+import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiClientParams;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClient;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClientBuilder;
@@ -71,6 +72,8 @@ import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
 import com.sequenceiq.sdx.client.SdxApiClientParams;
 import com.sequenceiq.sdx.client.SdxServiceClientBuilder;
 import com.sequenceiq.sdx.client.SdxServiceCrnClient;
+
+import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
 
 @Configuration
 @EnableRetry
@@ -169,6 +172,16 @@ public class AppConfig implements ResourceLoaderAware {
                 environment.getPropertySources().addFirst(propertySource);
             }
         }
+    }
+
+    @Bean
+    public FilterRegistrationBean spanFinishingFilter() {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new SpanFinishingFilter());
+        filterRegistrationBean.setAsyncSupported(true);
+        filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST);
+        filterRegistrationBean.addUrlPatterns("*");
+        return filterRegistrationBean;
     }
 
     @Bean
