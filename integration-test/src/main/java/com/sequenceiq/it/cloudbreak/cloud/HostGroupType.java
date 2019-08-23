@@ -5,7 +5,7 @@ import com.sequenceiq.it.TestParameter;
 
 public enum HostGroupType {
     MASTER("master", InstanceGroupType.GATEWAY, InstanceCountParameter.MASTER_INSTANCE_COUNT.getName()),
-    WORKER("worker", InstanceGroupType.CORE, InstanceCountParameter.WORKER_INSTANCE_COUNT.getName()),
+    WORKER("worker", InstanceGroupType.CORE, InstanceCountParameter.WORKER_INSTANCE_COUNT.getName(), 3),
     IDBROKER("idbroker", InstanceGroupType.CORE, InstanceCountParameter.IDBROKER_INSTANCE_COUNT.getName()),
     COMPUTE("compute", InstanceGroupType.CORE, InstanceCountParameter.COMPUTE_INSTANCE_COUNT.getName()),
     SERVICES("Services", InstanceGroupType.GATEWAY, InstanceCountParameter.SERVICE_INSTANCE_COUNT.getName()),
@@ -19,10 +19,20 @@ public enum HostGroupType {
 
     private final InstanceGroupType instanceGroupType;
 
+    private final int defaultInstanceCount;
+
     HostGroupType(String name, InstanceGroupType instanceGroupType, String countParameterName) {
         this.name = name;
         this.instanceGroupType = instanceGroupType;
         this.countParameterName = countParameterName;
+        defaultInstanceCount = 1;
+    }
+
+    HostGroupType(String name, InstanceGroupType instanceGroupType, String countParameterName, int defaultInstanceCount) {
+        this.name = name;
+        this.instanceGroupType = instanceGroupType;
+        this.countParameterName = countParameterName;
+        this.defaultInstanceCount = defaultInstanceCount;
     }
 
     public String getName() {
@@ -39,7 +49,7 @@ public enum HostGroupType {
         try {
             instanceCountInt = Integer.parseInt(instanceCount);
         } catch (NumberFormatException e) {
-            instanceCountInt = 1;
+            instanceCountInt = this.defaultInstanceCount;
         }
         return instanceCountInt;
     }

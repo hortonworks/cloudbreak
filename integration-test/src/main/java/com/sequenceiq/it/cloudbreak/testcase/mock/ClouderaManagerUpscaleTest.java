@@ -99,7 +99,7 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
 
     @BeforeMethod
     public void setUp() {
-        originalWorkerCount = 1;
+        originalWorkerCount = 3;
         desiredWorkerCount = 15;
 
         parcelStageResponses = new Stack<>();
