@@ -30,11 +30,14 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.BadRequestException;
+import com.sequenceiq.redbeams.exception.ConflictException;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
@@ -42,6 +45,7 @@ import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 @Service
@@ -60,6 +64,9 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     private DatabaseConfigService databaseConfigService;
 
     @Inject
+    private DBStackService dbStackService;
+
+    @Inject
     private DriverFunctions driverFunctions;
 
     @Inject
@@ -70,6 +77,9 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     @Inject
     private Clock clock;
+
+    @Inject
+    private TransactionService transactionService;
 
     @Inject
     private CrnService crnService;
@@ -130,6 +140,31 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     public DatabaseServerConfig update(DatabaseServerConfig resource) {
         MDCBuilder.buildMdcContext(resource);
         return repository.save(resource);
+    }
+
+    public DatabaseServerConfig release(String resourceCrn) {
+        try {
+            return transactionService.required(() -> {
+                DatabaseServerConfig resource = getByCrn(resourceCrn);
+                if (!resource.getResourceStatus().isReleasable()) {
+                    throw new ConflictException(String.format("Database server configuration has unreleasable resource "
+                        + "status %s: releasable statuses are %s", resource.getResourceStatus(), ResourceStatus.getReleasableValues()));
+                }
+
+                Optional<DBStack> dbStack = resource.getDbStack();
+                if (dbStack.isPresent()) {
+                    dbStackService.delete(dbStack.get());
+                    resource.setDbStack(null);
+                } else {
+                    LOGGER.info("Database stack missing for {}, continuing anyway");
+                }
+
+                resource.setResourceStatus(ResourceStatus.USER_MANAGED);
+                return repository.save(resource);
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw e.getCause() != null ? e.getCause() : new RedbeamsException("Failed to release management of " + resourceCrn);
+        }
     }
 
     public void archive(DatabaseServerConfig resource) {

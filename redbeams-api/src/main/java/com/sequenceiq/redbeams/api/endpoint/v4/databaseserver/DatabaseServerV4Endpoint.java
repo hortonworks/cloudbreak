@@ -9,6 +9,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -80,6 +81,14 @@ public interface DatabaseServerV4Endpoint {
             nickname = "createDatabaseServer")
     DatabaseServerStatusV4Response create(
             @Valid @ApiParam(DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request
+    );
+
+    @PUT
+    @Path("{crn}/release")
+    @ApiOperation(value = DatabaseServerOpDescription.RELEASE, notes = DatabaseServerNotes.RELEASE,
+            nickname = "releaseManagedDatabaseServer")
+    DatabaseServerV4Response release(
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @DELETE

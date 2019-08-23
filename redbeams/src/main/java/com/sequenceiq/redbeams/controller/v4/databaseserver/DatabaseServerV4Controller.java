@@ -79,6 +79,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
+    public DatabaseServerV4Response release(String crn) {
+        DatabaseServerConfig server = databaseServerConfigService.release(crn);
+        return converterUtil.convert(server, DatabaseServerV4Response.class);
+    }
+
+    @Override
     public DatabaseServerTerminationOutcomeV4Response terminate(String crn, boolean force) {
         DBStack dbStack = redbeamsTerminationService.terminateDatabaseServer(crn, force);
         return converterUtil.convert(dbStack, DatabaseServerTerminationOutcomeV4Response.class);

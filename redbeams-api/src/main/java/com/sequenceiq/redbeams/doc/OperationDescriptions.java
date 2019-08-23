@@ -22,6 +22,7 @@ public final class OperationDescriptions {
         public static final String GET_BY_NAME = "get a database server by name";
         public static final String GET_BY_CRN = "get a database server by CRN";
         public static final String CREATE = "create and register a database server in a cloud provider";
+        public static final String RELEASE = "release management of a service-managed database server";
         public static final String TERMINATE = "terminate a database server in a cloud provider and deregister it";
         public static final String REGISTER = "register a database server";
         public static final String DELETE_BY_CRN = "deregister a database server by CRN";

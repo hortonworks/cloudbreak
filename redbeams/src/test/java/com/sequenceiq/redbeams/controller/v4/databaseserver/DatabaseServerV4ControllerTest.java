@@ -176,6 +176,16 @@ public class DatabaseServerV4ControllerTest {
     }
 
     @Test
+    public void testRelease() {
+        when(service.release(SERVER_CRN)).thenReturn(server);
+        when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(response);
+
+        DatabaseServerV4Response response = underTest.release(SERVER_CRN);
+
+        assertEquals(1L, response.getId().longValue());
+    }
+
+    @Test
     public void testTerminate() {
         when(terminationService.terminateDatabaseServer(server.getResourceCrn().toString(), true)).thenReturn(dbStack);
         when(converterUtil.convert(dbStack, DatabaseServerTerminationOutcomeV4Response.class))

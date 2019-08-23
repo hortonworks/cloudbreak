@@ -48,8 +48,11 @@ public final class Notes {
             "Gets information on a database server by its CRN.";
         public static final String CREATE =
             "Creates a new database server. The database server starts out with only default databases.";
+        public static final String RELEASE =
+            "Releases management of a service-managed database server. Resource tracking information is discarded, "
+            + " but the server remains registered as user-managed.";
         public static final String TERMINATE =
-            "terminates a database server in a cloud provider and deregisters it";
+            "Terminates a database server in a cloud provider and deregisters it.";
         public static final String REGISTER =
             "Registers an existing database server.";
         public static final String DELETE_BY_CRN =
