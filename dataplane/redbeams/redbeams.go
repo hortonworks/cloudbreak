@@ -169,10 +169,11 @@ func CreateManagedDatabaseServer(c *cli.Context) {
 func TerminateManagedDatabaseServer(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "Terminate a managed database server")
 	crn := c.String(fl.FlCrn.Name)
+	force := c.Bool(fl.FlForceOptional.Name)
 	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
 
-	log.Infof("[TerminateDBServer] Terminating database server with CRN: %s", crn)
-	resp, err := redbeamsDbServerClient.TerminateManagedDatabaseServer(database_servers.NewTerminateManagedDatabaseServerParams().WithCrn(crn), nil)
+	log.Infof("[TerminateDBServer] Terminating database server with CRN: %s force: %t", crn, force)
+	resp, err := redbeamsDbServerClient.TerminateManagedDatabaseServer(database_servers.NewTerminateManagedDatabaseServerParams().WithCrn(crn).WithForce(&force), nil)
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}

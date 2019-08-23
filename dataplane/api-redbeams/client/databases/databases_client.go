@@ -211,7 +211,7 @@ func (a *Client) ListDatabases(params *ListDatabasesParams, authInfo runtime.Cli
 }
 
 /*
-RegisterDatabase registers database config of existing database
+RegisterDatabase registers a database config of existing database
 
 Registers an existing database, residing on some database server.
 */

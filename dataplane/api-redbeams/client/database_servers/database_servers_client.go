@@ -56,7 +56,7 @@ func (a *Client) CreateDatabaseOnServer(params *CreateDatabaseOnServerParams, au
 }
 
 /*
-CreateDatabaseServer creates and registers a database server in a cloud provider
+CreateDatabaseServer creates and register a database server in a cloud provider
 
 Creates a new database server. The database server starts out with only default databases.
 */
@@ -304,7 +304,7 @@ func (a *Client) RegisterDatabaseServer(params *RegisterDatabaseServerParams, au
 }
 
 /*
-TerminateManagedDatabaseServer terminates a database server in a cloud provider and deregisters it
+TerminateManagedDatabaseServer terminates a database server in a cloud provider and deregister it
 
 terminates a database server in a cloud provider and deregisters it
 */

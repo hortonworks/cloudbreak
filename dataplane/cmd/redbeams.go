@@ -68,10 +68,10 @@ func init() {
 						Name:   "terminate",
 						Usage:  "terminate a managed database server",
 						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCrn, fl.FlForceOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
 						Action: redbeams.TerminateManagedDatabaseServer,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().AddOutputFlag().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCrn, fl.FlForceOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},

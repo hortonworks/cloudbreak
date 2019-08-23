@@ -13,6 +13,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -20,8 +21,11 @@ import (
 // NewTerminateManagedDatabaseServerParams creates a new TerminateManagedDatabaseServerParams object
 // with the default values initialized.
 func NewTerminateManagedDatabaseServerParams() *TerminateManagedDatabaseServerParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &TerminateManagedDatabaseServerParams{
+		Force: &forceDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -30,8 +34,11 @@ func NewTerminateManagedDatabaseServerParams() *TerminateManagedDatabaseServerPa
 // NewTerminateManagedDatabaseServerParamsWithTimeout creates a new TerminateManagedDatabaseServerParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewTerminateManagedDatabaseServerParamsWithTimeout(timeout time.Duration) *TerminateManagedDatabaseServerParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &TerminateManagedDatabaseServerParams{
+		Force: &forceDefault,
 
 		timeout: timeout,
 	}
@@ -40,8 +47,11 @@ func NewTerminateManagedDatabaseServerParamsWithTimeout(timeout time.Duration) *
 // NewTerminateManagedDatabaseServerParamsWithContext creates a new TerminateManagedDatabaseServerParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewTerminateManagedDatabaseServerParamsWithContext(ctx context.Context) *TerminateManagedDatabaseServerParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &TerminateManagedDatabaseServerParams{
+		Force: &forceDefault,
 
 		Context: ctx,
 	}
@@ -50,8 +60,11 @@ func NewTerminateManagedDatabaseServerParamsWithContext(ctx context.Context) *Te
 // NewTerminateManagedDatabaseServerParamsWithHTTPClient creates a new TerminateManagedDatabaseServerParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewTerminateManagedDatabaseServerParamsWithHTTPClient(client *http.Client) *TerminateManagedDatabaseServerParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &TerminateManagedDatabaseServerParams{
+		Force:      &forceDefault,
 		HTTPClient: client,
 	}
 }
@@ -66,6 +79,8 @@ type TerminateManagedDatabaseServerParams struct {
 
 	*/
 	Crn string
+	/*Force*/
+	Force *bool
 
 	timeout    time.Duration
 	Context    context.Context
@@ -116,6 +131,17 @@ func (o *TerminateManagedDatabaseServerParams) SetCrn(crn string) {
 	o.Crn = crn
 }
 
+// WithForce adds the force to the terminate managed database server params
+func (o *TerminateManagedDatabaseServerParams) WithForce(force *bool) *TerminateManagedDatabaseServerParams {
+	o.SetForce(force)
+	return o
+}
+
+// SetForce adds the force to the terminate managed database server params
+func (o *TerminateManagedDatabaseServerParams) SetForce(force *bool) {
+	o.Force = force
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *TerminateManagedDatabaseServerParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -127,6 +153,22 @@ func (o *TerminateManagedDatabaseServerParams) WriteToRequest(r runtime.ClientRe
 	// path param crn
 	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
+	}
+
+	if o.Force != nil {
+
+		// query param force
+		var qrForce bool
+		if o.Force != nil {
+			qrForce = *o.Force
+		}
+		qForce := swag.FormatBool(qrForce)
+		if qForce != "" {
+			if err := r.SetQueryParam("force", qForce); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	if len(res) > 0 {
