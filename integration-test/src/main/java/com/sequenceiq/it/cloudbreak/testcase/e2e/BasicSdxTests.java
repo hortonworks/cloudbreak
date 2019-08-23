@@ -27,7 +27,7 @@ public class BasicSdxTests extends AbstractE2ETest {
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithNetwork(testContext);
+        createEnvironmentWithNetworkAndFreeIPA(testContext);
         initializeDefaultBlueprints(testContext);
     }
 
