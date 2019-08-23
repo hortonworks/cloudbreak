@@ -79,7 +79,7 @@ public class UmsUsersStateProvider {
 
             return envUsersStateMap;
         } catch (RuntimeException e) {
-            throw new UmsOperationException(String.format("Error during UMS operation: {}", e.getLocalizedMessage()), e);
+            throw new UmsOperationException(String.format("Error during UMS operation: '%s'", e.getLocalizedMessage()), e);
         } finally {
             requestIdThreadLocal.remove();
         }
