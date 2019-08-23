@@ -17,7 +17,9 @@ public enum LoggerContextKey {
     CRN("crn"),
     TENANT("tenant"),
     ACCOUNT_ID("accountId"),
-    USER_CRN("userCrn");
+    USER_CRN("userCrn"),
+    TRACE_ID("traceId"),
+    SPAN_ID("spanId");
 
     private final String value;
 

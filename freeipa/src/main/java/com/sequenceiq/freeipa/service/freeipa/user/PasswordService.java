@@ -75,7 +75,7 @@ public class PasswordService {
         SyncOperation syncOperation = syncOperationStatusService.startOperation(accountId, SyncOperationType.SET_PASSWORD,
                 environmentCrnFilter, List.of(userCrn));
         if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
-            MDCBuilder.addFlowIdToMdcContext(syncOperation.getOperationId());
+            MDCBuilder.addFlowId(syncOperation.getOperationId());
             asyncTaskExecutor.submit(() -> asyncSetPasswords(syncOperation.getOperationId(), accountId, actorCrn, userCrn, password, stacks));
         }
 

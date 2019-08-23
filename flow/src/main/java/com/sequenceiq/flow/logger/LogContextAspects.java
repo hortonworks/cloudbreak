@@ -46,7 +46,7 @@ public class LogContextAspects {
         if (mdcContextMap != null) {
             MDCBuilder.buildMdcContextFromMap(mdcContextMap);
             String requestId = mdcContextMap.get(LoggerContextKey.REQUEST_ID.toString());
-            MDCBuilder.addRequestIdToMdcContext(requestId);
+            MDCBuilder.addRequestId(requestId);
         }
     }
 }

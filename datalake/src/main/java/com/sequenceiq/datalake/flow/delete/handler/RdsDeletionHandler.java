@@ -60,7 +60,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();
         String requestId = rdsWaitRequest.getRequestId();
-        MDCBuilder.addRequestIdToMdcContext(requestId);
+        MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {
             sdxClusterRepository.findById(sdxId).ifPresent(sdxCluster -> {

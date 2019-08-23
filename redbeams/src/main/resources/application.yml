@@ -56,6 +56,8 @@ redbeams:
   etc.config.dir: /etc/cloudbreak
 
 spring:
+  application:
+    name: RedbeamsService
   freemarker:
     template-loader-path: file:/etc/redbeams,classpath:/
     prefer-file-system-access: false

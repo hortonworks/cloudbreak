@@ -12,7 +12,7 @@
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
             <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
                 <loggerNameFilter>com.sequenceiq</loggerNameFilter>
-                <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [type:%X{resourceType:-springLog}] [crn:%X{resourceCrn:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [userCrn:%X{userCrn:-}] [environment:%X{environmentCrn:-}] %msg%n</pattern>
+                <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [type:%X{resourceType:-springLog}] [crn:%X{resourceCrn:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [userCrn:%X{userCrn:-}] [environment:%X{environmentCrn:-}] [traceId:%X{traceId:-}] [spanId:%X{spanId:-}] %msg%n</pattern>
             </layout>
         </encoder>
     </appender>
@@ -26,7 +26,7 @@
                 <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
                     <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
                         <loggerNameFilter>com.sequenceiq</loggerNameFilter>
-                        <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [instance:${nodeid}] [type:%X{resourceType:-springLog}] [crn:%X{resourceCrn:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [userCrn:%X{userCrn:-}] [environment:%X{environmentCrn:-}] %msg%n</pattern>
+                        <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [instance:${nodeid}] [type:%X{resourceType:-springLog}] [crn:%X{resourceCrn:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [userCrn:%X{userCrn:-}] [environment:%X{environmentCrn:-}] [traceId:%X{traceId:-}] [spanId:%X{spanId:-}] %msg%n</pattern>
                     </layout>
                 </encoder>
                 <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">

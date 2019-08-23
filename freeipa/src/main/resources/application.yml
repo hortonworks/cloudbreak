@@ -67,6 +67,8 @@ altus:
     host: localhost
 
 spring:
+  application:
+    name: FreeIpaService
   freemarker:
     template-loader-path: file:/etc/cloudbreak,classpath:/
     prefer-file-system-access: false

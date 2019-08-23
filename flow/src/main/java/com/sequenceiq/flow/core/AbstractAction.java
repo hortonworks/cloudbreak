@@ -72,7 +72,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         if (flowParameters.getFlowTriggerUserCrn() != null) {
             threadBasedUserCrnProvider.setUserCrn(flowParameters.getFlowTriggerUserCrn());
         }
-        MDCBuilder.addFlowIdToMdcContext(flowParameters.getFlowId());
+        MDCBuilder.addFlowId(flowParameters.getFlowId());
         P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
         C flowContext = null;
         try {

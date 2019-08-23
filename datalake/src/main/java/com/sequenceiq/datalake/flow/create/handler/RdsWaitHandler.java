@@ -53,7 +53,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();
         String requestId = rdsWaitRequest.getRequestId();
-        MDCBuilder.addRequestIdToMdcContext(requestId);
+        MDCBuilder.addRequestId(requestId);
         DetailedEnvironmentResponse env = rdsWaitRequest.getDetailedEnvironmentResponse();
         try {
             sdxClusterRepository.findById(sdxId).ifPresentOrElse(sdxCluster -> {

@@ -49,7 +49,7 @@ public class StackDeletionHandler implements EventHandler<StackDeletionWaitReque
         Long sdxId = stackDeletionWaitRequest.getResourceId();
         String userId = stackDeletionWaitRequest.getUserId();
         String requestId = stackDeletionWaitRequest.getRequestId();
-        MDCBuilder.addRequestIdToMdcContext(requestId);
+        MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {
             LOGGER.debug("Start polling stack deletion process for id: {}", sdxId);

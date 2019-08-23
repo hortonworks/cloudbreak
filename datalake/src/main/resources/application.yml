@@ -1,5 +1,9 @@
 server.servlet.context-path: "/dl"
 
+spring:
+  application:
+    name: DatalakeService
+
 management:
   endpoints:
     web:

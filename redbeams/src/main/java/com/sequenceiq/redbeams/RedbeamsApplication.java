@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
-@EnableJpaRepositories(basePackages = { "com.sequenceiq.redbeams", "com.sequenceiq.flow", "com.sequenceiq.cloudbreak.ha.repository" })
+@EnableJpaRepositories(basePackages = {"com.sequenceiq.redbeams", "com.sequenceiq.flow", "com.sequenceiq.cloudbreak.ha.repository"})
 @SpringBootApplication(scanBasePackages = {"com.sequenceiq.redbeams",
         "com.sequenceiq.authorization",
         "com.sequenceiq.cloudbreak.auth",
@@ -44,7 +44,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.sequenceiq.environment.client",
         "com.sequenceiq.cloudbreak.client",
         "com.sequenceiq.cloudbreak.service",
-        "com.sequenceiq.cloudbreak.ha.service"},
+        "com.sequenceiq.cloudbreak.ha.service",
+        "com.sequenceiq.cloudbreak.tracing",
+        "com.sequenceiq.cloudbreak.filter"},
         exclude = WebMvcMetricsAutoConfiguration.class)
 public class RedbeamsApplication {
 

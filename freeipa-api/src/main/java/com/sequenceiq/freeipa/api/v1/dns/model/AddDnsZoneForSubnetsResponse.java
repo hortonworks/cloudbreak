@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.v1.freeipa.dns;
+package com.sequenceiq.freeipa.api.v1.dns.model;
 
 import java.util.HashMap;
 import java.util.HashSet;

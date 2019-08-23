@@ -55,7 +55,7 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Start stack deletion for SDX: {}", payload.getResourceId());
                 provisionerService.startStackDeletion(payload.getResourceId());
                 sendEvent(context, SDX_STACK_DELETION_IN_PROGRESS_EVENT.event(), payload);
@@ -79,7 +79,7 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("SDX stack deletion in progress: {}", payload.getResourceId());
                 sendEvent(context);
             }
@@ -107,7 +107,7 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, StackDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("SDX delete remote database of sdx cluster: {}", payload.getResourceId());
                 sendEvent(context);
             }
@@ -135,7 +135,7 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, RdsDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("SDX delete finalized: {}", payload.getResourceId());
                 sendEvent(context, SDX_DELETE_FINALIZED_EVENT.event(), payload);
             }
@@ -158,7 +158,7 @@ public class SdxDeleteActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxDeletionFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 Exception exception = payload.getException();
                 DatalakeStatusEnum deleteFailedStatus = DatalakeStatusEnum.DELETE_FAILED;
                 LOGGER.info("Update SDX status to {} for resource: {}", deleteFailedStatus, payload.getResourceId(), exception);

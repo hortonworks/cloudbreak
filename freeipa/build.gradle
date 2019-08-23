@@ -41,6 +41,10 @@ dependencies {
   implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
   implementation     group: 'org.springframework',       name: 'spring-context-support',               version: springFrameworkVersion
+
+  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
+  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                       version: opentracingJaxrs2Version
+
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                     version: '1.5.3'
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'

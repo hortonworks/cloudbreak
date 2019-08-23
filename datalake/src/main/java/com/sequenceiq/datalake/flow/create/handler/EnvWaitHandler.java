@@ -41,7 +41,7 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
         Long sdxId = envWaitRequest.getResourceId();
         String userId = envWaitRequest.getUserId();
         String requestId = envWaitRequest.getRequestId();
-        MDCBuilder.addRequestIdToMdcContext(requestId);
+        MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {
             LOGGER.debug("start polling env for sdx: {}", sdxId);

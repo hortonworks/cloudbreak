@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
@@ -20,7 +19,6 @@ import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.datalake.logger.MDCContextFilter;
 import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
 import com.sequenceiq.datalake.service.sdx.DatabaseConfig;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
@@ -86,15 +84,6 @@ public class AppConfig implements AsyncConfigurer {
                 .withIgnorePreValidation(ignorePreValidation)
                 .withDebug(restDebug)
                 .build();
-    }
-
-    @Bean
-    public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
-        FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
-        MDCContextFilter filter = new MDCContextFilter(threadBasedUserCrnProvider, threadBasedRequestIdProvider, null);
-        registrationBean.setFilter(filter);
-        registrationBean.setOrder(Integer.MAX_VALUE);
-        return registrationBean;
     }
 
     @Bean

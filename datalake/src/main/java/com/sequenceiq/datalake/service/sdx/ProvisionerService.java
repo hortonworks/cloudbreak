@@ -88,7 +88,7 @@ public class ProvisionerService {
                     .run(() -> {
                         LOGGER.info("Deletion polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         try {
-                            MDCBuilder.addRequestIdToMdcContext(requestId);
+                            MDCBuilder.addRequestId(requestId);
                             StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
                                     .stackV4Endpoint()
                                     .get(0L, sdxCluster.getClusterName(), Collections.emptySet());
@@ -159,7 +159,7 @@ public class ProvisionerService {
                                 LOGGER.info("Cloudbreak stack polling cancelled in inmemory store, id: " + sdxCluster.getId());
                                 return AttemptResults.breakFor("Cloudbreak stack polling cancelled in inmemory store, id: " + sdxCluster.getId());
                             }
-                            MDCBuilder.addRequestIdToMdcContext(requestId);
+                            MDCBuilder.addRequestId(requestId);
                             StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
                                     .stackV4Endpoint()
                                     .get(0L, sdxCluster.getClusterName(), Collections.emptySet());

@@ -91,7 +91,7 @@ public class UserService {
         LOGGER.info("Starting operation [{}] with status [{}]", syncOperation.getOperationId(), syncOperation.getStatus());
 
         if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
-            MDCBuilder.addFlowIdToMdcContext(syncOperation.getOperationId());
+            MDCBuilder.addFlowId(syncOperation.getOperationId());
             asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(
                 syncOperation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
         }

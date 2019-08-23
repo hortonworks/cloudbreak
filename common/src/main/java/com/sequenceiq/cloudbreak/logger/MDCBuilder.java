@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.logger;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -27,24 +26,32 @@ public class MDCBuilder {
         buildMdcContext(null);
     }
 
-    public static void addFlowIdToMdcContext(String flowId) {
+    public static void addFlowId(String flowId) {
         MDC.put(LoggerContextKey.FLOW_ID.toString(), flowId);
     }
 
-    public static void addRequestIdToMdcContext(String requestId) {
+    public static void addRequestId(String requestId) {
         MDC.put(LoggerContextKey.REQUEST_ID.toString(), requestId);
     }
 
-    public static void addEnvToMdcContext(String env) {
+    public static void addEnvCrn(String env) {
         MDC.put(LoggerContextKey.ENV_CRN.toString(), env);
     }
 
-    public static void addResourceCrnToMdcContext(String crn) {
+    public static void addResourceCrn(String crn) {
         MDC.put(LoggerContextKey.RESOURCE_CRN.toString(), crn);
     }
 
-    public static void addAccountToMdcContext(String account) {
+    public static void addAccountId(String account) {
         MDC.put(LoggerContextKey.ACCOUNT_ID.toString(), account);
+    }
+
+    public static void addTraceId(String traceId) {
+        MDC.put(LoggerContextKey.TRACE_ID.toString(), traceId);
+    }
+
+    public static void addSpanId(String spanId) {
+        MDC.put(LoggerContextKey.SPAN_ID.toString(), spanId);
     }
 
     public static void buildMdcContext(Object object) {
@@ -87,6 +94,8 @@ public class MDCBuilder {
         doIfNotNull(mdcContext.getResourceCrn(), v -> MDC.put(LoggerContextKey.RESOURCE_CRN.toString(), v));
         doIfNotNull(mdcContext.getResourceName(), v -> MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), v));
         doIfNotNull(mdcContext.getResourceType(), v -> MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), v));
+        doIfNotNull(mdcContext.getTraceId(), v -> MDC.put(LoggerContextKey.TRACE_ID.toString(), v));
+        doIfNotNull(mdcContext.getSpanId(), v -> MDC.put(LoggerContextKey.SPAN_ID.toString(), v));
     }
 
     public static void buildMdcContextFromCrn(Crn crn) {
@@ -96,10 +105,6 @@ public class MDCBuilder {
                     .userCrn(crn.toString())
                     .buildMdc();
         }
-    }
-
-    public static void buildWorkspaceMdcContext(Long workspaceId) {
-        MDC.put(LoggerContextKey.WORKSPACE_ID.toString(), getIfNotNull(workspaceId, String::valueOf));
     }
 
     public static void buildMdcContextFromMap(Map<String, String> map) {

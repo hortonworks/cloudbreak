@@ -26,13 +26,4 @@ public class FilterConfiguration {
         registrationBean.setOrder(Integer.MAX_VALUE);
         return registrationBean;
     }
-
-    @Bean
-    public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
-        FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
-        MDCContextFilter userFilter = new MDCContextFilter(authenticatedUserService);
-        registrationBean.setFilter(userFilter);
-        registrationBean.setOrder(Integer.MAX_VALUE);
-        return registrationBean;
-    }
 }

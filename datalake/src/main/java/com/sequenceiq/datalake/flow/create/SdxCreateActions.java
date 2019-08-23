@@ -56,7 +56,7 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 sendEvent(context);
             }
 
@@ -83,7 +83,7 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, EnvWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 RdsWaitRequest req = new RdsWaitRequest(context, payload.getDetailedEnvironmentResponse());
                 sendEvent(context, req.selector(), req);
             }
@@ -107,7 +107,7 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, RdsWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 provisionerService.startStackProvisioning(payload.getResourceId(),
                         payload.getDetailedEnvironmentResponse(), payload.getDatabaseServerResponse());
 
@@ -132,7 +132,7 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 sendEvent(context);
             }
 
@@ -159,7 +159,7 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, StackCreationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -181,7 +181,7 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxCreateFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 Exception exception = payload.getException();
                 DatalakeStatusEnum provisioningFailedStatus = DatalakeStatusEnum.PROVISIONING_FAILED;
                 LOGGER.info("Update SDX status to {} for resource: {}", provisioningFailedStatus.name(), payload.getResourceId(), exception);

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.auth.filter;
+package com.sequenceiq.cloudbreak.auth;
 
 import java.io.IOException;
 
@@ -10,8 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CrnFilter extends OncePerRequestFilter {

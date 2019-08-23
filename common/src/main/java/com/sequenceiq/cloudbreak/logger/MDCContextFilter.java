@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.filter;
+package com.sequenceiq.cloudbreak.logger;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
@@ -22,8 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.cloudbreak.logger.MdcContext.Builder;
 
 public class MDCContextFilter extends OncePerRequestFilter {
@@ -56,7 +54,9 @@ public class MDCContextFilter extends OncePerRequestFilter {
         LOGGER.debug("Request id has been added to MDC context for request, method: {}, path: {}",
                 request.getMethod().toUpperCase(),
                 request.getRequestURI());
-        mdcAppender.run();
+        if (mdcAppender != null) {
+            mdcAppender.run();
+        }
         filterChain.doFilter(wrapper, response);
     }
 
