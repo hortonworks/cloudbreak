@@ -36,7 +36,7 @@ import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class RecipeClusterTest extends AbstractIntegrationTest {
 
-    private static final int NODE_COUNT = 1;
+    private static final int NODE_COUNT = 3;
 
     private static final String INSTANCE_GROUP_ID = "ig";
 
@@ -172,7 +172,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
     public void testWhenClusterGetUpScaledThenPostClusterInstallRecipeShouldBeExecuted(MockedTestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
         SetupCmScalingMock mock = new SetupCmScalingMock();
-        mock.configure(testContext, 1, 2, 2);
+        mock.configure(testContext, 3, 4, 4);
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
@@ -202,7 +202,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             MockedTestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
         SetupCmScalingMock mock = new SetupCmScalingMock();
-        mock.configure(testContext, 1, 2, 2);
+        mock.configure(testContext, 3, 4, 4);
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)

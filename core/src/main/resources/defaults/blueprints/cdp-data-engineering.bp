@@ -286,7 +286,7 @@
       },
       {
         "refName": "worker",
-        "cardinality": 1,
+        "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hms-GATEWAY-BASE",

@@ -100,7 +100,7 @@
             "size": 50
           }
         },
-        "nodeCount": 1,
+        "nodeCount": 3,
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "securityGroup": {
