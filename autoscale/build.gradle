@@ -139,6 +139,8 @@ dependencies {
     compile group: 'io.springfox',                  name: 'springfox-core'
     compile group: 'io.springfox',                  name: 'springfox-swagger-ui'
 
+    compile group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
+
     implementation     ('io.swagger:swagger-jersey2-jaxrs') {
       exclude group: 'org.yaml'
     }

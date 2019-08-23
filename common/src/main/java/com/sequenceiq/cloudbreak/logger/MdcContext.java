@@ -18,6 +18,10 @@ public class MdcContext {
 
     private final String environmentCrn;
 
+    private final String traceId;
+
+    private final String spanId;
+
     private MdcContext(Builder builder) {
         resourceCrn = builder.resourceCrn;
         resourceName = builder.resourceName;
@@ -27,6 +31,8 @@ public class MdcContext {
         userCrn = builder.userCrn;
         tenant = builder.tenant;
         environmentCrn = builder.environmentCrn;
+        traceId = builder.traceId;
+        spanId = builder.spanId;
     }
 
     public String getResourceCrn() {
@@ -61,6 +67,14 @@ public class MdcContext {
         return environmentCrn;
     }
 
+    public String getTraceId() {
+        return traceId;
+    }
+
+    public String getSpanId() {
+        return spanId;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -81,6 +95,10 @@ public class MdcContext {
         private String tenant;
 
         private String environmentCrn;
+
+        private String traceId;
+
+        private String spanId;
 
         public Builder resourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
@@ -119,6 +137,16 @@ public class MdcContext {
 
         public Builder environmentCrn(String environmentCrn) {
             this.environmentCrn = environmentCrn;
+            return this;
+        }
+
+        public Builder traceId(String traceId) {
+            this.traceId = traceId;
+            return this;
+        }
+
+        public Builder spanId(String spanId) {
+            this.spanId = spanId;
             return this;
         }
 

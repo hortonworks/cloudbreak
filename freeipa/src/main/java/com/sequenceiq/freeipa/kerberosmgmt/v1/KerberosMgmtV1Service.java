@@ -163,13 +163,13 @@ public class KerberosMgmtV1Service {
     public void cleanupByCluster(VaultCleanupRequest request, String accountId) throws DeleteException {
         LOGGER.debug("Request to cleanup vault for a cluster for account {}: {}", accountId, request);
         try {
-            MDCBuilder.addEnvToMdcContext(request.getEnvironmentCrn());
-            MDCBuilder.addAccountToMdcContext(accountId);
+            MDCBuilder.addEnvCrn(request.getEnvironmentCrn());
+            MDCBuilder.addAccountId(accountId);
             if (Strings.isNullOrEmpty(request.getClusterCrn())) {
                 LOGGER.error("Cluster CRN not provided. Vault is not cleaned-up");
                 throw new DeleteException("Cluster CRN is required");
             }
-            MDCBuilder.addResourceCrnToMdcContext(request.getClusterCrn());
+            MDCBuilder.addResourceCrn(request.getClusterCrn());
             cleanupSecrets(request.getEnvironmentCrn(), request.getClusterCrn(), accountId);
         } catch (DeleteException e) {
             throw e;
@@ -182,8 +182,8 @@ public class KerberosMgmtV1Service {
     public void cleanupByEnvironment(String environmentCrn, String accountId) throws DeleteException {
         LOGGER.debug("Request to cleanup vault for an environment for account {}: {}", accountId, environmentCrn);
         try {
-            MDCBuilder.addEnvToMdcContext(environmentCrn);
-            MDCBuilder.addAccountToMdcContext(accountId);
+            MDCBuilder.addEnvCrn(environmentCrn);
+            MDCBuilder.addAccountId(accountId);
             cleanupSecrets(environmentCrn, null, accountId);
         } catch (Exception e) {
             LOGGER.error("Cleanup cluster failed " + e.getLocalizedMessage(), e);

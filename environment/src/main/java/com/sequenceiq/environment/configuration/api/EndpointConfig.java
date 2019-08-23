@@ -16,7 +16,6 @@ import com.sequenceiq.environment.environment.v1.EnvironmentController;
 import com.sequenceiq.environment.platformresource.v1.PlatformResourceController;
 import com.sequenceiq.environment.proxy.v1.controller.ProxyController;
 
-import io.opentracing.Tracer;
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
 import io.swagger.jaxrs.config.BeanConfig;
@@ -41,21 +40,19 @@ public class EndpointConfig extends ResourceConfig {
 
     private final List<ExceptionMapper<?>> exceptionMappers;
 
-    private final Tracer tracer;
-
     public EndpointConfig(@Value("${info.app.version:}") String applicationVersion,
             @Value("${environment.structuredevent.rest.enabled:false}") Boolean auditEnabled,
-            List<ExceptionMapper<?>> exceptionMappers, Tracer tracer) {
+            List<ExceptionMapper<?>> exceptionMappers, ServerTracingDynamicFeature serverTracingDynamicFeature,
+            ClientTracingFeature clientTracingFeature) {
 
         this.applicationVersion = applicationVersion;
         this.auditEnabled = auditEnabled;
         this.exceptionMappers = exceptionMappers;
-        this.tracer = tracer;
         registerEndpoints();
         registerExceptionMappers();
         registerSwagger();
-        register(new ServerTracingDynamicFeature.Builder(tracer).build());
-        register(new ClientTracingFeature.Builder(tracer).build());
+        register(serverTracingDynamicFeature);
+        register(clientTracingFeature);
     }
 
     private void registerSwagger() {

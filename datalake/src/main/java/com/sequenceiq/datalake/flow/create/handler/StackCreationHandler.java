@@ -50,7 +50,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
         Long sdxId = stackCreationWaitRequest.getResourceId();
         String userId = stackCreationWaitRequest.getUserId();
         String requestId = stackCreationWaitRequest.getRequestId();
-        MDCBuilder.addRequestIdToMdcContext(requestId);
+        MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {
             LOGGER.debug("start polling stack creation process for id: {}", sdxId);
