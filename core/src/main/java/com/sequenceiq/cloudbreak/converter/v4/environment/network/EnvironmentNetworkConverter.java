@@ -6,7 +6,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 
 public interface EnvironmentNetworkConverter {
 
-    Network convertToLegacyNetwork(EnvironmentNetworkResponse source);
+    Network convertToLegacyNetwork(EnvironmentNetworkResponse source, String availabilityZone);
 
     CloudPlatform getCloudPlatform();
 }

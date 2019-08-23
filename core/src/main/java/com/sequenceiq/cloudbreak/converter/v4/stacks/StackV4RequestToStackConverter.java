@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -40,7 +41,6 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -59,10 +59,8 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -71,9 +69,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackV4RequestToStackConverter.class);
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -113,9 +108,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     @Override
     public Stack convert(StackV4Request source) {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        User user = userService.getOrCreate(cloudbreakUser);
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        Workspace workspace = workspaceService.getForCurrentUser();
 
         Stack stack = new Stack();
         stack.setEnvironmentCrn(source.getEnvironmentCrn());
@@ -124,13 +117,16 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             if (source.getEnvironmentCrn() != null) {
                 environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
                 updateCustomDomainOrKerberos(source, stack);
+                updateCloudPlatformAndRelatedFields(source, stack, environment);
             }
-            convertAsStackTemplate(source, stack, workspace, environment);
+            convertAsStackTemplate(source, stack, environment);
+            setNetworkAsTemplate(source, stack);
         } else {
             environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
-            convertAsStack(source, stack, workspace, environment);
+            convertAsStack(source, stack);
+            updateCloudPlatformAndRelatedFields(source, stack, environment);
+            setNetworkIfApplicable(source, stack, environment);
         }
-        updateCloudPlatformAndRelatedFields(source, stack, workspace, environment);
         Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
         if (asMap != null) {
             Map<String, String> parameter = new HashMap<>();
@@ -147,7 +143,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         updateCluster(source, stack, workspace);
         stack.getComponents().add(getTelemetryComponent(stack, source));
-        setNetworkIfApplicable(source, stack, environment);
 
         stack.setGatewayPort(source.getGatewayPort());
         stack.setUuid(UUID.randomUUID().toString());
@@ -169,7 +164,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return source.getType() == StackType.TEMPLATE;
     }
 
-    private void convertAsStack(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
+    private void convertAsStack(StackV4Request source, Stack stack) {
         validateStackAuthentication(source);
         stack.setName(source.getName());
         stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
@@ -196,8 +191,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(Stack stack,
-            StackV4Request source) {
+    private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(Stack stack, StackV4Request source) {
         Telemetry telemetry = telemetryConverter.convert(source.getTelemetry());
         try {
             return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.TELEMETRY, ComponentType.TELEMETRY.name(), Json.silent(telemetry), stack);
@@ -207,18 +201,18 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private void updateCloudPlatformAndRelatedFields(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
-        String cloudPlatform = determineCloudPlatform(source, workspace, environment);
+    private void updateCloudPlatformAndRelatedFields(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
+        String cloudPlatform = determineCloudPlatform(source, environment);
         source.setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
-        stack.setRegion(getRegion(source, cloudPlatform));
+        stack.setRegion(getIfNotNull(source.getPlacement(), s -> getRegion(source, cloudPlatform)));
         stack.setCloudPlatform(cloudPlatform);
         stack.setTags(getTags(source, cloudPlatform));
         stack.setPlatformVariant(cloudPlatform);
     }
 
-    private void convertAsStackTemplate(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
+    private void convertAsStackTemplate(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
         if (environment != null) {
-            updateCloudPlatformAndRelatedFields(source, stack, workspace, environment);
+            updateCloudPlatformAndRelatedFields(source, stack, environment);
             stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         }
         stack.setType(StackType.TEMPLATE);
@@ -236,9 +230,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private String getRegion(StackV4Request source, String cloudPlatform) {
-        if (source.getPlacement() == null) {
-            return null;
-        }
         if (isEmpty(source.getPlacement().getRegion())) {
             Map<Platform, Region> regions = Maps.newHashMap();
             if (isNotEmpty(defaultRegions)) {
@@ -258,7 +249,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return source.getPlacement().getRegion();
     }
 
-    private String determineCloudPlatform(StackV4Request source, Workspace workspace, DetailedEnvironmentResponse environmentResponse) {
+    private String determineCloudPlatform(StackV4Request source, DetailedEnvironmentResponse environmentResponse) {
         if (source.getCloudPlatform() != null) {
             return source.getCloudPlatform().name();
         }
@@ -346,18 +337,25 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), Json.silent(image), stack);
     }
 
+    private void setNetworkAsTemplate(StackV4Request source, Stack stack) {
+        if (source.getNetwork() != null) {
+            source.getNetwork().setCloudPlatform(source.getCloudPlatform());
+            stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
+        }
+    }
+
     private void setNetworkIfApplicable(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(source.getCloudPlatform());
             stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
-        } else {
-            if (environment != null && environment.getNetwork() != null) {
-                EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(source.getCloudPlatform());
-                if (environmentNetworkConverter != null) {
-                    Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork());
-                    stack.setNetwork(network);
-                }
+        } else if (source.getPlacement() != null) {
+            EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(source.getCloudPlatform());
+            if (environmentNetworkConverter != null) {
+                Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork(), source.getPlacement().getAvailabilityZone());
+                stack.setNetwork(network);
             }
+        } else {
+            throw new BadRequestException("We cannot determine the subnet from environment. Please add 'network' or 'placement' to the request");
         }
     }
 }

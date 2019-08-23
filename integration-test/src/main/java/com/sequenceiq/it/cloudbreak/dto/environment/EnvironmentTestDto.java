@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.dto.environment;
 
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.force;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.ArrayList;
@@ -182,8 +183,8 @@ public class EnvironmentTestDto
     @Override
     public void cleanUp(TestContext context, CloudbreakClient client) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(environmentTestClient.delete(), key("delete-environment-" + getName()));
-        await(ARCHIVED);
+        when(environmentTestClient.delete(), key("delete-environment-" + getName()).withSkipOnFail(false));
+        await(ARCHIVED, force());
     }
 
     @Override

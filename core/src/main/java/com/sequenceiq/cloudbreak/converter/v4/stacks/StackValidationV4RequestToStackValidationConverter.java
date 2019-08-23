@@ -139,7 +139,9 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
                 CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
                 EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(cloudPlatform);
                 if (environmentNetworkConverter != null) {
-                    Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork());
+                    // we don't use subnets in the validation, so we set the first availability zone
+                    Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork(),
+                            environment.getNetwork().getSubnetMetas().values().stream().findFirst().get().getAvailabilityZone());
                     stackValidation.setNetwork(network);
                 }
             } else if (networkRequest != null) {
