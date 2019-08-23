@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.monitor.evaluator.cm;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -87,10 +88,11 @@ public class ClouderaManagerHostHealthEvaluator implements ClusterManagerSpecifi
     }
 
     private Predicate<ApiHost> isAlertStateMet() {
-        return apiHost -> {
-            String health = apiHost.getHealthSummary().getValue();
-            return !ApiHealthSummary.GOOD.name().equalsIgnoreCase(health) && !ApiHealthSummary.DISABLED.name().equalsIgnoreCase(health);
-        };
+        return apiHost -> Optional.ofNullable(apiHost)
+                .map(ApiHost::getHealthSummary)
+                .map(ApiHealthSummary::getValue)
+                .map(ApiHealthSummary.BAD.name()::equalsIgnoreCase)
+                .orElse(Boolean.FALSE);
     }
 
 }
