@@ -235,6 +235,11 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         return this;
     }
 
+    public StackTestDtoBase<T> withEmptyNetwork() {
+        getRequest().setNetwork(null);
+        return this;
+    }
+
     public StackTestDtoBase<T> withAzure(AzureStackV4Parameters azure) {
         getRequest().setAzure(azure);
         return this;
@@ -313,6 +318,10 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
                 .getMetadata();
     }
 
+    public StackTestDtoBase<T> withPlacement() {
+        return withPlacement(PlacementSettingsTestDto.class.getSimpleName());
+    }
+
     public StackTestDtoBase<T> withPlacement(String key) {
         PlacementSettingsTestDto placementSettings = getTestContext().get(key);
         return withPlacement(placementSettings);
@@ -320,6 +329,11 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
 
     public StackTestDtoBase<T> withPlacement(PlacementSettingsTestDto placementSettings) {
         getRequest().setPlacement(placementSettings.getRequest());
+        return this;
+    }
+
+    public StackTestDtoBase<T> withEmptyPlacement() {
+        getRequest().setPlacement(null);
         return this;
     }
 

@@ -62,7 +62,6 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -95,9 +94,6 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Mock
-    private UserService userService;
 
     @Mock
     private WorkspaceService workspaceService;
@@ -148,8 +144,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         MockitoAnnotations.initMocks(this);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
-        when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
-        when(workspaceService.get(1L, user)).thenReturn(workspace);
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(1L);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
