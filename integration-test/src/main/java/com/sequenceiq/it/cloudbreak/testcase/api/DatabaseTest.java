@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.mock;
+package com.sequenceiq.it.cloudbreak.testcase.api;
 
 import java.util.Arrays;
 import java.util.List;

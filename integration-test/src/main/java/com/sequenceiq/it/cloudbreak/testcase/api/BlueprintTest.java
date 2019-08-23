@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.mock;
+package com.sequenceiq.it.cloudbreak.testcase.api;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;

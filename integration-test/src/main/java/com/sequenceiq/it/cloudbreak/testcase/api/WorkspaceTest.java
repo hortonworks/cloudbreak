@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.mock;
+package com.sequenceiq.it.cloudbreak.testcase.api;
 
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
@@ -15,7 +15,6 @@ import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
-import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
@@ -24,7 +23,6 @@ import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class WorkspaceTest extends AbstractIntegrationTest {
@@ -58,17 +56,6 @@ public class WorkspaceTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    public void testCreateAStackAndGetOtherUser(MockedTestContext testContext) {
-        testContext
-                .given(StackTestDto.class)
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-                .when(stackTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_ACCESS_KEY).withLogError(false))
-                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
-                .validate();
-    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateABlueprintAndGetOtherUser(TestContext testContext) {
