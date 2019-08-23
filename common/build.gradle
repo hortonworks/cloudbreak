@@ -58,6 +58,8 @@ dependencies {
   compile group: 'io.swagger',                            name: 'swagger-annotations',            version: swaggerVersion
   compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
 
+  compile group: 'io.opentracing.contrib',                name: 'opentracing-jaxrs2',             version: opentracingJaxrs2Version
+
   compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonDatabindVersion) {
     force = true
   }

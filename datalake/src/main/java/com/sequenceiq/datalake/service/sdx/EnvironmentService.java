@@ -67,7 +67,7 @@ public class EnvironmentService {
                             LOGGER.info("Environment wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
                             return AttemptResults.breakFor("Environment wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
                         }
-                        MDCBuilder.addRequestIdToMdcContext(requestId);
+                        MDCBuilder.addRequestId(requestId);
                         LOGGER.info("Creation polling environment for environment status: '{}' in '{}' env",
                                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(

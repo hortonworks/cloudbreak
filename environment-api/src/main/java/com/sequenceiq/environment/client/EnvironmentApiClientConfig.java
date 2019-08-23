@@ -22,8 +22,11 @@ public class EnvironmentApiClientConfig {
 
     private final UserCrnClientRequestFilter userCrnClientRequestFilter;
 
-    public EnvironmentApiClientConfig(UserCrnClientRequestFilter userCrnClientRequestFilter) {
+    private final ClientTracingFeature clientTracingFeature;
+
+    public EnvironmentApiClientConfig(UserCrnClientRequestFilter userCrnClientRequestFilter, ClientTracingFeature clientTracingFeature) {
         this.userCrnClientRequestFilter = userCrnClientRequestFilter;
+        this.clientTracingFeature = clientTracingFeature;
     }
 
     @Bean
@@ -35,7 +38,7 @@ public class EnvironmentApiClientConfig {
                 .withDebug(environmentApiClientParams.isRestDebug())
                 .withClientRequestFilter(userCrnClientRequestFilter)
                 .withApiRoot(EnvironmentApi.API_ROOT_CONTEXT)
-                .withTracer(ClientTracingFeature.class)
+                .withTracer(clientTracingFeature)
                 .build();
     }
 

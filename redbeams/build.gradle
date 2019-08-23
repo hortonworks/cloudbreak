@@ -54,6 +54,9 @@ dependencies {
   implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
 
+  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
+  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                       version: opentracingJaxrs2Version
+
   testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine'
   testRuntime        group: 'org.junit.vintage',         name: 'junit-vintage-engine'
 

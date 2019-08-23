@@ -49,7 +49,7 @@ public class SdxRepairWaitHandler implements EventHandler<SdxRepairWaitRequest> 
         Long sdxId = sdxRepairWaitRequest.getResourceId();
         String userId = sdxRepairWaitRequest.getUserId();
         String requestId = sdxRepairWaitRequest.getRequestId();
-        MDCBuilder.addRequestIdToMdcContext(requestId);
+        MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {
             LOGGER.debug("Start polling stack deletion process for id: {}", sdxId);

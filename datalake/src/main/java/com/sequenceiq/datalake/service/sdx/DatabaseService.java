@@ -148,7 +148,7 @@ public class DatabaseService {
                         return AttemptResults.breakFor("Database wait polling cancelled in inmemory store, id: " + sdxCluster.getId());
                     }
                     try {
-                        MDCBuilder.addRequestIdToMdcContext(requestId);
+                        MDCBuilder.addRequestId(requestId);
                         LOGGER.info("Creation polling redbeams for database status: '{}' in '{}' env",
                                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         DatabaseServerStatusV4Response rdsStatus = getDatabaseStatus(databaseCrn);

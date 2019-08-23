@@ -54,7 +54,7 @@ public class SdxRepairActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxRepairStartEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("Start repair flow for SDX: {}", payload.getResourceId());
                 repairService.startSdxRepair(payload.getResourceId(), payload.getRepairRequest());
                 sendEvent(context, SDX_REPAIR_IN_PROGRESS_EVENT.event(), payload);
@@ -78,7 +78,7 @@ public class SdxRepairActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("SDX repair in progress: {}", payload.getResourceId());
                 sendEvent(context);
             }
@@ -106,7 +106,7 @@ public class SdxRepairActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxRepairSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 LOGGER.info("SDX repair finalized: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.RUNNING, "Datalake is running", payload.getResourceId());
                 sendEvent(context, SDX_REPAIR_FINALIZED_EVENT.event(), payload);
@@ -130,7 +130,7 @@ public class SdxRepairActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxRepairFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                MDCBuilder.addRequestIdToMdcContext(context.getRequestId());
+                MDCBuilder.addRequestId(context.getRequestId());
                 Exception exception = payload.getException();
                 DatalakeStatusEnum repairFailedStatus = DatalakeStatusEnum.REPAIR_FAILED;
                 LOGGER.info("Update SDX status to {} for resource: {}", repairFailedStatus, payload.getResourceId(), exception);

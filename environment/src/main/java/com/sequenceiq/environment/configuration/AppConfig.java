@@ -7,10 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.DispatcherType;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -22,12 +20,9 @@ import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
-import com.sequenceiq.environment.logger.MDCContextFilter;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
-
-import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
 
 @Configuration
 public class AppConfig {
@@ -110,25 +105,6 @@ public class AppConfig {
         executor.setTaskDecorator(new MDCCleanerTaskDecorator());
         executor.initialize();
         return executor;
-    }
-
-    @Bean
-    public FilterRegistrationBean spanFinishingFilter() {
-        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
-        filterRegistrationBean.setFilter(new SpanFinishingFilter());
-        filterRegistrationBean.setAsyncSupported(true);
-        filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST);
-        filterRegistrationBean.addUrlPatterns("*");
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
-        FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
-        MDCContextFilter filter = new MDCContextFilter(threadBasedUserCrnProvider, null);
-        registrationBean.setFilter(filter);
-        registrationBean.setOrder(Integer.MAX_VALUE);
-        return registrationBean;
     }
 
     @Bean
