@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
+import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -75,7 +76,8 @@ public class EnvironmentTestDto
                 .environment(withName(resourceProperyProvider().getEnvironmentName())
                         .withDescription(resourceProperyProvider().getDescription("environment")))
                         .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
-                        .withAuthentication(DUMMY_SSH_KEY);
+                        .withAuthentication(DUMMY_SSH_KEY)
+                        .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK);
     }
 
     public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
@@ -88,6 +90,11 @@ public class EnvironmentTestDto
     public EnvironmentTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
+        return this;
+    }
+
+    public EnvironmentTestDto withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
+        getRequest().setIdBrokerMappingSource(idBrokerMappingSource);
         return this;
     }
 
