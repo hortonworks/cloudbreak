@@ -1,9 +1,10 @@
 {%- from 'metering/settings.sls' import metering with context %}
 {%- from 'nodes/settings.sls' import host with context %}
 {% set os = salt['grains.get']('os') %}
-{% set metering_package_name = 'metering-heartbeat-application' %}
-{% set metering_package_version = '0.1-SNAPSHOT_652d2a8abc3132092b718c5f0cd24ef235f10910' %}
-{% set metering_rmp_repo_url = 'https://cloudera-service-delivery-cache.s3-us-west-2.amazonaws.com/metering/heartbeat_producer/'%}
+{% set metering_service_name = 'metering-heartbeat-application' %}
+{% set metering_package_name = 'thunderhead-metering-heartbeat-application' %}
+{% set metering_package_version = '0.1-SNAPSHOT' %}
+{% set metering_rmp_repo_url = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/thunderhead-metering-heartbeat-application/clients/'%}
 {% set metering_rpm_location = metering_rmp_repo_url + metering_package_name + '-' + metering_package_version + '.x86_64.rpm' %}
 
 {% if metering.enabled %}
@@ -12,16 +13,20 @@
 
 {% if metering.is_systemd %}
 
+remove_old_metering_package_manually:
+  cmd.run:
+    - name: "rpm -e {{ metering_service_name }}; exit 0"
+    - onlyif: "rpm -q {{ metering_service_name }}"
+
 install_metering_rpm_manually:
   cmd.run:
     - name: "rpm -i {{ metering_rpm_location }}"
     - onlyif: "! rpm -q {{ metering_package_name }}"
 
-{% if salt['file.file_exists' ]('/lib/systemd/system/metering-heartbeat-application.service') %}
 stop_metering_heartbeat_application:
   service.dead:
     - enable: False
-    - name: "{{ metering_package_name }}"
+    - name: "{{ metering_service_name }}"
     - onlyif: "test -f /etc/metering/generate_heartbeats.ini && ! grep -q 'CONFIGURED BY SALT' /etc/metering/generate_heartbeats.ini"
 
 /etc/metering:
@@ -57,8 +62,7 @@ stop_metering_heartbeat_application:
 start_metering_heartbeat_application:
   service.running:
     - enable: True
-    - name: "{{ metering_package_name }}"
-{% endif %}
+    - name: "{{ metering_service_name }}"
 
 {% else %}
 warning_metering_systemd:
