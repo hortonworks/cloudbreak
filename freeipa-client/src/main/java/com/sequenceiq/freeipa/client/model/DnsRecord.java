@@ -55,7 +55,7 @@ public class DnsRecord {
     public boolean isHostRelatedRecord(String fqdn, String domain) {
         if (isARecord()) {
             String hostname = StringUtils.substringBefore(fqdn, domain);
-            return arecord.contains(hostname);
+            return idnsname.equalsIgnoreCase(StringUtils.removeEnd(hostname, "."));
         }
         if (isPtrRecord()) {
             return ptrrecord.contains(StringUtils.appendIfMissing(fqdn, "."));
