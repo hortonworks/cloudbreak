@@ -3,6 +3,7 @@ package com.sequenceiq.flow.core.config;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +75,7 @@ public class AbstractFlowConfigurationTest {
         ((AbstractFlowConfiguration<State, Event>) underTest).init();
         Mockito.verify(applicationContext, Mockito.times(8)).getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class));
         flow = underTest.createFlow("flowId", 0L);
-        flow.initialize();
+        flow.initialize(Map.of());
     }
 
     @Test

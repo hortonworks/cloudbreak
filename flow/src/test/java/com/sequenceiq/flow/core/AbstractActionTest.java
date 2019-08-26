@@ -92,8 +92,8 @@ public class AbstractActionTest {
         verify(underTest, times(1)).createFlowContext(eq(FLOW_PARAMETERS), any(StateContext.class), nullable(Payload.class));
         verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
         verify(underTest, times(0)).sendEvent(any(CommonContext.class));
-        verify(underTest, times(0)).sendEvent(eq(FLOW_PARAMETERS), anyString(), any());
-        verify(underTest, times(0)).sendEvent(eq(FLOW_PARAMETERS), anyString(), any(Selectable.class));
+        verify(underTest, times(0)).sendEvent(eq(FLOW_PARAMETERS), anyString(), any(), any(Map.class));
+        verify(underTest, times(0)).sendEvent(eq(FLOW_PARAMETERS), anyString(), any(Selectable.class), any(Map.class));
         verify(underTest, times(0)).getFailurePayload(any(Payload.class), any(Optional.class), any(RuntimeException.class));
     }
 
@@ -105,7 +105,7 @@ public class AbstractActionTest {
         verify(underTest, times(1)).createFlowContext(eq(FLOW_PARAMETERS), any(StateContext.class), nullable(Payload.class));
         verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
         verify(underTest, times(1)).getFailurePayload(nullable(Payload.class), any(Optional.class), eq(exception));
-        verify(underTest, times(1)).sendEvent(eq(FLOW_PARAMETERS), eq(Event.FAILURE.name()), eq(Collections.emptyMap()));
+        verify(underTest, times(1)).sendEvent(eq(FLOW_PARAMETERS), eq(Event.FAILURE.name()), eq(Collections.emptyMap()), any(Map.class));
     }
 
     enum State implements FlowState {

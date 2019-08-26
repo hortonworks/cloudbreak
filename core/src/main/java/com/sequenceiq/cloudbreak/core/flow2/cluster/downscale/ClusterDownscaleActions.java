@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.ContextKeys;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent;
@@ -47,6 +48,7 @@ public class ClusterDownscaleActions {
         return new AbstractClusterAction<>(CollectDownscaleCandidatesResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) {
+                variables.put(ContextKeys.PRIVATE_IDS, payload.getPrivateIds());
                 DecommissionRequest request = new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getPrivateIds(),
                         payload.getRequest().getDetails());
                 sendEvent(context, request.selector(), request);

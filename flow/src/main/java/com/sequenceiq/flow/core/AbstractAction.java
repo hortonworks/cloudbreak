@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Payload;
@@ -97,7 +98,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         } catch (Exception ex) {
             LOGGER.error("Error during execution of " + getClass().getName(), ex);
             if (failureEvent != null) {
-                sendEvent(flowParameters, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex));
+                sendEvent(flowParameters, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex), Map.of());
             } else {
                 LOGGER.error("Missing error handling for " + getClass().getName());
             }
@@ -131,10 +132,10 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     }
 
     protected void sendEvent(CommonContext context, String selector, Object payload) {
-        sendEvent(context.getFlowParameters(), selector, payload);
+        sendEvent(context.getFlowParameters(), selector, payload, Map.of());
     }
 
-    protected void sendEvent(FlowParameters flowParameters, String selector, Object payload) {
+    protected void sendEvent(FlowParameters flowParameters, String selector, Object payload, Map<Object, Object> contextParameters) {
         LOGGER.debug("Triggering event: {}, payload: {}", selector, payload);
         Map<String, Object> headers = new HashMap<>();
         headers.put(FlowConstants.FLOW_ID, flowParameters.getFlowId());
@@ -142,6 +143,9 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         String flowChainId = runningFlows.getFlowChainId(flowParameters.getFlowId());
         if (flowChainId != null) {
             headers.put(FlowConstants.FLOW_CHAIN_ID, flowChainId);
+        }
+        if (!CollectionUtils.isEmpty(contextParameters)) {
+            headers.put(FlowConstants.FLOW_CONTEXTPARAMS_ID, contextParameters);
         }
         eventBus.notify(selector, reactorEventFactory.createEvent(headers, payload));
     }

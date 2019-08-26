@@ -832,13 +832,13 @@ public class SaltOrchestrator implements HostOrchestrator {
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     private void executeRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, RecipeExecutionPhase phase)
             throws CloudbreakOrchestratorFailedException {
+        boolean postRecipe = phase.isPostRecipe();
         try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
             // add 'recipe' grain to all nodes
             Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", phase.value(), CompoundType.IP), exitCriteriaModel);
 
             // Add Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
-            boolean postRecipe = phase.isPostRecipe();
             if (postRecipe) {
                 runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", RecipeExecutionPhase.POST.value(), CompoundType.IP), exitCriteriaModel);
             } else {
@@ -848,20 +848,27 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitCriteriaModel);
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe, true);
-
-            // remove 'recipe' grain from all nodes
-            targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", phase.value(), CompoundType.IP), exitCriteriaModel);
-
-            // Remove Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
-            if (postRecipe) {
-                runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", RecipeExecutionPhase.POST.value(), CompoundType.IP), exitCriteriaModel);
-            } else {
-                runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", RecipeExecutionPhase.PRE.value(), CompoundType.IP), exitCriteriaModel);
-            }
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for recipes).", e);
             throw new CloudbreakOrchestratorFailedException(e);
+        } finally {
+            try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+                // remove 'recipe' grain from all nodes
+                Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+                runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", phase.value(), CompoundType.IP), exitCriteriaModel);
+
+                // Remove Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
+                if (postRecipe) {
+                    runSaltCommand(sc, new GrainRemoveRunner(
+                            targets, allNodes, "recipes", RecipeExecutionPhase.POST.value(), CompoundType.IP), exitCriteriaModel);
+                } else {
+                    runSaltCommand(sc, new GrainRemoveRunner(
+                            targets, allNodes, "recipes", RecipeExecutionPhase.PRE.value(), CompoundType.IP), exitCriteriaModel);
+                }
+            } catch (Exception e) {
+                LOGGER.info("Error occurred during removing recipe roles.", e);
+                throw new CloudbreakOrchestratorFailedException(e);
+            }
         }
     }
 

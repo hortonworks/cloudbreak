@@ -13,6 +13,8 @@ public class FlowConstants {
 
     public static final String FLOW_PARAMETERS = "FLOW_PARAMETERS";
 
+    public static final String FLOW_CONTEXTPARAMS_ID = "FLOW_CONTEXTPARAMS_ID";
+
     private FlowConstants() {
     }
 }
