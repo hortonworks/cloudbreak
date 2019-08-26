@@ -49,6 +49,9 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListU
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse.Builder;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Policy;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.PolicyDefinition;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.PolicyStatement;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Role;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
@@ -87,6 +90,12 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     private static final String CDP_PRIVATE_KEY = "cdp_private_key";
 
     private static final int MOCK_USER_COUNT = 10;
+
+    private static final String ACCOUNT_ID_ALTUS = "altus";
+
+    private static final long CREATION_DATE_MS = 1483228800000L;
+
+    private static final String ALL_RIGHTS_AND_RESOURCES = "*";
 
     @Inject
     private JsonUtil jsonUtil;
@@ -173,8 +182,22 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         String accountId = Crn.fromString(actorCrn).getAccountId();
         List<Group> groups = List.copyOf(getOrCreateGroups(accountId));
         Group group = groups.get(FIRST_GROUP);
-        Role powerUser = Role.newBuilder().setCrn("PowerUser").build();
-        RoleAssignment roleAssignment = RoleAssignment.newBuilder().setRole(powerUser).build();
+        PolicyStatement policyStatement = PolicyStatement.newBuilder()
+                .addRight(ALL_RIGHTS_AND_RESOURCES)
+                .addResource(ALL_RIGHTS_AND_RESOURCES)
+                .build();
+        PolicyDefinition policyDefinition = PolicyDefinition.newBuilder().addStatement(policyStatement).build();
+        Policy powerUserPolicy = Policy.newBuilder()
+                .setCrn(createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, Crn.ResourceType.POLICY, "PowerUserPolicy").toString())
+                .setCreationDateMs(CREATION_DATE_MS)
+                .setPolicyDefinition(policyDefinition)
+                .build();
+        Role powerUserRole = Role.newBuilder()
+                .setCrn(createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, Crn.ResourceType.ROLE, "PowerUser").toString())
+                .setCreationDateMs(CREATION_DATE_MS)
+                .addPolicy(powerUserPolicy)
+                .build();
+        RoleAssignment roleAssignment = RoleAssignment.newBuilder().setRole(powerUserRole).build();
         responseObserver.onNext(
                 GetRightsResponse.newBuilder()
                         .addGroupCrn(group.getCrn())
