@@ -280,10 +280,6 @@
           {
             "name": "service_config_suppression_kafka_broker_count_validator",
             "value": "true"
-          },
-	        {
-            "name": "delegation.token.enable",
-            "value": "true"
           }
         ],
         "serviceType": "KAFKA"
