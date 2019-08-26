@@ -483,20 +483,19 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     private String getLicense() {
-        String license = "";
-        try {
-            if (Files.exists(Paths.get(cmLicenseFilePath))) {
+        if (Files.exists(Paths.get(cmLicenseFilePath))) {
+            try {
+                String license = Files.readString(Path.of(cmLicenseFilePath));
                 LOG.info("Cloudbreak license file successfully loaded.");
-                license = Files.readString(Path.of(cmLicenseFilePath));
-            } else {
-                LOG.warn("The license file could not be found on path: '{}'. "
-                        + "Please place your CM license file in your '<cbd_path>/etc' folder. "
-                        + "By default the name of the file should be 'license.txt'.", cmLicenseFilePath);
+                return license;
+            } catch (IOException e) {
+                throw new RuntimeException("Error during reading license.", e);
             }
-        } catch (IOException e) {
-            LOG.warn("Error during reading license.", e);
+        } else {
+            throw new IllegalStateException("The license file could not be found on path: '" + cmLicenseFilePath + "'. "
+                    + "Please place your CM license file in your '<cbd_path>/etc' folder. "
+                    + "By default the name of the file should be 'license.txt'.");
         }
-        return license;
     }
 
     private AltusCredential getAltusCredential(String altusCredentialFile, String altusCredentialProfile) {

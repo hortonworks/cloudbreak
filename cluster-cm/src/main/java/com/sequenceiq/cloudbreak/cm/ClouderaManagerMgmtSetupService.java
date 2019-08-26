@@ -101,7 +101,7 @@ public class ClouderaManagerMgmtSetupService {
             Set<RDSConfig> rdsConfigs, Telemetry telemetry, String sdxContextName, String sdxStackCrn)
             throws ApiException {
         LOGGER.debug("Setting up Cloudera Management Services.");
-        licenseService.beginTrialIfNeeded(stack.getCreator(), client);
+        licenseService.validateClouderaManagerLicense(stack.getCreator());
         MgmtServiceResourceApi mgmtServiceResourceApi = new MgmtServiceResourceApi(client);
         MgmtRolesResourceApi mgmtRolesResourceApi = new MgmtRolesResourceApi(client);
 
