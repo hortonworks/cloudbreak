@@ -23,9 +23,14 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
+import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
+import com.sequenceiq.environment.environment.dto.telemetry.WasbCloudStorageParameters;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CloudStorageLocationValidatorTest {
@@ -33,6 +38,10 @@ public class CloudStorageLocationValidatorTest {
     private static final String BUCKET_NAME = "bucket-name";
 
     private static final String OBJECT_PATH = "bucket-name/folder/file";
+
+    private static final String S3_OBJECT_PATH = "s3a://bucket-name/folder/file";
+
+    private static final String WASB_OBJECT_PATH = "wasb://bucket-name/folder/file";
 
     private static final String ENV_REGION = "env-region";
 
@@ -59,6 +68,18 @@ public class CloudStorageLocationValidatorTest {
     @Mock
     private CloudProviderServicesV4Endopint cloudProviderServicesEndpoint;
 
+    @Mock
+    private EnvironmentTelemetry environmentTelemetry;
+
+    @Mock
+    private EnvironmentLogging environmentLogging;
+
+    @Mock
+    private S3CloudStorageParameters s3;
+
+    @Mock
+    private WasbCloudStorageParameters wasb;
+
     @InjectMocks
     private CloudStorageLocationValidator underTest;
 
@@ -67,13 +88,53 @@ public class CloudStorageLocationValidatorTest {
         when(environment.getLocation()).thenReturn(ENV_REGION);
         when(environment.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(environment.getCredential()).thenReturn(new Credential());
+        when(environment.getTelemetry()).thenReturn(environmentTelemetry);
+        when(environmentTelemetry.getLogging()).thenReturn(environmentLogging);
         when(cloudbreakServiceUserCrnClient.withCrn(anyString())).thenReturn(cloudbreakServiceCrnEndpoints);
         when(cloudbreakServiceCrnEndpoints.cloudProviderServicesEndpoint()).thenReturn(cloudProviderServicesEndpoint);
         when(credentialToCloudCredentialConverter.convert(any(Credential.class))).thenReturn(CLOUD_CREDENTIAL);
     }
 
     @Test
-    public void validate() {
+    public void validateS3() {
+        when(environmentLogging.getS3()).thenReturn(s3);
+        when(s3.getType()).thenReturn(FileSystemType.S3);
+
+        ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder()
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(CLOUD_CREDENTIAL)
+                .withObjectStoragePath(BUCKET_NAME)
+                .build();
+        ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).build();
+        when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
+
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        underTest.validate(USER_CRN, S3_OBJECT_PATH, environment, validationResultBuilder);
+
+        assertFalse(validationResultBuilder.build().hasError());
+    }
+
+    @Test
+    public void validateWasb() {
+        when(environmentLogging.getWasb()).thenReturn(wasb);
+        when(wasb.getType()).thenReturn(FileSystemType.WASB);
+
+        ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder()
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(CLOUD_CREDENTIAL)
+                .withObjectStoragePath(BUCKET_NAME)
+                .build();
+        ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).build();
+        when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
+
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        underTest.validate(USER_CRN, WASB_OBJECT_PATH, environment, validationResultBuilder);
+
+        assertFalse(validationResultBuilder.build().hasError());
+    }
+
+    @Test
+    public void validateNoProtocol() {
         ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder()
                 .withCloudPlatform(CLOUD_PLATFORM)
                 .withCredential(CLOUD_CREDENTIAL)
