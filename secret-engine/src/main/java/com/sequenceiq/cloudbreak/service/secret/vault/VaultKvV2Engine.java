@@ -61,7 +61,7 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
     @Override
     @CacheEvict(cacheNames = "vaultCache", allEntries = true)
     public void delete(String secret) {
-        Optional.ofNullable(convertToVaultSecret(secret)).ifPresent(s -> template.opsForVersionedKeyValue(s.getEnginePath()).delete(s.getPath()));
+        Optional.ofNullable(convertToVaultSecret(secret)).ifPresent(s -> deleteAllVersionsOfSecret(s.getEnginePath(), s.getPath()));
     }
 
     @Override
@@ -83,6 +83,13 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
     @Override
     @CacheEvict(cacheNames = "vaultCache", allEntries = true)
     public void cleanup(String path) {
-        template.opsForVersionedKeyValue(enginePath).delete(appPath + path);
+        deleteAllVersionsOfSecret(enginePath, appPath + path);
+    }
+
+    private void deleteAllVersionsOfSecret(String engingPath, String path) {
+        template.doWithSession(restOperations -> {
+            restOperations.delete("/" + enginePath + "/metadata/" + path);
+            return null;
+        });
     }
 }
