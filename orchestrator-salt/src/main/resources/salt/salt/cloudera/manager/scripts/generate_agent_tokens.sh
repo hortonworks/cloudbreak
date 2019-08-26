@@ -2,7 +2,7 @@
 
 set -ex
 
-CERTMANAGER_DIR="/hadoopfs/fs1/cloudera-scm-server/certs"
+CERTMANAGER_DIR="/etc/cloudera-scm-server/certs"
 AGENT_HOSTS={%- for ip, args in pillar.get('hosts', {}).items() %}{{ args['fqdn'] }}{{ "," if not loop.last else "" }}{%- endfor %}
 TOKEN_DIR="/srv/salt/agent-tls-tokens"
 

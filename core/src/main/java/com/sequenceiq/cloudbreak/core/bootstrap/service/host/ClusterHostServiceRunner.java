@@ -297,6 +297,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithClouderaManagerRepo(stack.getId(), cluster.getId(), servicePillar);
         decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
         decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar);
+        decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
     }
 
     private void addAmbariConfig(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, ClusterPreCreationApi connector)
@@ -393,6 +394,16 @@ public class ClusterHostServiceRunner {
         communication.put("autotls_enabled", autoTls);
         servicePillar.put("cloudera-manager-communication", new SaltPillarProperties("/cloudera-manager/communication.sls",
                 singletonMap("cloudera-manager", singletonMap("communication", communication))));
+    }
+
+    private void decoratePillarWithClouderaManagerAutoTls(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+        if (cluster.getAutoTlsEnabled()) {
+            Map<String, Object> autoTls = new HashMap<>();
+            autoTls.put("keystore_password", cluster.getCloudbreakAmbariPassword());
+            autoTls.put("truststore_password", cluster.getCloudbreakAmbariPassword());
+            servicePillar.put("cloudera-manager-autotls", new SaltPillarProperties("/cloudera-manager/autotls.sls",
+                    singletonMap("cloudera-manager", singletonMap("autotls", autoTls))));
+        }
     }
 
     private void decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar)
