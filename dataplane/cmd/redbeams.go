@@ -77,18 +77,6 @@ func init() {
 						},
 					},
 					{
-						Name:   "terminate",
-						Usage:  "terminate a managed database server",
-						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCrn, fl.FlForceOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
-						Action: redbeams.TerminateManagedDatabaseServer,
-						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCrn, fl.FlForceOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
-								fl.PrintFlagCompletion(f)
-							}
-						},
-					},
-					{
 						Name:   "register",
 						Usage:  "register a database server",
 						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
@@ -102,12 +90,12 @@ func init() {
 					},
 					{
 						Name:   "delete",
-						Usage:  "delete a registered database server",
+						Usage:  "delete a database server",
 						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().Build(),
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCrn, fl.FlForceOptional).AddAuthenticationFlags().Build(),
 						Action: redbeams.DeleteDatabaseServer,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCrn, fl.FlForceOptional).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},

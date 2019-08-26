@@ -183,28 +183,6 @@ func ReleaseManagedDatabaseServer(c *cli.Context) {
 	output.Write(serverListHeader, row)
 }
 
-func TerminateManagedDatabaseServer(c *cli.Context) {
-	defer commonutils.TimeTrack(time.Now(), "Terminate a managed database server")
-	crn := c.String(fl.FlCrn.Name)
-	force := c.Bool(fl.FlForceOptional.Name)
-	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
-
-	log.Infof("[TerminateDBServer] Terminating database server with CRN: %s force: %t", crn, force)
-	resp, err := redbeamsDbServerClient.TerminateManagedDatabaseServer(database_servers.NewTerminateManagedDatabaseServerParams().WithCrn(crn).WithForce(&force), nil)
-	if err != nil {
-		commonutils.LogErrorAndExit(err)
-	}
-
-	outcome := resp.Payload
-	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	output.Write(statusListHeader, &serverStatusDetails{
-		Name:           *outcome.Name,
-		CRN:            *outcome.ResourceCrn,
-		EnvironmentCrn: *outcome.EnvironmentCrn,
-		Status:         outcome.Status,
-	})
-}
-
 func RegisterDatabaseServer(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "Register database server")
 	fileLocation := c.String(fl.FlDatabaseServerRegistrationFile.Name)
@@ -228,20 +206,25 @@ func RegisterDatabaseServer(c *cli.Context) {
 
 	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	row := NewDetailsFromResponse(server)
-	output.Write(statusListHeader, row)
+	output.Write(serverListHeader, row)
 }
 
 func DeleteDatabaseServer(c *cli.Context) {
-	defer commonutils.TimeTrack(time.Now(), "Delete a registered database server")
+	defer commonutils.TimeTrack(time.Now(), "Terminate and/or delete a database server")
 	crn := c.String(fl.FlCrn.Name)
+	force := c.Bool(fl.FlForceOptional.Name)
 	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
 
-	log.Infof("[DeleteDBServer] Deleting database server with CRN: %s", crn)
-	result, err := redbeamsDbServerClient.DeleteDatabaseServerByCrn(database_servers.NewDeleteDatabaseServerByCrnParams().WithCrn(crn), nil)
+	log.Infof("[DeleteDBServer] Deleting database server with CRN: %s force: %t", crn, force)
+	resp, err := redbeamsDbServerClient.DeleteDatabaseServerByCrn(database_servers.NewDeleteDatabaseServerByCrnParams().WithCrn(crn).WithForce(&force), nil)
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
-	log.Infof("[DeleteDBServer] Deleted database server with CRN: %s Details: %s", crn, result)
+
+	server := resp.Payload
+	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+	row := NewDetailsFromResponse(server)
+	output.Write(serverListHeader, row)
 }
 
 var dbListHeader = []string{"Name", "Description", "Crn", "EnvironmentCrn", "DatabaseVendor", "ConnectionURL"}
@@ -376,7 +359,7 @@ func RegisterDatabase(c *cli.Context) {
 
 	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	row := NewDetailsFromDbResponse(db)
-	output.Write(statusListHeader, row)
+	output.Write(dbListHeader, row)
 }
 
 func DeleteDatabase(c *cli.Context) {

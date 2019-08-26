@@ -13,6 +13,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -20,8 +21,11 @@ import (
 // NewDeleteMultipleDatabaseServersByCrnParams creates a new DeleteMultipleDatabaseServersByCrnParams object
 // with the default values initialized.
 func NewDeleteMultipleDatabaseServersByCrnParams() *DeleteMultipleDatabaseServersByCrnParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteMultipleDatabaseServersByCrnParams{
+		Force: &forceDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -30,8 +34,11 @@ func NewDeleteMultipleDatabaseServersByCrnParams() *DeleteMultipleDatabaseServer
 // NewDeleteMultipleDatabaseServersByCrnParamsWithTimeout creates a new DeleteMultipleDatabaseServersByCrnParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteMultipleDatabaseServersByCrnParamsWithTimeout(timeout time.Duration) *DeleteMultipleDatabaseServersByCrnParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteMultipleDatabaseServersByCrnParams{
+		Force: &forceDefault,
 
 		timeout: timeout,
 	}
@@ -40,8 +47,11 @@ func NewDeleteMultipleDatabaseServersByCrnParamsWithTimeout(timeout time.Duratio
 // NewDeleteMultipleDatabaseServersByCrnParamsWithContext creates a new DeleteMultipleDatabaseServersByCrnParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteMultipleDatabaseServersByCrnParamsWithContext(ctx context.Context) *DeleteMultipleDatabaseServersByCrnParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteMultipleDatabaseServersByCrnParams{
+		Force: &forceDefault,
 
 		Context: ctx,
 	}
@@ -50,8 +60,11 @@ func NewDeleteMultipleDatabaseServersByCrnParamsWithContext(ctx context.Context)
 // NewDeleteMultipleDatabaseServersByCrnParamsWithHTTPClient creates a new DeleteMultipleDatabaseServersByCrnParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteMultipleDatabaseServersByCrnParamsWithHTTPClient(client *http.Client) *DeleteMultipleDatabaseServersByCrnParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteMultipleDatabaseServersByCrnParams{
+		Force:      &forceDefault,
 		HTTPClient: client,
 	}
 }
@@ -66,6 +79,8 @@ type DeleteMultipleDatabaseServersByCrnParams struct {
 
 	*/
 	Body []string
+	/*Force*/
+	Force *bool
 
 	timeout    time.Duration
 	Context    context.Context
@@ -116,6 +131,17 @@ func (o *DeleteMultipleDatabaseServersByCrnParams) SetBody(body []string) {
 	o.Body = body
 }
 
+// WithForce adds the force to the delete multiple database servers by crn params
+func (o *DeleteMultipleDatabaseServersByCrnParams) WithForce(force *bool) *DeleteMultipleDatabaseServersByCrnParams {
+	o.SetForce(force)
+	return o
+}
+
+// SetForce adds the force to the delete multiple database servers by crn params
+func (o *DeleteMultipleDatabaseServersByCrnParams) SetForce(force *bool) {
+	o.Force = force
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *DeleteMultipleDatabaseServersByCrnParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -128,6 +154,22 @@ func (o *DeleteMultipleDatabaseServersByCrnParams) WriteToRequest(r runtime.Clie
 		if err := r.SetBodyParam(o.Body); err != nil {
 			return err
 		}
+	}
+
+	if o.Force != nil {
+
+		// query param force
+		var qrForce bool
+		if o.Force != nil {
+			qrForce = *o.Force
+		}
+		qForce := swag.FormatBool(qrForce)
+		if qForce != "" {
+			if err := r.SetQueryParam("force", qForce); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	if len(res) > 0 {

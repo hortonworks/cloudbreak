@@ -13,6 +13,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -20,8 +21,11 @@ import (
 // NewDeleteDatabaseServerByCrnParams creates a new DeleteDatabaseServerByCrnParams object
 // with the default values initialized.
 func NewDeleteDatabaseServerByCrnParams() *DeleteDatabaseServerByCrnParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteDatabaseServerByCrnParams{
+		Force: &forceDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -30,8 +34,11 @@ func NewDeleteDatabaseServerByCrnParams() *DeleteDatabaseServerByCrnParams {
 // NewDeleteDatabaseServerByCrnParamsWithTimeout creates a new DeleteDatabaseServerByCrnParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteDatabaseServerByCrnParamsWithTimeout(timeout time.Duration) *DeleteDatabaseServerByCrnParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteDatabaseServerByCrnParams{
+		Force: &forceDefault,
 
 		timeout: timeout,
 	}
@@ -40,8 +47,11 @@ func NewDeleteDatabaseServerByCrnParamsWithTimeout(timeout time.Duration) *Delet
 // NewDeleteDatabaseServerByCrnParamsWithContext creates a new DeleteDatabaseServerByCrnParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteDatabaseServerByCrnParamsWithContext(ctx context.Context) *DeleteDatabaseServerByCrnParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteDatabaseServerByCrnParams{
+		Force: &forceDefault,
 
 		Context: ctx,
 	}
@@ -50,8 +60,11 @@ func NewDeleteDatabaseServerByCrnParamsWithContext(ctx context.Context) *DeleteD
 // NewDeleteDatabaseServerByCrnParamsWithHTTPClient creates a new DeleteDatabaseServerByCrnParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteDatabaseServerByCrnParamsWithHTTPClient(client *http.Client) *DeleteDatabaseServerByCrnParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteDatabaseServerByCrnParams{
+		Force:      &forceDefault,
 		HTTPClient: client,
 	}
 }
@@ -66,6 +79,8 @@ type DeleteDatabaseServerByCrnParams struct {
 
 	*/
 	Crn string
+	/*Force*/
+	Force *bool
 
 	timeout    time.Duration
 	Context    context.Context
@@ -116,6 +131,17 @@ func (o *DeleteDatabaseServerByCrnParams) SetCrn(crn string) {
 	o.Crn = crn
 }
 
+// WithForce adds the force to the delete database server by crn params
+func (o *DeleteDatabaseServerByCrnParams) WithForce(force *bool) *DeleteDatabaseServerByCrnParams {
+	o.SetForce(force)
+	return o
+}
+
+// SetForce adds the force to the delete database server by crn params
+func (o *DeleteDatabaseServerByCrnParams) SetForce(force *bool) {
+	o.Force = force
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *DeleteDatabaseServerByCrnParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -127,6 +153,22 @@ func (o *DeleteDatabaseServerByCrnParams) WriteToRequest(r runtime.ClientRequest
 	// path param crn
 	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
+	}
+
+	if o.Force != nil {
+
+		// query param force
+		var qrForce bool
+		if o.Force != nil {
+			qrForce = *o.Force
+		}
+		qForce := swag.FormatBool(qrForce)
+		if qForce != "" {
+			if err := r.SetQueryParam("force", qForce); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	if len(res) > 0 {

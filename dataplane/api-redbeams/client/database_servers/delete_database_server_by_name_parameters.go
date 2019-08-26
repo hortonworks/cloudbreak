@@ -13,6 +13,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -20,8 +21,11 @@ import (
 // NewDeleteDatabaseServerByNameParams creates a new DeleteDatabaseServerByNameParams object
 // with the default values initialized.
 func NewDeleteDatabaseServerByNameParams() *DeleteDatabaseServerByNameParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteDatabaseServerByNameParams{
+		Force: &forceDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -30,8 +34,11 @@ func NewDeleteDatabaseServerByNameParams() *DeleteDatabaseServerByNameParams {
 // NewDeleteDatabaseServerByNameParamsWithTimeout creates a new DeleteDatabaseServerByNameParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewDeleteDatabaseServerByNameParamsWithTimeout(timeout time.Duration) *DeleteDatabaseServerByNameParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteDatabaseServerByNameParams{
+		Force: &forceDefault,
 
 		timeout: timeout,
 	}
@@ -40,8 +47,11 @@ func NewDeleteDatabaseServerByNameParamsWithTimeout(timeout time.Duration) *Dele
 // NewDeleteDatabaseServerByNameParamsWithContext creates a new DeleteDatabaseServerByNameParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewDeleteDatabaseServerByNameParamsWithContext(ctx context.Context) *DeleteDatabaseServerByNameParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteDatabaseServerByNameParams{
+		Force: &forceDefault,
 
 		Context: ctx,
 	}
@@ -50,8 +60,11 @@ func NewDeleteDatabaseServerByNameParamsWithContext(ctx context.Context) *Delete
 // NewDeleteDatabaseServerByNameParamsWithHTTPClient creates a new DeleteDatabaseServerByNameParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewDeleteDatabaseServerByNameParamsWithHTTPClient(client *http.Client) *DeleteDatabaseServerByNameParams {
-	var ()
+	var (
+		forceDefault = bool(false)
+	)
 	return &DeleteDatabaseServerByNameParams{
+		Force:      &forceDefault,
 		HTTPClient: client,
 	}
 }
@@ -66,6 +79,8 @@ type DeleteDatabaseServerByNameParams struct {
 
 	*/
 	EnvironmentCrn string
+	/*Force*/
+	Force *bool
 	/*Name
 	  Name of the database server
 
@@ -121,6 +136,17 @@ func (o *DeleteDatabaseServerByNameParams) SetEnvironmentCrn(environmentCrn stri
 	o.EnvironmentCrn = environmentCrn
 }
 
+// WithForce adds the force to the delete database server by name params
+func (o *DeleteDatabaseServerByNameParams) WithForce(force *bool) *DeleteDatabaseServerByNameParams {
+	o.SetForce(force)
+	return o
+}
+
+// SetForce adds the force to the delete database server by name params
+func (o *DeleteDatabaseServerByNameParams) SetForce(force *bool) {
+	o.Force = force
+}
+
 // WithName adds the name to the delete database server by name params
 func (o *DeleteDatabaseServerByNameParams) WithName(name string) *DeleteDatabaseServerByNameParams {
 	o.SetName(name)
@@ -147,6 +173,22 @@ func (o *DeleteDatabaseServerByNameParams) WriteToRequest(r runtime.ClientReques
 		if err := r.SetQueryParam("environmentCrn", qEnvironmentCrn); err != nil {
 			return err
 		}
+	}
+
+	if o.Force != nil {
+
+		// query param force
+		var qrForce bool
+		if o.Force != nil {
+			qrForce = *o.Force
+		}
+		qForce := swag.FormatBool(qrForce)
+		if qForce != "" {
+			if err := r.SetQueryParam("force", qForce); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	// path param name

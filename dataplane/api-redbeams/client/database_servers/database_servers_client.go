@@ -87,9 +87,9 @@ func (a *Client) CreateDatabaseServer(params *CreateDatabaseServerParams, authIn
 }
 
 /*
-DeleteDatabaseServerByCrn deregisters a database server by c r n
+DeleteDatabaseServerByCrn terminates and or deregister a database server by c r n
 
-Deregisters a database server by its CRN.
+Terminates and/or deregisters a database server by its CRN.
 */
 func (a *Client) DeleteDatabaseServerByCrn(params *DeleteDatabaseServerByCrnParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteDatabaseServerByCrnOK, error) {
 	// TODO: Validate the params before sending
@@ -118,9 +118,9 @@ func (a *Client) DeleteDatabaseServerByCrn(params *DeleteDatabaseServerByCrnPara
 }
 
 /*
-DeleteDatabaseServerByName deregisters a database server by name
+DeleteDatabaseServerByName terminates and or deregister a database server by name
 
-Deregisters a database server by its name.
+Terminates and/or deregisters a database server by its name.
 */
 func (a *Client) DeleteDatabaseServerByName(params *DeleteDatabaseServerByNameParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteDatabaseServerByNameOK, error) {
 	// TODO: Validate the params before sending
@@ -149,9 +149,9 @@ func (a *Client) DeleteDatabaseServerByName(params *DeleteDatabaseServerByNamePa
 }
 
 /*
-DeleteMultipleDatabaseServersByCrn deregisters or terminate multiple database servers by c r n
+DeleteMultipleDatabaseServersByCrn terminates and or deregister multiple database servers by c r n
 
-Deregisters multiple databases servers, each by CRN.
+Terminates and/or deregisters multiple database servers, each by CRN.
 */
 func (a *Client) DeleteMultipleDatabaseServersByCrn(params *DeleteMultipleDatabaseServersByCrnParams, authInfo runtime.ClientAuthInfoWriter) (*DeleteMultipleDatabaseServersByCrnOK, error) {
 	// TODO: Validate the params before sending
@@ -331,37 +331,6 @@ func (a *Client) ReleaseManagedDatabaseServer(params *ReleaseManagedDatabaseServ
 		return nil, err
 	}
 	return result.(*ReleaseManagedDatabaseServerOK), nil
-
-}
-
-/*
-TerminateManagedDatabaseServer terminates a database server in a cloud provider and deregister it
-
-Terminates a database server in a cloud provider and deregisters it.
-*/
-func (a *Client) TerminateManagedDatabaseServer(params *TerminateManagedDatabaseServerParams, authInfo runtime.ClientAuthInfoWriter) (*TerminateManagedDatabaseServerOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewTerminateManagedDatabaseServerParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "terminateManagedDatabaseServer",
-		Method:             "DELETE",
-		PathPattern:        "/v4/databaseservers/managed/{crn}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &TerminateManagedDatabaseServerReader{formats: a.formats},
-		AuthInfo:           authInfo,
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*TerminateManagedDatabaseServerOK), nil
 
 }
 
