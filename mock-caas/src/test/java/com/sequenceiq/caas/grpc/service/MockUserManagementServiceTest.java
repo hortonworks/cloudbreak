@@ -5,7 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,9 +19,10 @@ import com.sequenceiq.caas.util.JsonUtil;
 @RunWith(MockitoJUnitRunner.class)
 public class MockUserManagementServiceTest {
 
-    public static final String VALID_LICENSE = "License file content";
+    private static final String VALID_LICENSE = "License file content";
 
-    public static final String EMPTY_LICENSE = "";
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private MockUserManagementService underTest;
@@ -43,11 +46,12 @@ public class MockUserManagementServiceTest {
     @Test
     public void testSetLicenseShouldEmptyStringWhenTheFileIsNotExists() {
         ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", "/etc/license");
+
+        expectedException.expect(IllegalStateException.class);
+        expectedException.expectMessage("The license file could not be found on path: '/etc/license'. " +
+                "Please place your CM license file in your '<cbd_path>/etc' folder. By default the name of the file should be 'license.txt'.");
+
         underTest.init();
-
-        String actual = ReflectionTestUtils.getField(underTest, "cbLicense").toString();
-
-        Assert.assertEquals(EMPTY_LICENSE, actual);
     }
 
     @Test

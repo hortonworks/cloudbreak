@@ -10,6 +10,7 @@ services:
       - 10080:8080
     volumes:
     - ../mock-caas/build/libs/mock-caas.jar:/mock-caas.jar
+    - ../mock-caas/src/test/resources/etc:/etc/auth
     command: java -jar /mock-caas.jar
     image: openjdk:11-jdk
   test:
