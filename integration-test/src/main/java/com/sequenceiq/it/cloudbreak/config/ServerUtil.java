@@ -10,40 +10,29 @@ import org.springframework.util.StringUtils;
 @Component
 class ServerUtil {
 
-    String calculateApiKeyFromProfile(String apikeyid, Map<String, String> prof) {
-        return StringUtils.isEmpty(apikeyid)
-                ? prof.get("apikeyid")
-                : apikeyid;
+    String calculateApiKeyFromProfile(String apiKeyId, Map<String, String> prof) {
+        String apiKeyIdFromProfile = prof.get("apikeyid");
+        return StringUtils.isEmpty(apiKeyIdFromProfile)
+                ? apiKeyId
+                : apiKeyIdFromProfile;
     }
 
-    String calculatePrivateKeyFromProfile(String privatekey, Map<String, String> prof) {
-        return StringUtils.isEmpty(privatekey)
-                ? prof.get("privatekey")
-                : privatekey;
+    String calculatePrivateKeyFromProfile(String privateKey, Map<String, String> prof) {
+        String privateKeyFromProfile = prof.get("privatekey");
+        return StringUtils.isEmpty(privateKeyFromProfile)
+                ? privateKey
+                : privateKeyFromProfile;
     }
 
     String calculateServerAddressFromProfile(String server, Map<String, String> prof) {
-        return StringUtils.isEmpty(server)
-                ? enforceHttpForServerAddress(prof.get("server"))
-                : server;
-    }
-
-    String calculatePureServerAddressFromProfile(String server, Map<String, String> prof, int port) {
-        return StringUtils.isEmpty(server)
-                ? enforceHttpForServerAddress(prof.get("server"), port)
-                : server;
-    }
-
-    private String enforceHttpForServerAddress(String serverRaw) {
-        return "http://" + getDomainFromUrl(serverRaw);
+        String serverRaw = prof.get("server");
+        return StringUtils.isEmpty(serverRaw)
+                ? server
+                : enforceHttpsForServerAddress(serverRaw);
     }
 
     private String enforceHttpsForServerAddress(String serverRaw) {
         return "https://" + getDomainFromUrl(serverRaw);
-    }
-
-    private String enforceHttpForServerAddress(String serverRaw, int port) {
-        return "http://" + getDomainFromUrl(serverRaw) + ":" + port;
     }
 
     private String getDomainFromUrl(String url) {
