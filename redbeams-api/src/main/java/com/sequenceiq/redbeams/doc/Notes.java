@@ -51,16 +51,14 @@ public final class Notes {
         public static final String RELEASE =
             "Releases management of a service-managed database server. Resource tracking information is discarded, "
             + " but the server remains registered as user-managed.";
-        public static final String TERMINATE =
-            "Terminates a database server in a cloud provider and deregisters it.";
         public static final String REGISTER =
             "Registers an existing database server.";
         public static final String DELETE_BY_CRN =
-            "Deregisters a database server by its CRN.";
+            "Terminates and/or deregisters a database server by its CRN.";
         public static final String DELETE_BY_NAME =
-            "Deregisters a database server by its name.";
+            "Terminates and/or deregisters a database server by its name.";
         public static final String DELETE_MULTIPLE_BY_CRN =
-            "Deregisters multiple databases servers, each by CRN.";
+            "Terminates and/or deregisters multiple database servers, each by CRN.";
         public static final String CREATE_DATABASE =
             "Creates a new database on a database server. The database starts out empty. A new user with credentials "
             + "separate from the database server's administrative user is also created, with full rights to the new database.";

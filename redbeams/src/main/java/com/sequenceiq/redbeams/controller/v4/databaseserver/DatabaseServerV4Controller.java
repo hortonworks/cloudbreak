@@ -18,7 +18,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
@@ -84,13 +83,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
-    @Override
-    public DatabaseServerTerminationOutcomeV4Response terminate(String crn, boolean force) {
-        DBStack dbStack = redbeamsTerminationService.terminateDatabaseServer(crn, force);
-        return converterUtil.convert(dbStack, DatabaseServerTerminationOutcomeV4Response.class);
-    }
-
-    @Override
     public DatabaseServerV4Response register(DatabaseServerV4Request request) {
         DatabaseServerConfig server = databaseServerConfigService.create(converterUtil.convert(request, DatabaseServerConfig.class), DEFAULT_WORKSPACE, false);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_CREATED);
@@ -98,21 +90,24 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    public DatabaseServerV4Response deleteByCrn(String crn) {
-        DatabaseServerConfig deleted = databaseServerConfigService.deleteByCrn(crn);
+    public DatabaseServerV4Response deleteByCrn(String crn, boolean force) {
+        // RedbeamsTerminationService handles both service-managed and user-managed database servers
+        DatabaseServerConfig deleted = redbeamsTerminationService.terminateByCrn(crn, force);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
         return converterUtil.convert(deleted, DatabaseServerV4Response.class);
     }
 
     @Override
-    public DatabaseServerV4Response deleteByName(String environmentCrn, String name) {
-        DatabaseServerConfig deleted = databaseServerConfigService.deleteByName(environmentCrn, name);
+    public DatabaseServerV4Response deleteByName(String environmentCrn, String name, boolean force) {
+        // RedbeamsTerminationService handles both service-managed and user-managed database servers
+        DatabaseServerConfig deleted = redbeamsTerminationService.terminateByName(environmentCrn, name, force);
         return converterUtil.convert(deleted, DatabaseServerV4Response.class);
     }
 
     @Override
-    public DatabaseServerV4Responses deleteMultiple(Set<String> crns) {
-        Set<DatabaseServerConfig> deleted = databaseServerConfigService.deleteMultipleByCrn(crns);
+    public DatabaseServerV4Responses deleteMultiple(Set<String> crns, boolean force) {
+        // RedbeamsTerminationService handles both service-managed and user-managed database servers
+        Set<DatabaseServerConfig> deleted = redbeamsTerminationService.terminateMultipleByCrn(crns, force);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(deleted, DatabaseServerV4Response.class));
     }

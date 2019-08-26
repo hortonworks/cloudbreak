@@ -24,7 +24,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
@@ -91,15 +90,6 @@ public interface DatabaseServerV4Endpoint {
             @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
-    @DELETE
-    @Path("managed/{crn}")
-    @ApiOperation(value = DatabaseServerOpDescription.TERMINATE, notes = DatabaseServerNotes.TERMINATE,
-            nickname = "terminateManagedDatabaseServer")
-    DatabaseServerTerminationOutcomeV4Response terminate(
-            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
-            @QueryParam("force") @DefaultValue("false") boolean force
-    );
-
     @POST
     @Path("register")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -114,7 +104,8 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_CRN, notes = DatabaseServerNotes.DELETE_BY_CRN,
             nickname = "deleteDatabaseServerByCrn")
     DatabaseServerV4Response deleteByCrn(
-            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
+            @QueryParam("force") @DefaultValue("false") boolean force
     );
 
     @DELETE
@@ -124,7 +115,8 @@ public interface DatabaseServerV4Endpoint {
     DatabaseServerV4Response deleteByName(
             @ValidCrn @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
             @QueryParam("environmentCrn") String environmentCrn,
-            @ApiParam(DatabaseServerParamDescriptions.NAME) @PathParam("name") String name
+            @ApiParam(DatabaseServerParamDescriptions.NAME) @PathParam("name") String name,
+            @QueryParam("force") @DefaultValue("false") boolean force
     );
 
     @DELETE
@@ -133,7 +125,8 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_MULTIPLE_BY_CRN, notes = DatabaseServerNotes.DELETE_MULTIPLE_BY_CRN,
             nickname = "deleteMultipleDatabaseServersByCrn")
     DatabaseServerV4Responses deleteMultiple(
-            @ApiParam(DatabaseServerParamDescriptions.CRNS) Set<@ValidCrn String> crns
+            @ApiParam(DatabaseServerParamDescriptions.CRNS) Set<@ValidCrn String> crns,
+            @QueryParam("force") @DefaultValue("false") boolean force
     );
 
     @POST
