@@ -5,7 +5,7 @@ import java.util.Map;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 
 public interface Flow {
-    void initialize();
+    void initialize(Map<Object, Object> contextParams);
 
     void initialize(String stateRepresentation, Map<Object, Object> variables);
 

@@ -186,7 +186,7 @@ public class OfflineStateGenerator {
     private Flow initializeFlow() throws Exception {
         ((AbstractFlowConfiguration<?, ?>) flowConfiguration).init();
         Flow flow = flowConfiguration.createFlow("", 0L);
-        flow.initialize();
+        flow.initialize(Map.of());
         return flow;
     }
 

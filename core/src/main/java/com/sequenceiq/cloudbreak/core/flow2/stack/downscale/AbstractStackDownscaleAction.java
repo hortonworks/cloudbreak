@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
+import com.sequenceiq.cloudbreak.core.flow2.ContextKeys;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -86,13 +88,14 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     private Set<String> extractInstanceIds(P payload, Map<Object, Object> variables, Stack stack) {
         if (payload instanceof StackDownscaleTriggerEvent) {
             StackDownscaleTriggerEvent ssc = (StackDownscaleTriggerEvent) payload;
+            Set<Long> privateIds = CollectionUtils.isEmpty(ssc.getPrivateIds()) ? (Set<Long>) variables.get(ContextKeys.PRIVATE_IDS) : ssc.getPrivateIds();
             Set<String> instanceIds;
-            if (ssc.getPrivateIds() == null || ssc.getPrivateIds().isEmpty()) {
+            if (CollectionUtils.isEmpty(privateIds)) {
                 Map<String, String> unusedInstanceIds = stackScalingService.getUnusedInstanceIds(ssc.getInstanceGroup(), ssc.getAdjustment(), stack);
                 instanceIds = new HashSet<>(unusedInstanceIds.keySet());
             } else {
                 Set<InstanceMetaData> imds = stack.getInstanceGroupByInstanceGroupName(ssc.getInstanceGroup()).getNotTerminatedInstanceMetaDataSet();
-                instanceIds = imds.stream().filter(imd -> ssc.getPrivateIds().contains(imd.getPrivateId())).map(InstanceMetaData::getInstanceId)
+                instanceIds = imds.stream().filter(imd -> privateIds.contains(imd.getPrivateId())).map(InstanceMetaData::getInstanceId)
                         .collect(Collectors.toSet());
             }
             variables.put(INSTANCEIDS, instanceIds);

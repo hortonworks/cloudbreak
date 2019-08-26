@@ -38,7 +38,10 @@ public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Fl
     }
 
     @Override
-    public void initialize() {
+    public void initialize(Map<Object, Object> variables) {
+        if (variables != null) {
+            flowMachine.getExtendedState().getVariables().putAll(variables);
+        }
         flowMachine.start();
     }
 
