@@ -243,7 +243,7 @@ public class ClusterHostServiceRunner {
             addAmbariConfig(cluster, servicePillar, connector);
         }
 
-        Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn());
+        Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
         saveSssdAdPillar(cluster, servicePillar, kerberosConfig);

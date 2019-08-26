@@ -111,7 +111,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             Credential credential = credentialConverter.convert(environment.getCredential());
             Cluster cluster = clusterService.getById(source.getCluster().getId());
             FileSystem fileSystem = cluster.getFileSystem();
-            Optional<LdapView> ldapView = ldapConfigService.get(source.getEnvironmentCrn());
+            Optional<LdapView> ldapView = ldapConfigService.get(source.getEnvironmentCrn(), source.getName());
             StackRepoDetails hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
             String stackRepoDetailsHdpVersion = hdpRepo != null ? hdpRepo.getHdpVersion() : null;
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);

@@ -73,7 +73,7 @@ public class SharedServiceValidatorTest {
         when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getDatabase(HIVE_TYPE_STRING));
         when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(Blueprint.class));
         when(blueprintService.isAmbariBlueprint(any())).thenReturn(true);
-        when(ldapConfigService.isLdapConfigExistsForEnvironment(any())).thenReturn(true);
+        when(ldapConfigService.isLdapConfigExistsForEnvironment(any(), anyString())).thenReturn(true);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
 
@@ -88,7 +88,7 @@ public class SharedServiceValidatorTest {
         when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(null);
         when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(Blueprint.class));
         when(blueprintService.isAmbariBlueprint(any())).thenReturn(true);
-        when(ldapConfigService.isLdapConfigExistsForEnvironment(any())).thenReturn(true);
+        when(ldapConfigService.isLdapConfigExistsForEnvironment(any(), anyString())).thenReturn(true);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
 
@@ -105,7 +105,7 @@ public class SharedServiceValidatorTest {
         when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(null);
         when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(Blueprint.class));
         when(blueprintService.isAmbariBlueprint(any())).thenReturn(true);
-        when(ldapConfigService.isLdapConfigExistsForEnvironment(any())).thenReturn(true);
+        when(ldapConfigService.isLdapConfigExistsForEnvironment(any(), anyString())).thenReturn(true);
 
         ValidationResult validationResult = underTest.checkSharedServiceStackRequirements(stackRequest, getWorkspace());
 
@@ -149,6 +149,7 @@ public class SharedServiceValidatorTest {
         stackRequest.setCluster(clusterRequest);
         stackRequest.setCloudPlatform(cloudPlatform);
         stackRequest.setEnvironmentCrn("env");
+        stackRequest.setName("teststack");
         return stackRequest;
     }
 

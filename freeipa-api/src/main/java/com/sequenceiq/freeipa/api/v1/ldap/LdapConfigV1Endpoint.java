@@ -31,9 +31,17 @@ public interface LdapConfigV1Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
+    @ApiOperation(value = LdapConfigOpDescription.GET_BY_ENV, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
             nickname = "getLdapConfigV1")
     DescribeLdapConfigResponse describe(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
+
+    @GET
+    @Path("cluster")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = LdapConfigOpDescription.GET_BY_ENV_FOR_CLUSTER, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
+            nickname = "getLdapConfigForClusterV1")
+    DescribeLdapConfigResponse getForCluster(@QueryParam("environmentCrn") @NotEmpty String environmentCrn,
+            @QueryParam("clusterName") @NotEmpty String clusterName) throws Exception;
 
     @POST
     @Path("")
@@ -44,7 +52,7 @@ public interface LdapConfigV1Endpoint {
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LdapConfigOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
+    @ApiOperation(value = LdapConfigOpDescription.DELETE_BY_ENV, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
             nickname = "deleteLdapConfigV1")
     void delete(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 

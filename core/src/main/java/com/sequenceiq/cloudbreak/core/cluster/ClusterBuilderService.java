@@ -113,7 +113,7 @@ public class ClusterBuilderService {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         connector.waitForServer(stack);
-        boolean ldapConfigured = ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn());
+        boolean ldapConfigured = ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName());
         connector.changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
     }
 

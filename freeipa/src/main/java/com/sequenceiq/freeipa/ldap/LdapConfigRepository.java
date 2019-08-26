@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.ldap;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -16,5 +17,11 @@ import com.sequenceiq.authorization.resource.ResourceAction;
 public interface LdapConfigRepository extends BaseJpaRepository<LdapConfig, Long> {
 
     @CheckPermission(action = ResourceAction.READ)
-    Optional<LdapConfig> findByAccountIdAndEnvironmentCrn(String accountId, String environmentCrn);
+    Optional<LdapConfig> findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(String accountId, String environmentCrn);
+
+    @CheckPermission(action = ResourceAction.READ)
+    List<LdapConfig> findByAccountIdAndEnvironmentCrn(String accountId, String environmentCrn);
+
+    @CheckPermission(action = ResourceAction.READ)
+    Optional<LdapConfig> findByAccountIdAndEnvironmentCrnAndClusterName(String accountId, String environmentCrn, String clusterName);
 }

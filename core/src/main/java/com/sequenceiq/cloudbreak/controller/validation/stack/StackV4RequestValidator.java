@@ -201,7 +201,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
                 if (!databaseTypes.contains(DatabaseType.RANGER.name())) {
                     validationBuilder.error(String.format(rdsErrorMessageFormat, "Ranger"));
                 }
-                if (isLdapNotProvided(stackRequest.getEnvironmentCrn())) {
+                if (isLdapNotProvided(stackRequest.getEnvironmentCrn(), stackRequest.getName())) {
                     validationBuilder.error("For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide an "
                             + "LDAP configuration or its name/id to the Cluster request");
                 }
@@ -209,8 +209,8 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         }
     }
 
-    private boolean isLdapNotProvided(String environmentCrn) {
-        return !ldapConfigService.isLdapConfigExistsForEnvironment(environmentCrn);
+    private boolean isLdapNotProvided(String environmentCrn, String clusterName) {
+        return !ldapConfigService.isLdapConfigExistsForEnvironment(environmentCrn, clusterName);
     }
 
     private Set<String> getGivenRdsTypes(ClusterV4Request clusterRequest, Long workspaceId) {

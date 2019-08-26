@@ -37,23 +37,23 @@ public class LdapConfigService {
     private SecretService secretService;
 
     @Retryable(value = CloudbreakServiceException.class, maxAttempts = MAX_ATTEMPT, backoff = @Backoff(delay = DELAY))
-    public boolean isLdapConfigExistsForEnvironment(String environmentCrn) {
-        return describeLdapConfig(environmentCrn).isPresent();
+    public boolean isLdapConfigExistsForEnvironment(String environmentCrn, String clusterName) {
+        return describeLdapConfig(environmentCrn, clusterName).isPresent();
     }
 
     @Retryable(value = CloudbreakServiceException.class, maxAttempts = MAX_ATTEMPT, backoff = @Backoff(delay = DELAY))
-    public Optional<LdapView> get(String environmentCrn) {
-        Optional<DescribeLdapConfigResponse> describeLdapConfigResponse = describeLdapConfig(environmentCrn);
+    public Optional<LdapView> get(String environmentCrn, String clusterName) {
+        Optional<DescribeLdapConfigResponse> describeLdapConfigResponse = describeLdapConfig(environmentCrn, clusterName);
         return describeLdapConfigResponse.map(this::convert);
     }
 
-    private Optional<DescribeLdapConfigResponse> describeLdapConfig(String environmentCrn) {
+    private Optional<DescribeLdapConfigResponse> describeLdapConfig(String environmentCrn, String clusterName) {
         try {
-            return Optional.of(ldapConfigV1Endpoint.describe(environmentCrn));
+            return Optional.of(ldapConfigV1Endpoint.getForCluster(environmentCrn, clusterName));
         } catch (NotFoundException | ForbiddenException notFoundEx) {
             LOGGER.debug("No Ldap config found for {} environment. Ldap setup will be skipped!", environmentCrn);
             return Optional.empty();
-        } catch (RuntimeException communicationEx) {
+        } catch (Exception communicationEx) {
             String message = String.format("Failed to get Ldap config from FreeIpa service due to: '%s' ", communicationEx.getMessage());
             LOGGER.warn(message, communicationEx);
             throw new CloudbreakServiceException(message, communicationEx);

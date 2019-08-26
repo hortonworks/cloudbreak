@@ -192,6 +192,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         when(stackMock.getType()).thenReturn(StackType.DATALAKE);
         when(stackMock.getRegion()).thenReturn(REGION);
+        when(stackMock.getName()).thenReturn("stackname");
         when(sourceCluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(cluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(stackRepoDetails);
@@ -213,7 +214,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(credentialConverter.convert(any(CredentialResponse.class))).thenReturn(credential);
         when(awsMockAccountMappingService.getGroupMappings(REGION, credential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
         when(awsMockAccountMappingService.getUserMappings(REGION, credential)).thenReturn(MOCK_USER_MAPPINGS);
-        when(ldapConfigService.get(anyString())).thenReturn(Optional.empty());
+        when(ldapConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -296,7 +297,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenClusterFromClusterServiceHasLdapConfigThenItShouldBeStored() {
         LdapView ldapView = LdapView.LdapViewBuilder.aLdapView().withProtocol("").withBindDn("admin<>").build();
-        when(ldapConfigService.get(anyString())).thenReturn(Optional.of(ldapView));
+        when(ldapConfigService.get(anyString(), anyString())).thenReturn(Optional.of(ldapView));
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
