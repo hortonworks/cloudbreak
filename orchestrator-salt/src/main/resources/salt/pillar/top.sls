@@ -65,6 +65,7 @@ base:
     - cloudera-manager.repo
     - cloudera-manager.database
     - cloudera-manager.communication
+    - cloudera-manager.autotls
     - gateway.init
     - gateway.ldap
     - gateway.settings

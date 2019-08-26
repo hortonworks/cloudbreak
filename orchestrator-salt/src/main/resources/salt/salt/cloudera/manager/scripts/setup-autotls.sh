@@ -6,7 +6,7 @@ set -ex
 HOSTNAME={{ manager_server_fqdn }}
 CM_KEYTAB_FILE={{ cm_keytab.path }}
 CM_PRINCIPAL={{ cm_keytab.principal }}
-CERTMANAGER_DIR="/hadoopfs/fs1/cloudera-scm-server/certs"
+CERTMANAGER_DIR="/etc/cloudera-scm-server/certs"
 CERTMANAGER_ARGS=
 OUT_FILE=`mktemp -t signed_ca_chain.XXXXXX.pem`
 

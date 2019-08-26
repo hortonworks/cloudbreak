@@ -80,13 +80,16 @@ run_autotls_setup:
     - name: /opt/salt/scripts/cm-setup-autotls.sh
     - require:
       - file: /opt/salt/scripts/cm-setup-autotls.sh
-    - unless: test -f /hadoopfs/fs1/cloudera-scm-server/certs/autotls_setup_success
+    - env:
+        - AUTO_TLS_KEYSTORE_PASSWORD: {{salt['pillar.get']('cloudera-manager:autotls:keystore_password')}}
+        - AUTO_TLS_TRUSTSTORE_PASSWORD: {{salt['pillar.get']('cloudera-manager:autotls:truststore_password')}}
+    - unless: test -f /etc/cloudera-scm-server/certs/autotls_setup_success
 
 copy_autotls_setup_to_cm_settings:
   cmd.run:
     - name: >
         echo "# Auto-tls related configurations" >> /etc/cloudera-scm-server/cm.settings;
-        cat /hadoopfs/fs1/cloudera-scm-server/certs/auto-tls.init.txt >> /etc/cloudera-scm-server/cm.settings
+        cat /etc/cloudera-scm-server/certs/auto-tls.init.txt >> /etc/cloudera-scm-server/cm.settings
     - require:
       - cmd: run_autotls_setup
     - unless: grep "# Auto-tls related configurations" /etc/cloudera-scm-server/cm.settings
