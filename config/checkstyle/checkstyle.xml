@@ -169,9 +169,6 @@
             <property name="classes" value="java.util.Hashtable" />
         </module>
         <module name="IllegalThrows" />
-        <module name="IllegalCatch">
-            <property name="illegalClassNames" value="java.lang.IllegalStateException" />
-        </module>
         <module name="IllegalType">
             <property name="format" value="^$" />
         </module>

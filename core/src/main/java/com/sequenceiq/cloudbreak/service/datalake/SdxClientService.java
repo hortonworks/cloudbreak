@@ -25,7 +25,7 @@ public class SdxClientService {
     public List<SdxClusterResponse> getByEnvironmentCrn(String crn) {
         try {
             return sdxEndpoint.getByEnvCrn(crn);
-        } catch (WebApplicationException | ProcessingException e) {
+        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
             LOGGER.error(String.format("Failed to get datalake clusters for environment %s", crn), e);
             return new ArrayList<>();
         }
@@ -34,7 +34,7 @@ public class SdxClientService {
     public List<SdxClusterResponse> list() {
         try {
             return sdxEndpoint.list(null);
-        } catch (WebApplicationException | ProcessingException e) {
+        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
             LOGGER.error("Failed to list datalake clusters.", e);
             return new ArrayList<>();
         }

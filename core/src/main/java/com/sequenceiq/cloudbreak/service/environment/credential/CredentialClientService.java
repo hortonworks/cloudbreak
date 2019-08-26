@@ -32,7 +32,7 @@ public class CredentialClientService {
         try {
             CredentialResponse credentialResponse = credentialEndpoint.getByName(name);
             return credentialConverter.convert(credentialResponse);
-        } catch (WebApplicationException | ProcessingException e) {
+        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
             String message = String.format("Failed to GET Credential with name: %s, due to: '%s' ", name, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
@@ -43,7 +43,7 @@ public class CredentialClientService {
         try {
             CredentialResponse credentialResponse = credentialEndpoint.getByResourceCrn(crn);
             return credentialConverter.convert(credentialResponse);
-        } catch (WebApplicationException | ProcessingException e) {
+        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
             String message = String.format("Failed to GET Credential by crn: %s, due to: '%s' ", crn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
@@ -56,7 +56,7 @@ public class CredentialClientService {
             //TODO Revise paramaters because most of them should be a secret
             CredentialResponse credentialResponse = credentialEndpoint.getByEnvironmentCrn(envCrn);
             return credentialConverter.convert(credentialResponse);
-        } catch (WebApplicationException e) {
+        } catch (WebApplicationException | IllegalStateException e) {
             String message = String.format("Failed to GET Credential by environment crn: %s, due to: '%s' ", envCrn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
