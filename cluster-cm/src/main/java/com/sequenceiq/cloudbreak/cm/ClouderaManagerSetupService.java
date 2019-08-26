@@ -145,7 +145,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                     host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))
                     .findFirst();
 
-            clouderaManagerLicenseService.beginTrialIfNeeded(stack.getCreator(), client);
+            clouderaManagerLicenseService.validateClouderaManagerLicense(stack.getCreator());
             String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
 
             if (optionalCmHost.isPresent()) {
