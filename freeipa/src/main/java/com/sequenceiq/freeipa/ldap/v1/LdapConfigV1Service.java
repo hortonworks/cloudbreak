@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.ldap.v1;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -8,14 +10,22 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.MinimalLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigResponse;
+import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.User;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.ldap.LdapConfig;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
+import com.sequenceiq.freeipa.service.config.LdapConfigRegisterService;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class LdapConfigV1Service {
@@ -27,6 +37,15 @@ public class LdapConfigV1Service {
 
     @Inject
     private StringToSecretResponseConverter stringToSecretResponseConverter;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private FreeIpaClientFactory freeIpaClientFactory;
+
+    @Inject
+    private LdapConfigRegisterService ldapConfigRegisterService;
 
     public DescribeLdapConfigResponse post(CreateLdapConfigRequest createLdapConfigRequest) {
         LdapConfig ldapConfig = convertCreateLdapConfigRequest(createLdapConfigRequest);
@@ -147,5 +166,28 @@ public class LdapConfigV1Service {
         createLdapConfigRequest.setUserSearchBase(source.getUserSearchBase());
         createLdapConfigRequest.setCertificate(source.getCertificate());
         return createLdapConfigRequest;
+    }
+
+    public DescribeLdapConfigResponse getForCluster(String environmentCrn, String accountId, String clusterName)
+            throws FreeIpaClientException {
+        Optional<Stack> stack = stackService.findByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        if (stack.isPresent()) {
+            Optional<LdapConfig> existingLdapConfig = ldapConfigService.find(environmentCrn, accountId, clusterName);
+            LdapConfig ldapConfig;
+            if (existingLdapConfig.isPresent()) {
+                ldapConfig = existingLdapConfig.get();
+            } else {
+                FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack.get());
+                String bindUser = "ldapbind-" + clusterName;
+                Optional<User> existinguser = freeIpaClient.userFind(bindUser);
+                User user = existinguser.isPresent() ? existinguser.get() : freeIpaClient.userAdd(bindUser, "service", "account");
+                String password = PasswordUtil.generatePassword();
+                freeIpaClient.userSetPassword(user.getUid(), password);
+                ldapConfig = ldapConfigRegisterService.createLdapConfig(stack.get().getId(), user.getDn(), password, clusterName);
+            }
+            return convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);
+        } else {
+            return describe(environmentCrn);
+        }
     }
 }

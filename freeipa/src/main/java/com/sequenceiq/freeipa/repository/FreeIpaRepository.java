@@ -23,5 +23,6 @@ public interface FreeIpaRepository extends BaseCrudRepository<FreeIpa, Long> {
     Optional<FreeIpa> getByStack(Stack stack);
 
     @Query("SELECT f FROM FreeIpa f WHERE f.stack.id = :stackId")
+    @CheckPermission(action = ResourceAction.READ)
     Optional<FreeIpa> getByStackId(@Param("stackId") Long stackId);
 }

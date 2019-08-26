@@ -55,7 +55,7 @@ public class LdapSSOConfigurationHandler implements EventHandler<LdapSSOConfigur
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-            LdapView ldapView = ldapConfigService.get(stack.getEnvironmentCrn()).orElse(null);
+            LdapView ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
             clusterApiConnectors.getConnector(stack).clusterSecurityService().setupLdapAndSSO(primaryGatewayConfig.getPublicAddress(), ldapView);
             response = new LdapSSOConfigurationSuccess(stackId);
         } catch (Exception e) {

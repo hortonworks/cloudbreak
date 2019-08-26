@@ -246,7 +246,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     }
 
     private LdapView getLdapConfig(StackV4Request source) {
-        return ldapConfigService.get(source.getEnvironmentCrn()).orElse(null);
+        return ldapConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null);
     }
 
     private KerberosConfig getKerberosConfig(StackV4Request source) {

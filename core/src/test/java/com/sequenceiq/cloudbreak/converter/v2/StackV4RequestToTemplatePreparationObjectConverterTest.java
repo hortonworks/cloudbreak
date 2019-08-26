@@ -390,7 +390,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
                 .withBindDn("")
                 .withBindPassword("")
                 .build();
-        when(ldapConfigService.get(TEST_ENVIRONMENT_CRN)).thenReturn(Optional.of(expected));
+        when(ldapConfigService.get(TEST_ENVIRONMENT_CRN, source.getName())).thenReturn(Optional.of(expected));
 
         TemplatePreparationObject result = underTest.convert(source);
 

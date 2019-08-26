@@ -70,7 +70,7 @@ public class RecipeEngine {
     // note: executed when LDAP config is present, because later the LDAP sync is hooked for this salt state in the top.sls.
     public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if ((stack.getCluster() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn()))
+        if ((stack.getCluster() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName()))
                 || recipesFound(hostGroups, POST_CLOUDERA_MANAGER_START) && recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.postClusterManagerStartRecipes(stack);
         }

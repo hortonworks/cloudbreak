@@ -43,6 +43,8 @@ public class LdapConfig implements ArchivableResource, AuthResource, AccountIdAw
 
     private String environmentCrn;
 
+    private String clusterName;
+
     private boolean archived;
 
     private Long deletionTimestamp = -1L;
@@ -316,6 +318,14 @@ public class LdapConfig implements ArchivableResource, AuthResource, AccountIdAw
 
     public void setCertificate(String certificate) {
         this.certificate = certificate;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 
     @Override

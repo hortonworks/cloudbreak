@@ -110,6 +110,6 @@ class LdapConfigRegisterServiceTest {
 
         underTest.delete(stack);
 
-        verify(ldapConfigService).delete(stack.getEnvironmentCrn(), stack.getAccountId());
+        verify(ldapConfigService).deleteAllInEnvironment(stack.getEnvironmentCrn(), stack.getAccountId());
     }
 }

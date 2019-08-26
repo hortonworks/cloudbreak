@@ -11,6 +11,8 @@ import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigResponse;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.util.CrnService;
 import com.sequenceiq.notification.NotificationController;
 
 @Controller
@@ -19,9 +21,18 @@ public class LdapConfigV1Controller extends NotificationController implements Ld
     @Inject
     private LdapConfigV1Service ldapConfigV1Service;
 
+    @Inject
+    private CrnService crnService;
+
     @Override
     public DescribeLdapConfigResponse describe(String environmentId) {
         return ldapConfigV1Service.describe(environmentId);
+    }
+
+    @Override
+    public DescribeLdapConfigResponse getForCluster(String environmentCrn, String clusterName) throws FreeIpaClientException {
+        String accountId = crnService.getCurrentAccountId();
+        return ldapConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
     }
 
     @Override

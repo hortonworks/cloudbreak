@@ -77,7 +77,7 @@ public class SharedServiceValidator {
     }
 
     private boolean hasConfiguredLdap(StackV4Request request) {
-        return ldapConfigService.isLdapConfigExistsForEnvironment(request.getEnvironmentCrn());
+        return ldapConfigService.isLdapConfigExistsForEnvironment(request.getEnvironmentCrn(), request.getName());
     }
 
     private boolean hasConfiguredRdsByType(StackV4Request request, Workspace workspace, DatabaseType rdsType) {

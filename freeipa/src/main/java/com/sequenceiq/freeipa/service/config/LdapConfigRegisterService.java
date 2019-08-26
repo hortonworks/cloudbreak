@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
-import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.ldap.LdapConfig;
@@ -52,6 +51,10 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
 
     @Override
     public void register(Long stackId) {
+        createLdapConfig(stackId, null, null, null);
+    }
+
+    public LdapConfig createLdapConfig(Long stackId, String bindDn, String bindPassword, String clusterName) {
         Stack stack = getStackWithInstanceMetadata(stackId);
         FreeIpa freeIpa = getFreeIpaService().findByStackId(stackId);
         String adminGroupName = StringUtils.isNotEmpty(freeIpa.getAdminGroupName()) ? freeIpa.getAdminGroupName() : ADMIN_GROUP;
@@ -61,7 +64,7 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
         ldapConfig.setAdminGroup(adminGroupName);
         ldapConfig.setUserGroup(USER_GROUP);
         String domainComponent = generateDomainComponent(freeIpa);
-        ldapConfig.setBindDn(BIND_DN + domainComponent);
+        ldapConfig.setBindDn(StringUtils.isBlank(bindDn) ? BIND_DN + domainComponent : bindDn);
         ldapConfig.setUserSearchBase(USER_SEARCH_BASE + domainComponent);
         ldapConfig.setGroupSearchBase(GROUP_SEARCH_BASE + domainComponent);
         ldapConfig.setUserDnPattern(USER_DN_PATTERN + domainComponent);
@@ -69,14 +72,15 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
         ldapConfig.setProtocol(PROTOCOL);
         ldapConfig.setServerPort(SERVER_PORT);
         ldapConfig.setDomain(freeIpa.getDomain());
-        ldapConfig.setBindPassword(freeIpa.getAdminPassword());
+        ldapConfig.setBindPassword(StringUtils.isBlank(bindPassword) ? freeIpa.getAdminPassword() : bindPassword);
         ldapConfig.setDirectoryType(DirectoryType.LDAP);
         ldapConfig.setUserNameAttribute(USER_NAME_ATTRIBUTE);
         ldapConfig.setUserObjectClass(USER_OBJECT_CLASS);
         ldapConfig.setGroupMemberAttribute(GROUP_MEMBER_ATTRIBUTE);
         ldapConfig.setGroupNameAttribute(GROUP_NAME_ATTRIBUTE);
         ldapConfig.setGroupObjectClass(GROUP_OBJECT_CLASS);
-        ldapConfigService.createLdapConfig(ldapConfig, stack.getAccountId());
+        ldapConfig.setClusterName(clusterName);
+        return ldapConfigService.createLdapConfig(ldapConfig, stack.getAccountId());
     }
 
     private String generateDomainComponent(FreeIpa freeIpa) {
@@ -89,10 +93,6 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
 
     @Override
     public void delete(Stack stack) {
-        try {
-            ldapConfigService.delete(stack.getEnvironmentCrn(), stack.getAccountId());
-        } catch (NotFoundException e) {
-            LOGGER.info("Ldap config not exists for environment {}", stack.getEnvironmentCrn());
-        }
+        ldapConfigService.deleteAllInEnvironment(stack.getEnvironmentCrn(), stack.getAccountId());
     }
 }
