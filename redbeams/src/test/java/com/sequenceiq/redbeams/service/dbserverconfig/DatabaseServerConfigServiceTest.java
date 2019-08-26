@@ -1,8 +1,6 @@
 package com.sequenceiq.redbeams.service.dbserverconfig;
 
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.core.Every.everyItem;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -297,23 +295,6 @@ public class DatabaseServerConfigServiceTest {
     }
 
     @Test
-    public void testDeleteByCrnServiceManaged() {
-        server.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
-        when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.of(server));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cannot delete service managed configuration. "
-                + "Please use termination to stop the database-server and delete the configuration.");
-
-        try {
-            underTest.deleteByCrn(server.getResourceCrn().toString());
-
-        } catch (BadRequestException e) {
-            assertFalse(server.isArchived());
-            throw e;
-        }
-    }
-
-    @Test
     public void testDeleteByCrnNotFound() {
         thrown.expect(NotFoundException.class);
 
@@ -323,52 +304,14 @@ public class DatabaseServerConfigServiceTest {
     }
 
     @Test
-    public void testDeleteByNameFound() {
-        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(SERVER_NAME, WORKSPACE_ID, ENVIRONMENT_CRN)).thenReturn(Optional.of(server));
-
-        DatabaseServerConfig deletedServer = underTest.deleteByName(ENVIRONMENT_CRN, SERVER_NAME);
-
-        assertEquals(server, deletedServer);
-        assertTrue(deletedServer.isArchived());
-        verify(repository, never()).delete(server);
-    }
-
-    @Test
-    public void testDeleteByNameServiceManaged() {
-        server.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
-        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(SERVER_NAME, WORKSPACE_ID, ENVIRONMENT_CRN)).thenReturn(Optional.of(server));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cannot delete service managed configuration. "
-                + "Please use termination to stop the database-server and delete the configuration.");
-
-        try {
-            underTest.deleteByName(ENVIRONMENT_CRN, SERVER_NAME);
-
-        } catch (BadRequestException e) {
-            assertFalse(server.isArchived());
-            throw e;
-        }
-    }
-
-    @Test
-    public void testDeleteByNameNotFound() {
-        thrown.expect(NotFoundException.class);
-
-        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(SERVER_NAME, WORKSPACE_ID, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
-
-        underTest.deleteByName(ENVIRONMENT_CRN, SERVER_NAME);
-    }
-
-    @Test
-    public void testDeleteMultipleByNameFound() {
+    public void testGetByCrnsFound() {
         Set<String> crnSet = Set.of(SERVER_CRN.toString(), SERVER_2_CRN.toString());
         Set<DatabaseServerConfig> serverSet = Set.of(server, server2);
         when(repository.findByResourceCrnIn(any())).thenReturn(serverSet);
 
-        Set<DatabaseServerConfig> deletedServerSet = underTest.deleteMultipleByCrn(crnSet);
+        Set<DatabaseServerConfig> gottenSet = underTest.getByCrns(crnSet);
 
-        assertEquals(2, deletedServerSet.size());
-        assertThat(deletedServerSet, everyItem(hasProperty("archived", is(true))));
+        assertEquals(serverSet, gottenSet);
     }
 
     @Test
@@ -384,7 +327,7 @@ public class DatabaseServerConfigServiceTest {
     }
 
     @Test
-    public void testDeleteMultipleByNameNotFound() {
+    public void testGetByCrnsNotFound() {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("found with crn(s) " + SERVER_2_CRN);
 
@@ -392,7 +335,7 @@ public class DatabaseServerConfigServiceTest {
         Set<DatabaseServerConfig> serverSet = Set.of(server);
         when(repository.findByResourceCrnIn(Set.of(SERVER_CRN, SERVER_2_CRN))).thenReturn(serverSet);
 
-        underTest.deleteMultipleByCrn(crnSet);
+        underTest.getByCrns(crnSet);
     }
 
     @Test

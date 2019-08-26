@@ -55,8 +55,6 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     private static final Pattern VALID_DATABASE_NAME = Pattern.compile("^[\\p{Alnum}_][\\p{Alnum}_-]*$");
 
-    private static final Long DEFAULT_WORKSPACE = 0L;
-
     @Inject
     private DatabaseServerConfigRepository repository;
 
@@ -200,43 +198,18 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return repository.findByResourceCrn(resourceCrn);
     }
 
-    public DatabaseServerConfig deleteByName(String environmentCrn, String name) {
-        DatabaseServerConfig resource = getByName(DEFAULT_WORKSPACE, environmentCrn, name);
-        checkResourceCanBeDeleted(resource);
-        return delete(resource);
-    }
-
     public DatabaseServerConfig deleteByCrn(String crn) {
         DatabaseServerConfig resource = getByCrn(crn);
-        checkResourceCanBeDeleted(resource);
-        return delete(resource);
-    }
-
-    private void checkResourceCanBeDeleted(DatabaseServerConfig resource) {
-        if (resource.getResourceStatus().equals(ResourceStatus.SERVICE_MANAGED)) {
-            throw new BadRequestException("Cannot delete service managed configuration. "
-                    + "Please use termination to stop the database-server and delete the configuration.");
+        if (resource.getResourceStatus() == ResourceStatus.SERVICE_MANAGED) {
+            throw new IllegalStateException("deleteByCrn called with service-managed server. This indicates an error in redbeams code");
         }
+        return delete(resource);
     }
 
     @Override
     public JpaRepository repository() {
         return repository;
     }
-
-    public Set<DatabaseServerConfig> deleteMultipleByCrn(Set<String> crns) {
-        Set<DatabaseServerConfig> resources = getByCrns(crns);
-        return resources.stream()
-                .map(this::delete)
-                .collect(Collectors.toSet());
-    }
-
-    //    public Set<DatabaseServerConfig> deleteMultipleByName(Long workspaceId, String environmentCrn, Set<String> names) {
-//        Set<DatabaseServerConfig> resources = getByNames(workspaceId, environmentCrn, names);
-//        return resources.stream()
-//                .map(this::delete)
-//                .collect(Collectors.toSet());
-//    }
 
     private Set<DatabaseServerConfig> getByNames(Long workspaceId, String environmentCrn, Set<String> names) {
         Set<DatabaseServerConfig> resources =
@@ -252,7 +225,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return resources;
     }
 
-    private Set<DatabaseServerConfig> getByCrns(Set<String> crns) {
+    public Set<DatabaseServerConfig> getByCrns(Set<String> crns) {
         Set<Crn> parsedCrns = crns.stream()
                 .map(Crn::safeFromString)
                 .collect(Collectors.toSet());
