@@ -16,6 +16,8 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
@@ -41,6 +43,10 @@ public class AppConfig {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
+    @Inject
+    @Named("cloudbreakServerUrl")
+    private String cloudbreakServerUrl;
 
     @Value("${rest.debug:false}")
     private boolean restDebug;
@@ -110,6 +116,15 @@ public class AppConfig {
     @Bean
     public RedbeamsApiClientParams redbeamsApiClientParams() {
         return new RedbeamsApiClientParams(restDebug, certificateValidation, ignorePreValidation, redbeamsServerUrl);
+    }
+
+    @Bean
+    public CloudbreakServiceUserCrnClient cloudbreakClient() {
+        return new CloudbreakUserCrnClientBuilder(cloudbreakServerUrl)
+                .withCertificateValidation(certificateValidation)
+                .withIgnorePreValidation(ignorePreValidation)
+                .withDebug(restDebug)
+                .build();
     }
 
     @Bean

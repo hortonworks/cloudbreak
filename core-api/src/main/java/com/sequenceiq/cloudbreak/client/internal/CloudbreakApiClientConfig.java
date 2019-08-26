@@ -1,0 +1,68 @@
+package com.sequenceiq.cloudbreak.client.internal;
+
+import javax.ws.rs.client.WebTarget;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.sequenceiq.cloudbreak.api.CoreApi;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
+import com.sequenceiq.cloudbreak.client.UserCrnClientRequestFilter;
+import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+
+@Configuration
+public class CloudbreakApiClientConfig {
+
+    private final UserCrnClientRequestFilter userCrnClientRequestFilter;
+
+    private final ClientTracingFeature clientTracingFeature;
+
+    public CloudbreakApiClientConfig(UserCrnClientRequestFilter userCrnClientRequestFilter, ClientTracingFeature clientTracingFeature) {
+        this.userCrnClientRequestFilter = userCrnClientRequestFilter;
+        this.clientTracingFeature = clientTracingFeature;
+    }
+
+    @Bean
+    @ConditionalOnBean(CloudbreakApiClientParams.class)
+    public WebTarget cloudbreakApiClientWebTarget(CloudbreakApiClientParams cloudbreakApiClientParams) {
+        return new ThreadLocalUserCrnWebTargetBuilder(cloudbreakApiClientParams.getServiceUrl())
+                .withCertificateValidation(cloudbreakApiClientParams.isCertificateValidation())
+                .withIgnorePreValidation(cloudbreakApiClientParams.isIgnorePreValidation())
+                .withDebug(cloudbreakApiClientParams.isRestDebug())
+                .withClientRequestFilter(userCrnClientRequestFilter)
+                .withApiRoot(CoreApi.API_ROOT_CONTEXT)
+                .withTracer(clientTracingFeature)
+                .build();
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    DistroXV1Endpoint distroXV1Endpoint(WebTarget cloudbreakApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, DistroXV1Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    StackV4Endpoint stackV4Endpoint(WebTarget cloudbreakApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, StackV4Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    CloudProviderServicesV4Endopint cloudProviderServicesV4Endopint(WebTarget cloudbreakApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, CloudProviderServicesV4Endopint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    FileSystemV4Endpoint fileSystemV4Endpoint(WebTarget cloudbreakApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, FileSystemV4Endpoint.class);
+    }
+}

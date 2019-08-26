@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -31,7 +32,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -53,6 +53,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
@@ -74,7 +75,10 @@ public class SdxService {
     private EnvironmentServiceCrnClient environmentServiceCrnClient;
 
     @Inject
-    private CloudbreakServiceUserCrnClient cloudbreakClient;
+    private StackV4Endpoint stackV4Endpoint;
+
+    @Inject
+    private DistroXV1Endpoint distroXV1Endpoint;
 
     @Inject
     private CloudStorageManifester cloudStorageManifester;
@@ -107,10 +111,10 @@ public class SdxService {
         }
     }
 
-    public StackV4Response getDetail(String userCrn, String name, Set<String> entries) {
+    public StackV4Response getDetail(String name, Set<String> entries) {
         try {
             LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", name);
-            return cloudbreakClient.withCrn(userCrn).stackV4Endpoint().get(0L, name, entries);
+            return stackV4Endpoint.get(0L, name, entries);
         } catch (javax.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);
             return null;
@@ -121,9 +125,7 @@ public class SdxService {
         Set<String> clusterNames = new HashSet<>();
         LOGGER.debug("Get DistroX clusters of the environment: '{}'", environmentName);
         try {
-            Set<String> distroXClusterNames = cloudbreakClient
-                    .withCrn(userCrn)
-                    .distroXV1Endpoint()
+            Set<String> distroXClusterNames = distroXV1Endpoint
                     .list(environmentName, environmentCrn)
                     .getResponses()
                     .stream()
@@ -165,7 +167,7 @@ public class SdxService {
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
         validateInternalSdxRequest(stackV4Request, sdxClusterRequest.getClusterShape());
         DetailedEnvironmentResponse environment = getEnvironment(userCrn, sdxClusterRequest);
-        validateCloudStorageRequest(userCrn, sdxClusterRequest.getCloudStorage(), environment);
+        validateCloudStorageRequest(sdxClusterRequest.getCloudStorage(), environment);
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setInitiatorUserCrn(userCrn);
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
@@ -215,7 +217,7 @@ public class SdxService {
         }
     }
 
-    private void validateCloudStorageRequest(String userCrn, SdxCloudStorageRequest cloudStorage, DetailedEnvironmentResponse environment) {
+    private void validateCloudStorageRequest(SdxCloudStorageRequest cloudStorage, DetailedEnvironmentResponse environment) {
         if (cloudStorage != null) {
             ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
             validationBuilder.ifError(() -> cloudStorage.getFileSystemType() == null, "'fileSystemType' must be set in 'cloudStorage'!");
@@ -227,7 +229,7 @@ public class SdxService {
                     validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.S3.getProtocol()),
                             String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'S3'!", FileSystemType.S3.getProtocol()));
                     validationBuilder.ifError(() -> cloudStorage.getS3() == null, "'s3' must be set if 'fileSystemType' is 'S3'!");
-                    cloudStorageLocationValidator.validate(userCrn, cloudStorage.getBaseLocation(), environment, validationBuilder);
+                    cloudStorageLocationValidator.validate(cloudStorage.getBaseLocation(), environment, validationBuilder);
                 }
                 if (FileSystemType.ADLS.equals(cloudStorage.getFileSystemType())) {
                     validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS.getProtocol()),

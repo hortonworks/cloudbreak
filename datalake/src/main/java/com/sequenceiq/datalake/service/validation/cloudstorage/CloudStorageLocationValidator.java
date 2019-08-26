@@ -2,7 +2,7 @@ package com.sequenceiq.datalake.service.validation.cloudstorage;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
@@ -16,27 +16,25 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 @Component
 public class CloudStorageLocationValidator {
 
-    private final CloudbreakServiceUserCrnClient cloudbreakServiceUserCrnClient;
-
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     private final SecretService secretService;
 
-    public CloudStorageLocationValidator(CloudbreakServiceUserCrnClient cloudbreakServiceUserCrnClient,
-            CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
-            SecretService secretService) {
-        this.cloudbreakServiceUserCrnClient = cloudbreakServiceUserCrnClient;
+    private final CloudProviderServicesV4Endopint cloudProviderServicesV4Endopint;
+
+    public CloudStorageLocationValidator(CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
+            SecretService secretService, CloudProviderServicesV4Endopint cloudProviderServicesV4Endopint) {
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
         this.secretService = secretService;
+        this.cloudProviderServicesV4Endopint = cloudProviderServicesV4Endopint;
     }
 
-    public void validate(String userCrn, String storageLocation, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder) {
+    public void validate(String storageLocation, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder) {
         String bucketName = getBucketName(storageLocation);
         Credential credential = getCredential(environment);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
         ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName);
-        ObjectStorageMetadataResponse response = cloudbreakServiceUserCrnClient.withCrn(userCrn).cloudProviderServicesEndpoint()
-                .getObjectStorageMetaData(request);
+        ObjectStorageMetadataResponse response = cloudProviderServicesV4Endopint.getObjectStorageMetaData(request);
         resultBuilder.ifError(() -> !environment.getLocation().getName().equals(response.getRegion()),
                 String.format("Object storage location [%s] of bucket '%s' must match environment location [%s]",
                         response.getRegion(),

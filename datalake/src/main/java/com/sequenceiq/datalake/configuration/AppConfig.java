@@ -15,8 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
+import com.sequenceiq.cloudbreak.client.internal.CloudbreakApiClientParams;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
@@ -60,12 +59,8 @@ public class AppConfig implements AsyncConfigurer {
     private ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
 
     @Bean
-    public CloudbreakServiceUserCrnClient cloudbreakClient() {
-        return new CloudbreakUserCrnClientBuilder(cloudbreakUrl)
-                .withCertificateValidation(certificateValidation)
-                .withIgnorePreValidation(ignorePreValidation)
-                .withDebug(restDebug)
-                .build();
+    public CloudbreakApiClientParams environmentApiClientParams() {
+        return new CloudbreakApiClientParams(restDebug, certificateValidation, ignorePreValidation, cloudbreakUrl);
     }
 
     @Bean

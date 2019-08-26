@@ -71,7 +71,7 @@ public class ServiceEndpointConfig {
     }
 
     @Bean
-    public String cloudbreakUrl(ServiceAddressResolver serviceAddressResolver) {
+    public String cloudbreakServerUrl(ServiceAddressResolver serviceAddressResolver) {
         return serviceAddressResolver.resolveUrl(cloudbreakUrl + cbRootContextPath, "http", cloudbreakServiceId);
     }
 

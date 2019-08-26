@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.environment.client.EnvironmentApiClientParams;
+import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
 
 @Configuration
 public class EnvironmentConfig {

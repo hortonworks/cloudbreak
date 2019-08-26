@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
@@ -37,7 +37,7 @@ public class CloudStorageManifester {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudStorageManifester.class);
 
     @Inject
-    private CloudbreakServiceUserCrnClient cloudbreakClient;
+    private FileSystemV4Endpoint fileSystemV4Endpoint;
 
     public CloudStorageRequest initCloudStorageRequest(DetailedEnvironmentResponse environment,
             ClusterV4Request clusterRequest, SdxCluster sdxCluster, SdxClusterRequest sdxClusterRequest) {
@@ -74,7 +74,7 @@ public class CloudStorageManifester {
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
         SdxCloudStorageRequest cloudStorage = clusterRequest.getCloudStorage();
         validateCloudStorage(environment.getCloudPlatform(), cloudStorage);
-        FileSystemParameterV4Responses fileSystemRecommendations = getFileSystemRecommendations(sdxCluster.getInitiatorUserCrn(),
+        FileSystemParameterV4Responses fileSystemRecommendations = getFileSystemRecommendations(
                 blueprint,
                 sdxCluster.getClusterName(),
                 cloudStorage);
@@ -189,17 +189,17 @@ public class CloudStorageManifester {
         return fileSystemType != null;
     }
 
-    private FileSystemParameterV4Responses getFileSystemRecommendations(String userCrn, String blueprint,
+    private FileSystemParameterV4Responses getFileSystemRecommendations(String blueprint,
             String clusterName, SdxCloudStorageRequest cloudStorageRequest) {
-        return cloudbreakClient.withCrn(userCrn).filesystemV4Endpoint()
-                .getFileSystemParameters(0L,
-                        blueprint,
-                        clusterName,
-                        "",
-                        cloudStorageRequest.getBaseLocation(),
-                        cloudStorageRequest.getFileSystemType().toString(),
-                        false,
-                        false);
+
+        return fileSystemV4Endpoint.getFileSystemParameters(0L,
+                blueprint,
+                clusterName,
+                "",
+                cloudStorageRequest.getBaseLocation(),
+                cloudStorageRequest.getFileSystemType().toString(),
+                false,
+                false);
     }
 
 }

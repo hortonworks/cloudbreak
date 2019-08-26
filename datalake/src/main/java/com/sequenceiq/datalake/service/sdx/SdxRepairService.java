@@ -19,12 +19,12 @@ import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -52,9 +52,6 @@ public class SdxRepairService {
     private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Inject
-    private CloudbreakServiceUserCrnClient cloudbreakClient;
-
-    @Inject
     private SdxService sdxService;
 
     @Inject
@@ -62,6 +59,9 @@ public class SdxRepairService {
 
     @Inject
     private SdxStatusService sdxStatusService;
+
+    @Inject
+    private StackV4Endpoint stackV4Endpoint;
 
     public void triggerRepairByCrn(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
@@ -86,9 +86,7 @@ public class SdxRepairService {
     protected void startRepairInCb(SdxCluster sdxCluster, SdxRepairRequest repairRequest) {
         try {
             LOGGER.info("Triggering repair flow for cluster {} with hostgroups {}", sdxCluster.getClusterName(), repairRequest.getHostGroupName());
-            cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
-                    .stackV4Endpoint()
-                    .repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
+            stackV4Endpoint.repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
             sdxClusterRepository.save(sdxCluster);
             notificationService.send(ResourceEvent.SDX_REPAIR_STARTED, sdxCluster);
             sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.REPAIR_IN_PROGRESS,
@@ -129,9 +127,7 @@ public class SdxRepairService {
                 LOGGER.info("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
                 return AttemptResults.breakFor("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
             }
-            StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
-                    .stackV4Endpoint()
-                    .get(0L, sdxCluster.getClusterName(), Collections.emptySet());
+            StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
             LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
             ClusterV4Response cluster = stackV4Response.getCluster();
             if (stackAndClusterAvailable(stackV4Response, cluster)) {
