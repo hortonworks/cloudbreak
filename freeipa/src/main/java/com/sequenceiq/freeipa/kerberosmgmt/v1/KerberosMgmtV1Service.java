@@ -127,7 +127,7 @@ public class KerberosMgmtV1Service {
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
         delService(canonicalPrincipal, ipaClient);
         VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
-                .enableGeneratingClusterCrnIfNotPresent()
+                .enableGeneratingClusterIdIfNotPresent()
                 .withAccountId(accountId)
                 .withEnvironmentCrn(request.getEnvironmentCrn())
                 .withClusterCrn(request.getClusterCrn())
@@ -151,7 +151,7 @@ public class KerberosMgmtV1Service {
         }
         delHost(request.getServerHostName(), ipaClient);
         VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
-                .enableGeneratingClusterCrnIfNotPresent()
+                .enableGeneratingClusterIdIfNotPresent()
                 .withAccountId(accountId)
                 .withEnvironmentCrn(request.getEnvironmentCrn())
                 .withClusterCrn(request.getClusterCrn())
@@ -369,7 +369,7 @@ public class KerberosMgmtV1Service {
     private SecretResponse getSecretResponseForPrincipal(ServiceKeytabRequest request, String accountId, String principal) {
         try {
             String path = new VaultPathBuilder()
-                    .enableGeneratingClusterCrnIfNotPresent()
+                    .enableGeneratingClusterIdIfNotPresent()
                     .withAccountId(accountId)
                     .withSubType(PRINCIPAL_SUB_TYPE)
                     .withEnvironmentCrn(request.getEnvironmentCrn())
@@ -388,7 +388,7 @@ public class KerberosMgmtV1Service {
     private SecretResponse getSecretResponseForKeytab(ServiceKeytabRequest request, String accountId, String keytab) {
         try {
             String path = new VaultPathBuilder()
-                    .enableGeneratingClusterCrnIfNotPresent()
+                    .enableGeneratingClusterIdIfNotPresent()
                     .withAccountId(accountId)
                     .withSubType(KEYTAB_SUB_TYPE)
                     .withEnvironmentCrn(request.getEnvironmentCrn())
