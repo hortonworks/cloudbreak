@@ -4,9 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
 public class VaultPathBuilder {
 
@@ -14,22 +15,22 @@ public class VaultPathBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Service.class);
 
-    private boolean generateClusterCrnIfNotPresent;
+    private boolean generateClusterIdIfNotPresent;
 
     private Optional<String> accountId = Optional.empty();
 
     private Optional<String> subType = Optional.empty();
 
-    private Optional<String> environmentCrn = Optional.empty();
+    private Optional<String> environmentId = Optional.empty();
 
-    private Optional<String> clusterCrn = Optional.empty();
+    private Optional<String> clusterId = Optional.empty();
 
     private Optional<String> serverHostName = Optional.empty();
 
     private Optional<String> serviceName = Optional.empty();
 
-    public VaultPathBuilder enableGeneratingClusterCrnIfNotPresent() {
-        generateClusterCrnIfNotPresent = true;
+    public VaultPathBuilder enableGeneratingClusterIdIfNotPresent() {
+        generateClusterIdIfNotPresent = true;
         return this;
     }
 
@@ -44,14 +45,21 @@ public class VaultPathBuilder {
     }
 
     public VaultPathBuilder withEnvironmentCrn(String environmentCrn) {
-        String envCrn = StringUtils.substringAfterLast(environmentCrn, ":");
-        this.environmentCrn = Optional.ofNullable(envCrn);
+        this.environmentId = Optional.ofNullable(environmentCrn).map((String crn) -> {
+            return Crn.safeFromString(crn).getResource();
+        });
         return this;
     }
 
     public VaultPathBuilder withClusterCrn(String clusterCrn) {
-        String crn = StringUtils.substringAfterLast(clusterCrn, ":");
-        this.clusterCrn = Optional.ofNullable(crn);
+        this.clusterId = Optional.ofNullable(clusterCrn).map((String crnString) -> {
+            Crn crn = Crn.fromString(crnString);
+            if (crn == null) {
+                LOGGER.debug("An invalid cluster CRN was provided, it will be ignored.");
+                return null;
+            }
+            return crn.getResource();
+        });
         return this;
     }
 
@@ -66,13 +74,13 @@ public class VaultPathBuilder {
     }
 
     public String build() {
-        // Sample Vault Path "/enginePath/appPath/account-id/Type/SubType/envCrn/clusterCrn/hostname/serviceName"
+        // Sample Vault Path "/enginePath/appPath/account-id/Type/SubType/envId/clusterId/hostname/serviceName"
         StringBuilder ret = new StringBuilder();
         List<Optional<String>> requiredEntries = Arrays.asList(
                 accountId,
                 Optional.of(VAULT_SECRET_TYPE),
                 subType,
-                environmentCrn
+                environmentId
         );
 
         requiredEntries.stream().forEachOrdered(entry -> {
@@ -80,10 +88,10 @@ public class VaultPathBuilder {
             ret.append("/");
         });
 
-        if (clusterCrn.isPresent() || generateClusterCrnIfNotPresent) {
-            ret.append(clusterCrn.orElseGet(() -> {
+        if (clusterId.isPresent() || generateClusterIdIfNotPresent) {
+            ret.append(clusterId.orElseGet(() -> {
                 LOGGER.debug("Cluster CRN not provided. Auto-generating one");
-                return generateClusterCrn(accountId.get(), environmentCrn.get());
+                return generateClusterId(accountId.get(), environmentId.get());
             }));
             ret.append("/");
 
@@ -98,7 +106,7 @@ public class VaultPathBuilder {
         return ret.toString();
     }
 
-    private String generateClusterCrn(String accountId, String envCrn) {
+    private String generateClusterId(String accountId, String envCrn) {
         return accountId + "-" + envCrn;
     }
 
