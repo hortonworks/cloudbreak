@@ -24,7 +24,7 @@ public class EnvironmentLogStorageLocationValidator {
         Optional.ofNullable(environment.getTelemetry())
                 .map(EnvironmentTelemetry::getLogging)
                 .map(EnvironmentLogging::getStorageLocation)
-                .ifPresent(location ->  cloudStorageLocationValidator.validate(userCrn, location, environment, resultBuilder));
+                .ifPresent(location -> cloudStorageLocationValidator.validate(userCrn, location, environment, resultBuilder));
         return resultBuilder.build();
     }
 }
