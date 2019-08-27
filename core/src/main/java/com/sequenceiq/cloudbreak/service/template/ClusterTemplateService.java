@@ -139,6 +139,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         if (stackTemplate.getInstanceGroups() != null && !stackTemplate.getInstanceGroups().isEmpty()) {
             instanceGroupService.saveAll(stackTemplate.getInstanceGroups(), stackTemplate.getWorkspace());
         }
+        resource.setCreated(System.currentTimeMillis());
     }
 
     private void validateBeforeCreate(ClusterTemplate resource) {

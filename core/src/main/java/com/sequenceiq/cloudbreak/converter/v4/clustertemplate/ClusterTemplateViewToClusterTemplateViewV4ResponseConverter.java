@@ -36,6 +36,7 @@ public class ClusterTemplateViewToClusterTemplateViewV4ResponseConverter
                 clusterTemplateViewV4Response.setEnvironmentCrn(stackTemplate.getEnvironmentCrn());
             }
         }
+        clusterTemplateViewV4Response.setCreated(source.getCreated());
         return clusterTemplateViewV4Response;
     }
 }

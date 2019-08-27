@@ -23,6 +23,8 @@ public class RecipeV4Response extends RecipeV4Base {
     @ApiModelProperty(ModelDescriptions.CRN)
     private String crn;
 
+    private Long created;
+
     public String getCrn() {
         return crn;
     }
@@ -47,4 +49,11 @@ public class RecipeV4Response extends RecipeV4Base {
         this.workspace = workspace;
     }
 
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
+    }
 }

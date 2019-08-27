@@ -115,6 +115,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
 
     @Override
     protected void prepareCreation(Recipe resource) {
+        resource.setCreated(System.currentTimeMillis());
     }
 
     private void validateDto(RecipeAccessDto dto) {
