@@ -80,6 +80,7 @@ public class EnvironmentApiConverter {
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
         EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.Builder.anEnvironmentCreationDto()
                 .withAccountId(threadBasedUserCrnProvider.getAccountId())
+                .withCreator(threadBasedUserCrnProvider.getUserCrn())
                 .withName(request.getName())
                 .withDescription(request.getDescription())
                 .withCloudPlatform(request.getCloudPlatform())

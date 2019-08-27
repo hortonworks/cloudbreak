@@ -1,6 +1,7 @@
-package com.sequenceiq.environment.client;
+package com.sequenceiq.environment.client.internal;
 
 public class EnvironmentApiClientParams {
+
     private final boolean restDebug;
 
     private final boolean certificateValidation;

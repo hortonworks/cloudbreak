@@ -17,13 +17,13 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 
 @Service
 public class EnvironmentService {
@@ -41,10 +41,10 @@ public class EnvironmentService {
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private EnvironmentServiceCrnClient environmentServiceCrnClient;
+    private SdxNotificationService notificationService;
 
     @Inject
-    private SdxNotificationService notificationService;
+    private EnvironmentEndpoint environmentEndpoint;
 
     public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, String requestId) {
         PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
@@ -70,8 +70,7 @@ public class EnvironmentService {
                         MDCBuilder.addRequestId(requestId);
                         LOGGER.info("Creation polling environment for environment status: '{}' in '{}' env",
                                 sdxCluster.getClusterName(), sdxCluster.getEnvName());
-                        DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(
-                                sdxCluster.getInitiatorUserCrn(), sdxCluster.getEnvCrn());
+                        DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(sdxCluster.getEnvCrn());
                         LOGGER.info("Response from environment: {}", JsonUtil.writeValueAsString(environment));
                         if (environment.getEnvironmentStatus().isAvailable()) {
                             return AttemptResults.finishWith(environment);
@@ -92,11 +91,8 @@ public class EnvironmentService {
         }
     }
 
-    private DetailedEnvironmentResponse getDetailedEnvironmentResponse(String userCrn, String environmentCrn) {
-        return environmentServiceCrnClient
-                .withCrn(userCrn)
-                .environmentV1Endpoint()
-                .getByCrn(environmentCrn);
+    private DetailedEnvironmentResponse getDetailedEnvironmentResponse(String environmentCrn) {
+        return environmentEndpoint.getByCrn(environmentCrn);
     }
 
 }

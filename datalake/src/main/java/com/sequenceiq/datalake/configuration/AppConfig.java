@@ -15,16 +15,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
+import com.sequenceiq.cloudbreak.client.internal.CloudbreakApiClientParams;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
 import com.sequenceiq.datalake.service.sdx.DatabaseConfig;
-import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
-import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
-import com.sequenceiq.redbeams.client.RedbeamsServiceClientBuilder;
-import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
+import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
+import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Configuration
@@ -60,30 +57,18 @@ public class AppConfig implements AsyncConfigurer {
     private ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
 
     @Bean
-    public CloudbreakServiceUserCrnClient cloudbreakClient() {
-        return new CloudbreakUserCrnClientBuilder(cloudbreakUrl)
-                .withCertificateValidation(certificateValidation)
-                .withIgnorePreValidation(ignorePreValidation)
-                .withDebug(restDebug)
-                .build();
+    public CloudbreakApiClientParams cloudbreakApiClientParams() {
+        return new CloudbreakApiClientParams(restDebug, certificateValidation, ignorePreValidation, cloudbreakUrl);
     }
 
     @Bean
-    public EnvironmentServiceCrnClient environmentServiceClient() {
-        return new EnvironmentServiceClientBuilder(environmentServerUrl)
-                .withCertificateValidation(certificateValidation)
-                .withIgnorePreValidation(ignorePreValidation)
-                .withDebug(restDebug)
-                .build();
+    public EnvironmentApiClientParams environmentApiClientParams() {
+        return new EnvironmentApiClientParams(restDebug, certificateValidation, ignorePreValidation, environmentServerUrl);
     }
 
     @Bean
-    public RedbeamsServiceCrnClient redbeamsServiceCrnClient() {
-        return new RedbeamsServiceClientBuilder(redbeamsServerUrl)
-                .withCertificateValidation(certificateValidation)
-                .withIgnorePreValidation(ignorePreValidation)
-                .withDebug(restDebug)
-                .build();
+    public RedbeamsApiClientParams redbeamsApiClientParams() {
+        return new RedbeamsApiClientParams(restDebug, certificateValidation, ignorePreValidation, redbeamsServerUrl);
     }
 
     @Bean

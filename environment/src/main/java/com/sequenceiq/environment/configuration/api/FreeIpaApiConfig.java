@@ -16,7 +16,7 @@ import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.Free
 import com.sequenceiq.freeipa.api.client.FreeIpaApiClientParams;
 
 @Configuration
-public class FreeIpaConfig {
+public class FreeIpaApiConfig {
 
     @Value("${rest.debug:false}")
     private boolean restDebug;

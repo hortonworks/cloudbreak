@@ -68,6 +68,7 @@ public class EnvironmentDtoConverter {
     public Environment creationDtoToEnvironment(EnvironmentCreationDto creationDto) {
         Environment environment = new Environment();
         environment.setAccountId(creationDto.getAccountId());
+        environment.setCreator(creationDto.getCreator());
         environment.setName(creationDto.getName());
         environment.setArchived(false);
         environment.setCloudPlatform(creationDto.getCloudPlatform());
@@ -82,6 +83,7 @@ public class EnvironmentDtoConverter {
         environment.setTunnel(creationDto.getTunnel());
         environment.setAdminGroupName(creationDto.getAdminGroupName());
         environment.setIdBrokerMappingSource(creationDto.getIdBrokerMappingSource());
+        environment.setCreated(System.currentTimeMillis());
         return environment;
     }
 

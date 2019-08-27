@@ -61,14 +61,14 @@ import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.model.FileSystemType;
-import com.sequenceiq.environment.client.EnvironmentApiClientParams;
+import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiClientParams;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClient;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClientBuilder;
-import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
-import com.sequenceiq.sdx.client.SdxApiClientParams;
+import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
+import com.sequenceiq.sdx.client.internal.SdxApiClientParams;
 import com.sequenceiq.sdx.client.SdxServiceClientBuilder;
 import com.sequenceiq.sdx.client.SdxServiceCrnClient;
 

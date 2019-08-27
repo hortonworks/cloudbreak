@@ -19,10 +19,10 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -42,9 +42,6 @@ public class ProvisionerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionerService.class);
 
     @Inject
-    private CloudbreakServiceUserCrnClient cloudbreakClient;
-
-    @Inject
     private SdxClusterRepository sdxClusterRepository;
 
     @Inject
@@ -56,12 +53,13 @@ public class ProvisionerService {
     @Inject
     private SdxNotificationService notificationService;
 
+    @Inject
+    private StackV4Endpoint stackV4Endpoint;
+
     public void startStackDeletion(Long id) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             try {
-                cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
-                        .stackV4Endpoint()
-                        .delete(0L, sdxCluster.getClusterName(), false);
+                stackV4Endpoint.delete(0L, sdxCluster.getClusterName(), false);
                 sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS, "Datalake deletion in progress", sdxCluster);
                 sdxClusterRepository.save(sdxCluster);
                 notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_STARTED, sdxCluster);
@@ -89,9 +87,7 @@ public class ProvisionerService {
                         LOGGER.info("Deletion polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         try {
                             MDCBuilder.addRequestId(requestId);
-                            StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
-                                    .stackV4Endpoint()
-                                    .get(0L, sdxCluster.getClusterName(), Collections.emptySet());
+                            StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
                             LOGGER.info("Stack status of SDX {} by response from cloudbreak: {}", sdxCluster.getClusterName(),
                                     stackV4Response.getStatus().name());
                             LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
@@ -125,9 +121,7 @@ public class ProvisionerService {
                     stackV4Request.getCluster().setDatabaseServerCrn(crn);
                     sdxCluster.setStackRequestToCloudbreak(JsonUtil.writeValueAsStringSilent(stackV4Request));
                 });
-                StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
-                        .stackV4Endpoint()
-                        .post(0L, stackV4Request);
+                StackV4Response stackV4Response = stackV4Endpoint.post(0L, stackV4Request);
                 sdxCluster.setStackId(stackV4Response.getId());
                 sdxCluster.setStackCrn(stackV4Response.getCrn());
                 sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
@@ -160,9 +154,7 @@ public class ProvisionerService {
                                 return AttemptResults.breakFor("Cloudbreak stack polling cancelled in inmemory store, id: " + sdxCluster.getId());
                             }
                             MDCBuilder.addRequestId(requestId);
-                            StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
-                                    .stackV4Endpoint()
-                                    .get(0L, sdxCluster.getClusterName(), Collections.emptySet());
+                            StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
                             LOGGER.info("Stack status of SDX {} by response from cloudbreak: {}", sdxCluster.getClusterName(),
                                     stackV4Response.getStatus().name());
                             LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));

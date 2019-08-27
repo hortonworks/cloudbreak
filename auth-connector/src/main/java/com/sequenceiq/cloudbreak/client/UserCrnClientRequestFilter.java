@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
 @Component
 public class UserCrnClientRequestFilter implements ClientRequestFilter {
+
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 

@@ -78,8 +78,7 @@ class EnvironmentCreationServiceTest {
                 .build();
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(true);
-        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto, ACCOUNT_ID,
-                USER));
+        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
@@ -90,6 +89,7 @@ class EnvironmentCreationServiceTest {
         ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
         final EnvironmentCreationDto environmentCreationDto = new EnvironmentCreationDto.Builder()
                 .withName(ENVIRONMENT_NAME)
+                .withCreator(USER)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
@@ -108,10 +108,9 @@ class EnvironmentCreationServiceTest {
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(validatorService.validateCreation(any(), any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateTelemetryLoggingStorageLocation(eq(EnvironmentTestData.USER), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateTelemetryLoggingStorageLocation(any())).thenReturn(ValidationResult.builder().build());
         when(environmentService.save(any())).thenReturn(environment);
-        environmentCreationServiceUnderTest
-                .create(environmentCreationDto, ACCOUNT_ID, EnvironmentTestData.USER);
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
         verify(environmentService, times(2)).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto), eq(ACCOUNT_ID));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
@@ -124,6 +123,8 @@ class EnvironmentCreationServiceTest {
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
+                .withCreator(USER)
+                .withAccountId(ACCOUNT_ID)
                 .build();
         final Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
@@ -139,10 +140,9 @@ class EnvironmentCreationServiceTest {
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(validatorService.validateCreation(any(), any(), any())).thenReturn(ValidationResult.builder().error("nogood").build());
-        when(validatorService.validateTelemetryLoggingStorageLocation(eq(EnvironmentTestData.USER), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateTelemetryLoggingStorageLocation(any())).thenReturn(ValidationResult.builder().build());
         when(environmentService.save(any())).thenReturn(environment);
-        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto, ACCOUNT_ID,
-                EnvironmentTestData.USER));
+        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.client;
+package com.sequenceiq.environment.client.internal;
 
 import javax.ws.rs.client.WebTarget;
 

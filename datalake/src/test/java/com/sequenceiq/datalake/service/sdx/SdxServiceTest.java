@@ -35,23 +35,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
-import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
-import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -73,12 +69,6 @@ public class SdxServiceTest {
     private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Mock
-    private EnvironmentServiceCrnClient environmentServiceCrnClient;
-
-    @Mock
-    private EnvironmentServiceCrnEndpoints environmentServiceCrnEndpoints;
-
-    @Mock
     private EnvironmentEndpoint environmentEndpoint;
 
     @Mock
@@ -92,12 +82,6 @@ public class SdxServiceTest {
 
     @Mock
     private SdxStatusService sdxStatusService;
-
-    @Mock
-    private CloudbreakServiceUserCrnClient cloudbreakServiceUserCrnClient;
-
-    @Mock
-    private CloudbreakServiceCrnEndpoints cloudbreakServiceCrnEndpoints;
 
     @Mock
     private DistroXV1Endpoint distroXV1Endpoint;
@@ -259,8 +243,6 @@ public class SdxServiceTest {
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId(UUID.randomUUID().toString())
                 .build().toString());
-        when(environmentServiceCrnClient.withCrn(anyString())).thenReturn(environmentServiceCrnEndpoints);
-        when(environmentServiceCrnEndpoints.environmentV1Endpoint()).thenReturn(environmentEndpoint);
         when(environmentEndpoint.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
     }
 
@@ -355,8 +337,6 @@ public class SdxServiceTest {
     }
 
     private void mockCBCallForDistroXClusters(Set<StackViewV4Response> stackViews) {
-        when(cloudbreakServiceUserCrnClient.withCrn(anyString())).thenReturn(cloudbreakServiceCrnEndpoints);
-        when(cloudbreakServiceCrnEndpoints.distroXV1Endpoint()).thenReturn(distroXV1Endpoint);
         when(distroXV1Endpoint.list(anyString(), anyString())).thenReturn(new StackViewV4Responses(stackViews));
     }
 

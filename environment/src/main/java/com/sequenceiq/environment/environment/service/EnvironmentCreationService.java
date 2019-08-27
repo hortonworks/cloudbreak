@@ -72,24 +72,23 @@ public class EnvironmentCreationService {
         this.networkService = networkService;
     }
 
-    //TODO: accountId is kind of duplicated - creationDto also has accountId. should be removed?
-    public EnvironmentDto create(EnvironmentCreationDto creationDto, String accountId, String creator) {
+    public EnvironmentDto create(EnvironmentCreationDto creationDto) {
         if (environmentService.isNameOccupied(creationDto.getName(), creationDto.getAccountId())) {
             throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
                     creationDto.getName(), creationDto.getAccountId()));
         }
-        Environment environment = initializeEnvironment(creationDto, creator);
+        Environment environment = initializeEnvironment(creationDto);
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
         environmentService.setAdminGroupName(environment, creationDto.getAdminGroupName());
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
-        validateCreation(creator, creationDto, environment, cloudRegions);
+        validateCreation(creationDto, environment, cloudRegions);
         Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, creationDto.getNetwork());
         validateNetworkRequest(environment, creationDto.getNetwork(), subnetMetas);
         environment = environmentService.save(environment);
-        environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), accountId, subnetMetas);
-        createAndSetParameters(environment, creationDto.getParameters(), accountId);
+        environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(), subnetMetas);
+        createAndSetParameters(environment, creationDto.getParameters(), creationDto.getAccountId());
         environmentService.save(environment);
-        reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creator, environment.getResourceCrn());
+        reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
         return environmentDtoConverter.environmentToDto(environment);
     }
 
@@ -133,13 +132,11 @@ public class EnvironmentCreationService {
         return diff;
     }
 
-    private Environment initializeEnvironment(EnvironmentCreationDto creationDto, String creator) {
+    private Environment initializeEnvironment(EnvironmentCreationDto creationDto) {
         Environment environment = environmentDtoConverter.creationDtoToEnvironment(creationDto);
         environment.setResourceCrn(createCrn(creationDto.getAccountId()));
-        environment.setCreator(creator);
-        environment.setCreated(System.currentTimeMillis());
         Credential credential = environmentResourceService
-                .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId(), creator);
+                .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId(), creationDto.getCreator());
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.getCloudPlatform());
         environment.setTunnel(creationDto.getTunnel());
@@ -156,9 +153,9 @@ public class EnvironmentCreationService {
         return cloudRegions;
     }
 
-    private void validateCreation(String userCrn, EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions) {
+    private void validateCreation(EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions) {
         ValidationResult validationResult = validatorService.validateCreation(environment, creationDto, cloudRegions);
-        validationResult = validationResult.merge(validatorService.validateTelemetryLoggingStorageLocation(userCrn, environment));
+        validationResult = validationResult.merge(validatorService.validateTelemetryLoggingStorageLocation(environment));
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -16,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
@@ -51,14 +48,6 @@ public class CloudStorageLocationValidatorTest {
 
     private static final CloudCredential CLOUD_CREDENTIAL = new CloudCredential("id", "name");
 
-    private static final String USER_CRN = "userCrn";
-
-    @Mock
-    private CloudbreakServiceUserCrnClient cloudbreakServiceUserCrnClient;
-
-    @Mock
-    private CloudbreakServiceCrnEndpoints cloudbreakServiceCrnEndpoints;
-
     @Mock
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
@@ -90,8 +79,6 @@ public class CloudStorageLocationValidatorTest {
         when(environment.getCredential()).thenReturn(new Credential());
         when(environment.getTelemetry()).thenReturn(environmentTelemetry);
         when(environmentTelemetry.getLogging()).thenReturn(environmentLogging);
-        when(cloudbreakServiceUserCrnClient.withCrn(anyString())).thenReturn(cloudbreakServiceCrnEndpoints);
-        when(cloudbreakServiceCrnEndpoints.cloudProviderServicesEndpoint()).thenReturn(cloudProviderServicesEndpoint);
         when(credentialToCloudCredentialConverter.convert(any(Credential.class))).thenReturn(CLOUD_CREDENTIAL);
     }
 
@@ -109,7 +96,7 @@ public class CloudStorageLocationValidatorTest {
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        underTest.validate(USER_CRN, S3_OBJECT_PATH, environment, validationResultBuilder);
+        underTest.validate(S3_OBJECT_PATH, environment, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }
@@ -128,7 +115,7 @@ public class CloudStorageLocationValidatorTest {
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        underTest.validate(USER_CRN, WASB_OBJECT_PATH, environment, validationResultBuilder);
+        underTest.validate(WASB_OBJECT_PATH, environment, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }
@@ -144,7 +131,7 @@ public class CloudStorageLocationValidatorTest {
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        underTest.validate(USER_CRN, OBJECT_PATH, environment, validationResultBuilder);
+        underTest.validate(OBJECT_PATH, environment, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }
@@ -160,7 +147,7 @@ public class CloudStorageLocationValidatorTest {
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        underTest.validate(USER_CRN, OBJECT_PATH, environment, validationResultBuilder);
+        underTest.validate(OBJECT_PATH, environment, validationResultBuilder);
         ValidationResult result = validationResultBuilder.build();
 
         assertTrue(result.hasError());

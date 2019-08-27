@@ -25,13 +25,13 @@ import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
-import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
@@ -46,9 +46,6 @@ public class DatabaseService {
     private SdxClusterRepository sdxClusterRepository;
 
     @Inject
-    private RedbeamsServiceCrnClient redbeamsClient;
-
-    @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Inject
@@ -60,6 +57,9 @@ public class DatabaseService {
     @Inject
     private Map<SdxClusterShape, DatabaseConfig> dbConfigs;
 
+    @Inject
+    private DatabaseServerV4Endpoint databaseServerV4Endpoint;
+
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env, String requestId) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
         String dbResourceCrn;
@@ -67,9 +67,7 @@ public class DatabaseService {
             dbResourceCrn = sdxCluster.getDatabaseCrn();
         } else {
             try {
-                dbResourceCrn = redbeamsClient
-                        .withCrn(threadBasedUserCrnProvider.getUserCrn())
-                        .databaseServerV4Endpoint().create(getDatabaseRequest(sdxCluster.getClusterShape(), env))
+                dbResourceCrn = databaseServerV4Endpoint.create(getDatabaseRequest(sdxCluster.getClusterShape(), env))
                         .getResourceCrn();
                 sdxCluster.setDatabaseCrn(dbResourceCrn);
                 sdxClusterRepository.save(sdxCluster);
@@ -91,9 +89,7 @@ public class DatabaseService {
     public void terminate(SdxCluster sdxCluster, String requestId) {
         LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
         try {
-            DatabaseServerTerminationOutcomeV4Response resp = redbeamsClient
-                    .withCrn(threadBasedUserCrnProvider.getUserCrn())
-                    .databaseServerV4Endpoint().terminate(sdxCluster.getDatabaseCrn());
+            DatabaseServerTerminationOutcomeV4Response resp = databaseServerV4Endpoint.terminate(sdxCluster.getDatabaseCrn());
             sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
                     "External database deletion in progress", sdxCluster);
             notificationService.send(ResourceEvent.SDX_RDS_DELETION_STARTED, sdxCluster);
@@ -176,8 +172,7 @@ public class DatabaseService {
     }
 
     private DatabaseServerStatusV4Response getDatabaseStatus(String databaseCrn) {
-        DatabaseServerV4Response response = redbeamsClient.withCrn(threadBasedUserCrnProvider.getUserCrn())
-                .databaseServerV4Endpoint().getByCrn(databaseCrn);
+        DatabaseServerV4Response response = databaseServerV4Endpoint.getByCrn(databaseCrn);
         DatabaseServerStatusV4Response statusResponse = new DatabaseServerStatusV4Response();
         statusResponse.setEnvironmentCrn(response.getEnvironmentCrn());
         statusResponse.setName(response.getName());

@@ -22,7 +22,7 @@ import com.sequenceiq.environment.environment.validation.network.EnvironmentNetw
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
-import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
+import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 
 @Configuration
 public class AppConfig {
