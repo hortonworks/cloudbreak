@@ -32,13 +32,14 @@ class ServerUtil {
     }
 
     private String enforceHttpsForServerAddress(String serverRaw) {
+        //Hack to avoid SSLException in local mock/e2e tests due to CBD modification that allows traffic to services without https
+        if ("localhost".equals(serverRaw) || "http://localhost".equals(serverRaw)) {
+            return "http://" + serverRaw;
+        }
         return "https://" + getDomainFromUrl(serverRaw);
     }
 
     private String getDomainFromUrl(String url) {
-        if ("localhost".equals(url)) {
-            return url;
-        }
         try {
             return new URL(url).getHost();
         } catch (MalformedURLException e) {
