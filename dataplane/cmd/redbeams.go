@@ -65,6 +65,18 @@ func init() {
 						},
 					},
 					{
+						Name:   "release",
+						Usage:  "release a managed database server",
+						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Action: redbeams.ReleaseManagedDatabaseServer,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlCrn).AddAuthenticationFlags().AddOutputFlag().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
 						Name:   "terminate",
 						Usage:  "terminate a managed database server",
 						Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,

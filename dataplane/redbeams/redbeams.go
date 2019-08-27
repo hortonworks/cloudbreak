@@ -166,6 +166,23 @@ func CreateManagedDatabaseServer(c *cli.Context) {
 	output.Write(statusListHeader, row)
 }
 
+func ReleaseManagedDatabaseServer(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "Release a managed database server")
+	crn := c.String(fl.FlCrn.Name)
+	redbeamsDbServerClient := ClientRedbeams(*oauth.NewRedbeamsClientFromContext(c)).Redbeams.DatabaseServers
+
+	log.Infof("[ReleaseDBServer] Releasing database server with CRN: %s", crn)
+	resp, err := redbeamsDbServerClient.ReleaseManagedDatabaseServer(database_servers.NewReleaseManagedDatabaseServerParams().WithCrn(crn), nil)
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	server := resp.Payload
+
+	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+	row := NewDetailsFromResponse(server)
+	output.Write(serverListHeader, row)
+}
+
 func TerminateManagedDatabaseServer(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "Terminate a managed database server")
 	crn := c.String(fl.FlCrn.Name)

@@ -304,9 +304,40 @@ func (a *Client) RegisterDatabaseServer(params *RegisterDatabaseServerParams, au
 }
 
 /*
+ReleaseManagedDatabaseServer releases management of a service managed database server
+
+Releases management of a service-managed database server. Resource tracking information is discarded,  but the server remains registered as user-managed.
+*/
+func (a *Client) ReleaseManagedDatabaseServer(params *ReleaseManagedDatabaseServerParams, authInfo runtime.ClientAuthInfoWriter) (*ReleaseManagedDatabaseServerOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewReleaseManagedDatabaseServerParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "releaseManagedDatabaseServer",
+		Method:             "PUT",
+		PathPattern:        "/v4/databaseservers/{crn}/release",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &ReleaseManagedDatabaseServerReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*ReleaseManagedDatabaseServerOK), nil
+
+}
+
+/*
 TerminateManagedDatabaseServer terminates a database server in a cloud provider and deregister it
 
-terminates a database server in a cloud provider and deregisters it
+Terminates a database server in a cloud provider and deregisters it.
 */
 func (a *Client) TerminateManagedDatabaseServer(params *TerminateManagedDatabaseServerParams, authInfo runtime.ClientAuthInfoWriter) (*TerminateManagedDatabaseServerOK, error) {
 	// TODO: Validate the params before sending
