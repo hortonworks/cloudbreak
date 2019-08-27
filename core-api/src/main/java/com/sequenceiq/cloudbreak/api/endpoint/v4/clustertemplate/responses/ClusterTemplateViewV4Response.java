@@ -43,6 +43,8 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
     @ApiModelProperty
     private String environmentName;
 
+    private Long created;
+
     public ResourceStatus getStatus() {
         return status;
     }
@@ -113,5 +115,13 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
 
     public void setEnvironmentName(String environmentName) {
         this.environmentName = environmentName;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }

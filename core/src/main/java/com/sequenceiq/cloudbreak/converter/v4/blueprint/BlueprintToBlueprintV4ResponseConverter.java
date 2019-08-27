@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v4.blueprint;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
@@ -9,10 +7,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
-public class BlueprintToBlueprintV4ResponseConverter
-        extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintV4Response> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintV4ResponseConverter.class);
+public class BlueprintToBlueprintV4ResponseConverter extends AbstractConversionServiceAwareConverter<Blueprint, BlueprintV4Response> {
 
     @Override
     public BlueprintV4Response convert(Blueprint entity) {
@@ -24,6 +19,7 @@ public class BlueprintToBlueprintV4ResponseConverter
         blueprintJson.setTags(entity.getTags().getMap());
         blueprintJson.setBlueprint(entity.getBlueprintText());
         blueprintJson.setCrn(entity.getResourceCrn());
+        blueprintJson.setCreated(entity.getCreated());
         return blueprintJson;
     }
 

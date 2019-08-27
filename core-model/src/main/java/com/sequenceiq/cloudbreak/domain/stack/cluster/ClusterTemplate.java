@@ -60,6 +60,8 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     @Column(nullable = false)
     private String resourceCrn;
 
+    private Long created = System.currentTimeMillis();
+
     public ClusterTemplate() {
 
     }
@@ -162,5 +164,13 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }

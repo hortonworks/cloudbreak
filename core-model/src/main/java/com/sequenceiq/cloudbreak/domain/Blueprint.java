@@ -65,6 +65,8 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     private String stackVersion;
 
+    private Long created = System.currentTimeMillis();
+
     public String getResourceCrn() {
         return resourceCrn;
     }
@@ -167,5 +169,13 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setStackVersion(String stackVersion) {
         this.stackVersion = stackVersion;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }

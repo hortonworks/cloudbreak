@@ -20,6 +20,8 @@ public class RecipeView extends CompactView {
 
     private boolean archived;
 
+    private Long created;
+
     public RecipeV4Type getRecipeType() {
         return recipeType;
     }
@@ -34,5 +36,13 @@ public class RecipeView extends CompactView {
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }

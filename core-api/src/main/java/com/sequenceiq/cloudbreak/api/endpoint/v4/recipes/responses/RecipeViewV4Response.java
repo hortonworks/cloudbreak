@@ -15,11 +15,21 @@ public class RecipeViewV4Response extends CompactViewV4Response {
     @ApiModelProperty(RecipeModelDescription.TYPE)
     private RecipeV4Type type;
 
+    private Long created;
+
     public RecipeV4Type getType() {
         return type;
     }
 
     public void setType(RecipeV4Type type) {
         this.type = type;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }

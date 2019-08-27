@@ -56,6 +56,8 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
 
     private Long deletionTimestamp = -1L;
 
+    private Long created = System.currentTimeMillis();
+
     public Long getId() {
         return id;
     }
@@ -140,5 +142,13 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
     @Override
     public void unsetRelationsToEntitiesToBeDeleted() {
 
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }

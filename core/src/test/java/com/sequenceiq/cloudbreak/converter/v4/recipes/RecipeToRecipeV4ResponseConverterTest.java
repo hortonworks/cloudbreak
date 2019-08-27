@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.converter.v4.recipes;
 
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -32,7 +34,7 @@ public class RecipeToRecipeV4ResponseConverterTest extends AbstractEntityConvert
         when(conversionService.convert(recipe.getWorkspace(), WorkspaceResourceV4Response.class)).thenReturn(new WorkspaceResourceV4Response());
         RecipeV4Response result = underTest.convert(recipe);
         // THEN
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, List.of("created"));
     }
 
     @Override

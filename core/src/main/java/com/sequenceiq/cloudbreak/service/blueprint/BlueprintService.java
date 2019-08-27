@@ -300,6 +300,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Override
     protected void prepareCreation(Blueprint resource) {
+        resource.setCreated(System.currentTimeMillis());
     }
 
     private Set<String> queryCustomParameters(String name, Long workspaceId) {

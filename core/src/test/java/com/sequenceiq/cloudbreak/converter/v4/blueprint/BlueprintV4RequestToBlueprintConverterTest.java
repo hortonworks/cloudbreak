@@ -69,7 +69,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhereEveryDataFilledButThereIsNoTagsElementInBlueprintJsonThenItShouldBeEmpty() {
         Blueprint result = underTest.convert(getRequest("blueprint.json"));
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn"));
+        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
         assertEquals("{}", result.getTags().getValue());
         assertEquals("HDP", result.getStackType());
         assertEquals("2.3", result.getStackVersion());
@@ -87,7 +87,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhenInputJsonHasTagsFieldButItsEmpty() {
         Blueprint result = underTest.convert(getRequest("blueprint-empty-tags.json"));
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn"));
+        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
         assertEquals("{}", result.getTags().getValue());
         assertEquals("HDP", result.getStackType());
         assertEquals("2.3", result.getStackVersion());
@@ -96,7 +96,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void testConvertWhenInputJsonHasTagsFieldAndItHasMoreThanOneFieldInIt() {
         Blueprint result = underTest.convert(getRequest("blueprint-filled-tags.json"));
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn"));
+        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
         Assert.assertTrue(result.getTags().getMap().size() > 1);
         assertEquals("HDP", result.getStackType());
         assertEquals("2.3", result.getStackVersion());
@@ -215,7 +215,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = getRequest("blueprint.json");
         request.setServices(null);
         Blueprint result = underTest.convert(request);
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn"));
+        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
         assertEquals("{}", result.getTags().getValue());
         assertEquals("HDP", result.getStackType());
         assertEquals("2.3", result.getStackVersion());
@@ -226,7 +226,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = getRequest("blueprint.json");
         request.setServices(new HashSet<>());
         Blueprint result = underTest.convert(request);
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn"));
+        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
         assertEquals("{}", result.getTags().getValue());
         assertEquals("HDP", result.getStackType());
         assertEquals("2.3", result.getStackVersion());
@@ -246,7 +246,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
         Blueprint result = underTest.convert(request);
 
-        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn"));
+        assertAllFieldsNotNull(result, List.of("creator", "resourceCrn", "created"));
         assertEquals(blueprint, result.getBlueprintText());
     }
 

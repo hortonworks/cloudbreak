@@ -30,6 +30,8 @@ public class BlueprintView extends CompactView {
     @Column(columnDefinition = "TEXT")
     private Json tags;
 
+    private Long created;
+
     public String getStackType() {
         return stackType;
     }
@@ -70,11 +72,19 @@ public class BlueprintView extends CompactView {
         this.tags = tags;
     }
 
-    public String getResoureceCrn() {
+    public String getResourceCrn() {
         return resourceCrn;
     }
 
-    public void setResoureceCrn(String resourceCrn) {
+    public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.blueprint;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,7 +21,7 @@ public class BlueprintToBlueprintV4ResponseConverterTest extends AbstractEntityC
     @Test
     public void testConvert() {
         BlueprintV4Response result = underTest.convert(createSource());
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, List.of("created"));
     }
 
     @Test

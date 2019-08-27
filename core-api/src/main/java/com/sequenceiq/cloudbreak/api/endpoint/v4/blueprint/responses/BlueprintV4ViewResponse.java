@@ -31,6 +31,8 @@ public class BlueprintV4ViewResponse extends CompactViewV4Response {
     @ApiModelProperty(BlueprintModelDescription.TAGS)
     private Map<String, Object> tags = new HashMap<>();
 
+    private Long created;
+
     @NotNull
     @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100 and should not contain semicolon "
             + "and percentage character.")
@@ -77,5 +79,13 @@ public class BlueprintV4ViewResponse extends CompactViewV4Response {
 
     public void setTags(Map<String, Object> tags) {
         this.tags = tags;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }
