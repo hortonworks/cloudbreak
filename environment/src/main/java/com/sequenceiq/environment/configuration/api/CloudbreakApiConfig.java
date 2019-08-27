@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.configuration;
+package com.sequenceiq.environment.configuration.api;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -7,10 +7,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
+import com.sequenceiq.cloudbreak.client.internal.CloudbreakApiClientParams;
 
 @Configuration
-public class EnvironmentConfig {
+public class CloudbreakApiConfig {
+
+    @Inject
+    @Named("cloudbreakServerUrl")
+    private String cloudbreakServerUrl;
 
     @Value("${rest.debug:false}")
     private boolean restDebug;
@@ -21,12 +25,8 @@ public class EnvironmentConfig {
     @Value("${cert.ignorePreValidation:false}")
     private boolean ignorePreValidation;
 
-    @Inject
-    @Named("environmentServiceUrl")
-    private String environmentServiceUrl;
-
     @Bean
-    public EnvironmentApiClientParams environmentApiClientParams() {
-        return new EnvironmentApiClientParams(restDebug, certificateValidation, ignorePreValidation, environmentServiceUrl);
+    public CloudbreakApiClientParams cloudbreakClient() {
+        return new CloudbreakApiClientParams(restDebug, certificateValidation, ignorePreValidation, cloudbreakServerUrl);
     }
 }

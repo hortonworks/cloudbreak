@@ -19,12 +19,12 @@ public class EnvironmentLogStorageLocationValidator {
         this.cloudStorageLocationValidator = cloudStorageLocationValidator;
     }
 
-    public ValidationResult validateTelemetryLoggingStorageLocation(String userCrn, Environment environment) {
+    public ValidationResult validateTelemetryLoggingStorageLocation(Environment environment) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         Optional.ofNullable(environment.getTelemetry())
                 .map(EnvironmentTelemetry::getLogging)
                 .map(EnvironmentLogging::getStorageLocation)
-                .ifPresent(location -> cloudStorageLocationValidator.validate(userCrn, location, environment, resultBuilder));
+                .ifPresent(location -> cloudStorageLocationValidator.validate(location, environment, resultBuilder));
         return resultBuilder.build();
     }
 }

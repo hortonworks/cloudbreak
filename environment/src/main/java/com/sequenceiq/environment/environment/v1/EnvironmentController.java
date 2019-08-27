@@ -54,9 +54,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     public DetailedEnvironmentResponse post(@Valid EnvironmentRequest request) {
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String creator = threadBasedUserCrnProvider.getUserCrn();
-        EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto, accountId, creator);
+        EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);
         return environmentApiConverter.dtoToDetailedResponse(envDto);
     }
 
@@ -112,17 +110,15 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public DetailedEnvironmentResponse editByName(String environmentName, @NotNull EnvironmentEditRequest request) {
-        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
-        EnvironmentDto result = environmentModificationService.editByName(actualUserCrn, environmentName, editDto);
+        EnvironmentDto result = environmentModificationService.editByName(environmentName, editDto);
         return environmentApiConverter.dtoToDetailedResponse(result);
     }
 
     @Override
     public DetailedEnvironmentResponse editByCrn(String crn, @NotNull EnvironmentEditRequest request) {
-        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
-        EnvironmentDto result = environmentModificationService.editByCrn(actualUserCrn, crn, editDto);
+        EnvironmentDto result = environmentModificationService.editByCrn(crn, editDto);
         return environmentApiConverter.dtoToDetailedResponse(result);
     }
 

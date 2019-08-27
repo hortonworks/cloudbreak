@@ -44,7 +44,7 @@ public class EnvironmentValidatorService {
         return regionValidator.validateLocation(location, requestedRegions, environment, resultBuilder);
     }
 
-    public ValidationResult validateTelemetryLoggingStorageLocation(String userCrn, Environment environment) {
-        return logStorageLocationValidator.validateTelemetryLoggingStorageLocation(userCrn, environment);
+    public ValidationResult validateTelemetryLoggingStorageLocation(Environment environment) {
+        return logStorageLocationValidator.validateTelemetryLoggingStorageLocation(environment);
     }
 }

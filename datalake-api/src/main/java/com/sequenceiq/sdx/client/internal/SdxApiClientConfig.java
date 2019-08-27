@@ -1,4 +1,4 @@
-package com.sequenceiq.sdx.client;
+package com.sequenceiq.sdx.client.internal;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.WebTarget;
@@ -13,10 +13,16 @@ import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.sdx.api.SdxApi;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+
 @Configuration
 public class SdxApiClientConfig {
+
     @Inject
     private UserCrnClientRequestFilter userCrnClientRequestFilter;
+
+    @Inject
+    private ClientTracingFeature clientTracingFeature;
 
     @Bean
     @ConditionalOnBean(SdxApiClientParams.class)
@@ -27,6 +33,7 @@ public class SdxApiClientConfig {
                 .withDebug(sdxApiClientParams.isRestDebug())
                 .withClientRequestFilter(userCrnClientRequestFilter)
                 .withApiRoot(SdxApi.API_ROOT_CONTEXT)
+                .withTracer(clientTracingFeature)
                 .build();
     }
 

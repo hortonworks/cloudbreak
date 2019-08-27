@@ -1,23 +1,24 @@
-package com.sequenceiq.sdx.client;
+package com.sequenceiq.redbeams.client.internal;
 
-public class SdxApiClientParams {
+public class RedbeamsApiClientParams {
+
     private boolean restDebug;
 
     private boolean certificateValidation;
 
     private boolean ignorePreValidation;
 
-    private String sdxServerUrl;
+    private String redbeamsServerUrl;
 
-    public SdxApiClientParams(boolean restDebug, boolean certificateValidation, boolean ignorePreValidation, String sdxServerUrl) {
+    public RedbeamsApiClientParams(boolean restDebug, boolean certificateValidation, boolean ignorePreValidation, String redbeamsServerUrl) {
         this.restDebug = restDebug;
         this.certificateValidation = certificateValidation;
         this.ignorePreValidation = ignorePreValidation;
-        this.sdxServerUrl = sdxServerUrl;
+        this.redbeamsServerUrl = redbeamsServerUrl;
     }
 
     public String getServiceUrl() {
-        return sdxServerUrl;
+        return redbeamsServerUrl;
     }
 
     public boolean isCertificateValidation() {

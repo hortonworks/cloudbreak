@@ -28,7 +28,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
-import com.sequenceiq.redbeams.client.RedbeamsServiceCrnEndpoints;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,9 +58,6 @@ public class DatabaseServiceTest {
     private DatabaseService underTest;
 
     @Mock
-    private RedbeamsServiceCrnEndpoints redbeamsServiceCrnEndpoints;
-
-    @Mock
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
 
     @Test
@@ -73,9 +69,6 @@ public class DatabaseServiceTest {
         env.setName("ENV");
         DatabaseConfig databaseConfig = getDatabaseConfig();
 
-        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn("CRN");
-        when(redbeamsClient.withCrn(eq("CRN"))).thenReturn(redbeamsServiceCrnEndpoints);
-        when(redbeamsServiceCrnEndpoints.databaseServerV4Endpoint()).thenReturn(databaseServerV4Endpoint);
         when(databaseServerV4Endpoint.create(any())).thenThrow(BadRequestException.class);
         when(dbConfigs.get(eq(SdxClusterShape.LIGHT_DUTY))).thenReturn(databaseConfig);
 

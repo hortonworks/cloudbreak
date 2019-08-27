@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.client;
+package com.sequenceiq.redbeams.client.internal;
 
 import javax.ws.rs.client.WebTarget;
 

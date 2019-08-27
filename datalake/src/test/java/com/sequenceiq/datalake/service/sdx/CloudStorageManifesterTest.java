@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -24,8 +23,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoin
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
@@ -52,7 +49,7 @@ public class CloudStorageManifesterTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private CloudbreakServiceUserCrnClient cloudbreakClient;
+    private FileSystemV4Endpoint fileSystemV4Endpoint;
 
     @InjectMocks
     private CloudStorageManifester underTest;
@@ -224,10 +221,6 @@ public class CloudStorageManifesterTest {
     }
 
     private void mockFileSystemResponseForCloudbreakClient() {
-        CloudbreakServiceCrnEndpoints mockedEndpoint = mock(CloudbreakServiceCrnEndpoints.class);
-        FileSystemV4Endpoint mockedFileSystemV4Endpoint = mock(FileSystemV4Endpoint.class);
-        when(mockedEndpoint.filesystemV4Endpoint()).thenReturn(mockedFileSystemV4Endpoint);
-        when(cloudbreakClient.withCrn(anyString())).thenReturn(mockedEndpoint);
         FileSystemParameterV4Responses dummyResponses = new FileSystemParameterV4Responses();
         List<FileSystemParameterV4Response> responses = new ArrayList<>();
         FileSystemParameterV4Response resp = new FileSystemParameterV4Response();
@@ -238,7 +231,7 @@ public class CloudStorageManifesterTest {
         resp.setPropertyName("dummyPropertyName");
         responses.add(resp);
         dummyResponses.setResponses(responses);
-        when(mockedFileSystemV4Endpoint
+        when(fileSystemV4Endpoint
                 .getFileSystemParameters(anyLong(),
                         anyString(),
                         anyString(),

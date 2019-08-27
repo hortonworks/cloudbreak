@@ -15,9 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
@@ -34,16 +35,19 @@ public class EnvironmentResourceDeletionService {
 
     private final SdxEndpoint sdxEndpoint;
 
-    private final CloudbreakServiceUserCrnClient cloudbreakClient;
+    private final DatalakeV4Endpoint datalakeV4Endpoint;
+
+    private final DistroXV1Endpoint distroXV1Endpoint;
 
     private final ThreadBasedUserCrnProvider userCrnProvider;
 
     private final EventSender eventSender;
 
-    public EnvironmentResourceDeletionService(SdxEndpoint sdxEndpoint, CloudbreakServiceUserCrnClient cloudbreakClient,
+    public EnvironmentResourceDeletionService(SdxEndpoint sdxEndpoint, DatalakeV4Endpoint datalakeV4Endpoint, DistroXV1Endpoint distroXV1Endpoint,
             ThreadBasedUserCrnProvider userCrnProvider, EventSender eventSender) {
         this.sdxEndpoint = sdxEndpoint;
-        this.cloudbreakClient = cloudbreakClient;
+        this.datalakeV4Endpoint = datalakeV4Endpoint;
+        this.distroXV1Endpoint = distroXV1Endpoint;
         this.userCrnProvider = userCrnProvider;
         this.eventSender = eventSender;
     }
@@ -70,9 +74,7 @@ public class EnvironmentResourceDeletionService {
         Set<String> clusterNames = new HashSet<>();
         LOGGER.debug("Get Datalake clusters of the environment: '{}'", environment.getName());
         try {
-            Set<String> datalakeClusterNames = cloudbreakClient
-                    .withCrn(environment.getCreator())
-                    .datalakeV4Endpoint()
+            Set<String> datalakeClusterNames = datalakeV4Endpoint
                     .list(environment.getName())
                     .getResponses()
                     .stream()
@@ -91,9 +93,7 @@ public class EnvironmentResourceDeletionService {
         Set<String> clusterNames = new HashSet<>();
         LOGGER.debug("Get DistroX clusters of the environment: '{}'", environment.getName());
         try {
-            Set<String> distroXClusterNames = cloudbreakClient
-                    .withCrn(environment.getCreator())
-                    .distroXV1Endpoint()
+            Set<String> distroXClusterNames = distroXV1Endpoint
                     .list(environment.getName(), environment.getResourceCrn())
                     .getResponses()
                     .stream()

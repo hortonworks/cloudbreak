@@ -19,8 +19,6 @@ public class EnvironmentLogStorageLocationValidatorTest {
 
     private static final String REGION_1 = "region-1";
 
-    private static final String USER_CRN = "userCrn";
-
     @Mock
     private CloudStorageLocationValidator validator;
 
@@ -39,7 +37,7 @@ public class EnvironmentLogStorageLocationValidatorTest {
     @Test
     public void validateTelemetryLoggingStorageLocationNoTelemetry() {
         when(environment.getTelemetry()).thenReturn(null);
-        ValidationResult result = underTest.validateTelemetryLoggingStorageLocation(USER_CRN, environment);
+        ValidationResult result = underTest.validateTelemetryLoggingStorageLocation(environment);
         assertFalse(result.hasError());
     }
 
@@ -47,7 +45,7 @@ public class EnvironmentLogStorageLocationValidatorTest {
     public void validateTelemetryLoggingStorageLocationNoLogging() {
         when(environment.getTelemetry()).thenReturn(telemetry);
         when(telemetry.getLogging()).thenReturn(null);
-        ValidationResult result = underTest.validateTelemetryLoggingStorageLocation(USER_CRN, environment);
+        ValidationResult result = underTest.validateTelemetryLoggingStorageLocation(environment);
         assertFalse(result.hasError());
     }
 
@@ -56,7 +54,7 @@ public class EnvironmentLogStorageLocationValidatorTest {
         when(environment.getTelemetry()).thenReturn(telemetry);
         when(telemetry.getLogging()).thenReturn(logging);
         when(logging.getStorageLocation()).thenReturn(null);
-        ValidationResult result = underTest.validateTelemetryLoggingStorageLocation(USER_CRN, environment);
+        ValidationResult result = underTest.validateTelemetryLoggingStorageLocation(environment);
         assertFalse(result.hasError());
     }
 
@@ -65,7 +63,7 @@ public class EnvironmentLogStorageLocationValidatorTest {
         when(environment.getTelemetry()).thenReturn(telemetry);
         when(telemetry.getLogging()).thenReturn(logging);
         when(logging.getStorageLocation()).thenReturn(REGION_1);
-        ValidationResult result = underTest.validateTelemetryLoggingStorageLocation(USER_CRN, environment);
+        ValidationResult result = underTest.validateTelemetryLoggingStorageLocation(environment);
         assertFalse(result.hasError());
     }
 }

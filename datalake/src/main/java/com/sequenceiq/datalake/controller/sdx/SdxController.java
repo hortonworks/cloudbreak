@@ -97,7 +97,7 @@ public class SdxController implements SdxEndpoint {
     public SdxClusterDetailResponse getDetailByCrn(String clusterCrn, Set<String> entries) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
-        StackV4Response stackV4Response = sdxService.getDetail(userCrn, sdxCluster.getClusterName(), entries);
+        StackV4Response stackV4Response = sdxService.getDetail(sdxCluster.getClusterName(), entries);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
     }
@@ -118,7 +118,7 @@ public class SdxController implements SdxEndpoint {
     public SdxClusterDetailResponse getDetail(String name, Set<String> entries) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
-        StackV4Response stackV4Response = sdxService.getDetail(userCrn, name, entries);
+        StackV4Response stackV4Response = sdxService.getDetail(name, entries);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
     }
