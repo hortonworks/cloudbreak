@@ -44,11 +44,26 @@ configure-listen-address:
       - service: start-postgresql
     - unless: test -f /var/log/pgsql_listen_address_configured
 
+/opt/salt/scripts/conf_pgsql_max_connections.sh:
+  file.managed:
+    - makedirs: True
+    - mode: 755
+    - source: salt://postgresql/scripts/conf_pgsql_max_connections.sh
+
+configure-max-connections:
+  cmd.run:
+    - name: runuser -l postgres -c '/opt/salt/scripts/conf_pgsql_max_connections.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/pgsql_max_connections_configured
+    - require:
+      - file: /opt/salt/scripts/conf_pgsql_max_connections.sh
+      - service: start-postgresql
+    - unless: test -f /var/log/pgsql_max_connections_configured
+
 /opt/salt/scripts/init_db.sh:
   file.managed:
     - makedirs: True
     - require:
       - cmd: configure-listen-address
+      - cmd: configure-max-connections
     - mode: 755
     - source: salt://postgresql/scripts/init_db.sh
     - template: jinja
@@ -60,6 +75,7 @@ init-services-db:
     - require:
       - file: /opt/salt/scripts/init_db.sh
       - cmd: configure-listen-address
+      - cmd: configure-max-connections
 
 {% if not salt['file.directory_exists']('/yarn-private') %}  # FIXME (BUG-92637): must be disabled for YCloud
 
@@ -69,6 +85,7 @@ restart-pgsql-if-reconfigured:
     - name: postgresql
     - watch:
       - cmd: configure-listen-address
+      - cmd: configure-max-connections
       - cmd: init-services-db
 
 {% else %}
@@ -78,6 +95,7 @@ restart-postgresql:
     - name: netstat -tlpn |grep -q "0 0.0.0.0:5432" && service postgresql reload || service postgresql restart && while ! netstat -tlpn |grep -i "0 0.0.0.0:5432" &> /dev/null; do echo "waiting for postgres"; sleep 1; done
     - watch:
       - cmd: configure-listen-address
+      - cmd: configure-max-connections
       - cmd: init-services-db
 
 {% endif %}
