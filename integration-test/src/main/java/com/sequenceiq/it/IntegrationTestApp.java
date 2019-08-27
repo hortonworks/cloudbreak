@@ -36,11 +36,12 @@ import org.testng.xml.XmlSuite;
 import org.uncommons.reportng.JUnitXMLReporter;
 
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.it.config.ITProps;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.listener.ReportListener;
 import com.sequenceiq.it.cloudbreak.listener.ThreadLocalTestListener;
 import com.sequenceiq.it.cloudbreak.logsearch.CustomHTMLReporter;
+import com.sequenceiq.it.config.ITProps;
+import com.sequenceiq.it.util.cleanup.CleanupUtil;
 
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
@@ -54,6 +55,8 @@ public class IntegrationTestApp implements CommandLineRunner {
     private static final IFileParser<XmlSuite> YAML_PARSER = new YamlParser();
 
     private static final IFileParser<XmlSuite> DEFAULT_FILE_PARSER = XML_PARSER;
+
+    private static final String CLEANUP_COMMAND = "cleanup";
 
     @Value("${integrationtest.testsuite.threadPoolSize:8}")
     private int suiteThreadPoolSize;
@@ -85,6 +88,9 @@ public class IntegrationTestApp implements CommandLineRunner {
     @Inject
     private ITProps itProps;
 
+    @Inject
+    private CleanupUtil cleanupUtil;
+
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
         SpringApplication springApp = new SpringApplication(IntegrationTestApp.class);
@@ -115,9 +121,11 @@ public class IntegrationTestApp implements CommandLineRunner {
         testng.addListener(new JUnitXMLReporter());
         testng.addListener(new ReportListener());
         setupSuites(testng);
-        testng.run();
-        LOG.info("Html result of test run: file://{}/test-output/index.html", System.getProperty("user.dir"));
-        LOG.info("Text based result of test run: file://{}/test-output/emailable-report.html", System.getProperty("user.dir"));
+        if (!CLEANUP_COMMAND.equals(itCommand)) {
+            testng.run();
+            LOG.info("Html result of test run: file://{}/test-output/index.html", System.getProperty("user.dir"));
+            LOG.info("Text based result of test run: file://{}/test-output/emailable-report.html", System.getProperty("user.dir"));
+        }
     }
 
     private void setupSuites(TestNG testng) throws Exception {
@@ -142,6 +150,12 @@ public class IntegrationTestApp implements CommandLineRunner {
                 List<String> suitePathes = itProps.getSuiteFiles();
                 testng.setXmlSuites(loadSuites(suitePathes));
 
+                break;
+            case CLEANUP_COMMAND:
+                cleanupUtil.cleanupDistroxes();
+                cleanupUtil.cleanupSdxes();
+                cleanupUtil.cleanupEnvironments();
+                cleanupUtil.cleanupCredentials();
                 break;
             default:
                 LOG.info("Unknown command: {}", itCommand);
