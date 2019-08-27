@@ -17,6 +17,9 @@ import com.sequenceiq.redbeams.controller.mapper.WebApplicationExceptionMapper;
 import com.sequenceiq.redbeams.controller.v4.database.DatabaseV4Controller;
 import com.sequenceiq.redbeams.controller.v4.databaseserver.DatabaseServerV4Controller;
 
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
+
 @ApplicationPath(RedbeamsApi.API_ROOT_CONTEXT)
 @Configuration
 public class EndpointConfig extends ResourceConfig {
@@ -32,6 +35,12 @@ public class EndpointConfig extends ResourceConfig {
     @Inject
     private List<ExceptionMapper<?>> exceptionMappers;
 
+    @Inject
+    private ServerTracingDynamicFeature serverTracingDynamicFeature;
+
+    @Inject
+    private ClientTracingFeature clientTracingFeature;
+
     @PostConstruct
     private void init() {
         /* TODO Add StructuredEventFilter, preferably as a library
@@ -41,6 +50,8 @@ public class EndpointConfig extends ResourceConfig {
          */
         registerEndpoints();
         registerExceptionMappers();
+        register(serverTracingDynamicFeature);
+        register(clientTracingFeature);
     }
 
     private void registerExceptionMappers() {

@@ -13,13 +13,18 @@ import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+
 @Configuration
 public class RedbeamsApiClientConfig {
 
     private final UserCrnClientRequestFilter userCrnClientRequestFilter;
 
-    public RedbeamsApiClientConfig(UserCrnClientRequestFilter userCrnClientRequestFilter) {
+    private final ClientTracingFeature clientTracingFeature;
+
+    public RedbeamsApiClientConfig(UserCrnClientRequestFilter userCrnClientRequestFilter, ClientTracingFeature clientTracingFeature) {
         this.userCrnClientRequestFilter = userCrnClientRequestFilter;
+        this.clientTracingFeature = clientTracingFeature;
     }
 
     @Bean
@@ -30,6 +35,7 @@ public class RedbeamsApiClientConfig {
                 .withIgnorePreValidation(redbeamsApiClientParams.isIgnorePreValidation())
                 .withDebug(redbeamsApiClientParams.isRestDebug())
                 .withClientRequestFilter(userCrnClientRequestFilter)
+                .withTracer(clientTracingFeature)
                 .withApiRoot(RedbeamsApi.API_ROOT_CONTEXT)
                 .build();
     }
