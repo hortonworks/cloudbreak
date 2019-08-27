@@ -233,7 +233,6 @@ dependencies {
   compile project(':usage-collection')
 
   runtime project(':orchestrator-salt')
-  runtime project(':orchestrator-salt')
   runtime project(':orchestrator-yarn')
   runtime project(':cloud-reactor')
   runtime project(':cloud-openstack')
