@@ -17,7 +17,8 @@ public class BlueprintViewToBlueprintV4ViewResponseConverter
         blueprintV4ViewResponse.setHostGroupCount(entity.getHostGroupCount());
         blueprintV4ViewResponse.setStatus(entity.getStatus());
         blueprintV4ViewResponse.setTags(entity.getTags().getMap());
-        blueprintV4ViewResponse.setCrn(entity.getResoureceCrn());
+        blueprintV4ViewResponse.setCrn(entity.getResourceCrn());
+        blueprintV4ViewResponse.setCreated(entity.getCreated());
         return blueprintV4ViewResponse;
     }
 

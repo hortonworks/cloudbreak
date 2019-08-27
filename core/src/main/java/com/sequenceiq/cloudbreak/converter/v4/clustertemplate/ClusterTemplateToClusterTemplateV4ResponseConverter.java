@@ -47,6 +47,7 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter extends Abstrac
                 clusterTemplateV4Response.setEnvironmentCrn(stackTemplate.getEnvironmentCrn());
             }
         }
+        clusterTemplateV4Response.setCreated(source.getCreated());
         return clusterTemplateV4Response;
     }
 

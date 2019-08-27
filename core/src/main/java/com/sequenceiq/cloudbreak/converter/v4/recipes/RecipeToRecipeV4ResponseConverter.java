@@ -22,6 +22,7 @@ public class RecipeToRecipeV4ResponseConverter extends AbstractConversionService
         json.setWorkspace(workspace);
         json.setCreator(recipe.getCreator());
         json.setCrn(recipe.getResourceCrn());
+        json.setCreated(recipe.getCreated());
         return json;
     }
 

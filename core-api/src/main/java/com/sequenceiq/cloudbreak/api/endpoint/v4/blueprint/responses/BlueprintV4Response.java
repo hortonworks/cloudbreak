@@ -35,6 +35,8 @@ public class BlueprintV4Response extends BlueprintV4Base {
     @ApiModelProperty(BlueprintModelDescription.STATUS)
     private ResourceStatus status;
 
+    private Long created;
+
     public String getName() {
         return name;
     }
@@ -67,4 +69,11 @@ public class BlueprintV4Response extends BlueprintV4Base {
         this.crn = crn;
     }
 
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
+    }
 }

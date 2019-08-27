@@ -21,6 +21,7 @@ public class BlueprintToBlueprintV4ViewResponseConverter extends AbstractConvers
         blueprintV4ViewResponse.setHostGroupCount(source.getHostGroupCount());
         blueprintV4ViewResponse.setStatus(source.getStatus());
         blueprintV4ViewResponse.setTags(source.getTags().getMap());
+        blueprintV4ViewResponse.setCreated(source.getCreated());
         return blueprintV4ViewResponse;
     }
 }

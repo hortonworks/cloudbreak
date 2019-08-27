@@ -33,6 +33,8 @@ public class ClusterTemplateView extends CompactView {
     @OneToOne
     private StackApiView stackTemplate;
 
+    private Long created;
+
     public ResourceStatus getStatus() {
         return status;
     }
@@ -87,5 +89,13 @@ public class ClusterTemplateView extends CompactView {
                 .mapToInt(InstanceGroupView::getNodeCount)
                 .sum();
 
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }
