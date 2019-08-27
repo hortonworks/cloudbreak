@@ -22,6 +22,7 @@ type recipeOut struct {
 	Name          string `json:"Name" yaml:"Name"`
 	Description   string `json:"Description" yaml:"Description"`
 	ExecutionType string `json:"ExecutionType" yaml:"ExecutionType"`
+	Created       int64  `json:"Created" yaml:"Created"`
 }
 
 type recipeOutJsonDescribe struct {
@@ -117,9 +118,9 @@ func DescribeRecipe(c *cli.Context) {
 	}
 	recipe := resp.Payload
 	if output.Format != "table" {
-		output.Write(append(recipeHeader, "ContentAsBase64", "CRN"), &recipeOutJsonDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.Type}, recipe.Content, recipe.Crn})
+		output.Write(append(recipeHeader, "ContentAsBase64", "CRN"), &recipeOutJsonDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.Type, recipe.Created}, recipe.Content, recipe.Crn})
 	} else {
-		output.Write(append(recipeHeader, "CRN"), &recipeOutTableDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.Type}, recipe.Crn})
+		output.Write(append(recipeHeader, "CRN"), &recipeOutTableDescribe{&recipeOut{recipe.Name, *recipe.Description, *recipe.Type, recipe.Created}, recipe.Crn})
 	}
 }
 
@@ -158,7 +159,7 @@ func listRecipesImpl(client getPublicsRecipeClient, writer func([]string, []util
 
 	var tableRows []utils.Row
 	for _, recipe := range recipesResp.Payload.Responses {
-		tableRows = append(tableRows, &recipeOut{*recipe.Name, utils.SafeStringConvert(recipe.Description), *recipe.Type})
+		tableRows = append(tableRows, &recipeOut{*recipe.Name, utils.SafeStringConvert(recipe.Description), *recipe.Type, recipe.Created})
 	}
 
 	writer(recipeHeader, tableRows)

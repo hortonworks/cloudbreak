@@ -22,6 +22,9 @@ type BlueprintV4Response struct {
 	// blueprint, set this or the url field
 	Blueprint string `json:"blueprint,omitempty"`
 
+	// created
+	Created int64 `json:"created,omitempty"`
+
 	// the unique crn of the resource
 	// Required: true
 	Crn *string `json:"crn"`

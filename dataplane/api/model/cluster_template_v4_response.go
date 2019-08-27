@@ -22,6 +22,9 @@ type ClusterTemplateV4Response struct {
 	// cloudplatform which this template is compatible with
 	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
+	// created
+	Created int64 `json:"created,omitempty"`
+
 	// datalake required which this template is compatible with. The default is OPTIONAL
 	// Enum: [NONE OPTIONAL REQUIRED]
 	DatalakeRequired string `json:"datalakeRequired,omitempty"`

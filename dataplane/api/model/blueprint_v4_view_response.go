@@ -19,6 +19,9 @@ import (
 // swagger:model BlueprintV4ViewResponse
 type BlueprintV4ViewResponse struct {
 
+	// created
+	Created int64 `json:"created,omitempty"`
+
 	// the unique crn of the resource
 	Crn string `json:"crn,omitempty"`
 

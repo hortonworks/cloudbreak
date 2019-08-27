@@ -27,6 +27,7 @@ type blueprintOut struct {
 	StackVersion   string `json:"StackVersion" yaml:"StackVersion"`
 	HostgroupCount string `json:"HostgroupCount" yaml:"HostgroupCount"`
 	Tags           string `json:"Tags" yaml:"Tags"`
+	Created        int64  `json:"Created" yaml:"Created"`
 }
 
 type blueprintOutJsonDescribe struct {
@@ -179,6 +180,7 @@ func convertResponseToBlueprint(bp *model.BlueprintV4ViewResponse) *blueprintOut
 		StackVersion:   fmt.Sprintf("%v", bp.StackVersion),
 		HostgroupCount: fmt.Sprint(bp.HostGroupCount),
 		Tags:           bp.Status,
+		Created:        bp.Created,
 	}
 }
 
@@ -204,6 +206,7 @@ func convertResponseWithContentAndCRNToBlueprint(bp *model.BlueprintV4Response) 
 			StackVersion:   fmt.Sprintf("%v", stackVersion),
 			HostgroupCount: fmt.Sprint(bp.HostGroupCount),
 			Tags:           bp.Status,
+			Created:        bp.Created,
 		},
 		Content: bp.Blueprint,
 		Crn:     *bp.Crn,

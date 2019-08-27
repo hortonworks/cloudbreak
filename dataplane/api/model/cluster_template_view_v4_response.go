@@ -22,6 +22,9 @@ type ClusterTemplateViewV4Response struct {
 	// cloudplatform which this template is compatible with
 	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
+	// created
+	Created int64 `json:"created,omitempty"`
+
 	// the unique crn of the resource
 	Crn string `json:"crn,omitempty"`
 

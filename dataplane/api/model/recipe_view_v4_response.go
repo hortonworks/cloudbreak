@@ -19,6 +19,9 @@ import (
 // swagger:model RecipeViewV4Response
 type RecipeViewV4Response struct {
 
+	// created
+	Created int64 `json:"created,omitempty"`
+
 	// the unique crn of the resource
 	Crn string `json:"crn,omitempty"`
 
