@@ -28,6 +28,8 @@ dependencies {
   compile group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: httpClientVersion
   compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
 
+  implementation group: 'io.opentracing.contrib', name: 'opentracing-jaxrs2',             version: opentracingJaxrs2Version
+
   testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion

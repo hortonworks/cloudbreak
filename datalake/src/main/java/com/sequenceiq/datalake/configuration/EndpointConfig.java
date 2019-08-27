@@ -19,6 +19,8 @@ import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.datalake.controller.sdx.SdxController;
 import com.sequenceiq.datalake.controller.sdx.SdxInternalController;
 
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
@@ -40,6 +42,12 @@ public class EndpointConfig extends ResourceConfig {
     @Inject
     private List<ExceptionMapper<?>> exceptionMappers;
 
+    @Inject
+    private ServerTracingDynamicFeature serverTracingDynamicFeature;
+
+    @Inject
+    private ClientTracingFeature clientTracingFeature;
+
     @PostConstruct
     private void init() {
         /* TODO Add StructuredEventFilter, preferably as a library
@@ -49,6 +57,8 @@ public class EndpointConfig extends ResourceConfig {
          */
         registerEndpoints();
         registerExceptionMappers();
+        register(serverTracingDynamicFeature);
+        register(clientTracingFeature);
     }
 
     @PostConstruct
