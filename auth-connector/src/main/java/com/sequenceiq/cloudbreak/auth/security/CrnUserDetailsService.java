@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.auth.security;
 
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.security.authentication.UmsAuthenticationService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
+@Service
 public class CrnUserDetailsService implements UserDetailsService {
 
     private final UmsAuthenticationService umsAuthenticationService;
@@ -18,11 +19,11 @@ public class CrnUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String crn) throws UsernameNotFoundException {
+    public CrnUser loadUserByUsername(String crn) throws UsernameNotFoundException {
         return getUmsUser(crn);
     }
 
-    private UserDetails getUmsUser(String crnText) {
+    private CrnUser getUmsUser(String crnText) {
         if (InternalCrnBuilder.isInternalCrn(crnText)) {
             return InternalCrnBuilder.createInternalCrnUser(Crn.fromString(crnText));
         }
