@@ -1,14 +1,14 @@
 package com.sequenceiq.environment.network.dto;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 
 public class NetworkDto {
 
@@ -26,11 +26,11 @@ public class NetworkDto {
 
     private final YarnParams yarn;
 
-    private final Set<String> subnetIds;
-
     private final String networkCidr;
 
     private final Map<String, CloudSubnet> subnetMetas;
+
+    private final PrivateSubnetCreation privateSubnetCreation;
 
     public NetworkDto(Builder builder) {
         this.id = builder.id;
@@ -39,10 +39,10 @@ public class NetworkDto {
         this.aws = builder.aws;
         this.azure = builder.azure;
         this.yarn = builder.yarn;
-        this.subnetIds = CollectionUtils.isEmpty(builder.subnetIds) ? new HashSet<>() : builder.subnetIds;
         this.subnetMetas = MapUtils.isEmpty(builder.subnetMetas) ? new HashMap<>() : builder.subnetMetas;
         this.networkCidr = builder.networkCidr;
         this.networkId = builder.networkId;
+        this.privateSubnetCreation = builder.privateSubnetCreation;
     }
 
     public Long getId() {
@@ -74,7 +74,21 @@ public class NetworkDto {
     }
 
     public Set<String> getSubnetIds() {
-        return subnetIds;
+        return subnetMetas.keySet();
+    }
+
+    public Set<String> getPublicSubnetIds() {
+        return subnetMetas.values().stream()
+                .filter(CloudSubnet::isPrivateSubnet)
+                .map(CloudSubnet::getId)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<String> getPrivateSubnetIds() {
+        return subnetMetas.values().stream()
+                .filter(cloudSubnet -> !cloudSubnet.isPrivateSubnet())
+                .map(CloudSubnet::getId)
+                .collect(Collectors.toSet());
     }
 
     public String getNetworkCidr() {
@@ -93,6 +107,10 @@ public class NetworkDto {
         return networkId;
     }
 
+    public PrivateSubnetCreation getPrivateSubnetCreation() {
+        return privateSubnetCreation;
+    }
+
     public static final class Builder {
         private Long id;
 
@@ -108,11 +126,11 @@ public class NetworkDto {
 
         private YarnParams yarn;
 
-        private Set<String> subnetIds;
-
         private Map<String, CloudSubnet> subnetMetas;
 
         private String networkCidr;
+
+        private PrivateSubnetCreation privateSubnetCreation;
 
         private Builder() {
         }
@@ -146,11 +164,6 @@ public class NetworkDto {
             return this;
         }
 
-        public Builder withSubnetIds(Set<String> subnetIds) {
-            this.subnetIds = subnetIds;
-            return this;
-        }
-
         public Builder withSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
             this.subnetMetas = subnetMetas;
             return this;
@@ -168,6 +181,11 @@ public class NetworkDto {
 
         public Builder withNetworkId(String networkId) {
             this.networkId = networkId;
+            return this;
+        }
+
+        public Builder withPrivateSubnetCreation(PrivateSubnetCreation privateSubnetCreation) {
+            this.privateSubnetCreation = privateSubnetCreation;
             return this;
         }
 

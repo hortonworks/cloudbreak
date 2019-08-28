@@ -38,7 +38,6 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
         azureNetwork.setRegistrationType(RegistrationType.CREATE_NEW);
         azureNetwork.setNetworkId(createdCloudNetwork.getNetworkId());
         azureNetwork.setResourceGroupName(String.valueOf(createdCloudNetwork.getProperties().get("resourceGroupName")));
-        azureNetwork.setSubnetIds(createdCloudNetwork.getSubnets().stream().map(CreatedSubnet::getSubnetId).collect(Collectors.toSet()));
         azureNetwork.setSubnetMetas(createdCloudNetwork.getSubnets().stream()
                 .collect(Collectors.toMap(CreatedSubnet::getSubnetId,
                         subnet -> new CloudSubnet(
@@ -46,7 +45,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 subnet.getSubnetId(),
                                 subnet.getAvailabilityZone(),
                                 subnet.getCidr(),
-                                subnet.isPrivateSubnet(),
+                                subnet.isPublicSubnet(),
                                 subnet.isMapPublicIpOnLaunch(),
                                 subnet.isIgwAvailable())
                         )

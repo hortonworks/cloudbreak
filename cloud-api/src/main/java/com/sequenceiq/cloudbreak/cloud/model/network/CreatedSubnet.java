@@ -6,7 +6,7 @@ public class CreatedSubnet {
 
     private String cidr;
 
-    private boolean privateSubnet;
+    private boolean publicSubnet;
 
     private boolean mapPublicIpOnLaunch;
 
@@ -33,12 +33,12 @@ public class CreatedSubnet {
         this.cidr = cidr;
     }
 
-    public boolean isPrivateSubnet() {
-        return privateSubnet;
+    public boolean isPublicSubnet() {
+        return publicSubnet;
     }
 
-    public void setPrivateSubnet(boolean privateSubnet) {
-        this.privateSubnet = privateSubnet;
+    public void setPublicSubnet(boolean publicSubnet) {
+        this.publicSubnet = publicSubnet;
     }
 
     public boolean isMapPublicIpOnLaunch() {

@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -99,7 +100,10 @@ public class AwsNetworkConnectorTest {
     private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
     @Mock
-    private AwsCloudSubnetProvider awsCloudSubnetProvider;
+    private AwsSubnetRequestProvider awsSubnetRequestProvider;
+
+    @Mock
+    private AwsCreatedSubnetProvider awsCreatedSubnetProvider;
 
     @Test
     public void testPlatformShouldReturnAwsPlatform() {
@@ -125,21 +129,24 @@ public class AwsNetworkConnectorTest {
         PollTask pollTask = Mockito.mock(PollTask.class);
         Map<String, String> output = createOutput();
         NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnetCidrs);
-        List<CreatedSubnet> createdSubnetList = createCloudSubnetList();
+        List<SubnetRequest> subnetRequestList = createSubnetRequestList();
+        Set<CreatedSubnet> createdSubnets = Set.of(new CreatedSubnet(), new CreatedSubnet(), new CreatedSubnet());
 
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
-        when(awsCloudSubnetProvider.provide(ec2Client, new ArrayList<>(subnetCidrs))).thenReturn(createdSubnetList);
+        when(awsSubnetRequestProvider.provide(ec2Client, new ArrayList<>(subnetCidrs))).thenReturn(subnetRequestList);
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cloudFormationRetryClient);
-        when(awsNetworkCfTemplateProvider.provide(networkCidr, createdSubnetList)).thenReturn(CF_TEMPLATE);
+        when(awsNetworkCfTemplateProvider.provide(networkCidr, subnetRequestList, true)).thenReturn(CF_TEMPLATE);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
         when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest))
                 .thenReturn(pollTask);
         when(cfStackUtil.getOutputs(NETWORK_ID, cloudFormationRetryClient)).thenReturn(output);
+        when(awsCreatedSubnetProvider.provide(output, networkCreationRequest.getSubnetCidrs().size(), networkCreationRequest.isPrivateSubnetEnabled()))
+                .thenReturn(createdSubnets);
 
         CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
 
         verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
-        verify(awsNetworkCfTemplateProvider).provide(networkCidr, createdSubnetList);
+        verify(awsNetworkCfTemplateProvider).provide(networkCidr, subnetRequestList, true);
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
@@ -216,23 +223,27 @@ public class AwsNetworkConnectorTest {
                 .withRegion(REGION)
                 .withNetworkCidr(networkCidr)
                 .withSubnetCidrs(subnetCidrs)
+                .withPrivateSubnetEnabled(true)
                 .build();
     }
 
-    private List<CreatedSubnet> createCloudSubnetList() {
-        CreatedSubnet createdSubnet1 = new CreatedSubnet();
-        createdSubnet1.setCidr("2.2.2.2/24");
-        createdSubnet1.setAvailabilityZone("az1");
+    private List<SubnetRequest> createSubnetRequestList() {
+        SubnetRequest subnetRequest1 = new SubnetRequest();
+        subnetRequest1.setPublicSubnetCidr("2.2.2.2/24");
+        subnetRequest1.setPrivateSubnetCidr("2.2.2.2/24");
+        subnetRequest1.setAvailabilityZone("az1");
 
-        CreatedSubnet createdSubnet2 = new CreatedSubnet();
-        createdSubnet2.setCidr("2.2.2.2/24");
-        createdSubnet2.setAvailabilityZone("az2");
+        SubnetRequest subnetRequest2 = new SubnetRequest();
+        subnetRequest2.setPublicSubnetCidr("2.2.2.2/24");
+        subnetRequest2.setPrivateSubnetCidr("2.2.2.2/24");
+        subnetRequest2.setAvailabilityZone("az2");
 
-        CreatedSubnet createdSubnet3 = new CreatedSubnet();
-        createdSubnet2.setCidr("2.2.2.2/24");
-        createdSubnet2.setAvailabilityZone("az3");
+        SubnetRequest subnetRequest3 = new SubnetRequest();
+        subnetRequest3.setPublicSubnetCidr("2.2.2.2/24");
+        subnetRequest3.setPrivateSubnetCidr("2.2.2.2/24");
+        subnetRequest3.setAvailabilityZone("az3");
 
-        return List.of(createdSubnet1, createdSubnet2, createdSubnet3);
+        return List.of(subnetRequest1, subnetRequest2, subnetRequest3);
     }
 
 }

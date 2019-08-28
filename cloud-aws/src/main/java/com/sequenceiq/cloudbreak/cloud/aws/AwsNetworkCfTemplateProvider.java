@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
@@ -31,9 +31,9 @@ public class AwsNetworkCfTemplateProvider {
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
-    public String provide(String vpcCidr, List<CreatedSubnet> subnets) {
+    public String provide(String vpcCidr, List<SubnetRequest> subnets, boolean privateSubnetEnabled) {
 
-        Map<String, Object> model = createModel(vpcCidr, subnets);
+        Map<String, Object> model = createModel(vpcCidr, subnets, privateSubnetEnabled);
         try {
             String freeMarkerTemplate = freemarkerConfiguration.getTemplate(cloudFormationNetworkTemplatePath, "UTF-8").toString();
             Template template = new Template("aws-template", freeMarkerTemplate, freemarkerConfiguration);
@@ -43,10 +43,11 @@ public class AwsNetworkCfTemplateProvider {
         }
     }
 
-    private Map<String, Object> createModel(String vpcCidr, List<CreatedSubnet> subnets) {
+    private Map<String, Object> createModel(String vpcCidr, List<SubnetRequest> subnets, boolean privateSubnetEnabled) {
         Map<String, Object> model = new HashMap<>();
         model.put("vpcCidr", vpcCidr);
         model.put("subnetDetails", subnets);
+        model.put("privateSubnetEnabled", privateSubnetEnabled);
         model.put("network_resource", CloudbreakResourceType.NETWORK);
         return model;
     }
