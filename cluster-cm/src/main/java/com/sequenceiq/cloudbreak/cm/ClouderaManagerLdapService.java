@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.AuthRolesResourceApi;
@@ -31,6 +32,12 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 public class ClouderaManagerLdapService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerLdapService.class);
 
+    @Value("${cb.cm.admin.role}")
+    private String adminRole;
+
+    @Value("${cb.cm.user.role}")
+    private String userRole;
+
     @Inject
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
@@ -47,14 +54,14 @@ public class ClouderaManagerLdapService {
             AuthRolesResourceApi authRolesResourceApi = clouderaManagerClientFactory.getAuthRolesResourceApi(client);
             ApiAuthRoleMetadataList roleMetadataList = authRolesResourceApi.readAuthRolesMetadata(null);
             if (roleMetadataList.getItems() != null) {
-                Optional<ApiAuthRoleMetadata> adminMetadata = roleMetadataList.getItems().stream().filter(toRole("ROLE_CONFIGURATOR")).findFirst();
+                Optional<ApiAuthRoleMetadata> adminMetadata = roleMetadataList.getItems().stream().filter(toRole(adminRole)).findFirst();
                 if (adminMetadata.isPresent() && StringUtils.isNotBlank(ldapView.getAdminGroup())) {
                     addGroupMapping(ldapView, externalUserMappingsResourceApi, adminMetadata.get(), ldapView.getAdminGroup());
                 } else {
                     LOGGER.info("Cannot setup admin group mapping. Admin metadata present: [{}] Admin group: [{}]",
                             adminMetadata.isPresent(), ldapView.getAdminGroup());
                 }
-                Optional<ApiAuthRoleMetadata> userMetadata = roleMetadataList.getItems().stream().filter(toRole("ROLE_USER")).findFirst();
+                Optional<ApiAuthRoleMetadata> userMetadata = roleMetadataList.getItems().stream().filter(toRole(userRole)).findFirst();
                 if (userMetadata.isPresent() && StringUtils.isNotBlank(ldapView.getUserGroup())) {
                     addGroupMapping(ldapView, externalUserMappingsResourceApi, userMetadata.get(), ldapView.getUserGroup());
                 } else {

@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.AuthRolesResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -97,6 +98,8 @@ public class ClouderaManagerLdapServiceTest {
     @Test
     public void testSetupLdapWithGroupMapping() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
+        ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_CONFIGURATOR");
+        ReflectionTestUtils.setField(underTest, "userRole", "ROLE_USER");
         LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
                 new ApiAuthRoleMetadata().displayName("role").uuid("uuid").role("ROLE_CONFIGURATOR")));
@@ -115,6 +118,8 @@ public class ClouderaManagerLdapServiceTest {
     @Test
     public void testSetupLdapWithNoRoleAdmin() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
+        ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_CONFIGURATOR");
+        ReflectionTestUtils.setField(underTest, "userRole", "ROLE_USER");
         LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
                 new ApiAuthRoleMetadata().displayName("role").uuid("uuid").role("NO_ROLE_ADMIN")));
