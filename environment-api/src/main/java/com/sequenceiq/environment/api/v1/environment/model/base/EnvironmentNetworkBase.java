@@ -27,6 +27,9 @@ public abstract class EnvironmentNetworkBase {
     @Size(max = 255)
     private String networkCidr;
 
+    @ApiModelProperty(EnvironmentModelDescription.PRIVATE_SUBNET_CREATION)
+    private PrivateSubnetCreation privateSubnetCreation = PrivateSubnetCreation.DISABLED;
+
     @ApiModelProperty(EnvironmentModelDescription.AWS_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkAwsParams aws;
 
@@ -50,6 +53,14 @@ public abstract class EnvironmentNetworkBase {
 
     public void setNetworkCidr(String networkCidr) {
         this.networkCidr = networkCidr;
+    }
+
+    public PrivateSubnetCreation getPrivateSubnetCreation() {
+        return privateSubnetCreation;
+    }
+
+    public void setPrivateSubnetCreation(PrivateSubnetCreation privateSubnetCreation) {
+        this.privateSubnetCreation = privateSubnetCreation;
     }
 
     public EnvironmentNetworkAwsParams getAws() {

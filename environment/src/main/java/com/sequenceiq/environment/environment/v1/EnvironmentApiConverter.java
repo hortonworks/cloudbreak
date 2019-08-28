@@ -4,13 +4,18 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest.DEFAULT_USER_NAME;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
+import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -150,10 +155,15 @@ public class EnvironmentApiConverter {
             yarnParams.setQueue(network.getYarn().getQueue());
             builder.withYarn(yarnParams);
         }
+        Optional.ofNullable(network.getSubnetIds()).ifPresent(ids -> ids.stream().collect(Collectors.toMap(id -> id, id -> new CloudSubnet(id, id))));
+        builder.withPrivateSubnetCreation(getPrivateSubnetCreation(network));
         return builder
-                .withSubnetIds(network.getSubnetIds())
                 .withNetworkCidr(network.getNetworkCidr())
                 .build();
+    }
+
+    private PrivateSubnetCreation getPrivateSubnetCreation(EnvironmentNetworkRequest network) {
+        return Optional.ofNullable(network.getPrivateSubnetCreation()).orElse(PrivateSubnetCreation.DISABLED);
     }
 
     private AuthenticationDto authenticationRequestToDto(EnvironmentAuthenticationRequest authentication) {

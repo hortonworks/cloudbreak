@@ -26,68 +26,6 @@
                 ]
             }
         },
-        "PublicSubnet0": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "MapPublicIpOnLaunch": true,
-                "CidrBlock": "2.2.2.2/24",
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "AvailabilityZone": "az1",
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": {
-                            "Ref": "AWS::StackId"
-                        }
-                    },
-                    {
-                        "Key": "Network",
-                        "Value": "Public"
-                    },
-                    {
-                        "Key": "cb-resource-type",
-                        "Value": "NETWORK"
-                    },
-                    {
-                        "Key" : "kubernetes.io/role/elb",
-                        "Value" : "1"
-                    }
-                ]
-            }
-        },
-        "PublicSubnet1": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "MapPublicIpOnLaunch": true,
-                "CidrBlock": "2.2.2.2/24",
-                "VpcId": {
-                    "Ref": "VPC"
-                },
-                "AvailabilityZone": "az1",
-                "Tags": [
-                    {
-                        "Key": "Application",
-                        "Value": {
-                            "Ref": "AWS::StackId"
-                        }
-                    },
-                    {
-                        "Key": "Network",
-                        "Value": "Public"
-                    },
-                    {
-                        "Key": "cb-resource-type",
-                        "Value": "NETWORK"
-                    },
-                    {
-                        "Key" : "kubernetes.io/role/elb",
-                        "Value" : "1"
-                    }
-                ]
-            }
-        },
         "InternetGateway": {
             "Type": "AWS::EC2::InternetGateway",
             "Properties": {
@@ -120,6 +58,90 @@
                 }
             }
         },
+        "PublicSubnet0": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "MapPublicIpOnLaunch": "true",
+                "CidrBlock": "2.2.2.2/24",
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "AvailabilityZone": "az1",
+                "Tags": [
+                    {
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
+                        }
+                    },
+                    {
+                        "Key": "Network",
+                        "Value": "Public"
+                    },
+                    {
+                        "Key": "cb-resource-type",
+                        "Value": "NETWORK"
+                    },
+                    {
+                        "Key": "kubernetes.io/role/elb",
+                        "Value": "1"
+                    }
+                ]
+            }
+        },
+        "PublicSubnetRouteTableAssociation0": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "PublicSubnet0"
+                },
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                }
+            }
+        },
+        "PublicSubnet1": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "MapPublicIpOnLaunch": "true",
+                "CidrBlock": "2.2.2.2/24",
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "AvailabilityZone": "az2",
+                "Tags": [
+                    {
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
+                        }
+                    },
+                    {
+                        "Key": "Network",
+                        "Value": "Public"
+                    },
+                    {
+                        "Key": "cb-resource-type",
+                        "Value": "NETWORK"
+                    },
+                    {
+                        "Key": "kubernetes.io/role/elb",
+                        "Value": "1"
+                    }
+                ]
+            }
+        },
+        "PublicSubnetRouteTableAssociation1": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "PublicSubnet1"
+                },
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                }
+            }
+        },
         "PublicRouteTable": {
             "Type": "AWS::EC2::RouteTable",
             "Properties": {
@@ -144,28 +166,6 @@
                 ]
             }
         },
-        "PublicSubnetRouteTableAssociation0": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "PublicSubnet0"
-                },
-                "RouteTableId": {
-                    "Ref": "PublicRouteTable"
-                }
-            }
-        },
-        "PublicSubnetRouteTableAssociation1": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "PublicSubnet1"
-                },
-                "RouteTableId": {
-                    "Ref": "PublicRouteTable"
-                }
-            }
-        },
         "PublicRoute": {
             "Type": "AWS::EC2::Route",
             "DependsOn": [
@@ -184,14 +184,36 @@
         }
     },
     "Outputs": {
-        "CreatedSubnets0": {
+        "PublicSubnetId0": {
             "Value": {
                 "Ref": "PublicSubnet0"
             }
         },
-        "CreatedSubnets1": {
+        "PublicSubnetCidr0": {
+            "Value": "2.2.2.2/24"
+        },
+        "Az0": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "PublicSubnet0",
+                    "AvailabilityZone"
+                ]
+            }
+        },
+        "PublicSubnetId1": {
             "Value": {
                 "Ref": "PublicSubnet1"
+            }
+        },
+        "PublicSubnetCidr1": {
+            "Value": "2.2.2.2/24"
+        },
+        "Az1": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "PublicSubnet1",
+                    "AvailabilityZone"
+                ]
             }
         },
         "CreatedVpc": {

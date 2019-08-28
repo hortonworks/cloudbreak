@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -36,6 +37,7 @@ public class NetworkCreationRequestFactory {
                 .withVariant(environment.getCloudPlatform())
                 .withRegion(Region.region(environment.getLocation().getName()))
                 .withNetworkCidr(networkDto.getNetworkCidr())
+                .withPrivateSubnetEnabled(getPrivateSubnetEnabled(environment))
                 .withSubnetCidrs(getSubNetCidrs(networkDto.getNetworkCidr()));
         getNoPublicIp(networkDto).ifPresent(builder::withNoPublicIp);
         getNoFirewallRules(networkDto).ifPresent(builder::withNoFirewallRules);
@@ -48,6 +50,10 @@ public class NetworkCreationRequestFactory {
 
     public String getStackName(EnvironmentDto environment) {
         return String.join("-", environment.getName(), String.valueOf(environment.getNetwork().getId()));
+    }
+
+    private boolean getPrivateSubnetEnabled(EnvironmentDto environmentDto) {
+        return PrivateSubnetCreation.ENABLED.equals(environmentDto.getNetwork().getPrivateSubnetCreation());
     }
 
     private Set<String> getSubNetCidrs(String networkCidr) {

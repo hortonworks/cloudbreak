@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 
@@ -64,9 +65,9 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     @Column(columnDefinition = "TEXT", nullable = false)
     private Json subnetMetas;
 
-    @Convert(converter = JsonToString.class)
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private Json subnetIds;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PrivateSubnetCreation privateSubnetCreation;
 
     @Column(nullable = false)
     private String accountId;
@@ -75,7 +76,6 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     private String resourceCrn;
 
     public BaseNetwork() {
-        subnetIds = new Json(new HashSet<String>());
         subnetMetas = new Json(new HashMap<String, CloudSubnet>());
     }
 
@@ -147,15 +147,6 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
         });
     }
 
-    public void setSubnetIds(Set<String> subnetIds) {
-        this.subnetIds = new Json(subnetIds);
-    }
-
-    public Set<String> getSubnetIds() {
-        return JsonUtil.jsonToType(subnetIds.getValue(), new TypeReference<>() {
-        });
-    }
-
     public abstract String getNetworkId();
 
     public boolean isArchived() {
@@ -172,6 +163,14 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public PrivateSubnetCreation getPrivateSubnetCreation() {
+        return privateSubnetCreation;
+    }
+
+    public void setPrivateSubnetCreation(PrivateSubnetCreation privateSubnetCreation) {
+        this.privateSubnetCreation = privateSubnetCreation;
     }
 
     @Override

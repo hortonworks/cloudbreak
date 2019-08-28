@@ -96,7 +96,7 @@ public class EnvironmentCreationService {
         ValidationResult.ValidationResultBuilder errors = new ValidationResult.ValidationResultBuilder();
         String message;
         if (AWS.name().equalsIgnoreCase(environment.getCloudPlatform()) && network != null && network.getNetworkCidr() == null) {
-            if (network.getSubnetIds().size() < 2) {
+            if (network.getPublicSubnetIds().size() < 2) {
                 message = "Cannot create environment, there should be at least two subnets in the network";
                 LOGGER.info(message);
                 errors.error(message);

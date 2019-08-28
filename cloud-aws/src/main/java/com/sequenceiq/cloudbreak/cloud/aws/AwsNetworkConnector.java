@@ -8,7 +8,6 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAI
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 @Service
@@ -48,8 +48,6 @@ public class AwsNetworkConnector implements NetworkConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNetworkConnector.class);
 
     private static final String CREATED_VPC = "CreatedVpc";
-
-    private static final String CREATED_SUBNET = "CreatedSubnets";
 
     private static final int NOT_FOUND = 400;
 
@@ -69,25 +67,27 @@ public class AwsNetworkConnector implements NetworkConnector {
     private AwsBackoffSyncPollingScheduler<Boolean> awsBackoffSyncPollingScheduler;
 
     @Inject
-    private AwsCloudSubnetProvider awsCloudSubnetProvider;
+    private AwsSubnetRequestProvider awsSubnetRequestProvider;
+
+    @Inject
+    private AwsCreatedSubnetProvider awsCreatedSubnetProvider;
 
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
         AwsCredentialView credentialView = new AwsCredentialView(networkRequest.getCloudCredential());
         AmazonCloudFormationRetryClient cloudFormationRetryClient = getCloudFormationRetryClient(credentialView, networkRequest.getRegion().value());
-        List<CreatedSubnet> subnetList = getCloudSubNets(networkRequest);
-        String cloudFormationTemplate = createTemplate(networkRequest, subnetList);
+        List<SubnetRequest> subnetRequests = getCloudSubNets(networkRequest);
+        String cloudFormationTemplate = createTemplate(networkRequest, subnetRequests);
         String cfStackName = networkRequest.getStackName();
         try {
             cloudFormationRetryClient.describeStacks(new DescribeStacksRequest().withStackName(cfStackName));
             LOGGER.warn("AWS CloudFormation stack for Network with stack name: '{}' already exists. Attaching this one to the network.", cfStackName);
-            return getCreatedNetworkWithPolling(networkRequest, credentialView, cloudFormationRetryClient, subnetList);
+            return getCreatedNetworkWithPolling(networkRequest, credentialView, cloudFormationRetryClient);
         } catch (AmazonServiceException e) {
             if (networkDoesNotExist(e)) {
                 LOGGER.warn("{} occurred during describe AWS CloudFormation stack for Network with stack name: '{}'. "
                         + "Assuming the CF Stack does not exist, so creating a new one. Exception message: {}", e.getClass(), cfStackName, e.getMessage());
-                return createNewCfNetworkStack(networkRequest, credentialView, cloudFormationRetryClient,
-                        subnetList, cloudFormationTemplate);
+                return createNewCfNetworkStack(networkRequest, credentialView, cloudFormationRetryClient, cloudFormationTemplate);
             } else {
                 throw new CloudConnectorException("Failed to create network.", e);
             }
@@ -98,44 +98,48 @@ public class AwsNetworkConnector implements NetworkConnector {
         return e.getStatusCode() == NOT_FOUND && e.getErrorMessage().contains("does not exist");
     }
 
-    private List<CreatedSubnet> getCloudSubNets(NetworkCreationRequest networkRequest) {
+    private List<SubnetRequest> getCloudSubNets(NetworkCreationRequest networkRequest) {
         AwsCredentialView awsCredential = new AwsCredentialView(networkRequest.getCloudCredential());
         AmazonEC2Client awsClientAccess = awsClient.createAccess(awsCredential, networkRequest.getRegion().value());
-        return awsCloudSubnetProvider.provide(awsClientAccess, new ArrayList<>(networkRequest.getSubnetCidrs()));
+        return awsSubnetRequestProvider.provide(awsClientAccess, new ArrayList<>(networkRequest.getSubnetCidrs()));
     }
 
     private AmazonCloudFormationRetryClient getCloudFormationRetryClient(AwsCredentialView credentialView, String region) {
         return awsClient.createCloudFormationRetryClient(credentialView, region);
     }
 
-    private String createTemplate(NetworkCreationRequest networkRequest, List<CreatedSubnet> createdSubnetList) {
-        return awsNetworkCfTemplateProvider.provide(networkRequest.getNetworkCidr(), createdSubnetList);
+    private String createTemplate(NetworkCreationRequest networkRequest, List<SubnetRequest> subnetRequestList) {
+        return awsNetworkCfTemplateProvider.provide(networkRequest.getNetworkCidr(), subnetRequestList, privateSubnetEnabled(networkRequest, subnetRequestList));
+    }
+
+    private boolean privateSubnetEnabled(NetworkCreationRequest networkRequest, List<SubnetRequest> subnetRequestList) {
+        return subnetRequestList.stream().noneMatch(subnetRequest -> subnetRequest.getPrivateSubnetCidr().isEmpty()) && networkRequest.isPrivateSubnetEnabled();
     }
 
     private CreatedCloudNetwork createNewCfNetworkStack(NetworkCreationRequest networkRequest, AwsCredentialView credentialView,
-            AmazonCloudFormationRetryClient cloudFormationRetryClient, List<CreatedSubnet> subnetList, String cloudFormationTemplate) {
+            AmazonCloudFormationRetryClient cloudFormationRetryClient, String cloudFormationTemplate) {
         cloudFormationRetryClient.createStack(createStackRequest(networkRequest.getStackName(), cloudFormationTemplate));
         LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' ", networkRequest.getStackName());
-        return getCreatedNetworkWithPolling(networkRequest, credentialView, cloudFormationRetryClient, subnetList);
+        return getCreatedNetworkWithPolling(networkRequest, credentialView, cloudFormationRetryClient);
     }
 
     private CreatedCloudNetwork getCreatedNetworkWithPolling(NetworkCreationRequest networkRequest, AwsCredentialView credentialView,
-            AmazonCloudFormationRetryClient cloudFormationRetryClient, List<CreatedSubnet> subnetList) {
+            AmazonCloudFormationRetryClient cloudFormationRetryClient) {
         PollTask<Boolean> pollTask = getNewNetworkPollTask(credentialView, networkRequest);
         try {
             awsBackoffSyncPollingScheduler.schedule(pollTask);
         } catch (RuntimeException | InterruptedException | ExecutionException | TimeoutException e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }
-        return getCreatedCloudNetwork(cloudFormationRetryClient, subnetList, networkRequest.getStackName());
+        return getCreatedCloudNetwork(cloudFormationRetryClient, networkRequest);
     }
 
-    private CreatedCloudNetwork getCreatedCloudNetwork(AmazonCloudFormationRetryClient cloudFormationRetryClient,
-            List<CreatedSubnet> subnetList, String cfStackName) {
-        Map<String, String> output = cfStackUtil.getOutputs(cfStackName, cloudFormationRetryClient);
+    private CreatedCloudNetwork getCreatedCloudNetwork(AmazonCloudFormationRetryClient cloudFormationRetryClient, NetworkCreationRequest networkRequest) {
+        Map<String, String> output = cfStackUtil.getOutputs(networkRequest.getStackName(), cloudFormationRetryClient);
         String vpcId = getCreatedVpc(output);
-        Set<CreatedSubnet> subnets = getCreatedSubnets(output, subnetList);
-        return new CreatedCloudNetwork(cfStackName, vpcId, subnets);
+        Set<CreatedSubnet> subnets = awsCreatedSubnetProvider.provide(output, networkRequest.getSubnetCidrs().size(),
+                networkRequest.isPrivateSubnetEnabled());
+        return new CreatedCloudNetwork(networkRequest.getStackName(), vpcId, subnets);
     }
 
     private CreateStackRequest createStackRequest(String stackName, String cloudFormationTemplate) {
@@ -161,30 +165,9 @@ public class AwsNetworkConnector implements NetworkConnector {
         if (output.containsKey(CREATED_VPC)) {
             return output.get(CREATED_VPC);
         } else {
-            String outputKeyNotFound = String.format("Vpc could not be found in the CloudFormation stack output.");
+            String outputKeyNotFound = "Vpc could not be found in the CloudFormation stack output.";
             throw new CloudConnectorException(outputKeyNotFound);
         }
-    }
-
-    private Set<CreatedSubnet> getCreatedSubnets(Map<String, String> output, List<CreatedSubnet> createdSubnetList) {
-        Set<CreatedSubnet> subnets = new HashSet<>();
-        for (int i = 0; i < createdSubnetList.size(); i++) {
-            String expectedSubnetName = CREATED_SUBNET + i;
-            if (output.containsKey(expectedSubnetName)) {
-                CreatedSubnet createdSubnet = new CreatedSubnet();
-                createdSubnet.setSubnetId(output.get(expectedSubnetName));
-                createdSubnet.setCidr(createdSubnetList.get(i).getCidr());
-                createdSubnet.setAvailabilityZone(createdSubnetList.get(i).getAvailabilityZone());
-                createdSubnet.setPrivateSubnet(false);
-                createdSubnet.setMapPublicIpOnLaunch(true);
-                createdSubnet.setIgwAvailable(true);
-                subnets.add(createdSubnet);
-            } else {
-                String outputKeyNotFound = String.format("Subnet could not be found in the CloudFormation stack output.");
-                throw new CloudConnectorException(outputKeyNotFound);
-            }
-        }
-        return subnets;
     }
 
     @Override

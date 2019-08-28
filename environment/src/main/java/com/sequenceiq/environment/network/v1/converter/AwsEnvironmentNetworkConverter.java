@@ -33,7 +33,6 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
         awsNetwork.setName(createdCloudNetwork.getStackName());
         awsNetwork.setRegistrationType(RegistrationType.CREATE_NEW);
         awsNetwork.setVpcId(createdCloudNetwork.getNetworkId());
-        awsNetwork.setSubnetIds(createdCloudNetwork.getSubnets().stream().map(CreatedSubnet::getSubnetId).collect(Collectors.toSet()));
         awsNetwork.setSubnetMetas(createdCloudNetwork.getSubnets().stream()
                 .collect(Collectors.toMap(
                         CreatedSubnet::getSubnetId, subnet -> new CloudSubnet(
@@ -41,7 +40,7 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
                                 subnet.getSubnetId(),
                                 subnet.getAvailabilityZone(),
                                 subnet.getCidr(),
-                                subnet.isPrivateSubnet(),
+                                subnet.isPublicSubnet(),
                                 subnet.isMapPublicIpOnLaunch(),
                                 subnet.isIgwAvailable())
                         )
