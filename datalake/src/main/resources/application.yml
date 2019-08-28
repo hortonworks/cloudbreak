@@ -4,6 +4,10 @@ spring:
   application:
     name: DatalakeService
 
+opentracing:
+  jaeger:
+    log-spans: false
+
 management:
   endpoints:
     web:

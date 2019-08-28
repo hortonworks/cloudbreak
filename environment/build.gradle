@@ -81,6 +81,8 @@ dependencies {
 
   compile     group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
   compile     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                       version: opentracingJaxrs2Version
+  compile     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                         version: opentracingJdbcVersion
+
 
   testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-api'
   testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-params',                     version: junitJupiterVersion

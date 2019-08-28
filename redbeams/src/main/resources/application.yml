@@ -1,5 +1,9 @@
 server.servlet.context-path: "/redbeams"
 
+opentracing:
+  jaeger:
+    log-spans: false
+
 management:
   endpoints:
     web:
