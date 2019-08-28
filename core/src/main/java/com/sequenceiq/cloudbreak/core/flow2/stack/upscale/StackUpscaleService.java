@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -64,6 +65,9 @@ public class StackUpscaleService {
 
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
+
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Inject
     private MetadataSetupService metadataSetupService;
@@ -212,22 +216,8 @@ public class StackUpscaleService {
 
     private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
         LOGGER.info("Get first valid PrivateId of instanceGroups");
-        long highest = 0;
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            LOGGER.info("Checking of instanceGroup: {}", instanceGroup.getGroupName());
-            for (InstanceMetaData metaData : instanceGroup.getAllInstanceMetaData()) {
-                Long privateId = metaData.getPrivateId();
-                LOGGER.info("InstanceMetaData metaData: privateId: {}, instanceGroupName: {}, instanceId: {}, status: {}",
-                        privateId, metaData.getInstanceGroupName(), metaData.getInstanceId(), metaData.getInstanceStatus());
-                if (privateId == null) {
-                    continue;
-                }
-                if (privateId > highest) {
-                    highest = privateId;
-                }
-            }
-        }
-        LOGGER.info("highest privateId: {}", highest);
-        return highest == 0 ? 0 : highest + 1;
+        Long instanceCount = instanceMetaDataRepository.countByInstanceGroupIn(instanceGroups);
+        LOGGER.info("Number of instance metadata for cluster: {}", instanceCount);
+        return instanceCount;
     }
 }
