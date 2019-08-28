@@ -190,23 +190,26 @@ public class GrpcUmsClient {
     }
 
     /**
-     * Creates new machine user
+     * Creates new machine user, it queries against the machine user if it has already exist
      *
      * @param machineUserName new machine user name
      * @param userCrn         the CRN of the user
      * @param requestId       an optional request Id
-     * @return the user associated with this user CRN
+     * @return the machine user crn
      */
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
-    public MachineUser createMachineUser(String machineUserName, String userCrn, Optional<String> requestId) {
+    public Optional<String> createMachineUser(String machineUserName, String userCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             String generatedRequestId = requestId.orElse(UUID.randomUUID().toString());
             LOGGER.debug("Creating machine user {} for {} using request ID {}", machineUserName, userCrn, generatedRequestId);
-            client.createMachineUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
-            MachineUser machineUser = client.getMachineUserForUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
-            LOGGER.debug("Machine User information retrieved for userCrn: {}", machineUser.getCrn());
-            return machineUser;
+            Optional<String> machineUserCrn = client.createMachineUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
+            if (machineUserCrn.isEmpty()) {
+                MachineUser machineUser = client.getMachineUserForUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
+                machineUserCrn = Optional.of(machineUser.getCrn());
+            }
+            LOGGER.debug("Machine User information retrieved for userCrn: {}", machineUserCrn.orElse(null));
+            return machineUserCrn;
         } catch (StatusRuntimeException ex) {
             if (Status.NOT_FOUND.getCode().equals(ex.getStatus().getCode())) {
                 String errMessage = String.format("Machine user with name %s is not found yet", machineUserName);
@@ -390,11 +393,11 @@ public class GrpcUmsClient {
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn,
             String roleCrn, UserManagementProto.AccessKeyType.Value accessKeyType) {
-        UserManagementProto.MachineUser machineUser = createMachineUser(machineUserName, userCrn, Optional.empty());
+        Optional<String> machineUserCrn = createMachineUser(machineUserName, userCrn, Optional.empty());
         if (StringUtils.isNotEmpty(roleCrn)) {
-            assignMachineUserRole(userCrn, machineUser.getCrn(), roleCrn, Optional.empty());
+            assignMachineUserRole(userCrn, machineUserCrn.orElse(null), roleCrn, Optional.empty());
         }
-        return generateAccessSecretKeyPair(userCrn, machineUser.getCrn(), Optional.empty(), accessKeyType);
+        return generateAccessSecretKeyPair(userCrn, machineUserCrn.orElse(null), Optional.empty(), accessKeyType);
     }
 
     /**

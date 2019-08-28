@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -249,16 +250,17 @@ public class UmsClient {
     }
 
     /**
-     * Create new machine user - only if it does not exist
+     * Create new machine user - only if it does not exist (returns the machine user crn if the user newly created)
      *
      * @param requestId       id of the request
      * @param userCrn         actor useridentifier
      * @param machineUserName machine user name that will be created
      */
-    public void createMachineUser(String requestId, String userCrn, String machineUserName) {
+    public Optional<String> createMachineUser(String requestId, String userCrn, String machineUserName) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
+        Optional<String> emptyResponse = Optional.empty();
         try {
             UserManagementProto.CreateMachineUserResponse response = newStub(requestId).createMachineUser(
                     UserManagementProto.CreateMachineUserRequest.newBuilder()
@@ -266,6 +268,9 @@ public class UmsClient {
                             .setMachineUserName(machineUserName)
                             .build());
             LOGGER.info("Machine user created: {}.", response.getMachineUser().getCrn());
+            if (response.getMachineUser() != null) {
+                return Optional.of(response.getMachineUser().getCrn());
+            }
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode().equals(
                     io.grpc.Status.ALREADY_EXISTS.getCode())) {
@@ -274,6 +279,7 @@ public class UmsClient {
                 throw e;
             }
         }
+        return emptyResponse;
     }
 
     /**
