@@ -79,6 +79,8 @@ public class DBStack {
     @Convert(converter = CrnConverter.class)
     private Crn ownerCrn;
 
+    private String userName;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "dbStack")
     private DBStackStatus dbStackStatus;
 
@@ -200,6 +202,14 @@ public class DBStack {
 
     public void setOwnerCrn(Crn ownerCrn) {
         this.ownerCrn = ownerCrn;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public Crn getResourceCrn() {

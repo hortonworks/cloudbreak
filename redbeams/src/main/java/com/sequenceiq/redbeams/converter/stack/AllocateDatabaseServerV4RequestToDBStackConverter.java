@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.security.CrnUser;
+import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -95,6 +97,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     @Inject
     private NetworkParameterAdder networkParameterAdder;
 
+    @Inject
+    private CrnUserDetailsService crnUserDetailsService;
+
     @PostConstruct
     public void initSupportedPlatforms() {
         if (dbServiceSupportedPlatforms.isEmpty()) {
@@ -104,10 +109,13 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     public DBStack convert(AllocateDatabaseServerV4Request source, String ownerCrnString) {
         Crn ownerCrn = Crn.safeFromString(ownerCrnString);
+        CrnUser user = crnUserDetailsService.loadUserByUsername(ownerCrnString);
 
         DetailedEnvironmentResponse environment = environmentService.getByCrn(source.getEnvironmentCrn());
 
         DBStack dbStack = new DBStack();
+        dbStack.setOwnerCrn(ownerCrn);
+        dbStack.setUserName(user.getEmail());
         CloudPlatform cloudPlatform = updateCloudPlatformAndRelatedFields(source, dbStack, environment.getCloudPlatform());
         dbStack.setName(source.getName() != null ? source.getName() : generateDatabaseServerStackName(environment.getName()));
         dbStack.setEnvironmentId(source.getEnvironmentCrn());
@@ -127,8 +135,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         }
 
         Instant now = clock.getCurrentInstant();
-        dbStack.setOwnerCrn(ownerCrn);
-        dbStack.setTags(getTags(ownerCrn, cloudPlatform, now.getEpochSecond()));
+        dbStack.setTags(getTags(user.getEmail(), cloudPlatform, now.getEpochSecond()));
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
 
         return dbStack;
@@ -258,14 +265,14 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     // compare to freeipa CostTaggingService
 
-    private Json getTags(Crn ownerCrn, CloudPlatform cloudPlatform, long now) {
+    private Json getTags(String userEmail, CloudPlatform cloudPlatform, long now) {
         // freeipa currently uses account ID for username / owner
-        String user = ownerCrn.getUserId();
+//        String user = ownerCrn.getUserId();
 
         Map<String, String> defaultTags = new HashMap<>();
-        defaultTags.put(safeTagString(CB_USER_NAME.key(), cloudPlatform), safeTagString(user, cloudPlatform));
+        defaultTags.put(safeTagString(CB_USER_NAME.key(), cloudPlatform), safeTagString(userEmail, cloudPlatform));
         defaultTags.put(safeTagString(CB_VERSION.key(), cloudPlatform), safeTagString(version, cloudPlatform));
-        defaultTags.put(safeTagString(OWNER.key(), cloudPlatform), safeTagString(user, cloudPlatform));
+        defaultTags.put(safeTagString(OWNER.key(), cloudPlatform), safeTagString(userEmail, cloudPlatform));
         defaultTags.put(safeTagString(CB_CREATION_TIMESTAMP.key(), cloudPlatform),
                 safeTagString(String.valueOf(now), cloudPlatform));
 
