@@ -1,5 +1,9 @@
 server.servlet.context-path: "/cb"
 
+opentracing:
+  jaeger:
+    log-spans: false
+
 management:
   endpoints:
     web:

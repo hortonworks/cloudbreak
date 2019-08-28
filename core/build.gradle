@@ -206,6 +206,7 @@ dependencies {
 
   compile group: 'io.opentracing.contrib',             name: 'opentracing-spring-jaeger-starter',       version: opentracingSpringJaegerStarterVersion
   compile group: 'io.opentracing.contrib',             name: 'opentracing-jaxrs2',                      version: opentracingJaxrs2Version
+  compile group: 'io.opentracing.contrib',             name: 'opentracing-jdbc',                        version: opentracingJdbcVersion
 
   implementation     ('io.swagger:swagger-jersey2-jaxrs') {
     exclude group: 'org.yaml'

@@ -44,6 +44,7 @@ dependencies {
 
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
   implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                       version: opentracingJaxrs2Version
+  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                         version: opentracingJdbcVersion
 
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                     version: '1.5.3'
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {

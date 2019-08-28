@@ -18,6 +18,7 @@ import io.opentracing.contrib.jaxrs2.client.ClientSpanDecorator;
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import io.opentracing.contrib.jaxrs2.server.ServerSpanDecorator;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
+import io.opentracing.util.GlobalTracer;
 
 @Configuration
 public class TracingConfiguration {
@@ -26,6 +27,7 @@ public class TracingConfiguration {
 
     public TracingConfiguration(Tracer tracer) {
         this.tracer = tracer;
+        GlobalTracer.registerIfAbsent(tracer);
     }
 
     @Bean

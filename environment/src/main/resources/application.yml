@@ -2,6 +2,10 @@ server.servlet.context-path: "/environmentservice"
 
 server.port: 8088
 
+opentracing:
+  jaeger:
+    log-spans: false
+
 management:
   endpoints:
     web:
