@@ -44,12 +44,12 @@ export UAA_DEFAULT_USER_PW=YOUR_PASSWORD
 export VAULT_AUTO_UNSEAL=true
 ```
 
-In order to run Cloudbreak, Periscope, Datalake, FreeIPA, Redbeams, and Environment locally (from IDEA or the command line), put this into your Profile:
+In order to run Cloudbreak, Periscope, Datalake, FreeIPA, Redbeams, Environment, IDBroker Mapping Management, and Environments2 API services locally (from IDEA or the command line), put this into your Profile:
 ```
-export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake,freeipa,redbeams,environment
+export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake,freeipa,redbeams,environment,idbmms,environments2-api
 ```
 
-Containers for these applications won't be started and Uluwatu will connect to Java processes running on your host.
+Containers for these applications won't be started and Uluwatu (or the `cdp` & `dp` CLI tools) will connect to Java processes running on your host.
 You don't have to put all of the applications into local-dev mode; the value of the variable could be any combination.
 
 Then run these commands:
