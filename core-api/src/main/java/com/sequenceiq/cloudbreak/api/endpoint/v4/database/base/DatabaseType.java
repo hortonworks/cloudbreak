@@ -13,5 +13,6 @@ public enum DatabaseType {
     BEACON,
     REGISTRY,
     HIVE_DAS,
-    HUE
+    HUE,
+    STREAMS_MESSAGING_MANAGER
 }

@@ -23,6 +23,10 @@ public class GeneralClusterConfigs {
 
     private String password;
 
+    private String cloudbreakAmbariUser;
+
+    private String cloudbreakAmbariPassword;
+
     private ExecutorType executorType;
 
     private String clusterManagerIp;
@@ -63,6 +67,14 @@ public class GeneralClusterConfigs {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public void setCloudbreakAmbariUser(String cloudbreakAmbariUser) {
+        this.cloudbreakAmbariUser = cloudbreakAmbariUser;
+    }
+
+    public void setCloudbreakAmbariPassword(String cloudbreakAmbariPassword) {
+        this.cloudbreakAmbariPassword = cloudbreakAmbariPassword;
     }
 
     public void setUserName(String userName) {
@@ -111,6 +123,14 @@ public class GeneralClusterConfigs {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getCloudbreakAmbariUser() {
+        return cloudbreakAmbariUser;
+    }
+
+    public String getCloudbreakAmbariPassword() {
+        return cloudbreakAmbariPassword;
     }
 
     public ExecutorType getExecutorType() {
