@@ -1,82 +1,79 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.ec2.model.AvailabilityZone;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 
-@RunWith(MockitoJUnitRunner.class)
 public class AwsCreatedSubnetProviderTest {
 
-    private static final String CIDR_1 = "1.1.1.1/24";
+    private static final int NUMBER_OF_SUBNETS = 6;
 
-    private static final String CIDR_2 = "2.2.2.2/24";
+    private static final int NUMBER_OF_PUBLIC_SUBNETS = 3;
 
-    private static final String CIDR_3 = "3.3.3.3/24";
-
-    private static final String AZ_1 = "London";
-
-    private static final String AZ_2 = "Bristol";
-
-    private static final String AZ_3 = "Manchester";
-
-    private static final String AZ_4 = "Oxford";
-
-    @InjectMocks
-    private AwsCloudSubnetProvider underTest;
+    private AwsCreatedSubnetProvider underTest = new AwsCreatedSubnetProvider();
 
     @Test
-    public void testProvideWhenTwoAzAvailable() {
-        AmazonEC2Client ec2Client = createEc2Client(List.of(createAZ(AZ_1), createAZ(AZ_2)));
-        List<String> subnetCidrs = List.of(CIDR_1, CIDR_2, CIDR_3);
+    public void testProvideShouldReturnTheSubnetsFromCloudformationOutput() {
+        Map<String, String> output = new HashMap<>();
+        output.put("PublicSubnetId0", "public-subnet-0");
+        output.put("PrivateSubnetId0", "private-subnet-0");
+        output.put("PublicSubnetCidr0", "10.0.0.16/19");
+        output.put("PrivateSubnetCidr0", "10.0.0.32/19");
+        output.put("Az0", "eu-west-a");
 
-        List<CreatedSubnet> actual = underTest.provide(ec2Client, subnetCidrs);
+        output.put("PublicSubnetId1", "public-subnet-1");
+        output.put("PrivateSubnetId1", "private-subnet-1");
+        output.put("PublicSubnetCidr1", "10.0.0.16/19");
+        output.put("PrivateSubnetCidr1", "10.0.0.32/19");
+        output.put("Az1", "eu-west-a");
 
-        assertEquals(CIDR_1, actual.get(0).getCidr());
-        assertEquals(AZ_1, actual.get(0).getAvailabilityZone());
-        assertEquals(CIDR_2, actual.get(1).getCidr());
-        assertEquals(AZ_2, actual.get(1).getAvailabilityZone());
-        assertEquals(CIDR_3, actual.get(2).getCidr());
-        assertEquals(AZ_2, actual.get(2).getAvailabilityZone());
+        output.put("PublicSubnetId2", "public-subnet-1");
+        output.put("PrivateSubnetId2", "private-subnet-1");
+        output.put("PublicSubnetCidr2", "10.0.0.16/19");
+        output.put("PrivateSubnetCidr2", "10.0.0.32/19");
+        output.put("Az2", "eu-west-a");
+
+        Set<CreatedSubnet> actual = underTest.provide(output, NUMBER_OF_SUBNETS, true);
+
+        assertEquals(NUMBER_OF_SUBNETS, actual.size());
+        assertTrue(actual.stream().allMatch(createdSubnet -> output.containsValue(createdSubnet.getSubnetId())));
+        assertTrue(actual.stream().allMatch(createdSubnet -> output.containsValue(createdSubnet.getCidr())));
+        assertTrue(actual.stream().allMatch(createdSubnet -> output.containsValue(createdSubnet.getAvailabilityZone())));
     }
 
     @Test
-    public void testProvideWhenFourAzAvailable() {
-        AmazonEC2Client ec2Client = createEc2Client(List.of(createAZ(AZ_1), createAZ(AZ_2), createAZ(AZ_3), createAZ(AZ_4)));
-        List<String> subnetCidrs = List.of(CIDR_1, CIDR_2, CIDR_3);
+    public void testProvideShouldReturnThePublicSubnetsWhenThePrivateSubnetsAreDisabled() {
+        Map<String, String> output = new HashMap<>();
+        output.put("PublicSubnetId0", "public-subnet-0");
+        output.put("PublicSubnetCidr0", "10.0.0.16/19");
+        output.put("Az0", "eu-west-a");
 
-        List<CreatedSubnet> actual = underTest.provide(ec2Client, subnetCidrs);
+        output.put("PublicSubnetId1", "public-subnet-1");
+        output.put("PublicSubnetCidr1", "10.0.0.16/19");
+        output.put("Az1", "eu-west-a");
 
-        assertEquals(CIDR_1, actual.get(0).getCidr());
-        assertEquals(AZ_1, actual.get(0).getAvailabilityZone());
-        assertEquals(CIDR_2, actual.get(1).getCidr());
-        assertEquals(AZ_2, actual.get(1).getAvailabilityZone());
-        assertEquals(CIDR_3, actual.get(2).getCidr());
-        assertEquals(AZ_3, actual.get(2).getAvailabilityZone());
+        output.put("PublicSubnetId2", "public-subnet-1");
+        output.put("PublicSubnetCidr2", "10.0.0.16/19");
+        output.put("Az2", "eu-west-a");
+
+        Set<CreatedSubnet> actual = underTest.provide(output, NUMBER_OF_SUBNETS, false);
+
+        assertEquals(NUMBER_OF_PUBLIC_SUBNETS, actual.size());
+        assertTrue(actual.stream().allMatch(createdSubnet -> output.containsValue(createdSubnet.getSubnetId())));
+        assertTrue(actual.stream().allMatch(createdSubnet -> output.containsValue(createdSubnet.getCidr())));
+        assertTrue(actual.stream().allMatch(createdSubnet -> output.containsValue(createdSubnet.getAvailabilityZone())));
     }
 
-    private AmazonEC2Client createEc2Client(List<AvailabilityZone> availabilityZones) {
-        AmazonEC2Client ec2Client = Mockito.mock(AmazonEC2Client.class);
-        DescribeAvailabilityZonesResult result = new DescribeAvailabilityZonesResult();
-        result.setAvailabilityZones(availabilityZones);
-        Mockito.when(ec2Client.describeAvailabilityZones()).thenReturn(result);
-        return ec2Client;
+    @Test(expected = CloudConnectorException.class)
+    public void testProvideShouldThrowAnExceptionWhenAValueIsMissingFromTheCloudformationOutput() {
+        underTest.provide(new HashMap<>(), NUMBER_OF_SUBNETS, true);
     }
-
-    private AvailabilityZone createAZ(String name) {
-        AvailabilityZone availabilityZone = new AvailabilityZone();
-        availabilityZone.setZoneName(name);
-        return availabilityZone;
-    }
-
 }

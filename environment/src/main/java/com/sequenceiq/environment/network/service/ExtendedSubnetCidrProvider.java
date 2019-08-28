@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExtendedSubnetCidrProvider implements SubnetCidrProvider {
 
-    private static final int NUMBER_OF_SUBNETS = 3;
+    private static final int NUMBER_OF_SUBNETS = 6;
 
     private static final int PLUS_BITS = 32;
 

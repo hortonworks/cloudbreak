@@ -74,7 +74,7 @@ class AwsEnvironmentNetworkConverterTest {
                 .withAws(AwsParams.AwsParamsBuilder.anAwsParams().withVpcId(VPC_ID).build())
                 .withName(NETWORK_NAME)
                 .withNetworkCidr(NETWORK_CIDR)
-                .withSubnetIds(SUBNET_IDS)
+                .withSubnetMetas(createSubnetMetas())
                 .build();
 
         AwsNetwork actual = (AwsNetwork) underTest.convert(environment, networkDto, Map.of());
@@ -83,7 +83,7 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(VPC_ID, actual.getVpcId());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.EXISTING, actual.getRegistrationType());
-        assertEquals(SUBNET_IDS, actual.getSubnetIds());
+        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -92,7 +92,7 @@ class AwsEnvironmentNetworkConverterTest {
         Environment environment = createEnvironment();
         NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
                 .withNetworkCidr(NETWORK_CIDR)
-                .withSubnetIds(SUBNET_IDS)
+                .withSubnetMetas(createSubnetMetas())
                 .build();
 
         AwsNetwork actual = (AwsNetwork) underTest.convert(environment, networkDto, Map.of());
@@ -101,7 +101,7 @@ class AwsEnvironmentNetworkConverterTest {
         assertNull(actual.getVpcId());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
-        assertEquals(SUBNET_IDS, actual.getSubnetIds());
+        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -133,7 +133,7 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(createdCloudNetwork.getStackName(), actual.getName());
         assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
         assertEquals(VPC_ID, actual.getVpcId());
-        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetIds()));
+        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
 
         assertEquals(SUBNET_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getId());
         assertEquals(SUBNET_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getName());
@@ -159,19 +159,19 @@ class AwsEnvironmentNetworkConverterTest {
         createdSubnet1.setSubnetId(SUBNET_1);
         createdSubnet1.setAvailabilityZone(AZ_1);
         createdSubnet1.setCidr(SUBNET_CIDR_1);
-        createdSubnet1.setPrivateSubnet(true);
+        createdSubnet1.setPublicSubnet(true);
 
         CreatedSubnet createdSubnet2 = new CreatedSubnet();
         createdSubnet2.setSubnetId(SUBNET_2);
         createdSubnet2.setAvailabilityZone(AZ_2);
         createdSubnet2.setCidr(SUBNET_CIDR_2);
-        createdSubnet2.setPrivateSubnet(true);
+        createdSubnet2.setPublicSubnet(true);
 
         CreatedSubnet createdSubnet3 = new CreatedSubnet();
         createdSubnet3.setSubnetId(SUBNET_3);
         createdSubnet3.setAvailabilityZone(AZ_3);
         createdSubnet3.setCidr(SUBNET_CIDR_3);
-        createdSubnet3.setPrivateSubnet(true);
+        createdSubnet3.setPublicSubnet(true);
         return Set.of(createdSubnet1, createdSubnet2, createdSubnet3);
     }
 
@@ -179,12 +179,15 @@ class AwsEnvironmentNetworkConverterTest {
         AwsNetwork awsNetwork = new AwsNetwork();
         awsNetwork.setId(1L);
         awsNetwork.setName("network-1");
-        awsNetwork.setSubnetIds(Set.of(SUBNET_1, SUBNET_2, SUBNET_3));
-        awsNetwork.setSubnetMetas(Map.of(SUBNET_1, new CloudSubnet(), SUBNET_2, new CloudSubnet(), SUBNET_3, new CloudSubnet()));
+        awsNetwork.setSubnetMetas(createSubnetMetas());
         awsNetwork.setNetworkCidr(NETWORK_CIDR);
         awsNetwork.setResourceCrn("crn");
         awsNetwork.setVpcId(VPC_ID);
         return awsNetwork;
+    }
+
+    private Map<String, CloudSubnet> createSubnetMetas() {
+        return Map.of(SUBNET_1, new CloudSubnet(), SUBNET_2, new CloudSubnet(), SUBNET_3, new CloudSubnet());
     }
 
     private Environment createEnvironment() {

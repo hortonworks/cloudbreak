@@ -80,7 +80,7 @@ class AzureEnvironmentNetworkConverterTest {
                         .build())
                 .withName(NETWORK_NAME)
                 .withNetworkCidr(NETWORK_CIDR)
-                .withSubnetIds(SUBNET_IDS)
+                .withSubnetMetas(createSubnetMetas())
                 .build();
 
         AzureNetwork actual = (AzureNetwork) underTest.convert(environment, networkDto, Map.of());
@@ -92,7 +92,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertTrue(actual.getNoPublicIp());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.EXISTING, actual.getRegistrationType());
-        assertEquals(SUBNET_IDS, actual.getSubnetIds());
+        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -101,7 +101,7 @@ class AzureEnvironmentNetworkConverterTest {
         Environment environment = createEnvironment();
         NetworkDto networkDto = NetworkDto.Builder.aNetworkDto()
                 .withNetworkCidr(NETWORK_CIDR)
-                .withSubnetIds(SUBNET_IDS)
+                .withSubnetMetas(createSubnetMetas())
                 .build();
 
         AzureNetwork actual = (AzureNetwork) underTest.convert(environment, networkDto, Map.of());
@@ -113,7 +113,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertNull(actual.getNoFirewallRules());
         assertEquals(NETWORK_CIDR, actual.getNetworkCidr());
         assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
-        assertEquals(SUBNET_IDS, actual.getSubnetIds());
+        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -147,8 +147,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(RegistrationType.CREATE_NEW, actual.getRegistrationType());
         assertEquals(NETWORK_ID, actual.getNetworkId());
         assertEquals(RESOURCE_GROUP_NAME, actual.getResourceGroupName());
-
-        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetIds()));
+        assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
 
         assertEquals(SUBNET_1, actual.getSubnetMetas().get(SUBNET_1).getId());
         assertEquals(SUBNET_1, actual.getSubnetMetas().get(SUBNET_1).getName());
@@ -174,19 +173,19 @@ class AzureEnvironmentNetworkConverterTest {
         createdSubnet1.setSubnetId(SUBNET_1);
         createdSubnet1.setAvailabilityZone(AZ_1);
         createdSubnet1.setCidr(SUBNET_CIDR_1);
-        createdSubnet1.setPrivateSubnet(true);
+        createdSubnet1.setPublicSubnet(true);
 
         CreatedSubnet createdSubnet2 = new CreatedSubnet();
         createdSubnet2.setSubnetId(SUBNET_2);
         createdSubnet2.setAvailabilityZone(AZ_2);
         createdSubnet2.setCidr(SUBNET_CIDR_2);
-        createdSubnet2.setPrivateSubnet(true);
+        createdSubnet2.setPublicSubnet(true);
 
         CreatedSubnet createdSubnet3 = new CreatedSubnet();
         createdSubnet3.setSubnetId(SUBNET_3);
         createdSubnet3.setAvailabilityZone(AZ_3);
         createdSubnet3.setCidr(SUBNET_CIDR_3);
-        createdSubnet3.setPrivateSubnet(true);
+        createdSubnet3.setPublicSubnet(true);
         return Set.of(createdSubnet1, createdSubnet2, createdSubnet3);
     }
 
@@ -194,8 +193,7 @@ class AzureEnvironmentNetworkConverterTest {
         AzureNetwork azureNetwork = new AzureNetwork();
         azureNetwork.setId(1L);
         azureNetwork.setName("network-1");
-        azureNetwork.setSubnetIds(Set.of(SUBNET_1, SUBNET_2, SUBNET_3));
-        azureNetwork.setSubnetMetas(Map.of(SUBNET_1, new CloudSubnet(), SUBNET_2, new CloudSubnet(), SUBNET_3, new CloudSubnet()));
+        azureNetwork.setSubnetMetas(createSubnetMetas());
         azureNetwork.setNetworkCidr(NETWORK_CIDR);
         azureNetwork.setResourceCrn("crn");
         azureNetwork.setNetworkId(NETWORK_ID);
@@ -203,6 +201,10 @@ class AzureEnvironmentNetworkConverterTest {
         azureNetwork.setNoFirewallRules(true);
         azureNetwork.setNoPublicIp(true);
         return azureNetwork;
+    }
+
+    private Map<String, CloudSubnet> createSubnetMetas() {
+        return Map.of(SUBNET_1, new CloudSubnet(), SUBNET_2, new CloudSubnet(), SUBNET_3, new CloudSubnet());
     }
 
     private Environment createEnvironment() {

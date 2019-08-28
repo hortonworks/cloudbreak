@@ -69,7 +69,7 @@ public class NetworkService {
     }
 
     public Map<String, CloudSubnet> retrieveSubnetMetadata(Environment environment, NetworkDto network) {
-        if (network == null || network.getSubnetIds().isEmpty()) {
+        if (network == null || network.getPublicSubnetIds().isEmpty()) {
             return Map.of();
         } else if (AWS.equalsIgnoreCase(environment.getCloudPlatform())) {
             String regionName = environment.getRegionSet().iterator().next().getName();

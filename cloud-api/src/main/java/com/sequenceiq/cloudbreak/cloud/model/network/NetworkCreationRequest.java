@@ -27,6 +27,8 @@ public class NetworkCreationRequest {
 
     private final String stackName;
 
+    private final boolean privateSubnetEnabled;
+
     private NetworkCreationRequest(Builder builder) {
         this.envId = builder.envId;
         this.envName = builder.envName;
@@ -38,6 +40,7 @@ public class NetworkCreationRequest {
         this.noPublicIp = builder.noPublicIp;
         this.noFirewallRules = builder.noFirewallRules;
         this.stackName = builder.stackName;
+        this.privateSubnetEnabled = builder.privateSubnetEnabled;
     }
 
     public String getEnvName() {
@@ -80,6 +83,10 @@ public class NetworkCreationRequest {
         return envId;
     }
 
+    public boolean isPrivateSubnetEnabled() {
+        return privateSubnetEnabled;
+    }
+
     public static class Builder {
         private Long envId;
 
@@ -100,6 +107,8 @@ public class NetworkCreationRequest {
         private boolean noFirewallRules;
 
         private String stackName;
+
+        private boolean privateSubnetEnabled;
 
         public Builder withEnvId(Long envId) {
             this.envId = envId;
@@ -148,6 +157,11 @@ public class NetworkCreationRequest {
 
         public Builder withStackName(String stackName) {
             this.stackName = stackName;
+            return this;
+        }
+
+        public Builder withPrivateSubnetEnabled(boolean privateSubnetEnabled) {
+            this.privateSubnetEnabled = privateSubnetEnabled;
             return this;
         }
 

@@ -22,7 +22,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Template;
@@ -41,7 +41,7 @@ public class AwsNetworkCfTemplateProviderTest {
     @Mock
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
-    private List<CreatedSubnet> createdSubnetList = createCloudSubnetList();
+    private List<SubnetRequest> subnetRequestList = createSubnetRequestList();
 
     @Before
     public void before() throws IOException, TemplateException {
@@ -54,14 +54,29 @@ public class AwsNetworkCfTemplateProviderTest {
     }
 
     @Test
-    public void testProvideShouldReturnTheTemplate() throws IOException, TemplateException {
+    public void testProvideShouldReturnTheTemplateWhenPrivateSubnetCreationEnabled() throws IOException, TemplateException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode expectedJson = objectMapper.readTree(new File("src/test/resources/json/aws-cf-network-private-subnet.json"));
+
+
+        when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
+
+        String actual = underTest.provide(VPC_CIDR, subnetRequestList, true);
+
+        JsonNode json = objectMapper.readTree(actual);
+        assertEquals(expectedJson, json);
+        verify(freeMarkerTemplateUtils).processTemplateIntoString(any(Template.class), anyMap());
+    }
+
+    @Test
+    public void testProvideShouldReturnTheTemplateWhenPrivateSubnetCreationDisabled() throws IOException, TemplateException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode expectedJson = objectMapper.readTree(new File("src/test/resources/json/aws-cf-network.json"));
 
 
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
 
-        String actual = underTest.provide(VPC_CIDR, createdSubnetList);
+        String actual = underTest.provide(VPC_CIDR, subnetRequestList, false);
 
         JsonNode json = objectMapper.readTree(actual);
         assertEquals(expectedJson, json);
@@ -72,20 +87,22 @@ public class AwsNetworkCfTemplateProviderTest {
     public void testProvideShouldThrowExceptionWhenTemplateProcessHasFailed() throws IOException, TemplateException {
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(Template.class), anyMap())).thenThrow(TemplateException.class);
 
-        underTest.provide(VPC_CIDR, createdSubnetList);
+        underTest.provide(VPC_CIDR, subnetRequestList, true);
 
         verify(freeMarkerTemplateUtils).processTemplateIntoString(any(Template.class), anyMap());
     }
 
-    private List<CreatedSubnet> createCloudSubnetList() {
-        CreatedSubnet createdSubnet1 = new CreatedSubnet();
-        createdSubnet1.setCidr("2.2.2.2/24");
-        createdSubnet1.setAvailabilityZone("az1");
+    private List<SubnetRequest> createSubnetRequestList() {
+        SubnetRequest subnetRequest1 = new SubnetRequest();
+        subnetRequest1.setPublicSubnetCidr("2.2.2.2/24");
+        subnetRequest1.setPrivateSubnetCidr("2.2.2.2/24");
+        subnetRequest1.setAvailabilityZone("az1");
 
-        CreatedSubnet createdSubnet2 = new CreatedSubnet();
-        createdSubnet2.setCidr("2.2.2.2/24");
-        createdSubnet2.setAvailabilityZone("az1");
+        SubnetRequest subnetRequest2 = new SubnetRequest();
+        subnetRequest2.setPublicSubnetCidr("2.2.2.2/24");
+        subnetRequest2.setPrivateSubnetCidr("2.2.2.2/24");
+        subnetRequest2.setAvailabilityZone("az2");
 
-        return List.of(createdSubnet1, createdSubnet2);
+        return List.of(subnetRequest1, subnetRequest2);
     }
 }
