@@ -1,5 +1,15 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.model.Permission;
+import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.user.UserService;
+import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.util.FMSUtil;
+
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -8,14 +18,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.model.Permission;
-import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.service.freeipa.user.UserService;
 
 @Service
 public class FreeIpaPostInstallService {
@@ -57,5 +59,12 @@ public class FreeIpaPostInstallService {
             freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);
         }
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
+
+        // CDPCP-591 - Enable User Sync after environment created
+        Set<String> environmentCrnFilter = new HashSet<>();
+        environmentCrnFilter.add(stack.getEnvironmentCrn());
+        userService.synchronizeUsers(
+            threadBasedUserCrnProvider.getAccountId(), FMSUtil.checkUserCrn(threadBasedUserCrnProvider.getUserCrn()),
+            environmentCrnFilter, Set.of(), Set.of());
     }
 }

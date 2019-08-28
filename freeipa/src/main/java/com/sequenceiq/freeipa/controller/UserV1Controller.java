@@ -1,14 +1,5 @@
 package com.sequenceiq.freeipa.controller;
 
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
-
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
@@ -22,6 +13,16 @@ import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningEx
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
 import com.sequenceiq.freeipa.service.freeipa.user.SyncOperationStatusService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserService;
+import com.sequenceiq.freeipa.util.FMSUtil;
+
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
 
 @Controller
 public class UserV1Controller implements UserV1Endpoint {
@@ -42,7 +43,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
-        String userCrn = checkUserCrn();
+        String userCrn = FMSUtil.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
         String accountId = threadBaseUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeUser() requested for user {} in account {}", userCrn, accountId);
         Set<String> environmentCrnFilter = request == null ? Set.of() : nullToEmpty(request.getEnvironments());
@@ -65,7 +66,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
-        String userCrn = checkUserCrn();
+        String userCrn = FMSUtil.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
         String accountId = threadBaseUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
@@ -75,7 +76,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
-        String userCrn = checkUserCrn();
+        String userCrn = FMSUtil.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
         String accountId = threadBaseUserCrnProvider.getAccountId();
         LOGGER.debug("setPassword() requested for user {} in account {}", userCrn, accountId);
 
@@ -94,14 +95,6 @@ public class UserV1Controller implements UserV1Endpoint {
             throw new SyncOperationAlreadyRunningException(syncOperationStatus.getError());
         }
         return syncOperationStatus;
-    }
-
-    private String checkUserCrn() {
-        String userCrn = threadBaseUserCrnProvider.getUserCrn();
-        if (userCrn == null) {
-            throw new BadRequestException("User CRN must be provided");
-        }
-        return userCrn;
     }
 
     private Set<String> nullToEmpty(Set<String> set) {
