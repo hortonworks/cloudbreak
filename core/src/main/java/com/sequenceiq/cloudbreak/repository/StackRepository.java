@@ -113,7 +113,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "LEFT JOIN s.instanceGroups ig "
             + "LEFT JOIN ig.instanceMetaData im "
             + "LEFT JOIN s.securityConfig sc "
-            + "WHERE instanceGroupType = 'GATEWAY' AND instanceMetadataType = 'GATEWAY_PRIMARY' AND s.terminated = null")
+            + "WHERE instanceGroupType = 'GATEWAY' AND instanceMetadataType = 'GATEWAY_PRIMARY' AND s.terminated = null AND im.instanceStatus <> 'TERMINATED'")
     Set<AutoscaleStack> findAliveOnes();
 
     @DisableCheckPermissions

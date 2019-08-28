@@ -20,6 +20,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -56,6 +58,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @ManyToOne
     private Stack stack;
 
+    @Where(clause = "instanceStatus <> 'TERMINATED' AND terminationDate IS NULL")
     @OneToMany(mappedBy = "instanceGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<InstanceMetaData> instanceMetaData = new HashSet<>();
 

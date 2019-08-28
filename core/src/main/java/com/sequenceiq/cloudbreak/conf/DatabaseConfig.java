@@ -139,6 +139,7 @@ public class DatabaseConfig {
         Properties properties = new Properties();
         properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddlStrategy);
         properties.setProperty("hibernate.show_sql", Boolean.toString(debug));
+        properties.setProperty("hibernate.generate_statistics", Boolean.toString(debug));
         properties.setProperty("hibernate.format_sql", Boolean.toString(debug));
         properties.setProperty("hibernate.use_sql_comments", Boolean.toString(debug));
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
