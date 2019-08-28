@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaNetworkProvider;
-import com.sequenceiq.freeipa.api.client.FreeIpaApiClientParams;
+import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
 
 @Configuration
 public class FreeIpaApiConfig {
