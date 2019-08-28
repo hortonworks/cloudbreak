@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -50,7 +52,7 @@ public class ClouderaManagerDatabusServiceTest {
                 .setMachineUserName("machineUser")
                 .setCrn(USER_CRN)
                 .build();
-        when(umsClient.createMachineUser(any(), any(), any())).thenReturn(machineUser);
+        when(umsClient.createMachineUser(any(), any(), any())).thenReturn(Optional.of(machineUser.getCrn()));
         doNothing().when(umsClient).assignMachineUserRole(any(), any(), any(), any());
         when(umsClient.createMachineUserAndGenerateKeys(any(), any(), any())).thenReturn(credential);
         // WHEN
