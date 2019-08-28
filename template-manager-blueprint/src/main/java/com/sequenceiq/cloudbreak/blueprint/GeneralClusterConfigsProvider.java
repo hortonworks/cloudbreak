@@ -48,6 +48,8 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setUuid(stack.getUuid());
         generalClusterConfigs.setUserName(cluster.getUserName());
         generalClusterConfigs.setPassword(cluster.getPassword());
+        generalClusterConfigs.setCloudbreakAmbariUser(cluster.getCloudbreakAmbariUser());
+        generalClusterConfigs.setCloudbreakAmbariPassword(cluster.getCloudbreakAmbariPassword());
         generalClusterConfigs.setNodeCount(stack.getFullNodeCount());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
         String blueprintText = cluster.getBlueprint().getBlueprintText();
