@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.client;
+package com.sequenceiq.freeipa.api.client.internal;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.WebTarget;
@@ -17,10 +17,16 @@ import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+
 @Configuration
 public class FreeIpaApiClientConfig {
+
     @Inject
     private UserCrnClientRequestFilter userCrnClientRequestFilter;
+
+    @Inject
+    private ClientTracingFeature clientTracingFeature;
 
     @Bean
     @ConditionalOnBean(FreeIpaApiClientParams.class)
@@ -30,6 +36,7 @@ public class FreeIpaApiClientConfig {
                 .withIgnorePreValidation(freeIpaApiClientParams.isIgnorePreValidation())
                 .withDebug(freeIpaApiClientParams.isRestDebug())
                 .withClientRequestFilter(userCrnClientRequestFilter)
+                .withTracer(clientTracingFeature)
                 .withApiRoot(FreeIpaApi.API_ROOT_CONTEXT)
                 .build();
     }
