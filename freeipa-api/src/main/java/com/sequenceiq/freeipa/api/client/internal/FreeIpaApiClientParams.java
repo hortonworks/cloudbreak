@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.client;
+package com.sequenceiq.freeipa.api.client.internal;
 
 public class FreeIpaApiClientParams {
     private boolean restDebug;

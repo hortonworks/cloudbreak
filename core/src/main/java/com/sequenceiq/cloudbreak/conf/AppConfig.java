@@ -62,15 +62,9 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
-import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
-import com.sequenceiq.environment.client.EnvironmentServiceCrnClient;
-import com.sequenceiq.freeipa.api.client.FreeIpaApiClientParams;
-import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClient;
-import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClientBuilder;
+import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 import com.sequenceiq.sdx.client.internal.SdxApiClientParams;
-import com.sequenceiq.sdx.client.SdxServiceClientBuilder;
-import com.sequenceiq.sdx.client.SdxServiceCrnClient;
 
 @Configuration
 @EnableRetry
@@ -249,15 +243,6 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
-    public FreeIpaApiUserCrnClient freeIpaApiClient() {
-        return new FreeIpaApiUserCrnClientBuilder(freeIpaServerUrl)
-                .withCertificateValidation(certificateValidation)
-                .withIgnorePreValidation(ignorePreValidation)
-                .withDebug(restDebug)
-                .build();
-    }
-
-    @Bean
     public FreeIpaApiClientParams freeIpaApiClientParams() {
         return new FreeIpaApiClientParams(restDebug, certificateValidation, ignorePreValidation, freeIpaServerUrl);
     }
@@ -280,24 +265,6 @@ public class AppConfig implements ResourceLoaderAware {
     @Bean
     public Client restClient() {
         return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
-    }
-
-    @Bean
-    public EnvironmentServiceCrnClient environmentServiceClient() {
-        return new EnvironmentServiceClientBuilder(environmentServerUrl)
-                .withCertificateValidation(certificateValidation)
-                .withIgnorePreValidation(ignorePreValidation)
-                .withDebug(restDebug)
-                .build();
-    }
-
-    @Bean
-    public SdxServiceCrnClient sdxServiceClient() {
-        return new SdxServiceClientBuilder(sdxServerUrl)
-                .withCertificateValidation(certificateValidation)
-                .withIgnorePreValidation(ignorePreValidation)
-                .withDebug(restDebug)
-                .build();
     }
 
     @Bean
