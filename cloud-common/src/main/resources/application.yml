@@ -247,6 +247,10 @@ cb:
     db: ranger
     port: 5432
 
+  cm:
+    admin.role: "ROLE_CONFIGURATOR"
+    user.role: "ROLE_USER"
+
   clouderamanager:
     entries:
       6.1:
