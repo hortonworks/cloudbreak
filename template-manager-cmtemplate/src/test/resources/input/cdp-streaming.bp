@@ -1,0 +1,148 @@
+{
+    "cdhVersion": "7.0.0",
+    "displayName": "CDP - STREAMING",
+    "cmVersion": "7.x.0",
+    "repositories": [
+      "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1/cdh/7.x/parcels/",
+      "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/1/tars/parcel/"
+    ],
+    "products": [
+      {
+        "version": "0.8.0.1",
+        "product": "SCHEMAREGISTRY"
+      },
+      {
+        "version": "2.1.0.1",
+        "product": "STREAMS_MESSAGING_MANAGER"
+      },
+      {
+        "version": "7.0.0-1.cdh7.0.0.p0.1",
+        "product": "CDH"
+      }
+    ],
+    "services": [
+      {
+        "refName": "streams_messaging_manager",
+        "serviceType": "STREAMS_MESSAGING_MANAGER",
+        "serviceConfigs": [
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "kafka_service",
+            "ref": "kafka"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
+            "roleType": "STREAMS_MESSAGING_MANAGER_SERVER",
+            "configs": [],
+            "base": true
+          },
+          {
+            "refName": "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
+            "roleType": "STREAMS_MESSAGING_MANAGER_UI",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hdfs",
+        "serviceType": "HDFS",
+        "roleConfigGroups": [
+          {
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "kafka",
+        "serviceType": "KAFKA",
+        "serviceConfigs": [
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "kafka-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "kafka-KAFKA_BROKER-BASE",
+            "roleType": "KAFKA_BROKER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "schemaregistry",
+        "serviceType": "SCHEMAREGISTRY",
+        "serviceConfigs": [
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
+            "roleType": "SCHEMA_REGISTRY_SERVER",
+            "configs": [
+            ],
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "master",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hdfs-DATANODE-BASE",
+          "hdfs-NAMENODE-BASE",
+          "hdfs-SECONDARYNAMENODE-BASE",
+          "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
+          "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
+          "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE"
+        ]
+      },
+      {
+        "refName": "worker",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "zookeeper-SERVER-BASE"
+        ]
+      }
+    ]
+}
