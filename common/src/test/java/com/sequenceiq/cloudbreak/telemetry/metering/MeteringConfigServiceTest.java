@@ -28,6 +28,17 @@ public class MeteringConfigServiceTest {
     }
 
     @Test
+    public void testCreateMeteringConfigsWithLowercaseServiceType() {
+        // GIVEN
+        // WHEN
+        MeteringConfigView result = underTest.createMeteringConfigs(true, "AWS", "myCrn",
+                "datahub", "1.0.0");
+        // THEN
+        assertTrue(result.isEnabled());
+        assertEquals("DATAHUB", result.getServiceType());
+    }
+
+    @Test
     public void testCreateMeteringConfigsIfDisabled() {
         // GIVEN
         // WHEN
