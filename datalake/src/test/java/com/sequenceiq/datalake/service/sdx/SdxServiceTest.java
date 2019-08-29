@@ -31,6 +31,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -60,7 +61,11 @@ public class SdxServiceTest {
 
     public static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:default:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
 
+    public static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:default:datalake:e438a2db-d650-4132-ae62-242c5ba2f784";
+
     private static final Long SDX_ID = 2L;
+
+    private static final String CLUSTER_NAME = "test-sdx-cluster";
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
@@ -89,6 +94,9 @@ public class SdxServiceTest {
     @Mock
     private SdxNotificationService notificationService;
 
+    @Mock
+    private StackV4Endpoint stackV4Endpoint;
+
     @InjectMocks
     private SdxService sdxService;
 
@@ -99,21 +107,19 @@ public class SdxServiceTest {
 
     @Test
     void getWhenClusterNameProvided() {
-        String clusterName = "test-sdx-cluster";
         SdxCluster sdxCluser = new SdxCluster();
         sdxCluser.setEnvName("env");
-        sdxCluser.setClusterName(clusterName);
-        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq(clusterName))).thenReturn(Optional.of(sdxCluser));
-        SdxCluster returnedSdxCluster = sdxService.getSdxByNameInAccount(USER_CRN, clusterName);
+        sdxCluser.setClusterName(CLUSTER_NAME);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq(CLUSTER_NAME))).thenReturn(Optional.of(sdxCluser));
+        SdxCluster returnedSdxCluster = sdxService.getSdxByNameInAccount(USER_CRN, CLUSTER_NAME);
         Assertions.assertEquals(sdxCluser, returnedSdxCluster);
     }
 
     @Test
     void getWhenClusterCrnProvided() {
-        String clusterName = "test-sdx-cluster";
         SdxCluster sdxCluser = new SdxCluster();
         sdxCluser.setEnvName("env");
-        sdxCluser.setClusterName(clusterName);
+        sdxCluser.setClusterName(CLUSTER_NAME);
         when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(eq("hortonworks"), eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(sdxCluser));
         SdxCluster returnedSdxCluster = sdxService.getByCrn(USER_CRN, ENVIRONMENT_CRN);
         Assertions.assertEquals(sdxCluser, returnedSdxCluster);
@@ -135,7 +141,7 @@ public class SdxServiceTest {
         sdxClusterRequest.setTags(tags);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Collections.singletonList(new SdxCluster()));
         Assertions.assertThrows(BadRequestException.class,
-                () -> sdxService.createSdx(USER_CRN, "test-sdx-cluster", sdxClusterRequest, null), "SDX cluster exists for environment name");
+                () -> sdxService.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null), "SDX cluster exists for environment name");
     }
 
     @Test
@@ -155,14 +161,13 @@ public class SdxServiceTest {
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
-        String sdxName = "test-sdx-cluster";
-        SdxCluster createdSdxCluster = sdxService.createSdx(USER_CRN, sdxName, sdxClusterRequest, null);
+        SdxCluster createdSdxCluster = sdxService.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
         Assertions.assertEquals(id, createdSdxCluster.getId());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
         Assertions.assertEquals("tagecske", capturedSdx.getTags().getValue("mytag"));
-        Assertions.assertEquals(sdxName, capturedSdx.getClusterName());
+        Assertions.assertEquals(CLUSTER_NAME, capturedSdx.getClusterName());
         Assertions.assertEquals(LIGHT_DUTY, capturedSdx.getClusterShape());
         Assertions.assertEquals("envir", capturedSdx.getEnvName());
         Assertions.assertEquals("hortonworks", capturedSdx.getAccountId());
@@ -191,10 +196,9 @@ public class SdxServiceTest {
         long id = 10L;
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
-        String sdxName = "test-sdx-cluster";
 
         Assertions.assertThrows(BadRequestException.class,
-                () -> sdxService.createSdx(USER_CRN, sdxName, sdxClusterRequest, null),
+                () -> sdxService.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null),
                 "Cannot create external database for sdx: test-sdx-cluster, for now only AWS is supported");
     }
 
@@ -215,14 +219,13 @@ public class SdxServiceTest {
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        String sdxName = "test-sdx-cluster";
-        SdxCluster createdSdxCluster = sdxService.createSdx(USER_CRN, sdxName, sdxClusterRequest, null);
+        SdxCluster createdSdxCluster = sdxService.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
         Assertions.assertEquals(id, createdSdxCluster.getId());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
         Assertions.assertEquals("tagecske", capturedSdx.getTags().getValue("mytag"));
-        Assertions.assertEquals(sdxName, capturedSdx.getClusterName());
+        Assertions.assertEquals(CLUSTER_NAME, capturedSdx.getClusterName());
         Assertions.assertEquals(LIGHT_DUTY, capturedSdx.getClusterShape());
         Assertions.assertEquals("envir", capturedSdx.getEnvName());
         Assertions.assertEquals("hortonworks", capturedSdx.getAccountId());
@@ -248,9 +251,7 @@ public class SdxServiceTest {
 
     @Test
     void listSdxWhenNameisProvided() {
-        ArrayList<SdxCluster> sdxClusters = new ArrayList<>();
-        sdxClusters.add(new SdxCluster());
-        sdxClusters.add(new SdxCluster());
+        List<SdxCluster> sdxClusters = List.of(new SdxCluster(), new SdxCluster());
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(eq("hortonworks"), eq("envir"))).thenReturn(sdxClusters);
         List<SdxCluster> sdxList = sdxService.listSdx(USER_CRN, "envir");
         Assertions.assertEquals(2, sdxList.size());
@@ -258,9 +259,7 @@ public class SdxServiceTest {
 
     @Test
     void testListSdxWhenCrnIsProvided() {
-        ArrayList<SdxCluster> sdxClusters = new ArrayList<>();
-        sdxClusters.add(new SdxCluster());
-        sdxClusters.add(new SdxCluster());
+        List<SdxCluster> sdxClusters = List.of(new SdxCluster(), new SdxCluster());
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(eq("hortonworks"), eq(ENVIRONMENT_CRN))).thenReturn(sdxClusters);
         List<SdxCluster> sdxList = sdxService.listSdxByEnvCrn(USER_CRN, ENVIRONMENT_CRN);
         Assertions.assertEquals(2, sdxList.size());
@@ -275,9 +274,9 @@ public class SdxServiceTest {
     @Test
     void deleteSdxWhenNotFound() {
         Assertions.assertThrows(com.sequenceiq.cloudbreak.exception.NotFoundException.class,
-                () -> sdxService.deleteSdx(USER_CRN, "test-sdx-cluster"));
+                () -> sdxService.deleteSdx(USER_CRN, CLUSTER_NAME));
         verify(sdxClusterRepository, times(1))
-                .findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq("test-sdx-cluster"));
+                .findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq(CLUSTER_NAME));
     }
 
     @Test
@@ -334,6 +333,25 @@ public class SdxServiceTest {
         Assertions.assertThrows(BadRequestException.class,
                 () -> sdxService.deleteSdx(USER_CRN, "sdx-cluster-name"),
                 "The following Data Hub cluster(s) must be terminated before SDX deletion [existingDistroXCluster]");
+    }
+
+    @Test
+    void testSyncByName() {
+        sdxService.sync("name");
+
+        verify(stackV4Endpoint).sync(0L, "name");
+    }
+
+    @Test
+    void testSyncByCrn() {
+        SdxCluster sdxCluser = new SdxCluster();
+        sdxCluser.setEnvName("env");
+        sdxCluser.setClusterName(CLUSTER_NAME);
+        when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(eq("hortonworks"), eq(DATALAKE_CRN))).thenReturn(Optional.of(sdxCluser));
+
+        sdxService.syncByCrn(USER_CRN, DATALAKE_CRN);
+
+        verify(stackV4Endpoint).sync(0L, CLUSTER_NAME);
     }
 
     private void mockCBCallForDistroXClusters(Set<StackViewV4Response> stackViews) {

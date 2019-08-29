@@ -110,4 +110,14 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "list SDX clusters", produces = MediaType.APPLICATION_JSON, nickname = "listSdx")
     List<SdxClusterResponse> list(@QueryParam("envName") String envName);
+
+    @POST
+    @Path("{name}/sync")
+    @ApiOperation(value = "sync SDX cluster by name", produces = MediaType.APPLICATION_JSON, nickname = "syncSdx")
+    void sync(@PathParam("name") String name);
+
+    @POST
+    @Path("/crn/{crn}/sync")
+    @ApiOperation(value = "sync SDX cluster by crn", produces = MediaType.APPLICATION_JSON, nickname = "syncSdxByCrn")
+    void syncByCrn(@PathParam("crn") String crn);
 }

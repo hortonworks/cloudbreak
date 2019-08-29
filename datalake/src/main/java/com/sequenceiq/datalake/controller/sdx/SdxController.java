@@ -132,4 +132,15 @@ public class SdxController implements SdxEndpoint {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void sync(String name) {
+        sdxService.sync(name);
+    }
+
+    @Override
+    public void syncByCrn(String crn) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        sdxService.syncByCrn(userCrn, crn);
+    }
+
 }

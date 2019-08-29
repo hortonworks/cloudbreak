@@ -84,11 +84,11 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "deleteStackInWorkspaceV4")
     void delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
-    @PUT
+    @POST
     @Path("{name}/sync")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SYNC_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "syncStackInWorkspaceV4")
-    void putSync(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    void sync(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @PUT
     @Path("{name}/retry")

@@ -191,6 +191,9 @@ public class StackSyncService {
                 instanceStateCounts.put(InstanceSyncState.DELETED_ON_PROVIDER_SIDE, instanceStateCounts.get(InstanceSyncState.DELETED_ON_PROVIDER_SIDE) + 1);
                 LOGGER.debug("Instance '{}' is reported as deleted on the cloud provider, setting its state to DELETED_ON_PROVIDER_SIDE.",
                         instance.getInstanceId());
+                eventService.fireCloudbreakEvent(stack.getId(), "RECOVERY",
+                        cloudbreakMessagesService.getMessage(Msg.CLUSTER_FAILED_NODES_REPORTED.code(),
+                                Collections.singletonList(instance.getDiscoveryFQDN())));
                 updateMetaDataToDeletedOnProviderSide(stack, instance);
             }
         }
@@ -282,7 +285,8 @@ public class StackSyncService {
         STACK_SYNC_INSTANCE_TERMINATED("stack.sync.instance.terminated"),
         STACK_SYNC_INSTANCE_DELETED_CBMETADATA("stack.sync.instance.deleted.cbmetadata"),
         STACK_SYNC_INSTANCE_UPDATED("stack.sync.instance.updated"),
-        STACK_SYNC_INSTANCE_FAILED("stack.sync.instance.failed");
+        STACK_SYNC_INSTANCE_FAILED("stack.sync.instance.failed"),
+        CLUSTER_FAILED_NODES_REPORTED("cluster.failednodes.reported");
 
         private final String code;
 
