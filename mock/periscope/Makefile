@@ -10,7 +10,7 @@ deps:
 dockerhub-tag:
 	docker build -t ${IMAGE}:${VERSION} .
 	docker push ${IMAGE}:${VERSION}
-        docker tag ${IMAGE}:${VERSION} ${INTERNAL_IMAGE_NAME}:${VERSION}
-        docker push ${INTERNAL_IMAGE_NAME}:${VERSION}	
-        docker rmi ${IMAGE}:${VERSION}
-        docker rmi ${INTERNAL_IMAGE_NAME}:${VERSION}
+	docker tag ${IMAGE}:${VERSION} ${INTERNAL_IMAGE_NAME}:${VERSION}
+	docker push ${INTERNAL_IMAGE_NAME}:${VERSION}	
+	docker rmi ${IMAGE}:${VERSION}
+	docker rmi ${INTERNAL_IMAGE_NAME}:${VERSION}
