@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.ImmutableList;
 
 public enum ExposedService {
@@ -35,7 +36,7 @@ public enum ExposedService {
     NIFI("Nifi", "NIFI_NODE", "NIFI", "/nifi-app/nifi/", true, 8080, 8443, false, false),
     IMPALA("Impala", "IMPALAD", "IMPALA", "/impala/", true, 28000, 28000, true, true),
     NAMENODE_HDFS("NameNode HDFS", "NAMENODE", "NAMENODE", "/", true, 8020, 8020, true, true),
-    JOBTRACKER("Job Tracker", "RESOURCEMANAGER", "JOBTRACKER", "/", true, 8050, 8032, true, true);
+    JOBTRACKER("Job Tracker", "RESOURCEMANAGER", "JOBTRACKER", "/", true, 8032, 8032, true, true);
 
     private final String displayName;
     private final String serviceName;
@@ -65,7 +66,7 @@ public enum ExposedService {
     }
 
     public static Collection<ExposedService> filterSupportedKnoxServices() {
-        return Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.knoxService)).collect(Collectors.toList());
+        return Arrays.stream(values()).filter(x -> StringUtils.isNotEmpty(x.knoxService)).collect(Collectors.toList());
     }
 
     public static Collection<ExposedService> knoxServicesForComponents(Collection<String> components) {
@@ -84,14 +85,14 @@ public enum ExposedService {
     }
 
     public static List<String> getAllServiceName() {
-        List<String> allServiceName = Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.serviceName))
+        List<String> allServiceName = Arrays.stream(values()).filter(x -> StringUtils.isNotEmpty(x.serviceName))
                 .map(ExposedService::getServiceName).collect(Collectors.toList());
         return ImmutableList.copyOf(allServiceName);
     }
 
     public static Map<String, Integer> getAllServicePorts(boolean tls) {
-        return Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.serviceName))
-                .filter(x -> !Strings.isNullOrEmpty(x.knoxService))
+        return Arrays.stream(values()).filter(x -> StringUtils.isNotEmpty(x.serviceName))
+                .filter(x -> StringUtils.isNotEmpty(x.knoxService))
                 .filter(x -> Objects.nonNull(tls ? x.tlsPort : x.port))
                 .collect(Collectors.toMap(k -> k.knoxService, v -> tls ? v.tlsPort : v.port));
     }

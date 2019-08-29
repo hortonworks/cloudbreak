@@ -196,7 +196,7 @@
     <service>
         <role>JOBTRACKER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
-        <url>rpc://{{ hostloc }}:{{ ports['JOBTRACKER'] }}/ws</url>
+        <url>rpc://{{ hostloc }}:{{ ports['JOBTRACKER'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -223,11 +223,11 @@
     </service>
     {%- endif %}
 
-    {% if 'NAMENODE_HDFS' in exposed -%}
+    {% if 'NAMENODE' in exposed -%}
     <service>
         <role>NAMENODE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
-        <url>hdfs://{{ hostloc }}:{{ ports['NAMENODE_HDFS'] }}</url>
+        <url>hdfs://{{ hostloc }}:{{ ports['NAMENODE'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
