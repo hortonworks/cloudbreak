@@ -189,7 +189,7 @@ public class ClusterCreationSetupService {
     }
 
     private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack) {
-        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
+        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         if (kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain())) {
             stack.setCustomDomain(kerberosConfig.getDomain());
         }

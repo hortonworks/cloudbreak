@@ -18,6 +18,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigOperationDescription;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
 import com.sequenceiq.service.api.doc.ContentType;
@@ -34,6 +35,14 @@ public interface KerberosConfigV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DESCRIBE_FOR_ENVIRONMENT, produces = ContentType.JSON, notes = KERBEROS_CONFIG_NOTES, nickname = "getKerberosConfigForEnvironment")
     DescribeKerberosConfigResponse describe(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
+
+    @GET
+    @Path("cluster")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = KerberosConfigOperationDescription.GET_BY_ENV_FOR_CLUSTER, produces = MediaType.APPLICATION_JSON, notes = KERBEROS_CONFIG_NOTES,
+            nickname = "getKerberosConfigForClusterV1")
+    DescribeKerberosConfigResponse getForCluster(@QueryParam("environmentCrn") @NotEmpty String environmentCrn,
+            @QueryParam("clusterName") @NotEmpty String clusterName) throws Exception;
 
     @POST
     @Path("")

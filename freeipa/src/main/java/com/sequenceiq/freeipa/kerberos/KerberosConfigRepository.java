@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.kerberos;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -16,5 +17,11 @@ import com.sequenceiq.authorization.resource.ResourceAction;
 public interface KerberosConfigRepository extends BaseJpaRepository<KerberosConfig, Long> {
 
     @CheckPermission(action = ResourceAction.READ)
-    Optional<KerberosConfig> findByAccountIdAndEnvironmentCrn(String accountId, String environmentCrn);
+    Optional<KerberosConfig> findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(String accountId, String environmentCrn);
+
+    @CheckPermission(action = ResourceAction.READ)
+    List<KerberosConfig> findByAccountIdAndEnvironmentCrn(String accountId, String environmentCrn);
+
+    @CheckPermission(action = ResourceAction.READ)
+    Optional<KerberosConfig> findByAccountIdAndEnvironmentCrnAndClusterName(String accountId, String environmentCrn, String clusterName);
 }

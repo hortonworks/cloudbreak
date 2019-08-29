@@ -250,7 +250,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     }
 
     private KerberosConfig getKerberosConfig(StackV4Request source) {
-        return kerberosConfigService.get(source.getEnvironmentCrn()).orElse(null);
+        return kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null);
     }
 
     private void decorateBuilderWithAccountMapping(StackV4Request source, DetailedEnvironmentResponse environment, Credential credential, Builder builder) {

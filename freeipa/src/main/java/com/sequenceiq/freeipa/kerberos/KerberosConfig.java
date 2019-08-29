@@ -41,6 +41,8 @@ public class KerberosConfig implements ArchivableResource, AuthResource, Account
 
     private String environmentCrn;
 
+    private String clusterName;
+
     private boolean archived;
 
     private Long deletionTimestamp = -1L;
@@ -131,6 +133,14 @@ public class KerberosConfig implements ArchivableResource, AuthResource, Account
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 
     public void setName(String name) {

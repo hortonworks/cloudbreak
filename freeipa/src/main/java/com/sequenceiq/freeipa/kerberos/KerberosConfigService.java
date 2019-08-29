@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,8 +42,12 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
 
     public KerberosConfig get(String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return kerberosConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn)
+        return kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(accountId, environmentCrn)
                 .orElseThrow(notFound("KerberosConfig for environment", environmentCrn));
+    }
+
+    public Optional<KerberosConfig> find(String environmentCrn, String accountId, String clusterName) {
+        return kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterName(accountId, environmentCrn, clusterName);
     }
 
     public void delete(String environmentCrn) {
@@ -51,10 +56,14 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
     }
 
     public void delete(String environmentCrn, String accountId) {
-        Optional<KerberosConfig> kerberosConfig = kerberosConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn);
+        Optional<KerberosConfig> kerberosConfig = kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(accountId, environmentCrn);
         kerberosConfig.ifPresentOrElse(this::delete, () -> {
             throw notFound("KerberosConfig for environment", environmentCrn).get();
         });
+    }
+
+    public void deleteAllInEnvironment(String environmentCrn, String accountId) {
+        kerberosConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn).forEach(this::delete);
     }
 
     @Override
@@ -63,12 +72,15 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
     }
 
     private void checkIfExists(KerberosConfig resource) {
-        kerberosConfigRepository.findByAccountIdAndEnvironmentCrn(resource.getAccountId(), resource.getEnvironmentCrn())
-                .ifPresent(kerberosConfig -> {
-                    String message = format("KerberosConfig in the [%s] account's [%s] environment is already exists", resource.getAccountId(),
-                            resource.getEnvironmentCrn());
-                    LOGGER.info(message);
-                    throw new BadRequestException(message);
-                });
+        Optional<KerberosConfig> kerberosConfigOptional = StringUtils.isBlank(resource.getClusterName()) ?
+                kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(resource.getAccountId(), resource.getEnvironmentCrn())
+                : kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterName(resource.getAccountId(), resource.getEnvironmentCrn(),
+                resource.getClusterName());
+        kerberosConfigOptional.ifPresent(kerberosConfig -> {
+            String message = format("KerberosConfig in the [%s] account's [%s] environment is already exists", resource.getAccountId(),
+                    resource.getEnvironmentCrn());
+            LOGGER.info(message);
+            throw new BadRequestException(message);
+        });
     }
 }
