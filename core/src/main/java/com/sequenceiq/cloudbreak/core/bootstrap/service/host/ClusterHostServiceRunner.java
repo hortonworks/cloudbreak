@@ -147,7 +147,7 @@ public class ClusterHostServiceRunner {
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
             hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
-            recipeEngine.executePreAmbariStartRecipes(stack, hostGroupService.getByCluster(cluster.getId()));
+            recipeEngine.executePreAmbariStartRecipes(stack, hostGroupService.getByClusterWithRecipes(cluster.getId()));
             hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());

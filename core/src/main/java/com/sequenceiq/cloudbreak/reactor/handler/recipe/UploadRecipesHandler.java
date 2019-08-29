@@ -52,7 +52,7 @@ public class UploadRecipesHandler implements ReactorEventHandler<UploadRecipesRe
         Long stackId = request.getStackId();
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
+            Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
             recipeEngine.uploadRecipes(stack, hostGroups);
             result = new UploadRecipesSuccess(stackId);
         } catch (Exception e) {

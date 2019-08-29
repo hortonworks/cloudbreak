@@ -21,11 +21,11 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 public interface HostGroupRepository extends DisabledBaseRepository<HostGroup, Long> {
 
     @EntityGraph(value = "HostGroup.instanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
-    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.hostMetadata LEFT JOIN FETCH h.recipes WHERE h.cluster.id= :clusterId")
+    @Query("SELECT h FROM HostGroup h WHERE h.cluster.id= :clusterId")
     Set<HostGroup> findHostGroupsInCluster(@Param("clusterId") Long clusterId);
 
     @EntityGraph(value = "HostGroup.instanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
-    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.hostMetadata LEFT JOIN FETCH h.recipes WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
+    @Query("SELECT h FROM HostGroup h WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
     HostGroup findHostGroupInClusterByName(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
 
     @EntityGraph(value = "HostGroup.instanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
@@ -36,4 +36,16 @@ public interface HostGroupRepository extends DisabledBaseRepository<HostGroup, L
     @Query("SELECT h FROM HostGroup h WHERE h.cluster.id= :clusterId AND h.instanceGroup.groupName= :instanceGroupName")
     HostGroup findHostGroupsByInstanceGroupName(@Param("clusterId") Long clusterId, @Param("instanceGroupName") String instanceGroupName);
 
+    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.recipes WHERE h.cluster.id= :clusterId")
+    Set<HostGroup> findHostGroupsInClusterWithRecipes(@Param("clusterId") Long clusterId);
+
+    @EntityGraph(value = "HostGroup.instanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
+    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.recipes WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
+    HostGroup findHostGroupInClusterByNameWithRecipes(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
+
+    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.hostMetadata WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
+    HostGroup findHostGroupInClusterByNameWithHostMetadata(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
+
+    @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.hostMetadata LEFT JOIN FETCH h.recipes WHERE h.cluster.id= :clusterId")
+    Set<HostGroup> findHostGroupsInClusterWithRecipesAndHostmetadata(@Param("clusterId") Long clusterId);
 }

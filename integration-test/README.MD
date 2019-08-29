@@ -1,0 +1,7 @@
+# How to run newway test locally
+## Add environment variables
+INTEGRATIONTEST_CLOUDBREAK_SERVER=http://192.168.99.100:8080
+INTEGRATIONTEST_UAA_SERVER=http://192.168.99.100:8089
+INTEGRATIONTEST_UAA_USER=<UAA_DEFAULT_USER_EMAIL from Profile>
+INTEGRATIONTEST_UAA_PASSWORD=<UAA_DEFAULT_USER_PW from Profile>
+## Select the test and run! :)

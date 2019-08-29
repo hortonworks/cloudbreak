@@ -926,7 +926,7 @@ public class ClusterService {
 
     private void validateRegisteredHosts(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
         String hostGroup = hostGroupAdjustment.getHostGroup();
-        int hostsCount = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroup).getHostMetadata().size();
+        Long hostsCount = hostGroupService.countByClusterIdAndName(stack.getCluster().getId(), hostGroup);
         int adjustment = Math.abs(hostGroupAdjustment.getScalingAdjustment());
         Boolean validateNodeCount = hostGroupAdjustment.getValidateNodeCount();
         if (validateNodeCount == null || validateNodeCount) {

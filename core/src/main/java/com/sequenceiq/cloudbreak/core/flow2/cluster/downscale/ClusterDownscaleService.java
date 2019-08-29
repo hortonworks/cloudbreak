@@ -81,7 +81,7 @@ public class ClusterDownscaleService {
         StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
         ClusterView clusterView = stackView.getClusterView();
         hostNames.forEach(hn -> {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterView.getId(), hostGroupName);
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithHostMetadata(clusterView.getId(), hostGroupName);
             List<HostMetadata> hostMetaToRemove = hostGroup.getHostMetadata().stream()
                     .filter(md -> hostNames.contains(md.getHostName())).collect(Collectors.toList());
             hostGroup.getHostMetadata().removeAll(hostMetaToRemove);
