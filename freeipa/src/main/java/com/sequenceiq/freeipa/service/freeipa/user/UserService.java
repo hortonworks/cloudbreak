@@ -142,7 +142,7 @@ public class UserService {
             });
             syncOperationStatusService.completeOperation(operationId, success, failure);
         } catch (RuntimeException e) {
-            LOGGER.error("User sync operation {} failed with error:", e);
+            LOGGER.error("User sync operation {} failed with error:", operationId, e);
             syncOperationStatusService.failOperation(operationId, e.getLocalizedMessage());
             throw e;
         }
