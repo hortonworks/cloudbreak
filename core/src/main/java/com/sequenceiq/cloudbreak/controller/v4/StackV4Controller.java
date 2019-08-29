@@ -59,8 +59,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
-    public void putSync(Long workspaceId, String name) {
-        stackOperation.putSync(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
+    public void sync(Long workspaceId, String name) {
+        stackOperation.sync(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
     }
 
     @Override

@@ -174,7 +174,7 @@ public class StackCommonService {
         put(stack, updateStackJson);
     }
 
-    public void putSyncInWorkspace(String name, String crn, Long workspaceId) {
+    public void syncInWorkspace(String name, String crn, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         Stack stack;

@@ -116,7 +116,7 @@ public class StackTestAction {
     public static StackTestDto sync(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         Log.log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
         Log.logJSON(LOGGER, " Stack post request:\n", entity.getRequest());
-        client.getCloudbreakClient().stackV4Endpoint().putSync(client.getWorkspaceId(), entity.getName());
+        client.getCloudbreakClient().stackV4Endpoint().sync(client.getWorkspaceId(), entity.getName());
         Log.logJSON(LOGGER, " Stack sync was successful:\n", entity.getResponse());
         Log.log(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
         return entity;
