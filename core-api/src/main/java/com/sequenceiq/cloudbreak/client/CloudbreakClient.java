@@ -112,8 +112,6 @@ public class CloudbreakClient {
             SettingsEndpoint.class,
             SmartSenseSubscriptionEndpoint.class,
             SmartSenseSubscriptionV3Endpoint.class,
-            StackV1Endpoint.class,
-            StackV2Endpoint.class,
             StackV3Endpoint.class,
             SubscriptionEndpoint.class,
             UserEndpoint.class,

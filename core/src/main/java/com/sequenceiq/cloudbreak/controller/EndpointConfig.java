@@ -65,8 +65,6 @@ public class EndpointConfig extends ResourceConfig {
         SettingsController.class,
         SmartSenseSubscriptionController.class,
         SmartSenseSubscriptionV3Controller.class,
-        StackV1Controller.class,
-        StackV2Controller.class,
         StackV3Controller.class,
         SubscriptionController.class,
         UserController.class,
