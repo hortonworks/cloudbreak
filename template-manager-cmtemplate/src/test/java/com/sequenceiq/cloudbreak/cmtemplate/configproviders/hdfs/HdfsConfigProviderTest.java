@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
@@ -80,7 +81,8 @@ public class HdfsConfigProviderTest {
                 + "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer</value>"
                 + "</property><property><name>fs.s3a.metadatastore.impl</name><value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value>"
                 + "</property><property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>"
-                + "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>", serviceConfigs.get(0).getValue());
+                + "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>"
+                + "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>", serviceConfigs.get(0).getValue());
     }
 
     @Test
@@ -99,6 +101,7 @@ public class HdfsConfigProviderTest {
                 + "</property><property><name>fs.s3a.metadatastore.impl</name><value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value>"
                 + "</property><property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>"
                 + "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>"
+                + "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>"
                 + "<property><name>fs.s3a.authoritative.path</name><value>s3a://bucket/warehouse/managed</value></property>", serviceConfigs.get(0).getValue());
     }
 
@@ -128,9 +131,13 @@ public class HdfsConfigProviderTest {
 
         Gateway gateway = TestUtil.gatewayEnabledWithExposedKnoxServices(NAMENODE.getKnoxService());
 
+        PlacementView placementView = new PlacementView("region", "az");
+
         return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker))
-                .withGateway(gateway, "/cb/secret/signkey").build();
+                .withGateway(gateway, "/cb/secret/signkey")
+                .withPlacementView(placementView)
+                .build();
     }
 
     protected StorageLocation getStorageLocation(String property, String value) {

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 public class TemplatePreparationObject {
@@ -62,6 +63,8 @@ public class TemplatePreparationObject {
 
     private final AccountMappingView accountMappingView;
 
+    private final Optional<PlacementView> placementView;
+
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
         rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
@@ -81,6 +84,7 @@ public class TemplatePreparationObject {
         customInputs = builder.customInputs;
         fixInputs = builder.fixInputs;
         accountMappingView = builder.accountMappingView;
+        placementView = builder.placementView;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -154,6 +158,10 @@ public class TemplatePreparationObject {
         return accountMappingView;
     }
 
+    public Optional<PlacementView> getPlacementView() {
+        return placementView;
+    }
+
     public static class Builder {
 
         private CloudPlatform cloudPlatform;
@@ -185,6 +193,8 @@ public class TemplatePreparationObject {
         private Map<String, Object> fixInputs = new HashMap<>();
 
         private AccountMappingView accountMappingView;
+
+        private Optional<PlacementView> placementView = Optional.empty();
 
         public static Builder builder() {
             return new Builder();
@@ -285,6 +295,11 @@ public class TemplatePreparationObject {
 
         public Builder withAccountMappingView(AccountMappingView accountMappingView) {
             this.accountMappingView = accountMappingView;
+            return this;
+        }
+
+        public Builder withPlacementView(PlacementView placementView) {
+            this.placementView = Optional.of(placementView);
             return this;
         }
 
