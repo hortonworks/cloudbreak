@@ -202,7 +202,7 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, CollectMetadataResult payload, Map<Object, Object> variables)
                     throws TransactionExecutionException {
-                Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), context.getInstanceGroupName(), payload);
+                Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), context.getAdjustment(), payload);
                 variables.put(UPSCALE_CANDIDATE_ADDRESSES, upscaleCandidateAddresses);
                 InstanceGroup ig = instanceGroupService.findOneByGroupNameInStack(payload.getResourceId(), context.getInstanceGroupName())
                         .orElseThrow(NotFoundException.notFound("instanceGroup", context.getInstanceGroupName()));

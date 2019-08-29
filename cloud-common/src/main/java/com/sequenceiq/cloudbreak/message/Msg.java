@@ -19,6 +19,7 @@ public enum Msg {
     STACK_REMOVING_INSTANCE_FINISHED("stack.removing.instance.finished"),
     STACK_REMOVING_INSTANCE_FAILED("stack.removing.instance.failed"),
     STACK_METADATA_EXTEND("stack.metadata.extend"),
+    STACK_METADATA_EXTEND_WITH_COUNT("stack.metadata.extend.with.count"),
     STACK_METADATA_SETUP_BILLING_CHANGED("stack.metadata.setup.billing.changed"),
     STACK_BOOTSTRAP_NEW_NODES("stack.bootstrap.new.nodes"),
     STACK_UPSCALE_FINISHED("stack.upscale.finished"),

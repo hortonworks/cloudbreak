@@ -27,9 +27,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
-import com.sequenceiq.common.api.type.CommonResourceType;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
@@ -43,13 +43,12 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.common.api.type.CommonResourceType;
 
 @Service
 public class StackUpscaleService {
@@ -100,6 +99,7 @@ public class StackUpscaleService {
         validateResourceResults(context, payload.getErrorDetails(), results);
         Set<Resource> resourceSet = transformResults(results, context.getStack());
         if (resourceSet.isEmpty()) {
+            metadataSetupService.cleanupRequestedInstances(context.getStack(), context.getInstanceGroupName());
             throw new OperationException("Failed to upscale the cluster since all create request failed. Resource set is empty");
         }
         LOGGER.debug("Adding new instances to the stack is DONE");
@@ -110,17 +110,12 @@ public class StackUpscaleService {
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
     }
 
-    public Set<String> finishExtendMetadata(Stack stack, String instanceGroupName, CollectMetadataResult payload) throws TransactionExecutionException {
+    public Set<String> finishExtendMetadata(Stack stack, Integer scalingAdjustment, CollectMetadataResult payload) throws TransactionExecutionException {
         return transactionService.required(() -> {
             List<CloudVmMetaDataStatus> coreInstanceMetaData = payload.getResults();
             int newInstances = metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, CREATED);
-            Set<String> upscaleCandidateAddresses = new HashSet<>();
-            for (CloudVmMetaDataStatus cloudVmMetaDataStatus : coreInstanceMetaData) {
-                upscaleCandidateAddresses.add(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
-            }
-            InstanceGroup instanceGroup = instanceGroupService.findOneByGroupNameInStack(stack.getId(), instanceGroupName)
-                    .orElseThrow(NotFoundException.notFound("instanceGroup", instanceGroupName));
-            int nodeCount = instanceGroup.getNodeCount() + newInstances;
+            Set<String> upscaleCandidateAddresses = coreInstanceMetaData.stream().filter(im -> im.getMetaData().getPrivateIp() != null)
+                    .map(im -> im.getMetaData().getPrivateIp()).collect(Collectors.toSet());
             try {
                 clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);
             } catch (TransactionExecutionException e) {
@@ -128,6 +123,9 @@ public class StackUpscaleService {
             }
             eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                     flowMessageService.message(Msg.STACK_METADATA_SETUP_BILLING_CHANGED));
+            if (scalingAdjustment != newInstances) {
+                flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND_WITH_COUNT, AVAILABLE.name(), newInstances, scalingAdjustment);
+            }
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
 
             return upscaleCandidateAddresses;
