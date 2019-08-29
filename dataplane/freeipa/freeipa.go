@@ -167,9 +167,26 @@ func SynchronizeAllUsers(c *cli.Context) {
 func SynchronizeCurrentUser(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "sync current user to FreeIpa")
 
-	environments := c.StringSlice(fl.FlIpaEnvironmentCrnsSlice.Name)
+	environmentCrns := c.StringSlice(fl.FlIpaEnvironmentCrnsSlice.Name)
+	environmentNames := c.StringSlice(fl.FlIpaEnvironmentNamesOptionalSlice.Name)
+
+	envCrnSet := make(map[string]bool, 0)
+
+	for _, envName := range environmentNames {
+		envCrn := env.GetEnvCrnByName(envName, c)
+		envCrnSet[envCrn] = true
+	}
+	for _, envCrn := range environmentCrns {
+		envCrnSet[envCrn] = true
+	}
+
+	crns := make([]string, 0, len(envCrnSet))
+	for crn := range envCrnSet {
+		crns = append(crns, crn)
+	}
+
 	SynchronizeUserV1Request := freeIpaModel.SynchronizeUserV1Request{
-		Environments: environments,
+		Environments: crns,
 	}
 
 	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa

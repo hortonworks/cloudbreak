@@ -88,10 +88,10 @@ func init() {
 						Usage:       "syncs current user to FreeIpa clusters",
 						Description: `syncs current user to FreeIpa clusters`,
 						Before:      cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-						Flags:       fl.NewFlagBuilder().AddFlags(fl.FlIpaEnvironmentCrnsSlice, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+						Flags:       fl.NewFlagBuilder().AddFlags(fl.FlIpaEnvironmentCrnsSlice, fl.FlIpaEnvironmentNamesOptionalSlice, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
 						Action:      freeipa.SynchronizeCurrentUser,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlIpaEnvironmentCrnsSlice, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlIpaEnvironmentCrnsSlice, fl.FlIpaEnvironmentNamesOptionalSlice, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},

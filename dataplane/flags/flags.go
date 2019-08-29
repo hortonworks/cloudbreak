@@ -1280,6 +1280,13 @@ var (
 			Usage: "crn of environments to sync (provide option once for each environment)",
 		},
 	}
+	FlIpaEnvironmentNamesOptionalSlice = StringSliceFlag{
+		RequiredFlag: OPTIONAL,
+		StringSliceFlag: cli.StringSliceFlag{
+			Name:  "env-name",
+			Usage: "name of environments to sync (provide option once for each environment)",
+		},
+	}
 	FlIpaUserPassword = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

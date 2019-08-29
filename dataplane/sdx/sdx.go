@@ -172,7 +172,7 @@ func createInternalSdx(envName string, inputJson *sdxModel.StackV4Request, c *cl
 
 	if inputJson.EnvironmentCrn == nil || len(*inputJson.EnvironmentCrn) == 0 {
 		envCrn := env.GetEnvCrnByName(envName, c)
-		log.Debugf("[CreateInternalSdx] env crn § empty in stack request, update with: %s", envCrn)
+		log.Debugf("[CreateInternalSdx] env crn is empty in stack request, update with: %s", envCrn)
 		inputJson.EnvironmentCrn = &envCrn
 	}
 
