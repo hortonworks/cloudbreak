@@ -30,7 +30,6 @@ main() {
   : ${DOCKERHUB_USERNAME:?"required!"}
   : ${DOCKERHUB_PASSWORD:?"required!"}
   : ${DEBUG:=1}
-  : ${NEXUS_URL:?"required!"}
 
   new_version "$@"
 }
