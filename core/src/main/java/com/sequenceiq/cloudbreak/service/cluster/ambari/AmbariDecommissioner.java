@@ -74,6 +74,8 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.service.cluster.NotRecommendedNodeRemovalException;
@@ -173,6 +175,9 @@ public class AmbariDecommissioner {
 
     @Inject
     private AmbariDecommissionTimeCalculator ambariDecommissionTimeCalculator;
+
+    @Inject
+    private TransactionService transactionService;
 
     @PostConstruct
     public void init() {
@@ -360,7 +365,7 @@ public class AmbariDecommissioner {
     private List<HostMetadata> collectDownscaleCandidates(Stack stack, Cluster cluster, String hostGroupName, Integer scalingAdjustment, boolean forced) {
         List<HostMetadata> downScaleCandidates;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithHostMetadata(cluster.getId(), hostGroupName);
         Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
         List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(cluster, hostsInHostGroup, hostGroupName);
         int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
@@ -402,31 +407,39 @@ public class AmbariDecommissioner {
             }
         }
 
-        Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
-        for (HostGroup hostGroup : hostGroups) {
-            Collection<HostMetadata> removableHostsInHostGroup = hostGroupWithInstances.get(hostGroup.getId());
-            if (removableHostsInHostGroup != null && !removableHostsInHostGroup.isEmpty()) {
-                String hostGroupName = hostGroup.getName();
-                List<HostMetadata> hostListForDecommission = hostFilterService.filterHostsForDecommission(cluster, removableHostsInHostGroup, hostGroupName);
-                boolean hostGroupContainsDatanode = hostGroupNodesAreDataNodes(blueprintMap, hostGroupName);
-                int replication = hostGroupContainsDatanode ? getReplicationFactor(ambariClient, hostGroupName) : NO_REPLICATION;
-                if (hostListForDecommission.size() < removableHostsInHostGroup.size()) {
-                    List<HostMetadata> notRecommendedRemovableNodes = removableHostsInHostGroup.stream()
-                            .filter(hostMetadata -> !hostListForDecommission.contains(hostMetadata))
-                            .collect(Collectors.toList());
-                    throw new NotRecommendedNodeRemovalException("Following nodes shouldn't be removed from the cluster: "
-                            + notRecommendedRemovableNodes.stream().map(HostMetadata::getHostName).collect(Collectors.toList()));
+        try {
+            transactionService.required(() -> {
+                Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
+                for (HostGroup hostGroup : hostGroups) {
+                    Collection<HostMetadata> removableHostsInHostGroup = hostGroupWithInstances.get(hostGroup.getId());
+                    if (removableHostsInHostGroup != null && !removableHostsInHostGroup.isEmpty()) {
+                        String hostGroupName = hostGroup.getName();
+                        List<HostMetadata> hostListForDecommission =
+                                hostFilterService.filterHostsForDecommission(cluster, removableHostsInHostGroup, hostGroupName);
+                        boolean hostGroupContainsDatanode = hostGroupNodesAreDataNodes(blueprintMap, hostGroupName);
+                        int replication = hostGroupContainsDatanode ? getReplicationFactor(ambariClient, hostGroupName) : NO_REPLICATION;
+                        if (hostListForDecommission.size() < removableHostsInHostGroup.size()) {
+                            List<HostMetadata> notRecommendedRemovableNodes = removableHostsInHostGroup.stream()
+                                    .filter(hostMetadata -> !hostListForDecommission.contains(hostMetadata))
+                                    .collect(Collectors.toList());
+                            throw new NotRecommendedNodeRemovalException("Following nodes shouldn't be removed from the cluster: "
+                                    + notRecommendedRemovableNodes.stream().map(HostMetadata::getHostName).collect(Collectors.toList()));
+                        }
+                        verifyNodeCount(replication, removableHostsInHostGroup.size(), hostGroup.getHostMetadata().size(), 0);
+                        if (hostGroupContainsDatanode) {
+                            calculateDecommissioningTime(stack, hostListForDecommission, ambariClient);
+                        }
+                    }
                 }
-                verifyNodeCount(replication, removableHostsInHostGroup.size(), hostGroup.getHostMetadata().size(), 0);
-                if (hostGroupContainsDatanode) {
-                    calculateDecommissioningTime(stack, hostListForDecommission, ambariClient);
-                }
-            }
+                return null;
+            });
+        } catch (TransactionExecutionException e) {
+            throw e.getCause();
         }
     }
 
     private Map<String, HostMetadata> collectHostMetadata(Cluster cluster, String hostGroupName, Collection<String> hostNames) {
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithHostMetadata(cluster.getId(), hostGroupName);
         Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
         return hostsInHostGroup.stream().filter(hostMetadata -> hostNames.contains(hostMetadata.getHostName())).collect(
                 toMap(HostMetadata::getHostName, hostMetadata -> hostMetadata));

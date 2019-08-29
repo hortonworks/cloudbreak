@@ -23,9 +23,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -63,6 +65,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.service.cluster.NotRecommendedNodeRemovalException;
@@ -117,6 +120,14 @@ public class AmbariDecommissionerTest {
 
     @Mock
     private PollingService<AmbariClientPollerObject> ambariClientPollingService;
+
+    @Mock
+    private TransactionService transactionService;
+
+    @Before
+    public void setUp() throws Exception {
+        when(transactionService.required(any())).thenAnswer(answer -> ((Supplier) answer.getArgument(0)).get());
+    }
 
     @Test
     public void testSelectNodesWhenHasOneUnhealthyNodeAndShouldSelectOne() {

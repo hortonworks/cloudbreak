@@ -28,4 +28,8 @@ public interface HostMetadataRepository extends DisabledBaseRepository<HostMetad
     @Query("SELECT h FROM HostMetadata h "
             + "WHERE h.hostGroup.cluster.id= :clusterId AND h.hostName = :hostName")
     HostMetadata findHostInClusterByName(@Param("clusterId") Long clusterId, @Param("hostName") String hostName);
+
+    @Query("SELECT COUNT(h) FROM HostMetadata h "
+            + "WHERE h.hostGroup.cluster.id= :clusterId AND h.hostGroup.name = :hostGroupName")
+    Long countByClusterIdAndHostGroupName(@Param("clusterId") Long id, @Param("hostGroupName") String hostGroupName);
 }

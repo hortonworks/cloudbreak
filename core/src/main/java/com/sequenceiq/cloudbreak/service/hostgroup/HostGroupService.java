@@ -8,6 +8,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -21,6 +23,8 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 
 @Service
 public class HostGroupService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HostGroupService.class);
 
     @Inject
     private HostGroupRepository hostGroupRepository;
@@ -91,4 +95,23 @@ public class HostGroupService {
         });
     }
 
+    public Set<HostGroup> getByClusterWithRecipes(Long clusterId) {
+        return hostGroupRepository.findHostGroupsInClusterWithRecipes(clusterId);
+    }
+
+    public HostGroup getByClusterIdAndNameWithRecipes(Long clusterId, String hostGroupName) {
+        return hostGroupRepository.findHostGroupInClusterByNameWithRecipes(clusterId, hostGroupName);
+    }
+
+    public Long countByClusterIdAndName(Long id, String hostGroupName) {
+        return hostMetadataRepository.countByClusterIdAndHostGroupName(id, hostGroupName);
+    }
+
+    public HostGroup getByClusterIdAndNameWithHostMetadata(Long clusterId, String hostGroupName) {
+        return hostGroupRepository.findHostGroupInClusterByNameWithHostMetadata(clusterId, hostGroupName);
+    }
+
+    public Set<HostGroup> getByClusterWithRecipesAndHostmetadata(Long clusterId) {
+        return hostGroupRepository.findHostGroupsInClusterWithRecipesAndHostmetadata(clusterId);
+    }
 }

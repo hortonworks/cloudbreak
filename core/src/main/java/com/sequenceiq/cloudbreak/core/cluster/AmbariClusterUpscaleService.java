@@ -89,15 +89,15 @@ public class AmbariClusterUpscaleService {
     public void uploadRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.info("Start executing pre recipes");
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
-        Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName);
+        Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
         recipeEngine.uploadUpscaleRecipes(stack, hostGroup, hostGroups);
     }
 
     public void installServicesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.info("Start installing Ambari services");
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
         ambariClusterConnector.upscaleCluster(stack, hostGroup, hostMetadata);
     }

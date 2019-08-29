@@ -97,7 +97,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
 
     private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {
         try {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName);
             recipeEngine.executePreTerminationRecipes(stack, Collections.singleton(hostGroup), hostNames);
         } catch (Exception ex) {
             LOGGER.error(ex.getLocalizedMessage(), ex);

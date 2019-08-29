@@ -145,7 +145,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
         try {
             clusterService.updateCreationDateOnCluster(cluster);
             AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster());
-            Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
+            Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipesAndHostmetadata(cluster.getId());
             TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(hostGroups);
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
