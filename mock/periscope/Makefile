@@ -1,4 +1,5 @@
 IMAGE = hortonworks/periscope-mock
+INTERNAL_IMAGE_NAME=${INTERNAL_IMAGE_NAME:-${IMAGE}}
 VERSION ?= $(shell git  describe --tags --abbrev=0)
 BRANCH ?=$(shell git branch | grep \* | cut -d ' ' -f2)
 UNAME = $(shell uname)
@@ -9,4 +10,7 @@ deps:
 dockerhub-tag:
 	docker build -t ${IMAGE}:${VERSION} .
 	docker push ${IMAGE}:${VERSION}
-	docker rmi ${IMAGE}:${VERSION}
+        docker tag ${IMAGE}:${VERSION} ${INTERNAL_IMAGE_NAME}:${VERSION}
+        docker push ${INTERNAL_IMAGE_NAME}:${VERSION}	
+        docker rmi ${IMAGE}:${VERSION}
+        docker rmi ${INTERNAL_IMAGE_NAME}:${VERSION}
