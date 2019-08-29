@@ -101,6 +101,8 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     private static final String REGION = "region-1";
 
+    private static final String AVAILABILITY_ZONE = "az-1";
+
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
@@ -192,6 +194,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         when(stackMock.getType()).thenReturn(StackType.DATALAKE);
         when(stackMock.getRegion()).thenReturn(REGION);
+        when(stackMock.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
         when(sourceCluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(cluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(stackRepoDetails);
@@ -458,4 +461,11 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertEquals(USER_MAPPINGS, accountMappingView.getUserMappings());
     }
 
+    @Test
+    public void testStackPlacement() {
+        TemplatePreparationObject result = underTest.convert(stackMock);
+        assertTrue(result.getPlacementView().isPresent());
+        assertEquals(REGION, result.getPlacementView().get().getRegion());
+        assertEquals(AVAILABILITY_ZONE, result.getPlacementView().get().getAvailabilityZone());
+    }
 }

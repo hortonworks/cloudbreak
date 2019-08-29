@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
@@ -62,6 +63,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -190,6 +192,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                 }
             }
 
+            decorateBuilderWithPlacement(source, builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder);
 
             return builder.build();
@@ -251,6 +254,15 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
 
     private KerberosConfig getKerberosConfig(StackV4Request source) {
         return kerberosConfigService.get(source.getEnvironmentCrn()).orElse(null);
+    }
+
+    private void decorateBuilderWithPlacement(StackV4Request source, Builder builder) {
+        PlacementSettingsV4Request placementSettings = source.getPlacement();
+        if (placementSettings != null) {
+            String region = placementSettings.getRegion();
+            String availabilityZone = placementSettings.getAvailabilityZone();
+            builder.withPlacementView(new PlacementView(region, availabilityZone));
+        }
     }
 
     private void decorateBuilderWithAccountMapping(StackV4Request source, DetailedEnvironmentResponse environment, Credential credential, Builder builder) {
