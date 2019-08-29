@@ -53,15 +53,8 @@ public class ClusterProxyService {
     }
 
     public ConfigRegistrationResponse registerCluster(Stack stack) throws JsonProcessingException {
-        // Registering twice - once with Stack CRN and another time with Cluster Id. This is
-        // for backwards compatibility. Will remove this after all consumers start using Stack CRN instead of Cluster Id.
-        registerCluster(stack, clusterId(stack.getCluster()));
-        return registerCluster(stack, stack.getResourceCrn());
-    }
-
-    private ConfigRegistrationResponse registerCluster(Stack stack, String clusterIdentifier) throws JsonProcessingException {
         try {
-            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack, clusterIdentifier);
+            ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
             LOGGER.debug("Cluster Proxy config request: {}", proxyConfigRequest);
             ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(clusterProxyUrl + registerConfigPath,
                     requestEntity(proxyConfigRequest), ConfigRegistrationResponse.class);
@@ -82,15 +75,12 @@ public class ClusterProxyService {
                     stack.getCluster().getName(), stack.getResourceCrn(), stack.getEnvironmentCrn());
             return;
         }
-        // Registering twice - once with Stack CRN and another time with Cluster Id. This is
-        // for backwards compatibility. Will remove this after all consumers start using Stack CRN instead of Cluster Id.
-        registerGateway(stack, clusterId(stack.getCluster()));
-        registerGateway(stack, stack.getResourceCrn());
+        registerGateway(stack);
     }
 
-    private void registerGateway(Stack stack, String clusterIdentifier) throws JsonProcessingException {
+    private void registerGateway(Stack stack) throws JsonProcessingException {
         try {
-            ConfigUpdateRequest request = createProxyConfigUpdateRequest(stack, clusterIdentifier);
+            ConfigUpdateRequest request = createProxyConfigUpdateRequest(stack);
             LOGGER.debug("Cluster Proxy config update request: {}", request);
             ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(clusterProxyUrl + updateConfigPath,
                     requestEntity(request), ConfigRegistrationResponse.class);
@@ -104,21 +94,15 @@ public class ClusterProxyService {
     }
 
     public void deregisterCluster(Stack stack) throws JsonProcessingException {
-        // De-registering twice - once with Stack CRN and another time with Cluster Id. This is
-        // for backwards compatibility. Will remove this after all consumers start using Stack CRN instead of Cluster Id.
-        deregister(stack, clusterId(stack.getCluster()));
-        deregister(stack, stack.getResourceCrn());
-    }
-
-    private void deregister(Stack stack, String clusterIdentifier) throws JsonProcessingException {
+        String clusterId = clusterId(stack.getCluster());
         try {
-            LOGGER.debug("Removing cluster proxy configuration for cluster with crn: {} and cluster identifier: {}", stack.getResourceCrn(), clusterIdentifier);
+            LOGGER.debug("Removing cluster proxy configuration for cluster with crn: {} and id: {}", stack.getResourceCrn(), clusterId);
             restTemplate.postForEntity(clusterProxyUrl + removeConfigPath,
-                    requestEntity(new ConfigDeleteRequest(clusterIdentifier)), ConfigRegistrationResponse.class);
-            LOGGER.debug("Removed cluster proxy configuration for cluster with crn: {} and cluster identifier: {}", stack.getResourceCrn(), clusterIdentifier);
+                    requestEntity(new ConfigDeleteRequest(stack.getResourceCrn())), ConfigRegistrationResponse.class);
+            LOGGER.debug("Removed cluster proxy configuration for cluster with crn: {} and id: {}", stack.getResourceCrn(), clusterId);
         } catch (RestClientException e) {
             LOGGER.error("Error de-registering proxy configuration for cluster with stack crn {} and id {} from Cluster Proxy. URL: {}",
-                    stack.getResourceCrn(), clusterId(stack.getCluster()), clusterProxyUrl + removeConfigPath, e);
+                    stack.getResourceCrn(), clusterId, clusterProxyUrl + removeConfigPath, e);
             throw e;
         }
     }
@@ -141,7 +125,7 @@ public class ClusterProxyService {
         return new HttpEntity<>(JsonUtil.writeValueAsString(proxyConfigRequest), headers);
     }
 
-    private ConfigRegistrationRequest createProxyConfigRequest(Stack stack, String clusterIdentifier) {
+    private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
         Cluster cluster = stack.getCluster();
 
         String cloudbreakUser = cluster.getCloudbreakAmbariUser();
@@ -153,14 +137,14 @@ public class ClusterProxyService {
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
                 new ClusterServiceCredential(dpUser, dpPasswordVaultPath, true));
         ClusterServiceConfig serviceConfig = new ClusterServiceConfig("cloudera-manager", singletonList(clusterManagerUrl(stack)), credentials);
-        return new ConfigRegistrationRequest(clusterIdentifier, singletonList(serviceConfig));
+        return new ConfigRegistrationRequest(stack.getResourceCrn(), singletonList(clusterId(stack.getCluster())), singletonList(serviceConfig));
     }
 
-    private ConfigUpdateRequest createProxyConfigUpdateRequest(Stack stack, String clusterIdentifier) {
+    private ConfigUpdateRequest createProxyConfigUpdateRequest(Stack stack) {
         String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
         Cluster cluster = stack.getCluster();
         String knoxUrl = String.format("https://%s:8443/%s", gatewayIp, cluster.getGateway().getPath());
-        return new ConfigUpdateRequest(clusterIdentifier, knoxUrl);
+        return new ConfigUpdateRequest(stack.getResourceCrn(), knoxUrl);
     }
 
     private String clusterId(Cluster cluster) {

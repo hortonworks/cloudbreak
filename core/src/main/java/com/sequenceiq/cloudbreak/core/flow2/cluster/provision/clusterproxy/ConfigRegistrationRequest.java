@@ -10,16 +10,24 @@ class ConfigRegistrationRequest {
     private String clusterCrn;
 
     @JsonProperty
+    private List<String> aliases;
+
+    @JsonProperty
     private List<ClusterServiceConfig> services;
 
     @JsonCreator
-    ConfigRegistrationRequest(String clusterCrn, List<ClusterServiceConfig> services) {
+    ConfigRegistrationRequest(String clusterCrn, List<String> aliases, List<ClusterServiceConfig> services) {
         this.clusterCrn = clusterCrn;
+        this.aliases = aliases;
         this.services = services;
     }
 
     @Override
     public String toString() {
-        return "ConfigRegistrationRequest{clusterCrn='" + clusterCrn + '\'' + ", services=" + services + '}';
+        return "ConfigRegistrationRequest{" +
+                "clusterCrn=" + clusterCrn  +
+                ", aliases=" + aliases +
+                ", services=" + services +
+                '}';
     }
 }
