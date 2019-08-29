@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
+
 import java.util.Calendar;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -36,6 +40,15 @@ public class MetadataSetupService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
+    public void cleanupRequestedInstances(Stack stack, String instanceGroupName) {
+        InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
+        List<InstanceMetaData> requestedInstances = instanceMetaDataRepository.findAllByInstanceGroupAndInstanceStatus(ig, InstanceStatus.REQUESTED);
+        for (InstanceMetaData inst : requestedInstances) {
+            inst.setInstanceStatus(InstanceStatus.TERMINATED);
+        }
+        instanceMetaDataRepository.saveAll(requestedInstances);
+    }
+
     public int saveInstanceMetaData(Stack stack, Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
         try {
             int newInstances = 0;
@@ -49,7 +62,7 @@ public class MetadataSetupService {
                 Long privateId = cloudInstance.getTemplate().getPrivateId();
                 String instanceId = cloudInstance.getInstanceId();
                 InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
-                if (instanceMetaDataEntry.getInstanceId() == null) {
+                if (instanceMetaDataEntry.getInstanceId() == null && cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == CREATED) {
                     newInstances++;
                 }
                 // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
@@ -85,8 +98,12 @@ public class MetadataSetupService {
                     }
                 }
                 if (status != null) {
-                    instanceMetaDataEntry.setInstanceStatus(status);
-                    instanceMetaDataEntry.setImage(imageJson);
+                    if (cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == TERMINATED) {
+                        instanceMetaDataEntry.setInstanceStatus(InstanceStatus.TERMINATED);
+                    } else {
+                        instanceMetaDataEntry.setInstanceStatus(status);
+                        instanceMetaDataEntry.setImage(imageJson);
+                    }
                 }
                 instanceMetaDataRepository.save(instanceMetaDataEntry);
             }
