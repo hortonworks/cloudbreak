@@ -13,13 +13,15 @@ debug() {
 }
 
 new_version() {
+  # Build docker and push to hortonworks repo
   git checkout $VERSION
   debug "building docker image for version: $VERSION"
-
+  INTERNAL_IMAGE_NAME=${INTERNAL_IMAGE_NAME:-${DOCKER_IMAGE}}
   # Build docker and push to hortonworks repo
   docker build -t ${DOCKER_IMAGE}:${VERSION} --build-arg=REPO_URL=${NEXUS_URL} --build-arg=VERSION=${VERSION} .
   docker push ${DOCKER_IMAGE}:${VERSION}
-  docker rmi ${DOCKER_IMAGE}:${VERSION}
+  docker tag ${DOCKER_IMAGE}:${VERSION} ${INTERNAL_IMAGE_NAME}:${VERSION}
+  docker push ${INTERNAL_IMAGE_NAME}:${VERSION}
 }
 
 main() {
