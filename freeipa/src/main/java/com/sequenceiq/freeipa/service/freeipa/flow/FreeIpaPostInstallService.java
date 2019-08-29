@@ -7,9 +7,8 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.UserService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.util.FMSUtil;
+import com.sequenceiq.freeipa.util.CrnService;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -60,11 +59,10 @@ public class FreeIpaPostInstallService {
         }
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
 
-        // CDPCP-591 - Enable User Sync after environment created
-        Set<String> environmentCrnFilter = new HashSet<>();
+        Set<String> environmentCrnFilter = Set.of(stack.getEnvironmentCrn());
         environmentCrnFilter.add(stack.getEnvironmentCrn());
         userService.synchronizeUsers(
-            threadBasedUserCrnProvider.getAccountId(), FMSUtil.checkUserCrn(threadBasedUserCrnProvider.getUserCrn()),
+            threadBasedUserCrnProvider.getAccountId(), CrnService.checkUserCrn(threadBasedUserCrnProvider.getUserCrn()),
             environmentCrnFilter, Set.of(), Set.of());
     }
 }

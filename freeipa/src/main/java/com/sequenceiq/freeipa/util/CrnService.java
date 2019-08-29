@@ -1,5 +1,11 @@
 package com.sequenceiq.freeipa.util;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
+import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -7,11 +13,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
-import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 
 @Component
 public class CrnService {
@@ -69,4 +70,12 @@ public class CrnService {
                 .setResource(UUID.randomUUID().toString())
                 .build().toString();
     }
+
+    public static String checkUserCrn(String userCrn) {
+        if (userCrn == null) {
+            throw new BadRequestException("User CRN must be provided");
+        }
+        return userCrn;
+    }
+
 }

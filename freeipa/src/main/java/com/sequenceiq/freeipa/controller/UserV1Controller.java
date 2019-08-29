@@ -13,7 +13,7 @@ import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningEx
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
 import com.sequenceiq.freeipa.service.freeipa.user.SyncOperationStatusService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserService;
-import com.sequenceiq.freeipa.util.FMSUtil;
+import com.sequenceiq.freeipa.util.CrnService;
 
 import java.util.Set;
 
@@ -43,7 +43,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
-        String userCrn = FMSUtil.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
+        String userCrn = CrnService.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
         String accountId = threadBaseUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeUser() requested for user {} in account {}", userCrn, accountId);
         Set<String> environmentCrnFilter = request == null ? Set.of() : nullToEmpty(request.getEnvironments());
@@ -66,7 +66,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
-        String userCrn = FMSUtil.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
+        String userCrn = CrnService.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
         String accountId = threadBaseUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
@@ -76,7 +76,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
-        String userCrn = FMSUtil.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
+        String userCrn = CrnService.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
         String accountId = threadBaseUserCrnProvider.getAccountId();
         LOGGER.debug("setPassword() requested for user {} in account {}", userCrn, accountId);
 
