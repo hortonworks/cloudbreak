@@ -87,6 +87,6 @@ class KerberosConfigRegisterServiceTest {
 
         underTest.delete(stack);
 
-        verify(kerberosConfigService).delete(stack.getEnvironmentCrn(), stack.getAccountId());
+        verify(kerberosConfigService).deleteAllInEnvironment(stack.getEnvironmentCrn(), stack.getAccountId());
     }
 }

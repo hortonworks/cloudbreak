@@ -1,14 +1,25 @@
 package com.sequenceiq.freeipa.kerberos.v1;
 
+import java.util.Optional;
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
+import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.User;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
+import com.sequenceiq.freeipa.service.config.KerberosConfigRegisterService;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class KerberosConfigV1Service {
@@ -23,6 +34,15 @@ public class KerberosConfigV1Service {
 
     @Inject
     private StringToSecretResponseConverter stringToSecretResponseConverter;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private FreeIpaClientFactory freeIpaClientFactory;
+
+    @Inject
+    private KerberosConfigRegisterService kerberosConfigRegisterService;
 
     public DescribeKerberosConfigResponse post(CreateKerberosConfigRequest createKerberosConfigRequest) {
         KerberosConfig kerberosConfig = createKerberosConfigRequestToKerberosConfigConverter.convert(createKerberosConfigRequest);
@@ -64,5 +84,28 @@ public class KerberosConfigV1Service {
         describeKerberosConfigResponse.setVerifyKdcTrust(source.getVerifyKdcTrust());
         describeKerberosConfigResponse.setEnvironmentCrn(source.getEnvironmentCrn());
         return describeKerberosConfigResponse;
+    }
+
+    public DescribeKerberosConfigResponse getForCluster(String environmentCrn, String accountId, String clusterName) throws FreeIpaClientException {
+        Optional<Stack> stack = stackService.findByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        if (stack.isPresent()) {
+            Optional<KerberosConfig> existingKerberosConfig = kerberosConfigService.find(environmentCrn, accountId, clusterName);
+            KerberosConfig kerberosConfig;
+            if (existingKerberosConfig.isPresent()) {
+                kerberosConfig = existingKerberosConfig.get();
+            } else {
+                FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack.get());
+                String bindUser = "kerberosbind-" + clusterName;
+                Optional<User> existinguser = freeIpaClient.userFind(bindUser);
+                User user = existinguser.isPresent() ? existinguser.get() : freeIpaClient.userAdd(bindUser, "service", "account");
+                String password = PasswordUtil.generatePassword();
+                freeIpaClient.userSetPassword(user.getUid(), password);
+                freeIpaClient.addRoleMember("Enrollment Administrator", Set.of(user.getUid()), null, null, null, null);
+                kerberosConfig = kerberosConfigRegisterService.createKerberosConfig(stack.get().getId(), user.getUid(), password, clusterName);
+            }
+            return convertKerberosConfigToDescribeKerberosConfigResponse(kerberosConfig);
+        } else {
+            return describe(environmentCrn);
+        }
     }
 }

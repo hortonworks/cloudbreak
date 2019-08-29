@@ -183,7 +183,7 @@ public class ClusterUpscaleService {
 
     public void regenerateKerberosKeytabs(Long stackId, String hostname) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
+        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         LOGGER.info("Start regenerate kerberos keytabs in ambari on host {}", hostname);
         getClusterConnector(stack).clusterModificationService().regenerateKerberosKeytabs(hostname, kerberosConfig);
     }

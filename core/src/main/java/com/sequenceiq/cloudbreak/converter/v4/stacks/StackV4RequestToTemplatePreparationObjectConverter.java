@@ -253,7 +253,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     }
 
     private KerberosConfig getKerberosConfig(StackV4Request source) {
-        return kerberosConfigService.get(source.getEnvironmentCrn()).orElse(null);
+        return kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null);
     }
 
     private void decorateBuilderWithPlacement(StackV4Request source, Builder builder) {

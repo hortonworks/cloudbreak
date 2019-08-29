@@ -173,6 +173,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private boolean isKerberosSecured(Stack stack) {
-        return kerberosConfigService.isKerberosConfigExistsForEnvironment(stack.getEnvironmentCrn());
+        return kerberosConfigService.isKerberosConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName());
     }
 }

@@ -36,23 +36,23 @@ public class KerberosConfigService {
     private SecretService secretService;
 
     @Retryable(value = CloudbreakServiceException.class, maxAttempts = MAX_ATTEMPT, backoff = @Backoff(delay = DELAY))
-    public boolean isKerberosConfigExistsForEnvironment(String environmentCrn) {
-        return describeKerberosConfig(environmentCrn).isPresent();
+    public boolean isKerberosConfigExistsForEnvironment(String environmentCrn, String clusterName) {
+        return describeKerberosConfig(environmentCrn, clusterName).isPresent();
     }
 
     @Retryable(value = CloudbreakServiceException.class, maxAttempts = MAX_ATTEMPT, backoff = @Backoff(delay = DELAY))
-    public Optional<KerberosConfig> get(String environmentCrn) {
-        Optional<DescribeKerberosConfigResponse> describeKerberosConfigResponse = describeKerberosConfig(environmentCrn);
+    public Optional<KerberosConfig> get(String environmentCrn, String clusterName) {
+        Optional<DescribeKerberosConfigResponse> describeKerberosConfigResponse = describeKerberosConfig(environmentCrn, clusterName);
         return describeKerberosConfigResponse.map(this::convert);
     }
 
-    private Optional<DescribeKerberosConfigResponse> describeKerberosConfig(String environmentCrn) {
+    private Optional<DescribeKerberosConfigResponse> describeKerberosConfig(String environmentCrn, String clusterName) {
         try {
-            return Optional.of(kerberosConfigV1Endpoint.describe(environmentCrn));
+            return Optional.of(kerberosConfigV1Endpoint.getForCluster(environmentCrn, clusterName));
         } catch (NotFoundException | ForbiddenException notFoundEx) {
             LOGGER.debug("No Kerberos config found for {} environment. Ldap setup will be skipped!", environmentCrn);
             return Optional.empty();
-        } catch (RuntimeException communicationEx) {
+        } catch (Exception communicationEx) {
             String message = String.format("Failed to get Kerberos config from FreeIpa service due to: '%s' ", communicationEx.getMessage());
             LOGGER.warn(message, communicationEx);
             throw new CloudbreakServiceException(message, communicationEx);

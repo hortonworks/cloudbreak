@@ -98,6 +98,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     private static final String TEST_ENVIRONMENT_CRN = "envCrn";
 
+    private static final String TEST_CLUSTER_NAME = "clustername";
+
     private static final String ADMIN_GROUP_NAME = "mockAdmins";
 
     private static final Map<String, String> MOCK_GROUP_MAPPINGS = Map.of(ADMIN_GROUP_NAME, "mockGroupRole");
@@ -218,8 +220,10 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
         when(source.getType()).thenReturn(StackType.DATALAKE);
         when(source.getPlacement()).thenReturn(placementSettings);
+        when(source.getName()).thenReturn(TEST_CLUSTER_NAME);
         when(cluster.getAmbari()).thenReturn(ambari);
         when(cluster.getBlueprintName()).thenReturn(TEST_BLUEPRINT_NAME);
+        when(cluster.getName()).thenReturn(TEST_CLUSTER_NAME);
         when(blueprintService.getByNameForWorkspace(TEST_BLUEPRINT_NAME, workspace)).thenReturn(blueprint);
         when(blueprintService.getBlueprintVariant(any())).thenReturn("AMBARI");
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
@@ -244,7 +248,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testConvertWhenKerberosNameIsNullInAmbariThenEmptyKerberosShouldBeStored() {
-        when(kerberosConfigService.get(TEST_ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(kerberosConfigService.get(TEST_ENVIRONMENT_CRN, TEST_CLUSTER_NAME)).thenReturn(Optional.empty());
         TemplatePreparationObject result = underTest.convert(source);
 
         assertNotNull(result);
@@ -254,7 +258,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenKerberosNameIsNotNullInAmbariAndSecurityTrueThenExpectedKerberosConfigShouldBeStored() {
         KerberosConfig expected = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().build();
-        when(kerberosConfigService.get(TEST_ENVIRONMENT_CRN)).thenReturn(Optional.of(expected));
+        when(kerberosConfigService.get(TEST_ENVIRONMENT_CRN, TEST_CLUSTER_NAME)).thenReturn(Optional.of(expected));
 
         TemplatePreparationObject result = underTest.convert(source);
 

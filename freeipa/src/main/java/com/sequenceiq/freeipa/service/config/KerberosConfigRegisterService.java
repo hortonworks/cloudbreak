@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,10 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
 
     @Override
     public void register(Long stackId) {
+        createKerberosConfig(stackId, FREEIPA_DEFAULT_ADMIN, null, null);
+    }
+
+    public KerberosConfig createKerberosConfig(Long stackId, String dn, String password, String clusterName) {
         FreeIpa freeIpa = getFreeIpaService().findByStackId(stackId);
         Stack stack = getStackWithInstanceMetadata(stackId);
         KerberosConfig kerberosConfig = new KerberosConfig();
@@ -37,7 +42,7 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
         kerberosConfig.setDomain(freeIpa.getDomain());
         kerberosConfig.setEnvironmentCrn(stack.getEnvironmentCrn());
         kerberosConfig.setName(stack.getName());
-        kerberosConfig.setPrincipal(FREEIPA_DEFAULT_ADMIN);
+        kerberosConfig.setPrincipal(dn);
         kerberosConfig.setRealm(freeIpa.getDomain().toUpperCase());
         kerberosConfig.setType(KerberosType.FREEIPA);
         Set<InstanceMetaData> allNotDeletedInstances = stack.getInstanceGroups().stream()
@@ -46,14 +51,15 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
         kerberosConfig.setNameServers(allFreeIpaIpJoined);
         String allNotDeletedIpaInstanceFQDNJoined = allNotDeletedInstances.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining(","));
         kerberosConfig.setUrl(allNotDeletedIpaInstanceFQDNJoined);
-        kerberosConfig.setPassword(freeIpa.getAdminPassword());
-        kerberosConfigService.createKerberosConfig(kerberosConfig, stack.getAccountId());
+        kerberosConfig.setPassword(StringUtils.isBlank(password) ? freeIpa.getAdminPassword() : password);
+        kerberosConfig.setClusterName(clusterName);
+        return kerberosConfigService.createKerberosConfig(kerberosConfig, stack.getAccountId());
     }
 
     @Override
     public void delete(Stack stack) {
         try {
-            kerberosConfigService.delete(stack.getEnvironmentCrn(), stack.getAccountId());
+            kerberosConfigService.deleteAllInEnvironment(stack.getEnvironmentCrn(), stack.getAccountId());
         } catch (NotFoundException e) {
             LOGGER.info("Kerberos config not exists for environment {}", stack.getEnvironmentCrn());
         }

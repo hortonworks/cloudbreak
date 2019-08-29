@@ -146,7 +146,7 @@ public class ReactorFlowManagerTest {
         stack.setCluster(TestUtil.cluster());
         stack.setEnvironmentCrn("env");
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
-        when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env")).thenReturn(true);
+        when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env", stack.getName())).thenReturn(true);
 
         underTest.triggerClusterTermination(stack, false);
 
@@ -166,7 +166,7 @@ public class ReactorFlowManagerTest {
         stack.setCluster(TestUtil.cluster());
         stack.setEnvironmentCrn("env");
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
-        when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env")).thenReturn(true);
+        when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env", stack.getName())).thenReturn(true);
 
         underTest.triggerClusterTermination(stack, true);
 

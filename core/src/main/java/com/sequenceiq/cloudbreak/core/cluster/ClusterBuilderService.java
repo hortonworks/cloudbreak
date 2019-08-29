@@ -157,7 +157,7 @@ public class ClusterBuilderService {
                 .map(Stack::getResourceCrn)
                 .orElse(null);
 
-        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
+        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         clusterService.save(connector.clusterSetupService().buildCluster(
                 instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, sdxStackCrn, telemetry, kerberosConfig));
         recipeEngine.executePostInstallRecipes(stack, instanceMetaDataByHostGroup.keySet());

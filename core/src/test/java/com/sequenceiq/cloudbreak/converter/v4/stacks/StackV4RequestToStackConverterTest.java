@@ -151,7 +151,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         environmentResponse.setCloudPlatform("AWS");
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
-        when(kerberosConfigService.get(anyString())).thenReturn(Optional.empty());
+        when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         credential = Credential.builder()
                 .cloudPlatform("AWS")
                 .build();

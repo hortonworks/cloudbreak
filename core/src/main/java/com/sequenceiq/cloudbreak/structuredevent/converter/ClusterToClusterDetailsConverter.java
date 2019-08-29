@@ -62,7 +62,7 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
     }
 
     private void convertKerberosConfig(ClusterDetails clusterDetails, Cluster source) {
-        KerberosConfig kerberosConfig = kerberosConfigService.get(source.getEnvironmentCrn()).orElse(null);
+        KerberosConfig kerberosConfig = kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null);
         if (kerberosConfig != null) {
             String kerberosType = "New MIT Kerberos";
             if (StringUtils.isNotEmpty(kerberosConfig.getUrl())) {

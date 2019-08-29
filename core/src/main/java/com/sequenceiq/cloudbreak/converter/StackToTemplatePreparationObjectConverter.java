@@ -141,7 +141,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster))
                     .withLdapConfig(ldapView.orElse(null))
                     .withHdfConfigs(hdfConfigs)
-                    .withKerberosConfig(kerberosConfigService.get(source.getEnvironmentCrn()).orElse(null))
+                    .withKerberosConfig(kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null))
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource));
 
             decorateBuilderWithPlacement(source, builder);

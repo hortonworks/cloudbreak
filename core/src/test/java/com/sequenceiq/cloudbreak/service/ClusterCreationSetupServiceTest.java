@@ -124,6 +124,7 @@ public class ClusterCreationSetupServiceTest {
         stack.setId(1L);
         stack.setWorkspace(workspace);
         stack.setEnvironmentCrn("env");
+        stack.setName("name");
         blueprint = new Blueprint();
         blueprint.setBlueprintText("{}");
         user = new User();
@@ -166,7 +167,7 @@ public class ClusterCreationSetupServiceTest {
     public void testDomainIsSet() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
                 .withDomain("domain").build();
-        when(kerberosConfigService.get(anyString())).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
         underTest.prepare(clusterRequest, stack, blueprint, user);
         assertEquals("domain", stack.getCustomDomain());
     }
@@ -180,7 +181,7 @@ public class ClusterCreationSetupServiceTest {
     @Test
     public void testMissingDomain() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().build();
-        when(kerberosConfigService.get(anyString())).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
         underTest.prepare(clusterRequest, stack, blueprint, user);
         assertNull(stack.getCustomDomain());
     }

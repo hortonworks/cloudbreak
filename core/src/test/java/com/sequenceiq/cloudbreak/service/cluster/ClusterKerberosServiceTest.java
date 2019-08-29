@@ -76,7 +76,7 @@ public class ClusterKerberosServiceTest {
 
     @Test
     public void testAdLeave() throws CloudbreakException, CloudbreakOrchestratorFailedException {
-        when(kerberosConfigService.get(anyString())).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.isAdJoinable(any())).thenReturn(Boolean.TRUE);
 
         underTest.leaveDomains(stack);
@@ -86,7 +86,7 @@ public class ClusterKerberosServiceTest {
 
     @Test
     public void testIpaLeave() throws CloudbreakException, CloudbreakOrchestratorFailedException {
-        when(kerberosConfigService.get(anyString())).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.isIpaJoinable(any())).thenReturn(Boolean.TRUE);
 
         underTest.leaveDomains(stack);
@@ -96,7 +96,7 @@ public class ClusterKerberosServiceTest {
 
     @Test(expected = CloudbreakException.class)
     public void testExceptionMapped() throws CloudbreakOrchestratorFailedException, CloudbreakException {
-        when(kerberosConfigService.get(anyString())).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.isAdJoinable(any())).thenReturn(Boolean.TRUE);
 
         doThrow(new CloudbreakOrchestratorFailedException("error")).when(hostOrchestrator)

@@ -76,7 +76,7 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
         Selectable response;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            Optional<KerberosConfig> kerberosConfigOptional = kerberosConfigService.get(stack.getEnvironmentCrn());
+            Optional<KerberosConfig> kerberosConfigOptional = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
             // TODO remove Cloudplatform check when FreeIPA registration is ready
             if ((CloudPlatform.AWS.name().equals(stack.cloudPlatform()) || CloudPlatform.AZURE.name().equals(stack.cloudPlatform()))
                     && kerberosConfigOptional.isPresent() && kerberosDetailService.isIpaJoinable(kerberosConfigOptional.get())) {
