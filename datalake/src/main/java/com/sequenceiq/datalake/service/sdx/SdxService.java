@@ -209,6 +209,15 @@ public class SdxService {
         return sdxCluster;
     }
 
+    public void sync(String name) {
+        stackV4Endpoint.sync(0L, name);
+    }
+
+    public void syncByCrn(String userCrn, String crn) {
+        SdxCluster sdxCluster = getByCrn(userCrn, crn);
+        stackV4Endpoint.sync(0L, sdxCluster.getClusterName());
+    }
+
     private void createDatabaseByDefaultForAWS(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         if ("AWS".equals(environment.getCloudPlatform()) &&
                 (sdxClusterRequest.getExternalDatabase() == null ||

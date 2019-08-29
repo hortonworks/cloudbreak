@@ -19,7 +19,7 @@ public class StackSyncAction implements Action<StackTestDto, CloudbreakClient> {
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
         Log.logJSON(LOGGER, " Stack post request:\n", testDto.getRequest());
-        client.getCloudbreakClient().stackV4Endpoint().putSync(client.getWorkspaceId(), testDto.getName());
+        client.getCloudbreakClient().stackV4Endpoint().sync(client.getWorkspaceId(), testDto.getName());
         Log.logJSON(LOGGER, " Stack sync was successful:\n", testDto.getResponse());
         Log.log(LOGGER, format(" crn: %s", testDto.getResponse().getCrn()));
         return testDto;

@@ -111,14 +111,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public void putSyncByName(String name) {
-        stackOperation.putSync(
+        stackOperation.sync(
                 aStackAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId());
     }
 
     @Override
     public void putSyncByCrn(String crn) {
-        stackOperation.putSync(
+        stackOperation.sync(
                 aStackAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId());
     }

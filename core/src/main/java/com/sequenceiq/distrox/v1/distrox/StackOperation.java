@@ -155,11 +155,11 @@ public class StackOperation {
         }
     }
 
-    public void putSync(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
+    public void sync(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
         if (isNotEmpty(stackAccessDto.getName())) {
-            stackCommonService.putSyncInWorkspace(stackAccessDto.getName(), null, workspaceId);
+            stackCommonService.syncInWorkspace(stackAccessDto.getName(), null, workspaceId);
         } else {
-            stackCommonService.putSyncInWorkspace(null, stackAccessDto.getCrn(), workspaceId);
+            stackCommonService.syncInWorkspace(null, stackAccessDto.getCrn(), workspaceId);
         }
     }
 
