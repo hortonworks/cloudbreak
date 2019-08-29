@@ -110,6 +110,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     private static final String REGION = "region-1";
 
+    private static final String AVAILABILITY_ZONE = "az-1";
+
     @InjectMocks
     private StackV4RequestToTemplatePreparationObjectConverter underTest;
 
@@ -235,6 +237,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(credentialClientService.getByCrn(TEST_CREDENTIAL_NAME)).thenReturn(credential);
         when(credential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(placementSettings.getRegion()).thenReturn(REGION);
+        when(placementSettings.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
         when(awsMockAccountMappingService.getGroupMappings(REGION, credential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
         when(awsMockAccountMappingService.getUserMappings(REGION, credential)).thenReturn(MOCK_USER_MAPPINGS);
     }
@@ -429,6 +432,14 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         assertNotNull(accountMappingView);
         assertEquals(GROUP_MAPPINGS, accountMappingView.getGroupMappings());
         assertEquals(USER_MAPPINGS, accountMappingView.getUserMappings());
+    }
+
+    @Test
+    public void testStackPlacement() {
+        TemplatePreparationObject result = underTest.convert(source);
+        assertTrue(result.getPlacementView().isPresent());
+        assertEquals(REGION, result.getPlacementView().get().getRegion());
+        assertEquals(AVAILABILITY_ZONE, result.getPlacementView().get().getAvailabilityZone());
     }
 
     private Set<String> createRdsConfigNames() {

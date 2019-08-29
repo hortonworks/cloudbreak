@@ -39,6 +39,8 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
 
     private static final String S3GUARD_TABLE_NAME_PARAM = "fs.s3a.s3guard.ddb.table";
 
+    private static final String S3GUARD_TABLE_REGION_PARAM = "fs.s3a.s3guard.ddb.region";
+
     private static final String S3GUARD_AUTHORITATIVE_PATH_PARAM = "fs.s3a.authoritative.path";
 
     @Override
@@ -96,6 +98,9 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
                     .getSafetyValveProperty(S3GUARD_TABLE_CREATE_PARAM, S3GUARD_TABLE_CREATE_VALUE));
             hdfsCoreSiteSafetyValveValue.append(ConfigUtils
                     .getSafetyValveProperty(S3GUARD_TABLE_NAME_PARAM, s3FileSystemConfigurationsView.getS3GuardDynamoTableName()));
+
+            source.getPlacementView().ifPresent(placementView -> hdfsCoreSiteSafetyValveValue.append(ConfigUtils
+                    .getSafetyValveProperty(S3GUARD_TABLE_REGION_PARAM, placementView.getRegion())));
 
             ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_DIR)
                     .ifPresent(location -> hdfsCoreSiteSafetyValveValue.append(
