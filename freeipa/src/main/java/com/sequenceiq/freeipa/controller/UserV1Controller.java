@@ -44,13 +44,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
-        String userCrn = null;
-        try {
-            userCrn = CrnService.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
-        } catch (CrnParseException e) {
-            LOGGER.error("Invalid user CRN provided {}", e.getMessage(), e);
-            throw new BadRequestException("Invalid user CRN provided");
-        }
+        String userCrn = getUserCrn();
         String accountId = threadBaseUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeUser() requested for user {} in account {}", userCrn, accountId);
         Set<String> environmentCrnFilter = request == null ? Set.of() : nullToEmpty(request.getEnvironments());
@@ -73,7 +67,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
-        String userCrn = CrnService.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
+        String userCrn = getUserCrn();
         String accountId = threadBaseUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
@@ -83,7 +77,7 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
-        String userCrn = CrnService.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
+        String userCrn = getUserCrn();
         String accountId = threadBaseUserCrnProvider.getAccountId();
         LOGGER.debug("setPassword() requested for user {} in account {}", userCrn, accountId);
 
@@ -106,5 +100,17 @@ public class UserV1Controller implements UserV1Endpoint {
 
     private Set<String> nullToEmpty(Set<String> set) {
         return set == null ? Set.of() : set;
+    }
+
+    private String getUserCrn() {
+        String userCrn = null;
+        try {
+            userCrn = CrnService.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
+        } catch (CrnParseException e) {
+            LOGGER.error("Invalid user CRN provided {}", e.getMessage(), e);
+            throw new BadRequestException("Invalid user CRN provided");
+        }
+
+        return userCrn;
     }
 }
