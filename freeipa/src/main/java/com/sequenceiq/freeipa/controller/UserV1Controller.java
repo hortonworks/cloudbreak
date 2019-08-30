@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.controller;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -43,7 +44,13 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
-        String userCrn = CrnService.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
+        String userCrn = null;
+        try {
+            userCrn = CrnService.checkUserCrn(threadBaseUserCrnProvider.getUserCrn());
+        } catch (CrnParseException e) {
+            LOGGER.error("Invalid user CRN provided {}", e.getMessage(), e);
+            throw new BadRequestException("Invalid user CRN provided");
+        }
         String accountId = threadBaseUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeUser() requested for user {} in account {}", userCrn, accountId);
         Set<String> environmentCrnFilter = request == null ? Set.of() : nullToEmpty(request.getEnvironments());

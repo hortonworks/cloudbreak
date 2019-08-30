@@ -4,7 +4,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 
 import java.util.UUID;
 
@@ -73,7 +72,7 @@ public class CrnService {
 
     public static String checkUserCrn(String userCrn) {
         if (userCrn == null) {
-            throw new BadRequestException("User CRN must be provided");
+            throw new CrnParseException("User CRN must be provided");
         }
         return userCrn;
     }
