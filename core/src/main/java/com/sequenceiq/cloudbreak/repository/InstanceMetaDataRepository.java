@@ -67,5 +67,6 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceGroup.stack.id= :stackId")
     InstanceMetaData getPrimaryGatewayInstanceMetadata(@Param("stackId") Long stackId);
 
-    Long countByInstanceGroupIn(List<InstanceGroup> instanceGroups);
+    @Query("SELECT max(imd.privateId) FROM InstanceMetaData imd WHERE imd.instanceGroup IN :instanceGroups")
+    Long getMaxPrivateId(@Param("instanceGroups") List<InstanceGroup> instanceGroups);
 }

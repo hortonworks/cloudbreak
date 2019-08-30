@@ -216,8 +216,8 @@ public class StackUpscaleService {
 
     private Long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
         LOGGER.info("Get first valid PrivateId of instanceGroups");
-        Long instanceCount = instanceMetaDataRepository.countByInstanceGroupIn(instanceGroups);
-        LOGGER.info("Number of instance metadata for cluster: {}", instanceCount);
-        return instanceCount;
+        Long highestId = instanceMetaDataRepository.getMaxPrivateId(instanceGroups);
+        LOGGER.info("Highest id of instance metadata for cluster: {}", highestId);
+        return highestId + 1;
     }
 }
