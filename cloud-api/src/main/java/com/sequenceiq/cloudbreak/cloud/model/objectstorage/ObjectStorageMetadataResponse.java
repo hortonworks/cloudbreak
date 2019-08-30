@@ -6,11 +6,14 @@ public class ObjectStorageMetadataResponse {
 
     private String region;
 
+    private ResponseStatus status;
+
     public ObjectStorageMetadataResponse() {
     }
 
     public ObjectStorageMetadataResponse(Builder builder) {
         this.region = builder.region;
+        this.status = builder.status;
     }
 
     public String getRegion() {
@@ -21,6 +24,14 @@ public class ObjectStorageMetadataResponse {
         this.region = region;
     }
 
+    public ResponseStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ResponseStatus status) {
+        this.status = status;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -29,6 +40,7 @@ public class ObjectStorageMetadataResponse {
     public String toString() {
         return "ObjectStorageMetadataResponse{" +
                 "region='" + region + '\'' +
+                ", status=" + status +
                 '}';
     }
 
@@ -40,26 +52,39 @@ public class ObjectStorageMetadataResponse {
         if (o == null || !getClass().equals(o.getClass())) {
             return false;
         }
-        ObjectStorageMetadataResponse that = (ObjectStorageMetadataResponse) o;
-        return Objects.equals(region, that.region);
+        ObjectStorageMetadataResponse response = (ObjectStorageMetadataResponse) o;
+        return Objects.equals(region, response.region) &&
+                status == response.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(region);
+        return Objects.hash(region, status);
     }
 
     public static class Builder {
 
         private String region;
 
+        private ResponseStatus status;
+
         public Builder withRegion(String region) {
             this.region = region;
+            return this;
+        }
+
+        public Builder withStatus(ResponseStatus status) {
+            this.status = status;
             return this;
         }
 
         public ObjectStorageMetadataResponse build() {
             return new ObjectStorageMetadataResponse(this);
         }
+    }
+
+    public enum ResponseStatus {
+        OK,
+        ACCESS_DENIED
     }
 }

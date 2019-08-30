@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse.ResponseStatus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsObjectStorageConnectorTest {
@@ -54,6 +56,19 @@ public class AwsObjectStorageConnectorTest {
         ObjectStorageMetadataResponse result = underTest.getObjectStorageMetadata(request);
         verify(s3Client).getBucketLocation(BUCKET_NAME);
         assertEquals(REGION_NAME, result.getRegion());
+        assertEquals(ResponseStatus.OK, result.getStatus());
+    }
+
+    @Test
+    public void getObjectStorageMetadataAccessDenied() {
+        AmazonS3Exception exception = new AmazonS3Exception(ERROR_MESSAGE);
+        exception.setStatusCode(403);
+        when(s3Client.getBucketLocation(BUCKET_NAME)).thenThrow(exception);
+        ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder().withObjectStoragePath(BUCKET_NAME).build();
+        ObjectStorageMetadataResponse result = underTest.getObjectStorageMetadata(request);
+        verify(s3Client).getBucketLocation(BUCKET_NAME);
+        assertNull(result.getRegion());
+        assertEquals(ResponseStatus.ACCESS_DENIED, result.getStatus());
     }
 
     @Test
