@@ -2,14 +2,17 @@ package com.sequenceiq.cloudbreak.controller.validation.environment;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,6 +22,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -45,8 +51,17 @@ public class ClusterCreationEnvironmentValidatorTest {
     @Mock
     private User user;
 
+    @Mock
+    private KerberosConfigService kerberosConfigService;
+
     @InjectMocks
     private ClusterCreationEnvironmentValidator underTest;
+
+    @Before
+    public void setUp() throws Exception {
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.FREEIPA).build();
+        when(kerberosConfigService.get(any(), any())).thenReturn(Optional.of(kerberosConfig));
+    }
 
     @Test
     public void testValidateShouldBeSuccessWhenStackRegionIsValidAndEnvironmentsResourcesAreNotGiven() throws IOException {
@@ -151,7 +166,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         RDSConfig rdsConfig = createRdsConfig(rdsName);
         when(rdsConfigService.getByNamesForWorkspaceId(Set.of(rdsConfig.getName()), stack.getWorkspace().getId())).thenReturn(Set.of(rdsConfig));
         clusterRequest.setDatabases(Set.of(rdsName));
-        when(user.getUserCrn()).thenReturn("aUserCRN");
+//        when(user.getUserCrn()).thenReturn("aUserCRN");
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
         ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);

@@ -110,7 +110,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setProxyConfigCrn(source.getProxyConfigCrn());
         cluster.setAutoTlsEnabled(Optional.ofNullable(source.getCm())
                 .map(ClouderaManagerV4Request::getEnableAutoTls)
-                .orElse(Boolean.FALSE));
+                .orElse(Boolean.TRUE));
         return cluster;
     }
 
