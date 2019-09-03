@@ -48,6 +48,6 @@ public interface FlowLogService {
 
     Set<FlowLog> findAllByCloudbreakNodeId(String cloudbreakNodeId);
 
-    List<FlowLog> findAllByStackIdOrderByCreatedDesc(Long id);
+    List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long id);
 
 }

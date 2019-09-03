@@ -104,29 +104,29 @@ public interface DistroXV1Endpoint {
             nickname = "deleteDistroXV1ByCrn")
     void deleteByCrn(@PathParam("crn") String crn, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
-    @PUT
+    @POST
     @Path("name/{name}/sync")
     @ApiOperation(value = SYNC_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "syncDistroXV1ByName")
-    void putSyncByName(@PathParam("name") String name);
+    void syncByName(@PathParam("name") String name);
 
-    @PUT
+    @POST
     @Path("crn/{crn}/sync")
     @ApiOperation(value = SYNC_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "syncDistroXV1ByCrn")
-    void putSyncByCrn(@PathParam("crn") String crn);
+    void syncByCrn(@PathParam("crn") String crn);
 
-    @PUT
+    @POST
     @Path("name/{name}/retry")
     @ApiOperation(value = RETRY_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
             nickname = "retryDistroXV1ByName")
-    void putRetryByName(@PathParam("name") String name);
+    void retryByName(@PathParam("name") String name);
 
-    @PUT
+    @POST
     @Path("crn/{crn}/retry")
     @ApiOperation(value = RETRY_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
             nickname = "retryDistroXV1ByCrn")
-    void putRetryByCrn(@PathParam("crn") String crn);
+    void retryByCrn(@PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/stop")

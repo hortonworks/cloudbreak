@@ -110,8 +110,6 @@ class ProvisionerServiceTest {
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
         provisionerService.startStackProvisioning(id, getEnvironmentResponse(), getDatabaseServerResponse());
         verify(sdxClusterRepository, times(1)).save(any(SdxCluster.class));
-        verify(sdxStatusService, times(1))
-                .setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
         verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED), any());
     }
 
@@ -142,6 +140,8 @@ class ProvisionerServiceTest {
         when(sdxClusterRepository.findById(2L)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 100, TimeUnit.MILLISECONDS);
         Assertions.assertThrows(PollerStoppedException.class, () -> provisionerService.waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID));
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
     }
 
     @Test
@@ -158,6 +158,8 @@ class ProvisionerServiceTest {
         Assertions.assertThrows(UserBreakException.class, () -> provisionerService
                 .waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID), "Stack creation failed");
         verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_CREATION_FAILED), any());
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
     }
 
     @Test
@@ -184,8 +186,12 @@ class ProvisionerServiceTest {
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster savedSdxCluster = captor.getValue();
         verify(sdxStatusService, times(1))
+                .setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
+        verify(sdxStatusService, times(1))
                 .setStatusForDatalake(DatalakeStatusEnum.RUNNING, "Datalake is running", savedSdxCluster);
         verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED), any());
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
     }
 
     @Test

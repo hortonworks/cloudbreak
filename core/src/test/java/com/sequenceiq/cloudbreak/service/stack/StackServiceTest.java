@@ -574,7 +574,7 @@ public class StackServiceTest {
         FlowLog flowLog = new FlowLog();
         flowLog.setVariables("{\"FORCEDTERMINATION\":false}");
         flowLog.setCurrentState(StackTerminationState.PRE_TERMINATION_STATE.name());
-        when(flowLogService.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(Collections.singletonList(flowLog));
+        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(STACK_ID)).thenReturn(Collections.singletonList(flowLog));
 
         underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
@@ -592,7 +592,7 @@ public class StackServiceTest {
         FlowLog flowLog = new FlowLog();
         flowLog.setVariables("{\"FORCEDTERMINATION\":true}");
         flowLog.setCurrentState(StackTerminationState.PRE_TERMINATION_STATE.name());
-        when(flowLogService.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(Collections.singletonList(flowLog));
+        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(STACK_ID)).thenReturn(Collections.singletonList(flowLog));
 
         underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
@@ -612,7 +612,7 @@ public class StackServiceTest {
         underTest.deleteByName(STACK_NAME, WORKSPACE_ID, true, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
-        verify(flowLogService, times(0)).findAllByStackIdOrderByCreatedDesc(STACK_ID);
+        verify(flowLogService, times(0)).findAllByResourceIdOrderByCreatedDesc(STACK_ID);
     }
 
     @Test
@@ -628,7 +628,7 @@ public class StackServiceTest {
         underTest.deleteByName(STACK_NAME, WORKSPACE_ID, false, user);
 
         verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean());
-        verify(flowLogService, times(0)).findAllByStackIdOrderByCreatedDesc(STACK_ID);
+        verify(flowLogService, times(0)).findAllByResourceIdOrderByCreatedDesc(STACK_ID);
     }
 
     @Test
