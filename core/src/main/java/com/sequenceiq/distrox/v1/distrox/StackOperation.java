@@ -163,7 +163,7 @@ public class StackOperation {
         }
     }
 
-    public void putRetry(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
+    public void retry(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
         if (isNotEmpty(stackAccessDto.getName())) {
             stackCommonService.retryInWorkspaceByName(stackAccessDto.getName(), workspaceId);
         } else {

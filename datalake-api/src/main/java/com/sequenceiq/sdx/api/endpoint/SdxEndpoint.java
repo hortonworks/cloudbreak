@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
+import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
@@ -120,4 +121,16 @@ public interface SdxEndpoint {
     @Path("/crn/{crn}/sync")
     @ApiOperation(value = "sync SDX cluster by crn", produces = MediaType.APPLICATION_JSON, nickname = "syncSdxByCrn")
     void syncByCrn(@PathParam("crn") String crn);
+
+    @POST
+    @Path("{name}/retry")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "retry sdx", produces = ContentType.JSON, nickname = "retrySdx")
+    void retry(@PathParam("name") String name);
+
+    @POST
+    @Path("/crn/{crn}/retry")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "retry sdx by crn", produces = ContentType.JSON, nickname = "retrySdxByCrn")
+    void retryByCrn(@PathParam("crn") String crn);
 }

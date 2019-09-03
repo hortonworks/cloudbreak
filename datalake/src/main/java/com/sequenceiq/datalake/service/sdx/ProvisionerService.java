@@ -124,7 +124,6 @@ public class ProvisionerService {
                 StackV4Response stackV4Response = stackV4Endpoint.post(0L, stackV4Request);
                 sdxCluster.setStackId(stackV4Response.getId());
                 sdxCluster.setStackCrn(stackV4Response.getCrn());
-                sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
                 sdxClusterRepository.save(sdxCluster);
                 notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, sdxCluster);
                 LOGGER.info("Sdx cluster updated");
@@ -143,6 +142,7 @@ public class ProvisionerService {
 
     public void waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig, String requestId) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
+            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())

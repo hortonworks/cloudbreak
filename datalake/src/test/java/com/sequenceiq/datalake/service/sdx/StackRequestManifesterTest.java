@@ -7,13 +7,14 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -25,6 +26,7 @@ import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 
+@ExtendWith(MockitoExtension.class)
 public class StackRequestManifesterTest {
 
     private static final String ENVIRONMENT_CRN = "crn:myEnvironment";
@@ -53,9 +55,6 @@ public class StackRequestManifesterTest {
 
     private static final String GROUP_ROLE_2 = "group-role2";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Mock
     private GrpcIdbmmsClient idbmmsClient;
 
@@ -72,18 +71,13 @@ public class StackRequestManifesterTest {
     @InjectMocks
     private StackRequestManifester underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         clusterV4Request = new ClusterV4Request();
         when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
         when(stackV4Request.getName()).thenReturn(STACK_NAME);
         cloudStorage = new CloudStorageRequest();
-        when(idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, ENVIRONMENT_CRN, Optional.empty())).thenReturn(mappingsConfig);
-        when(idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, BAD_ENVIRONMENT_CRN, Optional.empty()))
-                .thenThrow(new IdbmmsOperationException("Houston, we have a problem."));
-        when(mappingsConfig.getGroupMappings()).thenReturn(Map.ofEntries(Map.entry(GROUP_2, GROUP_ROLE_2)));
-        when(mappingsConfig.getActorMappings()).thenReturn(Map.ofEntries(Map.entry(USER_2, USER_ROLE_2)));
     }
 
     @Test
@@ -125,6 +119,10 @@ public class StackRequestManifesterTest {
 
     @Test
     public void testSetupCloudStorageAccountMappingWhenCloudStorageWithNoAccountMappingAndIdbmmsSourceAndSuccess() {
+        when(idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, ENVIRONMENT_CRN, Optional.empty())).thenReturn(mappingsConfig);
+        when(mappingsConfig.getGroupMappings()).thenReturn(Map.ofEntries(Map.entry(GROUP_2, GROUP_ROLE_2)));
+        when(mappingsConfig.getActorMappings()).thenReturn(Map.ofEntries(Map.entry(USER_2, USER_ROLE_2)));
+
         clusterV4Request.setCloudStorage(cloudStorage);
 
         underTest.setupCloudStorageAccountMapping(stackV4Request, ENVIRONMENT_CRN, IdBrokerMappingSource.IDBMMS, CLOUD_PLATFORM_AWS);
@@ -138,11 +136,14 @@ public class StackRequestManifesterTest {
 
     @Test
     public void testSetupCloudStorageAccountMappingWhenCloudStorageWithNoAccountMappingAndIdbmmsSourceAndFailure() {
+        when(idbmmsClient.getMappingsConfig(IAM_INTERNAL_ACTOR_CRN, BAD_ENVIRONMENT_CRN, Optional.empty()))
+                .thenThrow(new IdbmmsOperationException("Houston, we have a problem."));
+
         clusterV4Request.setCloudStorage(cloudStorage);
 
-        thrown.expect(IdbmmsOperationException.class);
-
-        underTest.setupCloudStorageAccountMapping(stackV4Request, BAD_ENVIRONMENT_CRN, IdBrokerMappingSource.IDBMMS, CLOUD_PLATFORM_AWS);
+        Assertions.assertThrows(
+                IdbmmsOperationException.class,
+                () -> underTest.setupCloudStorageAccountMapping(stackV4Request, BAD_ENVIRONMENT_CRN, IdBrokerMappingSource.IDBMMS, CLOUD_PLATFORM_AWS));
     }
 
     @Test

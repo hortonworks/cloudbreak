@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.create;
 
+import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_CREATE_FAILED_EVENT;
+import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_CREATE_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_FAILED_STATE;
@@ -15,12 +17,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateState, SdxCreateEvent> {
+public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateState, SdxCreateEvent> implements RetryableFlowConfiguration<SdxCreateEvent> {
 
     private static final List<Transition<SdxCreateState, SdxCreateEvent>> TRANSITIONS = new Builder<SdxCreateState, SdxCreateEvent>()
-            .defaultFailureEvent(SdxCreateEvent.SDX_CREATE_FAILED_EVENT)
+            .defaultFailureEvent(SDX_CREATE_FAILED_EVENT)
             .from(INIT_STATE)
             .to(SDX_CREATION_WAIT_ENV_STATE)
             .event(SdxCreateEvent.ENV_WAIT_EVENT).defaultFailureEvent()
@@ -35,14 +38,14 @@ public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateStat
             .event(SdxCreateEvent.SDX_STACK_CREATION_IN_PROGRESS_EVENT).defaultFailureEvent()
             .from(SDX_STACK_CREATION_IN_PROGRESS_STATE)
             .to(SDX_CREATION_FINISHED_STATE)
-            .event(SdxCreateEvent.SDX_STACK_CREATION_SUCCESS_EVENT).failureEvent(SdxCreateEvent.SDX_CREATE_FAILED_EVENT)
+            .event(SdxCreateEvent.SDX_STACK_CREATION_SUCCESS_EVENT).failureEvent(SDX_CREATE_FAILED_EVENT)
             .from(SDX_CREATION_FINISHED_STATE)
             .to(FINAL_STATE)
             .event(SdxCreateEvent.SDX_CREATE_FINALIZED_EVENT).defaultFailureEvent()
             .build();
 
     private static final FlowEdgeConfig<SdxCreateState, SdxCreateEvent> EDGE_CONFIG =
-            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SDX_CREATION_FAILED_STATE, SdxCreateEvent.SDX_CREATE_FAILED_HANDLED_EVENT);
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SDX_CREATION_FAILED_STATE, SDX_CREATE_FAILED_HANDLED_EVENT);
 
     public SdxCreateFlowConfig() {
         super(SdxCreateState.class, SdxCreateEvent.class);
@@ -68,5 +71,10 @@ public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateStat
     @Override
     protected FlowEdgeConfig<SdxCreateState, SdxCreateEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public SdxCreateEvent getFailHandledEvent() {
+        return SDX_CREATE_FAILED_HANDLED_EVENT;
     }
 }

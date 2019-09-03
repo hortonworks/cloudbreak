@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
+import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.RedeploySdxClusterRequest;
@@ -32,6 +33,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxService sdxService;
+
+    @Inject
+    private SdxRetryService sdxRetryService;
 
     @Inject
     private SdxRepairService repairService;
@@ -141,6 +145,20 @@ public class SdxController implements SdxEndpoint {
     public void syncByCrn(String crn) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         sdxService.syncByCrn(userCrn, crn);
+    }
+
+    @Override
+    public void retry(String name) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getSdxByNameInAccount(userCrn, name);
+        sdxRetryService.retrySdx(sdxCluster);
+    }
+
+    @Override
+    public void retryByCrn(String crn) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
+        sdxRetryService.retrySdx(sdxCluster);
     }
 
 }
