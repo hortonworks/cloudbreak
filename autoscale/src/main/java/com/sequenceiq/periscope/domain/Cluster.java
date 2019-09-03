@@ -27,7 +27,7 @@ public class Cluster implements Monitored {
 
     private static final int DEFAULT_MIN_SIZE = 2;
 
-    private static final int DEFAULT_MAX_SIZE = 100;
+    private static final int DEFAULT_MAX_SIZE = 300;
 
     private static final int DEFAULT_COOLDOWN = 30;
 
