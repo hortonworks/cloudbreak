@@ -14,8 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.ambari.client.services.ServiceAndHostService;
+import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.converter.mapper.AmbariDatabaseMapper;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientRetryer;
 import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
@@ -49,15 +50,18 @@ public class AmbariConfigurationService {
     @Inject
     private AmbariDatabaseMapper ambariDatabaseMapper;
 
+    @Inject
+    private AmbariClientRetryer ambariClientRetryer;
+
     static {
         for (ConfigParam param : ConfigParam.values()) {
             CONFIG_LIST.add(param.key());
         }
     }
 
-    public Map<String, String> getConfiguration(ServiceAndHostService ambariClient, String hostGroup) {
+    public Map<String, String> getConfiguration(AmbariClient ambariClient, String hostGroup) {
         Map<String, String> configuration = new HashMap<>();
-        Set<Entry<String, Map<String, String>>> serviceConfigs = ambariClient.getServiceConfigMapByHostGroup(hostGroup).entrySet();
+        Set<Entry<String, Map<String, String>>> serviceConfigs = ambariClientRetryer.getServiceConfigMapByHostGroup(ambariClient, hostGroup);
         for (Entry<String, Map<String, String>> serviceEntry : serviceConfigs) {
             for (Entry<String, String> configEntry : serviceEntry.getValue().entrySet()) {
                 if (CONFIG_LIST.contains(configEntry.getKey())) {
@@ -68,7 +72,7 @@ public class AmbariConfigurationService {
         return configuration;
     }
 
-    private String replaceHostName(ServiceAndHostService ambariClient, Entry<String, String> entry) {
+    private String replaceHostName(AmbariClient ambariClient, Entry<String, String> entry) {
         String result = entry.getValue();
         if (entry.getKey().startsWith("yarn.resourcemanager")) {
             int portStartIndex = result.indexOf(':');

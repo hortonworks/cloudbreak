@@ -430,7 +430,7 @@ public class AmbariDecommissioner {
                 toMap(HostMetadata::getHostName, hostMetadata -> hostMetadata));
     }
 
-    private int getReplicationFactor(ServiceAndHostService ambariClient, String hostGroup) {
+    private int getReplicationFactor(AmbariClient ambariClient, String hostGroup) {
         Map<String, String> configuration = configurationService.getConfiguration(ambariClient, hostGroup);
         return Integer.parseInt(configuration.get(ConfigParam.DFS_REPLICATION.key()));
     }
