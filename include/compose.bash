@@ -515,6 +515,7 @@ cloudbreak:
         - SMARTSENSE_UPLOAD_HOST
         - SMARTSENSE_UPLOAD_USERNAME
         - SMARTSENSE_UPLOAD_PASSWORD
+        - CB_UPSCALE_MAX_NODECOUNT
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/

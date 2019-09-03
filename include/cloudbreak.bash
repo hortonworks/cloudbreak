@@ -285,6 +285,7 @@ cloudbreak-conf-defaults() {
 
     env-import PUBLIC_HTTP_PORT 80
     env-import PUBLIC_HTTPS_PORT 443
+    env-import CB_UPSCALE_MAX_NODECOUNT 100
 }
 
 cloudbreak-conf-autscale() {
