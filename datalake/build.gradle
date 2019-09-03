@@ -17,6 +17,11 @@ repositories {
   maven { url "https://plugins.gradle.org/m2/" }
 }
 
+// DO NOT DELETE! USE JUNIT5!
+configurations {
+  all*.exclude group: 'junit', module: 'junit'
+}
+
 dependencies {
   compile project(':authorization')
   compile project(':common')

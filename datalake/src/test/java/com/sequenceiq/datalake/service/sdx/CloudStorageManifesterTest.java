@@ -1,7 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -11,13 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
@@ -40,13 +39,10 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CloudStorageManifesterTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com";
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private FileSystemV4Endpoint fileSystemV4Endpoint;
@@ -58,8 +54,6 @@ public class CloudStorageManifesterTest {
 
     @Test
     public void whenInvalidConfigIsProvidedThrowBadRequest() {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("instance profile must be defined for S3");
         SdxCluster sdxCluster = new SdxCluster();
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         SdxCloudStorageRequest sdxCloudStorageRequest = new SdxCloudStorageRequest();
@@ -69,7 +63,9 @@ public class CloudStorageManifesterTest {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         clusterV4Request.setBlueprintName(exampleBlueprintName);
         environment.setCloudPlatform("AWS");
-        underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest);
+        Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest),
+                "instance profile must be defined for S3");
     }
 
     @Test
@@ -243,14 +239,15 @@ public class CloudStorageManifesterTest {
 
     @Test
     public void throwErrorWhenS3LocationInvalid() {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("AWS baselocation missing protocol. please specify s3a://");
         SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
         cloudStorageRequest.setBaseLocation("cloudbreakbucket/something");
         S3CloudStorageV1Parameters params = new S3CloudStorageV1Parameters();
         params.setInstanceProfile("instanceProfile");
         cloudStorageRequest.setS3(params);
-        underTest.validateCloudStorage(CloudPlatform.AWS.toString(), cloudStorageRequest);
+
+        Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateCloudStorage(CloudPlatform.AWS.toString(), cloudStorageRequest),
+                "AWS baselocation missing protocol. please specify s3a://");
     }
 
     @Test

@@ -921,7 +921,7 @@ public class StackService {
         MDCBuilder.buildMdcContext(stack);
         if (stack.isDeleteInProgress() && forced) {
             LOGGER.info("stack {} in environment {} is already delete in progress.", stack.getName(), stack.getEnvironmentCrn());
-            List<FlowLog> flowLogs = flowLogService.findAllByStackIdOrderByCreatedDesc(stack.getId());
+            List<FlowLog> flowLogs = flowLogService.findAllByResourceIdOrderByCreatedDesc(stack.getId());
             Optional<FlowLog> flowLog = flowLogs.stream()
                     .filter(fl -> StackTerminationState.PRE_TERMINATION_STATE.name().equalsIgnoreCase(fl.getCurrentState()))
                     .findFirst();

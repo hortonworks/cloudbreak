@@ -64,8 +64,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
-    public void putRetry(Long workspaceId, String name) {
-        stackOperation.putRetry(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
+    public void retry(Long workspaceId, String name) {
+        stackOperation.retry(aStackAccessDtoBuilder().withName(name).build(), workspaceId);
     }
 
     @Override

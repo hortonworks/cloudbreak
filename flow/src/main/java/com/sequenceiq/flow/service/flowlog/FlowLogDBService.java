@@ -180,7 +180,7 @@ public class FlowLogDBService implements FlowLogService {
         return flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeId);
     }
 
-    public List<FlowLog> findAllByStackIdOrderByCreatedDesc(Long id) {
+    public List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long id) {
         return flowLogRepository.findAllByResourceIdOrderByCreatedDesc(id);
     }
 }

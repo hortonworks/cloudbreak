@@ -1,7 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -305,7 +305,7 @@ public class SdxServiceTest {
 
     private void assertStackV4Request(CloudPlatform type, SdxClusterShape shape) {
         StackV4Request lightDutyStackrequest = sdxService.getStackRequestFromFile(sdxService.generateClusterTemplatePath(type.toString(), shape));
-        assertNotNull("Bp name should be defined in all templates", lightDutyStackrequest.getCluster().getBlueprintName());
+        assertNotNull(lightDutyStackrequest.getCluster().getBlueprintName(), "Bp name should be defined in all templates");
     }
 
     @Test

@@ -90,11 +90,11 @@ public interface StackV4Endpoint {
     @ApiOperation(value = SYNC_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "syncStackInWorkspaceV4")
     void sync(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
-    @PUT
+    @POST
     @Path("{name}/retry")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RETRY_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RETRY_STACK_NOTES, nickname = "retryStackInWorkspaceV4")
-    void putRetry(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    void retry(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     @PUT
     @Path("{name}/stop")
