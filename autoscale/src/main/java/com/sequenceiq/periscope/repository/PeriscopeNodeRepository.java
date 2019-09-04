@@ -4,16 +4,14 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
-import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
 
-@DisableHasPermission
 @EntityType(entityClass = PeriscopeNode.class)
-public interface PeriscopeNodeRepository extends DisabledBaseRepository<PeriscopeNode, String> {
+public interface PeriscopeNodeRepository extends CrudRepository<PeriscopeNode, String> {
 
     long countByLeaderIsTrueAndLastUpdatedIsGreaterThan(long than);
 

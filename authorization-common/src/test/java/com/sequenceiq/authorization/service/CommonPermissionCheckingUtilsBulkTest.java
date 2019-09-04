@@ -1,6 +1,7 @@
 package com.sequenceiq.authorization.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 
@@ -18,8 +19,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
-import com.sequenceiq.authorization.resource.ResourceAction;
+import com.google.common.collect.Lists;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 
 @RunWith(Parameterized.class)
 public class CommonPermissionCheckingUtilsBulkTest {
@@ -27,6 +29,10 @@ public class CommonPermissionCheckingUtilsBulkTest {
     private static final String USER_ID = "userId";
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:" + USER_ID;
+
+    private static final String RESOURCE_CRN = "crn:cdp:credential:us-west-1:1234:credential:5678";
+
+    private static final String OTHER_RESOURCE_CRN = "crn:cdp:credential:us-west-1:1234:credential:56789";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -43,18 +49,18 @@ public class CommonPermissionCheckingUtilsBulkTest {
     @Mock
     private UmsAuthorizationService umsAuthorizationService;
 
-    private ResourceAction action;
+    private AuthorizationResourceAction action;
 
-    private AuthorizationResource resource;
+    private AuthorizationResourceType resource;
 
-    public CommonPermissionCheckingUtilsBulkTest(ResourceAction action, AuthorizationResource resource) {
+    public CommonPermissionCheckingUtilsBulkTest(AuthorizationResourceAction action, AuthorizationResourceType resource) {
         this.action = action;
         this.resource = resource;
     }
 
     @Parameters(name = "Current Action - AuthorizationResource pair: [{0} - {1}]")
     public static Object[][] data() {
-        return combinationOf(ResourceAction.values(), AuthorizationResource.values());
+        return combinationOf(AuthorizationResourceAction.values(), AuthorizationResourceType.values());
     }
 
     @Before
@@ -63,21 +69,51 @@ public class CommonPermissionCheckingUtilsBulkTest {
     }
 
     @Test
-    public void testCheckPermissionByWorkspaceIdForUserWhenHasNoPermissionThenAccessDeniedExceptionComes() {
-        doThrow(AccessDeniedException.class).when(umsAuthorizationService).checkRightOfUserForResource(any(), any(), any());
+    public void testCheckPermissionWhenHasNoPermissionThenAccessDeniedExceptionComes() {
+        doThrow(AccessDeniedException.class).when(umsAuthorizationService).checkRightOfUser(any(), any(), any());
 
         thrown.expect(AccessDeniedException.class);
 
         underTest.checkPermissionForUser(resource, action, USER_CRN);
-
     }
 
     @Test
-    public void testCheckPermissionByWorkspaceIdForUserWhenHasPermissionThenNoExceptionComes() {
-        doNothing().when(umsAuthorizationService).checkRightOfUserForResource(any(), any(), any(), any());
+    public void testCheckPermissionForUserWhenHasPermissionThenNoExceptionComes() {
+        doNothing().when(umsAuthorizationService).checkRightOfUser(any(), any(), any());
 
         underTest.checkPermissionForUser(resource, action, USER_CRN);
+    }
 
+    @Test
+    public void testCheckPermissionOnResourceWhenHasNoPermissionThenAccessDeniedExceptionComes() {
+        doThrow(AccessDeniedException.class).when(umsAuthorizationService).checkRightOfUserOnResource(any(), any(), any(), anyString());
+
+        thrown.expect(AccessDeniedException.class);
+
+        underTest.checkPermissionForUserOnResource(resource, action, USER_CRN, RESOURCE_CRN);
+    }
+
+    @Test
+    public void testCheckPermissionOnResourceForUserWhenHasPermissionThenNoExceptionComes() {
+        doNothing().when(umsAuthorizationService).checkRightOfUserOnResource(any(), any(), any(), anyString());
+
+        underTest.checkPermissionForUserOnResource(resource, action, USER_CRN, RESOURCE_CRN);
+    }
+
+    @Test
+    public void testCheckPermissionOnResourcesWhenHasNoPermissionThenAccessDeniedExceptionComes() {
+        doThrow(AccessDeniedException.class).when(umsAuthorizationService).checkRightOfUserOnResources(any(), any(), any(), any());
+
+        thrown.expect(AccessDeniedException.class);
+
+        underTest.checkPermissionForUserOnResources(resource, action, USER_CRN, Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN, OTHER_RESOURCE_CRN));
+    }
+
+    @Test
+    public void testCheckPermissionOnResourcesForUserWhenHasPermissionThenNoExceptionComes() {
+        doNothing().when(umsAuthorizationService).checkRightOfUserOnResources(any(), any(), any(), any());
+
+        underTest.checkPermissionForUserOnResources(resource, action, USER_CRN, Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN, OTHER_RESOURCE_CRN));
     }
 
     public static Object[][] combinationOf(Object[] first, Object[] second) {

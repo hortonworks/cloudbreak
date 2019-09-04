@@ -14,8 +14,8 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDBStackV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDBStackV4Parameters;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
-import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DBStack;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

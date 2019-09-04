@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
@@ -62,7 +64,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
-public class SdxService implements ResourceIdProvider {
+public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
@@ -450,5 +452,22 @@ public class SdxService implements ResourceIdProvider {
 
     private DetailedEnvironmentResponse getEnvironment(String environmentName) {
         return environmentClientService.getByName(environmentName);
+    }
+
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        return getSdxByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), resourceName).getCrn();
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        return resourceNames.stream()
+                .map(resourceName -> getSdxByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), resourceName).getCrn())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public AuthorizationResourceType getResourceType() {
+        return AuthorizationResourceType.DATALAKE;
     }
 }

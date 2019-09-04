@@ -26,11 +26,16 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -46,7 +51,7 @@ import com.sequenceiq.environment.credential.verification.CredentialVerification
 import com.sequenceiq.notification.NotificationSender;
 
 @Service
-public class CredentialService extends AbstractCredentialService {
+public class CredentialService extends AbstractCredentialService implements ResourceBasedCrnProvider {
 
     private static final String DEPLOYMENT_ADDRESS_ATTRIBUTE_NOT_FOUND = "The 'deploymentAddress' parameter needs to be specified in the interactive login "
             + "request!";
@@ -72,6 +77,9 @@ public class CredentialService extends AbstractCredentialService {
 
     @Inject
     private CredentialRequestToCreateAWSCredentialRequestConverter credentialRequestToCreateAWSCredentialRequestConverter;
+
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
 
     protected CredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
@@ -158,11 +166,19 @@ public class CredentialService extends AbstractCredentialService {
         credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform(), creatorUserCrn);
         LOGGER.debug("Validating credential parameters for cloudPlatform {} and creator {}.", credential.getCloudPlatform(), creatorUserCrn);
         credentialValidator.validateParameters(Platform.platform(credential.getCloudPlatform()), new Json(credential.getAttributes()));
-        credential.setResourceCrn(createCRN(accountId));
+        String credentialCrn = createCRN(accountId);
+        credential.setResourceCrn(credentialCrn);
         credential.setCreator(creatorUserCrn);
         credential.setAccountId(accountId);
         Credential created = repository.save(credentialAdapter.verify(credential, accountId).getCredential());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
+        Crn credentialOwnerCrn = Crn.builder().setAccountId(accountId)
+                .setResource("CredentialOwner")
+                .setResourceType(Crn.ResourceType.RESOURCE_ROLE)
+                .setService(Crn.Service.IAM)
+                .setPartition(Crn.Partition.CDP)
+                .build();
+        grpcUmsClient.assignResourceRole(creatorUserCrn, credentialCrn, credentialOwnerCrn.toString(), MDCUtils.getRequestId());
         return created;
     }
 
@@ -291,5 +307,22 @@ public class CredentialService extends AbstractCredentialService {
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();
+    }
+
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        return getByNameForAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getResourceCrn();
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        return resourceNames.stream()
+                .map(resourceName -> getByNameForAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getResourceCrn())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public AuthorizationResourceType getResourceType() {
+        return AuthorizationResourceType.CREDENTIAL;
     }
 }

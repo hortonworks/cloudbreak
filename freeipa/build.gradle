@@ -81,7 +81,7 @@ dependencies {
     testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
   }
 
-  implementation project(':authorization')
+  implementation project(':authorization-common')
   implementation project(':cloud-reactor-api')
   implementation project(':cloud-reactor')
   implementation project(':orchestrator-api')

@@ -5,12 +5,12 @@ import java.lang.annotation.Annotation;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 public interface PermissionChecker<T extends Annotation> {
 
-    <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResource resource, String userCrn,
-            ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature);
+    <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResourceType resource, String userCrn,
+            ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime);
 
     Class<T> supportedAnnotation();
 }

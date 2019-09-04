@@ -5,6 +5,7 @@ import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
@@ -329,15 +331,11 @@ public class GrpcUmsClient {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
-        if (isReadRight(right)) {
-            LOGGER.info("Letting read operation through for right {} for user {}!", right, userCrn);
-            return true;
-        }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
-            LOGGER.info("Checking right {} for user {}!", right, userCrn);
-            client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, null);
-            LOGGER.info("User {} has right {}!", userCrn, right);
+            LOGGER.info("Checking right {} for user {} on resource {}!", right, userCrn, resource != null ? resource : "account");
+            client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, resource);
+            LOGGER.info("User {} has right {} on resource {}!", userCrn, right, resource != null ? resource : "account");
             return true;
         } catch (Exception e) {
             LOGGER.error("Checking right {} failed for user {}, thus access is denied! Cause: {}", right, userCrn, e.getMessage());
@@ -345,7 +343,7 @@ public class GrpcUmsClient {
         }
     }
 
-    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
+    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right }")
     public boolean checkRight(String actorCrn, String userCrn, String right, Optional<String> requestId) {
         return checkRight(actorCrn, userCrn, right, null, requestId);
     }
@@ -375,6 +373,15 @@ public class GrpcUmsClient {
             LOGGER.info("member {} has rights {}", memberCrn, retVal);
             return retVal;
         }
+    }
+
+    public List<Boolean> hasRights(String actorCrn, String memberCrn, Map<String, String> rightCheckMap, Optional<String> requestId) {
+        List<AuthorizationProto.RightCheck> rightChecks = Lists.newArrayList();
+        rightCheckMap.entrySet().stream().forEach(entry -> rightChecks.add(AuthorizationProto.RightCheck.newBuilder()
+                .setResource(entry.getKey())
+                .setRight(entry.getValue())
+                .build()));
+        return hasRights(actorCrn, memberCrn, rightChecks, requestId);
     }
 
     @Cacheable(cacheNames = "umsResourceAssigneesCache", key = "{ #actorCrn, #userCrn, #resourceCrn }")
@@ -627,16 +634,5 @@ public class GrpcUmsClient {
                 .setResource("DbusUploader")
                 .build();
         return databusCrn.toString();
-    }
-
-    protected boolean isReadRight(String action) {
-        if (action == null) {
-            return false;
-        }
-        String[] parts = action.split("/");
-        if (parts.length == 2 && parts[1] != null && parts[1].equals("read")) {
-            return true;
-        }
-        return false;
     }
 }

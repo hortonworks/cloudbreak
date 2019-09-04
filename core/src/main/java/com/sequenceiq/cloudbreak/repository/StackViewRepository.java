@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -9,25 +10,29 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
-import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
-import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
-@DisableHasPermission
 @EntityType(entityClass = StackView.class)
 @Transactional(TxType.REQUIRED)
-@AuthorizationResourceType(resource = AuthorizationResource.DATAHUB)
 public interface StackViewRepository extends WorkspaceResourceRepository<StackView, Long> {
 
-    @CheckPermissionsByReturnValue
+    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.name LIKE :name")
+    Optional<StackView> findByWorkspaceIdAndName(@Param("workspaceId") Long workspaceId, @Param("name") String name);
+
+    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.resourceCrn LIKE :crn")
+    Optional<StackView> findByWorkspaceIdAndCrn(@Param("workspaceId") Long workspaceId, @Param("crn") String resourceCrn);
+
+    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.resourceCrn IN (:crns)")
+    Set<StackView> findByWorkspaceIdAndCrns(@Param("workspaceId") Long workspaceId, @Param("crns") List<String> crns);
+
+    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.name IN (:names)")
+    Set<StackView> findByWorkspaceIdAndNames(@Param("workspaceId") Long workspaceId, @Param("names") List<String> names);
+
     @Query("SELECT s FROM StackView s WHERE s.id= :id")
     Optional<StackView> findById(@Param("id") Long id);
 
-    @CheckPermissionsByReturnValue
     @Query("SELECT s FROM StackView s WHERE s.workspace.id= :id AND s.terminated = null")
     Set<StackView> findByWorkspaceId(@Param("id") Long id);
 

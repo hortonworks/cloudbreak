@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
-import com.sequenceiq.authorization.resource.ResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.RightUtils;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
@@ -26,9 +26,10 @@ public class EnvironmentAccessChecker {
 
     private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
-    private static final String ACCESS_ENVIRONMENT_RIGHT = RightUtils.getRight(AuthorizationResource.ENVIRONMENT, ResourceAction.ACCESS_ENVIRONMENT);
+    private static final String ACCESS_ENVIRONMENT_RIGHT = RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT,
+            AuthorizationResourceAction.ACCESS_ENVIRONMENT);
 
-    private static final String ADMIN_FREEIPA_RIGHT = RightUtils.getRight(AuthorizationResource.ENVIRONMENT, ResourceAction.ADMIN_FREEIPA);
+    private static final String ADMIN_FREEIPA_RIGHT = RightUtils.getRight(AuthorizationResourceType.ENVIRONMENT, AuthorizationResourceAction.ADMIN_FREEIPA);
 
     private final GrpcUmsClient grpcUmsClient;
 

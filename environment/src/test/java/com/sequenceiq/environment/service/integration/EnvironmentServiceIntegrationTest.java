@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.sequenceiq.authorization.service.UmsAuthorizationService;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
@@ -107,6 +109,9 @@ public class EnvironmentServiceIntegrationTest {
     @MockBean
     private NetworkService networkService;
 
+    @MockBean
+    private GrpcUmsClient grpcUmsClient;
+
     @Inject
     private ProxyConfigRepository proxyConfigRepository;
 
@@ -140,8 +145,8 @@ public class EnvironmentServiceIntegrationTest {
         credential.setArchived(false);
         credentialRequest = new CredentialRequest();
 
-        doNothing().when(umsAuthorizationService).checkRightOfUserForResource(any(), any(), any(), any());
         when(entitlementService.azureEnabled(any(), any())).thenReturn(true);
+        doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
     }
 
     @AfterEach

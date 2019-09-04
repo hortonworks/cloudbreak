@@ -64,7 +64,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -166,9 +165,6 @@ public class StackServiceTest {
 
     @Mock
     private UserService userService;
-
-    @Mock
-    private PermissionCheckingUtils permissionCheckingUtils;
 
     @Mock
     private DatalakeResourcesService datalakeResourcesService;

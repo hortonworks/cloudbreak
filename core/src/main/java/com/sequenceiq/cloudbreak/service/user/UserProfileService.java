@@ -59,11 +59,7 @@ public class UserProfileService {
     }
 
     private Optional<UserProfile> getSilently(User user) {
-        try {
-            return userProfileRepository.findOneByUser(user.getId());
-        } catch (AccessDeniedException ignore) {
-            return Optional.empty();
-        }
+        return userProfileRepository.findOneByUser(user.getId());
     }
 
     public Set<UserProfile> findByImageCatalogId(Long catalogId) {

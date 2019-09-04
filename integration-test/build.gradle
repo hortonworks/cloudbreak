@@ -72,6 +72,9 @@ dependencies {
   compile (project(':environment-api')) {
     transitive = false;
   }
+  compile (project(':authorization-common-api')) {
+    transitive = false;
+  }
   compile (project(':datalake-api')) {
     transitive = false;
   }

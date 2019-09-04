@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.cdp.environments.model.CreateAWSEnvironmentRequest;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
@@ -43,7 +45,7 @@ import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
 @Service
-public class EnvironmentService implements ResourceIdProvider {
+public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
@@ -267,6 +269,23 @@ public class EnvironmentService implements ResourceIdProvider {
     @Override
     public Long getResourceIdByResourceName(String resourceName) {
         return getByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getId();
+    }
+
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        return getByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getResourceCrn();
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        return resourceNames.stream()
+                .map(resourceName -> getByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getResourceCrn())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public AuthorizationResourceType getResourceType() {
+        return AuthorizationResourceType.ENVIRONMENT;
     }
 
     public List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {

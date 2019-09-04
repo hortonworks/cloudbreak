@@ -3,14 +3,13 @@ package com.sequenceiq.cloudbreak.repository;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
-import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import org.springframework.data.repository.CrudRepository;
+
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @EntityType(entityClass = SaltSecurityConfig.class)
 @Transactional(TxType.REQUIRED)
-@DisableHasPermission
-public interface SaltSecurityConfigRepository extends DisabledBaseRepository<SaltSecurityConfig, Long> {
+public interface SaltSecurityConfigRepository extends CrudRepository<SaltSecurityConfig, Long> {
 
 }
