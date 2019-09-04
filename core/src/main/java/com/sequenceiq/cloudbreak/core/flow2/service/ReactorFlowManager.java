@@ -189,8 +189,9 @@ public class ReactorFlowManager {
     public void triggerClusterDownscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
         ScalingType scalingType = hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER;
+        ClusterDownscaleDetails clusterDownscaleDetails = new ClusterDownscaleDetails(hostGroupAdjustment.getForced());
         Acceptable event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
-                hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment(), scalingType);
+                hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment(), scalingType, clusterDownscaleDetails);
         notify(selector, event);
     }
 

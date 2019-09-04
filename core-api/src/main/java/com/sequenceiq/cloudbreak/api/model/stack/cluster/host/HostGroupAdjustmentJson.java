@@ -26,6 +26,8 @@ public class HostGroupAdjustmentJson implements JsonEntity {
     @ApiModelProperty(HostGroupAdjustmentModelDescription.VALIDATE_NODE_COUNT)
     private Boolean validateNodeCount = Boolean.TRUE;
 
+    private Boolean forced = Boolean.FALSE;
+
     public String getHostGroup() {
         return hostGroup;
     }
@@ -56,5 +58,13 @@ public class HostGroupAdjustmentJson implements JsonEntity {
 
     public void setValidateNodeCount(Boolean validateNodeCount) {
         this.validateNodeCount = validateNodeCount;
+    }
+
+    public Boolean getForced() {
+        return forced;
+    }
+
+    public void setForced(Boolean forced) {
+        this.forced = forced;
     }
 }

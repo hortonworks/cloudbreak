@@ -25,6 +25,8 @@ public class StackScaleRequestV2 implements JsonEntity {
 
     private Long stackId;
 
+    private Boolean forced = Boolean.FALSE;
+
     public String getGroup() {
         return group;
     }
@@ -49,5 +51,13 @@ public class StackScaleRequestV2 implements JsonEntity {
     @JsonIgnore
     public void setStackId(Long stackId) {
         this.stackId = stackId;
+    }
+
+    public Boolean getForced() {
+        return forced;
+    }
+
+    public void setForced(Boolean forced) {
+        this.forced = forced;
     }
 }

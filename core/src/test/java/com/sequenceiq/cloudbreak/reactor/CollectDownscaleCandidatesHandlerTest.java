@@ -67,7 +67,7 @@ public class CollectDownscaleCandidatesHandlerTest {
         Event<CollectDownscaleCandidatesResult> submittedEvent = capturedEvent.getValue();
         CollectDownscaleCandidatesResult submittedResult = submittedEvent.getData();
         assertNotNull(submittedResult);
-        verify(ambariDecommissioner, never()).collectDownscaleCandidates(stack, HOST_GROUP_NAME, SCALING_ADJUSTMENT);
+        verify(ambariDecommissioner, never()).collectDownscaleCandidates(stack, HOST_GROUP_NAME, SCALING_ADJUSTMENT, false);
 
     }
 

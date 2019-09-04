@@ -64,7 +64,8 @@ public class CollectDownscaleCandidatesHandler implements ReactorEventHandler<Co
     }
 
     private Set<Long> collectCandidates(CollectDownscaleCandidatesRequest request, Stack stack) throws CloudbreakException {
-        Set<String> hostNames = ambariDecommissioner.collectDownscaleCandidates(stack, request.getHostGroupName(), request.getScalingAdjustment());
+        Set<String> hostNames = ambariDecommissioner.collectDownscaleCandidates(stack, request.getHostGroupName(), request.getScalingAdjustment(),
+                request.getDetails().isForced());
         return stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
     }
 
