@@ -5,6 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.FileNotFoundException;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.Assert;
@@ -40,10 +42,24 @@ public class CommonPermissionCheckingUtilsTest {
 
     @Test
     //CHECKSTYLE:OFF
-    public void testProceedWhenProceedingJoinPointProceedThrowsExceptionThenAccessDeniedExceptionComes() throws Throwable {
+    public void testProceedWhenProceedingJoinPointProceedThrowsUncheckedExceptionThenAccessDeniedExceptionComes() throws Throwable {
         //CHECKSTYLE:ON
         String exceptionMessage = "somethingHappened!!!";
         doThrow(new RuntimeException(exceptionMessage)).when(proceedingJoinPoint).proceed();
+
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage(exceptionMessage);
+
+        underTest.proceed(proceedingJoinPoint, methodSignature);
+        verify(proceedingJoinPoint, times(1)).proceed();
+    }
+
+    @Test
+    //CHECKSTYLE:OFF
+    public void testProceedWhenProceedingJoinPointProceedThrowsCheckedExceptionThenAccessDeniedExceptionComes() throws Throwable {
+        //CHECKSTYLE:ON
+        String exceptionMessage = "somethingHappened!!!";
+        doThrow(new FileNotFoundException(exceptionMessage)).when(proceedingJoinPoint).proceed();
 
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage(exceptionMessage);

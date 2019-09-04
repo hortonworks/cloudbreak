@@ -56,11 +56,13 @@ public class DistroxService {
     public void stopAttachedDistrox(String envCrn) {
         Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envCrn);
         ArrayList<String> pollingCrn = attachedDistroXClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));
-        distroXV1Endpoint.putStopByCrns(pollingCrn);
-        Polling.stopAfterAttempt(attempt)
-                .stopIfException(true)
-                .waitPeriodly(sleeptime, TimeUnit.SECONDS)
-                .run(checkDistroxStatus(pollingCrn));
+        if (!pollingCrn.isEmpty()) {
+            distroXV1Endpoint.putStopByCrns(pollingCrn);
+            Polling.stopAfterAttempt(attempt)
+                    .stopIfException(true)
+                    .waitPeriodly(sleeptime, TimeUnit.SECONDS)
+                    .run(checkDistroxStatus(pollingCrn));
+        }
 
     }
 

@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -59,11 +58,7 @@ public class UserProfileService {
     }
 
     private Optional<UserProfile> getSilently(User user) {
-        try {
-            return userProfileRepository.findOneByUser(user.getId());
-        } catch (AccessDeniedException ignore) {
-            return Optional.empty();
-        }
+        return userProfileRepository.findOneByUser(user.getId());
     }
 
     public Set<UserProfile> findByImageCatalogId(Long catalogId) {

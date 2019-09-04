@@ -19,7 +19,6 @@ dependencies {
   compile project(':common-model')
   compile project(':structuredevent-model')
   compile project(':environment-api')
-  compile project(':workspace-authorization-api')
   compile project(':flow-api')
 
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion

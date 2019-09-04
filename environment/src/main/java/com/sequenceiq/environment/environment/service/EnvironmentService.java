@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.cdp.environments.model.CreateAWSEnvironmentRequest;
+import com.sequenceiq.authorization.service.ResourceBasedEnvironmentCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
@@ -43,7 +44,7 @@ import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
 @Service
-public class EnvironmentService implements ResourceIdProvider {
+public class EnvironmentService implements ResourceIdProvider, ResourceBasedEnvironmentCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 

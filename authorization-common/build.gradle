@@ -24,6 +24,7 @@ jar {
 dependencies {
   compile project(":authorization-common-api")
   compile project(":auth-connector")
+  compile project(":environment-api")
 
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion

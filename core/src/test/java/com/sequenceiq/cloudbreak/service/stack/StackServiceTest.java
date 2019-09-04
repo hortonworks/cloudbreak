@@ -67,7 +67,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -180,9 +179,6 @@ public class StackServiceTest {
     private UserService userService;
 
     @Mock
-    private PermissionCheckingUtils permissionCheckingUtils;
-
-    @Mock
     private DatalakeResourcesService datalakeResourcesService;
 
     @Mock
@@ -197,7 +193,6 @@ public class StackServiceTest {
         when(stack.getName()).thenReturn(STACK_NAME);
         when(stack.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
-        when(user.getUserCrn()).thenReturn(USER_CRN);
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setDatalakeStackId(STACK_ID);
         datalakeResources.setId(DATALAKE_RESOURCE_ID);

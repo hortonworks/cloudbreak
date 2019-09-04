@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticationServ
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
-import com.sequenceiq.cloudbreak.workspace.repository.PermissionType;
 
 @Service
 @Lazy
@@ -31,7 +30,6 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
 
     @Override
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
-        PermissionType p = PermissionType.valueOf(permission.toString().toUpperCase());
         if (target instanceof Optional) {
             target = ((Optional<?>) target).orElse(null);
         }
@@ -45,7 +43,7 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
 
         CloudbreakUser user = authenticationService.getCloudbreakUser(authentication);
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
-        return targets.stream().allMatch(t -> hasPermission(user, p, t));
+        return targets.stream().allMatch(t -> hasPermission(user, t));
     }
 
     @Override
@@ -54,7 +52,7 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
     }
 
     //CHECKSTYLE:OFF
-    private boolean hasPermission(CloudbreakUser cbUser, PermissionType p, Object targetDomainObject) {
+    private boolean hasPermission(CloudbreakUser cbUser, Object targetDomainObject) {
         Optional<Tenant> tenant = getTenant(targetDomainObject);
         return tenant.isPresent() && tenant.get().getName().contentEquals(cbUser.getTenant());
     }

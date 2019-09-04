@@ -91,7 +91,7 @@ dependencies {
     testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
     testRuntime        group: 'org.junit.vintage',         name: 'junit-vintage-engine',           version: junitJupiterVersion
   }
-  compile project(':authorization')
+  compile project(':authorization-common')
   
   implementation project(':flow')
   implementation project(':cloud-reactor')

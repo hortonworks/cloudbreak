@@ -55,6 +55,8 @@ public class StackView extends CompactView {
     @Enumerated(EnumType.STRING)
     private StackType type;
 
+    private String environmentCrn;
+
     public StackView() {
     }
 
@@ -146,5 +148,9 @@ public class StackView extends CompactView {
 
     public void setType(StackType type) {
         this.type = type;
+    }
+
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 }

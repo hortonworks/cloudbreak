@@ -27,7 +27,7 @@ configurations.all {
 }
 
 dependencies {
-    implementation     project(":authorization")
+    implementation     project(":authorization-common")
     implementation     project(":common")
     implementation     project(":secret-engine")
     implementation     project(":flow")

@@ -308,14 +308,10 @@ public class GrpcUmsClient {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
-        if (isReadRight(right)) {
-            LOGGER.info("Letting read operation through for right {} for user {}!", right, userCrn);
-            return true;
-        }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.info("Checking right {} for user {}!", right, userCrn);
-            client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, null);
+            client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, resource);
             LOGGER.info("User {} has right {}!", userCrn, right);
             return true;
         } catch (Exception e) {
@@ -324,7 +320,7 @@ public class GrpcUmsClient {
         }
     }
 
-    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
+    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right }")
     public boolean checkRight(String actorCrn, String userCrn, String right, Optional<String> requestId) {
         return checkRight(actorCrn, userCrn, right, null, requestId);
     }
@@ -579,16 +575,5 @@ public class GrpcUmsClient {
                 .setResource("DbusUploader")
                 .build();
         return databusCrn.toString();
-    }
-
-    protected boolean isReadRight(String action) {
-        if (action == null) {
-            return false;
-        }
-        String[] parts = action.split("/");
-        if (parts.length == 2 && parts[1] != null && parts[1].equals("read")) {
-            return true;
-        }
-        return false;
     }
 }

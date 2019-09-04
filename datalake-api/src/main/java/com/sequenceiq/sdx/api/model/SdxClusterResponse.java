@@ -1,8 +1,9 @@
 package com.sequenceiq.sdx.api.model;
 
+import com.sequenceiq.authorization.api.EnvironmentCrnAwareApiModel;
 import com.sequenceiq.common.model.FileSystemType;
 
-public class SdxClusterResponse {
+public class SdxClusterResponse implements EnvironmentCrnAwareApiModel {
 
     private String crn;
 

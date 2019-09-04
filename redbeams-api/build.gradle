@@ -44,6 +44,7 @@ dependencies {
   implementation project(':flow-api')
   implementation project(':common')
   implementation project(':auth-connector')
+  implementation project(':authorization-common-api')
 }
 
 

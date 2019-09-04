@@ -5,6 +5,10 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.CheckPermissionByEnvironmentName;
+import com.sequenceiq.authorization.annotation.EnvironmentName;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
@@ -15,6 +19,7 @@ import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Controller
+@AuthorizationResource(type = AuthorizationResourceType.DATALAKE)
 public class SdxInternalController implements SdxInternalEndpoint {
 
     @Inject
@@ -27,7 +32,8 @@ public class SdxInternalController implements SdxInternalEndpoint {
     private SdxMetricService metricService;
 
     @Override
-    public SdxClusterResponse create(String name, @Valid SdxInternalClusterRequest createSdxClusterRequest) {
+    @CheckPermissionByEnvironmentName
+    public SdxClusterResponse create(String name, @EnvironmentName @Valid SdxInternalClusterRequest createSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.createSdx(userCrn, name, createSdxClusterRequest, createSdxClusterRequest.getStackV4Request());
         metricService.incrementMetricCounter(MetricType.INTERNAL_SDX_REQUESTED, sdxCluster);
