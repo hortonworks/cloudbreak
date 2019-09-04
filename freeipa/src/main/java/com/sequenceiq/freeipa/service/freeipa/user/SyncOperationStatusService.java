@@ -67,12 +67,26 @@ public class SyncOperationStatusService {
         return syncOperationRepository.save(syncOperation);
     }
 
-    public SyncOperation completeOperation(String operationId, List<SuccessDetails> success, List<FailureDetails> failure) {
+    public SyncOperation completeOperation(String operationId) {
         SyncOperation syncOperation = getSyncOperationForOperationId(operationId);
         syncOperation.setStatus(SynchronizationStatus.COMPLETED);
-        syncOperation.setSuccessList(success);
-        syncOperation.setFailureList(failure);
         syncOperation.setEndTime(System.currentTimeMillis());
+        return syncOperationRepository.save(syncOperation);
+    }
+
+    public SyncOperation updateOperation(String operationId, SuccessDetails success, FailureDetails failure) {
+        // TODO: Make this as fire and forget
+        SyncOperation syncOperation = getSyncOperationForOperationId(operationId);
+        if (success != null) {
+            List<SuccessDetails> successList = syncOperation.getSuccessList();
+            successList.add(success);
+            syncOperation.setSuccessList(successList);
+        }
+        if (failure != null) {
+            List<FailureDetails> failureList = syncOperation.getFailureList();
+            failureList.add(failure);
+            syncOperation.setFailureList(failureList);
+        }
         return syncOperationRepository.save(syncOperation);
     }
 

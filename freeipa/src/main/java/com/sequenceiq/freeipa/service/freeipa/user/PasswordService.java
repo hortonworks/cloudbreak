@@ -91,21 +91,20 @@ public class PasswordService {
                 requests.add(triggerSetPassword(stack, stack.getEnvironmentCrn(), userId, password));
             }
 
-            List<SuccessDetails> success = new ArrayList<>();
-            List<FailureDetails> failure = new ArrayList<>();
             for (SetPasswordRequest request : requests) {
                 try {
                     waitSetPassword(request);
-                    success.add(new SuccessDetails(request.getEnvironment()));
+                    syncOperationStatusService.updateOperation(operationId, new SuccessDetails(request.getEnvironment()), null);
                 } catch (InterruptedException e) {
                     LOGGER.error("Interrupted while setting passwords for user {} in account {}", userCrn, accountId);
                     throw e;
                 } catch (Exception e) {
                     LOGGER.debug("Failed to set password for user {} in environment {}", userCrn, request.getEnvironment(), e);
-                    failure.add(new FailureDetails(request.getEnvironment(), e.getLocalizedMessage()));
+                    syncOperationStatusService.updateOperation(
+                        operationId, null, new FailureDetails(request.getEnvironment(), e.getLocalizedMessage()));
                 }
             }
-            syncOperationStatusService.completeOperation(operationId, success, failure);
+            syncOperationStatusService.completeOperation(operationId);
         } catch (InterruptedException e) {
             syncOperationStatusService.failOperation(operationId, e.getLocalizedMessage());
             Thread.currentThread().interrupt();

@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -107,9 +106,7 @@ public class UserService {
             Map<String, UsersState> envToUmsStateMap = umsUsersStateProvider
                 .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter);
 
-            // TODO: fix me.
             Set<String> userIdFilter = Set.of();
-//            Set<String> userIdFilter = filterUsers ? umsState.getUsernamesFromCrns(userCrnFilter, machineUserCrnFilter) : Set.of();
 
             Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
                     .collect(Collectors.toMap(Stack::getEnvironmentCrn,
@@ -118,29 +115,28 @@ public class UserService {
                                 return synchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), userIdFilter);
                             })));
 
-            List<SuccessDetails> success = new ArrayList<>();
-            List<FailureDetails> failure = new ArrayList<>();
-
             statusFutures.forEach((envCrn, statusFuture) -> {
                 SyncStatusDetail status;
                 try {
                     status = statusFuture.get();
                     switch (status.getStatus()) {
                         case COMPLETED:
-                            success.add(new SuccessDetails(envCrn));
+                            syncOperationStatusService.updateOperation(operationId, new SuccessDetails(envCrn), null);
                             break;
                         case FAILED:
-                            failure.add(new FailureDetails(envCrn, status.getDetails()));
+                            syncOperationStatusService.updateOperation(operationId, null, new FailureDetails(envCrn, status.getDetails()));
                             break;
                         default:
-                            failure.add(new FailureDetails(envCrn, "Unknown status"));
+                            LOGGER.error("Unknown Failure for env: {} ", envCrn);
+                            syncOperationStatusService.updateOperation(operationId, null, new FailureDetails(envCrn, "Unknown status"));
                             break;
                     }
+
                 } catch (InterruptedException | ExecutionException e) {
-                    failure.add(new FailureDetails(envCrn, e.getLocalizedMessage()));
+                    syncOperationStatusService.updateOperation(operationId, null, new FailureDetails(envCrn, e.getLocalizedMessage()));
                 }
             });
-            syncOperationStatusService.completeOperation(operationId, success, failure);
+            syncOperationStatusService.completeOperation(operationId);
         } catch (RuntimeException e) {
             LOGGER.error("User sync operation {} failed with error:", operationId, e);
             syncOperationStatusService.failOperation(operationId, e.getLocalizedMessage());
