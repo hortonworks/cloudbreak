@@ -180,10 +180,10 @@ public class AmbariDecommissioner {
         COMPONENTS_NEED_TO_DECOMMISSION.put(NODEMANAGER, "YARN");
     }
 
-    public Set<String> collectDownscaleCandidates(Stack stack, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
+    public Set<String> collectDownscaleCandidates(Stack stack, String hostGroupName, Integer scalingAdjustment, boolean forced) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
         int adjustment = Math.abs(scalingAdjustment);
-        Set<String> hostsToRemove = selectHostsToRemove(collectDownscaleCandidates(stack, cluster, hostGroupName, adjustment), adjustment);
+        Set<String> hostsToRemove = selectHostsToRemove(collectDownscaleCandidates(stack, cluster, hostGroupName, adjustment, forced), adjustment);
         if (hostsToRemove.size() != adjustment) {
             throw new CloudbreakException(String.format("Only %d hosts found to downscale but %d required.", hostsToRemove.size(), adjustment));
         }
@@ -357,7 +357,7 @@ public class AmbariDecommissioner {
         }
     }
 
-    private List<HostMetadata> collectDownscaleCandidates(Stack stack, Cluster cluster, String hostGroupName, Integer scalingAdjustment) {
+    private List<HostMetadata> collectDownscaleCandidates(Stack stack, Cluster cluster, String hostGroupName, Integer scalingAdjustment, boolean forced) {
         List<HostMetadata> downScaleCandidates;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
@@ -369,8 +369,10 @@ public class AmbariDecommissioner {
         Map<String, List<String>> blueprintMap = ambariClient.getBlueprintMap(blueprintName);
         if (hostGroupNodesAreDataNodes(blueprintMap, hostGroupName)) {
             int replication = getReplicationFactor(ambariClient, hostGroupName);
-            verifyNodeCount(replication, scalingAdjustment, filteredHostList.size(), reservedInstances);
-            downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication, scalingAdjustment, filteredHostList);
+            if (!forced) {
+                verifyNodeCount(replication, scalingAdjustment, filteredHostList.size(), reservedInstances);
+            }
+            downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication, scalingAdjustment, filteredHostList, forced);
         } else {
             verifyNodeCount(NO_REPLICATION, scalingAdjustment, filteredHostList.size(), reservedInstances);
             downScaleCandidates = filteredHostList;
@@ -445,7 +447,7 @@ public class AmbariDecommissioner {
     }
 
     private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int replication, int adjustment,
-            List<HostMetadata> filteredHostList) {
+            List<HostMetadata> filteredHostList, boolean forced) {
         int removeCount = Math.abs(adjustment);
         LOGGER.info("removeCount: {}, replication: {}, filteredHostList size: {}, filteredHostList: {}",
                 removeCount, replication, filteredHostList.size(), filteredHostList);
@@ -461,7 +463,7 @@ public class AmbariDecommissioner {
         long safetyUsedSpace = ((Double) (usedSpace * replication * SAFETY_PERCENTAGE)).longValue();
         LOGGER.info("Checking DFS space for decommission, usedSpace: {}, remainingSpace: {}", usedSpace, remainingSpace);
         LOGGER.info("Used space with replication: {} and safety space: {} is: {}", replication, SAFETY_PERCENTAGE, safetyUsedSpace);
-        if (remainingSpace < safetyUsedSpace) {
+        if (remainingSpace < safetyUsedSpace && !forced) {
             throw new BadRequestException(
                     String.format("Trying to move '%s' bytes worth of data to nodes with '%s' bytes of capacity is not allowed", usedSpace, remainingSpace)
             );

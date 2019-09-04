@@ -15,6 +15,12 @@ public class ClusterDownscaleTriggerEvent extends ClusterScaleTriggerEvent {
         privateIds = null;
     }
 
+    public ClusterDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment,  ClusterDownscaleDetails details) {
+        super(selector, stackId, hostGroup, adjustment);
+        this.details = details;
+        privateIds = null;
+    }
+
     public ClusterDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Promise<Boolean> accepted,
             ClusterDownscaleDetails details) {
         super(selector, stackId, hostGroup, adjustment, accepted);

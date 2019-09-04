@@ -9,8 +9,9 @@ import reactor.rx.Promise;
 public class ClusterAndStackDownscaleTriggerEvent extends ClusterDownscaleTriggerEvent {
     private final ScalingType scalingType;
 
-    public ClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, ScalingType scalingType) {
-        super(selector, stackId, hostGroup, adjustment);
+    public ClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, ScalingType scalingType,
+            ClusterDownscaleDetails clusterDownscaleDetails) {
+        super(selector, stackId, hostGroup, adjustment, clusterDownscaleDetails);
         this.scalingType = scalingType;
     }
 

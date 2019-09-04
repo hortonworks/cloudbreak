@@ -36,6 +36,7 @@ public class StackScaleRequestV2ToUpdateClusterRequestConverter extends Abstract
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setValidateNodeCount(dataNodeComponentInHostGroup);
             hostGroupAdjustmentJson.setHostGroup(source.getGroup());
+            hostGroupAdjustmentJson.setForced(source.getForced());
             int scaleNumber = source.getDesiredCount() - hostGroup.getHostMetadata().size();
             hostGroupAdjustmentJson.setScalingAdjustment(scaleNumber);
             updateStackJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
