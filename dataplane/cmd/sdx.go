@@ -78,6 +78,18 @@ func init() {
 					}
 				},
 			},
+			{
+				Name:   "sync",
+				Usage:  "sync SDX cluster",
+				Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+				Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build(),
+				Action: sdx.SyncSdx,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddAuthenticationFlags().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
 		},
 	})
 }

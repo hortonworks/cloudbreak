@@ -32,10 +32,6 @@ func (*mockRdsClient) CreateDatabaseInWorkspace(params *v4db.CreateDatabaseInWor
 	return nil, nil
 }
 
-func (*mockRdsClient) TestDatabaseConnectionInWorkspace(params *v4db.TestDatabaseConnectionInWorkspaceParams) (*v4db.TestDatabaseConnectionInWorkspaceOK, error) {
-	return nil, nil
-}
-
 func TestListRdsImpl(t *testing.T) {
 	var rows []utils.Row
 	listAllRdsImpl(new(mockRdsClient), func(h []string, r []utils.Row) { rows = r }, int64(2))

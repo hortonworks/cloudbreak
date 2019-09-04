@@ -605,7 +605,7 @@ func (a *Client) SyncStackInWorkspaceV4(params *SyncStackInWorkspaceV4Params) er
 
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "syncStackInWorkspaceV4",
-		Method:             "PUT",
+		Method:             "POST",
 		PathPattern:        "/v4/{workspaceId}/stacks/{name}/sync",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},

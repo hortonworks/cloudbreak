@@ -84,9 +84,6 @@ type StackV4Response struct {
 
 	// name of the stack
 	// Required: true
-	// Max Length: 40
-	// Min Length: 5
-	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
 	// stack related network
@@ -465,18 +462,6 @@ func (m *StackV4Response) validateInstanceGroups(formats strfmt.Registry) error 
 func (m *StackV4Response) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
-		return err
-	}
-
-	if err := validate.MinLength("name", "body", string(*m.Name), 5); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("name", "body", string(*m.Name), 40); err != nil {
-		return err
-	}
-
-	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
 	}
 

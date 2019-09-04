@@ -37,7 +37,7 @@ type ClusterV4Request struct {
 	// custom queue for yarn orchestrator
 	CustomQueue string `json:"customQueue,omitempty"`
 
-	// Contains valid Crn for a readbeams database server
+	// Contains valid Crn for a redbeams database server
 	DatabaseServerCrn string `json:"databaseServerCrn,omitempty"`
 
 	// RDS configuration names for the cluster

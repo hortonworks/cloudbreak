@@ -1,7 +1,6 @@
 package rds
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -43,65 +42,6 @@ func (r *rdsOutDescribe) DataAsStringArray() []string {
 type rdsClient interface {
 	ListDatabasesByWorkspace(params *v4db.ListDatabasesByWorkspaceParams) (*v4db.ListDatabasesByWorkspaceOK, error)
 	CreateDatabaseInWorkspace(params *v4db.CreateDatabaseInWorkspaceParams) (*v4db.CreateDatabaseInWorkspaceOK, error)
-	TestDatabaseConnectionInWorkspace(params *v4db.TestDatabaseConnectionInWorkspaceParams) (*v4db.TestDatabaseConnectionInWorkspaceOK, error)
-}
-
-func TestRdsByName(c *cli.Context) {
-	log.Infof("[TestRdsByParams] test a database configuration")
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	testRdsByNameImpl(
-		cbClient.Cloudbreak.V4WorkspaceIDDatabases,
-		c.Int64(fl.FlWorkspaceOptional.Name),
-		c.String(fl.FlName.Name))
-}
-
-func TestRdsByParams(c *cli.Context) {
-	log.Infof("[TestRdsByParams] test a database configuration")
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	testRdsByParamsImpl(
-		cbClient.Cloudbreak.V4WorkspaceIDDatabases,
-		c.Int64(fl.FlWorkspaceOptional.Name),
-		c.String(fl.FlRdsUserName.Name),
-		c.String(fl.FlRdsPassword.Name),
-		c.String(fl.FlRdsURL.Name),
-		c.String(fl.FlRdsConnectorJarURLOptional.Name))
-}
-
-func testRdsByNameImpl(client rdsClient, workspaceID int64, name string) {
-	defer utils.TimeTrack(time.Now(), "test database configuration by name")
-	rdsRequest := &model.DatabaseTestV4Request{
-		ExistingDatabaseName: name,
-	}
-	log.Infof("[testRdsByParamsImpl] sending test database configuration by parameters request")
-	resp, err := client.TestDatabaseConnectionInWorkspace(v4db.NewTestDatabaseConnectionInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(rdsRequest))
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	if responseText := getEmptyIfNil(resp.Payload.Result); responseText != "connected" {
-		utils.LogErrorMessageAndExit(fmt.Sprintf("database configuration test result: %s", responseText))
-	}
-}
-
-func testRdsByParamsImpl(client rdsClient, workspaceID int64, username string, password string, URL string, jarURL string) {
-	defer utils.TimeTrack(time.Now(), "test database configuration by parameters")
-	rdsRequest := &model.DatabaseTestV4Request{
-		Database: &model.DatabaseV4Request{
-			Name:               &(&types.S{S: "testconnection"}).S,
-			ConnectionUserName: &username,
-			ConnectionPassword: &password,
-			ConnectionURL:      &URL,
-			Type:               &(&types.S{S: "testtype"}).S,
-			ConnectorJarURL:    jarURL,
-		},
-	}
-	log.Infof("[testRdsByParamsImpl] sending test database configuration by parameters request")
-	resp, err := client.TestDatabaseConnectionInWorkspace(v4db.NewTestDatabaseConnectionInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(rdsRequest))
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	if responseText := getEmptyIfNil(resp.Payload.Result); responseText != "connected" {
-		utils.LogErrorMessageAndExit(fmt.Sprintf("database configuration test result: %s", responseText))
-	}
 }
 
 func CreateRdsOracle11(c *cli.Context) {

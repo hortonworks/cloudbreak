@@ -20,7 +20,7 @@ import (
 type StorageLocationBase struct {
 
 	// type
-	// Enum: [ZEPPELIN_NOTEBOOK YARN_LOG HIVE_METASTORE_WAREHOUSE HIVE_METASTORE_EXTERNAL_WAREHOUSE HIVE_REPLICA_WAREHOUSE RANGER_AUDIT]
+	// Enum: [ZEPPELIN_NOTEBOOK YARN_LOG HIVE_METASTORE_WAREHOUSE HIVE_METASTORE_EXTERNAL_WAREHOUSE HIVE_REPLICA_WAREHOUSE HBASE_ROOT RANGER_AUDIT]
 	Type string `json:"type,omitempty"`
 
 	// value
@@ -45,7 +45,7 @@ var storageLocationBaseTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["ZEPPELIN_NOTEBOOK","YARN_LOG","HIVE_METASTORE_WAREHOUSE","HIVE_METASTORE_EXTERNAL_WAREHOUSE","HIVE_REPLICA_WAREHOUSE","RANGER_AUDIT"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["ZEPPELIN_NOTEBOOK","YARN_LOG","HIVE_METASTORE_WAREHOUSE","HIVE_METASTORE_EXTERNAL_WAREHOUSE","HIVE_REPLICA_WAREHOUSE","HBASE_ROOT","RANGER_AUDIT"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -69,6 +69,9 @@ const (
 
 	// StorageLocationBaseTypeHIVEREPLICAWAREHOUSE captures enum value "HIVE_REPLICA_WAREHOUSE"
 	StorageLocationBaseTypeHIVEREPLICAWAREHOUSE string = "HIVE_REPLICA_WAREHOUSE"
+
+	// StorageLocationBaseTypeHBASEROOT captures enum value "HBASE_ROOT"
+	StorageLocationBaseTypeHBASEROOT string = "HBASE_ROOT"
 
 	// StorageLocationBaseTypeRANGERAUDIT captures enum value "RANGER_AUDIT"
 	StorageLocationBaseTypeRANGERAUDIT string = "RANGER_AUDIT"

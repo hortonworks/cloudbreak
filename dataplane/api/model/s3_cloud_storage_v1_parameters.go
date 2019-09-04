@@ -20,9 +20,6 @@ type S3CloudStorageV1Parameters struct {
 	// instance profile
 	// Required: true
 	InstanceProfile *string `json:"instanceProfile"`
-
-	// s3 guard dynamo table name
-	S3GuardDynamoTableName string `json:"s3GuardDynamoTableName,omitempty"`
 }
 
 // Validate validates this s3 cloud storage v1 parameters

@@ -53,7 +53,7 @@ func (o *SyncStackInWorkspaceV4Default) Code() int {
 }
 
 func (o *SyncStackInWorkspaceV4Default) Error() string {
-	return fmt.Sprintf("[PUT /v4/{workspaceId}/stacks/{name}/sync][%d] syncStackInWorkspaceV4 default ", o._statusCode)
+	return fmt.Sprintf("[POST /v4/{workspaceId}/stacks/{name}/sync][%d] syncStackInWorkspaceV4 default ", o._statusCode)
 }
 
 func (o *SyncStackInWorkspaceV4Default) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

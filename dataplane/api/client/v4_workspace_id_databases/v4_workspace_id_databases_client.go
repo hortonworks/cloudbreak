@@ -204,36 +204,6 @@ func (a *Client) ListDatabasesByWorkspace(params *ListDatabasesByWorkspaceParams
 
 }
 
-/*
-TestDatabaseConnectionInWorkspace tests r d s connectivity
-
-A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
-*/
-func (a *Client) TestDatabaseConnectionInWorkspace(params *TestDatabaseConnectionInWorkspaceParams) (*TestDatabaseConnectionInWorkspaceOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewTestDatabaseConnectionInWorkspaceParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "testDatabaseConnectionInWorkspace",
-		Method:             "POST",
-		PathPattern:        "/v4/{workspaceId}/databases/test",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &TestDatabaseConnectionInWorkspaceReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*TestDatabaseConnectionInWorkspaceOK), nil
-
-}
-
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

@@ -110,36 +110,6 @@ func init() {
 					}
 				},
 			},
-			{
-				Name:  "test",
-				Usage: "test database connection configurations",
-				Subcommands: []cli.Command{
-					{
-						Name:   "by-name",
-						Usage:  "test a stored database configuration by name",
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build(),
-						Before: cf.CheckConfigAndCommandFlags,
-						Action: rds.TestRdsByName,
-						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build() {
-								fl.PrintFlagCompletion(f)
-							}
-						},
-					},
-					{
-						Name:   "by-params",
-						Usage:  "test database connection parameters",
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build(),
-						Before: cf.CheckConfigAndCommandFlags,
-						Action: rds.TestRdsByParams,
-						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
-								fl.PrintFlagCompletion(f)
-							}
-						},
-					},
-				},
-			},
 		},
 	})
 }

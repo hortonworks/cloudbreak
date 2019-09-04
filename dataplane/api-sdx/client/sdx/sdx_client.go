@@ -388,6 +388,62 @@ func (a *Client) RepairSdxNodeByCrn(params *RepairSdxNodeByCrnParams) error {
 
 }
 
+/*
+SyncSdx syncs s d x cluster by name
+*/
+func (a *Client) SyncSdx(params *SyncSdxParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSyncSdxParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "syncSdx",
+		Method:             "POST",
+		PathPattern:        "/sdx/{name}/sync",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &SyncSdxReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+SyncSdxByCrn syncs s d x cluster by crn
+*/
+func (a *Client) SyncSdxByCrn(params *SyncSdxByCrnParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSyncSdxByCrnParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "syncSdxByCrn",
+		Method:             "POST",
+		PathPattern:        "/sdx/crn/{crn}/sync",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &SyncSdxByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

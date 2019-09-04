@@ -23,6 +23,12 @@ type SharedServiceV4Response struct {
 	// Unique: true
 	AttachedClusters []*AttachedClusterInfoV4Response `json:"attachedClusters"`
 
+	// sdx crn
+	SdxCrn string `json:"sdxCrn,omitempty"`
+
+	// sdx name
+	SdxName string `json:"sdxName,omitempty"`
+
 	// shared cluster Id
 	SharedClusterID int64 `json:"sharedClusterId,omitempty"`
 

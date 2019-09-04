@@ -8,9 +8,7 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // ClouderaManagerProductV4Request cloudera manager product v4 request
@@ -18,8 +16,7 @@ import (
 type ClouderaManagerProductV4Request struct {
 
 	// name of the Cloudera manager product
-	// Required: true
-	Name *string `json:"name"`
+	Name string `json:"name,omitempty"`
 
 	// parcel url of the Cloudera manager product
 	Parcel string `json:"parcel,omitempty"`
@@ -30,24 +27,6 @@ type ClouderaManagerProductV4Request struct {
 
 // Validate validates this cloudera manager product v4 request
 func (m *ClouderaManagerProductV4Request) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateName(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *ClouderaManagerProductV4Request) validateName(formats strfmt.Registry) error {
-
-	if err := validate.Required("name", "body", m.Name); err != nil {
-		return err
-	}
-
 	return nil
 }
 
