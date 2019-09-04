@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 
-import static com.sequenceiq.authorization.resource.AuthorizationResource.DATAHUB;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
@@ -14,7 +12,6 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
@@ -36,7 +33,6 @@ import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -57,9 +53,6 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
-    private PermissionCheckingUtils permissionCheckingUtils;
 
     @Inject
     private StackCommonService stackCommonService;
@@ -113,11 +106,8 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
         AuthorizeForAutoscaleV4Response response = new AuthorizeForAutoscaleV4Response();
         try {
             restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(userId, tenant);
+            // TODO check permission explicitly
             Stack stack = stackService.getByCrn(crn);
-            if (ResourceAction.WRITE.name().equalsIgnoreCase(permission)) {
-                User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-                permissionCheckingUtils.checkPermissionForUser(DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-            }
             response.setSuccess(true);
         } catch (RuntimeException ignore) {
             response.setSuccess(false);

@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.service.UmsAuthorizationService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RenewCertificateV4Request;
@@ -34,7 +35,6 @@ import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixServi
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
-import com.sequenceiq.cloudbreak.workspace.authorization.UmsWorkspaceAuthorizationService;
 import com.sequenceiq.common.api.util.versionchecker.ClientVersionUtil;
 import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
 
@@ -66,7 +66,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private NotificationSender notificationSender;
 
     @Inject
-    private UmsWorkspaceAuthorizationService umsAuthorizationService;
+    private UmsAuthorizationService umsAuthorizationService;
 
     @Inject
     private StackService stackService;
@@ -125,7 +125,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
         String userCrn = restRequestThreadLocalService.getCloudbreakUser().getUserCrn();
         return new CheckRightV4Response(checkRightV4Request.getRights().stream()
                 .map(rightReq -> new CheckRightV4SingleResponse(rightReq,
-                        umsAuthorizationService.hasRightOfUserForResource(userCrn, rightReq.getResource(), rightReq.getAction())))
+                        umsAuthorizationService.hasRightOfUser(userCrn, rightReq.getResource(), rightReq.getAction())))
                 .collect(Collectors.toList()));
     }
 

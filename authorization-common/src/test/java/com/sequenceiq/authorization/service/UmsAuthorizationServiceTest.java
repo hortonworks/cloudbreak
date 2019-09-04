@@ -3,14 +3,10 @@ package com.sequenceiq.authorization.service;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
@@ -23,13 +19,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
-import com.sequenceiq.authorization.resource.ResourceAction;
-import com.sequenceiq.authorization.resource.RightUtils;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,6 +30,8 @@ public class UmsAuthorizationServiceTest {
     private static final String USER_ID = "userId";
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:" + USER_ID;
+
+    private static final String RESOURCE_CRN = "crn:cdp:datalake:us-west-1:1234:resource:" + USER_ID;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -56,7 +50,7 @@ public class UmsAuthorizationServiceTest {
         thrown.expectMessage("You have no right to perform datalake/write. This requires one of these roles: PowerUser. "
                 + "You can request access through IAM service from an administrator.");
 
-        underTest.checkRightOfUserForResource(USER_CRN, AuthorizationResource.DATALAKE, ResourceAction.WRITE);
+        underTest.checkRightOfUser(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.WRITE);
     }
 
     @Test
@@ -67,74 +61,78 @@ public class UmsAuthorizationServiceTest {
         thrown.expectMessage("You have no right to perform datalake/read. This requires one of these roles: PowerUser. "
                 + "You can request access through IAM service from an administrator.");
 
-        underTest.checkRightOfUserForResource(USER_CRN, AuthorizationResource.DATALAKE, ResourceAction.READ);
+        underTest.checkRightOfUser(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.READ);
     }
 
     @Test
-    public void testHasRightOfUserForResourceWithValidResourceAndAction() {
+    public void testHasRightOfUserWithValidResourceTypeAndAction() {
         when(umsClient.checkRight(anyString(), anyString(), anyString(), any())).thenReturn(true);
 
-        assertTrue(underTest.hasRightOfUserForResource(USER_CRN, "datalake", "write"));
+        assertTrue(underTest.hasRightOfUser(USER_CRN, "datalake", "write"));
 
         when(umsClient.checkRight(anyString(), anyString(), anyString(), any())).thenReturn(false);
 
-        assertFalse(underTest.hasRightOfUserForResource(USER_CRN, "datalake", "write"));
+        assertFalse(underTest.hasRightOfUser(USER_CRN, "datalake", "write"));
     }
 
     @Test
-    public void testHasRightOfUserForResourceWithInvalidResource() {
+    public void testCheckReadRightOnResource() {
+        when(umsClient.checkRight(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(false);
+
+        thrown.expect(AccessDeniedException.class);
+        thrown.expectMessage("You have no right to perform datalake/write. This requires one of these roles: PowerUser. "
+                + "You can request access through IAM service from an administrator.");
+
+        underTest.checkRightOfUserOnResource(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.WRITE, RESOURCE_CRN);
+    }
+
+    @Test
+    public void testCheckWriteRightOnResource() {
+        when(umsClient.checkRight(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(false);
+
+        thrown.expect(AccessDeniedException.class);
+        thrown.expectMessage("You have no right to perform datalake/read. This requires one of these roles: PowerUser. "
+                + "You can request access through IAM service from an administrator.");
+
+        underTest.checkRightOfUserOnResource(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.READ, RESOURCE_CRN);
+    }
+
+    @Test
+    public void testCheckRightOnResourcesFailure() {
+        when(umsClient.hasRights(anyString(), anyString(), anyMap(), any())).thenReturn(Lists.newArrayList(Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
+
+        thrown.expect(AccessDeniedException.class);
+        thrown.expectMessage("You have no right to perform datalake/write. This requires one of these roles: PowerUser. "
+                + "You can request access through IAM service from an administrator.");
+
+        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.WRITE, Lists.newArrayList(RESOURCE_CRN));
+    }
+
+    @Test
+    public void testCheckRightOnResources() {
+        when(umsClient.hasRights(anyString(), anyString(), anyMap(), any())).thenReturn(Lists.newArrayList(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
+
+        underTest.checkRightOfUserOnResources(USER_CRN, AuthorizationResourceType.DATALAKE, AuthorizationResourceAction.WRITE, Lists.newArrayList(RESOURCE_CRN));
+    }
+
+    @Test
+    public void testHasRightOfUserWithInvalidResourceType() {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Resource or action cannot be found by request!");
 
-        underTest.hasRightOfUserForResource(USER_CRN, "invalid", "write");
+        underTest.hasRightOfUser(USER_CRN, "invalid", "write");
 
         verifyZeroInteractions(umsClient);
     }
 
     @Test
-    public void testHasRightOfUserForResourceWithInvalidAction() {
+    public void testHasRightOfUserWithInvalidAction() {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Resource or action cannot be found by request!");
 
-        underTest.hasRightOfUserForResource(USER_CRN, "datalake", "invalid");
+        underTest.hasRightOfUser(USER_CRN, "datalake", "invalid");
 
         verifyZeroInteractions(umsClient);
-    }
-
-    private List<UserManagementProto.Role> getRoles() {
-        ArrayList<UserManagementProto.Role> roles = Lists.newArrayList();
-        List<String> writeRights = Arrays.stream(AuthorizationResource.values())
-                .map(resource -> RightUtils.getRight(resource, ResourceAction.WRITE))
-                .collect(Collectors.toList());
-        List<String> readRights = Arrays.stream(AuthorizationResource.values())
-                .map(resource -> RightUtils.getRight(resource, ResourceAction.READ))
-                .collect(Collectors.toList());
-        roles.add(createRole("EnvironmentAdmin", Lists.newArrayList(Iterables.concat(writeRights, readRights))));
-        roles.add(createRole("EnvironmentUser", readRights));
-        return roles;
-    }
-
-    private UserManagementProto.Role createRole(String name, List<String> rights) {
-        UserManagementProto.PolicyStatement policyStatement = UserManagementProto.PolicyStatement.newBuilder()
-                .addAllRight(rights)
-                .build();
-        UserManagementProto.PolicyDefinition policyDefinition = UserManagementProto.PolicyDefinition.newBuilder()
-                .addStatement(policyStatement)
-                .build();
-
-        UserManagementProto.Policy policy = UserManagementProto.Policy.newBuilder()
-                .setPolicyDefinition(policyDefinition)
-                .build();
-        return UserManagementProto.Role.newBuilder()
-                .setCrn(Crn.builder()
-                        .setAccountId(Crn.fromString(USER_CRN).getAccountId())
-                        .setResource(name)
-                        .setResourceType(Crn.ResourceType.ROLE)
-                        .setService(Crn.Service.IAM)
-                        .build()
-                        .toString())
-                .addPolicy(policy)
-                .build();
     }
 
 }

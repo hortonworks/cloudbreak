@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,6 +33,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -111,6 +113,9 @@ class CredentialServiceTest {
 
     @MockBean
     private CredentialRequestToCreateAWSCredentialRequestConverter credentialRequestToCreateAWSCredentialRequestConverter;
+
+    @MockBean
+    private GrpcUmsClient grpcUmsClient;
 
     @BeforeEach
     void setupTestCredential() {
@@ -274,6 +279,7 @@ class CredentialServiceTest {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection()))
                 .thenReturn(Optional.empty());
         when(credentialAdapter.verify(any(), anyString())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
+        doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
         credentialServiceUnderTest.create(CREDENTIAL, ACCOUNT_ID, USER_ID);
         verify(credentialValidator).validateCredentialCloudPlatform(eq(PLATFORM), eq(USER_ID));
         verify(credentialValidator).validateParameters(any(), any());

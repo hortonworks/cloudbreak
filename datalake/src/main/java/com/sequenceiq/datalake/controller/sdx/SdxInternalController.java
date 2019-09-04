@@ -6,6 +6,9 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
@@ -17,6 +20,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 
 @Controller
+@AuthorizationResource(type = AuthorizationResourceType.DATALAKE)
 public class SdxInternalController implements SdxInternalEndpoint {
 
     @Inject
@@ -29,6 +33,7 @@ public class SdxInternalController implements SdxInternalEndpoint {
     private SdxMetricService metricService;
 
     @Override
+    @CheckPermissionByAccount
     public SdxClusterResponse create(String name, @Valid SdxInternalClusterRequest createSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest, createSdxClusterRequest.getStackV4Request());

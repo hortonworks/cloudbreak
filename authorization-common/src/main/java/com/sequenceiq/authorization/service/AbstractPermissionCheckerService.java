@@ -18,10 +18,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.sequenceiq.authorization.repository.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -39,37 +37,29 @@ public abstract class AbstractPermissionCheckerService {
     private final Map<Class<? extends Annotation>, PermissionChecker<? extends Annotation>> permissionCheckerMap = new HashMap<>();
 
     @PostConstruct
-    public void populatePermissionCheckerMap() {
+    public void populatePermissionCheckMap() {
         permissionCheckers.forEach(permissionChecker -> permissionCheckerMap.put(permissionChecker.supportedAnnotation(), permissionChecker));
     }
 
     public Object hasPermission(ProceedingJoinPoint proceedingJoinPoint) {
+        long startTime = System.currentTimeMillis();
+        LOGGER.debug("Permission check started at {}", startTime);
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
-            return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
+
+        Optional<Class<?>> authorizationClass = commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint);
+        if (!authorizationClass.isPresent()) {
+            throw getAccessDeniedAndLogMissingAnnotation(methodSignature.getMethod().getDeclaringClass());
         }
 
-        Optional<Class<?>> repositoryClass = commonPermissionCheckingUtils
-                .getRepositoryClass(proceedingJoinPoint, getRepositoryClass());
-        if (!repositoryClass.isPresent()) {
-            return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
-        }
-
-        return checkPermission(proceedingJoinPoint, methodSignature, repositoryClass.get());
+        return checkPermission(proceedingJoinPoint, methodSignature, authorizationClass.get(), startTime);
     }
 
     protected abstract List<Class<? extends Annotation>> getPossibleMethodAnnotations();
 
-    protected abstract List<Class> getRepositoryClass();
+    protected Object checkPermission(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Class<?> authorizationClass, long startTime) {
+        Optional<Annotation> classAnnotation = commonPermissionCheckingUtils.getClassAnnotation(authorizationClass);
 
-    protected Object checkPermission(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Class<?> repositoryClass) {
-        Optional<Annotation> classAnnotation = commonPermissionCheckingUtils.getClassAnnotation(repositoryClass);
-        if (!classAnnotation.isPresent()) {
-            throw getAccessDeniedAndLogMissingAnnotation(repositoryClass);
-        }
-
-        AuthorizationResourceType classAuthorizationResourceType = (AuthorizationResourceType) classAnnotation.get();
+        AuthorizationResource classAuthorizationResource = (AuthorizationResource) classAnnotation.get();
 
         List<? extends Annotation> annotations = getPossibleMethodAnnotations().stream()
                 .map(c -> methodSignature.getMethod().getAnnotation(c))
@@ -77,13 +67,13 @@ public abstract class AbstractPermissionCheckerService {
 
         Annotation methodAnnotation = validateNumberOfAnnotations(methodSignature, annotations);
         if (methodAnnotation instanceof DisableCheckPermissions) {
-            return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
+            return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         }
 
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(methodAnnotation.annotationType());
-        AuthorizationResource resource = classAuthorizationResourceType.resource();
-        return permissionChecker.checkPermissions(methodAnnotation, resource, userCrn, proceedingJoinPoint, methodSignature);
+        AuthorizationResourceType resource = classAuthorizationResource.type();
+        return permissionChecker.checkPermissions(methodAnnotation, resource, userCrn, proceedingJoinPoint, methodSignature, startTime);
     }
 
     private Annotation validateNumberOfAnnotations(MethodSignature methodSignature, List<? extends Annotation> annotations) {
@@ -102,7 +92,7 @@ public abstract class AbstractPermissionCheckerService {
 
     private AccessDeniedException getAccessDeniedAndLogMissingAnnotation(Class<?> repositoryClass) {
         LOGGER.error("Class '{}' should be annotated with @{} and specify the resource!", repositoryClass.getCanonicalName(),
-                AuthorizationResourceType.class.getName());
+                AuthorizationResource.class.getName());
         return new AccessDeniedException("You have no access to this resource.");
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -12,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
@@ -49,7 +52,7 @@ import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
-public class StackOperations {
+public class StackOperations implements ResourceBasedCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackOperations.class);
 
@@ -287,4 +290,21 @@ public class StackOperations {
         return stackCommonService.getRetryableFlows(name, workspaceId);
     }
 
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        return stackService.getViewByNameInWorkspace(resourceName, workspaceService.getForCurrentUser().getId()).getEnvironmentCrn();
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceName) {
+        return stackService.getViewsByNameListInWorkspace(resourceName, workspaceService.getForCurrentUser().getId())
+                .stream()
+                .map(view -> view.getResourceCrn())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public AuthorizationResourceType getResourceType() {
+        return AuthorizationResourceType.DATAHUB;
+    }
 }

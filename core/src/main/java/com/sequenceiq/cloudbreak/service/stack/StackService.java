@@ -33,10 +33,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
-import com.sequenceiq.authorization.resource.ResourceAction;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -116,7 +114,6 @@ import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -161,9 +158,6 @@ public class StackService implements ResourceIdProvider {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private PermissionCheckingUtils permissionCheckingUtils;
 
     @Inject
     private OpenSshPublicKeyValidator rsaPublicKeyValidator;
@@ -464,6 +458,24 @@ public class StackService implements ResourceIdProvider {
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
     }
 
+    public StackView getViewByNameInWorkspace(String name, Long workspaceId) {
+        return stackViewService.findNotTerminatedByName(name, workspaceId)
+                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
+    }
+
+    public StackView getViewByCrnInWorkspace(String crn, Long workspaceId) {
+        return stackViewService.findNotTerminatedByCrn(crn, workspaceId)
+                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
+    }
+
+    public Set<StackView> getViewsByCrnListInWorkspace(List<String> crns, Long workspaceId) {
+        return stackViewService.findNotTerminatedByCrnList(crns, workspaceId);
+    }
+
+    public Set<StackView> getViewsByNameListInWorkspace(List<String> names, Long workspaceId) {
+        return stackViewService.findNotTerminatedByNameList(names, workspaceId);
+    }
+
     public Optional<Stack> getByNameInWorkspaceWithLists(String name, Long workspaceId) {
         return findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
@@ -657,7 +669,6 @@ public class StackService implements ResourceIdProvider {
     }
 
     public FlowIdentifier updateImage(Long stackId, Long workspaceId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         return flowManager.triggerStackImageUpdate(stackId, imageId, imageCatalogName, imageCatalogUrl);
     }
 
@@ -703,7 +714,6 @@ public class StackService implements ResourceIdProvider {
     }
 
     private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
                 .orElseThrow(() -> new NotFoundException(format("Metadata for instance %s has not found.", instanceId)));
         downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
@@ -720,13 +730,11 @@ public class StackService implements ResourceIdProvider {
     }
 
     private FlowIdentifier repairFailedNodes(Stack stack, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         LOGGER.debug("Received request to replace failed nodes: " + stack.getId());
         return flowManager.triggerManualRepairFlow(stack.getId());
     }
 
     private FlowIdentifier sync(Stack stack, boolean full, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         // TODO: is it a good condition?
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             if (full) {
@@ -750,7 +758,6 @@ public class StackService implements ResourceIdProvider {
     }
 
     private FlowIdentifier triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         if (!isStopNeeded(stack)) {
             return FlowIdentifier.notTriggered();
         }
@@ -794,7 +801,6 @@ public class StackService implements ResourceIdProvider {
 
     @VisibleForTesting
     FlowIdentifier start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         if (stack.isAvailable() && (cluster == null || cluster.isAvailable())) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
@@ -820,7 +826,6 @@ public class StackService implements ResourceIdProvider {
     }
 
     public FlowIdentifier updateNodeCount(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         try {
             return transactionService.required(() -> {
                 Stack stackWithLists = getByIdWithLists(stack.getId());
