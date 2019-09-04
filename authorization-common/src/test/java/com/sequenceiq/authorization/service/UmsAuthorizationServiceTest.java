@@ -26,7 +26,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.ResourceType;
 import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.authorization.resource.RightUtils;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -56,7 +56,7 @@ public class UmsAuthorizationServiceTest {
         thrown.expectMessage("You have no right to perform datalake/write. This requires one of these roles: PowerUser. "
                 + "You can request access through IAM service from an administrator.");
 
-        underTest.checkRightOfUserForResource(USER_CRN, AuthorizationResource.DATALAKE, ResourceAction.WRITE);
+        underTest.checkRightOfUserForResource(USER_CRN, ResourceType.DATALAKE, ResourceAction.WRITE);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class UmsAuthorizationServiceTest {
         thrown.expectMessage("You have no right to perform datalake/read. This requires one of these roles: PowerUser. "
                 + "You can request access through IAM service from an administrator.");
 
-        underTest.checkRightOfUserForResource(USER_CRN, AuthorizationResource.DATALAKE, ResourceAction.READ);
+        underTest.checkRightOfUserForResource(USER_CRN, ResourceType.DATALAKE, ResourceAction.READ);
     }
 
     @Test
@@ -103,10 +103,10 @@ public class UmsAuthorizationServiceTest {
 
     private List<UserManagementProto.Role> getRoles() {
         ArrayList<UserManagementProto.Role> roles = Lists.newArrayList();
-        List<String> writeRights = Arrays.stream(AuthorizationResource.values())
+        List<String> writeRights = Arrays.stream(ResourceType.values())
                 .map(resource -> RightUtils.getRight(resource, ResourceAction.WRITE))
                 .collect(Collectors.toList());
-        List<String> readRights = Arrays.stream(AuthorizationResource.values())
+        List<String> readRights = Arrays.stream(ResourceType.values())
                 .map(resource -> RightUtils.getRight(resource, ResourceAction.READ))
                 .collect(Collectors.toList());
         roles.add(createRole("EnvironmentAdmin", Lists.newArrayList(Iterables.concat(writeRights, readRights))));

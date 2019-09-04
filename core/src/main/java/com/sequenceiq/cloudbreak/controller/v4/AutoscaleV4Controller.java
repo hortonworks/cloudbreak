@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 
-import static com.sequenceiq.authorization.resource.AuthorizationResource.DATAHUB;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
@@ -24,12 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.Certificate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
-import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.workspace.model.Tenant;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
@@ -37,6 +30,9 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -50,9 +46,6 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
-    private PermissionCheckingUtils permissionCheckingUtils;
 
     @Inject
     private StackCommonService stackCommonService;
@@ -106,11 +99,8 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
         AuthorizeForAutoscaleV4Response response = new AuthorizeForAutoscaleV4Response();
         try {
             restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(userId, tenant);
+            // TODO check permission explicitly
             Stack stack = stackService.getByCrn(crn);
-            if (ResourceAction.WRITE.name().equalsIgnoreCase(permission)) {
-                User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-                permissionCheckingUtils.checkPermissionForUser(DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-            }
             response.setSuccess(true);
         } catch (RuntimeException ignore) {
             response.setSuccess(false);

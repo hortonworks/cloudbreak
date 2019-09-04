@@ -24,12 +24,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.authorization.service.ResourceBasedEnvironmentCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -61,7 +63,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
-public class SdxService {
+public class SdxService implements ResourceBasedEnvironmentCrnProvider<SdxCluster> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
@@ -94,6 +96,9 @@ public class SdxService {
 
     @Inject
     private SdxNotificationService notificationService;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
@@ -414,6 +419,25 @@ public class SdxService {
         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name).ifPresentOrElse(this::deleteSdxCluster, () -> {
             throw notFound("SDX cluster", name).get();
         });
+    }
+
+    @Override
+    public String getEnvironmentCrnByResourceName(String resourceName) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = getSdxByNameInAccount(userCrn, resourceName);
+        return sdxCluster.getEnvCrn();
+    }
+
+    @Override
+    public String getEnvironmentCrnByResourceCrn(String resourceCrn) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = getByCrn(userCrn, resourceCrn);
+        return sdxCluster.getEnvCrn();
+    }
+
+    @Override
+    public Class<SdxCluster> supportedResourceClass() {
+        return SdxCluster.class;
     }
 
     private void deleteSdxCluster(SdxCluster sdxCluster) {

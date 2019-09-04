@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.ResourceType;
 import com.sequenceiq.authorization.resource.ResourceAction;
 
 @RunWith(Parameterized.class)
@@ -45,16 +45,16 @@ public class CommonPermissionCheckingUtilsBulkTest {
 
     private ResourceAction action;
 
-    private AuthorizationResource resource;
+    private ResourceType resource;
 
-    public CommonPermissionCheckingUtilsBulkTest(ResourceAction action, AuthorizationResource resource) {
+    public CommonPermissionCheckingUtilsBulkTest(ResourceAction action, ResourceType resource) {
         this.action = action;
         this.resource = resource;
     }
 
     @Parameters(name = "Current Action - AuthorizationResource pair: [{0} - {1}]")
     public static Object[][] data() {
-        return combinationOf(ResourceAction.values(), AuthorizationResource.values());
+        return combinationOf(ResourceAction.values(), ResourceType.values());
     }
 
     @Before

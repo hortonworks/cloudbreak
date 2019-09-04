@@ -9,17 +9,15 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
-import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @EntityType(entityClass = HostGroup.class)
 @Transactional(TxType.REQUIRED)
-@DisableHasPermission
-public interface HostGroupRepository extends DisabledBaseRepository<HostGroup, Long> {
+public interface HostGroupRepository extends CrudRepository<HostGroup, Long> {
 
     @EntityGraph(value = "HostGroup.constraint.instanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
     @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.hostMetadata LEFT JOIN FETCH h.recipes WHERE h.cluster.id= :clusterId")

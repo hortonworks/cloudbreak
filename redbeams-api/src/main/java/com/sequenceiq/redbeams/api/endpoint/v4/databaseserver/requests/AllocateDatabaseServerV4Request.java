@@ -6,6 +6,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.authorization.api.EnvironmentCrnAwareApiModel;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -22,7 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = ModelDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
+public class AllocateDatabaseServerV4Request extends ProviderParametersBase implements EnvironmentCrnAwareApiModel {
 
     public static final int RDS_NAME_MAX_LENGTH = 40;
 

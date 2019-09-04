@@ -8,19 +8,17 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
-import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @EntityType(entityClass = InstanceMetaData.class)
 @Transactional(TxType.REQUIRED)
-@DisableHasPermission
-public interface InstanceMetaDataRepository extends DisabledBaseRepository<InstanceMetaData, Long> {
+public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaData, Long> {
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceStatus <> 'TERMINATED'")
     Set<InstanceMetaData> findNotTerminatedForStack(@Param("stackId") Long stackId);

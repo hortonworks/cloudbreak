@@ -8,8 +8,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.authorization.repository.DisableCheckPermissions;
-import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.resource.ResourceType;
 
 @Component
 public class DisabledPermissionChecker implements PermissionChecker<DisableCheckPermissions> {
@@ -18,7 +18,7 @@ public class DisabledPermissionChecker implements PermissionChecker<DisableCheck
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
     @Override
-    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, AuthorizationResource resource, String userCrn,
+    public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, ResourceType resource, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
     }

@@ -4,7 +4,9 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
-public class SdxClusterRequest {
+import com.sequenceiq.authorization.api.EnvironmentNameAwareApiModel;
+
+public class SdxClusterRequest implements EnvironmentNameAwareApiModel {
 
     @NotNull
     private String environment;
@@ -56,5 +58,10 @@ public class SdxClusterRequest {
 
     public void setExternalDatabase(SdxDatabaseRequest externalDatabase) {
         this.externalDatabase = externalDatabase;
+    }
+
+    @Override
+    public String getEnvironmentName() {
+        return environment;
     }
 }

@@ -161,7 +161,7 @@ dependencies {
     compile project(':core-api')
     compile project(':autoscale-api')
     compile project(':common')
-    compile project(':workspace-authorization')
+    compile project(':workspace')
     compile project(':secret-engine')
     compile project(':client-cm')
 }

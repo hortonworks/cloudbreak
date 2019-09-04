@@ -9,6 +9,12 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.authorization.annotation.CheckPermissionByEnvironmentCrn;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.EnvironmentCrn;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.ResourceAction;
+import com.sequenceiq.authorization.resource.ResourceType;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
@@ -30,6 +36,7 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 
 @Component
 @Transactional(TxType.NEVER)
+@AuthorizationResource(type = ResourceType.DATALAKE)
 public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     static final Long DEFAULT_WORKSPACE = 0L;
@@ -53,43 +60,50 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private ConverterUtil converterUtil;
 
     @Override
+    @DisableCheckPermissions
     public DatabaseServerV4Responses list(String environmentCrn) {
         Set<DatabaseServerConfig> all = databaseServerConfigService.findAll(DEFAULT_WORKSPACE, environmentCrn);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(all, DatabaseServerV4Response.class));
     }
 
     @Override
+    @DisableCheckPermissions
     public DatabaseServerV4Response getByName(String environmentCrn, String name) {
         DatabaseServerConfig server = databaseServerConfigService.getByName(DEFAULT_WORKSPACE, environmentCrn, name);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
     @Override
+    @DisableCheckPermissions
     public DatabaseServerV4Response getByCrn(String crn) {
         DatabaseServerConfig server = databaseServerConfigService.getByCrn(crn);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
     @Override
-    public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
+    @CheckPermissionByEnvironmentCrn(action = ResourceAction.WRITE)
+    public DatabaseServerStatusV4Response create(@EnvironmentCrn AllocateDatabaseServerV4Request request) {
         DBStack dbStack = dbStackConverter.convert(request, threadBasedUserCrnProvider.getUserCrn());
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack);
         return converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class);
     }
 
     @Override
+    @DisableCheckPermissions
     public DatabaseServerV4Response release(String crn) {
         DatabaseServerConfig server = databaseServerConfigService.release(crn);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
-    public DatabaseServerV4Response register(DatabaseServerV4Request request) {
+    @CheckPermissionByEnvironmentCrn(action = ResourceAction.WRITE)
+    public DatabaseServerV4Response register(@EnvironmentCrn DatabaseServerV4Request request) {
         DatabaseServerConfig server = databaseServerConfigService.create(converterUtil.convert(request, DatabaseServerConfig.class), DEFAULT_WORKSPACE, false);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_CREATED);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
     @Override
+    @DisableCheckPermissions
     public DatabaseServerV4Response deleteByCrn(String crn, boolean force) {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         DatabaseServerConfig deleted = redbeamsTerminationService.terminateByCrn(crn, force);
@@ -98,13 +112,15 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    public DatabaseServerV4Response deleteByName(String environmentCrn, String name, boolean force) {
+    @CheckPermissionByEnvironmentCrn(action = ResourceAction.WRITE)
+    public DatabaseServerV4Response deleteByName(@EnvironmentCrn String environmentCrn, String name, boolean force) {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         DatabaseServerConfig deleted = redbeamsTerminationService.terminateByName(environmentCrn, name, force);
         return converterUtil.convert(deleted, DatabaseServerV4Response.class);
     }
 
     @Override
+    @DisableCheckPermissions
     public DatabaseServerV4Responses deleteMultiple(Set<String> crns, boolean force) {
         // RedbeamsTerminationService handles both service-managed and user-managed database servers
         Set<DatabaseServerConfig> deleted = redbeamsTerminationService.terminateMultipleByCrn(crns, force);
@@ -113,6 +129,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
+    @DisableCheckPermissions
     public DatabaseServerTestV4Response test(DatabaseServerTestV4Request request) {
         throw new UnsupportedOperationException("Connection testing is disabled for security reasons until further notice");
         // String connectionResult;
@@ -126,6 +143,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
+    @DisableCheckPermissions
     public CreateDatabaseV4Response createDatabase(CreateDatabaseV4Request request) {
         String result = databaseServerConfigService.createDatabaseOnServer(
                 request.getExistingDatabaseServerCrn(),

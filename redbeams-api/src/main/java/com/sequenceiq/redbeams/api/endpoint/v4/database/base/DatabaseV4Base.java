@@ -7,6 +7,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.authorization.api.EnvironmentCrnAwareApiModel;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidJdbcConnectionUrl;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
@@ -14,7 +15,7 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class DatabaseV4Base implements Serializable {
+public abstract class DatabaseV4Base implements Serializable, EnvironmentCrnAwareApiModel {
 
     @NotNull
     @Size(max = 100, min = 5, message = "The length of the database's name must be between 5 to 100, inclusive")

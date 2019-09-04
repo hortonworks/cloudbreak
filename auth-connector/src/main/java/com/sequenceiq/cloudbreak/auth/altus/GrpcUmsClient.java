@@ -285,14 +285,10 @@ public class GrpcUmsClient {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
-        if (isReadRight(right)) {
-            LOGGER.info("Letting read operation through for right {} for user {}!", right, userCrn);
-            return true;
-        }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.info("Checking right {} for user {}!", right, userCrn);
-            client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, null);
+            client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, resource);
             LOGGER.info("User {} has right {}!", userCrn, right);
             return true;
         } catch (Exception e) {
@@ -490,14 +486,6 @@ public class GrpcUmsClient {
         }
     }
 
-    @Cacheable(cacheNames = "umsRolesCache", key = "{ #accountId }")
-    public List<UserManagementProto.Role> listRoles(String actorCrn, String accountId, Optional<String> requestId) {
-        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
-            return client.listRoles(requestId.orElse(UUID.randomUUID().toString()), accountId).getRoleList();
-        }
-    }
-
     /**
      * Get built-in Dbus uploader role
      * Partition and region is hard coded right now, if it will change use the same as the user crn
@@ -511,16 +499,5 @@ public class GrpcUmsClient {
                 .setResource("DbusUploader")
                 .build();
         return databusCrn.toString();
-    }
-
-    protected boolean isReadRight(String action) {
-        if (action == null) {
-            return false;
-        }
-        String[] parts = action.split("/");
-        if (parts.length == 2 && parts[1] != null && parts[1].equals("read")) {
-            return true;
-        }
-        return false;
     }
 }

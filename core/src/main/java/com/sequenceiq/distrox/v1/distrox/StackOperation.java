@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.service.ResourceBasedEnvironmentCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.dto.StackAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
@@ -45,7 +46,7 @@ import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 
 @Service
-public class StackOperation {
+public class StackOperation implements ResourceBasedEnvironmentCrnProvider<Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackOperation.class);
 
@@ -298,6 +299,21 @@ public class StackOperation {
 
     public Stack getStackByCrn(String crn) {
         return stackService.getByCrnInWorkspace(crn, workspaceService.getForCurrentUser().getId());
+    }
+
+    @Override
+    public String getEnvironmentCrnByResourceName(String resourceName) {
+        return getStackByName(resourceName).getEnvironmentCrn();
+    }
+
+    @Override
+    public String getEnvironmentCrnByResourceCrn(String resourceCrn) {
+        return getStackByCrn(resourceCrn).getEnvironmentCrn();
+    }
+
+    @Override
+    public Class<Stack> supportedResourceClass() {
+        return Stack.class;
     }
 
     private void validateAccessDto(StackAccessDto dto) {
