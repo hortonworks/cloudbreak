@@ -54,7 +54,7 @@ type EnvironmentV1Request struct {
 
 	// name of the resource
 	// Required: true
-	// Max Length: 255
+	// Max Length: 28
 	// Min Length: 5
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
@@ -301,7 +301,7 @@ func (m *EnvironmentV1Request) validateName(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MaxLength("name", "body", string(*m.Name), 255); err != nil {
+	if err := validate.MaxLength("name", "body", string(*m.Name), 28); err != nil {
 		return err
 	}
 

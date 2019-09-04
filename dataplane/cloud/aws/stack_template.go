@@ -38,7 +38,8 @@ func (p *AwsProvider) GenerateDefaultNetworkWithParams(getFlags func(string) str
 	case cloud.NEW_NETWORK_NEW_SUBNET:
 		networkCidr := getFlags(fl.FlNetworkCidr.Name)
 		return &envmodel.EnvironmentNetworkV1Request{
-			NetworkCidr: &networkCidr,
+			NetworkCidr:           &networkCidr,
+			PrivateSubnetCreation: "DISABLED",
 		}
 	case cloud.EXISTING_NETWORK_EXISTING_SUBNET:
 		vpcId := getFlags(fl.FlNetworkId.Name)

@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -28,6 +30,10 @@ type EnvironmentNetworkV1Request struct {
 	// Min Length: 0
 	NetworkCidr *string `json:"networkCidr,omitempty"`
 
+	// A flag to enable or disable the private sutbet creation.
+	// Enum: [ENABLED DISABLED]
+	PrivateSubnetCreation string `json:"privateSubnetCreation,omitempty"`
+
 	// Subnet ids of the specified networks
 	// Unique: true
 	SubnetIds []string `json:"subnetIds"`
@@ -49,6 +55,10 @@ func (m *EnvironmentNetworkV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateNetworkCidr(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePrivateSubnetCreation(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -113,6 +123,49 @@ func (m *EnvironmentNetworkV1Request) validateNetworkCidr(formats strfmt.Registr
 	}
 
 	if err := validate.MaxLength("networkCidr", "body", string(*m.NetworkCidr), 255); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var environmentNetworkV1RequestTypePrivateSubnetCreationPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["ENABLED","DISABLED"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		environmentNetworkV1RequestTypePrivateSubnetCreationPropEnum = append(environmentNetworkV1RequestTypePrivateSubnetCreationPropEnum, v)
+	}
+}
+
+const (
+
+	// EnvironmentNetworkV1RequestPrivateSubnetCreationENABLED captures enum value "ENABLED"
+	EnvironmentNetworkV1RequestPrivateSubnetCreationENABLED string = "ENABLED"
+
+	// EnvironmentNetworkV1RequestPrivateSubnetCreationDISABLED captures enum value "DISABLED"
+	EnvironmentNetworkV1RequestPrivateSubnetCreationDISABLED string = "DISABLED"
+)
+
+// prop value enum
+func (m *EnvironmentNetworkV1Request) validatePrivateSubnetCreationEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, environmentNetworkV1RequestTypePrivateSubnetCreationPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *EnvironmentNetworkV1Request) validatePrivateSubnetCreation(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.PrivateSubnetCreation) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validatePrivateSubnetCreationEnum("privateSubnetCreation", "body", m.PrivateSubnetCreation); err != nil {
 		return err
 	}
 
