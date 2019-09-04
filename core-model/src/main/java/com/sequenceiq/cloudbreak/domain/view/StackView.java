@@ -43,6 +43,8 @@ public class StackView extends CompactView {
 
     private String resourceCrn;
 
+    private String environmentCrn;
+
     public StackView() {
     }
 
@@ -118,5 +120,9 @@ public class StackView extends CompactView {
 
     public Long getTerminated() {
         return terminated;
+    }
+
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 }

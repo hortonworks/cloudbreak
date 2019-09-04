@@ -4,18 +4,15 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.workspace.repository.BaseRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.cloudbreak.workspace.repository.HasPermission;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 
-@HasPermission
 @EntityType(entityClass = Cluster.class)
-public interface ClusterRepository extends BaseRepository<Cluster, Long> {
+public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Cluster findByStackId(@Param("stackId") Long stackId);
 
@@ -32,7 +29,6 @@ public interface ClusterRepository extends BaseRepository<Cluster, Long> {
 
     List<Cluster> findByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState state, boolean autoscalingEnabled, String nodeId);
 
-    @DisableHasPermission
     int countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState state, boolean autoscalingEnabled, String nodeId);
 
     List<Cluster> findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(List<String> nodes);

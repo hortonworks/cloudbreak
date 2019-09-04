@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.authorization.resource.AuthorizationResource;
-import com.sequenceiq.authorization.resource.ResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.resource.RightUtils;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
@@ -26,18 +26,16 @@ public class UmsAuthorizationService {
     @Inject
     private GrpcUmsClient umsClient;
 
-    public void checkRightOfUserForResource(String userCrn, AuthorizationResource resource, ResourceAction action, String unauthorizedMessage) {
-        if (!umsClient.checkRight(userCrn, userCrn, RightUtils.getRight(resource, action), getRequestId())) {
+    // ACCOUNT LEVEL
+
+    public void checkRightOfUserForResource(String userCrn, AuthorizationResourceType resource, AuthorizationResourceAction action, String unauthorizedMessage) {
+        if (!hasRightOfUserForResource(userCrn, resource, action)) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
     }
 
-    public boolean hasRightOfUserForResource(String userCrn, AuthorizationResource resource, ResourceAction action) {
-        return umsClient.checkRight(userCrn, userCrn, RightUtils.getRight(resource, action), getRequestId());
-    }
-
-    public void checkRightOfUserForResource(String userCrn, AuthorizationResource resource, ResourceAction action) {
+    public void checkRightOfUserForResource(String userCrn, AuthorizationResourceType resource, AuthorizationResourceAction action) {
         String right = RightUtils.getRight(resource, action);
         String unauthorizedMessage = String.format("You have no right to perform %s. This requires one of these roles: %s. "
                         + "You can request access through IAM service from an administrator.",
@@ -46,8 +44,8 @@ public class UmsAuthorizationService {
     }
 
     public Boolean hasRightOfUserForResource(String userCrn, String resource, String action) {
-        Optional<AuthorizationResource> resourceEnum = AuthorizationResource.getByName(resource);
-        Optional<ResourceAction> actionEnum = ResourceAction.getByName(action);
+        Optional<AuthorizationResourceType> resourceEnum = AuthorizationResourceType.getByName(resource);
+        Optional<AuthorizationResourceAction> actionEnum = AuthorizationResourceAction.getByName(action);
         if (!resourceEnum.isPresent() || !actionEnum.isPresent()) {
             throw new BadRequestException("Resource or action cannot be found by request!");
         }
@@ -55,6 +53,29 @@ public class UmsAuthorizationService {
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
+    }
+
+    public boolean hasRightOfUserForResource(String userCrn, AuthorizationResourceType resource, AuthorizationResourceAction action) {
+        return umsClient.checkRight(userCrn, userCrn, RightUtils.getRight(resource, action), getRequestId());
+    }
+
+    // RESOURCE LEVEL
+
+    public void checkRightOfUserForResourceOnResource(String userCrn, AuthorizationResourceType resource,
+            AuthorizationResourceAction action, String resourceCrn) {
+        String right = RightUtils.getRight(resource, action);
+        String unauthorizedMessage = String.format("You have no right to perform %s. This requires one of these roles: %s. "
+                        + "You can request access through IAM service from an administrator.",
+                right, "PowerUser");
+        checkRightOfUserForResourceOnResource(userCrn, resource, action, resourceCrn, unauthorizedMessage);
+    }
+
+    public void checkRightOfUserForResourceOnResource(String userCrn, AuthorizationResourceType resource, AuthorizationResourceAction action,
+            String resourceCrn, String unauthorizedMessage) {
+        if (!umsClient.checkRight(userCrn, userCrn, RightUtils.getRight(resource, action), resourceCrn, getRequestId())) {
+            LOGGER.error(unauthorizedMessage);
+            throw new AccessDeniedException(unauthorizedMessage);
+        }
     }
 
     protected Optional<String> getRequestId() {

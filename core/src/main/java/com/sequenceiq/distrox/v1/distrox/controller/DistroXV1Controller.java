@@ -14,6 +14,19 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.authorization.annotation.CheckPermissionByEnvironmentName;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.EnvironmentName;
+import com.sequenceiq.authorization.annotation.ResourceCrnList;
+import com.sequenceiq.authorization.annotation.ResourceName;
+import com.sequenceiq.authorization.annotation.ResourceNameList;
+import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto.ResourceAccessDtoBuilder;
@@ -50,6 +63,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 
 @Controller
 @InternalReady
+@AuthorizationResource(type = AuthorizationResourceType.DATAHUB)
 public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Lazy
@@ -81,6 +95,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     private EnvironmentClientService environmentClientService;
 
     @Override
+    @DisableCheckPermissions
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
         StackViewV4Responses stackViewV4Responses;
         List<StackType> stackTypes = List.of(StackType.WORKLOAD);
@@ -93,14 +108,16 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public StackV4Response post(@Valid DistroXV1Request request) {
+    @CheckPermissionByEnvironmentName(action = AuthorizationResourceAction.WRITE)
+    public StackV4Response post(@EnvironmentName @Valid DistroXV1Request request) {
         return stackOperations.post(
                 workspaceService.getForCurrentUser().getId(),
                 stackRequestConverter.convert(request));
     }
 
     @Override
-    public StackV4Response getByName(String name, Set<String> entries) {
+    @CheckPermissionByResourceName
+    public StackV4Response getByName(@ResourceName String name, Set<String> entries) {
         return stackOperations.get(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -109,6 +126,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn
     public StackV4Response getByCrn(@ResourceCrn String crn, Set<String> entries) {
         return stackOperations.get(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
@@ -118,7 +136,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void deleteByName(String name, Boolean forced) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
+    public void deleteByName(@ResourceName String name, Boolean forced) {
         stackOperations.delete(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -126,7 +145,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void deleteByCrn(String crn, Boolean forced) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    public void deleteByCrn(@ResourceCrn String crn, Boolean forced) {
         stackOperations.delete(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -134,6 +154,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    @DisableCheckPermissions
     public void deleteMultiple(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
         validateMultidelete(multiDeleteRequest);
         if (CollectionUtils.isNotEmpty(multiDeleteRequest.getNames())) {
@@ -169,21 +190,24 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void syncByName(String name) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
+    public void syncByName(@ResourceName String name) {
         stackOperations.sync(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    public void syncByCrn(String crn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    public void syncByCrn(@ResourceCrn String crn) {
         stackOperations.sync(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    public void retryByName(String name) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
+    public void retryByName(@ResourceName String name) {
         stackOperations.retry(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId());
@@ -191,7 +215,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public List<RetryableFlowResponse> listRetryableFlows(String name) {
+    @CheckPermissionByResourceName
+    public List<RetryableFlowResponse> listRetryableFlows(@ResourceName String name) {
         List<RetryableFlow> retryableFlows = stackOperations.getRetryableFlows(name, workspaceService.getForCurrentUser().getId());
         return retryableFlows.stream()
                 .map(retryable -> Builder.builder().setName(retryable.getName()).setFailDate(retryable.getFailDate()).build())
@@ -199,7 +224,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void retryByCrn(String crn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    public void retryByCrn(@ResourceCrn String crn) {
         stackOperations.retry(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId());
@@ -207,7 +233,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void putStopByName(String name) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
+    public void putStopByName(@ResourceName String name) {
         stackOperations.putStop(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId());
@@ -215,7 +242,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void putStopByCrn(String crn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    public void putStopByCrn(@ResourceCrn String crn) {
         stackOperations.putStop(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId());
@@ -223,17 +251,20 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void putStopByNames(List<String> names) {
+    @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.WRITE)
+    public void putStopByNames(@ResourceNameList List<String> names) {
         names.forEach(this::putStopByName);
     }
 
     @Override
-    public void putStopByCrns(List<String> crns) {
+    @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.WRITE)
+    public void putStopByCrns(@ResourceCrnList List<String> crns) {
         crns.forEach(this::putStopByCrn);
     }
 
     @Override
-    public void putStartByName(String name) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
+    public void putStartByName(@ResourceName String name) {
         stackOperations.putStart(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId());
@@ -241,7 +272,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void putStartByCrn(String crn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    public void putStartByCrn(@ResourceCrn String crn) {
         stackOperations.putStart(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId());
@@ -249,17 +281,20 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void putStartByNames(List<String> names) {
+    @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.WRITE)
+    public void putStartByNames(@ResourceNameList List<String> names) {
         names.forEach(this::putStartByName);
     }
 
     @Override
-    public void putStartByCrns(List<String> crns) {
+    @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.WRITE)
+    public void putStartByCrns(@ResourceCrnList List<String> crns) {
         crns.forEach(this::putStartByCrn);
     }
 
     @Override
-    public void putScalingByName(String name, @Valid DistroXScaleV1Request updateRequest) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
+    public void putScalingByName(@ResourceName String name, @Valid DistroXScaleV1Request updateRequest) {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
         stackScaleV4Request.setStackId(stackOperations.getStackByName(name).getId());
         stackOperations.putScaling(
@@ -269,7 +304,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void putScalingByCrn(String crn, @Valid DistroXScaleV1Request updateRequest) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    public void putScalingByCrn(@ResourceCrn String crn, @Valid DistroXScaleV1Request updateRequest) {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
         stackScaleV4Request.setStackId(stackOperations.getStackByCrn(crn).getId());
         stackOperations.putScaling(
@@ -279,7 +315,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void repairClusterByName(String name, @Valid DistroXRepairV1Request clusterRepairRequest) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
+    public void repairClusterByName(@ResourceName String name, @Valid DistroXRepairV1Request clusterRepairRequest) {
         stackOperations.repairCluster(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -288,7 +325,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void repairClusterByCrn(String crn, @Valid DistroXRepairV1Request clusterRepairRequest) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    public void repairClusterByCrn(@ResourceCrn String crn, @Valid DistroXRepairV1Request clusterRepairRequest) {
         stackOperations.repairCluster(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -297,7 +335,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public GeneratedBlueprintV4Response postStackForBlueprintByName(String name, @Valid DistroXV1Request stackRequest) {
+    @CheckPermissionByEnvironmentName
+    public GeneratedBlueprintV4Response postStackForBlueprintByName(String name, @EnvironmentName @Valid DistroXV1Request stackRequest) {
         return stackOperations.postStackForBlueprint(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -305,7 +344,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public GeneratedBlueprintV4Response postStackForBlueprintByCrn(String crn, @Valid DistroXV1Request stackRequest) {
+    @CheckPermissionByEnvironmentName
+    public GeneratedBlueprintV4Response postStackForBlueprintByCrn(String crn, @EnvironmentName @Valid DistroXV1Request stackRequest) {
         return stackOperations.postStackForBlueprint(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -313,33 +353,37 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public Object getRequestfromName(String name) {
+    public Object getRequestfromName(@ResourceName String name) {
         StackV4Request stackV4Request = getStackV4Request(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build());
         return getCreateAWSClusterRequest(stackV4Request);
     }
 
     @Override
-    public Object getRequestfromCrn(String crn) {
+    @CheckPermissionByResourceCrn
+    public Object getRequestfromCrn(@ResourceCrn String crn) {
         StackV4Request stackV4Request = getStackV4Request(ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build());
         return getCreateAWSClusterRequest(stackV4Request);
     }
 
     @Override
-    public StackStatusV4Response getStatusByName(String name) {
+    @CheckPermissionByResourceName
+    public StackStatusV4Response getStatusByName(@ResourceName String name) {
         return stackOperations.getStatus(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    public StackStatusV4Response getStatusByCrn(String crn) {
+    @CheckPermissionByResourceCrn
+    public StackStatusV4Response getStatusByCrn(@ResourceCrn String crn) {
         return stackOperations.getStatusByCrn(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    public void deleteInstanceByName(String name, Boolean forced, String instanceId) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
+    public void deleteInstanceByName(@ResourceName String name, Boolean forced, String instanceId) {
         stackOperations.deleteInstance(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -348,7 +392,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void deleteInstanceByCrn(String crn, Boolean forced, String instanceId) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    public void deleteInstanceByCrn(@ResourceCrn String crn, Boolean forced, String instanceId) {
         stackOperations.deleteInstance(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -357,7 +402,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void deleteInstancesByName(String name, @NotEmpty List<String> instances, boolean forced) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
+    public void deleteInstancesByName(@ResourceName String name, @NotEmpty List<String> instances, boolean forced) {
         stackOperations.deleteInstances(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -366,7 +412,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void deleteInstancesByCrn(String crn, @NotEmpty List<String> instances, boolean forced) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    public void deleteInstancesByCrn(@ResourceCrn String crn, @NotEmpty List<String> instances, boolean forced) {
         stackOperations.deleteInstances(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -375,7 +422,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void setClusterMaintenanceModeByName(String name, @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
+    public void setClusterMaintenanceModeByName(@ResourceName String name, @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
         stackOperations.setClusterMaintenanceMode(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -384,7 +432,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void setClusterMaintenanceModeByCrn(String crn, @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    public void setClusterMaintenanceModeByCrn(@ResourceCrn String crn, @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
         stackOperations.setClusterMaintenanceMode(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -392,7 +441,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void deleteWithKerberosByName(String name, boolean forced) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.WRITE)
+    public void deleteWithKerberosByName(@ResourceName String name, boolean forced) {
         stackOperations.delete(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withName(name).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -401,7 +451,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public void deleteWithKerberosByCrn(String crn, boolean forced) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.WRITE)
+    public void deleteWithKerberosByCrn(@ResourceCrn String crn, boolean forced) {
         stackOperations.delete(
                 ResourceAccessDtoBuilder.aResourceAccessDtoBuilder().withCrn(crn).build(),
                 workspaceService.getForCurrentUser().getId(),
@@ -410,7 +461,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public Object getCreateAwsClusterForCli(DistroXV1Request request) {
+    @CheckPermissionByEnvironmentName
+    public Object getCreateAwsClusterForCli(@EnvironmentName DistroXV1Request request) {
         DetailedEnvironmentResponse env = environmentClientService.getByName(request.getEnvironmentName());
         if (!CloudPlatform.AWS.name().equals(env.getCloudPlatform())) {
             return new EmptyResponse();

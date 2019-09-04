@@ -1,6 +1,28 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.authorization.service.ResourceBasedEnvironmentCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
@@ -36,28 +58,9 @@ import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 
 @Service
-public class SdxService implements ResourceIdProvider {
+public class SdxService implements ResourceIdProvider, ResourceBasedEnvironmentCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
@@ -383,6 +386,20 @@ public class SdxService implements ResourceIdProvider {
         }, () -> {
             throw notFound("SDX cluster", name).get();
         });
+    }
+
+    @Override
+    public String getEnvironmentCrnByResourceName(String resourceName) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = getSdxByNameInAccount(userCrn, resourceName);
+        return sdxCluster.getEnvCrn();
+    }
+
+    @Override
+    public String getEnvironmentCrnByResourceCrn(String resourceCrn) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = getByCrn(userCrn, resourceCrn);
+        return sdxCluster.getEnvCrn();
     }
 
     private void deleteSdxCluster(SdxCluster sdxCluster, boolean forced) {

@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.service.ResourceBasedEnvironmentCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.ResourceAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
@@ -48,7 +50,7 @@ import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 
 @Service
-public class StackOperations {
+public class StackOperations implements ResourceBasedEnvironmentCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackOperations.class);
 
@@ -342,4 +344,29 @@ public class StackOperations {
         return stackCommonService.getRetryableFlows(name, workspaceId);
     }
 
+    @Override
+    public String getEnvironmentCrnByResourceName(String resourceName) {
+        return stackService.getViewByNameInWorkspace(resourceName, workspaceService.getForCurrentUser().getId()).getEnvironmentCrn();
+    }
+
+    @Override
+    public String getEnvironmentCrnByResourceCrn(String resourceCrn) {
+        return stackService.getViewByCrnInWorkspace(resourceCrn, workspaceService.getForCurrentUser().getId()).getEnvironmentCrn();
+    }
+
+    @Override
+    public List<String> getEnvironmentCrnListByResourceCrnList(List<String> resourceCrns) {
+        return stackService.getViewsByCrnListInWorkspace(resourceCrns, workspaceService.getForCurrentUser().getId())
+                .stream()
+                .map(view -> view.getEnvironmentCrn())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getEnvironmentCrnListByResourceNameList(List<String> resourceName) {
+        return stackService.getViewsByNameListInWorkspace(resourceName, workspaceService.getForCurrentUser().getId())
+                .stream()
+                .map(view -> view.getEnvironmentCrn())
+                .collect(Collectors.toList());
+    }
 }

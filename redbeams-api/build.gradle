@@ -43,6 +43,7 @@ dependencies {
   implementation project(':core-api')
   implementation project(':common')
   implementation project(':auth-connector')
+  implementation project(':authorization-common-api')
 }
 
 

@@ -3,14 +3,13 @@ package com.sequenceiq.cloudbreak.repository;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.repository.CrudRepository;
+
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
-import com.sequenceiq.cloudbreak.workspace.repository.BaseRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.cloudbreak.workspace.repository.HasPermission;
 
 @EntityType(entityClass = VolumeTemplate.class)
 @Transactional(TxType.REQUIRED)
-@HasPermission
-public interface VolumeTemplateRepository extends BaseRepository<VolumeTemplate, Long> {
+public interface VolumeTemplateRepository extends CrudRepository<VolumeTemplate, Long> {
 
 }

@@ -23,7 +23,7 @@ configurations {
 }
 
 dependencies {
-  compile project(':authorization')
+  compile project(':authorization-common')
   compile project(':common')
   compile project(':flow')
   compile project(':secret-engine')
