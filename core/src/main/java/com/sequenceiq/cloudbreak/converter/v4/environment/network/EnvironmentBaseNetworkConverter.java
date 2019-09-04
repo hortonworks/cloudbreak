@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +30,15 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         result.setName(missingResourceNameGenerator.generateName(APIResourceType.NETWORK));
         result.setSubnetCIDR(null);
         Map<String, Object> attributes = new HashMap<>();
-        Optional<CloudSubnet> cloudSubnet = source.getSubnetMetas().values().stream()
-                .filter(s -> s.getAvailabilityZone().equals(availabilityZone))
-                .findFirst();
+        Optional<CloudSubnet> cloudSubnet;
+        if (StringUtils.isNotEmpty(availabilityZone)) {
+            cloudSubnet = source.getSubnetMetas().values().stream()
+                    .filter(s -> StringUtils.isNotEmpty(s.getAvailabilityZone()) &&
+                            s.getAvailabilityZone().equals(availabilityZone))
+                    .findFirst();
+        } else {
+            cloudSubnet = source.getSubnetMetas().values().stream().findFirst();
+        }
         if (!cloudSubnet.isPresent()) {
             throw new BadRequestException("No subnet for the given availability zone: " + availabilityZone);
         }
