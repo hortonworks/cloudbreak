@@ -873,6 +873,13 @@ var (
 			EnvVar: "CB_WORKSPACE",
 		},
 	}
+	FlWithSdxOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "with-sdx-ready",
+			Usage: "filter by SDX Ready or not. If true, the SDX Ready cluster definitions are listed. Otherwise these cluster definitions are ignored.",
+		},
+	}
 	FlUserID = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

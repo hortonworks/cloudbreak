@@ -22,8 +22,11 @@ import (
 // NewListBlueprintsByWorkspaceParams creates a new ListBlueprintsByWorkspaceParams object
 // with the default values initialized.
 func NewListBlueprintsByWorkspaceParams() *ListBlueprintsByWorkspaceParams {
-	var ()
+	var (
+		withSdxDefault = bool(false)
+	)
 	return &ListBlueprintsByWorkspaceParams{
+		WithSdx: &withSdxDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -32,8 +35,11 @@ func NewListBlueprintsByWorkspaceParams() *ListBlueprintsByWorkspaceParams {
 // NewListBlueprintsByWorkspaceParamsWithTimeout creates a new ListBlueprintsByWorkspaceParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewListBlueprintsByWorkspaceParamsWithTimeout(timeout time.Duration) *ListBlueprintsByWorkspaceParams {
-	var ()
+	var (
+		withSdxDefault = bool(false)
+	)
 	return &ListBlueprintsByWorkspaceParams{
+		WithSdx: &withSdxDefault,
 
 		timeout: timeout,
 	}
@@ -42,8 +48,11 @@ func NewListBlueprintsByWorkspaceParamsWithTimeout(timeout time.Duration) *ListB
 // NewListBlueprintsByWorkspaceParamsWithContext creates a new ListBlueprintsByWorkspaceParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewListBlueprintsByWorkspaceParamsWithContext(ctx context.Context) *ListBlueprintsByWorkspaceParams {
-	var ()
+	var (
+		withSdxDefault = bool(false)
+	)
 	return &ListBlueprintsByWorkspaceParams{
+		WithSdx: &withSdxDefault,
 
 		Context: ctx,
 	}
@@ -52,8 +61,11 @@ func NewListBlueprintsByWorkspaceParamsWithContext(ctx context.Context) *ListBlu
 // NewListBlueprintsByWorkspaceParamsWithHTTPClient creates a new ListBlueprintsByWorkspaceParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewListBlueprintsByWorkspaceParamsWithHTTPClient(client *http.Client) *ListBlueprintsByWorkspaceParams {
-	var ()
+	var (
+		withSdxDefault = bool(false)
+	)
 	return &ListBlueprintsByWorkspaceParams{
+		WithSdx:    &withSdxDefault,
 		HTTPClient: client,
 	}
 }
@@ -63,6 +75,8 @@ for the list blueprints by workspace operation typically these are written to a 
 */
 type ListBlueprintsByWorkspaceParams struct {
 
+	/*WithSdx*/
+	WithSdx *bool
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -104,6 +118,17 @@ func (o *ListBlueprintsByWorkspaceParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithWithSdx adds the withSdx to the list blueprints by workspace params
+func (o *ListBlueprintsByWorkspaceParams) WithWithSdx(withSdx *bool) *ListBlueprintsByWorkspaceParams {
+	o.SetWithSdx(withSdx)
+	return o
+}
+
+// SetWithSdx adds the withSdx to the list blueprints by workspace params
+func (o *ListBlueprintsByWorkspaceParams) SetWithSdx(withSdx *bool) {
+	o.WithSdx = withSdx
+}
+
 // WithWorkspaceID adds the workspaceID to the list blueprints by workspace params
 func (o *ListBlueprintsByWorkspaceParams) WithWorkspaceID(workspaceID int64) *ListBlueprintsByWorkspaceParams {
 	o.SetWorkspaceID(workspaceID)
@@ -122,6 +147,22 @@ func (o *ListBlueprintsByWorkspaceParams) WriteToRequest(r runtime.ClientRequest
 		return err
 	}
 	var res []error
+
+	if o.WithSdx != nil {
+
+		// query param withSdx
+		var qrWithSdx bool
+		if o.WithSdx != nil {
+			qrWithSdx = *o.WithSdx
+		}
+		qWithSdx := swag.FormatBool(qrWithSdx)
+		if qWithSdx != "" {
+			if err := r.SetQueryParam("withSdx", qWithSdx); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	// path param workspaceId
 	if err := r.SetPathParam("workspaceId", swag.FormatInt64(o.WorkspaceID)); err != nil {

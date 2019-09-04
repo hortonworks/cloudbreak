@@ -149,7 +149,8 @@ func ListBlueprints(c *cli.Context) {
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	workspace := fl.FlWorkspaceOptional.Name
-	listBlueprintsImpl(c.Int64(workspace), cbClient.Cloudbreak.V4WorkspaceIDBlueprints, output.WriteList)
+	withSdx := fl.FlWithSdxOptional.Name
+	listBlueprintsImpl(c.Int64(workspace), c.Bool(withSdx), cbClient.Cloudbreak.V4WorkspaceIDBlueprints, output.WriteList)
 }
 
 type blueprintClient interface {
@@ -158,9 +159,9 @@ type blueprintClient interface {
 	DeleteBlueprintsInWorkspace(params *v4bp.DeleteBlueprintsInWorkspaceParams) (*v4bp.DeleteBlueprintsInWorkspaceOK, error)
 }
 
-func listBlueprintsImpl(workspace int64, client blueprintClient, writer func([]string, []utils.Row)) {
+func listBlueprintsImpl(workspace int64, withSdx bool, client blueprintClient, writer func([]string, []utils.Row)) {
 	log.Infof("[listBlueprintsImpl] sending blueprint list request")
-	resp, err := client.ListBlueprintsByWorkspace(v4bp.NewListBlueprintsByWorkspaceParams().WithWorkspaceID(workspace))
+	resp, err := client.ListBlueprintsByWorkspace(v4bp.NewListBlueprintsByWorkspaceParams().WithWithSdx(&withSdx).WithWorkspaceID(workspace))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

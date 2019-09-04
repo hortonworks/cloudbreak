@@ -45,7 +45,7 @@ func TestListBlueprintsImpl(t *testing.T) {
 	var rows []utils.Row
 
 	workspaceID := int64(2)
-	listBlueprintsImpl(workspaceID, new(mockBlueprintsClient), func(h []string, r []utils.Row) { rows = r })
+	listBlueprintsImpl(workspaceID, true, new(mockBlueprintsClient), func(h []string, r []utils.Row) { rows = r })
 
 	if len(rows) != 2 {
 		t.Fatalf("row number doesn't match 2 == %d", len(rows))

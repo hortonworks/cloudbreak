@@ -69,11 +69,11 @@ func init() {
 			{
 				Name:   "list",
 				Usage:  "lists the available blueprints",
-				Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlWithSdxOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: bp.ListBlueprints,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlWithSdxOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
