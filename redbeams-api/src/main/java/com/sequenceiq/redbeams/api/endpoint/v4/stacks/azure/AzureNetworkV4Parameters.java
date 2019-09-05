@@ -18,23 +18,23 @@ import java.util.Map;
 @JsonInclude(Include.NON_NULL)
 public class AzureNetworkV4Parameters extends MappableBase {
 
-    private static final String VIRTUAL_NETWORK = "virtualNetwork";
+    private static final String SUBNETS = "subnets";
 
-    @ApiModelProperty(AzureNetworkModelDescription.VIRTUAL_NETWORK)
-    private String virtualNetwork;
+    @ApiModelProperty(AzureNetworkModelDescription.SUBNETS)
+    private String subnets;
 
-    public String getVirtualNetwork() {
-        return virtualNetwork;
+    public String getSubnets() {
+        return subnets;
     }
 
-    public void setVirtualNetwork(String virtualNetwork) {
-        this.virtualNetwork = virtualNetwork;
+    public void setSubnets(String subnets) {
+        this.subnets = subnets;
     }
 
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map, VIRTUAL_NETWORK, virtualNetwork);
+        putIfValueNotNull(map, SUBNETS, subnets);
         return map;
     }
 
@@ -47,6 +47,6 @@ public class AzureNetworkV4Parameters extends MappableBase {
 
     @Override
     public void parse(Map<String, Object> parameters) {
-        virtualNetwork = getParameterOrNull(parameters, VIRTUAL_NETWORK);
+        subnets = getParameterOrNull(parameters, SUBNETS);
     }
 }

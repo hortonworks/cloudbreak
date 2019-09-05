@@ -102,7 +102,7 @@ public final class ModelDescriptions {
     }
 
     public static class AzureNetworkModelDescription {
-        public static final String VIRTUAL_NETWORK = "Fully qualified IDs for an Azure network and subnet";
+        public static final String SUBNETS = "Comma-separated list of fully-qualified subnets with connectivity to the database server";
     }
 
     public static class AwsDatabaseServerModelDescriptions {

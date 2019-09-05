@@ -33,6 +33,8 @@ public class NetworkParameterAdder {
         switch (cloudPlatform) {
             case AWS:
                 return environmentResponse.getNetwork().getAws().getVpcId();
+            case AZURE:
+                return environmentResponse.getNetwork().getAzure().getNetworkId();
             default:
                 throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
         }
