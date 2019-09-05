@@ -23,7 +23,6 @@ public class StackScalingV2Test extends AbstractCloudbreakIntegrationTest {
     public void setContextParameters() {
         IntegrationTestContext itContext = getItContext();
         Assert.assertNotNull(itContext.getContextParam(CloudbreakV2Constants.STACK_NAME), "Stack name is mandatory.");
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.STACK_ID), "Stack id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID), "Ambari user id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), "Ambari password id is mandatory.");
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID), "Ambari port id is mandatory.");
@@ -35,25 +34,26 @@ public class StackScalingV2Test extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackName = itContext.getContextParam(CloudbreakV2Constants.STACK_NAME);
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         StackScaleRequestV2 stackScaleRequestV2 = new StackScaleRequestV2();
         stackScaleRequestV2.setGroup(hostGroup);
         stackScaleRequestV2.setDesiredCount(desiredCount);
         // WHEN
-        Response response = getCloudbreakClient().stackV2Endpoint().putScaling(stackName, stackScaleRequestV2);
+        Response response = getCloudbreakClient().stackV3Endpoint().putScalingInWorkspace(workspaceId, stackName, stackScaleRequestV2);
         // THEN
         CloudbreakUtil.checkResponse("ScalingStackV2", response);
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
-        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId, desiredStatuses);
-        ScalingUtil.checkStackScaled(getCloudbreakClient().stackV2Endpoint(), stackId, hostGroup, desiredCount);
+        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), workspaceId, stackName, desiredStatuses);
+        ScalingUtil.checkStackScaled(getCloudbreakClient().stackV3Endpoint(), workspaceId, stackName, hostGroup, desiredCount);
         if (checkAmbari) {
-            int nodeCount = ScalingUtil.getNodeCountStack(getCloudbreakClient().stackV2Endpoint(), stackId);
-            ScalingUtil.checkClusterScaled(getCloudbreakClient().stackV2Endpoint(), ambariPort, stackId, ambariUser, ambariPassword, nodeCount, itContext);
+            int nodeCount = ScalingUtil.getNodeCountStack(getCloudbreakClient().stackV3Endpoint(), workspaceId, stackName);
+            ScalingUtil.checkClusterScaled(getCloudbreakClient().stackV3Endpoint(), ambariPort, workspaceId, stackName,
+                    ambariUser, ambariPassword, nodeCount, itContext);
         }
     }
 }

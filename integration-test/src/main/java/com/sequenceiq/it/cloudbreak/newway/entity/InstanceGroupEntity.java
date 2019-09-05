@@ -19,7 +19,7 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV2Request, InstanceGroupResponse, InstanceGroupEntity> {
+public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV2Request, InstanceGroupResponse, InstanceGroupEntity, InstanceGroupResponse> {
 
     private static final String AUTO = "auto";
 

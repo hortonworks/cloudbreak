@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.CredentialV3Action;
 
-public class CredentialEntity extends AbstractCloudbreakEntity<CredentialRequest, CredentialResponse, CredentialEntity> {
+public class CredentialEntity extends AbstractCloudbreakEntity<CredentialRequest, CredentialResponse, CredentialEntity, CredentialResponse> {
 
     public static final String CREDENTIAL = "CREDENTIAL";
 

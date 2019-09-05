@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class NetworkV2Entity extends AbstractCloudbreakEntity<NetworkV2Request, NetworkResponse, NetworkV2Entity> {
+public class NetworkV2Entity extends AbstractCloudbreakEntity<NetworkV2Request, NetworkResponse, NetworkV2Entity, NetworkResponse> {
     public static final String NETWORK = "NETWORK";
 
     public NetworkV2Entity(NetworkV2Request request, TestContext testContext) {

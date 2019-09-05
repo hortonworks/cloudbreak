@@ -12,20 +12,22 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterRepairRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.WaitResult;
 import com.sequenceiq.it.cloudbreak.scaling.ScalingUtil;
+import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
 
 public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
     @BeforeMethod
     public void setContextParameters() {
-        Assert.assertNotNull(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID), "Stack id is mandatory.");
+        Assert.assertNotNull(getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class), "Workspace id is mandatory.");
+        Assert.assertNotNull(getItContext().getContextParam(CloudbreakV2Constants.STACK_NAME), "Stack name is mandatory.");
         Assert.assertNotNull(getItContext().getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID), "Ambari user id is mandatory.");
         Assert.assertNotNull(getItContext().getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), "Ambari password id is mandatory.");
         Assert.assertNotNull(getItContext().getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID), "Ambari port id is mandatory.");
@@ -41,22 +43,23 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
             Assert.assertNotEquals(removedInstanceCount, 0);
         }
         IntegrationTestContext itContext = getItContext();
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        String stackName = getItContext().getContextParam(CloudbreakV2Constants.STACK_NAME);
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
-        StackV1Endpoint stackV1Endpoint = getCloudbreakClient().stackV1Endpoint();
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        StackV3Endpoint stackV3Endpoint = getCloudbreakClient().stackV3Endpoint();
+        StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
 
         String instanceToDelete = RecoveryUtil.getInstanceId(stackResponse, hostGroup);
         Assert.assertNotNull(instanceToDelete);
         RecoveryUtil.deleteInstance(cloudProviderParams, instanceToDelete);
 
-        Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
-                - removedInstanceCount;
+        Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV3Endpoint, ambariPort, workspaceId, stackName,
+                ambariUser, ambariPassword, itContext) - removedInstanceCount;
 
-        WaitResult waitResult = CloudbreakUtil.waitForHostStatusStack(stackV1Endpoint, stackId, hostGroup, "UNHEALTHY");
+        WaitResult waitResult = CloudbreakUtil.waitForHostStatusStack(stackV3Endpoint, workspaceId, stackName, hostGroup, "UNHEALTHY");
 
         if (waitResult == WaitResult.TIMEOUT) {
             Assert.fail("Timeout happened when waiting for the desired host state");
@@ -66,13 +69,14 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         ClusterRepairRequest clusterRepairRequest = new ClusterRepairRequest();
         clusterRepairRequest.setHostGroups(hostgroupList);
         clusterRepairRequest.setRemoveOnly(removeOnly);
-        getCloudbreakClient().clusterEndpoint().repairCluster(Long.valueOf(stackId), clusterRepairRequest);
+        stackV3Endpoint.repairClusterInWorkspace(workspaceId, stackName, clusterRepairRequest);
         //THEN
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
-        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId, desiredStatuses);
-        Integer actualNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext);
+        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), workspaceId, stackName, desiredStatuses);
+        Integer actualNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV3Endpoint, ambariPort, workspaceId, stackName,
+                ambariUser, ambariPassword, itContext);
         Assert.assertEquals(expectedNodeCountAmbari, actualNodeCountAmbari);
     }
 }

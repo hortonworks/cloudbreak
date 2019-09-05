@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class StackImageChangeEntity extends AbstractCloudbreakEntity<StackImageChangeRequest, Response, StackImageChangeEntity> {
+public class StackImageChangeEntity extends AbstractCloudbreakEntity<StackImageChangeRequest, Response, StackImageChangeEntity, Response> {
     public static final String IMAGE_CHANGE = "IMAGE_CHANGE";
 
     protected StackImageChangeEntity(String newId) {
@@ -37,8 +37,8 @@ public class StackImageChangeEntity extends AbstractCloudbreakEntity<StackImageC
         StackEntity stack;
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" changeImage " + stack.getRequest().getGeneral().getName());
-        stackImageChange.setResponse(client.getCloudbreakClient().stackV2Endpoint()
-                .changeImage(stack.getRequest().getGeneral().getName(), stackImageChange.getRequest()));
+        stackImageChange.setResponse(client.getCloudbreakClient().stackV3Endpoint()
+                .changeImage(client.getWorkspaceId(), stack.getRequest().getGeneral().getName(), stackImageChange.getRequest()));
     }
 
     public static StackImageChangeEntity request() {

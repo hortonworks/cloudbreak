@@ -46,30 +46,31 @@ public class MockInstanceTerminationTest extends AbstractCloudbreakIntegrationTe
     public void testInstanceTermination() {
         // GIVEN
         // WHEN
-        Long stackId = Long.parseLong(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID));
-        StackResponse stackResponse = getStackResponse(stackId);
+        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        String stackName = getItContext().getContextParam(CloudbreakV2Constants.STACK_NAME);
+        StackResponse stackResponse = getStackResponse(workspaceId, stackName);
         // THEN
         String hostGroupName = "compute";
 
         int before = getInstanceMetaData(stackResponse, hostGroupName).size();
         String instanceId = getInstanceId(stackResponse, hostGroupName);
 
-        getCloudbreakClient().stackV2Endpoint().deleteInstance(stackResponse.getId(), instanceId, false);
+        getCloudbreakClient().stackV3Endpoint().deleteInstance(workspaceId, stackResponse.getName(), instanceId, false);
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
-        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId.toString(), desiredStatuses);
-        int after = getInstanceMetaData(getStackResponse(stackId), hostGroupName).size();
+        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), workspaceId, stackName, desiredStatuses);
+        int after = getInstanceMetaData(getStackResponse(workspaceId, stackName), hostGroupName).size();
 
         Assert.assertEquals(after, before - 1);
 
-        stackResponse = getStackResponse(stackId);
+        stackResponse = getStackResponse(workspaceId, stackName);
 
         Assert.assertTrue(getInstanceMetaData(stackResponse, hostGroupName).stream().noneMatch(a -> a.getDiscoveryFQDN().equals(instanceId)));
     }
 
-    protected StackResponse getStackResponse(Long stackId) {
-        return getCloudbreakClient().stackV2Endpoint().get(stackId, Collections.emptySet());
+    protected StackResponse getStackResponse(Long workspaceId, String stackName) {
+        return getCloudbreakClient().stackV3Endpoint().getByNameInWorkspace(workspaceId, stackName, Collections.emptySet());
     }
 
     protected String getInstanceId(StackResponse stackResponse, String hostGroupName) {

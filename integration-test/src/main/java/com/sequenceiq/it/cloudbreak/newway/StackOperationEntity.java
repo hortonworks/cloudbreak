@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
-public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleRequestV2, Response, StackOperationEntity> {
+public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleRequestV2, Response, StackOperationEntity, Response> {
     public static final String SCALE = "SCALE";
 
     protected StackOperationEntity(String newId) {
@@ -52,8 +52,8 @@ public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleReq
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" scale " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
-                client.getCloudbreakClient().stackV2Endpoint()
-                        .putScaling(stack.getRequest().getGeneral().getName(), stackOperation.getRequest()));
+                client.getCloudbreakClient().stackV3Endpoint()
+                        .putScalingInWorkspace(client.getWorkspaceId(), stack.getRequest().getGeneral().getName(), stackOperation.getRequest()));
     }
 
     public static void start(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -64,8 +64,8 @@ public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleReq
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" start " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
-                client.getCloudbreakClient().stackV2Endpoint()
-                        .putStart(stack.getRequest().getGeneral().getName()));
+                client.getCloudbreakClient().stackV3Endpoint()
+                        .putStartInWorkspace(client.getWorkspaceId(), stack.getRequest().getGeneral().getName()));
     }
 
     public static void stop(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -76,8 +76,8 @@ public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleReq
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" stop " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
-                client.getCloudbreakClient().stackV2Endpoint()
-                        .putStop(stack.getRequest().getGeneral().getName()));
+                client.getCloudbreakClient().stackV3Endpoint()
+                        .putStopInWorkspace(client.getWorkspaceId(), stack.getRequest().getGeneral().getName()));
     }
 
     public static void sync(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -88,8 +88,8 @@ public class StackOperationEntity extends AbstractCloudbreakEntity<StackScaleReq
         stack = Stack.getTestContextStack().apply(integrationTestContext);
         Log.log(" sync " + stack.getRequest().getGeneral().getName());
         stackOperation.setResponse(
-                client.getCloudbreakClient().stackV2Endpoint()
-                        .putSync(stack.getRequest().getGeneral().getName()));
+                client.getCloudbreakClient().stackV3Endpoint()
+                        .putSyncInWorkspace(client.getWorkspaceId(), stack.getRequest().getGeneral().getName()));
     }
 
     public static StackOperationEntity request() {

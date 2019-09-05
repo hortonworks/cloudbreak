@@ -3,9 +3,6 @@ package com.sequenceiq.it;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +23,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.InputStreamSource;
-import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 import org.testng.TestNG;
 import org.testng.internal.YamlParser;
@@ -112,16 +108,6 @@ public class IntegrationTestApp implements CommandLineRunner {
 
     private void setupSuites(TestNG testng) throws Exception {
         switch (itCommand) {
-            case "smoketest":
-                setupSmokeTest(testng, itProps.getTestTypes());
-                break;
-            case "fulltest":
-                if (fullTestRegionIndex > -1 && fullTestRegionNumber > 0) {
-                    setupFullTest(testng, fullTestRegionIndex, fullTestRegionNumber);
-                } else {
-                    LOG.info("fulltest command require integrationtest.fulltest.regindex and integrationtest.fulltest.regnum parameters!");
-                }
-                break;
             case "suites":
                 List<String> suiteFiles = itProps.getSuiteFiles();
                 if (!CollectionUtils.isEmpty(suiteFiles)) {
@@ -136,47 +122,6 @@ public class IntegrationTestApp implements CommandLineRunner {
                 LOG.info("Unknown command: {}", itCommand);
                 break;
         }
-    }
-
-    private void setupSmokeTest(TestNG testng, Collection<String> testTypes) throws IOException {
-        if (!CollectionUtils.isEmpty(testTypes)) {
-            Collection<String> suitePathes = new LinkedHashSet<>();
-            for (String testType : testTypes) {
-                List<String> suites = itProps.getTestSuites(testType);
-                if (suites != null) {
-                    suitePathes.addAll(suites);
-                }
-            }
-            testng.setXmlSuites(loadSuites(suitePathes));
-        }
-    }
-
-    private void setupFullTest(TestNG testng, int salt, int regionNum) throws IOException {
-        Collection<Resource> suites = new ArrayList<>();
-        suites.addAll(getProviderSuites("classpath:/testsuites/aws/full/*.yaml", salt, regionNum));
-        suites.addAll(getProviderSuites("classpath:/testsuites/azure/full/*.yaml", salt, regionNum));
-        suites.addAll(getProviderSuites("classpath:/testsuites/gcp/full/*.yaml", salt, regionNum));
-        LOG.info("The following suites will be executed: {}", suites);
-        testng.setXmlSuites(loadSuiteResources(suites));
-    }
-
-    private Collection<Resource> getProviderSuites(String providerDirPattern, int salt, int regionNum) throws IOException {
-        Resource[] suites = applicationContext.getResources(providerDirPattern);
-        Collection<Resource> providerTests = new HashSet<>();
-        regionNum = Math.min(regionNum, suites.length);
-        int regionIndex = salt * regionNum % suites.length;
-        for (int i = regionIndex; i < regionIndex + regionNum; i++) {
-            providerTests.add(suites[i % suites.length]);
-        }
-        return providerTests;
-    }
-
-    private List<XmlSuite> loadSuiteResources(Iterable<Resource> suitePathes) throws IOException {
-        List<XmlSuite> suites = new ArrayList<>();
-        for (Resource suite : suitePathes) {
-            suites.add(loadSuite(suite.getURL().toString(), suite));
-        }
-        return suites;
     }
 
     private List<XmlSuite> loadSuites(Iterable<String> suitePathes) throws IOException {

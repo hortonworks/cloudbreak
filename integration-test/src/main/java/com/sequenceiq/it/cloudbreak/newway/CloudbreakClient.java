@@ -1,12 +1,13 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
-import com.sequenceiq.cloudbreak.client.ConfigKey;
-import com.sequenceiq.it.IntegrationTestContext;
+import java.util.function.Function;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.Function;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
+import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.actor.CloudbreakUser;
 
 public class CloudbreakClient extends Entity {
@@ -78,6 +79,10 @@ public class CloudbreakClient extends Entity {
                     new ConfigKey(false, true, true));
         }
         clientEntity.cloudbreakClient = singletonCloudbreakClient;
+        String defaultWorkspace = integrationTestContext.getContextParam(CloudbreakTest.USER);
+        clientEntity.workspaceId = singletonCloudbreakClient
+                .workspaceV3Endpoint()
+                .getByName(defaultWorkspace).getId();
     }
 
     public static synchronized CloudbreakClient createProxyCloudbreakClient(TestParameter testParameter) {

@@ -22,7 +22,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.newway.finder.Finder;
 
-public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity> extends Entity implements CloudbreakEntity, Purgable<S> {
+public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity, L> extends Entity implements CloudbreakEntity, Purgable<S> {
 
     @Inject
     private TestParameter testParameter;
@@ -39,7 +39,7 @@ public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity>
 
     private S response;
 
-    private Set<S> responses;
+    private Set<L> responses;
 
     private TestContext testContext;
 
@@ -52,11 +52,11 @@ public abstract class AbstractCloudbreakEntity<R, S, T extends CloudbreakEntity>
         this.testContext = testContext;
     }
 
-    public Set<S> getResponses() {
+    public Set<L> getResponses() {
         return responses;
     }
 
-    public void setResponses(Set<S> responses) {
+    public void setResponses(Set<L> responses) {
         this.responses = responses;
     }
 

@@ -11,12 +11,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
+import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
 
 public class TagsTest extends AbstractCloudbreakIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(TagsTest.class);
@@ -33,10 +34,11 @@ public class TagsTest extends AbstractCloudbreakIntegrationTest {
     public void testTagTest(String tags) throws Exception {
         //GIVEN
         IntegrationTestContext itContext = getItContext();
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        String stackName = getItContext().getContextParam(CloudbreakV2Constants.STACK_NAME);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
-        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint();
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        StackV3Endpoint stackV3Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV3Endpoint();
+        StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
 
         Map<String, String> userDefinedTagsStack = TagsUtil.checkTagsStack(stackResponse);
         Map<String, String> tagsToCheckMap = TagsUtil.getTagsToCheck(tags);

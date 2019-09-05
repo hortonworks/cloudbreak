@@ -8,7 +8,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, KerberosResponse, KerberosEntity>  {
+public class KerberosEntity extends AbstractCloudbreakEntity<KerberosRequest, KerberosResponse, KerberosEntity, KerberosResponse>  {
     public static final String KERBEROS_REQUEST = "KERBEROS_REQUEST";
 
     public static final String DEFAULT_MASTERKEY = "masterkey";

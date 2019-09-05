@@ -141,8 +141,8 @@ public class Mock extends SparkMockEntity {
                 CloudbreakClient.class);
         stackName = mock.getModel().getClusterName();
         Log.log(" delete by mock: " + stackName);
-        client.getCloudbreakClient().stackV2Endpoint()
-                .deletePrivate(stackName, false, false);
+        client.getCloudbreakClient().stackV3Endpoint()
+                .deleteInWorkspace(client.getWorkspaceId(), stackName, false, false);
     }
 
     protected static void deleteCredential(IntegrationTestContext integrationTestContext, Entity entity) {

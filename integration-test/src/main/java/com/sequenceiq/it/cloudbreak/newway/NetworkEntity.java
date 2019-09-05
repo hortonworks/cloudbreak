@@ -5,7 +5,7 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 
-public class NetworkEntity extends AbstractCloudbreakEntity<NetworkRequest, NetworkResponse, NetworkEntity> {
+public class NetworkEntity extends AbstractCloudbreakEntity<NetworkRequest, NetworkResponse, NetworkEntity, NetworkResponse> {
     public static final String NETWORK = "NETWORK";
 
     NetworkEntity(String newId) {

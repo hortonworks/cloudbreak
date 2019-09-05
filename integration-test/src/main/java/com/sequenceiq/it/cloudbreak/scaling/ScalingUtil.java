@@ -15,11 +15,10 @@ import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.services.ServiceAndHostService;
-import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
-import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -55,13 +54,13 @@ public class ScalingUtil {
         return nodeCount;
     }
 
-    public static void checkStackScaled(StackEndpoint stackV1Endpoint, String stackId, int expectedNodeCount) {
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+    public static void checkStackScaled(StackV3Endpoint stackV3Endpoint, Long workspaceId, String stackName, int expectedNodeCount) {
+        StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
         checkStackScaled(expectedNodeCount, stackResponse);
     }
 
-    public static void checkStackScaled(StackEndpoint stackV2Endpoint, String stackId, String instanceGroup, int expectedNodeCount) {
-        StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+    public static void checkStackScaled(StackV3Endpoint stackV3Endpoint, Long workspaceId, String stackName, String instanceGroup, int expectedNodeCount) {
+        StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
         checkStackScaled(instanceGroup, expectedNodeCount, stackResponse);
     }
 
@@ -77,9 +76,10 @@ public class ScalingUtil {
                 "After scaling, the number of the nodes in stack differs from the expected number!");
     }
 
-    public static void checkClusterScaled(StackEndpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassword,
+    public static void checkClusterScaled(StackV3Endpoint stackV3Endpoint, String port, Long workspaceId, String stackName,
+            String ambariUser, String ambariPassword,
             int expectedNodeCount, IntegrationTestContext itContext) throws IOException, URISyntaxException {
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
         checkClusterScaled(CloudbreakUtil.getAmbariIp(stackResponse, itContext), port, ambariUser, ambariPassword, expectedNodeCount, stackResponse);
     }
 
@@ -95,15 +95,15 @@ public class ScalingUtil {
                 "After scaling, the number of the nodes registered in ambari differs from the expected number!");
     }
 
-    public static int getNodeCountStack(StackEndpoint stackV1Endpoint, String stackId) {
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+    public static int getNodeCountStack(StackV3Endpoint stackV3Endpoint, Long workspaceId, String stackName) {
+        StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
         return getNodeCount(stackResponse);
     }
 
-    public static int getNodeCountAmbari(StackEndpoint stackV1Endpoint, String port, String stackId, String ambariUser, String ambariPassword,
-            IntegrationTestContext itContext) {
+    public static int getNodeCountAmbari(StackV3Endpoint stackV3Endpoint, String port, Long workspaceId, String stackName,
+            String ambariUser, String ambariPassword, IntegrationTestContext itContext) {
 
-        String ambariIp = CloudbreakUtil.getAmbariIp(stackV1Endpoint, stackId, itContext);
+        String ambariIp = CloudbreakUtil.getAmbariIp(stackV3Endpoint, workspaceId, stackName, itContext);
 
         ServiceAndHostService ambariClient = new AmbariClient(ambariIp, port, ambariUser, ambariPassword);
         return ambariClient.getClusterHosts().size();
@@ -122,10 +122,10 @@ public class ScalingUtil {
         return instanceCount;
     }
 
-    public static void putInstanceCountToContext(IntegrationTestContext itContext, String stackId) {
+    public static void putInstanceCountToContext(IntegrationTestContext itContext, Long workspaceId, String stackName) {
         Collection<Map<String, Integer>> tmpInstanceCount = new ArrayList<>();
-        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint();
-        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
+        StackV3Endpoint stackV3Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV3Endpoint();
+        StackResponse stackResponse = stackV3Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>());
 
         if (itContext.getContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, List.class) != null) {
             tmpInstanceCount = itContext.getContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, List.class);

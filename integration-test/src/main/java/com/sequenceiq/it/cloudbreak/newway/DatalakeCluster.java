@@ -8,7 +8,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.DatalakeClusterV3Action;
 
-public class DatalakeCluster extends AbstractCloudbreakEntity<StackV2Request, StackResponse, DatalakeCluster> {
+public class DatalakeCluster extends AbstractCloudbreakEntity<StackV2Request, StackResponse, DatalakeCluster, StackResponse> {
 
     private static final String DATALAKE_CLUSTER_ID = "DATALAKE_CLUSTER";
 

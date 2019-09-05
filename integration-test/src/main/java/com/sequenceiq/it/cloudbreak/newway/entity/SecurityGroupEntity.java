@@ -12,7 +12,7 @@ import com.sequenceiq.it.cloudbreak.newway.SecurityRules;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class SecurityGroupEntity extends AbstractCloudbreakEntity<SecurityGroupV2Request, SecurityGroupResponse, SecurityGroupEntity> {
+public class SecurityGroupEntity extends AbstractCloudbreakEntity<SecurityGroupV2Request, SecurityGroupResponse, SecurityGroupEntity, SecurityGroupResponse> {
 
     protected SecurityGroupEntity(SecurityGroupV2Request request, TestContext testContext) {
         super(request, testContext);

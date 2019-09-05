@@ -49,18 +49,19 @@ public class MockInstanceTerminationReplicationErrorTest extends AbstractCloudbr
     public void testInstanceTermination() {
         // GIVEN
         // WHEN
-        Long stackId = Long.parseLong(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID));
-        StackResponse stackResponse = getStackResponse(stackId);
+        String stackName = getItContext().getContextParam(CloudbreakV2Constants.STACK_NAME);
+        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        StackResponse stackResponse = getStackResponse(workspaceId, stackName);
         // THEN
         String hostGroupName = "worker";
 
         String instanceId = getInstanceId(stackResponse, hostGroupName);
 
-        getCloudbreakClient().stackV2Endpoint().deleteInstance(stackResponse.getId(), instanceId, false);
+        getCloudbreakClient().stackV3Endpoint().deleteInstance(workspaceId, stackResponse.getName(), instanceId, false);
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
-        String reason = CloudbreakUtil.getFailedStatusReason(getCloudbreakClient(), stackId.toString(), desiredStatuses, singleton(WaitResult.SUCCESSFUL));
+        String reason = CloudbreakUtil.getFailedStatusReason(getCloudbreakClient(), workspaceId, stackName, desiredStatuses, singleton(WaitResult.SUCCESSFUL));
         Assert.assertEquals(reason, "Node(s) could not be removed from the cluster: There is not enough node to downscale. "
                 + "Check the replication factor and the ApplicationMaster occupation.");
     }
@@ -69,26 +70,27 @@ public class MockInstanceTerminationReplicationErrorTest extends AbstractCloudbr
     public void testInstanceTerminationForced() {
         // GIVEN
         // WHEN
-        Long stackId = Long.parseLong(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID));
-        StackResponse stackResponse = getStackResponse(stackId);
+        String stackName = getItContext().getContextParam(CloudbreakV2Constants.STACK_NAME);
+        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        StackResponse stackResponse = getStackResponse(workspaceId, stackName);
         // THEN
         String hostGroupName = "worker";
 
         String instanceId = getInstanceId(stackResponse, hostGroupName);
         int before = getInstanceMetaData(stackResponse, hostGroupName).size();
 
-        getCloudbreakClient().stackV2Endpoint().deleteInstance(stackResponse.getId(), instanceId, true);
+        getCloudbreakClient().stackV3Endpoint().deleteInstance(workspaceId, stackName, instanceId, true);
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
-        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId.toString(), desiredStatuses);
-        int after = getInstanceMetaData(getStackResponse(stackId), hostGroupName).size();
+        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), workspaceId, stackName, desiredStatuses);
+        int after = getInstanceMetaData(getStackResponse(workspaceId, stackName), hostGroupName).size();
 
         Assert.assertEquals(after, before - 1);
     }
 
-    protected StackResponse getStackResponse(Long stackId) {
-        return getCloudbreakClient().stackV2Endpoint().get(stackId, Collections.emptySet());
+    protected StackResponse getStackResponse(Long workspaceId, String stackName) {
+        return getCloudbreakClient().stackV3Endpoint().getByNameInWorkspace(workspaceId, stackName, Collections.emptySet());
     }
 
     protected String getInstanceId(StackResponse stackResponse, String hostGroupName) {

@@ -34,7 +34,8 @@ public class MockScalingTest extends StackScalingV2Test {
     public void configMockServer(@Optional("9443") int mockPort, @Optional("2020") int sshPort, int desiredCount, String hostGroup) {
         IntegrationTestContext itContext = getItContext();
         String clusterName = itContext.getContextParam(CloudbreakV2Constants.STACK_NAME);
-        StackResponse response = getCloudbreakClient().stackV2Endpoint().getStackFromDefaultWorkspace(clusterName, null);
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        StackResponse response = getCloudbreakClient().stackV3Endpoint().getByNameInWorkspace(workspaceId, clusterName, null);
         java.util.Optional<InstanceGroupResponse> igg = response.getInstanceGroups().stream().filter(ig -> ig.getGroup().equals(hostGroup)).findFirst();
         Map<String, CloudVmInstanceStatus> instanceMap = itContext.getContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, Map.class);
         ScalingMock scalingMock = (ScalingMock) applicationContext.getBean(ScalingMock.NAME, mockPort, sshPort, instanceMap);
@@ -58,9 +59,10 @@ public class MockScalingTest extends StackScalingV2Test {
         super.testStackScaling(hostGroup, desiredCount, checkAmbari);
         // THEN
         ScalingMock scalingMock = getItContext().getContextParam(CloudbreakV2Constants.MOCK_SERVER, ScalingMock.class);
-        String stackId = getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID);
+        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        String stackName = getItContext().getContextParam(CloudbreakV2Constants.STACK_NAME);
         StackV2Request stackV2Request = getItContext().getContextParam(CloudbreakV2Constants.STACK_CREATION_REQUEST, StackV2Request.class);
-        scalingMock.verifyV2Calls(stackV2Request.getCluster(), ScalingUtil.getNodeCountStack(getCloudbreakClient().stackV2Endpoint(), stackId));
+        scalingMock.verifyV2Calls(stackV2Request.getCluster(), ScalingUtil.getNodeCountStack(getCloudbreakClient().stackV3Endpoint(), workspaceId, stackName));
     }
 
     @AfterClass

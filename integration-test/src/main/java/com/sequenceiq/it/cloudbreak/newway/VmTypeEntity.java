@@ -5,7 +5,7 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVmtypesResponse;
 
-public class VmTypeEntity extends AbstractCloudbreakEntity<PlatformResourceRequestJson, PlatformVmtypesResponse, VmTypeEntity> {
+public class VmTypeEntity extends AbstractCloudbreakEntity<PlatformResourceRequestJson, PlatformVmtypesResponse, VmTypeEntity, PlatformVmtypesResponse> {
     public static final String VMTYPE = "VMTYPE";
 
     VmTypeEntity(String newId) {
