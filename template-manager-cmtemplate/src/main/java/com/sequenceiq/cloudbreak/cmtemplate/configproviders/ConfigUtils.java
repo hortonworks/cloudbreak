@@ -5,10 +5,13 @@ import java.util.regex.Pattern;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
+import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 public class ConfigUtils {
 
@@ -73,5 +76,13 @@ public class ConfigUtils {
 
     public static String getBasePathFromStorageLocation(String path) {
         return STORAGE_LOCATION_PATH_PATTERN.matcher(path).replaceAll("$1$2");
+    }
+
+    public static String getDbTypePostgres(RdsView rdsView, String serviceType) {
+        if (!(rdsView != null && rdsView.getDatabaseVendor() == DatabaseVendor.POSTGRES)) {
+            DatabaseVendor dbVendor = rdsView != null ? rdsView.getDatabaseVendor() : null;
+            throw new CloudbreakServiceException(String.format("Unsupported database type: %s for service %s", dbVendor, serviceType));
+        }
+        return DatabaseVendor.POSTGRES.name();
     }
 }

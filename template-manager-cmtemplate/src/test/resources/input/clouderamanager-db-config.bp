@@ -193,6 +193,28 @@
           "base": true
         }
       ]
+    },
+    {
+      "refName": "profiler_admin",
+      "serviceType": "PROFILER_ADMIN",
+      "roleConfigGroups": [
+        {
+          "refName": "profiler_admin-PROFILER_ADMIN_AGENT-BASE",
+          "roleType": "PROFILER_ADMIN_AGENT",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "profiler_metrics",
+      "serviceType": "PROFILER_METRICS",
+      "roleConfigGroups": [
+        {
+          "refName": "profiler_metrics-PROFILER_METRICS_AGENT-BASE",
+          "roleType": "PROFILER_METRICS_AGENT",
+          "base": true
+        }
+      ]
     }
   ],
   "hostTemplates": [
