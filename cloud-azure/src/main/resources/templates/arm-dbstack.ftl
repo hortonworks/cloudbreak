@@ -122,11 +122,11 @@
                 "description": "The location in which the database should be deployed."
             }
         },
-        "vnets": {
+        "subnets": {
             "type": "string",
-            "defaultValue": "${vnets}",
+            "defaultValue": "${subnets}",
             "metadata": {
-                "description": "The virtual networks to connect through service endpoints."
+                "description": "The subnets to connect through virtual network rules. It is expected that each subnet has a service endpoint defined."
             }
         },
         "serverTags": {
@@ -145,7 +145,7 @@
         }
     },
     "variables": {
-        "subnets": "[split(parameters('vnets'),',')]",
+        "subnetList": "[split(parameters('subnets'),',')]",
         "apiVersionMSSql":"2015-05-01-preview",
         "apiVersion":"2017-12-01",
         "sslEnforcementString":"[if(parameters('sslEnforcement'), 'Enabled', 'Disabled')]",
@@ -190,12 +190,12 @@
                 "[concat('Microsoft.DBforPostgreSQL/servers/',parameters('dbServerName'))]"
             ],
             "properties": {
-                "virtualNetworkSubnetId": "[variables('subnets')[copyIndex()]]",
+                "virtualNetworkSubnetId": "[variables('subnetList')[copyIndex()]]",
                 "ignoreMissingVnetServiceEndpoint": false
             },
             "copy": {
                 "name": "vnetcopy",
-                "count": "[length(variables('subnets'))]"
+                "count": "[length(variables('subnetList'))]"
             }
         }
     ],

@@ -20,15 +20,15 @@ public class AzureNetworkV4ParametersTest {
 
     @Test
     public void testGettersAndSetters() {
-        underTest.setVirtualNetwork("someVirtualNetwork");
-        assertThat(underTest.getVirtualNetwork()).isEqualTo("someVirtualNetwork");
+        underTest.setSubnets("someSubnets");
+        assertThat(underTest.getSubnets()).isEqualTo("someSubnets");
     }
 
     @Test
     public void testAsMap() {
-        underTest.setVirtualNetwork("someVirtualNetwork");
+        underTest.setSubnets("someSubnets");
 
-        assertThat(underTest.asMap()).containsOnly(Map.entry("virtualNetwork", "someVirtualNetwork"),
+        assertThat(underTest.asMap()).containsOnly(Map.entry("subnets", "someSubnets"),
                 Map.entry("cloudPlatform", "AZURE"));
     }
 
@@ -39,11 +39,11 @@ public class AzureNetworkV4ParametersTest {
 
     @Test
     public void testParse() {
-        Map<String, Object> parameters = Map.of("virtualNetwork", "someVirtualNetwork");
+        Map<String, Object> parameters = Map.of("subnets", "someSubnets");
 
         underTest.parse(parameters);
 
-        assertThat(underTest.getVirtualNetwork()).isEqualTo("someVirtualNetwork");
+        assertThat(underTest.getSubnets()).isEqualTo("someSubnets");
     }
 
 }

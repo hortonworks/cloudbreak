@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
 import com.google.common.collect.Lists;
+import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureContextService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
@@ -23,10 +24,14 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AzureDatabaseResourceService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureDatabaseResourceService.class);
 
     // PostgreSQL server port is fixed for now
     private static final int POSTGRESQL_SERVER_PORT = 5432;
@@ -96,7 +101,16 @@ public class AzureDatabaseResourceService {
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, stack);
 
-        client.deleteResourceGroup(resourceGroupName);
+        try {
+            client.deleteResourceGroup(resourceGroupName);
+        } catch (CloudException e) {
+            String errorCode = e.body().code();
+            if ("ResourceGroupNotFound".equals(errorCode)) {
+                LOGGER.warn("Resource group {} does not exist, assuming that it has already been deleted");
+            } else {
+                throw e;
+            }
+        }
 
         return Lists.newArrayList(new CloudResourceStatus(CloudResource.builder()
                 .type(ResourceType.AZURE_RESOURCE_GROUP)
