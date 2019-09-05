@@ -71,8 +71,18 @@ PATH_PREFIX="/user"
 
 export KRB5CCNAME=/tmp/krb5cc_cloudbreak_$EUID
 
-NAMENODE_HTTP_ADDRESS=$(hdfs getconf -confkey dfs.namenode.http-address)
-WEBHDFS_URL=http://$NAMENODE_HTTP_ADDRESS/webhdfs/v1
+WEBHDFS_HTTP_POLICY=$(hdfs getconf -confkey dfs.http.policy)
+
+if [ "$WEBHDFS_HTTP_POLICY" == "HTTP_ONLY" ]; then
+  NAMENODE_HTTP_ADDRESS=$(hdfs getconf -confkey dfs.namenode.http-address)
+  WEBHDFS_URL=http://$NAMENODE_HTTP_ADDRESS/webhdfs/v1
+else
+  NAMENODE_HTTP_ADDRESS=$(hdfs getconf -confkey dfs.namenode.https-address)
+  WEBHDFS_URL=https://$NAMENODE_HTTP_ADDRESS/webhdfs/v1
+fi
+
+echo "Webhdfs url: $WEBHDFS_URL"
+
 WEBHDFS_COOKIE_JAR=/tmp/cloudbreak-webhdfs.cookies
 
 klist -s
