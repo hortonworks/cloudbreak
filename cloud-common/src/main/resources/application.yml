@@ -251,6 +251,16 @@ cb:
     db: ranger
     port: 5432
 
+  profiler.admin.database:
+    user: profiler_agent
+    db: profiler_agent
+    port: 5432
+
+  profiler.metrics.database:
+    user: profiler_metric
+    db: profiler_metric
+    port: 5432
+
   cm:
     admin.role: "ROLE_CONFIGURATOR"
     user.role: "ROLE_USER"
