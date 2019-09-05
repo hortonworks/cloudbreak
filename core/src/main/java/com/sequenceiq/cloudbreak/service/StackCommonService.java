@@ -218,6 +218,7 @@ public class StackCommonService {
         if (scalingAdjustment < 0 && !cloudParameterCache.isDownScalingSupported(stack.cloudPlatform())) {
             throw new BadRequestException(String.format("Downscaling is not supported on %s cloudplatform", stack.cloudPlatform()));
         }
+
         if (scalingAdjustment > 0) {
             put(stack, updateStackJson);
         } else {

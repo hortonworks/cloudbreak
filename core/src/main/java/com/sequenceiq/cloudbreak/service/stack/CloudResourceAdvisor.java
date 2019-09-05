@@ -106,11 +106,23 @@ public class CloudResourceAdvisor {
             availableVmTypes = Collections.emptySet();
         }
         if (recommendations != null) {
-            Map<String, VmType> masterVmTypes = getVmTypesForComponentType(true, recommendations.getMaster(),
-                    hostGroupContainsMasterComp, availableVmTypes, cloudPlatform, diskTypes);
+            Map<String, VmType> masterVmTypes = getVmTypesForComponentType(
+                    true,
+                    recommendations.getMaster(),
+                    hostGroupContainsMasterComp,
+                    availableVmTypes,
+                    cloudPlatform,
+                    diskTypes,
+                    recommendations.getMaster());
             vmTypesByHostGroup.putAll(masterVmTypes);
-            Map<String, VmType> workerVmTypes = getVmTypesForComponentType(false, recommendations.getWorker(),
-                    hostGroupContainsMasterComp, availableVmTypes, cloudPlatform, diskTypes);
+            Map<String, VmType> workerVmTypes = getVmTypesForComponentType(
+                    false,
+                    recommendations.getWorker(),
+                    hostGroupContainsMasterComp,
+                    availableVmTypes,
+                    cloudPlatform,
+                    diskTypes,
+                    recommendations.getWorker(), recommendations.getBroker(), recommendations.getQuorum());
             vmTypesByHostGroup.putAll(workerVmTypes);
         } else {
             componentsByHostGroup.keySet().forEach(hg -> vmTypesByHostGroup.put(hg, null));
@@ -179,21 +191,38 @@ public class CloudResourceAdvisor {
         return vmType;
     }
 
-    private Map<String, VmType> getVmTypesForComponentType(boolean containsMasterComponent, VmRecommendation recommendation,
-            Map<String, Boolean> hostGroupContainsMasterComp, Collection<VmType> availableVmTypes, String cloudPlatform, DiskTypes diskTypes) {
+    private Map<String, VmType> getVmTypesForComponentType(
+            boolean containsMasterComponent,
+            VmRecommendation defaultRecommendation,
+            Map<String, Boolean> hostGroupContainsMasterComp,
+            Collection<VmType> availableVmTypes,
+            String cloudPlatform,
+            DiskTypes diskTypes,
+            VmRecommendation... recommendations) {
         Map<String, VmType> result = new HashMap<>();
-        Optional<VmType> masterVmType = getVmTypeByFlavor(recommendation.getFlavor(), availableVmTypes);
-        if (masterVmType.isPresent()) {
+        Optional<VmType> availableVmType = getVmTypeByFlavor(defaultRecommendation.getFlavor(), availableVmTypes);
+        if (availableVmType.isPresent()) {
             for (Entry<String, Boolean> entry : hostGroupContainsMasterComp.entrySet()) {
                 Boolean hasMasterComponentType = entry.getValue();
                 if (hasMasterComponentType == containsMasterComponent) {
-                    VmType vmType = masterVmType.get();
-                    decorateWithRecommendation(vmType, recommendation, cloudPlatform, diskTypes);
+                    defaultRecommendation = getVmRecommendation(defaultRecommendation, entry.getKey(), recommendations);
+                    VmType vmType = availableVmType.get();
+                    decorateWithRecommendation(vmType, defaultRecommendation, cloudPlatform, diskTypes);
                     result.put(entry.getKey(), vmType);
                 }
             }
         }
         return result;
+    }
+
+    private VmRecommendation getVmRecommendation(VmRecommendation defaultRecommendation, String group, VmRecommendation[] recommendations) {
+        for (VmRecommendation recommendation : recommendations) {
+            if (recommendation.getType().equals(group.toLowerCase())) {
+                defaultRecommendation = recommendation;
+                break;
+            }
+        }
+        return defaultRecommendation;
     }
 
     private Optional<VmType> getVmTypeByFlavor(String flavor, Collection<VmType> availableVmTypes) {

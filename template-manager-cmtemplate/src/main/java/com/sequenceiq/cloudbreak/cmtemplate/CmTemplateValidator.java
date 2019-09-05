@@ -6,13 +6,13 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidatorUtil;
 
@@ -37,6 +37,13 @@ public class CmTemplateValidator implements BlueprintValidator {
 
     @Override
     public void validateHostGroupScalingRequest(Blueprint blueprint, HostGroup hostGroup, Integer adjustment) {
-        throw new NotImplementedException("Scale request validation for CM");
+        CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
+        Set<String> services = templateProcessor.getComponentsByHostGroup().get(hostGroup.getName());
+        for (BlackListedDownScalingService blackListedScalingService : BlackListedDownScalingService.values()) {
+            if (services.contains(blackListedScalingService.name()) && adjustment < 0) {
+                throw new BadRequestException(String.format("'%s' service is not enabled to scale",
+                        blackListedScalingService.name()));
+            }
+        }
     }
 }
