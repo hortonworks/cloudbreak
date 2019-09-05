@@ -71,14 +71,56 @@
       "Description" : "User data to be executed",
       "Type" : "String",
       "MinLength": "9",
-      "MaxLength": "50000"
+      "MaxLength": "4096"
+    },
+
+    "CBUserData1" : {
+      "Description" : "User data to be executed (continued)",
+      "Type" : "String",
+      "MinLength": "0",
+      "MaxLength": "4096"
+    },
+
+    "CBUserData2" : {
+      "Description" : "User data to be executed (continued)",
+      "Type" : "String",
+      "MinLength": "0",
+      "MaxLength": "4096"
+    },
+
+    "CBUserData3" : {
+      "Description" : "User data to be executed (continued)",
+      "Type" : "String",
+      "MinLength": "0",
+      "MaxLength": "4096"
     },
 
     "CBGateWayUserData" : {
       "Description" : "Gateway user data to be executed",
       "Type" : "String",
       "MinLength": "9",
-      "MaxLength": "50000"
+      "MaxLength": "4096"
+    },
+
+    "CBGateWayUserData1" : {
+      "Description" : "Gateway user data to be executed (continued)",
+      "Type" : "String",
+      "MinLength": "0",
+      "MaxLength": "4096"
+    },
+
+    "CBGateWayUserData2" : {
+      "Description" : "Gateway user data to be executed (continued)",
+      "Type" : "String",
+      "MinLength": "0",
+      "MaxLength": "4096"
+    },
+
+    "CBGateWayUserData3" : {
+      "Description" : "Gateway user data to be executed (continued)",
+      "Type" : "String",
+      "MinLength": "0",
+      "MaxLength": "4096"
     },
 
     "KeyName": {
@@ -318,10 +360,16 @@
         "SpotPrice"      : "${group.spotPrice}",
         </#if>
         <#if group.type == "CORE">
-        "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}
+        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [ { "Ref" : "CBUserData"},
+                                                                  { "Ref" : "CBUserData1"},
+                                                                  { "Ref" : "CBUserData2"},
+                                                                  { "Ref" : "CBUserData3"}]] }}
         </#if>
         <#if group.type == "GATEWAY">
-        "UserData"       : { "Fn::Base64" : { "Ref" : "CBGateWayUserData"}}
+        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [ { "Ref" : "CBGateWayUserData"},
+                                                                  { "Ref" : "CBGateWayUserData1"},
+                                                                  { "Ref" : "CBGateWayUserData2"},
+                                                                  { "Ref" : "CBGateWayUserData3"}]] }}
         </#if>
       }
     }
