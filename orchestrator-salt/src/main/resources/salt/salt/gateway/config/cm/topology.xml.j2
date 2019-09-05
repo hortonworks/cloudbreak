@@ -173,6 +173,18 @@
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
              </param>
              {%- endif %}
+             {% if 'PROFILER_ADMIN' in exposed and 'PROFILER_ADMIN_AGENT' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>PROFILER_ADMIN</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+             </param>
+             {%- endif %}
+             {% if 'PROFILER_METRICS' in exposed and 'PROFILER_METRICS_AGENT' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>PROFILER_METRICS</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+             </param>
+             {%- endif %}
          </provider>
 
     </gateway>
@@ -415,6 +427,28 @@
         <role>NIFI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NIFI_NODE'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['NIFI'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'PROFILER_ADMIN_AGENT' in salt['pillar.get']('gateway:location') -%}
+    {% if 'PROFILER_ADMIN' in exposed -%}
+    <service>
+        <role>PROFILER_ADMIN</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['PROFILER_ADMIN_AGENT'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['PROFILER_ADMIN'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'PROFILER_METRICS_AGENT' in salt['pillar.get']('gateway:location') -%}
+    {% if 'PROFILER_METRICS' in exposed -%}
+    <service>
+        <role>PROFILER_METRICS</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['PROFILER_METRICS_AGENT'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['PROFILER_METRICS'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
