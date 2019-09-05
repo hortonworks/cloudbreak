@@ -128,10 +128,10 @@ public class AzureTemplateBuilder {
             model.put("skuSizeMB", azureDatabaseServerView.getAllocatedStorageInMb().toString());
             model.put("skuTier", azureDatabaseServerView.getSkuTier());
             model.put("storageAutoGrow", azureDatabaseServerView.getStorageAutoGrow());
-            model.put("vnets", databaseStack.getNetwork().getStringParameter("virtualNetwork"));
+            model.put("subnets", databaseStack.getNetwork().getStringParameter("subnets"));
             model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(databaseStack), model);
-            LOGGER.debug("Generated Arm database template: {}", generatedTemplate);
+            LOGGER.debug("Generated ARM database template: {}", generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process the ARM TemplateBuilder", e);
