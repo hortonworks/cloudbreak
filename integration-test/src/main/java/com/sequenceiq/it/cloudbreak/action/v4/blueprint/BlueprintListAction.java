@@ -23,7 +23,7 @@ public class BlueprintListAction implements Action<BlueprintTestDto, CloudbreakC
         testDto.setViewResponses(
                 client.getCloudbreakClient()
                         .blueprintV4Endpoint()
-                        .list(client.getWorkspaceId()).getResponses());
+                        .list(client.getWorkspaceId(), true).getResponses());
         logJSON(LOGGER, format(" Blueprint list has executed successfully:%n"), testDto.getViewResponses());
 
         return testDto;

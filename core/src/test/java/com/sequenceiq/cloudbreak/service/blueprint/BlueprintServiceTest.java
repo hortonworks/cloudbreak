@@ -25,8 +25,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,15 +41,23 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -71,7 +81,25 @@ public class BlueprintServiceTest {
     private BlueprintRepository blueprintRepository;
 
     @Mock
+    private BlueprintViewRepository blueprintViewRepository;
+
+    @Mock
     private BlueprintLoaderService blueprintLoaderService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private WorkspaceService workspaceService;
+
+    @Mock
+    private CloudbreakUser cloudbreakUser;
+
+    @Mock
+    private User user;
 
     @InjectMocks
     private BlueprintService underTest;
@@ -81,6 +109,9 @@ public class BlueprintServiceTest {
     @Before
     public void setup() {
         blueprint = getBlueprint("name", USER_MANAGED);
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
+        when(workspaceService.get(1L, user)).thenReturn(getWorkspace());
     }
 
     @Test
@@ -295,6 +326,111 @@ public class BlueprintServiceTest {
         assertTrue(blueprint.getResourceCrn().matches("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":clusterdefinition:.*"));
     }
 
+    @Test
+    public void testGetAllAvailableViewInWorkspaceGivenHasSdxReadyWhenWithSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", ResourceStatus.DEFAULT, true),
+                getBlueprintView("bp2", ResourceStatus.DEFAULT, false),
+                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+        when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
+        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
+        assertEquals(3, result.size());
+        assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("bp1", "bp2", "bp3")));
+    }
+
+    @Test
+    public void testGetAllAvailableViewInWorkspaceGivenSdxReadyIsNullWhenWithSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json("{}")),
+                getBlueprintView("bp2", ResourceStatus.DEFAULT, false),
+                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+        when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
+        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    public void testGetAllAvailableViewInWorkspaceGivenHasNullOfSdxReadyWhenWithSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json("{}")),
+                getBlueprintView("bp2", ResourceStatus.DEFAULT, true),
+                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+        when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
+        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
+        assertEquals(3, result.size());
+        assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("bp1", "bp2", "bp3")));
+    }
+
+    @Test
+    public void testGetAllAvailableViewInWorkspaceGivenAttributeIsNullWhenWithSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", null));
+        when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
+        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
+        assertEquals(1, result.size());
+        assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).contains("bp1"));
+    }
+
+    @Test
+    public void testGetAllAvailableViewInWorkspaceGivenAttributeValueIsNullWhenWithSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json(null)));
+        when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
+        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
+        assertEquals(1, result.size());
+        assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).contains("bp1"));
+    }
+
+    @Test
+    // if the tags are null or empty that same as no an sdx ready bp
+    public void testGetAllAvailableViewInWorkspaceGivenAttributeValueIsNullWhenWithoutSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json(null)));
+        when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
+        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
+        assertEquals(1, result.size());
+        assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).contains("bp1"));
+    }
+
+    @Test
+    public void testGetAllAvailableViewInWorkspaceGivenHasSdxReadyWhenWithoutSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", ResourceStatus.DEFAULT, true),
+                getBlueprintView("bp2", ResourceStatus.DEFAULT, false),
+                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+        when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
+        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
+        assertEquals(2, result.size());
+        assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("bp2", "bp3")));
+    }
+
+    @Test
+    // if the tags are null or empty that same as no an sdx ready bp
+    public void testGetAllAvailableViewInWorkspaceGivenSdxReadyIsNullWhenWithoutSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json("{}")),
+                getBlueprintView("bp2", ResourceStatus.DEFAULT, false),
+                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+        when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
+        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
+        assertEquals(3, result.size());
+        assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("bp1", "bp2", "bp3")));
+    }
+
+    @Test
+    // if the tags are null or empty that same as no an sdx ready bp
+    public void testGetAllAvailableViewInWorkspaceGivenHasNullOfSdxReadyWhenWithoutSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json("{}")),
+                getBlueprintView("bp2", ResourceStatus.DEFAULT, true),
+                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+        when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
+        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
+        assertEquals(2, result.size());
+        assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("bp1", "bp3")));
+    }
+
+    @Test
+    // if the tags are null or empty that same as no an sdx ready bp
+    public void testGetAllAvailableViewInWorkspaceGivenAttributeIsNullWhenWithoutSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", null));
+        when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
+        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
+        assertEquals(1, result.size());
+        assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).contains("bp1"));
+    }
+
     private Cluster getCluster(String name, Long id, Blueprint blueprint, Status clusterStatus, Status stackStatus) {
         Cluster cluster1 = new Cluster();
         cluster1.setName(name);
@@ -320,6 +456,28 @@ public class BlueprintServiceTest {
         blueprint.setStatus(status);
         blueprint.setCreator(CREATOR);
         blueprint.setResourceCrn("someCrn");
+        return blueprint;
+    }
+
+    private BlueprintView getBlueprintView(String name, ResourceStatus status, Boolean sdxReady) {
+        BlueprintView blueprint = new BlueprintView();
+        blueprint.setName(name);
+        blueprint.setWorkspace(getWorkspace());
+        blueprint.setStatus(status);
+        blueprint.setResourceCrn("someCrn");
+        if (sdxReady != null) {
+            blueprint.setTags(Json.silent(Map.of("shared_services_ready", sdxReady)));
+        }
+        return blueprint;
+    }
+
+    private BlueprintView getBlueprintView(String name, Json attribute) {
+        BlueprintView blueprint = new BlueprintView();
+        blueprint.setName(name);
+        blueprint.setWorkspace(getWorkspace());
+        blueprint.setStatus(DEFAULT);
+        blueprint.setResourceCrn("someCrn");
+        blueprint.setTags(attribute);
         return blueprint;
     }
 
