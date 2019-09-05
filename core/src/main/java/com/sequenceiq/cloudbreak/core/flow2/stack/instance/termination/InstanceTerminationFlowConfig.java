@@ -33,6 +33,8 @@ public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<Ins
     private static final FlowEdgeConfig<InstanceTerminationState, InstanceTerminationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, TERMINATION_FAILED_STATE, TERMINATION_FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Instance Termination";
+
     public InstanceTerminationFlowConfig() {
         super(InstanceTerminationState.class, InstanceTerminationEvent.class);
     }
@@ -50,6 +52,11 @@ public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<Ins
     @Override
     protected FlowEdgeConfig<InstanceTerminationState, InstanceTerminationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override

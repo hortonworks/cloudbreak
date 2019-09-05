@@ -15,4 +15,6 @@ public interface FlowConfiguration<E extends FlowEvent> {
     E[] getInitEvents();
 
     RestartAction getRestartAction(String event);
+
+    String getDisplayName();
 }

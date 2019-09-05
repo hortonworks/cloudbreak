@@ -26,9 +26,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.cloudbreak.core.flow2.config.RetryableFlowConfiguration;
 
 @Component
-public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<ClusterDownscaleState, ClusterDownscaleEvent> {
+public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<ClusterDownscaleState, ClusterDownscaleEvent>
+    implements RetryableFlowConfiguration<ClusterDownscaleEvent> {
+
     private static final List<Transition<ClusterDownscaleState, ClusterDownscaleEvent>> TRANSITIONS =
             new Builder<ClusterDownscaleState, ClusterDownscaleEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
@@ -47,6 +50,8 @@ public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<Cluste
     private static final FlowEdgeConfig<ClusterDownscaleState, ClusterDownscaleEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_DOWNSCALE_FAILED_STATE, FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Cluster Downscale";
+
     public ClusterDownscaleFlowConfig() {
         super(ClusterDownscaleState.class, ClusterDownscaleEvent.class);
     }
@@ -62,6 +67,11 @@ public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<Cluste
     }
 
     @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
+    }
+
+    @Override
     public ClusterDownscaleEvent[] getEvents() {
         return ClusterDownscaleEvent.values();
     }
@@ -69,5 +79,10 @@ public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<Cluste
     @Override
     public ClusterDownscaleEvent[] getInitEvents() {
         return new ClusterDownscaleEvent[] { DECOMMISSION_EVENT };
+    }
+
+    @Override
+    public ClusterDownscaleEvent getFailHandledEvent() {
+        return FAIL_HANDLED_EVENT;
     }
 }

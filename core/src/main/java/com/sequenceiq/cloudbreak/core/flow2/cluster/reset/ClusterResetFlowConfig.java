@@ -37,6 +37,8 @@ public class ClusterResetFlowConfig extends AbstractFlowConfiguration<ClusterRes
     private static final FlowEdgeConfig<ClusterResetState, ClusterResetEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_RESET_FAILED_STATE, FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Cluster Reset";
+
     public ClusterResetFlowConfig() {
         super(ClusterResetState.class, ClusterResetEvent.class);
     }
@@ -49,6 +51,11 @@ public class ClusterResetFlowConfig extends AbstractFlowConfiguration<ClusterRes
     @Override
     protected FlowEdgeConfig<ClusterResetState, ClusterResetEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override

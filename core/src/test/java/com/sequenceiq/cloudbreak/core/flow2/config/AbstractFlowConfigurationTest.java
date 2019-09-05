@@ -185,6 +185,11 @@ public class AbstractFlowConfigurationTest {
         }
 
         @Override
+        public String getDisplayName() {
+            return "Test Flow";
+        }
+
+        @Override
         public Event[] getEvents() {
             return EVENTS;
         }

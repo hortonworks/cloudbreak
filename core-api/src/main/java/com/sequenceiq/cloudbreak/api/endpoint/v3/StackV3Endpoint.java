@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.MaintenanceModeJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.stack.RetryableFlowResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
@@ -92,6 +93,13 @@ public interface StackV3Endpoint {
     @ApiOperation(value = StackOpDescription.RETRY_BY_NAME_IN_WORKSPACE,
             produces = ContentType.JSON, notes = Notes.RETRY_STACK_NOTES, nickname = "retryStackV3")
     void retryInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @GET
+    @Path("{name}/retry")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.LIST_RETRYABLE_FLOWS, produces = ContentType.JSON, notes = Notes.LIST_RETRYABLE_NOTES,
+            nickname = "listRetryableFlowsV3")
+    List<RetryableFlowResponse> listRetryableFlows(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
     // putstopStackV2
     @PUT

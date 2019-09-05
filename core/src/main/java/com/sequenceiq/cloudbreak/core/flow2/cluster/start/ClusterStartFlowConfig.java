@@ -35,6 +35,8 @@ public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterSta
     private static final FlowEdgeConfig<ClusterStartState, ClusterStartEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_START_FAILED_STATE, FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Start Cluster";
+
     public ClusterStartFlowConfig() {
         super(ClusterStartState.class, ClusterStartEvent.class);
     }
@@ -52,6 +54,11 @@ public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterSta
     @Override
     protected FlowEdgeConfig<ClusterStartState, ClusterStartEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override

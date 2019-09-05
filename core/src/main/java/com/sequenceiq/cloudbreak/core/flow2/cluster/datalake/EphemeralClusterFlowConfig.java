@@ -33,6 +33,8 @@ public class EphemeralClusterFlowConfig extends AbstractFlowConfiguration<Epheme
     private static final FlowEdgeConfig<EphemeralClusterState, EphemeralClusterEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             EPHEMERAL_CLUSTER_UPDATE_FAILED_STATE, EPHEMERAL_CLUSTER_FAILURE_HANDLED);
 
+    private static final String FLOW_DISPLAY_NAME = "Ephemeral Cluster";
+
     public EphemeralClusterFlowConfig() {
         super(EphemeralClusterState.class, EphemeralClusterEvent.class);
     }
@@ -45,6 +47,11 @@ public class EphemeralClusterFlowConfig extends AbstractFlowConfiguration<Epheme
     @Override
     protected FlowEdgeConfig<EphemeralClusterState, EphemeralClusterEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override

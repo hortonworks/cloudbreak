@@ -30,6 +30,8 @@ public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldSt
     private static final FlowEdgeConfig<HelloWorldState, HelloWorldEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, HELLO_WORLD_FAILED_STATE, HELLO_WORLD_FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Hello World";
+
     public HelloWorldFlowConfig() {
         super(HelloWorldState.class, HelloWorldEvent.class);
     }
@@ -54,5 +56,10 @@ public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldSt
     @Override
     protected FlowEdgeConfig<HelloWorldState, HelloWorldEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 }

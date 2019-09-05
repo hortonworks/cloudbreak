@@ -28,9 +28,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.cloudbreak.core.flow2.config.RetryableFlowConfiguration;
 
 @Component
-public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterUpscaleState, ClusterUpscaleEvent> {
+public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterUpscaleState, ClusterUpscaleEvent>
+    implements RetryableFlowConfiguration<ClusterUpscaleEvent> {
+
     private static final List<Transition<ClusterUpscaleState, ClusterUpscaleEvent>> TRANSITIONS =
             new Builder<ClusterUpscaleState, ClusterUpscaleEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
@@ -49,6 +52,8 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
     private static final FlowEdgeConfig<ClusterUpscaleState, ClusterUpscaleEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_UPSCALE_FAILED_STATE, FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Cluster Upscale";
+
     public ClusterUpscaleFlowConfig() {
         super(ClusterUpscaleState.class, ClusterUpscaleEvent.class);
     }
@@ -64,6 +69,11 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
     }
 
     @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
+    }
+
+    @Override
     public ClusterUpscaleEvent[] getEvents() {
         return values();
     }
@@ -71,5 +81,10 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
     @Override
     public ClusterUpscaleEvent[] getInitEvents() {
         return new ClusterUpscaleEvent[]{CLUSTER_UPSCALE_TRIGGER_EVENT};
+    }
+
+    @Override
+    public ClusterUpscaleEvent getFailHandledEvent() {
+        return FAIL_HANDLED_EVENT;
     }
 }

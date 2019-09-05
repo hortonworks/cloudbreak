@@ -16,9 +16,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.cloudbreak.core.flow2.config.RetryableFlowConfiguration;
 
 @Component
-public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncState, StackSyncEvent> {
+public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncState, StackSyncEvent>
+    implements RetryableFlowConfiguration<StackSyncEvent> {
+
     private static final List<Transition<StackSyncState, StackSyncEvent>> TRANSITIONS = new Builder<StackSyncState, StackSyncEvent>()
             .defaultFailureEvent(StackSyncEvent.SYNC_FAILURE_EVENT)
             .from(INIT_STATE).to(SYNC_STATE).event(STACK_SYNC_EVENT).noFailureEvent()
@@ -28,6 +31,8 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
 
     private static final FlowEdgeConfig<StackSyncState, StackSyncEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SYNC_FAILED_STATE, SYNC_FAIL_HANDLED_EVENT);
+
+    private static final String FLOW_DISPLAY_NAME = "Stack Sync";
 
     public StackSyncFlowConfig() {
         super(StackSyncState.class, StackSyncEvent.class);
@@ -53,5 +58,15 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
     @Override
     protected FlowEdgeConfig<StackSyncState, StackSyncEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
+    }
+
+    @Override
+    public StackSyncEvent getFailHandledEvent() {
+        return SYNC_FAIL_HANDLED_EVENT;
     }
 }

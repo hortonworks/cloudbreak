@@ -37,6 +37,8 @@ public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterU
     private static final FlowEdgeConfig<ClusterUpgradeState, ClusterUpgradeEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_UPGRADE_FAILED_STATE, FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Cluster Upgrade";
+
     public ClusterUpgradeFlowConfig() {
         super(ClusterUpgradeState.class, ClusterUpgradeEvent.class);
     }
@@ -49,6 +51,11 @@ public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterU
     @Override
     protected FlowEdgeConfig<ClusterUpgradeState, ClusterUpgradeEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override

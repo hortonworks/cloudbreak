@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -277,6 +278,13 @@ public class StackCommonService implements StackEndpoint {
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         operationRetryService.retry(stack);
+    }
+
+    public List<RetryableFlow> getRetryableFlows(String name, Long workspaceId) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+        return operationRetryService.getRetryableFlows(stack);
     }
 
     private Response put(Stack stack, UpdateStackJson updateRequest) {

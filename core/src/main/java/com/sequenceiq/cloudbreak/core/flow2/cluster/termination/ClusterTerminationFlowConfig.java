@@ -47,6 +47,8 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
     private static final FlowEdgeConfig<ClusterTerminationState, ClusterTerminationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CLUSTER_TERMINATION_FAILED_STATE, FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Cluster Termination";
+
     public ClusterTerminationFlowConfig() {
         super(ClusterTerminationState.class, ClusterTerminationEvent.class);
     }
@@ -59,6 +61,11 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
     @Override
     protected FlowEdgeConfig<ClusterTerminationState, ClusterTerminationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override
