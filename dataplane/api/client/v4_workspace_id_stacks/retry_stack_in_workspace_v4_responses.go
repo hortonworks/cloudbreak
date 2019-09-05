@@ -53,7 +53,7 @@ func (o *RetryStackInWorkspaceV4Default) Code() int {
 }
 
 func (o *RetryStackInWorkspaceV4Default) Error() string {
-	return fmt.Sprintf("[PUT /v4/{workspaceId}/stacks/{name}/retry][%d] retryStackInWorkspaceV4 default ", o._statusCode)
+	return fmt.Sprintf("[POST /v4/{workspaceId}/stacks/{name}/retry][%d] retryStackInWorkspaceV4 default ", o._statusCode)
 }
 
 func (o *RetryStackInWorkspaceV4Default) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

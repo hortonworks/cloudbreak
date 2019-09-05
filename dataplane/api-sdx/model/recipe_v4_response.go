@@ -22,6 +22,9 @@ type RecipeV4Response struct {
 	// content of recipe
 	Content string `json:"content,omitempty"`
 
+	// created
+	Created int64 `json:"created,omitempty"`
+
 	// the creator of the resource
 	Creator string `json:"creator,omitempty"`
 

@@ -455,7 +455,7 @@ func (a *Client) RetryStackInWorkspaceV4(params *RetryStackInWorkspaceV4Params) 
 
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "retryStackInWorkspaceV4",
-		Method:             "PUT",
+		Method:             "POST",
 		PathPattern:        "/v4/{workspaceId}/stacks/{name}/retry",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},

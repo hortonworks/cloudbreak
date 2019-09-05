@@ -389,6 +389,62 @@ func (a *Client) RepairSdxNodeByCrn(params *RepairSdxNodeByCrnParams) error {
 }
 
 /*
+RetrySdx retries sdx
+*/
+func (a *Client) RetrySdx(params *RetrySdxParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRetrySdxParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "retrySdx",
+		Method:             "POST",
+		PathPattern:        "/sdx/{name}/retry",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &RetrySdxReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+RetrySdxByCrn retries sdx by crn
+*/
+func (a *Client) RetrySdxByCrn(params *RetrySdxByCrnParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRetrySdxByCrnParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "retrySdxByCrn",
+		Method:             "POST",
+		PathPattern:        "/sdx/crn/{crn}/retry",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &RetrySdxByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
 SyncSdx syncs s d x cluster by name
 */
 func (a *Client) SyncSdx(params *SyncSdxParams) error {

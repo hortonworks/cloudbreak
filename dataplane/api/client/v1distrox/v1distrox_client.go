@@ -577,7 +577,7 @@ func (a *Client) RetryDistroXV1ByCrn(params *RetryDistroXV1ByCrnParams) error {
 
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "retryDistroXV1ByCrn",
-		Method:             "PUT",
+		Method:             "POST",
 		PathPattern:        "/v1/distrox/crn/{crn}/retry",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
@@ -607,7 +607,7 @@ func (a *Client) RetryDistroXV1ByName(params *RetryDistroXV1ByNameParams) error 
 
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "retryDistroXV1ByName",
-		Method:             "PUT",
+		Method:             "POST",
 		PathPattern:        "/v1/distrox/name/{name}/retry",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
@@ -877,7 +877,7 @@ func (a *Client) SyncDistroXV1ByCrn(params *SyncDistroXV1ByCrnParams) error {
 
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "syncDistroXV1ByCrn",
-		Method:             "PUT",
+		Method:             "POST",
 		PathPattern:        "/v1/distrox/crn/{crn}/sync",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
@@ -907,7 +907,7 @@ func (a *Client) SyncDistroXV1ByName(params *SyncDistroXV1ByNameParams) error {
 
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "syncDistroXV1ByName",
-		Method:             "PUT",
+		Method:             "POST",
 		PathPattern:        "/v1/distrox/name/{name}/sync",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},

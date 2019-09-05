@@ -257,6 +257,17 @@ func SyncSdx(c *cli.Context) {
 	log.Infof("[SyncSdx] SDX cluster sync started for: %s", name)
 }
 
+func RetrySdx(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "Retry sdx cluster")
+	name := c.String(fl.FlName.Name)
+	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
+	err := sdxClient.Sdx.RetrySdx(sdx.NewRetrySdxParams().WithName(name))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[RetrySdx] SDX cluster retry started for: %s", name)
+}
+
 func createCloudStorageRequestForSdx() {
 
 }

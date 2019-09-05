@@ -53,7 +53,7 @@ func (o *SyncDistroXV1ByCrnDefault) Code() int {
 }
 
 func (o *SyncDistroXV1ByCrnDefault) Error() string {
-	return fmt.Sprintf("[PUT /v1/distrox/crn/{crn}/sync][%d] syncDistroXV1ByCrn default ", o._statusCode)
+	return fmt.Sprintf("[POST /v1/distrox/crn/{crn}/sync][%d] syncDistroXV1ByCrn default ", o._statusCode)
 }
 
 func (o *SyncDistroXV1ByCrnDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

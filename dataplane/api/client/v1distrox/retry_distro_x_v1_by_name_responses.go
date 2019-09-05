@@ -53,7 +53,7 @@ func (o *RetryDistroXV1ByNameDefault) Code() int {
 }
 
 func (o *RetryDistroXV1ByNameDefault) Error() string {
-	return fmt.Sprintf("[PUT /v1/distrox/name/{name}/retry][%d] retryDistroXV1ByName default ", o._statusCode)
+	return fmt.Sprintf("[POST /v1/distrox/name/{name}/retry][%d] retryDistroXV1ByName default ", o._statusCode)
 }
 
 func (o *RetryDistroXV1ByNameDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
