@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -171,6 +172,7 @@ public class KerberosMgmtV1Service {
                 .withServiceName(request.getServiceName());
         recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
         recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
+        deleteRoleIfItIsNoLongerUsed(request.getRoleName(), ipaClient);
     }
 
     public void deleteHost(HostRequest request, String accountId) throws FreeIpaClientException, DeleteException {
@@ -197,6 +199,7 @@ public class KerberosMgmtV1Service {
             recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
             recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
         }
+        deleteRoleIfItIsNoLongerUsed(request.getRoleName(), ipaClient);
     }
 
     public void cleanupByCluster(VaultCleanupRequest request, String accountId) throws DeleteException {
@@ -516,4 +519,29 @@ public class KerberosMgmtV1Service {
         return serviceName + "/" + hostName + "@" + realm;
     }
 
+    private void deleteRoleIfItIsNoLongerUsed(String role, FreeIpaClient ipaClient) throws FreeIpaClientException {
+        if (role == null) {
+            return;
+        }
+
+        try {
+            Role ipaRole = ipaClient.showRole(role);
+            List<String> usesOfRole = new ArrayList<>();
+            usesOfRole.addAll(ipaRole.getMemberUser());
+            usesOfRole.addAll(ipaRole.getMemberGroup());
+            usesOfRole.addAll(ipaRole.getMemberHost());
+            usesOfRole.addAll(ipaRole.getMemberHostGroup());
+            usesOfRole.addAll(ipaRole.getMemberService());
+            if (usesOfRole.isEmpty()) {
+                ipaClient.deleteRole(role);
+            } else {
+                LOGGER.debug("The role {} is still in use, so it was not deleted.", role);
+            }
+        } catch (FreeIpaClientException e) {
+            if (!isNotFoundException(e)) {
+                throw e;
+            }
+            LOGGER.debug("The role {} does not exist, so it was not deleted.", role);
+        }
+    }
 }
