@@ -9,6 +9,10 @@ public class VmRecommendations {
 
     private VmRecommendation worker;
 
+    private VmRecommendation broker;
+
+    private VmRecommendation quorum;
+
     public VmRecommendation getMaster() {
         return master;
     }
@@ -23,5 +27,21 @@ public class VmRecommendations {
 
     public void setWorker(VmRecommendation worker) {
         this.worker = worker;
+    }
+
+    public VmRecommendation getBroker() {
+        return broker;
+    }
+
+    public void setBroker(VmRecommendation broker) {
+        this.broker = broker;
+    }
+
+    public VmRecommendation getQuorum() {
+        return quorum;
+    }
+
+    public void setQuorum(VmRecommendation quorum) {
+        this.quorum = quorum;
     }
 }
