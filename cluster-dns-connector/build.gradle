@@ -1,0 +1,62 @@
+apply plugin: 'com.google.protobuf'
+
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = "$repoUrl" }
+    maven { url 'http://repo.spring.io/libs-release' }
+    jcenter()
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
+  }
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+dependencyManagement {
+  dependencies {
+    dependencySet(group: 'org.springframework.boot', version: springBootVersion) {
+      entry 'spring-boot-starter-test'
+    }
+  }
+}
+
+dependencies {
+  compile project(':common')
+  compile project(':grpc-common')
+
+  compile ("io.grpc:grpc-all:1.19.0") {
+    exclude group: 'org.mockito'
+  }
+
+  testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+  testCompile group: 'junit', name: 'junit', version: '4.12'
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+}
+
+checkstyle {
+  checkstyleMain.exclude '**/generated/**'
+}
+
+protobuf {
+  protoc {
+    // The version of protoc must match protobuf-java. If you don't depend on
+    // protobuf-java directly, you will be transitively depending on the
+    // protobuf-java version that grpc depends on.
+    artifact = "com.google.protobuf:protoc:3.6.1"
+  }
+  plugins {
+    grpc {
+      artifact = 'io.grpc:protoc-gen-grpc-java:1.12.0'
+    }
+  }
+  generateProtoTasks {
+    all()*.plugins {
+      grpc {}
+    }
+  }
+  generatedFilesBaseDir = "$projectDir/src/generated"
+}
