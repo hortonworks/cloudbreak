@@ -28,6 +28,9 @@ public class ServicePrincipalRequest {
     @ApiModelProperty(value = ModelDescriptions.CLUSTER_CRN)
     private String clusterCrn;
 
+    @ApiModelProperty(value = KeytabModelDescription.ROLE_NAME)
+    private String roleName;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -60,6 +63,14 @@ public class ServicePrincipalRequest {
         this.clusterCrn = clusterCrn;
     }
 
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
     @Override
     public String toString() {
         return "ServicePrincipalRequest{"
@@ -67,6 +78,7 @@ public class ServicePrincipalRequest {
                 + ", serviceName='" + serviceName + '\''
                 + ", serverHostName='" + serverHostName + '\''
                 + ", clusterCrn='" + clusterCrn + '\''
+                + ", roleName='" + roleName + '\''
                 + '}';
     }
 }

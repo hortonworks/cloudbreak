@@ -24,6 +24,9 @@ public class HostRequest {
     @ApiModelProperty(value = ModelDescriptions.CLUSTER_CRN)
     private String clusterCrn;
 
+    @ApiModelProperty(value = KeytabModelDescription.ROLE_NAME)
+    private String roleName;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -48,12 +51,21 @@ public class HostRequest {
         this.clusterCrn = clusterCrn;
     }
 
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
     @Override
     public String toString() {
         return "HostRequest{"
                 + "environmentCrn='" + environmentCrn + '\''
                 + ", serverHostName='" + serverHostName + '\''
                 + ", clusterCrn='" + clusterCrn + '\''
+                + ", roleName='" + roleName + '\''
                 + '}';
     }
 }
