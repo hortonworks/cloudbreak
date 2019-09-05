@@ -8,6 +8,9 @@ logging:
     path: ${integrationtest.outputdir}
 
 integrationtest:
+  user:
+    accessKey:
+    secretKey:
   database:
     connectionUrl: jdbc:postgresql://localhost:5432/
     username: postgres
