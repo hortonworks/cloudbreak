@@ -57,4 +57,5 @@ include 'workspace-authorization-api'
 include 'authorization-common'
 include 'idbmms-connector'
 include 'authorization-common-api'
+include 'cluster-dns-connector'
 
