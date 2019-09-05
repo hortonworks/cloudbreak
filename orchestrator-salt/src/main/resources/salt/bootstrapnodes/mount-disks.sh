@@ -19,7 +19,7 @@ VERSION="V1.0"
 mount_remaining() {
       local hadoop_fs_dir_counter=$1
       local return_value=0
-      not_mounted_volume_names=$(lsblk_command | grep -v / | grep ^[a-z] | cut -f1 -d' ')
+      not_mounted_volume_names=$(lsblk_command --noheadings --raw -o NAME,MOUNTPOINT | awk '$1~/[[:digit:]]/ && $2 == ""')
       log $LOG_FILE remaining not mounted volumes: $not_mounted_volume_names
       root_disk=$(get_root_disk)
       for volume in $not_mounted_volume_names; do
@@ -120,6 +120,30 @@ create_directories() {
     return 1
 }
 
+grow_mount_partition() {
+    # TODO: remove this line if cloud-utils-growpart is already on the image
+    yum -y install cloud-utils-growpart
+    if growpart -N $(get_root_disk) $(get_root_disk_partition_number) ; then
+        log $LOG_FILE Before growing: $(df -h)
+        growpart $(get_root_disk) $(get_root_disk_partition_number)
+        if [ ! $? -eq 0 ]; then
+          log $LOG_FILE error growing partition
+          return 1
+        fi
+        if [ "$(get_root_disk_type)" == "xfs" ]; then
+            xfs_growfs /
+            return_value=$?
+        elif [[ "$(get_root_disk_type)" =~ "ext" ]]; then
+            resize2fs  $(get_root_disk)$(get_root_disk_partition_number)
+            return_value=$?
+        fi
+        log $LOG_FILE After growing: $(df -h)
+        return $((return_value))
+    else
+        log $LOG_FILE Growpart indicates that there is no need for growing root partition
+    fi
+}
+
 save_env_vars_to_log_file() {
     log $LOG_FILE environment variables:
     log $LOG_FILE ATTACHED_VOLUME_UUID_LIST=$ATTACHED_VOLUME_UUID_LIST
@@ -136,6 +160,10 @@ main() {
     mount_common
     return_code=$?
     [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Not all devices were mounted"
+
+    grow_mount_partition
+    return_code=$?
+    [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error growing root partition"
 
     create_directories
     return_code=$?
