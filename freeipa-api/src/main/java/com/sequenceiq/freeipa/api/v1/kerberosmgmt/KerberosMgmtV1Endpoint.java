@@ -13,9 +13,11 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabModelNotes;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabOperationsDescription;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.VaultCleanupRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServicePrincipalRequest;
 import com.sequenceiq.service.api.doc.ContentType;
@@ -32,16 +34,31 @@ public interface KerberosMgmtV1Endpoint {
     @Path("servicekeytab")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_GENERATE_SERVICE_KEYTAB, produces = ContentType.JSON,
-            notes = KeytabModelNotes.GENERATE_KEYTAB_NOTES,
+            notes = KeytabModelNotes.GENERATE_SERVICE_KEYTAB_NOTES,
             nickname = "generateServiceKeytabV1")
     ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request) throws Exception;
 
     @GET
     @Path("servicekeytab")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_SERVICE_KEYTAB, produces = ContentType.JSON, notes = KeytabModelNotes.GET_KEYTAB_NOTES,
+    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_SERVICE_KEYTAB, produces = ContentType.JSON, notes = KeytabModelNotes.GET_SERVICE_KEYTAB_NOTES,
             nickname = "getServiceKeytabV1")
     ServiceKeytabResponse getServiceKeytab(@Valid ServiceKeytabRequest request) throws Exception;
+
+    @POST
+    @Path("hostkeytab")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_GENERATE_HOST_KEYTAB, produces = ContentType.JSON,
+            notes = KeytabModelNotes.GENERATE_HOST_KEYTAB_NOTES,
+            nickname = "generateHostKeytabV1")
+    HostKeytabResponse generateHostKeytab(@Valid HostKeytabRequest request) throws Exception;
+
+    @GET
+    @Path("hostkeytab")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_HOST_KEYTAB, produces = ContentType.JSON, notes = KeytabModelNotes.GET_HOST_KEYTAB_NOTES,
+            nickname = "getHostKeytabV1")
+    HostKeytabResponse getHostKeytab(@Valid HostKeytabRequest request) throws Exception;
 
     @DELETE
     @Path("serviceprincipal")

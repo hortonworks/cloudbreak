@@ -11,9 +11,25 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
 public class VaultPathBuilder {
 
-    private static final String VAULT_SECRET_TYPE = "ServiceKeytab";
+    public enum SecretType {
+        SERVICE_KEYTAB("ServiceKeytab"),
+        HOST_KEYTAB("HostKeytab");
+
+        private final String value;
+
+        SecretType(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Service.class);
+
+    private Optional<SecretType> secretType = Optional.empty();
 
     private boolean generateClusterIdIfNotPresent;
 
@@ -31,6 +47,11 @@ public class VaultPathBuilder {
 
     public VaultPathBuilder enableGeneratingClusterIdIfNotPresent() {
         generateClusterIdIfNotPresent = true;
+        return this;
+    }
+
+    public VaultPathBuilder withSecretType(SecretType secretType) {
+        this.secretType = Optional.ofNullable(secretType);
         return this;
     }
 
@@ -78,7 +99,7 @@ public class VaultPathBuilder {
         StringBuilder ret = new StringBuilder();
         List<Optional<String>> requiredEntries = Arrays.asList(
                 accountId,
-                Optional.of(VAULT_SECRET_TYPE),
+                secretType.map(SecretType::toString),
                 subType,
                 environmentId
         );
@@ -97,8 +118,10 @@ public class VaultPathBuilder {
 
             if (serverHostName.isPresent()) {
                 ret.append(serverHostName.get());
-                ret.append("/");
-                ret.append(serviceName.orElse(""));
+                if (secretType.get() == SecretType.SERVICE_KEYTAB) {
+                    ret.append("/");
+                    ret.append(serviceName.orElse(""));
+                }
             }
         }
 

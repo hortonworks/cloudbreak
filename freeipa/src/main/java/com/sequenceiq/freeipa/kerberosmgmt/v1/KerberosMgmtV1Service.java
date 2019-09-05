@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.RoleRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
@@ -26,6 +28,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServicePrincipalRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.VaultCleanupRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Keytab;
 import com.sequenceiq.freeipa.client.model.Privilege;
 import com.sequenceiq.freeipa.client.model.Role;
@@ -50,6 +53,8 @@ public class KerberosMgmtV1Service {
     private static final String SERVICE_PRINCIPAL_CREATION_FAILED = "Failed to create service principal.";
 
     private static final String SERVICE_PRINCIPAL_DELETION_FAILED = "Failed to delete service principal.";
+
+    private static final String HOST_ALLOW_FAILURE = "Request to allow the host keytab retrieval failed.";
 
     private static final String SERVICE_ALLOW_FAILURE = "Request to allow the service to retrieve keytab failed.";
 
@@ -87,18 +92,18 @@ public class KerberosMgmtV1Service {
     private StringToSecretResponseConverter stringToSecretResponseConverter;
 
     public ServiceKeytabResponse generateServiceKeytab(ServiceKeytabRequest request, String accountId) throws FreeIpaClientException {
-        LOGGER.debug("Request to generate keytab: {}", request);
+        LOGGER.debug("Request to generate service keytab: {}", request);
         ServiceKeytabResponse response = new ServiceKeytabResponse();
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
-        addHost(request.getServerHostName(), ipaClient);
+        addHost(request.getServerHostName(), null, ipaClient);
         com.sequenceiq.freeipa.client.model.Service service = serviceAdd(request, realm, ipaClient);
         String serviceKeytab;
         if (service.getHasKeytab() && request.getDoNotRecreateKeytab()) {
-            serviceKeytab = getExistingServiceKeytab(service.getKrbprincipalname(), ipaClient);
+            serviceKeytab = getExistingKeytab(service.getKrbprincipalname(), ipaClient);
         } else {
-            serviceKeytab = getServiceKeytab(service.getKrbprincipalname(), ipaClient);
+            serviceKeytab = getKeytab(service.getKrbprincipalname(), ipaClient);
         }
         response.setKeytab(getSecretResponseForKeytab(request, accountId, serviceKeytab));
         response.setServicePrincipal(getSecretResponseForPrincipal(request, accountId, service.getKrbprincipalname()));
@@ -106,16 +111,46 @@ public class KerberosMgmtV1Service {
     }
 
     public ServiceKeytabResponse getExistingServiceKeytab(ServiceKeytabRequest request, String accountId) throws FreeIpaClientException {
-        LOGGER.debug("Request to get keytab for account {}: {}", accountId, request);
+        LOGGER.debug("Request to get service keytab for account {}: {}", accountId, request);
         ServiceKeytabResponse response = new ServiceKeytabResponse();
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
 
         String servicePrincipal = request.getServiceName() + "/" + request.getServerHostName() + "@" + realm;
-        String serviceKeytab = getExistingServiceKeytab(servicePrincipal, ipaClient);
+        String serviceKeytab = getExistingKeytab(servicePrincipal, ipaClient);
         response.setKeytab(getSecretResponseForKeytab(request, accountId, serviceKeytab));
         response.setServicePrincipal(getSecretResponseForPrincipal(request, accountId, servicePrincipal));
+        return response;
+    }
+
+    public HostKeytabResponse generateHostKeytab(HostKeytabRequest request, String accountId) throws FreeIpaClientException {
+        LOGGER.debug("Request to generate host keytab: {}", request);
+        HostKeytabResponse response = new HostKeytabResponse();
+        Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
+        FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
+        Host host = addHost(request.getServerHostName(), request.getRoleRequest(), ipaClient);
+        String hostKeytab;
+        if (host.getHasKeytab() && request.getDoNotRecreateKeytab()) {
+            hostKeytab = getExistingKeytab(host.getKrbprincipalname(), ipaClient);
+        } else {
+            hostKeytab = getKeytab(host.getKrbprincipalname(), ipaClient);
+        }
+        response.setKeytab(getSecretResponseForKeytab(request, accountId, hostKeytab));
+        response.setHostPrincipal(getSecretResponseForPrincipal(request, accountId, host.getKrbprincipalname()));
+        return response;
+    }
+
+    public HostKeytabResponse getExistingHostKeytab(HostKeytabRequest request, String accountId) throws FreeIpaClientException {
+        LOGGER.debug("Request to get host keytab for account {}: {}", accountId, request);
+        HostKeytabResponse response = new HostKeytabResponse();
+        Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
+        FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
+
+        String hostPrincipal = ipaClient.showHost(request.getServerHostName()).getKrbprincipalname();
+        String hostKeytab = getExistingKeytab(hostPrincipal, ipaClient);
+        response.setKeytab(getSecretResponseForKeytab(request, accountId, hostKeytab));
+        response.setHostPrincipal(getSecretResponseForPrincipal(request, accountId, hostPrincipal));
         return response;
     }
 
@@ -128,6 +163,7 @@ public class KerberosMgmtV1Service {
         delService(canonicalPrincipal, ipaClient);
         VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
                 .enableGeneratingClusterIdIfNotPresent()
+                .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                 .withAccountId(accountId)
                 .withEnvironmentCrn(request.getEnvironmentCrn())
                 .withClusterCrn(request.getClusterCrn())
@@ -156,8 +192,11 @@ public class KerberosMgmtV1Service {
                 .withEnvironmentCrn(request.getEnvironmentCrn())
                 .withClusterCrn(request.getClusterCrn())
                 .withServerHostName(request.getServerHostName());
-        recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
-        recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
+        for (VaultPathBuilder.SecretType secretType : VaultPathBuilder.SecretType.values()) {
+            vaultPathBuilder.withSecretType(secretType);
+            recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
+            recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
+        }
     }
 
     public void cleanupByCluster(VaultCleanupRequest request, String accountId) throws DeleteException {
@@ -193,11 +232,15 @@ public class KerberosMgmtV1Service {
 
     private void cleanupSecrets(String environmentCrn, String clusterCrn, String accountId) {
         VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
+                .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                 .withAccountId(accountId)
                 .withEnvironmentCrn(environmentCrn)
                 .withClusterCrn(clusterCrn);
-        recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
-        recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
+        for (VaultPathBuilder.SecretType secretType : VaultPathBuilder.SecretType.values()) {
+            vaultPathBuilder.withSecretType(secretType);
+            recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
+            recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
+        }
     }
 
     private void recursivelyCleanupVault(String path) {
@@ -232,15 +275,25 @@ public class KerberosMgmtV1Service {
         throw new KeytabCreationException(EMPTY_REALM);
     }
 
-    private void addHost(String hostname, FreeIpaClient ipaClient) throws KeytabCreationException {
+    private Host addHost(String hostname, RoleRequest roleRequest, FreeIpaClient ipaClient) throws KeytabCreationException {
+        Host host;
         try {
-            ipaClient.addHost(hostname);
-        } catch (FreeIpaClientException e) {
-            if (!isDuplicateEntryException(e)) {
-                LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
-                throw new KeytabCreationException(HOST_CREATION_FAILED);
+            try {
+                host = ipaClient.addHost(hostname);
+            } catch (FreeIpaClientException e) {
+                if (!isDuplicateEntryException(e)) {
+                    LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
+                    throw new KeytabCreationException(HOST_CREATION_FAILED);
+                }
+                host = ipaClient.showHost(hostname);
             }
+            allowHostKeytabRetrieval(hostname, freeIpaClientFactory.getAdminUser(), ipaClient);
+            addRoleAndPrivileges(Optional.empty(), Optional.of(host), roleRequest, ipaClient);
+        } catch (FreeIpaClientException e) {
+            LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
+            throw new KeytabCreationException(HOST_CREATION_FAILED);
         }
+        return host;
     }
 
     private void delHost(String hostname, FreeIpaClient ipaClient) throws DeleteException {
@@ -268,7 +321,7 @@ public class KerberosMgmtV1Service {
                 service = ipaClient.showService(canonicalPrincipal);
             }
             allowServiceKeytabRetrieval(service.getKrbprincipalname(), freeIpaClientFactory.getAdminUser(), ipaClient);
-            addRoleAndPrivileges(service, request.getRoleRequest(), ipaClient);
+            addRoleAndPrivileges(Optional.of(service), Optional.empty(), request.getRoleRequest(), ipaClient);
         } catch (FreeIpaClientException e) {
             LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
             throw new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED);
@@ -287,7 +340,8 @@ public class KerberosMgmtV1Service {
         }
     }
 
-    private void addRoleAndPrivileges(com.sequenceiq.freeipa.client.model.Service service, RoleRequest roleRequest, FreeIpaClient ipaClient)
+    private void addRoleAndPrivileges(Optional<com.sequenceiq.freeipa.client.model.Service> service, Optional<Host> host, RoleRequest roleRequest,
+            FreeIpaClient ipaClient)
             throws FreeIpaClientException {
         if (roleRequest != null && StringUtils.isNotBlank(roleRequest.getRoleName())) {
             Set<Role> allRole = ipaClient.findAllRole();
@@ -295,10 +349,15 @@ public class KerberosMgmtV1Service {
             Role role = optionalRole.isPresent() ? optionalRole.get() : ipaClient.addRole(roleRequest.getRoleName());
             addPrivilegesToRole(roleRequest.getPrivileges(), ipaClient, role);
             role = ipaClient.showRole(role.getCn());
-            boolean roleSetForService = service.getMemberOfRole().stream().anyMatch(member -> member.contains(roleRequest.getRoleName()));
-            if (!roleSetForService) {
-                ipaClient.addRoleMember(role.getCn(), null, null, null, null, Set.of(service.getKrbprincipalname()));
-            }
+            Set<String> servicesToAssignRole = service.stream()
+                    .filter(s -> !s.getMemberOfRole().stream().anyMatch(member -> member.contains(roleRequest.getRoleName())))
+                    .map(com.sequenceiq.freeipa.client.model.Service::getKrbprincipalname)
+                    .collect(Collectors.toSet());
+            Set<String> hostsToAssignRole = host.stream()
+                    .filter(h -> !h.getMemberOfRole().stream().anyMatch(member -> member.contains(roleRequest.getRoleName())))
+                    .map(Host::getFqdn)
+                    .collect(Collectors.toSet());
+            ipaClient.addRoleMember(role.getCn(), null, null, hostsToAssignRole, null, servicesToAssignRole);
         }
     }
 
@@ -328,7 +387,16 @@ public class KerberosMgmtV1Service {
         }
     }
 
-    private String getServiceKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) throws KeytabCreationException {
+    private void allowHostKeytabRetrieval(String fqdn, String adminUser, FreeIpaClient ipaClient) throws FreeIpaClientException {
+        try {
+            ipaClient.allowHostKeytabRetrieval(fqdn, adminUser);
+        } catch (FreeIpaClientException e) {
+            LOGGER.error(HOST_ALLOW_FAILURE + " " + e.getLocalizedMessage(), e);
+            throw e;
+        }
+    }
+
+    private String getKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) throws KeytabCreationException {
         try {
             Keytab keytab = ipaClient.getKeytab(canonicalPrincipal);
             return keytab.getKeytab();
@@ -338,7 +406,7 @@ public class KerberosMgmtV1Service {
         }
     }
 
-    private String getExistingServiceKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) throws KeytabCreationException {
+    private String getExistingKeytab(String canonicalPrincipal, FreeIpaClient ipaClient) throws KeytabCreationException {
         try {
             Keytab keytab = ipaClient.getExistingKeytab(canonicalPrincipal);
             return keytab.getKeytab();
@@ -370,6 +438,7 @@ public class KerberosMgmtV1Service {
         try {
             String path = new VaultPathBuilder()
                     .enableGeneratingClusterIdIfNotPresent()
+                    .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                     .withAccountId(accountId)
                     .withSubType(PRINCIPAL_SUB_TYPE)
                     .withEnvironmentCrn(request.getEnvironmentCrn())
@@ -389,12 +458,51 @@ public class KerberosMgmtV1Service {
         try {
             String path = new VaultPathBuilder()
                     .enableGeneratingClusterIdIfNotPresent()
+                    .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                     .withAccountId(accountId)
                     .withSubType(KEYTAB_SUB_TYPE)
                     .withEnvironmentCrn(request.getEnvironmentCrn())
                     .withClusterCrn(request.getClusterCrn())
                     .withServerHostName(request.getServerHostName())
                     .withServiceName(request.getServiceName())
+                    .build();
+            String secret = secretService.put(path, keytab);
+            return stringToSecretResponseConverter.convert(secret);
+        } catch (Exception exception) {
+            LOGGER.warn("Failure while updating vault.", exception);
+            throw new KeytabCreationException(VAULT_UPDATE_FAILED);
+        }
+    }
+
+    private SecretResponse getSecretResponseForPrincipal(HostKeytabRequest request, String accountId, String principal) {
+        try {
+            String path = new VaultPathBuilder()
+                    .enableGeneratingClusterIdIfNotPresent()
+                    .withSecretType(VaultPathBuilder.SecretType.HOST_KEYTAB)
+                    .withAccountId(accountId)
+                    .withSubType(PRINCIPAL_SUB_TYPE)
+                    .withEnvironmentCrn(request.getEnvironmentCrn())
+                    .withClusterCrn(request.getClusterCrn())
+                    .withServerHostName(request.getServerHostName())
+                    .build();
+            String secret = secretService.put(path, principal);
+            return stringToSecretResponseConverter.convert(secret);
+        } catch (Exception exception) {
+            LOGGER.warn("Failure while updating vault.", exception);
+            throw new KeytabCreationException(VAULT_UPDATE_FAILED);
+        }
+    }
+
+    private SecretResponse getSecretResponseForKeytab(HostKeytabRequest request, String accountId, String keytab) {
+        try {
+            String path = new VaultPathBuilder()
+                    .enableGeneratingClusterIdIfNotPresent()
+                    .withSecretType(VaultPathBuilder.SecretType.HOST_KEYTAB)
+                    .withAccountId(accountId)
+                    .withSubType(KEYTAB_SUB_TYPE)
+                    .withEnvironmentCrn(request.getEnvironmentCrn())
+                    .withClusterCrn(request.getClusterCrn())
+                    .withServerHostName(request.getServerHostName())
                     .build();
             String secret = secretService.put(path, keytab);
             return stringToSecretResponseConverter.convert(secret);
