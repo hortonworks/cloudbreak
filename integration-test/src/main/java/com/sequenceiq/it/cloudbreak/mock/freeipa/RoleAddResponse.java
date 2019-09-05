@@ -20,7 +20,11 @@ public class RoleAddResponse extends AbstractFreeIpaResponse<Role> {
     protected Role handleInternal(Request request, Response response) {
         Role role = new Role();
         role.setCn("roleName");
-        role.setMember(List.of());
+        role.setMemberUser(List.of());
+        role.setMemberGroup(List.of());
+        role.setMemberHost(List.of());
+        role.setMemberHostGroup(List.of());
+        role.setMemberService(List.of());
         return role;
     }
 }

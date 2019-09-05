@@ -13,9 +13,10 @@ public class KeytabModelNotes {
     public static final String GET_HOST_KEYTAB_NOTES = "Retrieves the existing keytab for the host provided. Gets the existing keytab without modification "
             + "and not effecting the prior keytab. The keytab in the response is base64 encoded.";
     public static final String DELETE_SERVICE_PRINCIPAL_NOTES = "Deletes the principal from the FreeIPA. It also deletes vault secrets associated with the "
-            + "principal";
+            + "principal. If a role is specified, it will also be deleted. However, if the role is still in use, it will not be deleted in a normal scenerio.";
     public static final String DELETE_HOST_NOTES = "Deletes the host and all the principals associated with the host in the FreeIPA. It also deletes vault "
-            + "secrets associated with the host.";
+            + "secrets associated with the host. If a role is specified, it will also be deleted. However, if the role is still in use, it will not be deleted "
+            + "in a normal scenerio.";
     public static final String CLEANUP_NOTES = "Deletes all the secrets that are associated for the given cluster.";
 
     private KeytabModelNotes() {
