@@ -143,7 +143,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     }
 
     private void putBlueprintToContextIfExist(BlueprintV4Endpoint endpoint, String blueprintName, Long workspaceId) {
-        endpoint.list(workspaceId);
+        endpoint.list(workspaceId, false);
         if (StringUtils.isEmpty(blueprintName)) {
             blueprintName = defaultBlueprintName;
         }

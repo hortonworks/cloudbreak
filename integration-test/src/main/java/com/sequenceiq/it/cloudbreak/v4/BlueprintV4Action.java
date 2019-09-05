@@ -61,7 +61,7 @@ public class BlueprintV4Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" getByName all private blueprints. ");
         Collection<BlueprintV4ViewResponse> blueprints = client.getCloudbreakClient().blueprintV4Endpoint()
-                .list(workspaceId).getResponses();
+                .list(workspaceId, true).getResponses();
         Set<BlueprintV4Response> detailedBlueprints = blueprints.stream()
                 .map(bp -> client.getCloudbreakClient().blueprintV4Endpoint()
                         .getByName(workspaceId, bp.getName())).collect(Collectors.toSet());

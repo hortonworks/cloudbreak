@@ -41,8 +41,8 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Override
-    public BlueprintV4ViewResponses list(Long workspaceId) {
-        Set<BlueprintView> allAvailableViewInWorkspace = blueprintService.getAllAvailableViewInWorkspace(workspaceId);
+    public BlueprintV4ViewResponses list(Long workspaceId, Boolean withSdx) {
+        Set<BlueprintView> allAvailableViewInWorkspace = blueprintService.getAllAvailableViewInWorkspaceAndFilterBySdxReady(workspaceId, withSdx);
         return new BlueprintV4ViewResponses(converterUtil.convertAllAsSet(allAvailableViewInWorkspace, BlueprintV4ViewResponse.class));
     }
 
