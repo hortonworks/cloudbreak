@@ -38,7 +38,7 @@ public class CleanupService {
                 .forEach(stack -> deleteStackAndWait(cloudbreakClient, workspaceId, stack.getName()));
 
         cloudbreakClient.blueprintV4Endpoint()
-                .list(workspaceId)
+                .list(workspaceId, false)
                 .getResponses()
                 .stream()
                 .filter(blueprint -> blueprint.getName().startsWith("it-"))
@@ -61,7 +61,7 @@ public class CleanupService {
 
     public void deleteBlueprint(Long workspaceId, CloudbreakClient cloudbreakClient, Long blueprintId) {
         if (blueprintId != null) {
-            Optional<BlueprintV4ViewResponse> response = cloudbreakClient.blueprintV4Endpoint().list(workspaceId)
+            Optional<BlueprintV4ViewResponse> response = cloudbreakClient.blueprintV4Endpoint().list(workspaceId, false)
                     .getResponses()
                     .stream()
                     .filter(blueprint -> blueprint.getId().equals(blueprintId))

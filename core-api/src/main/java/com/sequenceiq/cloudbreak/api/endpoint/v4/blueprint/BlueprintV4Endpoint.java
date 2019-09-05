@@ -9,11 +9,13 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
@@ -38,7 +40,7 @@ public interface BlueprintV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = BlueprintOpDescription.LIST_BY_WORKSPACE, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "listBlueprintsByWorkspace")
-    BlueprintV4ViewResponses list(@PathParam("workspaceId") Long workspaceId);
+    BlueprintV4ViewResponses list(@PathParam("workspaceId") Long workspaceId, @DefaultValue("false") @QueryParam("withSdx") Boolean withSdx);
 
     @GET
     @Path("name/{name}")

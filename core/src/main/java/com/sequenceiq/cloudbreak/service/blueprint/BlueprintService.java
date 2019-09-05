@@ -176,11 +176,23 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return getAllAvailableInWorkspace(workspace);
     }
 
-    public Set<BlueprintView> getAllAvailableViewInWorkspace(Long workspaceId) {
+    public Set<BlueprintView> getAllAvailableViewInWorkspaceAndFilterBySdxReady(Long workspaceId, Boolean withSdx) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         updateDefaultBlueprintCollection(workspace);
-        return blueprintViewRepository.findAllByNotDeletedInWorkspace(workspaceId);
+        Set<BlueprintView> allByNotDeletedInWorkspace = blueprintViewRepository.findAllByNotDeletedInWorkspace(workspaceId);
+        if (withSdx) {
+            return allByNotDeletedInWorkspace;
+        }
+        return allByNotDeletedInWorkspace.stream().filter(it -> !isSdxReady(it)).collect(Collectors.toSet());
+    }
+
+    private boolean isSdxReady(BlueprintView blueprintView) {
+        if (blueprintView.getTags() == null || blueprintView.getTags().getValue() == null) {
+            return false;
+        }
+        Boolean sdxReady = blueprintView.getTags().getValue(SHARED_SERVICES_READY);
+        return sdxReady == null ? false : sdxReady;
     }
 
     public Set<Blueprint> getAllAvailableInWorkspace(Workspace workspace) {
