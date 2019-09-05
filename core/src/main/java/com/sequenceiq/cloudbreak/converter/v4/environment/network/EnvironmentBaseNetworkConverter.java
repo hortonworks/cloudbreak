@@ -30,7 +30,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         result.setSubnetCIDR(null);
         Map<String, Object> attributes = new HashMap<>();
         Optional<CloudSubnet> cloudSubnet = source.getSubnetMetas().values().stream()
-                .filter(s -> s.getAvailabilityZone().equals(availabilityZone))
+                .filter(s -> s.getAvailabilityZone() == null ? availabilityZone == null : s.getAvailabilityZone().equals(availabilityZone))
                 .findFirst();
         if (!cloudSubnet.isPresent()) {
             throw new BadRequestException("No subnet for the given availability zone: " + availabilityZone);
