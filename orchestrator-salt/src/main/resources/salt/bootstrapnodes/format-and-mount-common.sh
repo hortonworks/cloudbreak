@@ -88,6 +88,14 @@ get_root_disk() {
     fi
 }
 
+get_root_disk_partition_number() {
+    echo $(lsblk --output MAJ:MIN,MOUNTPOINT --raw | grep /$ | cut -f1 -d' ' | cut -f2 -d':')
+}
+
+get_root_disk_type() {
+    echo $(lsblk --output FSTYPE,MOUNTPOINT --raw | grep /$ | cut -f1 -d' ')
+}
+
 not_elastic_block_store() {
     local device_name=$1 # input is evpected without '/dev/'
     local log_file=$2
