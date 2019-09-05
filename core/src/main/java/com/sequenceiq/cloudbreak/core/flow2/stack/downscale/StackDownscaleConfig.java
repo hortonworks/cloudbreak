@@ -20,9 +20,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.cloudbreak.core.flow2.config.RetryableFlowConfiguration;
 
 @Component
-public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownscaleState, StackDownscaleEvent> {
+public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownscaleState, StackDownscaleEvent>
+    implements RetryableFlowConfiguration<StackDownscaleEvent> {
+
     private static final List<Transition<StackDownscaleState, StackDownscaleEvent>> TRANSITIONS =
             new Builder<StackDownscaleState, StackDownscaleEvent>()
                 .from(INIT_STATE).to(DOWNSCALE_COLLECT_RESOURCES_STATE).event(STACK_DOWNSCALE_EVENT).noFailureEvent()
@@ -60,5 +63,10 @@ public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownsca
     @Override
     protected FlowEdgeConfig<StackDownscaleState, StackDownscaleEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public StackDownscaleEvent getFailHandledEvent() {
+        return DOWNSCALE_FAIL_HANDLED_EVENT;
     }
 }

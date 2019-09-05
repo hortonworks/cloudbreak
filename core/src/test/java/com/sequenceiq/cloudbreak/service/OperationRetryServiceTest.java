@@ -74,26 +74,6 @@ public class OperationRetryServiceTest {
         return flowLog;
     }
 
-    @Test(expected = BadRequestException.class)
-    public void retrySuccessful() {
-        when(stackMock.getId()).thenReturn(STACK_ID);
-        when(stackMock.getStatus()).thenReturn(Status.AVAILABLE);
-        Cluster cluster = new Cluster();
-        cluster.setStatus(Status.AVAILABLE);
-        when(stackMock.getCluster()).thenReturn(cluster);
-
-        List<FlowLog> pendingFlowLogs = Lists.newArrayList(
-                createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, Instant.now().toEpochMilli()),
-                createFlowLog("START_STATE", StateStatus.SUCCESSFUL, Instant.now().toEpochMilli())
-        );
-        when(flowLogRepository.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(pendingFlowLogs);
-        try {
-            underTest.retry(stackMock);
-        } finally {
-            verify(flow2Handler, times(0)).restartFlow(any(FlowLog.class));
-        }
-    }
-
     @Test
     public void retry() {
         when(stackMock.getId()).thenReturn(STACK_ID);

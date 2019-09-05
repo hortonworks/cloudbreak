@@ -26,9 +26,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.cloudbreak.core.flow2.config.RetryableFlowConfiguration;
 
 @Component
-public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<ClusterDownscaleState, ClusterDownscaleEvent> {
+public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<ClusterDownscaleState, ClusterDownscaleEvent>
+    implements RetryableFlowConfiguration<ClusterDownscaleEvent> {
+
     private static final List<Transition<ClusterDownscaleState, ClusterDownscaleEvent>> TRANSITIONS =
             new Builder<ClusterDownscaleState, ClusterDownscaleEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
@@ -69,5 +72,10 @@ public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<Cluste
     @Override
     public ClusterDownscaleEvent[] getInitEvents() {
         return new ClusterDownscaleEvent[] { DECOMMISSION_EVENT };
+    }
+
+    @Override
+    public ClusterDownscaleEvent getFailHandledEvent() {
+        return FAIL_HANDLED_EVENT;
     }
 }
