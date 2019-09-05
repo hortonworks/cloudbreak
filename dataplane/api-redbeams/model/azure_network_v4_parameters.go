@@ -15,8 +15,8 @@ import (
 // swagger:model AzureNetworkV4Parameters
 type AzureNetworkV4Parameters struct {
 
-	// Fully qualified IDs for an Azure network and subnet
-	VirtualNetwork string `json:"virtualNetwork,omitempty"`
+	// Comma-separated list of fully-qualified subnets with connectivity to the database server
+	Subnets string `json:"subnets,omitempty"`
 }
 
 // Validate validates this azure network v4 parameters
