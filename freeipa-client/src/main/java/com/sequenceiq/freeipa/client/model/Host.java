@@ -1,8 +1,10 @@
 package com.sequenceiq.freeipa.client.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.sequenceiq.freeipa.client.deserializer.ListFlatteningDeserializer;
 
@@ -21,6 +23,12 @@ public class Host {
 
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private String krbcanonicalname;
+
+    @JsonProperty("has_keytab")
+    private Boolean hasKeytab = Boolean.FALSE;
+
+    @JsonProperty("memberof_role")
+    private List<String> memberOfRole = new ArrayList<>();
 
     public String getDn() {
         return dn;
@@ -58,7 +66,19 @@ public class Host {
         return krbcanonicalname;
     }
 
-    public void setKrbcanonicalname(String krbcanonicalname) {
-        this.krbcanonicalname = krbcanonicalname;
+    public void setHasKeytab(Boolean hasKeytab) {
+        this.hasKeytab = hasKeytab;
+    }
+
+    public Boolean getHasKeytab() {
+        return hasKeytab;
+    }
+
+    public List<String> getMemberOfRole() {
+        return memberOfRole;
+    }
+
+    public void setMemberOfRole(List<String> memberOfRole) {
+        this.memberOfRole = memberOfRole;
     }
 }

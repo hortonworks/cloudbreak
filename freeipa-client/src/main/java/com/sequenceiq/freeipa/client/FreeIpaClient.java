@@ -429,6 +429,12 @@ public class FreeIpaClient {
         invoke("service_allow_retrieve_keytab", flags, params, Service.class);
     }
 
+    public void allowHostKeytabRetrieval(String fqdn, String user) throws FreeIpaClientException {
+        List<String> flags = List.of(fqdn);
+        Map<String, Object> params = Map.of("user", user);
+        invoke("host_allow_retrieve_keytab", flags, params, Host.class);
+    }
+
     public Keytab getExistingKeytab(String canonicalPrincipal) throws FreeIpaClientException {
         List<String> flags = List.of(canonicalPrincipal);
         Map<String, Object> params = Map.of("retrieve", true);
@@ -439,6 +445,12 @@ public class FreeIpaClient {
         List<String> flags = List.of(canonicalPrincipal);
         Map<String, Object> params = Map.of();
         return (Keytab) invoke("get_keytab", flags, params, Keytab.class).getResult();
+    }
+
+    public Host showHost(String fqdn) throws FreeIpaClientException {
+        List<String> flags = List.of(fqdn);
+        Map<String, Object> params = Map.of();
+        return (Host) invoke("host_show", flags, params, Host.class).getResult();
     }
 
     public <T> RPCResponse<T> invoke(String method, List<String> flags, Map<String, Object> params, Type resultType) throws FreeIpaClientException {

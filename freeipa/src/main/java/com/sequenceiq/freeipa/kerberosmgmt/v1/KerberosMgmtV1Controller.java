@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.VaultCleanupRequest;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
@@ -33,6 +35,16 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     public ServiceKeytabResponse getServiceKeytab(@Valid ServiceKeytabRequest request) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
         return kerberosMgmtV1Service.getExistingServiceKeytab(request, accountId);
+    }
+
+    public HostKeytabResponse generateHostKeytab(@Valid HostKeytabRequest request) throws FreeIpaClientException {
+        String accountId = crnService.getCurrentAccountId();
+        return kerberosMgmtV1Service.generateHostKeytab(request, accountId);
+    }
+
+    public HostKeytabResponse getHostKeytab(@Valid HostKeytabRequest request) throws FreeIpaClientException {
+        String accountId = crnService.getCurrentAccountId();
+        return kerberosMgmtV1Service.getExistingHostKeytab(request, accountId);
     }
 
     public void deleteServicePrincipal(@Valid ServicePrincipalRequest request) throws FreeIpaClientException, DeleteException {

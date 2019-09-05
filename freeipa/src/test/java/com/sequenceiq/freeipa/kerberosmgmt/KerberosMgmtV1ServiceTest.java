@@ -16,6 +16,8 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -214,5 +216,73 @@ public class KerberosMgmtV1ServiceTest {
         request.setServerHostName(HOST);
         ServiceKeytabResponse resp = underTest.getExistingServiceKeytab(request, ACCOUNT_ID);
         Assert.assertNotNull(resp.getKeytab());
+        Assert.assertNotNull(resp.getServicePrincipal());
+    }
+
+    @Test
+    public void testExistingHostKeytabFailure() throws Exception {
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        HostKeytabRequest request = new HostKeytabRequest();
+        request.setEnvironmentCrn(ENVIRONMENT_ID);
+        request.setServerHostName(HOST);
+        Mockito.when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.getExistingKeytab(anyString())).thenReturn(new Keytab());
+        try {
+            underTest.getExistingHostKeytab(request, ACCOUNT_ID);
+        } catch (RuntimeException exp) {
+            Assert.assertEquals("Failed to fetch keytab.", exp.getMessage());
+        }
+    }
+
+    @Test
+    public void testGenerateHostKeytabFailure() throws Exception {
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        HostKeytabRequest request = new HostKeytabRequest();
+        request.setEnvironmentCrn(ENVIRONMENT_ID);
+        request.setServerHostName(HOST);
+        Mockito.when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.addHost(anyString())).thenThrow(ipaClientException);
+        try {
+            underTest.generateHostKeytab(request, ACCOUNT_ID);
+        } catch (RuntimeException exp) {
+            Assert.assertEquals("Failed to create host.", exp.getMessage());
+        }
+    }
+
+    @Test
+    public void testGenerateHostKeytab() throws Exception {
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenReturn(stack);
+        Mockito.when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.addHost(anyString())).thenReturn(host);
+        Mockito.when(mockIpaClient.getKeytab(anyString())).thenReturn(keytab);
+        Mockito.when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
+        Mockito.when(stringToSecretResponseConverter.convert(SECRET)).thenReturn(new SecretResponse());
+        HostKeytabRequest request = new HostKeytabRequest();
+        request.setEnvironmentCrn(ENVIRONMENT_ID);
+        request.setServerHostName(HOST);
+        HostKeytabResponse resp = underTest.generateHostKeytab(request, ACCOUNT_ID);
+        Assert.assertNotNull(resp.getKeytab());
+        Assert.assertNotNull(resp.getHostPrincipal());
+    }
+
+    @Test
+    public void testGetExistingHostKeytab() throws Exception {
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenReturn(stack);
+        Mockito.when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.getExistingKeytab(anyString())).thenReturn(keytab);
+        Mockito.when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
+        Mockito.when(stringToSecretResponseConverter.convert(SECRET)).thenReturn(new SecretResponse());
+        HostKeytabRequest request = new HostKeytabRequest();
+        request.setEnvironmentCrn(ENVIRONMENT_ID);
+        request.setServerHostName(HOST);
+        HostKeytabResponse resp = underTest.getExistingHostKeytab(request, ACCOUNT_ID);
+        Assert.assertNotNull(resp.getKeytab());
+        Assert.assertNotNull(resp.getHostPrincipal());
     }
 }

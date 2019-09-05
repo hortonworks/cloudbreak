@@ -22,6 +22,7 @@ public class VaultPathBuilderV1Test {
     public void testVaultServicePrincipalPath() throws Exception {
         Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/54321-9876/host1/service1",
                 new VaultPathBuilder()
+                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(SUBTYPE)
                         .withEnvironmentCrn(ENVIRONMENT_ID)
@@ -36,6 +37,7 @@ public class VaultPathBuilderV1Test {
         Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/accountId-12345-6789/host1/service1",
                 new VaultPathBuilder()
                         .enableGeneratingClusterIdIfNotPresent()
+                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(SUBTYPE)
                         .withEnvironmentCrn(ENVIRONMENT_ID)
@@ -45,9 +47,36 @@ public class VaultPathBuilderV1Test {
     }
 
     @Test
+    public void testVaultHostPrincipalPath() throws Exception {
+        Assertions.assertEquals("accountId/HostKeytab/keytab/12345-6789/54321-9876/host1",
+                new VaultPathBuilder()
+                        .withSecretType(VaultPathBuilder.SecretType.HOST_KEYTAB)
+                        .withAccountId(ACCOUNT_ID)
+                        .withSubType(SUBTYPE)
+                        .withEnvironmentCrn(ENVIRONMENT_ID)
+                        .withClusterCrn(CLUSTER_ID)
+                        .withServerHostName(HOST)
+                        .build());
+    }
+
+    @Test
+    public void testVaultHostPrincipalPathGenerateClusterId() throws Exception {
+        Assertions.assertEquals("accountId/HostKeytab/keytab/12345-6789/accountId-12345-6789/host1",
+                new VaultPathBuilder()
+                        .enableGeneratingClusterIdIfNotPresent()
+                        .withSecretType(VaultPathBuilder.SecretType.HOST_KEYTAB)
+                        .withAccountId(ACCOUNT_ID)
+                        .withSubType(SUBTYPE)
+                        .withEnvironmentCrn(ENVIRONMENT_ID)
+                        .withServerHostName(HOST)
+                        .build());
+    }
+
+    @Test
     public void testVaultHostPath() throws Exception {
         Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/54321-9876/host1/",
                 new VaultPathBuilder()
+                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(SUBTYPE)
                         .withEnvironmentCrn(ENVIRONMENT_ID)
@@ -61,6 +90,7 @@ public class VaultPathBuilderV1Test {
         Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/accountId-12345-6789/host1/",
                 new VaultPathBuilder()
                         .enableGeneratingClusterIdIfNotPresent()
+                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(SUBTYPE)
                         .withEnvironmentCrn(ENVIRONMENT_ID)
@@ -72,6 +102,7 @@ public class VaultPathBuilderV1Test {
     public void testVaultClusterCrnPath() throws Exception {
         Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/54321-9876/",
                 new VaultPathBuilder()
+                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(SUBTYPE)
                         .withEnvironmentCrn(ENVIRONMENT_ID)
@@ -84,6 +115,7 @@ public class VaultPathBuilderV1Test {
         Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/accountId-12345-6789/",
                 new VaultPathBuilder()
                         .enableGeneratingClusterIdIfNotPresent()
+                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(SUBTYPE)
                         .withEnvironmentCrn(ENVIRONMENT_ID)
@@ -94,6 +126,7 @@ public class VaultPathBuilderV1Test {
     public void testVaultEnvironmentCrnPath() throws Exception {
         Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/",
                 new VaultPathBuilder()
+                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(SUBTYPE)
                         .withEnvironmentCrn(ENVIRONMENT_ID)
@@ -105,6 +138,7 @@ public class VaultPathBuilderV1Test {
         Assertions.assertEquals("accountId/ServiceKeytab/keytab/12345-6789/accountId-12345-6789/",
                 new VaultPathBuilder()
                         .enableGeneratingClusterIdIfNotPresent()
+                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(SUBTYPE)
                         .withEnvironmentCrn(ENVIRONMENT_ID)
@@ -116,16 +150,25 @@ public class VaultPathBuilderV1Test {
     public void testMissingRequiredConfiguration() throws Exception {
         Assertions.assertThrows(IllegalStateException.class,
                 () -> new VaultPathBuilder()
+                        .withAccountId(ACCOUNT_ID)
                         .withSubType(SUBTYPE)
                         .withEnvironmentCrn(ENVIRONMENT_ID)
                         .build());
         Assertions.assertThrows(IllegalStateException.class,
                 () -> new VaultPathBuilder()
+                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
+                        .withSubType(SUBTYPE)
+                        .withEnvironmentCrn(ENVIRONMENT_ID)
+                        .build());
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> new VaultPathBuilder()
+                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withEnvironmentCrn(ENVIRONMENT_ID)
                         .build());
         Assertions.assertThrows(IllegalStateException.class,
                 () -> new VaultPathBuilder()
+                        .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
                         .withAccountId(ACCOUNT_ID)
                         .withSubType(SUBTYPE)
                         .build());
