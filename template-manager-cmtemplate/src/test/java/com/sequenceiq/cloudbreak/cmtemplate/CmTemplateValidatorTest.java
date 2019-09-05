@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collection;
@@ -16,6 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidationException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -74,6 +76,28 @@ public class CmTemplateValidatorTest {
                 .collect(toSet());
 
         assertThrows(BlueprintValidationException.class, () -> subject.validate(blueprint, hostGroups, instanceGroups, true));
+    }
+
+    @Test
+    public void testValidationIfKafkaPresentedThenShouldThrowBadRequest() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("master");
+
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, -1));
+    }
+
+    @Test
+    public void testValidationIfKafkaNotPresentedThenValidationShouldRunSuccefully() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("management");
+
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, 2));
     }
 
 }

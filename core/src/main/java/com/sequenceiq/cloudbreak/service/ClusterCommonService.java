@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.s
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -65,6 +66,9 @@ public class ClusterCommonService {
 
     @Inject
     private AmbariBlueprintValidator ambariBlueprintValidator;
+
+    @Inject
+    private CmTemplateValidator cmTemplateValidator;
 
     @Inject
     private StackService stackService;
@@ -142,6 +146,9 @@ public class ClusterCommonService {
         }
         if (blueprintService.isAmbariBlueprint(blueprint)) {
             ambariBlueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(),
+                    updateJson.getHostGroupAdjustment().getScalingAdjustment());
+        } else {
+            cmTemplateValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(),
                     updateJson.getHostGroupAdjustment().getScalingAdjustment());
         }
         clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());

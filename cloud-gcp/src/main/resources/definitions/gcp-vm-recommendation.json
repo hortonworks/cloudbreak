@@ -14,5 +14,21 @@
     "volumeType": "SSD",
     "volumeCount": 1,
     "volumeSizeGB": 100
+  },
+  "broker": {
+    "type": "broker",
+    "flavor": "n1-standard-8",
+    "cardinality": 3,
+    "volumeType": "MAGNETIC",
+    "volumeCount": 1,
+    "volumeSizeGB": 500
+  },
+  "quorum": {
+    "type": "quorum",
+    "flavor": "n1-standard-4",
+    "cardinality": 3,
+    "volumeType": "MAGNETIC",
+    "volumeCount": 1,
+    "volumeSizeGB": 100
   }
 }

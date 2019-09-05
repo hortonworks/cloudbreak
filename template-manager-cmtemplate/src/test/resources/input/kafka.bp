@@ -1,0 +1,86 @@
+{
+  "cdhVersion": "7.0.0",
+  "displayName": "CDPD 1.0 - Streaming Basic",
+  "services": [
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "serviceConfigs": [
+        {
+          "name": "hdfs_service_config_safety_valve",
+          "value": "<property><name>dfs.datanode.keytab.file</name><value>{{CMF_CONF_DIR}}/hdfs.keytab</value></property>"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-SECONDARYNAMENODE-BASE",
+          "roleType": "SECONDARYNAMENODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "kafka",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "refName": "kafka-GATEWAY-BASE",
+          "roleType": "GATEWAY"
+        },
+        {
+          "base": true,
+          "refName": "kafka-KAFKA_BROKER-BASE",
+          "roleType": "KAFKA_BROKER"
+        }
+      ],
+      "serviceConfigs": [
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        }
+      ],
+      "serviceType": "KAFKA"
+    },
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "cardinality": 3,
+      "roleConfigGroupsRefNames": [
+        "kafka-GATEWAY-BASE",
+        "kafka-KAFKA_BROKER-BASE",
+        "zookeeper-SERVER-BASE"
+      ]
+    },
+    {
+      "refName": "management",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "hdfs-NAMENODE-BASE",
+        "hdfs-SECONDARYNAMENODE-BASE",
+        "hdfs-DATANODE-BASE"
+      ]
+    }
+  ]
+}

@@ -10,5 +10,7 @@ public enum ClusterTemplateV4Type {
     DATALAKE,
     DATAENGINEERING,
     DATAENGINEERING_HA,
+    STREAMING,
+    STREAMING_HA,
     OTHER
 }
