@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -19,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.MaintenanceModeJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.stack.RetryableFlowResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
@@ -31,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
@@ -99,6 +103,14 @@ public class StackV3Controller extends NotificationController implements StackV3
     @Override
     public void retryInWorkspace(Long workspaceId, String name) {
         stackCommonService.retryInWorkspace(name, workspaceId);
+    }
+
+    @Override
+    public List<RetryableFlowResponse> listRetryableFlows(Long workspaceId, String name) {
+        List<RetryableFlow> retryableFlows = stackCommonService.getRetryableFlows(name, workspaceId);
+        return retryableFlows.stream()
+                .map(retryable -> RetryableFlowResponse.Builder.builder().setName(retryable.getName()).setFailDate(retryable.getFailDate()).build())
+                .collect(Collectors.toList());
     }
 
     @Override

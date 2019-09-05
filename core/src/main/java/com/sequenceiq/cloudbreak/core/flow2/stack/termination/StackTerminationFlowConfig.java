@@ -36,6 +36,8 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     private static final FlowEdgeConfig<StackTerminationState, StackTerminationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, TERMINATION_FAILED_STATE, STACK_TERMINATION_FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Stack Termination";
+
     public StackTerminationFlowConfig() {
         super(StackTerminationState.class, StackTerminationEvent.class);
     }
@@ -48,6 +50,11 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     @Override
     protected FlowEdgeConfig<StackTerminationState, StackTerminationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override

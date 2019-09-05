@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.core.flow2.config.RetryableFlowConfiguration;
 @Component
 public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<ClusterCreationState, ClusterCreationEvent>
         implements RetryableFlowConfiguration<ClusterCreationEvent> {
+
     private static final List<Transition<ClusterCreationState, ClusterCreationEvent>> TRANSITIONS =
             new Builder<ClusterCreationState, ClusterCreationEvent>().defaultFailureEvent(CLUSTER_CREATION_FAILED_EVENT)
             .from(INIT_STATE).to(BOOTSTRAPPING_MACHINES_STATE).event(CLUSTER_CREATION_EVENT).noFailureEvent()
@@ -70,6 +71,8 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
 
     private static final FlowEdgeConfig<ClusterCreationState, ClusterCreationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CLUSTER_CREATION_FAILED_STATE, CLUSTER_CREATION_FAILURE_HANDLED_EVENT);
+
+    private static final String FLOW_DISPLAY_NAME = "Cluster Creation";
 
     public ClusterCreationFlowConfig() {
         super(ClusterCreationState.class, ClusterCreationEvent.class);
@@ -101,6 +104,11 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
     @Override
     protected FlowEdgeConfig<ClusterCreationState, ClusterCreationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override

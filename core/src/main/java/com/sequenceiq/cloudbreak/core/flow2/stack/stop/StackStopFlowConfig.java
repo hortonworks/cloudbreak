@@ -31,6 +31,8 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     private static final FlowEdgeConfig<StackStopState, StackStopEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STOP_FAILED_STATE, STOP_FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Stop Stack";
+
     public StackStopFlowConfig() {
         super(StackStopState.class, StackStopEvent.class);
     }
@@ -60,5 +62,10 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     @Override
     protected FlowEdgeConfig<StackStopState, StackStopEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 }

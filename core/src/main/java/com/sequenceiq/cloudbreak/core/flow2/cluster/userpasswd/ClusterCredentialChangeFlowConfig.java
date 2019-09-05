@@ -32,6 +32,8 @@ public class ClusterCredentialChangeFlowConfig extends AbstractFlowConfiguration
     private static final FlowEdgeConfig<ClusterCredentialChangeState, ClusterCredentialChangeEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_CREDENTIALCHANGE_FAILED_STATE, FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Change Cluster Credential";
+
     public ClusterCredentialChangeFlowConfig() {
         super(ClusterCredentialChangeState.class, ClusterCredentialChangeEvent.class);
     }
@@ -44,6 +46,11 @@ public class ClusterCredentialChangeFlowConfig extends AbstractFlowConfiguration
     @Override
     protected FlowEdgeConfig<ClusterCredentialChangeState, ClusterCredentialChangeEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override

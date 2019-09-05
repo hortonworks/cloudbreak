@@ -41,6 +41,8 @@ public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<Ch
     private static final FlowEdgeConfig<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CHANGE_PRIMARY_GATEWAY_FAILED_STATE, CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED);
 
+    private static final String FLOW_DISPLAY_NAME = "Change Primary Gateway";
+
     public ChangePrimaryGatewayFlowConfig() {
         super(ChangePrimaryGatewayState.class, ChangePrimaryGatewayEvent.class);
     }
@@ -53,6 +55,11 @@ public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<Ch
     @Override
     protected FlowEdgeConfig<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override

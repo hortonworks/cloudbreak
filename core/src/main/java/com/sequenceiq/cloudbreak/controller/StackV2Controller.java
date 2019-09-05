@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -20,6 +22,8 @@ import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
+import com.sequenceiq.cloudbreak.api.model.stack.RetryableFlowResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.RetryableFlowResponse.Builder;
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
@@ -32,6 +36,7 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
@@ -236,6 +241,16 @@ public class StackV2Controller extends NotificationController implements StackV2
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         stackCommonService.retryInWorkspace(stackName, workspace.getId());
+    }
+
+    @Override
+    public List<RetryableFlowResponse> listRetryableFlows(String stackName) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        List<RetryableFlow> retryableFlows = stackCommonService.getRetryableFlows(stackName, workspace.getId());
+        return retryableFlows.stream()
+                .map(retryable -> Builder.builder().setName(retryable.getName()).setFailDate(retryable.getFailDate()).build())
+                .collect(Collectors.toList());
     }
 
     @Override

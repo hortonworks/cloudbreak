@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v2;
 
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.common.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.GeneratedBlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
+import com.sequenceiq.cloudbreak.api.model.stack.RetryableFlowResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackImageChangeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.StackScaleRequestV2;
@@ -224,6 +226,13 @@ public interface StackV2Endpoint extends StackEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.RETRY_BY_ID, produces = ContentType.JSON, notes = Notes.RETRY_STACK_NOTES, nickname = "retryStack")
     void retry(@PathParam("name") String name);
+
+    @GET
+    @Path("{name}/retry")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.LIST_RETRYABLE_FLOWS, produces = ContentType.JSON, notes = Notes.LIST_RETRYABLE_NOTES,
+            nickname = "listRetryableFlows")
+    List<RetryableFlowResponse> listRetryableFlows(@PathParam("name") String name);
 
     @POST
     @Path("{name}/manualrepair")

@@ -21,6 +21,8 @@ public class ModelDescriptions {
     public static final String WORKSPACE_ID = "Workspace ID of the resource";
     public static final String PREINSTALLED = "Denotes that the image is prewarmed or base image.";
     public static final String GOV_CLOUD_FLAG = "Flag indicating if the credential type is AWS Gov Cloud";
+    public static final String FAIL_DATE = "Date when the operation went failed.";
+    public static final String OPERATION_NAME = "Name of the failed operation, that is also retryable.";
 
     private ModelDescriptions() {
     }

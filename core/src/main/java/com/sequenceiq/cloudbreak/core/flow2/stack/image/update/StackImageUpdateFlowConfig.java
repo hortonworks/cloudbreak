@@ -51,6 +51,8 @@ public class StackImageUpdateFlowConfig extends AbstractFlowConfiguration<StackI
     private static final FlowEdgeConfig<StackImageUpdateState, StackImageUpdateEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STACK_IMAGE_UPDATE_FAILED_STATE, STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Update Stack Image";
+
     public StackImageUpdateFlowConfig() {
         super(StackImageUpdateState.class, StackImageUpdateEvent.class);
     }
@@ -68,6 +70,11 @@ public class StackImageUpdateFlowConfig extends AbstractFlowConfiguration<StackI
     @Override
     protected FlowEdgeConfig<StackImageUpdateState, StackImageUpdateEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override

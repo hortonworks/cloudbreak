@@ -90,7 +90,8 @@ public enum Msg {
     MAINTENANCE_MODE_VALIDATION_STARTED("maintenance.mode.validation.started"),
     MAINTENANCE_MODE_VALIDATION_FINISHED_FOUND_WARNINGS("maintenance.mode.validation.finished.warn"),
     MAINTENANCE_MODE_VALIDATION_FINISHED_NO_WARNINGS("maintenance.mode.validation.finished.nowarn"),
-    MAINTENANCE_MODE_VALIDATION_FAILED("maintenance.mode.validation.failed");
+    MAINTENANCE_MODE_VALIDATION_FAILED("maintenance.mode.validation.failed"),
+    RETRY_FLOW_START("retry.flow.start");
 
     private final String code;
 

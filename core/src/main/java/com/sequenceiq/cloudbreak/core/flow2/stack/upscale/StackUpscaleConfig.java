@@ -30,9 +30,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.cloudbreak.core.flow2.config.RetryableFlowConfiguration;
 
 @Component
-public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleState, StackUpscaleEvent> {
+public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleState, StackUpscaleEvent>
+    implements RetryableFlowConfiguration<StackUpscaleEvent> {
+
     private static final List<Transition<StackUpscaleState, StackUpscaleEvent>> TRANSITIONS =
             new Builder<StackUpscaleState, StackUpscaleEvent>()
                     .from(INIT_STATE).to(UPSCALE_PREVALIDATION_STATE).event(ADD_INSTANCES_EVENT).noFailureEvent()
@@ -60,6 +63,8 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
     private static final FlowEdgeConfig<StackUpscaleState, StackUpscaleEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, UPSCALE_FAILED_STATE, UPSCALE_FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Upscale Stack";
+
     public StackUpscaleConfig() {
         super(StackUpscaleState.class, StackUpscaleEvent.class);
     }
@@ -75,6 +80,11 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
     }
 
     @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
+    }
+
+    @Override
     public StackUpscaleEvent[] getEvents() {
         return StackUpscaleEvent.values();
     }
@@ -84,5 +94,10 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
         return new StackUpscaleEvent[] {
                 ADD_INSTANCES_EVENT
         };
+    }
+
+    @Override
+    public StackUpscaleEvent getFailHandledEvent() {
+        return UPSCALE_FAIL_HANDLED_EVENT;
     }
 }

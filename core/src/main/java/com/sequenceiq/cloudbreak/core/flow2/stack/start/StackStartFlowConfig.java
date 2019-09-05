@@ -35,6 +35,8 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     private static final FlowEdgeConfig<StackStartState, StackStartEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, START_FAILED_STATE, START_FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Start Stack";
+
     public StackStartFlowConfig() {
         super(StackStartState.class, StackStartEvent.class);
     }
@@ -59,5 +61,10 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     @Override
     protected FlowEdgeConfig<StackStartState, StackStartEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 }

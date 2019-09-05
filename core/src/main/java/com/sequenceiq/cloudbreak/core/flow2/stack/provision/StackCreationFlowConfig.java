@@ -70,6 +70,8 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
     private static final FlowEdgeConfig<StackCreationState, StackCreationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STACK_CREATION_FAILED_STATE, STACKCREATION_FAILURE_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Create Stack";
+
     public StackCreationFlowConfig() {
         super(StackCreationState.class, StackCreationEvent.class);
     }
@@ -82,6 +84,11 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
     @Override
     protected FlowEdgeConfig<StackCreationState, StackCreationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override

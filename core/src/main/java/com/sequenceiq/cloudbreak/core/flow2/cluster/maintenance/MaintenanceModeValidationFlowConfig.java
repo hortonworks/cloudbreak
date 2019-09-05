@@ -40,6 +40,8 @@ public class MaintenanceModeValidationFlowConfig extends AbstractFlowConfigurati
     private static final FlowEdgeConfig<MaintenanceModeValidationState, MaintenanceModeValidationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, VALIDATION_FAILED_STATE, VALIDATION_FAIL_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Maintenance Mode Validation";
+
     public MaintenanceModeValidationFlowConfig() {
         super(MaintenanceModeValidationState.class, MaintenanceModeValidationEvent.class);
     }
@@ -64,5 +66,10 @@ public class MaintenanceModeValidationFlowConfig extends AbstractFlowConfigurati
     @Override
     protected FlowEdgeConfig<MaintenanceModeValidationState, MaintenanceModeValidationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 }

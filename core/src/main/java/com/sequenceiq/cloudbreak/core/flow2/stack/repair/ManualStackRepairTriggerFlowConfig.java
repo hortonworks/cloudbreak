@@ -32,6 +32,8 @@ public class ManualStackRepairTriggerFlowConfig extends AbstractFlowConfiguratio
     private static final FlowEdgeConfig<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, MANUAL_STACK_REPAIR_TRIGGER_FAILED_STATE, MANUAL_STACK_REPAIR_TRIGGER_FAILURE_HANDLED_EVENT);
 
+    private static final String FLOW_DISPLAY_NAME = "Manual Stack Repair";
+
     public ManualStackRepairTriggerFlowConfig() {
         super(ManualStackRepairTriggerState.class, ManualStackRepairTriggerEvent.class);
     }
@@ -44,6 +46,11 @@ public class ManualStackRepairTriggerFlowConfig extends AbstractFlowConfiguratio
     @Override
     protected FlowEdgeConfig<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> getEdgeConfig() {
         return EDGE_CONFIG;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return FLOW_DISPLAY_NAME;
     }
 
     @Override
