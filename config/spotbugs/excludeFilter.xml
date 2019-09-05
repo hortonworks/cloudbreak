@@ -51,6 +51,9 @@
         <Package name="~com\.cloudera\.thunderhead\.service\.*"/>
     </Match>
     <Match>
+        <Package name="~com\.cloudera\.thunderhead\.service\.publicendpointmanagement.*"/>
+    </Match>
+    <Match>
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
 </FindBugsFilter>

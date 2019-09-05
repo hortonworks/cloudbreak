@@ -1,0 +1,123 @@
+syntax = "proto3";
+
+package publicendpointmanagement;
+
+option java_package = "com.cloudera.thunderhead.service.publicendpointmanagement";
+option java_outer_classname = "PublicEndpointManagementProto";
+option go_package = "com/cloudera/cdp/protobuf";
+
+import "version.proto";
+import "options.proto";
+
+// For future compatibility, all rpcs must take a request and return a response
+// even if there is initially no content for these messages.
+service PublicEndpointManagement {
+  // Get the service version.
+  rpc GetVersion (version.VersionRequest)
+    returns (version.VersionResponse) {}
+
+  // Create or update a DNS entry. :: Create or update a DNS entry.
+  rpc CreateDnsEntry(CreateDnsEntryRequest)
+    returns (CreateDnsEntryResponse) {}
+
+  // Delete a DNS entry. :: Delete a DNS entry.
+  rpc DeleteDnsEntry(DeleteDnsEntryRequest)
+    returns (DeleteDnsEntryResponse) {}
+
+  // Get a TLS certificate. :: Get a TLS certificate
+  rpc CreateCertificate(CreateCertificateRequest)
+    returns (CreateCertificateResponse) {}
+
+  rpc PollCertificateCreation(PollCertificateCreationRequest)
+    returns (PollCertificateCreationResponse) {}
+}
+
+message AWSElbDnsTarget {
+  // The full dns name for this AWS elb
+  string dnsName = 1;
+  // The hosted zone associated with this elb
+  string hostedZoneId = 2;
+}
+
+message IPs {
+  repeated string IP = 1;
+}
+
+message DnsTarget {
+  oneof Target {
+    // Supported record types.
+    // Only one type is supported per request.
+    IPs targetIPs = 1;
+    string targetCname = 2;
+    AWSElbDnsTarget targetAWSELBDns = 3;
+  }
+}
+
+// Request object for the CreateDnsEntry method.
+message CreateDnsEntryRequest {
+  // The account id
+  string accountId = 1;
+  // The environment for this cluster
+  string environment = 2;
+  // The endpoint for this cluster
+  string endpoint = 3;
+  // Also create a wildcard entry
+  bool addWildcard = 4;
+  // The dns target set for this domain name
+  DnsTarget dnsTarget = 5;
+}
+
+// Response object for the CreateDnsEntry method.
+message CreateDnsEntryResponse {
+}
+
+// Request object for the DeleteDnsEntry method.
+message DeleteDnsEntryRequest {
+  // The account id
+  string accountId = 1;
+  // The environment for this cluster
+  string environment = 2;
+  // The endpoint for this cluster
+  string endpoint = 3;
+  // Also remove wildcard entry
+  bool removeWildcard = 4;
+  // The dns target set for this domain name
+  DnsTarget dnsTarget = 5;
+}
+
+// Response object for the DeleteDnsEntry method.
+message DeleteDnsEntryResponse {
+}
+
+// Request object for the GetCertificate method.
+message CreateCertificateRequest {
+  // The account id
+  string accountId = 1;
+  // The environment for this cluster
+  string environment = 2;
+  // The endpoint for this cluster
+  string endpoint = 3;
+  // This request also contains wild card domain.
+  bool addWildcard = 4;
+  // The encoded csr request. We pass the csr instead of domains to allow clients
+  // to hold on to the private keys.
+  bytes csr = 5 [(options.FieldExtension.skipLogging) = true];
+
+}
+
+// Response object for the GetCertificate method.
+message CreateCertificateResponse {
+  // The id used for polling the results
+  string requestId = 1;
+}
+
+message PollCertificateCreationRequest {
+  string requestId = 1;
+}
+
+message PollCertificateCreationResponse {
+  string status = 1;
+  string error = 2;
+  repeated string certificates = 3 [(options.FieldExtension.skipLogging) = true];
+}
+
