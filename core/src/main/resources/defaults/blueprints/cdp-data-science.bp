@@ -50,6 +50,12 @@
       {
         "refName": "yarn",
         "serviceType": "YARN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_admin_acl",
+            "value": "yarn,hive,hdfs"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "yarn-RESOURCEMANAGER-BASE",
