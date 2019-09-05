@@ -37,7 +37,9 @@ public enum ExposedService {
     NIFI_REGISTRY("Nifi Registry", "NIFI_REGISTRY_SERVER", "NIFI-REGISTRY", "/nifi-registry-app/nifi-registry/", true, 18080, 18433, false, false),
     IMPALA("Impala", "IMPALAD", "IMPALA", "/impala/", true, 28000, 28000, true, true),
     NAMENODE_HDFS("NameNode HDFS", "NAMENODE", "NAMENODE", "/", true, 8020, 8020, true, true),
-    JOBTRACKER("Job Tracker", "RESOURCEMANAGER", "JOBTRACKER", "/", true, 8032, 8032, true, true);
+    JOBTRACKER("Job Tracker", "RESOURCEMANAGER", "JOBTRACKER", "/", true, 8032, 8032, true, true),
+    PROFILER_ADMIN("Profiler Admin", "PROFILER_ADMIN_AGENT", "PROFILER_ADMIN", "/profiler-admin/", false, 21700, 21700, true, true),
+    PROFILER_METRICS("Profiler Metrics", "PROFILER_METRICS_AGENT", "PROFILER_METRICS", "/profiler-metrics/", false, 21800, 21800, true, true);
 
     private final String displayName;
     private final String serviceName;
