@@ -11,7 +11,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.v2.NetworkV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
 
-public class OpenstackStackCreationV2Test extends AbstractStackCreationV2Test {
+public class OpenstackStackCreationV2Test extends AbstractStackCreationV3Test {
     @BeforeMethod(dependsOnGroups = "V2StackCreationInit")
     @Parameters({"subnetCidr", "floatingPool"})
     public void networkParams(String subnetCidr, @Optional("") String floatingPool) {

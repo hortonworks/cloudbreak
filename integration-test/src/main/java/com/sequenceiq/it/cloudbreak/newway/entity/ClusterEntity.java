@@ -12,7 +12,7 @@ import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV2Request, ClusterResponse, ClusterEntity> {
+public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV2Request, ClusterResponse, ClusterEntity, ClusterResponse> {
 
     private static final String CLUSTER_REQUEST = "CLUSTER_REQUEST";
 

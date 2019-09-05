@@ -25,6 +25,7 @@ import com.sequenceiq.it.verification.Call;
 import com.sequenceiq.it.verification.Verification;
 
 import spark.Response;
+import spark.Spark;
 
 public abstract class AbstractMockIntegrationTest extends AbstractCloudbreakIntegrationTest {
 
@@ -56,6 +57,15 @@ public abstract class AbstractMockIntegrationTest extends AbstractCloudbreakInte
     @AfterClass
     public void breakDown() {
         stop();
+        while (true) {
+            try {
+                Spark.port();
+                Thread.sleep(500);
+            } catch (IllegalStateException | InterruptedException e) {
+                break;
+            }
+
+        }
     }
 
     public Verification verify(String path, String httpMethod) {

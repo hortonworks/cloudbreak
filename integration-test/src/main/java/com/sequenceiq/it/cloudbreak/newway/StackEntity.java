@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.stack.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
@@ -41,7 +42,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthentication;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackV3Action;
 
-public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackResponse, StackEntity> {
+public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackResponse, StackEntity, StackViewResponse> {
 
     public static final String STACK = "STACK";
 

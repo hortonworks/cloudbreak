@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImageCatalogResponse;
 import com.sequenceiq.cloudbreak.api.model.imagecatalog.ImagesResponse;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class ImageCatalogEntity extends AbstractCloudbreakEntity<ImageCatalogRequest, ImageCatalogResponse, ImageCatalogEntity> {
+public class ImageCatalogEntity extends AbstractCloudbreakEntity<ImageCatalogRequest, ImageCatalogResponse, ImageCatalogEntity, ImageCatalogResponse> {
     public static final String IMAGE_CATALOG = "IMAGE_CATALOG";
 
     public static final String IMAGE_CATALOG_URL = "IMAGE_CATALOG_URL";

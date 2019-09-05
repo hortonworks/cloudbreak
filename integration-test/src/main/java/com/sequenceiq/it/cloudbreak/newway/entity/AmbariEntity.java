@@ -16,7 +16,7 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.v2.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Response, AmbariEntity> {
+public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Response, AmbariEntity, Response> {
 
     public AmbariEntity(AmbariV2Request request, TestContext testContex) {
         super(request, testContex);

@@ -46,12 +46,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.RepositoryConfigValidationEndpo
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityRuleEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.AuditV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.BlueprintV3Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ConnectorV3Endpoint;
@@ -304,14 +302,6 @@ public class CloudbreakClient {
 
     public SmartSenseSubscriptionV3Endpoint smartSenseSubscriptionV3Endpoint() {
         return getEndpoint(SmartSenseSubscriptionV3Endpoint.class);
-    }
-
-    public StackV1Endpoint stackV1Endpoint() {
-        return getEndpoint(StackV1Endpoint.class);
-    }
-
-    public StackV2Endpoint stackV2Endpoint() {
-        return getEndpoint(StackV2Endpoint.class);
     }
 
     public StackV3Endpoint stackV3Endpoint() {

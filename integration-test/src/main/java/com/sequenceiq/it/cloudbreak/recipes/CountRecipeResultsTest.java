@@ -22,13 +22,14 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v3.StackV3Endpoint;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
+import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
 
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.IOUtils;
@@ -51,10 +52,11 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
 
         IntegrationTestContext itContext = getItContext();
 
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
+        String stackName = itContext.getContextParam(CloudbreakV2Constants.STACK_NAME);
 
-        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint();
-        List<InstanceGroupResponse> instanceGroups = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>()).getInstanceGroups();
+        StackV3Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV3Endpoint();
+        Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
+        List<InstanceGroupResponse> instanceGroups = stackV1Endpoint.getByNameInWorkspace(workspaceId, stackName, new HashSet<>()).getInstanceGroups();
         String[] files = lookingFor.split(",");
         List<String> publicIps = getPublicIps(instanceGroups, Arrays.asList(searchRecipesOnHosts.split(",")));
         Collection<Future<Boolean>> futures = new ArrayList<>(publicIps.size() * files.length);

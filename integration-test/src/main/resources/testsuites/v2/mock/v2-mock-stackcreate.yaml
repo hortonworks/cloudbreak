@@ -13,11 +13,17 @@ tests:
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
       - com.sequenceiq.it.MockSuiteInitializer
 
+  - name: create mock workspace
+    parameters:
+      workspaceName: its-mock-workspace-v3
+    classes:
+      - com.sequenceiq.it.cloudbreak.mock.MockWorkspaceCreationTest
+
   - name: create mock credential
     parameters:
       credentialName: its-mock-credential-v2
     classes:
-      - com.sequenceiq.it.cloudbreak.mock.MockCredentialCreationTest
+      - com.sequenceiq.it.cloudbreak.mock.MockCredentialV3CreationTest
 
   - name: create master template
     parameters:

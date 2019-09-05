@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.gateway.SSOType;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class ClusterGateway extends AbstractCloudbreakEntity<GatewayJson, GatewayResponse, ClusterGateway> {
+public class ClusterGateway extends AbstractCloudbreakEntity<GatewayJson, GatewayResponse, ClusterGateway, GatewayResponse> {
 
     public static final String GATEWAY_REQUEST = "GATEWAY_REQUEST";
 

@@ -7,7 +7,8 @@ import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.AccessConfigV3Action;
 
-public class AccessConfigEntity extends AbstractCloudbreakEntity<PlatformResourceRequestJson, PlatformAccessConfigsResponse, AccessConfigEntity> {
+public class AccessConfigEntity extends AbstractCloudbreakEntity<PlatformResourceRequestJson, PlatformAccessConfigsResponse, AccessConfigEntity,
+        PlatformAccessConfigsResponse> {
 
     private static final String ACCESS_CONFIG_ID = "ACCESS_CONFIG";
 

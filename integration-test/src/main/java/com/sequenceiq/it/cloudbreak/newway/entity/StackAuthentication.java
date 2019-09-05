@@ -7,7 +7,8 @@ import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class StackAuthentication extends AbstractCloudbreakEntity<StackAuthenticationRequest, StackAuthenticationResponse, StackAuthentication> {
+public class StackAuthentication extends AbstractCloudbreakEntity<StackAuthenticationRequest, StackAuthenticationResponse, StackAuthentication,
+        StackAuthenticationResponse> {
 
     protected StackAuthentication(StackAuthenticationRequest request, TestContext testContext) {
         super(request, testContext);

@@ -22,8 +22,8 @@ public abstract class StackPostStrategyRoot implements Strategy {
         logJSON(" Stack post request:\n", stackEntity.getRequest());
         stackEntity.setResponse(
                 client.getCloudbreakClient()
-                        .stackV2Endpoint()
-                        .postPrivate(stackEntity.getRequest()));
+                        .stackV3Endpoint()
+                        .createInWorkspace(client.getWorkspaceId(), stackEntity.getRequest()));
         logJSON(" Stack post response:\n", stackEntity.getResponse());
         log(" ID:\n" + stackEntity.getResponse().getId());
     }

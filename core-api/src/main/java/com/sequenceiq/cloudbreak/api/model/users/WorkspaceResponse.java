@@ -8,11 +8,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@SuppressFBWarnings("EQ_COMPARETO_USE_OBJECT_EQUALS")
 @ApiModel
-public class WorkspaceResponse extends WorkspaceBase {
+public class WorkspaceResponse extends WorkspaceBase implements Comparable<WorkspaceResponse> {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
@@ -44,6 +46,11 @@ public class WorkspaceResponse extends WorkspaceBase {
 
     public void setStatus(WorkspaceStatus status) {
         this.status = status;
+    }
+
+    @Override
+    public int compareTo(WorkspaceResponse o) {
+        return new NameComparator().compare(o, this);
     }
 
     public static class NameComparator implements Comparator<WorkspaceResponse>, Serializable {

@@ -15,7 +15,7 @@ import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class TemplateEntity extends AbstractCloudbreakEntity<TemplateV2Request, TemplateResponse, TemplateEntity> {
+public class TemplateEntity extends AbstractCloudbreakEntity<TemplateV2Request, TemplateResponse, TemplateEntity, TemplateResponse> {
 
     public TemplateEntity(TemplateV2Request request, TestContext testContext) {
         super(request, testContext);

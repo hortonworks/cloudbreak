@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 
-public class DiskTypesEntity extends AbstractCloudbreakEntity<Integer, PlatformDisksJson, DiskTypesEntity> {
+public class DiskTypesEntity extends AbstractCloudbreakEntity<Integer, PlatformDisksJson, DiskTypesEntity, PlatformDisksJson> {
     public static final String DISKTYPES = "DISKTYPES";
 
     private String type;

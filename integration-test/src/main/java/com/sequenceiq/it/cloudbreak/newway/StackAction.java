@@ -35,8 +35,8 @@ public class StackAction {
                 CloudbreakClient.class);
         Log.log(" get stack " + stackEntity.getName());
         stackEntity.setResponse(
-                client.getCloudbreakClient().stackV2Endpoint()
-                        .getStackFromDefaultWorkspace(stackEntity.getName(), null));
+                client.getCloudbreakClient().stackV3Endpoint()
+                        .getByNameInWorkspace(client.getWorkspaceId(), stackEntity.getName(), null));
         Log.logJSON(" stack get response: ", stackEntity.getResponse());
     }
 
@@ -48,8 +48,8 @@ public class StackAction {
         Log.log(" get all stack");
         stackEntity.setResponses(
                 client.getCloudbreakClient()
-                        .stackV2Endpoint()
-                        .getStacksInDefaultWorkspace());
+                        .stackV3Endpoint()
+                        .listByWorkspace(client.getWorkspaceId()));
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
@@ -66,8 +66,8 @@ public class StackAction {
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
         Log.log(" delete: " + stackEntity.getName());
-        client.getCloudbreakClient().stackV2Endpoint()
-                .deletePrivate(stackEntity.getName(), forced, false);
+        client.getCloudbreakClient().stackV3Endpoint()
+                .deleteInWorkspace(client.getWorkspaceId(), stackEntity.getName(), forced, false);
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {

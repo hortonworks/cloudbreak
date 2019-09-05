@@ -44,7 +44,7 @@ public class CloudbreakTest extends GherkinTest {
 
     public static final String AUTOSCALE_SECRET = "AUTOSCALE_SECRET";
 
-    public static final String WORKSPACE_ID = "ORGANIZATION_ID";
+    public static final String WORKSPACE_ID = "WORKSPACE_ID";
 
     public static final String LOG_SEARCH_QUERY_TYPES = "LOG_SEARCH_QUERY_TYPES";
 

@@ -42,6 +42,8 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
 
     private String stackName;
 
+    private Long workspaceId;
+
     @BeforeClass
     @Parameters({"mockPort", "sshPort"})
     public void configMockServer(@Optional("9443") int mockPort, @Optional("2020") int sshPort) {
@@ -53,6 +55,7 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
         }
 
         stackName = itContext.getContextParam(CloudbreakV2Constants.STACK_NAME);
+        workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
 
         MaintenanceModeMock maintenanceModeMock = applicationContext.getBean(MaintenanceModeMock.class, mockPort, sshPort, numberOfServers);
         maintenanceModeMock.addSPIEndpoints();
@@ -63,20 +66,15 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
 
     @Test(priority = 1)
     public void testEnableMaintenanceMode() {
-        Long workspaceId = getWorkspaceId();
-        getItContext().putContextParam(CloudbreakITContextConstants.WORKSPACE_ID, workspaceId);
-
         postMaintenanceMode(workspaceId, MaintenanceModeStatus.ENABLED, OK);
-
-        Long stackId = Long.parseLong(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID));
-        checkDesiredStatuses(stackId, MAINTENANCE_MODE_ENABLED);
+        checkDesiredStatuses(workspaceId, stackName, MAINTENANCE_MODE_ENABLED);
     }
 
-    private void checkDesiredStatuses(Long stackId, Status desiredClusterStatus) {
+    private void checkDesiredStatuses(Long workspaceId, String stackName, Status desiredClusterStatus) {
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", AVAILABLE.name());
         desiredStatuses.put("clusterStatus", desiredClusterStatus.name());
-        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId.toString(), desiredStatuses);
+        CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), workspaceId, stackName, desiredStatuses);
     }
 
     private void postMaintenanceMode(Long workspaceId, MaintenanceModeStatus maintenanceModeStatus, HttpStatus expected) {
@@ -85,11 +83,6 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
         try (Response response = getCloudbreakClient().stackV3Endpoint().setClusterMaintenanceMode(workspaceId, stackName, maintenanceMode)) {
             assertEquals(expected.value(), response.getStatus());
         }
-    }
-
-    private Long getWorkspaceId() {
-        StackResponse stackResponse = getCloudbreakClient().stackV2Endpoint().getPublic(stackName, new HashSet<>());
-        return stackResponse.getWorkspace().getId();
     }
 
     @Test(priority = 2)
@@ -145,7 +138,6 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
 
     @Test(priority = 4)
     public void testAttemptUpscaleInMaintenanceMode() {
-        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         StackScaleRequestV2 updateRequest = new StackScaleRequestV2();
         Long stackId = Long.parseLong(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID));
         updateRequest.setStackId(stackId);
@@ -157,30 +149,25 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
             assertTrue(entity.contains(MAINTENANCE_MODE_ENABLED.name()));
         }
 
-        checkDesiredStatuses(stackId, MAINTENANCE_MODE_ENABLED);
+        checkDesiredStatuses(workspaceId, stackName, MAINTENANCE_MODE_ENABLED);
     }
 
     @Test(priority = 5)
     public void testAttemptStopInMaintenanceMode() {
-        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         try (Response response = getCloudbreakClient().stackV3Endpoint().putStopInWorkspace(workspaceId, stackName)) {
             assertEquals(BAD_REQUEST.value(), response.getStatus());
             String entity = response.readEntity(String.class);
             assertTrue(entity.contains(MAINTENANCE_MODE_ENABLED.name()));
         }
 
-        Long stackId = Long.parseLong(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID));
-        checkDesiredStatuses(stackId, MAINTENANCE_MODE_ENABLED);
+        checkDesiredStatuses(workspaceId, stackName, MAINTENANCE_MODE_ENABLED);
     }
 
     @Test(priority = 6)
     public void testRequestValidationForMaintenanceMode() {
-        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
-
         postMaintenanceMode(workspaceId, MaintenanceModeStatus.VALIDATION_REQUESTED, ACCEPTED);
 
-        Long stackId = Long.parseLong(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID));
-        checkDesiredStatuses(stackId, MAINTENANCE_MODE_ENABLED);
+        checkDesiredStatuses(workspaceId, stackName, MAINTENANCE_MODE_ENABLED);
 
         MaintenanceModeMock maintenanceModeMock = getItContext().getContextParam(CloudbreakV2Constants.MOCK_SERVER, MaintenanceModeMock.class);
         maintenanceModeMock.verify();
@@ -188,12 +175,8 @@ public class MockStackMaintenanceModeTest extends AbstractCloudbreakIntegrationT
 
     @Test(priority = 7)
     public void testDisableMaintenanceMode() {
-        Long workspaceId = getItContext().getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
-
         postMaintenanceMode(workspaceId, MaintenanceModeStatus.DISABLED, OK);
-
-        Long stackId = Long.parseLong(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID));
-        checkDesiredStatuses(stackId, AVAILABLE);
+        checkDesiredStatuses(workspaceId, stackName, AVAILABLE);
     }
 
     @AfterClass

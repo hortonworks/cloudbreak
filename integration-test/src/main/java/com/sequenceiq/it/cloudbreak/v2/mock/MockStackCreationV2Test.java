@@ -15,10 +15,10 @@ import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
-import com.sequenceiq.it.cloudbreak.v2.AbstractStackCreationV2Test;
+import com.sequenceiq.it.cloudbreak.v2.AbstractStackCreationV3Test;
 import com.sequenceiq.it.cloudbreak.v2.CloudbreakV2Constants;
 
-public class MockStackCreationV2Test extends AbstractStackCreationV2Test {
+public class MockStackCreationV2Test extends AbstractStackCreationV3Test {
     @BeforeClass
     @Parameters({"stackName", "mockPort", "sshPort"})
     public void configMockServer(String stackName, @Optional("9443") int mockPort, @Optional("2020") int sshPort) {
