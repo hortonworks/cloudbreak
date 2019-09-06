@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
 import com.google.common.collect.Lists;
+import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureContextService;
@@ -70,7 +71,20 @@ public class AzureDatabaseResourceService {
             throw new CloudConnectorException(ex);
         }
 
-        client.createTemplateDeployment(resourceGroupName, stackName, template, "");
+        try {
+            client.createTemplateDeployment(resourceGroupName, stackName, template, "");
+        } catch (CloudException e) {
+            if (e.body() != null && e.body().details() != null) {
+                String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
+                throw new CloudConnectorException(String.format("Database stack provisioning failed, status code %s, error message: %s, details: %s",
+                        e.body().code(), e.body().message(), details), e);
+            } else {
+                throw new CloudConnectorException(String.format("Database stack provisioning failed: '%s', please go to Azure Portal for details",
+                        e.getMessage()), e);
+            }
+        } catch (Exception e) {
+            throw new CloudConnectorException(String.format("Error in provisioning database stack %s: %s", stackName, e.getMessage()), e);
+        }
 
         Deployment deployment = client.getTemplateDeployment(resourceGroupName, stackName);
 
