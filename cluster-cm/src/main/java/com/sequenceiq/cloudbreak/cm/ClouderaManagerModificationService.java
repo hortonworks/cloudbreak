@@ -85,6 +85,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Inject
     private ClusterComponentConfigProvider clusterComponentProvider;
 
+    @Inject
+    private ClouderaManagerRoleRefreshService clouderaManagerRoleRefreshService;
+
     private final Stack stack;
 
     private final HttpClientConfig clientConfig;
@@ -114,12 +117,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         ClustersResourceApi clustersResourceApi = clouderaManagerClientFactory.getClustersResourceApi(client);
         try {
             String clusterName = stack.getName();
-            List<ApiHostRef> hostRefs = clustersResourceApi.listHosts(clusterName).getItems();
-            List<String> clusterHosts = hostRefs.stream().map(ApiHostRef::getHostname).collect(Collectors.toList());
-            List<String> upscaleHostNames = hostMetadata.stream()
-                    .map(HostMetadata::getHostName)
-                    .filter(hostname -> !clusterHosts.contains(hostname))
-                    .collect(Collectors.toList());
+            List<String> upscaleHostNames = getUpscaleHosts(clustersResourceApi, clusterName, hostMetadata);
             if (!upscaleHostNames.isEmpty()) {
                 List<ApiHost> hosts = clouderaManagerClientFactory.getHostsResourceApi(client).readHosts(SUMMARY).getItems();
                 ApiHostRefList body = createUpscaledHostRefList(upscaleHostNames, hosts);
@@ -131,14 +129,28 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 if (!isPrewarmed(clusterId)) {
                     redistributeParcelsForRecovery();
                 }
+                activateParcel(clustersResourceApi);
+                clouderaManagerRoleRefreshService.refreshClusterRoles(client, stack);
             }
-            MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerClientFactory.getMgmtServiceResourceApi(client);
-            restartStaleServices(mgmtServiceResourceApi, clustersResourceApi);
         } catch (ApiException e) {
             LOGGER.warn("Failed to upscale: {}", e.getResponseBody(), e);
             throw new CloudbreakException("Failed to upscale", e);
         }
 
+    }
+
+    private List<String> getUpscaleHosts(ClustersResourceApi clustersResourceApi, String clusterName, Collection<HostMetadata> hostMetadata)
+            throws ApiException {
+        List<String> clusterHosts = getHostNamesFromCM(clustersResourceApi, clusterName);
+        return hostMetadata.stream()
+                .map(HostMetadata::getHostName)
+                .filter(hostname -> !clusterHosts.contains(hostname))
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getHostNamesFromCM(ClustersResourceApi clustersResourceApi, String clusterName) throws ApiException {
+        List<ApiHostRef> hostRefs = clustersResourceApi.listHosts(clusterName).getItems();
+        return hostRefs.stream().map(ApiHostRef::getHostname).collect(Collectors.toList());
     }
 
     private void redistributeParcelsForRecovery() throws ApiException, CloudbreakException {

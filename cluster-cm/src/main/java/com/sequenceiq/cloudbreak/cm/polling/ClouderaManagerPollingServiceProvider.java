@@ -128,6 +128,11 @@ public class ClouderaManagerPollingServiceProvider {
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, deployClientConfigListenerTask);
     }
 
+    public PollingResult refreshClusterPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+        LOGGER.debug("Waiting for Cloudera Manager to refresh cluster. [Server address: {}]", stack.getClusterManagerIp());
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, deployClientConfigListenerTask);
+    }
+
     public PollingResult applyHostTemplatePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to apply host template. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, applyHostTemplateListenerTask);
