@@ -3,8 +3,5 @@
   "recipeIds" : [
     1, 2, 3, 4, 5
   ],
-  "constraint": {
-    "instanceGroupName": "instancegroup_name",
-    "hostCount": 1
-  }
+  "instanceGroupName": "instancegroup_name"
 }

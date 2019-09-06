@@ -69,7 +69,7 @@ public class ClusterProxyReRegistrationHandler implements EventHandler<ClusterPr
             String hostGroupName = request.getHostGroupName();
             HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName)
                     .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
-            InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
+            InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
             boolean gatewayInstanceGroup = InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType());
 
             if (!gatewayInstanceGroup) {

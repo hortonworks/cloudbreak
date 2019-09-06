@@ -29,12 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.CdpResourceTypeProvider;
-import com.sequenceiq.common.api.type.AdjustmentType;
-import com.sequenceiq.common.api.type.CdpResourceType;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -45,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.service.CdpResourceTypeProvider;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
@@ -54,8 +50,12 @@ import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -117,6 +117,7 @@ public class StackDecorator {
     @Measure(StackDecorator.class)
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackV4Request request, User user, Workspace workspace) {
         String stackName = request.getName();
+
 
         DetailedEnvironmentResponse environment = measure(() -> environmentClientService.getByCrn(subject.getEnvironmentCrn()),
                 LOGGER, "Environment properties were queried under {} ms for environment {}", request.getEnvironmentCrn());
@@ -201,6 +202,9 @@ public class StackDecorator {
                 .getInstanceGroupParameters(extendedCloudCredentialConverter.convert(credential), getInstanceGroupParameterRequests(subject));
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         subject.getInstanceGroups().parallelStream().forEach(instanceGroup -> {
+            subject.getCluster().getHostGroups().stream()
+                    .filter(hostGroup -> hostGroup.getName().equals(instanceGroup.getGroupName()))
+                    .forEach(hostGroup -> hostGroup.setInstanceGroup(instanceGroup));
             restRequestThreadLocalService.setCloudbreakUser(cloudbreakUser);
             updateInstanceGroupParameters(instanceGroupParameterResponse, instanceGroup);
             if (instanceGroup.getTemplate() != null) {

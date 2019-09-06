@@ -24,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -210,9 +209,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     private HostGroup setupHostGroup(InstanceGroup instanceGroup) {
         HostGroup hostGroup = mock(HostGroup.class);
         when(hostGroup.getName()).thenReturn("hostGroupName");
-        Constraint constraint = mock(Constraint.class);
-        when(constraint.getInstanceGroup()).thenReturn(instanceGroup);
-        when(hostGroup.getConstraint()).thenReturn(constraint);
+        when(hostGroup.getInstanceGroup()).thenReturn(instanceGroup);
         return hostGroup;
     }
 

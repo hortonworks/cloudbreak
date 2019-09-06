@@ -483,6 +483,7 @@ public class TestUtil {
         hostGroup.setRecipes(recipes(1));
         hostGroup.setHostMetadata(hostMetadata(hostGroup, count));
         InstanceGroup instanceGroup = instanceGroup(1L, name, InstanceGroupType.CORE, gcpTemplate(1L), count);
+        hostGroup.setInstanceGroup(instanceGroup);
         hostGroup.setCluster(cluster(blueprint(), stack(), 1L));
         hostGroup.setRecoveryMode(RecoveryMode.MANUAL);
         return hostGroup;

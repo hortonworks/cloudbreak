@@ -25,7 +25,7 @@ public class HostGroupRequestToHostGroupConverterTest extends AbstractJsonConver
         // WHEN
         HostGroup result = underTest.convert(getRequest("host-group.json"));
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("cluster", "constraint"));
+        assertAllFieldsNotNull(result, Arrays.asList("cluster", "instanceGroup"));
     }
 
     @Override

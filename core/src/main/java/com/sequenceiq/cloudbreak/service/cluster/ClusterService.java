@@ -110,7 +110,6 @@ import com.sequenceiq.cloudbreak.service.altus.AltusIAMService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
-import com.sequenceiq.cloudbreak.service.constraint.ConstraintService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -161,9 +160,6 @@ public class ClusterService {
 
     @Inject
     private KerberosConfigService kerberosConfigService;
-
-    @Inject
-    private ConstraintService constraintService;
 
     @Inject
     private HostMetadataService hostMetadataService;
@@ -1260,10 +1256,6 @@ public class ClusterService {
 
     public Optional<Cluster> findById(Long clusterId) {
         return repository.findById(clusterId);
-    }
-
-    public List<Cluster> findAllClustersForConstraintTemplate(Long constraintTemplateId) {
-        return repository.findAllClustersForConstraintTemplate(constraintTemplateId);
     }
 
     public Set<Cluster> findByRdsConfig(Long rdsConfigId) {

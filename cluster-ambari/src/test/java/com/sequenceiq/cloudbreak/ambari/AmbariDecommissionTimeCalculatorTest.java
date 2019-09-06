@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -69,7 +68,7 @@ public class AmbariDecommissionTimeCalculatorTest {
     public void testCalculateWithNullRootVolumeSize() {
         Stack stack = TestUtil.stack();
         List<HostMetadata> hostMetadata = createHostMetadataList();
-        hostMetadata.forEach(data -> data.getHostGroup().getConstraint().getInstanceGroup().getTemplate().setRootVolumeSize(null));
+        hostMetadata.forEach(data -> data.getHostGroup().getInstanceGroup().getTemplate().setRootVolumeSize(null));
         Map<String, Map<Long, Long>> dfsSpace = createDfsSpaceMapsWithHalfUsage();
         long usedSpace = 5128 * BYTE_TO_GB;
 
@@ -88,10 +87,8 @@ public class AmbariDecommissionTimeCalculatorTest {
         template.getVolumeTemplates().add(volumeTemplate);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setTemplate(template);
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(instanceGroup);
         HostGroup hostGroup = new HostGroup();
-        hostGroup.setConstraint(constraint);
+        hostGroup.setInstanceGroup(instanceGroup);
         HostMetadata hm = new HostMetadata();
         hm.setHostGroup(hostGroup);
         return Collections.singletonList(hm);

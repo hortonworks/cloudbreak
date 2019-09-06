@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -22,18 +21,16 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -56,9 +53,6 @@ public class ClusterUpscaleService {
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
-
-    @Inject
-    private ClusterContainerRunner containerRunner;
 
     @Inject
     private ClusterHostServiceRunner hostRunner;
@@ -91,14 +85,7 @@ public class ClusterUpscaleService {
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
-        if (orchestratorType.containerOrchestrator()) {
-            Map<String, List<Container>> containers = containerRunner.addClusterContainers(stackId, hostGroupName, scalingAdjustment);
-            for (Entry<String, List<Container>> containersEntry : containers.entrySet()) {
-                List<String> hostNames = containersEntry.getValue().stream().map(Container::getHost).collect(Collectors.toList());
-                hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
-            }
-            clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup, HostMetadataState.CONTAINER_RUNNING);
-        } else if (orchestratorType.hostOrchestrator()) {
+        if (orchestratorType.hostOrchestrator()) {
             Map<String, String> hosts = hostRunner.addClusterServices(stackId, hostGroupName, scalingAdjustment);
             if (primaryGatewayChanged) {
                 clusterServiceRunner.updateAmbariClientConfig(stack, stack.getCluster());
@@ -139,7 +126,7 @@ public class ClusterUpscaleService {
         HostGroup hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName))
                 .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
-        Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
+        Long instanceGroupId = hostGroup.getInstanceGroup().getId();
         List<InstanceMetaData> metas = instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroupId);
         recipeEngine.executePostAmbariStartRecipes(stack, Sets.newHashSet(hostGroup));
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
