@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelOrchestratorComponentRunner;
-import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -120,9 +119,6 @@ public class AppConfig implements ResourceLoaderAware {
     private StackUnderOperationService stackUnderOperationService;
 
     @Inject
-    private List<ContainerOrchestrator> containerOrchestrators;
-
-    @Inject
     private List<HostOrchestrator> hostOrchestrators;
 
     @Inject
@@ -179,16 +175,6 @@ public class AppConfig implements ResourceLoaderAware {
         registration.addUrlPatterns("/*");
         registration.setName("turnOnStackUnderOperationService");
         return registration;
-    }
-
-    @Bean
-    public Map<String, ContainerOrchestrator> containerOrchestrators() {
-        Map<String, ContainerOrchestrator> map = new HashMap<>();
-        for (ContainerOrchestrator containerOrchestrator : containerOrchestrators) {
-            containerOrchestrator.init(simpleParallelContainerRunnerExecutor(), clusterDeletionBasedExitCriteria());
-            map.put(containerOrchestrator.name(), containerOrchestrator);
-        }
-        return map;
     }
 
     @Bean

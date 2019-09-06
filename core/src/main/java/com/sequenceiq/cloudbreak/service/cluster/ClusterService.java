@@ -1044,10 +1044,6 @@ public class ClusterService {
         return clusterRepository.findById(clusterId);
     }
 
-    public List<Cluster> findAllClustersForConstraintTemplate(Long constraintTemplateId) {
-        return clusterRepository.findAllClustersForConstraintTemplate(constraintTemplateId);
-    }
-
     public void updateAmbariRepoDetails(Long clusterId, AmbariStackDetailsJson ambariStackDetails) {
         if (Objects.isNull(ambariStackDetails.getVersion())
                 || Objects.isNull(ambariStackDetails.getStackBaseURL())) {
