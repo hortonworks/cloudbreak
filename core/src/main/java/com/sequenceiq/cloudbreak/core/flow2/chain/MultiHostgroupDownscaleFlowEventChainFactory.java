@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
@@ -33,7 +32,7 @@ public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventCh
         for (Entry<String, Set<Long>> entry : event.getInstanceIdsByHostgroupMap().entrySet()) {
             ClusterScaleTriggerEvent cste;
             cste = new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getStackId(), entry.getKey(), entry.getValue(), event.accepted(),
-                    new ClusterDownscaleDetails());
+                    event.getDetails());
             flowEventChain.add(cste);
             if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {
                 StackScaleTriggerEvent sste;

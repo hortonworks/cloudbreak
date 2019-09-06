@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v3;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -160,6 +162,16 @@ public interface StackV3Endpoint {
             nickname = "deleteInstanceStackV3")
     Response deleteInstance(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @PathParam("instanceId") String instanceId,
+            @QueryParam("forced") @DefaultValue("false") boolean forced);
+
+    // deleteInstancesStackV3
+    @DELETE
+    @Path("{name}/instances")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteMultipleInstancesStackV3")
+    Response deleteMultipleInstances(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("id") @NotEmpty List<String> instances,
             @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     // changeImage
