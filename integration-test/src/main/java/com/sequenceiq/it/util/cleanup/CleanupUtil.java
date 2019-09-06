@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.environment.client.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.util.WaitResult;
 import com.sequenceiq.sdx.client.SdxClient;
 
 @Component
@@ -39,7 +40,15 @@ public class CleanupUtil extends CleanupClientUtil {
                     LOG.error("Distrox with name: {} cannot be deleted, because of: {}", distroxName, e);
                 }
             });
-            waitUtil.waitForDistroxesCleanup(cloudbreak, environment);
+            for (int i = 0; i < 3; i++) {
+                WaitResult waitResult = waitUtil.waitForDistroxesCleanup(cloudbreak, environment);
+                if (waitResult == WaitResult.FAILED) {
+                    throw new RuntimeException("Distrox deletion has been failed!");
+                }
+                if (waitResult == WaitResult.TIMEOUT) {
+                    throw new RuntimeException("Timeout happened during the wait for distrox deletion!");
+                }
+            }
         } else {
             LOG.info("Cannot find any distrox");
         }
@@ -60,7 +69,15 @@ public class CleanupUtil extends CleanupClientUtil {
                     LOG.error("Sdx with name: {} cannot be deleted, because of: {}", sdxName, e);
                 }
             });
-            waitUtil.waitForSdxesCleanup(sdx, environment);
+            for (int i = 0; i < 3; i++) {
+                WaitResult waitResult = waitUtil.waitForSdxesCleanup(sdx, environment);
+                if (waitResult == WaitResult.FAILED) {
+                    throw new RuntimeException("Sdx deletion has been failed!");
+                }
+                if (waitResult == WaitResult.TIMEOUT) {
+                    throw new RuntimeException("Timeout happened during the wait for sdx deletion!");
+                }
+            }
         } else {
             LOG.info("Cannot find any sdx");
         }
@@ -77,7 +94,15 @@ public class CleanupUtil extends CleanupClientUtil {
             } catch (Exception e) {
                 LOG.error("One or more environment cannot be deleted, because of: ", e);
             }
-            waitUtil.waitForEnvironmentsCleanup(environment);
+            for (int i = 0; i < 3; i++) {
+                WaitResult waitResult = waitUtil.waitForEnvironmentsCleanup(environment);
+                if (waitResult == WaitResult.FAILED) {
+                    throw new RuntimeException("Environment deletion has been failed!");
+                }
+                if (waitResult == WaitResult.TIMEOUT) {
+                    throw new RuntimeException("Timeout happened during the wait for environments deletion!");
+                }
+            }
         } else {
             LOG.info("Cannot find any environment");
         }
