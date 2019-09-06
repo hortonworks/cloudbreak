@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -318,6 +320,13 @@ public class StackCommonService {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         stackService.removeInstance(stack, workspaceId, instanceId, forced, user);
+    }
+
+    public Response deleteMultipleInstancesByNameInWorkspace(String name, Long workspaceId, List<String> instanceIds, boolean forced) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+        stackService.removeInstances(stack, workspaceId, instanceIds, forced, user);
+        return Response.status(Status.NO_CONTENT).build();
     }
 
     public void deleteInstanceByCrnInWorkspace(String crn, Long workspaceId, String instanceId, boolean forced) {
