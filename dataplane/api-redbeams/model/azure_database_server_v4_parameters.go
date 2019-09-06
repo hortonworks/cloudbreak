@@ -8,7 +8,9 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // AzureDatabaseServerV4Parameters azure database server v4 parameters
@@ -16,21 +18,25 @@ import (
 type AzureDatabaseServerV4Parameters struct {
 
 	// Time to retain backups, in days
+	// Minimum: 7
 	BackupRetentionDays int32 `json:"backupRetentionDays,omitempty"`
 
 	// The version of the database software to use
+	// Pattern: \d+(?:\.\d)?
 	DbVersion string `json:"dbVersion,omitempty"`
 
 	// Whether backups are geographically redundant
 	GeoRedundantBackup bool `json:"geoRedundantBackup,omitempty"`
 
 	// The number of vCPUs assigned to the database server
+	// Minimum: 2
 	SkuCapacity int32 `json:"skuCapacity,omitempty"`
 
 	// The family of hardware used for the database server
 	SkuFamily string `json:"skuFamily,omitempty"`
 
 	// The tier of SKU for the database server
+	// Pattern: Basic|GeneralPurpose|MemoryOptimized
 	SkuTier string `json:"skuTier,omitempty"`
 
 	// Whether the database server will automatically grow storage when necessary
@@ -39,6 +45,79 @@ type AzureDatabaseServerV4Parameters struct {
 
 // Validate validates this azure database server v4 parameters
 func (m *AzureDatabaseServerV4Parameters) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateBackupRetentionDays(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateDbVersion(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSkuCapacity(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSkuTier(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *AzureDatabaseServerV4Parameters) validateBackupRetentionDays(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.BackupRetentionDays) { // not required
+		return nil
+	}
+
+	if err := validate.MinimumInt("backupRetentionDays", "body", int64(m.BackupRetentionDays), 7, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *AzureDatabaseServerV4Parameters) validateDbVersion(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DbVersion) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("dbVersion", "body", string(m.DbVersion), `\d+(?:\.\d)?`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *AzureDatabaseServerV4Parameters) validateSkuCapacity(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SkuCapacity) { // not required
+		return nil
+	}
+
+	if err := validate.MinimumInt("skuCapacity", "body", int64(m.SkuCapacity), 2, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *AzureDatabaseServerV4Parameters) validateSkuTier(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SkuTier) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("skuTier", "body", string(m.SkuTier), `Basic|GeneralPurpose|MemoryOptimized`); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // DatabaseServerV4StackRequest database server v4 stack request
@@ -32,6 +33,8 @@ type DatabaseServerV4StackRequest struct {
 	InstanceType string `json:"instanceType,omitempty"`
 
 	// Port of the database server
+	// Maximum: 65535
+	// Minimum: 1
 	Port int32 `json:"port,omitempty"`
 
 	// Username of the administrative user of the database server
@@ -56,6 +59,10 @@ func (m *DatabaseServerV4StackRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateAzure(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePort(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -100,6 +107,23 @@ func (m *DatabaseServerV4StackRequest) validateAzure(formats strfmt.Registry) er
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *DatabaseServerV4StackRequest) validatePort(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Port) { // not required
+		return nil
+	}
+
+	if err := validate.MinimumInt("port", "body", int64(m.Port), 1, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("port", "body", int64(m.Port), 65535, false); err != nil {
+		return err
 	}
 
 	return nil
