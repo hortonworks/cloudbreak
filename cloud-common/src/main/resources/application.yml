@@ -46,6 +46,10 @@ rest:
 cert:
   validation: true
   ignorePreValidation: false
+  base.domain.name: cloudera.site
+  polling:
+    intervall: 10
+    attempt: 20
 
 secret:
   application: cb/shared
