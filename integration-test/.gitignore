@@ -19,6 +19,7 @@ build/
 test-output/
 integcb/.deps/
 integcb/cbd
+integcb/etc
 integcb/certs/
 integcb/docker-containers/
 integcb/docker-compose.yml

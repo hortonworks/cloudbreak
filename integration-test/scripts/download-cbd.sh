@@ -33,4 +33,6 @@ fi
 
 chmod +x cbd
 cbd_version=$(./cbd --version)
+mkdir etc
+cp ../../mock-caas/src/test/resources/etc/license.txt etc/license.txt
 echo -e "$cbd_version"
