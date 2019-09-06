@@ -14,6 +14,7 @@ import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
+import com.cloudera.api.swagger.RoleCommandsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -77,6 +78,10 @@ public class ClouderaManagerClientFactory {
 
     public RolesResourceApi getRolesResourceApi(ApiClient client) {
         return new RolesResourceApi(client);
+    }
+
+    public RoleCommandsResourceApi getRoleCommandsResourceApi(ApiClient client) {
+        return new RoleCommandsResourceApi(client);
     }
 
     public HostTemplatesResourceApi getHostTemplatesResourceApi(ApiClient client) {
