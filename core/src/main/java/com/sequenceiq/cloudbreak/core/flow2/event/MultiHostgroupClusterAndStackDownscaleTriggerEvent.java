@@ -13,10 +13,13 @@ public class MultiHostgroupClusterAndStackDownscaleTriggerEvent extends StackEve
 
     private final Map<String, Set<Long>> instanceIdsByHostgroupMap;
 
+    private final ClusterDownscaleDetails details;
+
     public MultiHostgroupClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap,
-            ScalingType scalingType, Promise<Boolean> accepted) {
+            ClusterDownscaleDetails details, ScalingType scalingType, Promise<Boolean> accepted) {
         super(selector, stackId, accepted);
         this.instanceIdsByHostgroupMap = instanceIdsByHostgroupMap;
+        this.details = details;
         this.scalingType = scalingType;
     }
 
@@ -26,5 +29,9 @@ public class MultiHostgroupClusterAndStackDownscaleTriggerEvent extends StackEve
 
     public Map<String, Set<Long>> getInstanceIdsByHostgroupMap() {
         return instanceIdsByHostgroupMap;
+    }
+
+    public ClusterDownscaleDetails getDetails() {
+        return details;
     }
 }

@@ -144,10 +144,11 @@ public class ReactorFlowManager {
         notify(stackId, selector, event);
     }
 
-    public void triggerStackRemoveInstances(Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap) {
+    public void triggerStackRemoveInstances(Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap, boolean forced) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_MULTIHOSTGROUP_TRIGGER_EVENT;
+        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced);
         MultiHostgroupClusterAndStackDownscaleTriggerEvent event = new MultiHostgroupClusterAndStackDownscaleTriggerEvent(selector, stackId,
-                instanceIdsByHostgroupMap, ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
+                instanceIdsByHostgroupMap, details, ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
         notify(stackId, selector, event);
     }
 
