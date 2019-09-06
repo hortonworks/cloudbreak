@@ -2,16 +2,16 @@ package com.sequenceiq.cloudbreak.client;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.springframework.stereotype.Component;
-
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementGrpc;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementGrpc.PublicEndpointManagementBlockingStub;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateRequest;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse;
+import com.google.protobuf.ByteString;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 
 import io.grpc.ManagedChannel;
 
-@Component
 public class ClusterDnsClient {
 
     private final ManagedChannel channel;
@@ -23,14 +23,26 @@ public class ClusterDnsClient {
         this.actorCrn = actorCrn;
     }
 
-    public String createCertificate(String requestId, String accountId) {
+    public String createCertificate(String requestId, String accountId, String endpoint, String environment, boolean wildcard, byte[] csr) {
         checkNotNull(requestId);
         checkNotNull(accountId);
-
         CreateCertificateRequest.Builder requestBuilder = CreateCertificateRequest.newBuilder()
-                .setAccountId(accountId);
+                .setAccountId(accountId)
+                .setEnvironment(environment)
+                .setEndpoint(endpoint)
+                .setAddWildcard(wildcard)
+                .setCsr(ByteString.copyFrom(csr));
 
         return newStub(requestId).createCertificate(requestBuilder.build()).getRequestId();
+    }
+
+    public PollCertificateCreationResponse pollCertificateCreation(String requestId, String pollRequestId) {
+        checkNotNull(requestId);
+
+        PollCertificateCreationRequest.Builder requestBuilder = PollCertificateCreationRequest.newBuilder()
+                .setRequestId(pollRequestId);
+
+        return newStub(requestId).pollCertificateCreation(requestBuilder.build());
     }
 
     /**

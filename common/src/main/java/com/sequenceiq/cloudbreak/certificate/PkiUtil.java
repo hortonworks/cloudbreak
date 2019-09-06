@@ -145,6 +145,15 @@ public class PkiUtil {
         }
     }
 
+    public static PKCS10CertificationRequest csr(String publicAddress) {
+        try {
+            LOGGER.info("Generate csr for '{}'", publicAddress);
+            return generateCsr(generateKeypair(), publicAddress);
+        } catch (Exception e) {
+            throw new PkiException("Failed to generate csr for the cluster!", e);
+        }
+    }
+
     public static String convert(PrivateKey privateKey) {
         try {
             return convertToString(privateKey);
@@ -222,8 +231,8 @@ public class PkiUtil {
     }
 
     private static PKCS10CertificationRequest generateCsr(KeyPair identity, String publicAddress) throws Exception {
-        PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(
-                new X500Principal(String.format("cn=%s", publicAddress)), identity.getPublic());
+        X500Principal principal = new X500Principal(String.format("CN=%s, O=Cloudera, C=US", publicAddress));
+        PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(principal, identity.getPublic());
         JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder("SHA256withRSA");
         ContentSigner signer = csBuilder.build(identity.getPrivate());
         return p10Builder.build(signer);
