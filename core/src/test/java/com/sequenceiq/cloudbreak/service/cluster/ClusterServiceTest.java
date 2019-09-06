@@ -52,7 +52,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -170,13 +169,10 @@ public class ClusterServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
 
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(instanceGroup);
-
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
-        hostGroup1.setConstraint(constraint);
+        hostGroup1.setInstanceGroup(instanceGroup);
 
         HostMetadata host1Metadata = new HostMetadata();
         host1Metadata.setHostName("host1Name");
@@ -207,13 +203,10 @@ public class ClusterServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
 
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(instanceGroup);
-
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
-        hostGroup1.setConstraint(constraint);
+        hostGroup1.setInstanceGroup(instanceGroup);
 
         HostMetadata host1Metadata = new HostMetadata();
         host1Metadata.setHostName("host1Name.healthy");
@@ -397,13 +390,10 @@ public class ClusterServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
 
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(instanceGroup);
-
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName(hostGroupName);
         hostGroup.setRecoveryMode(recoveryMode);
-        hostGroup.setConstraint(constraint);
+        hostGroup.setInstanceGroup(instanceGroup);
 
         HostMetadata hostMetadata = new HostMetadata();
         hostMetadata.setHostName(hostName);

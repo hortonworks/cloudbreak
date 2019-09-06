@@ -188,7 +188,7 @@ public class ClusterBuilderService {
     private Map<HostGroup, List<InstanceMetaData>> loadInstanceMetadataForHostGroups(Iterable<HostGroup> hostGroups) {
         Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup = new HashMap<>();
         for (HostGroup hostGroup : hostGroups) {
-            Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
+            Long instanceGroupId = hostGroup.getInstanceGroup().getId();
             List<InstanceMetaData> metas = instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroupId);
             instanceMetaDataByHostGroup.put(hostGroup, metas);
         }

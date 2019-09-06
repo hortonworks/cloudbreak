@@ -30,7 +30,7 @@ public class AmbariDecommissionTimeCalculator {
             int defaultRootVolumeSize) {
         Optional<HostMetadata> aHostMetadata = filteredHostList.stream().findFirst();
         if (aHostMetadata.isPresent()) {
-            Template template = aHostMetadata.get().getHostGroup().getConstraint().getInstanceGroup().getTemplate();
+            Template template = aHostMetadata.get().getHostGroup().getInstanceGroup().getTemplate();
             int rootVolumeSize = template.getRootVolumeSize() == null
                     ? defaultRootVolumeSize
                     : template.getRootVolumeSize();

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +39,8 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
@@ -169,7 +172,10 @@ public class StackDecoratorTest {
         MockitoAnnotations.initMocks(this);
         subject = new Stack();
         subject.setEnvironmentCrn("envCrn");
-        subject.setInstanceGroups(createInstanceGroups(GATEWAY));
+        Set<InstanceGroup> instanceGroups = createInstanceGroups(GATEWAY);
+        subject.setInstanceGroups(instanceGroups);
+        Cluster cluster = getCluster(instanceGroups);
+        subject.setCluster(cluster);
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
         when(platformParametersMap.get(any(Platform.class))).thenReturn(pps);
         when(pps.specialParameters()).thenReturn(specialParameters);
@@ -199,6 +205,18 @@ public class StackDecoratorTest {
         when(credentialConverter.convert(credentialResponse)).thenReturn(credential);
         ExtendedCloudCredential extendedCloudCredential = mock(ExtendedCloudCredential.class);
         when(extendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
+    }
+
+    private Cluster getCluster(Set<InstanceGroup> instanceGroups) {
+        Cluster cluster = new Cluster();
+        Set<HostGroup> hostGroups = new HashSet<>();
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            HostGroup hostGroup = new HostGroup();
+            hostGroup.setName(instanceGroup.getGroupName());
+            hostGroups.add(hostGroup);
+        }
+        cluster.setHostGroups(hostGroups);
+        return cluster;
     }
 
     @Test
@@ -231,10 +249,11 @@ public class StackDecoratorTest {
 
     private Set<InstanceGroup> createInstanceGroups(InstanceGroupType... types) {
         Set<InstanceGroup> groups = new LinkedHashSet<>(types.length);
+        int i = 0;
         for (InstanceGroupType type : types) {
             InstanceGroup group = mock(InstanceGroup.class);
             when(group.getInstanceGroupType()).thenReturn(type);
-            when(group.getGroupName()).thenReturn("name");
+            when(group.getGroupName()).thenReturn("name" + i);
             when(group.getNodeCount()).thenReturn(2);
             groups.add(group);
         }

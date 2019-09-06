@@ -46,10 +46,6 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     List<Cluster> findByStatuses(@Param("statuses") Collection<Status> statuses);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c inner join c.hostGroups hg WHERE hg.constraint.constraintTemplate.id = :id")
-    List<Cluster> findAllClustersForConstraintTemplate(@Param("id") Long id);
-
-    @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.stack WHERE c.workspace = null")
     Set<Cluster> findAllWithNoWorkspace();
 

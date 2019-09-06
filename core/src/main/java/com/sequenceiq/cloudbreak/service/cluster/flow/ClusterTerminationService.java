@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
-import com.sequenceiq.cloudbreak.service.constraint.ConstraintService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
@@ -64,9 +63,6 @@ public class ClusterTerminationService {
 
     @Resource
     private Map<FileSystemType, FileSystemConfigurator<BaseFileSystemConfigurationsView>> fileSystemConfigurators;
-
-    @Inject
-    private ConstraintService constraintService;
 
     @Inject
     private ContainerService containerService;

@@ -43,12 +43,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorksp
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
-import com.sequenceiq.common.api.type.AdjustmentType;
-import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -85,6 +81,9 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
+import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 public class TestUtil {
 
@@ -446,9 +445,7 @@ public class TestUtil {
         hostGroup.setRecipes(recipes(1));
         hostGroup.setHostMetadata(hostMetadata(hostGroup, count));
         InstanceGroup instanceGroup = instanceGroup(1L, name, InstanceGroupType.CORE, gcpTemplate(1L), count);
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(instanceGroup);
-        hostGroup.setConstraint(constraint);
+        hostGroup.setInstanceGroup(instanceGroup);
         hostGroup.setCluster(cluster(blueprint(), stack(), 1L));
         hostGroup.setRecoveryMode(RecoveryMode.MANUAL);
         return hostGroup;

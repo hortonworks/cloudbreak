@@ -308,6 +308,7 @@ public class AmbariBlueprintValidatorTest {
 
     public static HostGroup createHostGroup(String groupName, InstanceGroup instanceGroup) {
         HostGroup group = new HostGroup();
+        group.setInstanceGroup(instanceGroup);
         group.setName(groupName);
         return group;
     }

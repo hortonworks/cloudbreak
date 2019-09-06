@@ -34,7 +34,7 @@ public class HostGroupAssociationBuilder {
 
     public List<Map<String, String>> buildHostGroupAssociation(HostGroup hostGroup, List<InstanceMetaData> metas) {
         List<Map<String, String>> hostInfoForHostGroup = new ArrayList<>();
-        if (hostGroup.getConstraint().getInstanceGroup() != null) {
+        if (hostGroup.getInstanceGroup() != null) {
             Map<String, String> topologyMapping = getTopologyMapping(hostGroup);
             if (metas.isEmpty()) {
                 for (HostMetadata hostMetadata : hostGroup.getHostMetadata()) {
