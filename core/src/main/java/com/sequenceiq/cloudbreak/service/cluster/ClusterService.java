@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -103,6 +104,7 @@ import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.altus.AltusIAMService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
@@ -124,6 +126,9 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.StateStatus;
 
 @Service
 public class ClusterService {
@@ -222,6 +227,12 @@ public class ClusterService {
 
     @Inject
     private UsageLoggingUtil usageLoggingUtil;
+
+    @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
+    private StackUpdater stackUpdater;
 
     @Measure(ClusterService.class)
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
@@ -615,42 +626,58 @@ public class ClusterService {
 
     private void repairClusterInternal(ManualClusterRepairMode repairMode, Long stackId, List<String> repairedHostGroups,
             List<String> nodeIds, boolean deleteVolumes, boolean removeOnly) {
-        Map<String, List<String>> hostGroupToNodesMap = new HashMap<>();
+        Map<String, List<String>> failedNodeMap = new HashMap<>();
         try {
             transactionService.required(() -> {
-                Stack inTransactionStack = stackService.get(stackId);
+                if (hasPendingFlow(stackId)) {
+                    LOGGER.info("Repair cannot be performed, because there is already an active flow. Stack id: {}", stackId);
+                    throw new BadRequestException("Repair cannot be performed, because there is already an active flow.");
+                }
+                Stack stack = stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_IN_PROGRESS);
                 boolean repairWithReattach = !deleteVolumes;
-                checkReattachSupportedOnProvider(inTransactionStack, repairWithReattach);
-                Cluster cluster = inTransactionStack.getCluster();
-                Set<String> instanceHostNames = getInstanceHostNames(repairMode, inTransactionStack, nodeIds);
-                Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
-                for (HostGroup hg : hostGroups) {
-                    List<String> nodesToRepair = new ArrayList<>();
-                    if (hg.getRecoveryMode() == RecoveryMode.MANUAL
-                            && (repairMode == ManualClusterRepairMode.NODE_ID || repairedHostGroups.contains(hg.getName()))) {
-                        for (HostMetadata hmd : hg.getHostMetadata()) {
-                            if (isRepairNeededForHost(repairMode, instanceHostNames, hmd)) {
-                                checkReattachSupportForGateways(inTransactionStack, repairWithReattach, cluster, hmd);
-                                checkDiskTypeSupported(inTransactionStack, repairWithReattach, hg);
-                                validateRepair(inTransactionStack, hmd, repairWithReattach);
-                                hostGroupToNodesMap.putIfAbsent(hg.getName(), nodesToRepair);
-                                nodesToRepair.add(hmd.getHostName());
-                            }
-                        }
-                    }
-                }
+                checkReattachSupportedOnProvider(stack, repairWithReattach);
+                failedNodeMap.putAll(collectFailedNodeMap(stack, repairMode, repairWithReattach, repairedHostGroups, nodeIds));
                 if (repairMode == ManualClusterRepairMode.NODE_ID) {
-                    updateNodeVolumeSetsDeleteVolumesFlag(inTransactionStack, nodeIds, deleteVolumes);
+                    updateNodeVolumeSetsDeleteVolumesFlag(stack, nodeIds, deleteVolumes);
                 } else {
-                    updateIgNodeVolumeSetsDeleteVolumesFlag(inTransactionStack, repairedHostGroups, deleteVolumes);
+                    updateIgNodeVolumeSetsDeleteVolumesFlag(stack, repairedHostGroups, deleteVolumes);
                 }
-                return inTransactionStack;
+                return stack;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
         List<String> repairedEntities = CollectionUtils.isEmpty(repairedHostGroups) ? nodeIds : repairedHostGroups;
-        triggerRepair(stackId, hostGroupToNodesMap, removeOnly, repairedEntities);
+        triggerRepair(stackId, failedNodeMap, removeOnly, repairedEntities);
+    }
+
+    public Map<String, List<String>> collectFailedNodeMap(Stack stack, ManualClusterRepairMode repairMode, boolean repairWithReattach,
+            List<String> repairedHostGroups, List<String> nodeIds) {
+        Map<String, List<String>> failedNodeMap = new HashMap<>();
+        Cluster cluster = stack.getCluster();
+        Set<String> instanceHostNames = getInstanceHostNames(repairMode, stack, nodeIds);
+        Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
+        for (HostGroup hg : hostGroups) {
+            List<String> nodesToRepair = new ArrayList<>();
+            if (hg.getRecoveryMode() == RecoveryMode.MANUAL
+                    && (repairMode == ManualClusterRepairMode.NODE_ID || repairedHostGroups.contains(hg.getName()))) {
+                for (HostMetadata hmd : hg.getHostMetadata()) {
+                    if (isRepairNeededForHost(repairMode, instanceHostNames, hmd)) {
+                        checkReattachSupportForGateways(stack, repairWithReattach, cluster, hmd);
+                        checkDiskTypeSupported(stack, repairWithReattach, hg);
+                        validateRepair(stack, hmd, repairWithReattach);
+                        failedNodeMap.putIfAbsent(hg.getName(), nodesToRepair);
+                        nodesToRepair.add(hmd.getHostName());
+                    }
+                }
+            }
+        }
+        return failedNodeMap;
+    }
+
+    private boolean hasPendingFlow(Long stackId) {
+        List<FlowLog> flowLogs = flowLogService.findAllByResourceIdOrderByCreatedDesc(stackId);
+        return flowLogs.stream().anyMatch(fl -> StateStatus.PENDING.equals(fl.getStateStatus()));
     }
 
     private void checkReattachSupportForGateways(Stack inTransactionStack, boolean repairWithReattach, Cluster cluster, HostMetadata hmd) {
