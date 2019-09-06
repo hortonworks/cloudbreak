@@ -13,6 +13,9 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.Map;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
+
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
@@ -32,26 +35,30 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
 
     private static final String STORAGE_AUTO_GROW = "storageAutoGrow";
 
+    @Min(value = 7, message = "backupRetentionDays must be 7 or higher")
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.BACKUP_RETENTION_DAYS)
     private Integer backupRetentionDays;
 
+    @Pattern(regexp = "\\d+(?:\\.\\d)?")
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.DB_VERSION)
     private String dbVersion;
 
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.GEO_REDUNDANT_BACKUPS)
-    private boolean geoRedundantBackup;
+    private Boolean geoRedundantBackup;
 
+    @Min(value = 2, message = "skuCapacity must be 2 or higher")
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.SKU_CAPACITY)
     private Integer skuCapacity;
 
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.SKU_FAMILY)
     private String skuFamily;
 
+    @Pattern(regexp = "Basic|GeneralPurpose|MemoryOptimized")
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.SKU_TIER)
     private String skuTier;
 
     @ApiModelProperty(AzureDatabaseServerModelDescriptions.STORAGE_AUTO_GROW)
-    private boolean storageAutoGrow;
+    private Boolean storageAutoGrow;
 
     public Integer getBackupRetentionDays() {
         return backupRetentionDays;
@@ -69,11 +76,11 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         this.dbVersion = dbVersion;
     }
 
-    public boolean isGeoRedundantBackup() {
+    public Boolean getGeoRedundantBackup() {
         return geoRedundantBackup;
     }
 
-    public void setGeoRedundantBackup(boolean geoRedundantBackup) {
+    public void setGeoRedundantBackup(Boolean geoRedundantBackup) {
         this.geoRedundantBackup = geoRedundantBackup;
     }
 
@@ -101,11 +108,11 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         this.skuTier = skuTier;
     }
 
-    public boolean isStorageAutoGrow() {
+    public Boolean getStorageAutoGrow() {
         return storageAutoGrow;
     }
 
-    public void setStorageAutoGrow(boolean storageAutoGrow) {
+    public void setStorageAutoGrow(Boolean storageAutoGrow) {
         this.storageAutoGrow = storageAutoGrow;
     }
 
@@ -133,10 +140,10 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
     public void parse(Map<String, Object> parameters) {
         backupRetentionDays = getInt(parameters, BACKUP_RETENTION_DAYS);
         dbVersion = getParameterOrNull(parameters, DB_VERSION);
-        geoRedundantBackup = Boolean.parseBoolean(getParameterOrNull(parameters, GEO_REDUNDANT_BACKUP));
+        geoRedundantBackup = Boolean.valueOf(getParameterOrNull(parameters, GEO_REDUNDANT_BACKUP));
         skuCapacity = getInt(parameters, SKU_CAPACITY);
         skuFamily = getParameterOrNull(parameters, SKU_FAMILY);
         skuTier = getParameterOrNull(parameters, SKU_TIER);
-        storageAutoGrow = Boolean.parseBoolean(getParameterOrNull(parameters, STORAGE_AUTO_GROW));
+        storageAutoGrow = Boolean.valueOf(getParameterOrNull(parameters, STORAGE_AUTO_GROW));
     }
 }

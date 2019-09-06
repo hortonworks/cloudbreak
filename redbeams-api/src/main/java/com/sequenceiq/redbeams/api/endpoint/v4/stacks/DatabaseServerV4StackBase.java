@@ -9,6 +9,10 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescript
 
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Max;
+
 public class DatabaseServerV4StackBase extends ProviderParametersBase {
 
     @ApiModelProperty(DatabaseServerModelDescriptions.INSTANCE_TYPE)
@@ -30,12 +34,15 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
     @ApiModelProperty(DatabaseServerModelDescriptions.ROOT_USER_PASSWORD)
     private String rootUserPassword;
 
+    @Min(value = 1, message = "Port must be between 1 and 65535")
+    @Max(value = 65535, message = "Port must be between 1 and 65535")
     @ApiModelProperty(DatabaseServerModelDescriptions.PORT)
     private Integer port;
 
     @ApiModelProperty(DatabaseServerModelDescriptions.AWS_PARAMETERS)
     private AwsDatabaseServerV4Parameters aws;
 
+    @Valid
     @ApiModelProperty(DatabaseServerModelDescriptions.AZURE_PARAMETERS)
     private AzureDatabaseServerV4Parameters azure;
 
