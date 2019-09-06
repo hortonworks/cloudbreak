@@ -542,13 +542,17 @@ public class StackService {
         if (stack == null) {
             throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_ID_TXT, stackId));
         }
+        removeInstances(stack, workspaceId, instanceIds, false, user);
+    }
+
+    public void removeInstances(Stack stack, Long workspaceId, Collection<String> instanceIds, boolean forced, User user) {
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
             InstanceMetaData metaData = validateInstanceForDownscale(instanceId, stack, workspaceId, user);
             instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
         }
-        flowManager.triggerStackRemoveInstances(stackId, instanceIdsByHostgroupMap);
+        flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
     }
 
     public void updateStatus(Long stackId, StatusRequest status, boolean updateCluster, User user) {

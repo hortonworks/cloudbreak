@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -140,6 +141,11 @@ public class StackV3Controller extends NotificationController implements StackV3
     @Override
     public Response deleteInstance(Long workspaceId, String name, String instanceId, boolean forced) {
         return stackCommonService.deleteInstanceByNameInWorkspace(name, workspaceId, instanceId, forced);
+    }
+
+    @Override
+    public Response deleteMultipleInstances(Long workspaceId, String name, List<String> instanceIds, boolean forced) {
+        return stackCommonService.deleteMultipleInstancesByNameInWorkspace(name, workspaceId, instanceIds, forced);
     }
 
     @Override
