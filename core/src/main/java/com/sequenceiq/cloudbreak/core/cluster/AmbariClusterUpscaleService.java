@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -19,9 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -48,9 +45,6 @@ public class AmbariClusterUpscaleService {
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Inject
-    private ClusterContainerRunner containerRunner;
-
-    @Inject
     private ClusterHostServiceRunner hostRunner;
 
     @Inject
@@ -71,14 +65,7 @@ public class AmbariClusterUpscaleService {
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
-        if (orchestratorType.containerOrchestrator()) {
-            Map<String, List<Container>> containers = containerRunner.addClusterContainers(stackId, hostGroupName, scalingAdjustment);
-            for (Entry<String, List<Container>> containersEntry : containers.entrySet()) {
-                List<String> hostNames = containersEntry.getValue().stream().map(Container::getHost).collect(Collectors.toList());
-                hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
-            }
-            clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup, HostMetadataState.CONTAINER_RUNNING);
-        } else if (orchestratorType.hostOrchestrator()) {
+        if (orchestratorType.hostOrchestrator()) {
             Map<String, String> hosts = hostRunner.addAmbariServices(stackId, hostGroupName, scalingAdjustment);
             for (String hostName : hosts.keySet()) {
                 if (!hostsPerHostGroup.keySet().contains(hostGroupName)) {

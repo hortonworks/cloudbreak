@@ -11,9 +11,6 @@ public class ConstraintToConstraintJsonConverter extends AbstractConversionServi
     @Override
     public ConstraintJson convert(Constraint source) {
         ConstraintJson constraintJson = new ConstraintJson();
-        if (source.getConstraintTemplate() != null) {
-            constraintJson.setConstraintTemplateName(source.getConstraintTemplate().getName());
-        }
         if (source.getInstanceGroup() != null) {
             constraintJson.setInstanceGroupName(source.getInstanceGroup().getGroupName());
         }

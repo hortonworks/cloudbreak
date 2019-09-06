@@ -21,9 +21,6 @@ public class Constraint implements ProvisionEntity {
     @ManyToOne
     private InstanceGroup instanceGroup;
 
-    @ManyToOne
-    private ConstraintTemplate constraintTemplate;
-
     public Long getId() {
         return id;
     }
@@ -38,14 +35,6 @@ public class Constraint implements ProvisionEntity {
 
     public void setInstanceGroup(InstanceGroup instanceGroup) {
         this.instanceGroup = instanceGroup;
-    }
-
-    public ConstraintTemplate getConstraintTemplate() {
-        return constraintTemplate;
-    }
-
-    public void setConstraintTemplate(ConstraintTemplate constraintTemplate) {
-        this.constraintTemplate = constraintTemplate;
     }
 
     public Integer getHostCount() {

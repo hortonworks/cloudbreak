@@ -27,11 +27,7 @@ import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerBootstrapApiCheckerTask;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.context.ContainerBootstrapApiContext;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.context.ContainerOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
@@ -76,25 +72,13 @@ public class ClusterBootstrapper {
     private OrchestratorRepository orchestratorRepository;
 
     @Inject
-    private PollingService<ContainerBootstrapApiContext> containerBootstrapApiPollingService;
-
-    @Inject
     private PollingService<HostBootstrapApiContext> hostBootstrapApiPollingService;
-
-    @Inject
-    private ContainerBootstrapApiCheckerTask containerBootstrapApiCheckerTask;
 
     @Inject
     private HostBootstrapApiCheckerTask hostBootstrapApiCheckerTask;
 
     @Inject
-    private PollingService<ContainerOrchestratorClusterContext> containerClusterAvailabilityPollingService;
-
-    @Inject
     private PollingService<HostOrchestratorClusterContext> hostClusterAvailabilityPollingService;
-
-    @Inject
-    private ContainerClusterAvailabilityCheckerTask containerClusterAvailabilityCheckerTask;
 
     @Inject
     private HostClusterAvailabilityCheckerTask hostClusterAvailabilityCheckerTask;

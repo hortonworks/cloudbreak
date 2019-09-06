@@ -18,18 +18,16 @@ import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Constraint;
-import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.constraint.ConstraintTemplateService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 
@@ -39,9 +37,6 @@ public class HostGroupDecorator {
 
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
-
-    @Inject
-    private ConstraintTemplateService constraintTemplateService;
 
     @Inject
     private ConstraintRepository constraintRepository;
@@ -114,10 +109,6 @@ public class HostGroupDecorator {
                 throw new BadRequestException(String.format("Instance group '%s' not found on stack.", instanceGroupName));
             }
             constraint.setInstanceGroup(instanceGroup);
-        }
-        if (constraintTemplateName != null) {
-            ConstraintTemplate constraintTemplate = constraintTemplateService.getByNameForWorkspace(constraintTemplateName, stack.getWorkspace());
-            constraint.setConstraintTemplate(constraintTemplate);
         }
         return constraint;
     }
