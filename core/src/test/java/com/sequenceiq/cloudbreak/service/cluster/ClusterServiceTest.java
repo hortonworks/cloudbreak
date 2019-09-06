@@ -1,55 +1,65 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.StateStatus;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ClusterServiceTest {
 
     @Mock
@@ -76,6 +86,12 @@ public class ClusterServiceTest {
     @Mock
     private BlueprintService blueprintService;
 
+    @Mock
+    private FlowLogService flowLogService;
+
+    @Mock
+    private StackUpdater stackUpdater;
+
     @InjectMocks
     private ClusterService clusterService;
 
@@ -86,16 +102,15 @@ public class ClusterServiceTest {
     @Spy
     private ResourceAttributeUtil resourceAttributeUtil;
 
-    @Before
+    @BeforeEach
     public void setUp() throws TransactionExecutionException {
         cluster = new Cluster();
         cluster.setId(1L);
         cluster.setRdsConfigs(Set.of());
         stack = spy(new Stack());
+        stack.setId(1L);
         stack.setCluster(cluster);
         stack.setPlatformVariant("AWS");
-        when(stackService.get(any(Long.class))).thenReturn(stack);
-        when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
 
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
     }
@@ -127,6 +142,10 @@ public class ClusterServiceTest {
         hostGroup1.setHostMetadata(hostMetadata);
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
+        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(Collections.emptyList());
+        when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
+        when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
+
         clusterService.repairCluster(1L, List.of("hostGroup1"), false);
 
         verify(stack, never()).getInstanceMetaDataAsList();
@@ -164,7 +183,6 @@ public class ClusterServiceTest {
 
         when(stack.getInstanceMetaDataAsList()).thenReturn(instanceMetaData);
 
-
         Resource volumeSet = new Resource();
         VolumeSetAttributes attributes = new VolumeSetAttributes("eu-west-1", Boolean.TRUE, "", List.of(), 100, "standard");
         attributes.setDeleteOnTermination(null);
@@ -172,6 +190,11 @@ public class ClusterServiceTest {
         volumeSet.setInstanceId("instanceId1");
         volumeSet.setResourceType(ResourceType.AWS_VOLUMESET);
         stack.setResources(Set.of(volumeSet));
+        FlowLog flowLog = new FlowLog();
+        flowLog.setStateStatus(StateStatus.SUCCESSFUL);
+        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(List.of(flowLog));
+        when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
+        when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
 
         clusterService.repairCluster(1L, List.of("instanceId1"), false, false);
         verify(stack).getInstanceMetaDataAsList();
@@ -181,5 +204,19 @@ public class ClusterServiceTest {
         verify(resourceService).saveAll(saveCaptor.capture());
         assertFalse(resourceAttributeUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false));
+    }
+
+    @Test
+    public void shouldNotUpdateStackStateWhenHasPendingFlow() {
+        FlowLog flowLog = new FlowLog();
+        flowLog.setStateStatus(StateStatus.PENDING);
+        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(List.of(flowLog));
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            clusterService.repairCluster(1L, List.of("instanceId1"), false, false);
+        });
+        assertEquals("Repair cannot be performed, because there is already an active flow.", exception.getMessage());
+
+        verifyZeroInteractions(stackUpdater);
     }
 }

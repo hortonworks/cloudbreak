@@ -58,7 +58,9 @@ public enum DetailedStackStatus {
     // Wait for sync
     WAIT_FOR_SYNC(Status.WAIT_FOR_SYNC),
     // Retry
-    RETRY(Status.UPDATE_IN_PROGRESS);
+    RETRY(Status.UPDATE_IN_PROGRESS),
+    // Repair status
+    REPAIR_IN_PROGRESS(Status.UPDATE_IN_PROGRESS);
 
     private final Status status;
 
