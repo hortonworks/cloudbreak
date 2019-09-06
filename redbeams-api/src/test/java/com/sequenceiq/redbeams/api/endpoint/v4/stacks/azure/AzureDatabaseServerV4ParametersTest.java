@@ -25,7 +25,7 @@ public class AzureDatabaseServerV4ParametersTest {
         assertThat(underTest.getBackupRetentionDays().intValue()).isEqualTo(3);
 
         underTest.setGeoRedundantBackup(true);
-        assertThat(underTest.isGeoRedundantBackup()).isTrue();
+        assertThat(underTest.getGeoRedundantBackup()).isTrue();
 
         underTest.setSkuCapacity(5);
         assertThat(underTest.getSkuCapacity().intValue()).isEqualTo(5);
@@ -37,7 +37,7 @@ public class AzureDatabaseServerV4ParametersTest {
         assertThat(underTest.getSkuTier()).isEqualTo("some-tier");
 
         underTest.setStorageAutoGrow(true);
-        assertThat(underTest.isStorageAutoGrow()).isTrue();
+        assertThat(underTest.getStorageAutoGrow()).isTrue();
 
         underTest.setDbVersion("1.2.3");
         assertThat(underTest.getDbVersion()).isEqualTo("1.2.3");
@@ -50,9 +50,7 @@ public class AzureDatabaseServerV4ParametersTest {
 
         assertThat(underTest.asMap()).containsOnly(Map.entry("backupRetentionDays", 3),
                 Map.entry("dbVersion", "1.2.3"),
-                Map.entry("cloudPlatform", "AZURE"),
-                Map.entry("geoRedundantBackup", false),
-                Map.entry("storageAutoGrow", false));
+                Map.entry("cloudPlatform", "AZURE"));
 
         underTest.setSkuCapacity(5);
         underTest.setSkuFamily("some-family");
@@ -89,13 +87,13 @@ public class AzureDatabaseServerV4ParametersTest {
 
         underTest.parse(parameters);
 
-        underTest.setBackupRetentionDays(3);
-        underTest.setGeoRedundantBackup(true);
-        underTest.setSkuCapacity(5);
-        underTest.setSkuFamily("some-family");
-        underTest.setSkuTier("some-tier");
-        underTest.setStorageAutoGrow(true);
-        underTest.setDbVersion("1.2.3");
+        assertThat(underTest.getBackupRetentionDays().intValue()).isEqualTo(3);
+        assertThat(underTest.getDbVersion()).isEqualTo("1.2.3");
+        assertThat(underTest.getSkuCapacity().intValue()).isEqualTo(5);
+        assertThat(underTest.getSkuFamily()).isEqualTo("some-family");
+        assertThat(underTest.getSkuTier()).isEqualTo("some-tier");
+        assertThat(underTest.getGeoRedundantBackup()).isTrue();
+        assertThat(underTest.getStorageAutoGrow()).isTrue();
     }
 
 }
