@@ -110,7 +110,7 @@ public class AzureDatabaseResourceService {
                 .collect(Collectors.toList());
     }
 
-    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack) {
+    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack, boolean force) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureUtils.getResourceGroupName(cloudContext, stack);
@@ -118,11 +118,29 @@ public class AzureDatabaseResourceService {
         try {
             client.deleteResourceGroup(resourceGroupName);
         } catch (CloudException e) {
-            String errorCode = e.body().code();
-            if ("ResourceGroupNotFound".equals(errorCode)) {
-                LOGGER.warn("Resource group {} does not exist, assuming that it has already been deleted");
+            String errorMessage = null;
+            if (e.body() != null) {
+                String errorCode = e.body().code();
+                if ("ResourceGroupNotFound".equals(errorCode)) {
+                    LOGGER.warn("Resource group {} does not exist, assuming that it has already been deleted", resourceGroupName);
+                    // leave errorMessage null => do not throw exception
+                } else {
+                    String details = e.body().details() != null ? e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", ")) : "";
+                    errorMessage = String.format("Resource group %s deletion failed, status code %s, error message: %s, details: %s",
+                            resourceGroupName, errorCode, e.body().message(), details);
+                }
             } else {
-                throw e;
+                errorMessage = String.format("Resource group %s deletion failed: '%s', please go to Azure Portal for details",
+                        resourceGroupName, e.getMessage());
+            }
+
+            if (errorMessage != null) {
+                if (force) {
+                    LOGGER.warn(errorMessage);
+                    LOGGER.warn("Resource group {} deletion failed, continuing because termination is forced", resourceGroupName);
+                } else {
+                    throw new CloudConnectorException(errorMessage, e);
+                }
             }
         }
 
