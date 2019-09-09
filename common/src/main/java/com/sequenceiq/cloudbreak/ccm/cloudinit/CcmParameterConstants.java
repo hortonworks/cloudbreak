@@ -43,9 +43,14 @@ public class CcmParameterConstants {
     public static final String TUNNEL_INITIATOR_ID_KEY = "ccmTunnelInitiatorId";
 
     /**
+     * The template model key for the key ID under which the private key was registered with CCM.
+     */
+    public static final String KEY_ID_KEY = "ccmKeyId";
+
+    /**
      * The template model key for the enciphered private key, which CCM uses to authenticate the instance.
      */
-    public static final String ENCIPHERED_PRIVATE_KEY = "ccmEncipheredPrivateKey";
+    public static final String ENCIPHERED_PRIVATE_KEY_KEY = "ccmEncipheredPrivateKey";
 
     /**
      * The template model key for specifying the port for which a tunnel is being registered.

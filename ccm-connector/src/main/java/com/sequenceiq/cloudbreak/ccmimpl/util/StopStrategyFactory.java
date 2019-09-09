@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.ccmimpl.endpoint;
+package com.sequenceiq.cloudbreak.ccmimpl.util;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;

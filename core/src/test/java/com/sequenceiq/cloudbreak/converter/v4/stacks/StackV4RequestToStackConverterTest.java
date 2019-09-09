@@ -174,7 +174,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         // THEN
         assertAllFieldsNotNull(
                 stack,
-                Arrays.asList("description", "cluster", "environmentCrn", "gatewayPort", "network", "securityConfig",
+                Arrays.asList("description", "cluster", "environmentCrn", "gatewayPort", "useCcm", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy", "resourceCrn"));
@@ -200,7 +200,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         // THEN
         assertAllFieldsNotNull(
                 stack,
-                Arrays.asList("description", "cluster", "environmentCrn", "gatewayPort", "network", "securityConfig",
+                Arrays.asList("description", "cluster", "environmentCrn", "gatewayPort", "useCcm", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform", "resourceCrn",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy"));

@@ -1,0 +1,241 @@
+syntax = "proto3";
+
+package minasshdmanagement;
+
+option java_package = "com.cloudera.thunderhead.service.minasshdmanagement";
+option java_outer_classname = "MinaSshdManagementProto";
+
+import "version.proto";
+import "paging.proto";
+import "options.proto";
+
+// For future compatibility, all rpcs must take a request and return a response
+// even if there is initially no content for these messages.
+service MinaSshdManagement {
+  // Get the service version.
+  rpc GetVersion (version.VersionRequest)
+    returns (version.VersionResponse) {}
+
+  // Acquire an open MinaSshdService. This always returns a MinaSshdService
+  // open to rececive new connections of which there will always be at most
+  // one per account.
+  // The MinaSshdService may not be ready. If one already exists, it will
+  // be returned. If one does not, a new one will have been created, but the
+  // initializing workflows may not have completed yet.
+  rpc AcquireMinaSshdService (AcquireMinaSshdServiceRequest)
+    returns (AcquireMinaSshdServiceResponse) {}
+
+  // Currently there can only be one MinaSshdService open per account.
+  // Use this to check if the MinaSshdService is ready as well as to get
+  // the public key for the server.
+  rpc ListMinaSshdServices (ListMinaSshdServicesRequest)
+    returns (ListMinaSshdServicesResponse) {}
+
+  // Generates a ssh key pair, registers the public key, and returns the
+  // enciphered private key and public key
+  // MinaSshdService must be ready or this will fail.
+  rpc GenerateAndRegisterSshTunnelingKeyPair (GenerateAndRegisterSshTunnelingKeyPairRequest)
+    returns (GenerateAndRegisterSshTunnelingKeyPairResponse) {}
+
+  // Register an ssh tunneling public key in case you want to generate the ssh
+  // tunneling key pair separately or use a different algorithm from the
+  // default.
+  // Right now only RSA or ED25519 are supported
+  // MinaSshdService must be ready or this will fail.
+  rpc RegisterSshTunnelingKey (RegisterSshTunnelingKeyRequest)
+    returns (RegisterSshTunnelingKeyResponse) {}
+
+  // Unregister Ssh Tunneling Key
+  rpc UnregisterSshTunnelingKey (UnregisterSshTunnelingKeyRequest)
+    returns (UnregisterSshTunnelingKeyResponse) {}
+
+  // For minaSshdService
+  rpc ListSshTunnelingKeys (ListSshTunnelingKeysRequest)
+    returns (ListSshTunnelingKeysResponse) {}
+}
+
+message MinaSshdService {
+  // MinaSshdServiceStatusTransitions captures the transition logic described
+  // here.
+  enum Status {
+    // MinaSshdServices start in this state, with a creation request set as
+    // well. This is a special state that is not visible to users, they see the
+    // MinaSshdService as creating. This is a transitory state.
+    INITIAL = 0;
+    // MinaSshdServices enter this state as the first step of the creating
+    // workflow. This is a transitory state.
+    CREATING = 1;
+    // This state is reached upon successful creation of a
+    // MinaSshdService. A MinaSshdService in this state generally has a cloud
+    // formation stack. This is a stable state.
+    STARTED = 2;
+    // MinaSshdServices enter this state as the first step of the delete
+    // worklfow. We accept delete requests in any state. This is a transitory
+    // state.
+    TERMINATING = 3;
+    // MinaSshdServices enter this state after a failure of create or
+    // terminate. Once in this state we will only accept delete requests. This
+    // is a stable state.
+    FAILED = 4;
+  }
+  string minaSshdServiceId = 1;
+  Status status = 2;
+  string minaSshdServiceImageId = 3;
+  // This is an ordered version that is incremented everytime a new
+  // MinaSshdService image is available. For any interesting version that is
+  // used to gate logic in code, an entry is added to
+  // MinaSshdServiceVersions.java.
+  uint64 minaSshdServiceImageVersion = 4;
+  // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 creationDateMs = 5;
+  // Whether the MinaSshdService is ready to accept requests. Currently it
+  // means MinaSshdService CF stack is comeplete, an NLB port has been
+  // assinged, and a public key is set.
+  // Duplicates sshTunnelingConfiguration.configInitialized for
+  // MinaSshdServices.
+  bool ready = 6;
+  SshTunnelingConfiguration sshTunnelingConfiguration = 7;
+  // DNS name for making API calls of the minaSshdService.
+  string loadBalancerDnsName = 8;
+}
+
+message ListMinaSshdServicesRequest {
+  string accountId = 1;
+  // The list is optional. The default is to return all MinaSshdServices.
+  repeated string id = 2;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
+}
+
+message ListMinaSshdServicesResponse {
+  repeated MinaSshdService minaSshdService = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
+}
+
+message RegisterSshTunnelingKeyRequest {
+  string minaSshdServiceId = 1;
+  // keyId needs to be unique per account.
+  string keyId = 2;
+  string accountId = 3;
+  string publicKey = 4;
+  PublicKeyAlgorithm.Value publicKeyAlgorithm = 5;
+}
+
+message RegisterSshTunnelingKeyResponse {
+}
+
+message UnregisterSshTunnelingKeyRequest {
+  string minaSshdServiceId = 1;
+  string keyId = 2;
+}
+
+message UnregisterSshTunnelingKeyResponse {
+}
+
+message ListSshTunnelingKeysRequest {
+  string minaSshdServiceId = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 2;
+  paging.PageToken pageToken = 3;
+}
+
+message ListSshTunnelingKeysResponse {
+  repeated PublicKey publicKey = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
+}
+
+message AcquireMinaSshdServiceRequest {
+  string accountId = 1;
+}
+
+message AcquireMinaSshdServiceResponse {
+  MinaSshdService minaSshdService = 1;
+}
+
+
+// On-the-wire SshTunnelingConfiguration. Private key is not needed.
+message SshTunnelingConfiguration {
+  // Whether the ssh tunneling configuration is fully initialized.
+  bool configInitialized = 1;
+  // The nlbPort acquired for the Ssh Tunnel, if enabled
+  NlbPort nlbPort = 2;
+  // The Mina instancepublic key, if enabled
+  bytes sshdPublicKey = 3 [(options.FieldExtension.skipLogging) = true];
+}
+
+// The SSH public key algorithm
+// Note: don't change enum name
+message PublicKeyAlgorithm {
+  enum Value {
+    UNSET = 0;
+    SSH_RSA = 1;
+    SSH_ED25519 = 2;
+  }
+}
+
+message PublicKey {
+  string keyId = 1;
+  string publicKey = 2;
+  PublicKeyAlgorithm.Value publicKeyAlgorithm = 3;
+}
+
+// Always generates RSA now
+message GenerateAndRegisterSshTunnelingKeyPairRequest {
+  string minaSshdServiceId = 1;
+  string keyId = 2;
+  string accountId = 3;
+}
+
+message GenerateAndRegisterSshTunnelingKeyPairResponse {
+  // Enciphered private key to pass to workload node in userdata.
+  // It is expected that the enciphered key is passed in user data and the
+  // node contains a script to decipher it.
+  //
+  // For how Altus does this, see
+  // services/clustermanagement/src/main/resources/com/cloudera/thunderhead/service/clustermanagement/server/CLOUD-INIT.template
+  // where it calls
+  // /opt/bin/update_autossh_config.sh
+  // which deciphers it like this:
+  //   cat ${ENCRYPTED_PRIVATE_KEY} | openssl enc -aes-128-cbc -d -A -a \
+  //           -K $(xxd -pu <<< $(echo ${CLUSTER_ID} | cut -c1-16) | cut -c1-32) \
+  //           -iv ${IV} > ${PRIVATE_KEY}
+  //
+  //      -aes-128-cbc - AES-128, CBC mode
+  //      -d           - decrypt
+  //      -a           - Base64 process the data, meaning it will be decoded from
+  //                     base64 prior to deciphering.
+  //      -A           - if the -a option is set then base64 process the data
+  //                     on one line
+  //      -k           - password
+  //      -K           - the actual key to use: this must be represented as a
+  //                     string comprised only of hex digits.
+  //      -iv          - the actual IV to use: this must be represented as a
+  //                     string comprised only of hex digits.
+  //
+  //    Regarding padding, from the openssl docs:
+  //
+  //      "All the block ciphers normally use PKCS#5 padding, also known as
+  //       standard block padding. This allows a rudimentary integrity or
+  //       password check to be performed. However since the chance of random
+  //       data passing the test is better than 1 in 256 it isn't a very good
+  //       test."
+  // Script doing this is here:
+  // service-delivery/spinnaker/spinnaker-rosco/cws-spinnaker-rosco-cmcdh/src/opt/rosco/config/packer/files/systemd/director-reversetunnel.sh
+  string encipheredPrivateKey = 1 [(options.FieldExtension.sensitive) = true];
+  // public key is RFC4716 encoded, alwasy RSA for now
+  string publicKey = 2 [(options.FieldExtension.skipLogging) = true];
+}
+
+message NlbPort {
+  // The nlb id
+  string nlbId = 1;
+  // AWS - the nlb arn
+  string nlbArn = 2;
+  // AWS - the dns name
+  string nlbFqdn = 3;
+  // The port number
+  int32 port = 4;
+}

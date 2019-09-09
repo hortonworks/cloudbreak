@@ -86,6 +86,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private Integer gatewayPort;
 
+    private Boolean useCcm;
+
     private int consulServers;
 
     private String customDomain;
@@ -329,6 +331,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setGatewayPort(Integer gatewayPort) {
         this.gatewayPort = gatewayPort;
+    }
+
+    public Boolean getUseCcm() {
+        return useCcm;
+    }
+
+    public void setUseCcm(Boolean useCcm) {
+        this.useCcm = useCcm;
     }
 
     public String getPlatformVariant() {
