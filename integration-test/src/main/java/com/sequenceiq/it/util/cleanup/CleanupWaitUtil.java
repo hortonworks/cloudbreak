@@ -1,10 +1,7 @@
 package com.sequenceiq.it.util.cleanup;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -27,140 +24,77 @@ public class CleanupWaitUtil {
 
     private static final int DELETE_SLEEP = 30000;
 
-    @Value("${integrationtest.testsuite.pollingInterval:3000}")
+    @Value("${integrationtest.testsuite.pollingInterval:30000}")
     private long pollingInterval;
 
-    @Value("${integrationtest.testsuite.maxRetry:2000}")
+    @Value("${integrationtest.testsuite.maxRetry:3000}")
     private int maxRetry;
 
     public WaitResult waitForDistroxesCleanup(CloudbreakClient cloudbreak, EnvironmentClient environment) {
-        WaitResult waitResult = WaitResult.SUCCESSFUL;
-        Map<String, String> failedEnvironments = new HashMap<>();
+        int retryCount = 0;
+        Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
+                .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()));
 
-        AtomicInteger retryCount = new AtomicInteger(0);
-        while (checkDistroxesAreAvailable(cloudbreak, environment) && !checkDistroxesDeleteFailedStatus(cloudbreak, environment)
-                && retryCount.get() < maxRetry) {
-
+        while (retryCount < maxRetry && checkDistroxesAreAvailable(cloudbreak, environments) && !checkDistroxesDeleteFailedStatus(cloudbreak, environments)) {
             sleep(pollingInterval);
-
-            environment.environmentV1Endpoint().list().getResponses().stream()
-                    .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()))
-                    .entrySet().stream().forEach(env -> {
-                LOG.info("Waiting for deleting all the DISTROXes from environment with name: {}", env.getValue());
-
-                Map<String, Status> distroxes = cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
-                        .collect(Collectors.toMap(response -> response.getName(), response -> response.getStatus()));
-
-                if (distroxes == null || distroxes.isEmpty()) {
-                    LOG.info("All the DISTROXes have been deleted from environment with name: {}", env.getValue());
-                    retryCount.set(maxRetry);
-                } else {
-                    distroxes.keySet().stream().forEach(distroxName -> LOG.info("Waiting for deleting, DISTROX with name: {}", distroxName));
-                    if (distroxes.values().stream().anyMatch(distroxStatus -> distroxStatus.equals(Status.DELETE_FAILED))) {
-                        LOG.info("One or more DISTROX cannot be deleted from environment with name: {}", env.getValue());
-                        failedEnvironments.put(env.getKey(), env.getValue());
-                    }
-                }
-            });
-            retryCount.getAndIncrement();
+            retryCount++;
         }
-        sleep(DELETE_SLEEP);
 
-        if (!failedEnvironments.isEmpty()) {
-            waitResult = WaitResult.FAILED;
-            failedEnvironments.values().stream().forEach(envName -> LOG.info("One or more DISTROX cannot be deleted from environment with name: {}", envName));
-        } else if (retryCount.get() >= maxRetry) {
-            waitResult = WaitResult.TIMEOUT;
-            LOG.info("Timeout: environment cannot be cleaned up during {} retries", maxRetry);
+        if (checkDistroxesDeleteFailedStatus(cloudbreak, environments)) {
+            LOG.info("One or more DISTROX cannot be terminated in the associated environment");
+            return WaitResult.FAILED;
+        } else if (checkDistroxesAreAvailable(cloudbreak, environments)) {
+            LOG.info("Timeout: DISTROXes cannot be terminated in environment during {} retries", maxRetry);
+            return WaitResult.TIMEOUT;
         } else {
-            LOG.info("All the DISTROXs have been deleted from environments");
+            sleep(DELETE_SLEEP);
+            LOG.info("All the DISTROXs have been terminated in all the environments");
+            return WaitResult.SUCCESSFUL;
         }
-        return waitResult;
     }
 
     public WaitResult waitForSdxesCleanup(SdxClient sdx, EnvironmentClient environment) {
-        WaitResult waitResult = WaitResult.SUCCESSFUL;
-        Map<String, String> failedEnvironments = new HashMap<>();
+        int retryCount = 0;
+        Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
+                .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()));
 
-        AtomicInteger retryCount = new AtomicInteger(0);
-        while (checkSdxesAreAvailable(sdx, environment) && !checkSdxesDeleteFailedStatus(sdx, environment) && retryCount.get() < maxRetry) {
-
+        while (retryCount < maxRetry && checkSdxesAreAvailable(sdx, environments) && !checkSdxesDeleteFailedStatus(sdx, environments)) {
             sleep(pollingInterval);
-
-            environment.environmentV1Endpoint().list().getResponses().stream()
-                    .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()))
-                    .entrySet().stream().forEach(env -> {
-                LOG.info("Waiting for deleting all the SDXes from environment with name: {}", env.getValue());
-
-                Map<String, SdxClusterStatusResponse> sdxes = sdx.sdxEndpoint().list(env.getValue()).stream()
-                        .collect(Collectors.toMap(response -> response.getName(), response -> response.getStatus()));
-
-                if (sdxes == null || sdxes.isEmpty()) {
-                    LOG.info("All the SDXes have been deleted from environment with name: {}", env.getValue());
-                    retryCount.set(maxRetry);
-                } else {
-                    sdxes.keySet().stream().forEach(sdxName -> LOG.info("Waiting for deleting, SDX with name: {}", sdxName));
-                    if (sdxes.values().stream().anyMatch(sdxStatus -> sdxStatus.equals(SdxClusterStatusResponse.DELETE_FAILED))) {
-                        LOG.info("One or more SDX cannot be deleted from environment with name: {}", env.getValue());
-                        failedEnvironments.put(env.getKey(), env.getValue());
-                    }
-                }
-            });
-            retryCount.getAndIncrement();
+            retryCount++;
         }
-        sleep(DELETE_SLEEP);
 
-        if (!failedEnvironments.isEmpty()) {
-            waitResult = WaitResult.FAILED;
-            failedEnvironments.values().stream().forEach(envName -> LOG.info("One or more SDX cannot be deleted from environment with name: {}", envName));
-        } else if (retryCount.get() >= maxRetry) {
-            waitResult = WaitResult.TIMEOUT;
-            LOG.info("Timeout: environment cannot be cleaned up during {} retries", maxRetry);
+        if (checkSdxesDeleteFailedStatus(sdx, environments)) {
+            LOG.info("One or more SDX cannot be terminated in the associated environment");
+            return WaitResult.FAILED;
+        } else if (checkSdxesAreAvailable(sdx, environments)) {
+            LOG.info("Timeout: SDXes cannot be terminated in environment during {} retries", maxRetry);
+            return WaitResult.TIMEOUT;
         } else {
-            LOG.info("All the SDXs have been deleted from environments");
+            sleep(DELETE_SLEEP);
+            LOG.info("All the SDXs have been terminated in all the environments");
+            return WaitResult.SUCCESSFUL;
         }
-        return waitResult;
     }
 
     public WaitResult waitForEnvironmentsCleanup(EnvironmentClient environment) {
-        WaitResult waitResult = WaitResult.SUCCESSFUL;
-        List<String> failedEnvironments = new ArrayList<>();
-
         int retryCount = 0;
-        while (checkEnvironmentsAreAvailable(environment) && !checkEnvironmentsDeleteFailedStatus(environment) && retryCount < maxRetry) {
 
+        while (retryCount < maxRetry && checkEnvironmentsAreAvailable(environment) && !checkEnvironmentsDeleteFailedStatus(environment)) {
             sleep(pollingInterval);
-
-            Map<String, EnvironmentStatus> environments = environment.environmentV1Endpoint().list().getResponses().stream()
-                    .collect(Collectors.toMap(response -> response.getName(), response -> response.getEnvironmentStatus()));
-
-            if (environments == null || environments.isEmpty()) {
-                LOG.info("All the environments have been deleted");
-                retryCount = maxRetry;
-            } else {
-                environments.keySet().stream().forEach(environmentName -> LOG.info("Waiting for deleting, Environment with name: {}", environmentName));
-                if (environments.values().stream().anyMatch(environmentStatus -> environmentStatus.equals(EnvironmentStatus.DELETE_FAILED))) {
-                    LOG.info("One or more Environment cannot be deleted");
-                    failedEnvironments = environment.environmentV1Endpoint().list().getResponses().stream()
-                            .filter(response -> response.getEnvironmentStatus().equals(EnvironmentStatus.DELETE_FAILED))
-                            .map(response -> response.getName())
-                            .collect(Collectors.toList());
-                }
-            }
             retryCount++;
         }
-        sleep(DELETE_SLEEP);
 
-        if (!failedEnvironments.isEmpty()) {
-            waitResult = WaitResult.FAILED;
-            failedEnvironments.stream().forEach(envName -> LOG.info("Environment with name: {} cannot be deleted", envName));
-        } else if (retryCount >= maxRetry) {
-            waitResult = WaitResult.TIMEOUT;
-            LOG.info("Timeout: environments cannot be cleaned up during {} retries", maxRetry);
+        if (checkEnvironmentsDeleteFailedStatus(environment)) {
+            LOG.info("One or more environment cannot be terminated");
+            return WaitResult.FAILED;
+        } else if (checkEnvironmentsAreAvailable(environment)) {
+            LOG.info("Timeout: Environments cannot be terminated during {} retries", maxRetry);
+            return WaitResult.TIMEOUT;
         } else {
-            LOG.info("All the environments have been deleted");
+            sleep(DELETE_SLEEP);
+            LOG.info("All the environments have been terminated");
+            return WaitResult.SUCCESSFUL;
         }
-        return waitResult;
     }
 
     private void sleep(long pollingInterval) {
@@ -171,73 +105,77 @@ public class CleanupWaitUtil {
         }
     }
 
-    private boolean checkDistroxesAreAvailable(CloudbreakClient cloudbreak, EnvironmentClient environment) {
-        List<String> distroxNames = new ArrayList<>();
+    private boolean checkDistroxesAreAvailable(CloudbreakClient cloudbreak, Map<String, String> environments) {
+        AtomicBoolean distroxesAreAvailable = new AtomicBoolean(true);
 
-        Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
-                .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()));
         environments.entrySet().stream().forEach(env -> {
-            LOG.info("Wait collecting available distroxes for environment: {}", env.getValue());
-            distroxNames.addAll(cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
-                    .map(response -> response.getName())
-                    .collect(Collectors.toList()));
+            Map<String, Status> distroxes = cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
+                    .collect(Collectors.toMap(response -> response.getName(), response -> response.getStatus()));
+
+            if (distroxes == null || distroxes.isEmpty()) {
+                LOG.info("All the DISTROXes have been deleted from environment with name: {}", env.getValue());
+                distroxesAreAvailable.set(false);
+            }
         });
-        return !distroxNames.isEmpty();
+        return distroxesAreAvailable.get();
     }
 
-    private boolean checkSdxesAreAvailable(SdxClient sdx, EnvironmentClient environment) {
-        List<String> sdxNames = new ArrayList<>();
+    private boolean checkSdxesAreAvailable(SdxClient sdx, Map<String, String> environments) {
+        AtomicBoolean sdxesAreAvailable = new AtomicBoolean(true);
 
-        Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
-                .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()));
         environments.entrySet().stream().forEach(env -> {
-            LOG.info("Wait collecting available sdxes for environment: {}", env.getValue());
-            sdxNames.addAll(sdx.sdxEndpoint().list(env.getValue()).stream()
-                    .map(response -> response.getName())
-                    .collect(Collectors.toList()));
+            Map<String, SdxClusterStatusResponse> sdxes = sdx.sdxEndpoint().list(env.getValue()).stream()
+                    .collect(Collectors.toMap(response -> response.getName(), response -> response.getStatus()));
+
+            if (sdxes == null || sdxes.isEmpty()) {
+                LOG.info("All the SDXes have been deleted from environment with name: {}", env.getValue());
+                sdxesAreAvailable.set(false);
+            }
         });
-        return !sdxNames.isEmpty();
+        return sdxesAreAvailable.get();
     }
 
     private boolean checkEnvironmentsAreAvailable(EnvironmentClient environment) {
-        List<String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
-                .map(response -> response.getName())
-                .collect(Collectors.toList());
-        return !environments.isEmpty();
+        Map<String, EnvironmentStatus> environments = environment.environmentV1Endpoint().list().getResponses().stream()
+                .collect(Collectors.toMap(response -> response.getName(), response -> response.getEnvironmentStatus()));
+
+        return (environments == null || environments.isEmpty()) ? false : true;
     }
 
-    private boolean checkDistroxesDeleteFailedStatus(CloudbreakClient cloudbreak, EnvironmentClient environment) {
-        List<Status> distroxStatuses = new ArrayList<>();
+    private boolean checkDistroxesDeleteFailedStatus(CloudbreakClient cloudbreak, Map<String, String> environments) {
+        AtomicBoolean failedIsAvailable = new AtomicBoolean(false);
 
-        Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
-                .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()));
         environments.entrySet().stream().forEach(env -> {
-            LOG.info("Wait collecting available distroxes' statuses for environment: {}", env.getValue());
-            distroxStatuses.addAll(cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
-                    .map(response -> response.getStatus())
-                    .collect(Collectors.toList()));
+            Map<String, Status> distroxes = cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
+                    .collect(Collectors.toMap(response -> response.getName(), response -> response.getStatus()));
+
+            if (distroxes.values().stream().anyMatch(distroxStatus -> distroxStatus.equals(Status.DELETE_FAILED))) {
+                LOG.info("One or more DISTROX cannot be deleted from environment with name: {}", env.getValue());
+                failedIsAvailable.set(true);
+            }
         });
-        return distroxStatuses.stream().anyMatch(status -> status.equals(Status.DELETE_FAILED));
+        return failedIsAvailable.get();
     }
 
-    private boolean checkSdxesDeleteFailedStatus(SdxClient sdx, EnvironmentClient environment) {
-        List<SdxClusterStatusResponse> sdxStatuses = new ArrayList<>();
+    private boolean checkSdxesDeleteFailedStatus(SdxClient sdx, Map<String, String> environments) {
+        AtomicBoolean failedIsAvailable = new AtomicBoolean(false);
 
-        Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
-                .collect(Collectors.toMap(response -> response.getCrn(), response -> response.getName()));
         environments.entrySet().stream().forEach(env -> {
-            LOG.info("Wait collecting available sdxes' statuses for environment: {}", env.getValue());
-            sdxStatuses.addAll(sdx.sdxEndpoint().list(env.getValue()).stream()
-                    .map(response -> response.getStatus())
-                    .collect(Collectors.toList()));
+            Map<String, SdxClusterStatusResponse> sdxes = sdx.sdxEndpoint().list(env.getValue()).stream()
+                    .collect(Collectors.toMap(response -> response.getName(), response -> response.getStatus()));
+
+            if (sdxes.values().stream().anyMatch(sdxStatus -> sdxStatus.equals(SdxClusterStatusResponse.DELETE_FAILED))) {
+                LOG.info("One or more SDX cannot be deleted from environment with name: {}", env.getValue());
+                failedIsAvailable.set(true);
+            }
         });
-        return sdxStatuses.stream().anyMatch(status -> status.equals(SdxClusterStatusResponse.DELETE_FAILED));
+        return failedIsAvailable.get();
     }
 
     private boolean checkEnvironmentsDeleteFailedStatus(EnvironmentClient environment) {
-        List<EnvironmentStatus> environmentStatuses = environment.environmentV1Endpoint().list().getResponses().stream()
-                .map(response -> response.getEnvironmentStatus())
-                .collect(Collectors.toList());
-        return environmentStatuses.stream().anyMatch(status -> status.equals(EnvironmentStatus.DELETE_FAILED));
+        Map<String, EnvironmentStatus> environments = environment.environmentV1Endpoint().list().getResponses().stream()
+                .collect(Collectors.toMap(response -> response.getName(), response -> response.getEnvironmentStatus()));
+
+        return environments.values().stream().anyMatch(environmentStatus -> environmentStatus.equals(EnvironmentStatus.DELETE_FAILED)) ? true : false;
     }
 }
