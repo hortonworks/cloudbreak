@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -65,10 +66,10 @@ public class ImageService {
     @Value("${freeipa.image.catalog.default.os}")
     private String defaultOs;
 
-    public Image create(Stack stack, ImageSettingsRequest imageRequest, Credential credential) {
+    public Image create(Stack stack, ImageSettingsRequest imageRequest, Credential credential, CcmParameters ccmParameters) {
         Future<PlatformParameters> platformParametersFuture =
                 intermediateBuilderExecutor.submit(() -> platformParameterService.getPlatformParameters(stack, credential));
-        String userData = createUserData(stack, platformParametersFuture);
+        String userData = createUserData(stack, platformParametersFuture, ccmParameters);
         String region = stack.getRegion();
         String platformString = stack.getCloudPlatform().toLowerCase();
         com.sequenceiq.freeipa.api.model.image.Image imageCatalogImage = getImage(imageRequest, region, platformString);
@@ -172,7 +173,7 @@ public class ImageService {
                 .findFirst();
     }
 
-    private String createUserData(Stack stack, Future<PlatformParameters> platformParametersFuture) {
+    private String createUserData(Stack stack, Future<PlatformParameters> platformParametersFuture, CcmParameters ccmParameters) {
         SecurityConfig securityConfig = stack.getSecurityConfig();
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         String cbPrivKey = saltSecurityConfig.getSaltBootSignPrivateKey();
@@ -184,7 +185,7 @@ public class ImageService {
         try {
             platformParameters = platformParametersFuture.get();
             return userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()), cbSshKeyDer, sshUser, platformParameters, saltBootPassword,
-                    cbCert);
+                    cbCert, ccmParameters);
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parmaters", e);
             throw new GetCloudParameterException("Failed to get Platform parmaters", e);

@@ -10,10 +10,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -195,6 +197,48 @@ public class AwsStackRequestHelperTest {
         assertDoesNotContainParameter(parameters, "MultiAZParameter");
         assertDoesNotContainParameter(parameters, "StorageTypeParameter");
         assertDoesNotContainParameter(parameters, "PortParameter");
+    }
+
+    @Test
+    public void testAddParameterChunks() {
+        int chunkSize = AwsStackRequestHelper.CHUNK_SIZE;
+        String baseParameterKey = RandomStringUtils.random(20);
+        int len = 2 * chunkSize;
+        String bigParameterValue = RandomStringUtils.random(len);
+        String chunk0 = bigParameterValue.substring(0, chunkSize);
+        String key1 = baseParameterKey + "1";
+        String chunk1 = bigParameterValue.substring(chunkSize, len);
+        // for padding
+        String key2 = baseParameterKey + "2";
+
+        // len is a multiple of chunk size
+        Collection<Parameter> parameters = new ArrayList<>();
+        underTest.addParameterChunks(parameters, baseParameterKey, bigParameterValue, 3);
+        assertContainsParameter(parameters, baseParameterKey, chunk0);
+        assertContainsParameter(parameters, key1, chunk1);
+        assertContainsParameter(parameters, key2, "");
+
+        // len is not a multiple of chunk size
+        parameters = new ArrayList<>();
+        underTest.addParameterChunks(parameters, baseParameterKey, bigParameterValue.substring(0, len - 1), 3);
+        assertContainsParameter(parameters, baseParameterKey, chunk0);
+        assertContainsParameter(parameters, key1, chunk1.substring(0, chunkSize - 1));
+        assertContainsParameter(parameters, key2, "");
+
+        // len is 0
+        parameters = new ArrayList<>();
+        underTest.addParameterChunks(parameters, baseParameterKey, "", 3);
+        assertContainsParameter(parameters, baseParameterKey, "");
+        assertContainsParameter(parameters, key1, "");
+        assertContainsParameter(parameters, key2, "");
+
+        // string is null
+        parameters = new ArrayList<>();
+        underTest.addParameterChunks(parameters, baseParameterKey, null, 3);
+        // this is the backwards-compatible behavior
+        assertContainsParameter(parameters, baseParameterKey, null);
+        assertContainsParameter(parameters, key1, "");
+        assertContainsParameter(parameters, key2, "");
     }
 
     private void assertContainsParameter(Collection<Parameter> parameters, String key, String value) {

@@ -15,6 +15,7 @@ export SSH_USER=cloudbreak
 export SALT_BOOT_PASSWORD=pass
 export SALT_BOOT_SIGN_KEY=cHJpdi1rZXk=
 export CB_CERT=cert
+export IS_CCM_ENABLED=false
 
 date >> /tmp/time.txt
 
