@@ -124,3 +124,44 @@ knox-create-sign-jks:
     - replace: False
 
 {% endif %}
+
+{% if salt['pillar.get']('gateway:userfacingcert_configured') is defined and salt['pillar.get']('gateway:userfacingcert_configured') == True and salt['pillar.get']('gateway:autotls_enabled') is defined and salt['pillar.get']('gateway:autotls_enabled') == True %}
+
+{{ gateway.knox_data_root }}/security/keystores/userfacingkey.pem:
+  file.managed:
+    - contents_pillar: gateway:userfacingkey
+    - makedirs: True
+    - mode: 777
+
+{{ gateway.knox_data_root }}/security/keystores/userfacingcert.pem:
+  file.managed:
+    - contents_pillar: gateway:userfacingcert
+    - makedirs: True
+    - mode: 777
+
+  # openssl pkcs12 -export -in cert.pem -inkey key.pem -out userfacing.p12 -name userfacing-identity -password pass:admin
+  # keytool -importkeystore -deststorepass admin1 -destkeypass admin1 -destkeystore userfacing.jks -srckeystore userfacing.p12 -srcstoretype PKCS12 -srcstorepass admin -alias userfacing-identity
+
+knox-create-userfacing-pkcs12:
+  cmd.run:
+    - name: cd {{ gateway.knox_data_root }}/security/keystores/ && openssl pkcs12 -export -in userfacingcert.pem -inkey userfacingkey.pem -out userfacing.p12 -name userfacing-identity -password pass:{{ salt['pillar.get']('gateway:mastersecret') }}
+    - creates: {{ gateway.knox_data_root }}/security/keystores/userfacing.p12
+    - output_loglevel: quiet
+
+{{ gateway.knox_data_root }}/security/keystores/userfacing.p12:
+  file.managed:
+    - mode: 777
+    - replace: False
+
+knox-create-userfacing-jks:
+  cmd.run:
+    - name: cd {{ gateway.knox_data_root }}/security/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeypass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeystore userfacing.jks -srckeystore userfacing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('gateway:mastersecret') }} -alias userfacing-identity
+    - creates: {{ gateway.knox_data_root }}/security/keystores/userfacing.jks
+    - output_loglevel: quiet
+
+{{ gateway.knox_data_root }}/security/keystores/userfacing.jks:
+  file.managed:
+    - mode: 777
+    - replace: False
+
+{% endif %}
