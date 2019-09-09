@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.ccm.cloudinit;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Holds CCM cloud-init parameters, which encapsulate the user data required to configure an instance to
  * connect to CCM, identify itself to CCM, and register tunnels with CCM.
@@ -14,7 +17,7 @@ public interface CcmParameters {
      *
      * @param model the template model map
      */
-    static void addToTemplateModel(CcmParameters ccmParameters, Map<String, Object> model) {
+    static void addToTemplateModel(@Nullable CcmParameters ccmParameters, @Nonnull Map<String, Object> model) {
         if (ccmParameters == null) {
             model.put(CcmParameterConstants.CCM_ENABLED_KEY, Boolean.FALSE);
         } else {
@@ -51,7 +54,7 @@ public interface CcmParameters {
      *
      * @param model the template model map
      */
-    default void addToTemplateModel(Map<String, Object> model) {
+    default void addToTemplateModel(@Nonnull Map<String, Object> model) {
         getServerParameters().addToTemplateModel(model);
         getInstanceParameters().addToTemplateModel(model);
         for (TunnelParameters tunnelParameters : getTunnelParameters()) {

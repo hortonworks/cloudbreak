@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -35,7 +37,8 @@ public class DefaultCcmParameters implements CcmParameters, Serializable {
      * @param instanceParameters the instance parameters, which specify how the instance identifies itself to CCM
      * @param tunnelParameters   the list of CCM tunnel parameters, each of which specifies how to register a tunnel for a single service with CCM
      */
-    public DefaultCcmParameters(ServerParameters serverParameters, InstanceParameters instanceParameters, List<TunnelParameters> tunnelParameters) {
+    public DefaultCcmParameters(@Nonnull ServerParameters serverParameters, @Nonnull InstanceParameters instanceParameters,
+            @Nonnull List<TunnelParameters> tunnelParameters) {
         this.serverParameters = Objects.requireNonNull(serverParameters, "serverParameters is null");
         this.instanceParameters = Objects.requireNonNull(instanceParameters, "instanceParameters is null");
         this.tunnelParameters = ImmutableList.copyOf(Objects.requireNonNull(tunnelParameters, "tunnelParameters is null"));

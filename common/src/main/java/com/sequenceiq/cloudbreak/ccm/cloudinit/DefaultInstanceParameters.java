@@ -20,6 +20,11 @@ public class DefaultInstanceParameters implements InstanceParameters, Serializab
     private final String tunnelInitiatorId;
 
     /**
+     * The key ID under which the private key was registered with CCM.
+     */
+    private final String keyId;
+
+    /**
      * The enciphered private key, which CCM uses to authenticate the instance.
      */
     private final String encipheredPrivateKey;
@@ -28,10 +33,12 @@ public class DefaultInstanceParameters implements InstanceParameters, Serializab
      * Creates default CCM instance parameters with the specified parameters.
      *
      * @param tunnelInitiatorId    the optional tunnel initiator ID, which uniquely identifies the instance to CCM
+     * @param keyId                the key ID under which the private key was registered with CCM
      * @param encipheredPrivateKey the enciphered private key, which CCM uses to authenticate the instance
      */
-    public DefaultInstanceParameters(@Nullable String tunnelInitiatorId, @Nonnull String encipheredPrivateKey) {
+    public DefaultInstanceParameters(@Nullable String tunnelInitiatorId, String keyId, @Nonnull String encipheredPrivateKey) {
         this.tunnelInitiatorId = tunnelInitiatorId;
+        this.keyId = Objects.requireNonNull(keyId, "keyId is null");
         this.encipheredPrivateKey = Objects.requireNonNull(encipheredPrivateKey, "encipheredPrivateKey is null");
     }
 
@@ -39,6 +46,12 @@ public class DefaultInstanceParameters implements InstanceParameters, Serializab
     @Override
     public Optional<String> getTunnelInitiatorId() {
         return Optional.ofNullable(tunnelInitiatorId);
+    }
+
+    @Nonnull
+    @Override
+    public String getKeyId() {
+        return keyId;
     }
 
     @Nonnull

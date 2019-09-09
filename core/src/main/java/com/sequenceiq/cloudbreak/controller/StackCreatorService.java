@@ -80,6 +80,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
@@ -213,6 +214,9 @@ public class StackCreatorService {
                     }
                 }, LOGGER, "Stack's instance templates have been validated in {} ms for stack {}", stackName);
 
+                DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackRequest.getEnvironmentCrn());
+                stack.setUseCcm(Tunnel.CCM == environment.getTunnel());
+
                 if (stackRequest.getCluster() != null) {
                     LOGGER.info("Cluster not null so creating cluster for stack name {}.", stackName);
                     StackValidationV4Request stackValidationRequest = measure(() -> converterUtil.convert(stackRequest, StackValidationV4Request.class),
@@ -230,7 +234,6 @@ public class StackCreatorService {
                     fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential,
                             stackValidationRequest.getFileSystem(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
 
-                    DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackRequest.getEnvironmentCrn());
                     clusterCreationService.validate(stackRequest.getCluster(), cloudCredential, stack, user, workspace, environment);
                 }
 

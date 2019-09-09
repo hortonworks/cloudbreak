@@ -23,6 +23,14 @@ public interface InstanceParameters {
     Optional<String> getTunnelInitiatorId();
 
     /**
+     * Returns the key ID under which the private key was registered with CCM.
+     *
+     * @return the key ID under which the private key was registered with CCM
+     */
+    @Nonnull
+    String getKeyId();
+
+    /**
      * Returns the enciphered private key, which CCM uses to authenticate the instance.
      *
      * @return the enciphered private key, which CCM uses to authenticate the instance
@@ -37,7 +45,8 @@ public interface InstanceParameters {
      */
     default void addToTemplateModel(Map<String, Object> model) {
         getTunnelInitiatorId().ifPresent(s -> model.put(CcmParameterConstants.TUNNEL_INITIATOR_ID_KEY, s));
-        model.put(CcmParameterConstants.ENCIPHERED_PRIVATE_KEY,
+        model.put(CcmParameterConstants.KEY_ID_KEY, getKeyId());
+        model.put(CcmParameterConstants.ENCIPHERED_PRIVATE_KEY_KEY,
                 BaseEncoding.base64().encode(getEncipheredPrivateKey().getBytes(StandardCharsets.UTF_8)));
     }
 }

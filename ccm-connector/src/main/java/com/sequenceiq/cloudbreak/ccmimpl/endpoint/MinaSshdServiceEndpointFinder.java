@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpoint;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointFinder;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointLookupException;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointRequest;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -134,7 +135,7 @@ public class MinaSshdServiceEndpointFinder implements ServiceEndpointFinder {
             String message = "Lookup using minasshd gRPC failed: " + e.getMessage();
             Status status = e.getStatus();
             Status.Code code = status.getCode();
-            boolean retryable = RETRYABLE_STATUS_CODES.contains(code);
+            boolean retryable = GrpcUtil.isRetryable(code);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Got status code: {}, retryable: {}", code, retryable);
             }

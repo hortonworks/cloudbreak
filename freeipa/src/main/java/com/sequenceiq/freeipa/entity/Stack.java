@@ -60,6 +60,8 @@ public class Stack {
 
     private Integer gatewayport;
 
+    private Boolean useCcm;
+
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
 
@@ -157,6 +159,14 @@ public class Stack {
 
     public void setGatewayport(Integer gatewayport) {
         this.gatewayport = gatewayport;
+    }
+
+    public Boolean getUseCcm() {
+        return useCcm;
+    }
+
+    public void setUseCcm(Boolean useCcm) {
+        this.useCcm = useCcm;
     }
 
     public SecurityConfig getSecurityConfig() {

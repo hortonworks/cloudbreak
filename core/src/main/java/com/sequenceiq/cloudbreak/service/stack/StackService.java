@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,12 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
+import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
+import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
+import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -114,9 +122,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
-import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -139,6 +144,8 @@ public class StackService implements ResourceIdProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
     private static final String SSH_USER_CB = "cloudbreak";
+
+    private static final int CCM_KEY_ID_LENGTH = 36;
 
     @Inject
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
@@ -238,6 +245,9 @@ public class StackService implements ResourceIdProvider {
 
     @Inject
     private StackIdViewToStackResponseConverter stackIdViewToStackResponseConverter;
+
+    @Autowired(required = false)
+    private CcmParameterSupplier ccmParameterSupplier;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -507,7 +517,10 @@ public class StackService implements ResourceIdProvider {
         }
         stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
 
-        stack.setResourceCrn(createCRN(threadBasedUserCrnProvider.getAccountId()));
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+
+        stack.setResourceCrn(createCRN(accountId));
 
         Stack savedStack = measure(() -> stackRepository.save(stack),
                 LOGGER, "Stackrepository save took {} ms for stack {}", stackName);
@@ -536,8 +549,15 @@ public class StackService implements ResourceIdProvider {
         }, LOGGER, "Security config save took {} ms for stack {}", stackName);
         savedStack.setSecurityConfig(securityConfig);
 
-        // JSA todo populate CCM parameters
         CcmParameters ccmParameters = null;
+        if ((ccmParameterSupplier != null) && Boolean.TRUE.equals(stack.getUseCcm())) {
+            int gatewayPort = Optional.ofNullable(stack.getGatewayPort()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
+            Map<KnownServiceIdentifier, Integer> tunneledServicePorts = Collections.singletonMap(KnownServiceIdentifier.GATEWAY, gatewayPort);
+            // JSA TODO Use stack ID or something else instead?
+            String keyId = StringUtils.right(stack.getResourceCrn(), CCM_KEY_ID_LENGTH);
+            String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
+            ccmParameters = ccmParameterSupplier.getCcmParameters(actorCrn, accountId, keyId, tunneledServicePorts).orElse(null);
+        }
 
         try {
             imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog, ccmParameters);

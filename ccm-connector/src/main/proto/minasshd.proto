@@ -21,6 +21,9 @@ service MinaSshd {
 
 message GetServiceEndpointRequest {
   // The instanceId which has started remote port forwarding.
+  // This is a unique identifier for a workload client. It need not be
+  // an AWS or Azure instance ID. Defining a better name for this field
+  // is tracked in CDPCP-237.
   string instanceId = 1;
   // The service which has started remote port forwarding.
   EndpointService.Value endpointService = 2;
@@ -46,5 +49,6 @@ message EndpointService {
     HUE = 2;
     KNOX = 3;
     GATEWAY = 4;
+    CM = 5;
   }
 }

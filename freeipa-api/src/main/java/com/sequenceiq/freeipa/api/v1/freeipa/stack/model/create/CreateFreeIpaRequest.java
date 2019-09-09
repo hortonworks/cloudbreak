@@ -62,6 +62,9 @@ public class CreateFreeIpaRequest {
     @Max(value = 65535, message = "Port should be between 1025 and 65535")
     private Integer gatewayPort;
 
+    @ApiModelProperty(value = FreeIpaModelDescriptions.USE_CCM)
+    private Boolean useCcm;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -132,6 +135,14 @@ public class CreateFreeIpaRequest {
 
     public void setGatewayPort(Integer gatewayPort) {
         this.gatewayPort = gatewayPort;
+    }
+
+    public Boolean getUseCcm() {
+        return useCcm;
+    }
+
+    public void setUseCcm(Boolean useCcm) {
+        this.useCcm = useCcm;
     }
 
     @Override

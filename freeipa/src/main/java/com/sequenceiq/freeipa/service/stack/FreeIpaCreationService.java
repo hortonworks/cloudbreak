@@ -1,14 +1,18 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -16,7 +20,10 @@ import org.springframework.stereotype.Service;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
+import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
+import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -49,6 +56,8 @@ import com.sequenceiq.freeipa.util.CrnService;
 public class FreeIpaCreationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationService.class);
+
+    private static final int CCM_KEY_ID_LENGTH = 36;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
@@ -92,6 +101,9 @@ public class FreeIpaCreationService {
     @Inject
     private TransactionService transactionService;
 
+    @Autowired(required = false)
+    private CcmParameterSupplier ccmParameterSupplier;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -116,8 +128,15 @@ public class FreeIpaCreationService {
                 Stack savedStack = stackService.save(stack);
                 ImageSettingsRequest imageSettingsRequest = request.getImage();
 
-                // JSA todo populate CCM parameters
                 CcmParameters ccmParameters = null;
+                if ((ccmParameterSupplier != null) && Boolean.TRUE.equals(stack.getUseCcm())) {
+                    int gatewayPort = Optional.ofNullable(stack.getGatewayport()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
+                    Map<KnownServiceIdentifier, Integer> tunneledServicePorts = Collections.singletonMap(KnownServiceIdentifier.GATEWAY, gatewayPort);
+                    // JSA TODO Use stack ID or something else instead?
+                    String keyId = StringUtils.right(stack.getResourceCrn(), CCM_KEY_ID_LENGTH);
+                    String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");
+                    ccmParameters = ccmParameterSupplier.getCcmParameters(actorCrn, accountId, keyId, tunneledServicePorts).orElse(null);
+                }
 
                 Image image = imageService.create(savedStack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest
                         : new ImageSettingsRequest(), credential, ccmParameters);
@@ -131,7 +150,7 @@ public class FreeIpaCreationService {
                     .convert(stackImageFreeIpaTuple.getLeft(), stackImageFreeIpaTuple.getMiddle(), stackImageFreeIpaTuple.getRight());
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Creation of FreeIPA failed", e);
-            throw new BadRequestException("Creation of FreeIPA failed: " +  e.getCause().getMessage(), e);
+            throw new BadRequestException("Creation of FreeIPA failed: " + e.getCause().getMessage(), e);
         }
     }
 

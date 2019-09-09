@@ -21,6 +21,9 @@ public final class MinaSshdProto {
     /**
      * <pre>
      * The instanceId which has started remote port forwarding.
+     * This is a unique identifier for a workload client. It need not be
+     * an AWS or Azure instance ID. Defining a better name for this field
+     * is tracked in CDPCP-237.
      * </pre>
      *
      * <code>string instanceId = 1;</code>
@@ -29,6 +32,9 @@ public final class MinaSshdProto {
     /**
      * <pre>
      * The instanceId which has started remote port forwarding.
+     * This is a unique identifier for a workload client. It need not be
+     * an AWS or Azure instance ID. Defining a better name for this field
+     * is tracked in CDPCP-237.
      * </pre>
      *
      * <code>string instanceId = 1;</code>
@@ -143,6 +149,9 @@ public final class MinaSshdProto {
     /**
      * <pre>
      * The instanceId which has started remote port forwarding.
+     * This is a unique identifier for a workload client. It need not be
+     * an AWS or Azure instance ID. Defining a better name for this field
+     * is tracked in CDPCP-237.
      * </pre>
      *
      * <code>string instanceId = 1;</code>
@@ -162,6 +171,9 @@ public final class MinaSshdProto {
     /**
      * <pre>
      * The instanceId which has started remote port forwarding.
+     * This is a unique identifier for a workload client. It need not be
+     * an AWS or Azure instance ID. Defining a better name for this field
+     * is tracked in CDPCP-237.
      * </pre>
      *
      * <code>string instanceId = 1;</code>
@@ -528,6 +540,9 @@ public final class MinaSshdProto {
       /**
        * <pre>
        * The instanceId which has started remote port forwarding.
+       * This is a unique identifier for a workload client. It need not be
+       * an AWS or Azure instance ID. Defining a better name for this field
+       * is tracked in CDPCP-237.
        * </pre>
        *
        * <code>string instanceId = 1;</code>
@@ -547,6 +562,9 @@ public final class MinaSshdProto {
       /**
        * <pre>
        * The instanceId which has started remote port forwarding.
+       * This is a unique identifier for a workload client. It need not be
+       * an AWS or Azure instance ID. Defining a better name for this field
+       * is tracked in CDPCP-237.
        * </pre>
        *
        * <code>string instanceId = 1;</code>
@@ -567,6 +585,9 @@ public final class MinaSshdProto {
       /**
        * <pre>
        * The instanceId which has started remote port forwarding.
+       * This is a unique identifier for a workload client. It need not be
+       * an AWS or Azure instance ID. Defining a better name for this field
+       * is tracked in CDPCP-237.
        * </pre>
        *
        * <code>string instanceId = 1;</code>
@@ -584,6 +605,9 @@ public final class MinaSshdProto {
       /**
        * <pre>
        * The instanceId which has started remote port forwarding.
+       * This is a unique identifier for a workload client. It need not be
+       * an AWS or Azure instance ID. Defining a better name for this field
+       * is tracked in CDPCP-237.
        * </pre>
        *
        * <code>string instanceId = 1;</code>
@@ -597,6 +621,9 @@ public final class MinaSshdProto {
       /**
        * <pre>
        * The instanceId which has started remote port forwarding.
+       * This is a unique identifier for a workload client. It need not be
+       * an AWS or Azure instance ID. Defining a better name for this field
+       * is tracked in CDPCP-237.
        * </pre>
        *
        * <code>string instanceId = 1;</code>
@@ -2110,6 +2137,10 @@ public final class MinaSshdProto {
        * <code>GATEWAY = 4;</code>
        */
       GATEWAY(4),
+      /**
+       * <code>CM = 5;</code>
+       */
+      CM(5),
       UNRECOGNIZED(-1),
       ;
 
@@ -2133,6 +2164,10 @@ public final class MinaSshdProto {
        * <code>GATEWAY = 4;</code>
        */
       public static final int GATEWAY_VALUE = 4;
+      /**
+       * <code>CM = 5;</code>
+       */
+      public static final int CM_VALUE = 5;
 
 
       public final int getNumber() {
@@ -2158,6 +2193,7 @@ public final class MinaSshdProto {
           case 2: return HUE;
           case 3: return KNOX;
           case 4: return GATEWAY;
+          case 5: return CM;
           default: return null;
         }
       }
@@ -2589,15 +2625,15 @@ public final class MinaSshdProto {
       "ceEndpointResponse\0222\n\017serviceEndpoint\030\001 " +
       "\001(\0132\031.minasshd.ServiceEndpoint\"1\n\017Servic" +
       "eEndpoint\022\020\n\010hostName\030\001 \001(\t\022\014\n\004port\030\002 \001(" +
-      "\005\"N\n\017EndpointService\";\n\005Value\022\t\n\005UNSET\020\000" +
+      "\005\"V\n\017EndpointService\"C\n\005Value\022\t\n\005UNSET\020\000" +
       "\022\007\n\003SSH\020\001\022\007\n\003HUE\020\002\022\010\n\004KNOX\020\003\022\013\n\007GATEWAY\020" +
-      "\0042\260\001\n\010MinaSshd\022A\n\nGetVersion\022\027.version.V" +
-      "ersionRequest\032\030.version.VersionResponse\"" +
-      "\000\022a\n\022GetServiceEndpoint\022#.minasshd.GetSe" +
-      "rviceEndpointRequest\032$.minasshd.GetServi" +
-      "ceEndpointResponse\"\000B:\n)com.cloudera.thu" +
-      "nderhead.service.minasshdB\rMinaSshdProto" +
-      "b\006proto3"
+      "\004\022\006\n\002CM\020\0052\260\001\n\010MinaSshd\022A\n\nGetVersion\022\027.v" +
+      "ersion.VersionRequest\032\030.version.VersionR" +
+      "esponse\"\000\022a\n\022GetServiceEndpoint\022#.minass" +
+      "hd.GetServiceEndpointRequest\032$.minasshd." +
+      "GetServiceEndpointResponse\"\000B:\n)com.clou" +
+      "dera.thunderhead.service.minasshdB\rMinaS" +
+      "shdProtob\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

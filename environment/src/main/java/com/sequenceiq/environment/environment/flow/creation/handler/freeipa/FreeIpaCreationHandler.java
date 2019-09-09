@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.environment.api.v1.environment.model.base.Tunnel;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
@@ -170,6 +171,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         setPlacementAndNetwork(environment, createFreeIpaRequest);
         setAuthentication(environment.getAuthentication(), createFreeIpaRequest);
         doIfNotNull(environment.getSecurityAccess(), securityAccess -> setSecurityAccess(securityAccess, createFreeIpaRequest));
+        setUseCcm(environment.getExperimentalFeatures().getTunnel(), createFreeIpaRequest);
         return createFreeIpaRequest;
     }
 
@@ -219,6 +221,10 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         }
         InstanceGroupRequest instanceGroupRequest = createInstanceGroupRequest(securityGroupRequest);
         createFreeIpaRequest.setInstanceGroups(List.of(instanceGroupRequest));
+    }
+
+    private void setUseCcm(Tunnel tunnel, CreateFreeIpaRequest createFreeIpaRequest) {
+        createFreeIpaRequest.setUseCcm(Tunnel.CCM == tunnel);
     }
 
     private InstanceGroupRequest createInstanceGroupRequest(SecurityGroupRequest securityGroupRequest) {

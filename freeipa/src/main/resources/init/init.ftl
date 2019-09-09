@@ -23,6 +23,7 @@ export CCM_PUBLIC_KEY="${ccmPublicKey}"
 <#if ccmTunnelInitiatorId??>
 export CCM_TUNNEL_INITIATOR_ID="${ccmTunnelInitiatorId}"
 </#if>
+export CCM_KEY_ID="${ccmKeyId}"
 export CCM_ENCIPHERED_PRIVATE_KEY="${ccmEncipheredPrivateKey}"
 <#if ccmGatewayPort??>
 export CCM_GATEWAY_PORT=${ccmGatewayPort?c}
