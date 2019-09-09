@@ -53,17 +53,13 @@ public class ClouderaManagerMgmtSetupService {
 
     private static final String MGMT_SERVICE = "MGMT";
 
-    private static final String ACTIVITYMONITOR = "ACTIVITYMONITOR";
-
     private static final String REPORTSMANAGER = "REPORTSMANAGER";
 
     // This map contains the roles and their internal config name that's necessary for setting database config values
-    private static final Map<String, String> ROLE_TYPE_TO_INTERNAL_NAME = ImmutableMap.of(
-            ACTIVITYMONITOR, "firehose",
-            REPORTSMANAGER, "headlamp");
+    private static final Map<String, String> ROLE_TYPE_TO_INTERNAL_NAME = ImmutableMap.of(REPORTSMANAGER, "headlamp");
 
     private static final List<String> BLACKLISTED_ROLE_TYPES = ImmutableList.of(
-            ClouderaManagerMgmtTelemetryService.TELEMETRYPUBLISHER, "NAVIGATOR", "NAVIGATORMETASERVER");
+            ClouderaManagerMgmtTelemetryService.TELEMETRYPUBLISHER, "NAVIGATOR", "NAVIGATORMETASERVER", "ACTIVITYMONITOR");
 
     private static final String GENERATE_CREDENTIALS_COMMAND_NAME = "GenerateCredentials";
 
@@ -194,19 +190,9 @@ public class ClouderaManagerMgmtSetupService {
         for (ApiRole role : installedRoles) {
             String roleType = role.getType();
             Optional<RDSConfig> rdsConfig = Optional.empty();
-            switch (roleType) {
-                case ACTIVITYMONITOR:
-                    rdsConfig =
-                            findDbConfig(DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_ACTIVITY_MONITOR, rdsConfigs);
-                    break;
-                case REPORTSMANAGER:
-                    rdsConfig =
-                            findDbConfig(DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER, rdsConfigs);
-                    break;
-                default:
-                    break;
+            if (REPORTSMANAGER.equals(roleType)) {
+                rdsConfig = findDbConfig(DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER, rdsConfigs);
             }
-
             if (rdsConfig.isPresent()) {
                 updateDatabaseForComponent(client, roleType, rdsConfig.get());
             }
@@ -215,8 +201,7 @@ public class ClouderaManagerMgmtSetupService {
 
     private Optional<RDSConfig> findDbConfig(DatabaseType databaseType, Set<RDSConfig> rdsConfigs) {
         return rdsConfigs.stream()
-                .filter(dbConfig -> databaseType.name()
-                        .equals(dbConfig.getType()))
+                .filter(dbConfig -> databaseType.name().equals(dbConfig.getType()))
                 .findFirst();
     }
 
