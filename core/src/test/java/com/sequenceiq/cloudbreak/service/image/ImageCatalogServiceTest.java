@@ -39,7 +39,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.ImmutableSet;
@@ -58,6 +57,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateS
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -386,7 +386,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenCustomImageCatalogDoesNotExists() throws Exception {
-        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenThrow(new AccessDeniedException("denied"));
+        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenThrow(new NotFoundException("no no"));
 
         thrown.expectMessage("The verycool catalog does not exist or does not belongs to your account.");
         thrown.expect(CloudbreakImageCatalogException.class);
@@ -628,7 +628,6 @@ public class ImageCatalogServiceTest {
     public void testPopulateCrnCorrectly() {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        when(userService.getOrCreate(any(CloudbreakUser.class))).thenReturn(user);
         when(workspaceService.get(1L, user)).thenReturn(imageCatalog.getWorkspace());
         when(workspaceService.retrieveForUser(user)).thenReturn(Set.of(imageCatalog.getWorkspace()));
 

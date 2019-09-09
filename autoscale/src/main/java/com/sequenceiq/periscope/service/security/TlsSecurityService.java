@@ -3,7 +3,6 @@ package com.sequenceiq.periscope.service.security;
 import javax.inject.Inject;
 
 import org.bouncycastle.util.encoders.Base64;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
@@ -61,11 +60,7 @@ public class TlsSecurityService {
     }
 
     private SecurityConfig getSecurityConfigSilently(Cluster cluster) {
-        try {
-            return securityConfigRepository.findByClusterId(cluster.getId());
-        } catch (AccessDeniedException ignore) {
-            return null;
-        }
+        return securityConfigRepository.findByClusterId(cluster.getId());
     }
 
 }

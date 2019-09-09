@@ -297,7 +297,7 @@ public class GrpcUmsClient {
         }
     }
 
-    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
+    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right }")
     public boolean checkRight(String actorCrn, String userCrn, String right, Optional<String> requestId) {
         return checkRight(actorCrn, userCrn, right, null, requestId);
     }

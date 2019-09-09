@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.util.ThrowableUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
@@ -73,14 +72,10 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
             prepareCreation(resource);
             setWorkspace(resource, user, workspace);
             return repository().save(resource);
-        } catch (AccessDeniedException e) {
-            ConstraintViolationException cve = ThrowableUtil.getSpecificCauseRecursively(e, ConstraintViolationException.class);
-            if (cve != null) {
-                String message = String.format("%s already exists with name '%s' in workspace %s",
-                        resource.getResourceName(), resource.getName(), resource.getWorkspace().getName());
-                throw new BadRequestException(message, e);
-            }
-            throw e;
+        } catch (DataIntegrityViolationException | ConstraintViolationException e) {
+            String message = String.format("%s already exists with name '%s' in workspace %s",
+                    resource.getResourceName(), resource.getName(), resource.getWorkspace().getName());
+            throw new BadRequestException(message, e);
         }
     }
 

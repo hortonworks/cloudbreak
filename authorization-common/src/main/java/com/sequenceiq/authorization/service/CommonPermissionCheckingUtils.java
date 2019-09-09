@@ -40,6 +40,8 @@ public class CommonPermissionCheckingUtils {
                 LOGGER.debug("Return value is null, method signature: {}", methodSignature.toLongString());
             }
             return proceed;
+        } catch (Error | RuntimeException unchecked) {
+            throw unchecked;
         } catch (Throwable t) {
             throw new AccessDeniedException(t.getMessage(), t);
         }

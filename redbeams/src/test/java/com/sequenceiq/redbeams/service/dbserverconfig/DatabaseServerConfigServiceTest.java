@@ -10,12 +10,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -194,7 +194,7 @@ public class DatabaseServerConfigServiceTest {
         server.setConnectionDriver("org.postgresql.MyCustomDriver");
         Crn serverCrn = TestData.getTestCrn("databaseServer", "myserver");
         when(crnService.createCrn(server)).thenReturn(serverCrn);
-        AccessDeniedException e = new AccessDeniedException("no way", mock(ConstraintViolationException.class));
+        ConstraintViolationException e = new ConstraintViolationException("no way", new SQLException("sql no way"), "duplicate");
         when(repository.save(server)).thenThrow(e);
 
         underTest.create(server, 0L, false);

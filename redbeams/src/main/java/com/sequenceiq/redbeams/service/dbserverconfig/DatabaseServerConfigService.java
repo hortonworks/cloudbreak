@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.MapBindingResult;
@@ -124,7 +123,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             }
             resource.setWorkspaceId(workspaceId);
             return repository.save(resource);
-        } catch (AccessDeniedException | DataIntegrityViolationException e) {
+        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
             Optional<Throwable> cve = Throwables.getCausalChain(e).stream()
                     .filter(c -> c instanceof ConstraintViolationException)
                     .findFirst();
