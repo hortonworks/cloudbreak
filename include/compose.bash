@@ -675,6 +675,7 @@ periscope:
         - REST_DEBUG
         - CERT_VALIDATION
         - CB_DEFAULT_SUBSCRIPTION_ADDRESS
+        - CB_UPSCALE_MAX_NODECOUNT
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/as/
