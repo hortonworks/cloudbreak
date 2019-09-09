@@ -90,4 +90,15 @@ limitations under the License.
         <description>Enable/Disable cookie scoping feature.</description>
     </property>
 
+    {% if salt['pillar.get']('gateway:userfacingcert_configured') is defined and salt['pillar.get']('gateway:userfacingcert_configured') == True and salt['pillar.get']('gateway:autotls_enabled') is defined and salt['pillar.get']('gateway:autotls_enabled') == True %}
+    <property>
+        <name>gateway.tls.keystore.path</name>
+        <value>/var/lib/knox/cloudbreak_resources/security/keystores/userfacing.jks</value>
+    </property>
+    <property>
+        <name>gateway.tls.key.alias</name>
+        <value>userfacing-identity</value>
+    </property>
+    {% endif %}
+
 </configuration>
