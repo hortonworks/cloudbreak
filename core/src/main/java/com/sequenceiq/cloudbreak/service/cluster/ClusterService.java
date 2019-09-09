@@ -696,7 +696,6 @@ public class ClusterService {
             long cmRdsCount = cluster.getRdsConfigs().stream()
                     .map(RDSConfig::getType)
                     .filter(type -> DatabaseType.CLOUDERA_MANAGER.name().equals(type)
-                            || DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_ACTIVITY_MONITOR.name().equals(type)
                             || DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER.name().equals(type))
                     .distinct()
                     .count();

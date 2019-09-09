@@ -65,8 +65,6 @@ public class AwsSdxTests extends BasicSdxTests {
 
     private String cldmgr;
 
-    private String cldrmgrSrvActMtr;
-
     private String cldrmgrSrvRepMgr;
 
     private String hivedb;
@@ -85,7 +83,6 @@ public class AwsSdxTests extends BasicSdxTests {
     private void executeDatabaseDdl(String databaseStatement) {
         jdbcTemplate.execute(String.format(databaseStatement, cldmgr));
         jdbcTemplate.execute(String.format(databaseStatement, cldrmgrSrvRepMgr));
-        jdbcTemplate.execute(String.format(databaseStatement, cldrmgrSrvActMtr));
         jdbcTemplate.execute(String.format(databaseStatement, hivedb));
         jdbcTemplate.execute(String.format(databaseStatement, rangerdb));
     }
@@ -93,7 +90,6 @@ public class AwsSdxTests extends BasicSdxTests {
     private void setUpDatabaseNames() {
         cldmgr = "cldmgrdb" + UUID.randomUUID().toString().replace("-", "");
         cldrmgrSrvRepMgr = "cldrmgrsrvrepmgrdb" + UUID.randomUUID().toString().replace("-", "");
-        cldrmgrSrvActMtr = "cldrmgrsrvactmtrdb" + UUID.randomUUID().toString().replace("-", "");
         hivedb = "hivedb" + UUID.randomUUID().toString().replace("-", "");
         rangerdb = "rangerdb" + UUID.randomUUID().toString().replace("-", "");
     }
@@ -134,7 +130,7 @@ public class AwsSdxTests extends BasicSdxTests {
                 .given(cluster, ClusterTestDto.class)
                 .withValidateBlueprint(Boolean.FALSE)
                 .withClouderaManager(cm)
-                .withDatabases(Set.of(cldmgr, cldrmgrSrvRepMgr, cldrmgrSrvActMtr, rangerdb, hivedb))
+                .withDatabases(Set.of(cldmgr, cldrmgrSrvRepMgr, rangerdb, hivedb))
                 .given(stack, StackTestDto.class)
                 .withName(sdx)
                 .withDomainName("sdx")
@@ -206,14 +202,6 @@ public class AwsSdxTests extends BasicSdxTests {
                 .withConnectionUserName(databaseProperties.getUsername())
                 .withConnectionPassword(databaseProperties.getPassword())
                 .withConnectionURL(databaseProperties.getConnectionUrl() + cldrmgrSrvRepMgr)
-                .when(databaseTestClient.createV4())
-
-                .given(cldrmgrSrvActMtr, DatabaseTestDto.class)
-                .withName(cldrmgrSrvActMtr)
-                .withType(DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_ACTIVITY_MONITOR.name())
-                .withConnectionUserName(databaseProperties.getUsername())
-                .withConnectionPassword(databaseProperties.getPassword())
-                .withConnectionURL(databaseProperties.getConnectionUrl() + cldrmgrSrvActMtr)
                 .when(databaseTestClient.createV4())
 
                 .given(rangerdb, DatabaseTestDto.class)
