@@ -17,37 +17,37 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAcce
 
 public class NetworkParameterAdderTest {
 
-    private static final String VPC_SECURITY_CIDR = "1.2.3.4/16";
+    private static final String TEST_VPC_CIDR = "1.2.3.4/16";
 
-    private static final String VPC_ID = "vpcId";
+    private static final String TEST_VPC_ID = "vpcId";
 
     private final NetworkParameterAdder underTest = new NetworkParameterAdder();
 
     @Test
-    public void testAddNetworkParameters() {
+    public void testAddNetworkParametersWhenAws() {
         Map<String, Object> parameters = new HashMap<>();
         List<String> subnetIds = List.of("subnet1", "subnet2");
 
-        parameters = underTest.addNetworkParameters(parameters, subnetIds);
+        parameters = underTest.addSubnetIds(parameters, subnetIds, CloudPlatform.AWS);
 
-        assertThat(parameters, IsMapContaining.hasEntry("subnetId", String.join(",", subnetIds)));
+        assertThat(parameters, IsMapContaining.hasEntry(NetworkParameterAdder.SUBNET_ID, String.join(",", subnetIds)));
     }
 
     @Test
-    public void testAddVpcParametersWhenAws() {
+    public void testAddParametersWhenAws() {
         Map<String, Object> parameters = new HashMap<>();
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
                 .withCloudPlatform(CloudPlatform.AWS.name())
                 .withSecurityAccess(SecurityAccessResponse.builder()
-                        .withCidr(VPC_SECURITY_CIDR).build())
+                        .withCidr(TEST_VPC_CIDR).build())
                 .withNetwork(EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
-                        .withAws(EnvironmentNetworkAwsParamsBuilder.anEnvironmentNetworkAwsParams().withVpcId(VPC_ID).build())
+                        .withAws(EnvironmentNetworkAwsParamsBuilder.anEnvironmentNetworkAwsParams().withVpcId(TEST_VPC_ID).build())
                         .build())
                 .build();
 
-        parameters = underTest.addVpcParameters(parameters, environment, CloudPlatform.AWS);
+        parameters = underTest.addParameters(parameters, environment, CloudPlatform.AWS);
 
-        assertThat(parameters, IsMapContaining.hasEntry("vpcId", VPC_ID));
-        assertThat(parameters, IsMapContaining.hasEntry("vpcCidr", VPC_SECURITY_CIDR));
+        assertThat(parameters, IsMapContaining.hasEntry(NetworkParameterAdder.VPC_ID, TEST_VPC_ID));
+        assertThat(parameters, IsMapContaining.hasEntry(NetworkParameterAdder.VPC_CIDR, TEST_VPC_CIDR));
     }
 }

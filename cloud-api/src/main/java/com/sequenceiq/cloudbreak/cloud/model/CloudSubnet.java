@@ -104,6 +104,10 @@ public class CloudSubnet implements Serializable {
         this.igwAvailable = igwAvailable;
     }
 
+    public CloudSubnet withId(String newId) {
+        return new CloudSubnet(newId, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable);
+    }
+
     @Override
     public String toString() {
         return "CloudSubnet{"
