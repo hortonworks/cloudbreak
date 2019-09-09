@@ -36,6 +36,14 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @Component
 public class AwsStackRequestHelper {
 
+    // The number of chunks for large parameters
+    @VisibleForTesting
+    static final int CHUNK_COUNT = 4;
+
+    // The size of each chunk for large parameters
+    @VisibleForTesting
+    static final int CHUNK_SIZE = 4096;
+
     @Inject
     private AwsTagPreparationService awsTagPreparationService;
 
@@ -75,9 +83,10 @@ public class AwsStackRequestHelper {
             keyPairName = awsClient.getExistingKeyPairName(stack.getInstanceAuthentication());
         }
 
-        Collection<Parameter> parameters = new ArrayList<>(asList(
-                new Parameter().withParameterKey("CBUserData").withParameterValue(stack.getImage().getUserDataByType(InstanceGroupType.CORE)),
-                new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(stack.getImage().getUserDataByType(InstanceGroupType.GATEWAY)),
+        Collection<Parameter> parameters = new ArrayList<>();
+        addParameterChunks(parameters, "CBUserData", stack.getImage().getUserDataByType(InstanceGroupType.CORE), CHUNK_COUNT);
+        addParameterChunks(parameters, "CBGateWayUserData", stack.getImage().getUserDataByType(InstanceGroupType.GATEWAY), CHUNK_COUNT);
+        parameters.addAll(asList(
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(String.valueOf(ac.getCloudContext().getUserName())),
                 new Parameter().withParameterKey("KeyName").withParameterValue(keyPairName),
@@ -103,6 +112,34 @@ public class AwsStackRequestHelper {
             }
         }
         return parameters;
+    }
+
+    @VisibleForTesting
+    void addParameterChunks(Collection<Parameter> parameters, String baseParameterKey, String parameterValue, int chunkCount) {
+        int chunk = 0;
+        String parameterKey = baseParameterKey;
+        if (parameterValue == null) {
+            parameters.add(new Parameter().withParameterKey(parameterKey).withParameterValue(null));
+        } else {
+            int len = parameterValue.length();
+            int offset = 0;
+            int limit = CHUNK_SIZE;
+            // Add full chunks
+            while ((chunk < chunkCount) && (len > limit)) {
+                parameters.add(new Parameter().withParameterKey(parameterKey).withParameterValue(parameterValue.substring(offset, limit)));
+                chunk++;
+                parameterKey = baseParameterKey + chunk;
+                offset = limit;
+                limit += CHUNK_SIZE;
+            }
+            // Add the final partial chunk
+            parameters.add(new Parameter().withParameterKey(parameterKey).withParameterValue(parameterValue.substring(offset, len)));
+        }
+        // Pad with empty chunks if necessary
+        while (++chunk < chunkCount) {
+            parameterKey = baseParameterKey + chunk;
+            parameters.add(new Parameter().withParameterKey(parameterKey).withParameterValue(""));
+        }
     }
 
     private String getRootDeviceName(AuthenticatedContext ac, CloudStack cloudStack) {

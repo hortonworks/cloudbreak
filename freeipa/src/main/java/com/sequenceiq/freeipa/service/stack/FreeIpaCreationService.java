@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -114,8 +115,12 @@ public class FreeIpaCreationService {
             Triple<Stack, Image, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
                 Stack savedStack = stackService.save(stack);
                 ImageSettingsRequest imageSettingsRequest = request.getImage();
+
+                // JSA todo populate CCM parameters
+                CcmParameters ccmParameters = null;
+
                 Image image = imageService.create(savedStack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest
-                        : new ImageSettingsRequest(), credential);
+                        : new ImageSettingsRequest(), credential, ccmParameters);
                 FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa());
                 return Triple.of(savedStack, image, freeIpa);
             });

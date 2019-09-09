@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
@@ -521,8 +522,11 @@ public class StackService {
         }, LOGGER, "Security config save took {} ms for stack {}", stackName);
         savedStack.setSecurityConfig(securityConfig);
 
+        // JSA todo populate CCM parameters
+        CcmParameters ccmParameters = null;
+
         try {
-            imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog);
+            imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog, ccmParameters);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -37,10 +38,10 @@ public class UserDataBuilder {
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
-        PlatformParameters parameters, String saltBootPassword, String cbCert) {
+            PlatformParameters parameters, String saltBootPassword, String cbCert, CcmParameters ccmParameters) {
         Map<InstanceGroupType, String> result = new EnumMap<>(InstanceGroupType.class);
         for (InstanceGroupType type : InstanceGroupType.values()) {
-            String userData = build(type, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert);
+            String userData = build(type, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert, ccmParameters);
             result.put(type, userData);
             LOGGER.debug("User data for {}, content; {}", type, userData);
         }
@@ -48,7 +49,7 @@ public class UserDataBuilder {
     }
 
     private String build(InstanceGroupType type, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
-        PlatformParameters params, String saltBootPassword, String cbCert) {
+            PlatformParameters params, String saltBootPassword, String cbCert, CcmParameters ccmParameters) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
@@ -60,6 +61,7 @@ public class UserDataBuilder {
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("saltBootPassword", saltBootPassword);
         model.put("cbCert", cbCert);
+        CcmParameters.addToTemplateModel(ccmParameters, model);
         return build(model);
     }
 

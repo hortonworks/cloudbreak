@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -35,14 +36,14 @@ public class UserDataBuilder {
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     public String buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
-            PlatformParameters parameters, String saltBootPassword, String cbCert) {
-        String userData = build(cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert);
+            PlatformParameters parameters, String saltBootPassword, String cbCert, CcmParameters ccmParameters) {
+        String userData = build(cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert, ccmParameters);
         LOGGER.debug("User data  content; {}", userData);
         return userData;
     }
 
     private String build(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
-            PlatformParameters params, String saltBootPassword, String cbCert) {
+            PlatformParameters params, String saltBootPassword, String cbCert, CcmParameters ccmParameters) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
@@ -53,6 +54,7 @@ public class UserDataBuilder {
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("saltBootPassword", saltBootPassword);
         model.put("cbCert", cbCert);
+        CcmParameters.addToTemplateModel(ccmParameters, model);
         return build(model);
     }
 

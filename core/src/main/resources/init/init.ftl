@@ -15,6 +15,24 @@ export SSH_USER=${sshUser}
 export SALT_BOOT_PASSWORD=${saltBootPassword}
 export SALT_BOOT_SIGN_KEY=${signaturePublicKey}
 export CB_CERT=${cbCert}
+<#if ccmEnabled!false>
+export IS_CCM_ENABLED=true
+export CCM_HOST=${ccmHost}
+export CCM_SSH_PORT=${ccmSshPort?c}
+export CCM_PUBLIC_KEY="${ccmPublicKey}"
+<#if ccmTunnelInitiatorId??>
+export CCM_TUNNEL_INITIATOR_ID="${ccmTunnelInitiatorId}"
+</#if>
+export CCM_ENCIPHERED_PRIVATE_KEY="${ccmEncipheredPrivateKey}"
+<#if ccmGatewayPort??>
+export CCM_GATEWAY_PORT=${ccmGatewayPort?c}
+</#if>
+<#if ccmKnoxPort??>
+export CCM_KNOX_PORT=${ccmKnoxPort?c}
+</#if>
+<#else>
+export IS_CCM_ENABLED=false
+</#if>
 
 ${customUserData}
 

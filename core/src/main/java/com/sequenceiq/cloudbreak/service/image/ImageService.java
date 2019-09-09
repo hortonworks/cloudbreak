@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
@@ -85,7 +86,7 @@ public class ImageService {
     }
 
     @Measure(ImageService.class)
-    public void create(Stack stack, String platformString, PlatformParameters params, StatedImage imgFromCatalog)
+    public void create(Stack stack, String platformString, PlatformParameters params, StatedImage imgFromCatalog, CcmParameters ccmParameters)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         try {
             Platform platform = platform(stack.cloudPlatform());
@@ -97,7 +98,8 @@ public class ImageService {
             String sshUser = stack.getStackAuthentication().getLoginUserName();
             String cbCert = securityConfig.getClientCert();
             String saltBootPassword = saltSecurityConfig.getSaltBootPassword();
-            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params, saltBootPassword, cbCert);
+            Map<InstanceGroupType, String> userData =
+                    userDataBuilder.buildUserData(platform, cbSshKeyDer, sshUser, params, saltBootPassword, cbCert, ccmParameters);
 
             LOGGER.debug("Determined image from catalog: {}", imgFromCatalog);
 
