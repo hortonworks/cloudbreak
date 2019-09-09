@@ -19,10 +19,23 @@ public class CredentialService {
     @Inject
     private SecretService secretService;
 
+    /**
+     * Gets the credential for an environment.
+     *
+     * @param  envCrn environment CRN
+     * @return        environment credential
+     */
     public Credential getCredentialByEnvCrn(String envCrn) {
         CredentialResponse credentialResponse = credentialEndpoint.getByEnvironmentCrn(envCrn);
+
         SecretResponse secretResponse = credentialResponse.getAttributes();
         String attributes = secretService.getByResponse(secretResponse);
-        return new Credential(credentialResponse.getName(), attributes, credentialResponse.getCrn());
+
+        if (credentialResponse.getAzure() != null) {
+            return new Credential(credentialResponse.getCrn(), credentialResponse.getName(), attributes,
+                new Credential.AzureParameters(credentialResponse.getAzure().getSubscriptionId()));
+        } else {
+            return new Credential(credentialResponse.getCrn(), credentialResponse.getName(), attributes);
+        }
     }
 }

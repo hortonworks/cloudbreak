@@ -59,6 +59,7 @@ import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
+import com.sequenceiq.redbeams.service.network.SubnetListerService;
 import com.sequenceiq.redbeams.service.uuid.UuidGeneratorService;
 
 public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
@@ -73,7 +74,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private static final Map<String, Object> ALLOCATE_REQUEST_PARAMETERS = Map.of("key", "value");
 
-    private static final Map<String, Object> NETWORK_REQUEST_PARAMETERS = Map.of("netkey", "netvalue");
+    private static final Map<String, Object> SUBNET_ID_REQUEST_PARAMETERS = Map.of("netkey", "netvalue");
 
     private static final Map<String, Object> DATABASE_SERVER_REQUEST_PARAMETERS = Map.of("dbkey", "dbvalue");
 
@@ -96,6 +97,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     @Mock
     private Clock clock;
+
+    @Mock
+    private SubnetListerService subnetListerService;
 
     @Mock
     private SubnetChooserService subnetChooserService;
@@ -189,8 +193,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(securityGroupRequest.getSecurityGroupIds(), dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds());
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator).get(networkRequest);
-        verify(subnetChooserService, never()).chooseSubnetsFromDifferentAzs(anyList());
-        verify(networkParameterAdder, never()).addNetworkParameters(any(), any());
+        verify(subnetListerService, never()).listSubnets(any(), any());
+        verify(subnetChooserService, never()).chooseSubnets(anyList(), any());
+        verify(networkParameterAdder, never()).addSubnetIds(any(), any(), any());
         verify(userGeneratorService, never()).generatePassword();
         verify(userGeneratorService, never()).generateUserName();
     }
@@ -217,8 +222,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                         .build())
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        when(subnetChooserService.chooseSubnetsFromDifferentAzs(any())).thenReturn(cloudSubnets);
-        when(networkParameterAdder.addNetworkParameters(any(), any())).thenReturn(NETWORK_REQUEST_PARAMETERS);
+        when(subnetListerService.listSubnets(any(), any())).thenReturn(cloudSubnets);
+        when(subnetChooserService.chooseSubnets(any(), any())).thenReturn(cloudSubnets);
+        when(networkParameterAdder.addSubnetIds(any(), any(), any())).thenReturn(SUBNET_ID_REQUEST_PARAMETERS);
         when(userGeneratorService.generatePassword()).thenReturn(PASSWORD);
         when(userGeneratorService.generateUserName()).thenReturn(USERNAME);
 
@@ -234,8 +240,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds().iterator().next(), DEFAULT_SECURITY_GROUP_ID);
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator, never()).get(networkRequest);
-        verify(subnetChooserService).chooseSubnetsFromDifferentAzs(anyList());
-        verify(networkParameterAdder).addNetworkParameters(any(), any());
+        verify(subnetListerService).listSubnets(any(), any());
+        verify(subnetChooserService).chooseSubnets(anyList(), any());
+        verify(networkParameterAdder).addSubnetIds(any(), any(), any());
         verify(userGeneratorService).generatePassword();
         verify(userGeneratorService).generateUserName();
     }
@@ -278,7 +285,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
             AwsNetworkV4Parameters awsNetworkV4Parameters = new AwsNetworkV4Parameters();
             awsNetworkV4Parameters.setSubnetId("subnet-1,subnet-2");
             allocateRequest.getNetwork().setAws(awsNetworkV4Parameters);
-            setupProviderCalculatorResponse(networkRequest, NETWORK_REQUEST_PARAMETERS);
+            setupProviderCalculatorResponse(networkRequest, SUBNET_ID_REQUEST_PARAMETERS);
         } else {
             allocateRequest.setNetwork(null);
             allocateRequest.getDatabaseServer().setSecurityGroup(null);

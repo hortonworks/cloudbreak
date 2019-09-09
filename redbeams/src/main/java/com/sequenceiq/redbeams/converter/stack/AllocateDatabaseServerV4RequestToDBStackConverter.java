@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request.RDS_NAME_MAX_LENGTH;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
@@ -50,6 +48,7 @@ import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
+import com.sequenceiq.redbeams.service.network.SubnetListerService;
 import com.sequenceiq.redbeams.service.uuid.UuidGeneratorService;
 
 @Component
@@ -74,6 +73,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     @Inject
     private Clock clock;
+
+    @Inject
+    private SubnetListerService subnetListerService;
 
     @Inject
     private SubnetChooserService subnetChooserService;
@@ -164,16 +166,13 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         }
     }
 
-    private Map<String, Object> getNetworkFromEnvironment(EnvironmentNetworkResponse environmentNetworkResponse) {
-        if (environmentNetworkResponse == null || environmentNetworkResponse.getSubnetMetas() == null) {
-            throw new RedbeamsException("Environment does not contain metadata for subnets");
-        }
-        List<CloudSubnet> subnetMetas = new ArrayList<>(environmentNetworkResponse.getSubnetMetas().values());
-        List<String> chosenSubnetIds = subnetChooserService.chooseSubnetsFromDifferentAzs(subnetMetas).stream()
+    private Map<String, Object> getSubnetsFromEnvironment(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
+        List<CloudSubnet> subnets = subnetListerService.listSubnets(environmentResponse, cloudPlatform);
+        List<String> chosenSubnetIds = subnetChooserService.chooseSubnets(subnets, cloudPlatform).stream()
                 .map(CloudSubnet::getId)
                 .collect(Collectors.toList());
 
-        return networkParameterAdder.addNetworkParameters(new HashMap<>(), chosenSubnetIds);
+        return networkParameterAdder.addSubnetIds(new HashMap<>(), chosenSubnetIds, cloudPlatform);
     }
 
     private Network buildNetwork(NetworkV4StackRequest source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
@@ -182,9 +181,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
         Map<String, Object> parameters = source != null
                 ? providerParameterCalculator.get(source).asMap()
-                : getNetworkFromEnvironment(environmentResponse.getNetwork());
+                : getSubnetsFromEnvironment(environmentResponse, cloudPlatform);
 
-        networkParameterAdder.addVpcParameters(parameters, environmentResponse, cloudPlatform);
+        networkParameterAdder.addParameters(parameters, environmentResponse, cloudPlatform);
 
         if (parameters != null) {
             try {

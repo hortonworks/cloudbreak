@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceCredentialView;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureSecurityView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -111,6 +112,7 @@ public class AzureTemplateBuilder {
     public String build(String stackName, CloudContext cloudContext, DatabaseStack databaseStack) {
         try {
             String location = cloudContext.getLocation().getRegion().getRegionName();
+            AzureNetworkView azureNetworkView = new AzureNetworkView(databaseStack.getNetwork());
             AzureDatabaseServerView azureDatabaseServerView = new AzureDatabaseServerView(databaseStack.getDatabaseServer());
             Map<String, Object> model = new HashMap<>();
 
@@ -128,7 +130,7 @@ public class AzureTemplateBuilder {
             model.put("skuSizeMB", azureDatabaseServerView.getAllocatedStorageInMb().toString());
             model.put("skuTier", azureDatabaseServerView.getSkuTier());
             model.put("storageAutoGrow", azureDatabaseServerView.getStorageAutoGrow());
-            model.put("subnets", databaseStack.getNetwork().getStringParameter("subnets"));
+            model.put("subnets", azureNetworkView.getSubnets());
             model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(databaseStack), model);
             LOGGER.debug("Generated ARM database template: {}", generatedTemplate);

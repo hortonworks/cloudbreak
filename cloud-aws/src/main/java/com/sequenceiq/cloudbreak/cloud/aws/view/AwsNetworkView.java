@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 public class AwsNetworkView {
 
     @VisibleForTesting
-    static final String VPC = "vpcId";
+    static final String VPC_ID = "vpcId";
 
     @VisibleForTesting
     static final String VPC_CIDR = "vpcCidr";
@@ -19,7 +19,7 @@ public class AwsNetworkView {
     static final String IGW = "internetGatewayId";
 
     @VisibleForTesting
-    static final String SUBNET = "subnetId";
+    static final String SUBNET_ID = "subnetId";
 
     private final Network network;
 
@@ -28,11 +28,11 @@ public class AwsNetworkView {
     }
 
     public boolean isExistingVPC() {
-        return isNotEmpty(network.getStringParameter(VPC));
+        return isNotEmpty(network.getStringParameter(VPC_ID));
     }
 
     public boolean isExistingSubnet() {
-        return isNotEmpty(network.getStringParameter(SUBNET));
+        return isNotEmpty(network.getStringParameter(SUBNET_ID));
     }
 
     public boolean isExistingIGW() {
@@ -40,7 +40,7 @@ public class AwsNetworkView {
     }
 
     public String getExistingSubnet() {
-        return network.getStringParameter(SUBNET);
+        return network.getStringParameter(SUBNET_ID);
     }
 
     public boolean isSubnetList() {
@@ -56,7 +56,7 @@ public class AwsNetworkView {
     }
 
     public String getExistingVpc() {
-        return network.getStringParameter(VPC);
+        return network.getStringParameter(VPC_ID);
     }
 
     public String getExistingVpcCidr() {

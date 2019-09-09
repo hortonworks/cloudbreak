@@ -25,7 +25,7 @@ public class CredentialToCloudCredentialConverterTest {
 
     @Test
     public void testConvert() {
-        credential = new Credential("userId", "{ \"foo\": \"bar\" }", "userCrn");
+        credential = new Credential("userCrn", "userId", "{ \"foo\": \"bar\" }");
 
         CloudCredential cloudCredential = underTest.convert(credential);
 
@@ -37,7 +37,7 @@ public class CredentialToCloudCredentialConverterTest {
 
     @Test
     public void testConvertNoAttributes() {
-        credential = new Credential("userId", null, "userCrn");
+        credential = new Credential("userCrn", "userId", null);
 
         CloudCredential cloudCredential = underTest.convert(credential);
 

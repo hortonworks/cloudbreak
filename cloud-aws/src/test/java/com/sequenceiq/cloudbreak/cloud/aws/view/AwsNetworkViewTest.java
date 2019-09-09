@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.IGW;
-import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.SUBNET;
-import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC;
+import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_CIDR;
+import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -35,14 +35,14 @@ public class AwsNetworkViewTest {
 
     @Test
     public void testVpc() {
-        when(network.getStringParameter(VPC)).thenReturn("vpc-123");
+        when(network.getStringParameter(VPC_ID)).thenReturn("vpc-123");
         assertTrue(underTest.isExistingVPC());
         assertEquals("vpc-123", underTest.getExistingVpc());
     }
 
     @Test
     public void testNoVpc() {
-        when(network.getStringParameter(VPC)).thenReturn(null);
+        when(network.getStringParameter(VPC_ID)).thenReturn(null);
         assertFalse(underTest.isExistingVPC());
         assertNull(underTest.getExistingVpc());
     }
@@ -55,7 +55,7 @@ public class AwsNetworkViewTest {
 
     @Test
     public void testNoVpcCidr() {
-        when(network.getStringParameter(VPC)).thenReturn(null);
+        when(network.getStringParameter(VPC_ID)).thenReturn(null);
         assertNull(underTest.getExistingVpcCidr());
     }
 
@@ -75,7 +75,7 @@ public class AwsNetworkViewTest {
 
     @Test
     public void testSingleSubnet() {
-        when(network.getStringParameter(SUBNET)).thenReturn("subnet-123");
+        when(network.getStringParameter(SUBNET_ID)).thenReturn("subnet-123");
         assertTrue(underTest.isExistingSubnet());
         assertEquals("subnet-123", underTest.getExistingSubnet());
         assertFalse(underTest.isSubnetList());
@@ -84,7 +84,7 @@ public class AwsNetworkViewTest {
 
     @Test
     public void testMultipleSubnet() {
-        when(network.getStringParameter(SUBNET)).thenReturn("subnet-123,subnet-456,subnet-789");
+        when(network.getStringParameter(SUBNET_ID)).thenReturn("subnet-123,subnet-456,subnet-789");
         assertTrue(underTest.isExistingSubnet());
         assertEquals("subnet-123,subnet-456,subnet-789", underTest.getExistingSubnet());
         assertTrue(underTest.isSubnetList());
@@ -93,7 +93,7 @@ public class AwsNetworkViewTest {
 
     @Test
     public void testNoSubnet() {
-        when(network.getStringParameter(SUBNET)).thenReturn(null);
+        when(network.getStringParameter(SUBNET_ID)).thenReturn(null);
         assertFalse(underTest.isExistingSubnet());
         assertNull(underTest.getExistingSubnet());
         assertFalse(underTest.isSubnetList());

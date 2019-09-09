@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
@@ -12,31 +13,49 @@ import com.sequenceiq.redbeams.exception.RedbeamsException;
 @Service
 public class NetworkParameterAdder {
 
-    private static final String VPC_ID = "vpcId";
+    // These constants must match those in AwsNetworkView
 
-    private static final String VPC_CIDR = "vpcCidr";
+    @VisibleForTesting
+    static final String VPC_ID = "vpcId";
 
-    private static final String SUBNET_ID = "subnetId";
+    @VisibleForTesting
+    static final String VPC_CIDR = "vpcCidr";
 
-    public Map<String, Object> addNetworkParameters(Map<String, Object> parameters, List<String> subnetIds) {
-        parameters.put(SUBNET_ID, String.join(",", subnetIds));
-        return parameters;
-    }
+    @VisibleForTesting
+    static final String SUBNET_ID = "subnetId";
 
-    public Map<String, Object> addVpcParameters(Map<String, Object> parameters, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
-        parameters.put(VPC_CIDR, environmentResponse.getSecurityAccess().getCidr());
-        parameters.put(VPC_ID, getVpcId(environmentResponse, cloudPlatform));
-        return parameters;
-    }
+    // These constants must match those in AzureNetworkView
 
-    private String getVpcId(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
+    @VisibleForTesting
+    static final String SUBNETS = "subnets";
+
+    public Map<String, Object> addSubnetIds(Map<String, Object> parameters, List<String> subnetIds, CloudPlatform cloudPlatform) {
         switch (cloudPlatform) {
             case AWS:
-                return environmentResponse.getNetwork().getAws().getVpcId();
+                parameters.put(SUBNET_ID, String.join(",", subnetIds));
+                break;
             case AZURE:
-                return environmentResponse.getNetwork().getAzure().getNetworkId();
+                parameters.put(SUBNETS, String.join(",", subnetIds));
+                break;
             default:
                 throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
         }
+        return parameters;
+    }
+
+    public Map<String, Object> addParameters(Map<String, Object> parameters, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
+        switch (cloudPlatform) {
+            case AWS:
+                parameters.put(VPC_CIDR, environmentResponse.getSecurityAccess().getCidr());
+                parameters.put(VPC_ID, environmentResponse.getNetwork().getAws().getVpcId());
+                break;
+            case AZURE:
+                // oddly, nothing to pass on yet
+                //parameters.put(VPC_ID, environmentResponse.getNetwork().getAzure().getNetworkId());
+                break;
+            default:
+                throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
+        }
+        return parameters;
     }
 }
