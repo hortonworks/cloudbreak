@@ -8,9 +8,11 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -56,6 +58,10 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setKafkaReplicationFactor(
                 getKafkaReplicationFactor(blueprintText) >= DEFAULT_REPLICATION_FACTOR ? DEFAULT_REPLICATION_FACTOR : 1);
         generalClusterConfigs.setVariant(cluster.getVariant());
+        generalClusterConfigs.setAutoTlsEnabled(cluster.getAutoTlsEnabled());
+        boolean userFacingCertHasBeenGenerated = StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingKey())
+                && StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingCert());
+        generalClusterConfigs.setKnoxUserFacingCertConfigured(userFacingCertHasBeenGenerated);
         return generalClusterConfigs;
     }
 
@@ -85,6 +91,10 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(PENDING_DEFAULT_VALUE));
         generalClusterConfigs.setKafkaReplicationFactor(1);
         generalClusterConfigs.setVariant(clusterVariant);
+        Boolean autoTlsEnabled = Optional.ofNullable(stack.getCluster().getCm())
+                .map(ClouderaManagerV4Request::getEnableAutoTls)
+                .orElse(Boolean.FALSE);
+        generalClusterConfigs.setAutoTlsEnabled(autoTlsEnabled);
         return generalClusterConfigs;
     }
 

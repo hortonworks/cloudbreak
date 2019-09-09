@@ -47,15 +47,20 @@ public class GatewayConfig {
 
     private final String saltSignPublicKey;
 
+    private final String userFacingCert;
+
+    private final String userFacingKey;
+
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress,
             Integer gatewayPort, String instanceId, Boolean knoxGatewayEnabled) {
         this(connectionAddress, publicAddress, privateAddress, null, gatewayPort,
-                instanceId, null, null, null, null, null, null, knoxGatewayEnabled, true, null, null);
+                instanceId, null, null, null, null, null, null, knoxGatewayEnabled, true, null, null, null, null);
     }
 
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress, String hostname,
             Integer gatewayPort, String instanceId, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
-            String signatureKey, Boolean knoxGatewayEnabled, boolean primary, String saltSignPrivateKey, String saltSignPublicKey) {
+            String signatureKey, Boolean knoxGatewayEnabled, boolean primary, String saltSignPrivateKey, String saltSignPublicKey,
+            String userFacingCert, String userFacingKey) {
         this.connectionAddress = connectionAddress;
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
@@ -72,6 +77,8 @@ public class GatewayConfig {
         this.primary = primary;
         this.saltSignPrivateKey = saltSignPrivateKey;
         this.saltSignPublicKey = saltSignPublicKey;
+        this.userFacingCert = userFacingCert;
+        this.userFacingKey = userFacingKey;
     }
 
     private GatewayConfig(GatewayConfig gatewayConfig, @Nonnull ServiceEndpoint serviceEndpoint) {
@@ -81,7 +88,8 @@ public class GatewayConfig {
                 gatewayConfig.serverCert, gatewayConfig.clientCert, gatewayConfig.clientKey,
                 gatewayConfig.saltPassword, gatewayConfig.saltBootPassword, gatewayConfig.signatureKey,
                 gatewayConfig.knoxGatewayEnabled, gatewayConfig.primary,
-                gatewayConfig.saltSignPrivateKey, gatewayConfig.saltSignPublicKey);
+                gatewayConfig.saltSignPrivateKey, gatewayConfig.saltSignPublicKey,
+                gatewayConfig.getUserFacingCert(), gatewayConfig.getUserFacingKey());
     }
 
     public String getConnectionAddress() {
@@ -150,6 +158,14 @@ public class GatewayConfig {
 
     public String getSaltSignPublicKey() {
         return saltSignPublicKey;
+    }
+
+    public String getUserFacingCert() {
+        return userFacingCert;
+    }
+
+    public String getUserFacingKey() {
+        return userFacingKey;
     }
 
     /**

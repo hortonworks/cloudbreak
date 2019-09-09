@@ -527,6 +527,7 @@ public class ClusterHostServiceRunner {
                     throw new NotFoundException("Could not get SAML metadata file to set up IdP in KNOXSSO: " + e.getMessage());
                 }
             }
+            addGatewayUserFacingCert(gatewayConfig, cluster, gateway);
         }
         gateway.put("kerberos", kerberosConfig != null);
 
@@ -537,6 +538,16 @@ public class ClusterHostServiceRunner {
         serviceLocations.put(ExposedService.CLOUDERA_MANAGER.getServiceName(), asList(gatewayConfig.getHostname()));
         gateway.put("location", serviceLocations);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private void addGatewayUserFacingCert(GatewayConfig gatewayConfig, Cluster cluster, Map<String, Object> gateway) {
+        boolean userFacingCertHasBeenGenerated = StringUtils.isNotEmpty(gatewayConfig.getUserFacingCert())
+                && StringUtils.isNotEmpty(gatewayConfig.getUserFacingKey());
+        if (!cluster.getAutoTlsEnabled() && gatewayConfig.getKnoxGatewayEnabled() && userFacingCertHasBeenGenerated) {
+            gateway.put("userfacingcert_configured", Boolean.TRUE);
+            gateway.put("userfacingkey", cluster.getStack().getSecurityConfig().getUserFacingKey());
+            gateway.put("userfacingcert", cluster.getStack().getSecurityConfig().getUserFacingCert());
+        }
     }
 
     private Map<String, List<String>> getServiceLocations(Cluster cluster) {
