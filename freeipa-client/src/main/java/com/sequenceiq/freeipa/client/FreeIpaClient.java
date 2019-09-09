@@ -173,6 +173,12 @@ public class FreeIpaClient {
         return (Group) invoke("group_add", flags, params, Group.class).getResult();
     }
 
+    public Group removeGroup(String group) throws FreeIpaClientException {
+        List<String> flags = List.of(group);
+        Map<String, Object> params = Map.of();
+        return (Group) invoke("delete_group", flags, params, Group.class).getResult();
+    }
+
     // TODO unpack response into something meaningful
     // NOTE: API may partially succeed/fail
     //ipa: INFO: Response: {

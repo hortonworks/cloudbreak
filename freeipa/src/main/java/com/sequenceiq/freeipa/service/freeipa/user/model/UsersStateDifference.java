@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.sequenceiq.freeipa.service.freeipa.user.UserServiceConstants;
 
 public class UsersStateDifference {
     private static final Logger LOGGER = LoggerFactory.getLogger(UsersStateDifference.class);
@@ -78,28 +81,45 @@ public class UsersStateDifference {
 
         Multimap<String, String> groupMembershipToAdd = HashMultimap.create();
         umsGroupMembership.forEach((group, user) -> {
-            LOGGER.info("Evaluation group = {} and user = {}", group, user);
             if (!ipaGroupMembership.containsEntry(group, user)) {
-                LOGGER.info("adding");
+                LOGGER.debug("adding user : {} to group : {}", user, group);
                 groupMembershipToAdd.put(group, user);
             }
         });
+        LOGGER.info("groupMembershipToAdd size= {}", groupMembershipToAdd.size());
 
         Multimap<String, String> groupMembershipToRemove = HashMultimap.create();
         ipaGroupMembership.forEach((group, user) -> {
-            LOGGER.info("Evaluation group = {} and user = {}", group, user);
             if (!umsGroupMembership.containsEntry(group, user)) {
-                LOGGER.info("removing");
+                LOGGER.debug("removing user : {} to group : {}", user, group);
                 groupMembershipToRemove.put(group, user);
             }
         });
 
+        LOGGER.info("groupMembershipToRemove size= {}", groupMembershipToRemove.size());
+
+        Set<FmsUser> usersToRemove =
+            getUsersToBeRemoved(umsState.getGroupMembership().get(UserServiceConstants.USERSYNC_INTERNAL_GROUP),
+                                ipaState.getUsers());
+        LOGGER.info("usersToRemove size= {}", usersToRemove.size());
+
         return new UsersStateDifference(
-                Set.copyOf(Sets.difference(umsState.getGroups(), ipaState.getGroups())),
-                Set.copyOf(Sets.difference(umsState.getUsers(), ipaState.getUsers())),
-                Set.copyOf(Sets.difference(ipaState.getGroups(), umsState.getGroups())),
-                Set.copyOf(Sets.difference(ipaState.getUsers(), umsState.getUsers())),
-                groupMembershipToAdd,
-                groupMembershipToRemove);
+            Set.copyOf(Sets.difference(umsState.getGroups(), ipaState.getGroups())),
+            Set.copyOf(Sets.difference(umsState.getUsers(), ipaState.getUsers())),
+            Set.copyOf(Sets.difference(ipaState.getGroups(), umsState.getGroups())),
+            usersToRemove,
+            groupMembershipToAdd,
+            groupMembershipToRemove);
+    }
+
+    private static Set<FmsUser> getUsersToBeRemoved(Collection<String> users, Set<FmsUser> ipaStateUsers) {
+        Set<FmsUser> usersToBeRemoved = new HashSet<>();
+
+        ipaStateUsers.forEach(ipaUser -> {
+            if (!users.contains(ipaUser.getName())) {
+                usersToBeRemoved.add(ipaUser);
+            }
+        });
+        return usersToBeRemoved;
     }
 }

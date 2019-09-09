@@ -50,7 +50,6 @@ public class UmsUsersStateProvider {
 
             Map<String, UsersState> envUsersStateMap = new HashMap<>();
 
-
             List<User> users = userCrns.isEmpty() ? umsClient.listAllUsers(actorCrn, accountId, requestIdOptional)
                     : umsClient.listUsers(actorCrn, accountId, List.copyOf(userCrns), requestIdOptional);
             List<MachineUser> machineUsers = machineUserCrns.isEmpty() ? umsClient.listAllMachineUsers(actorCrn, accountId, requestIdOptional)
@@ -63,6 +62,11 @@ public class UmsUsersStateProvider {
                 UsersState.Builder userStateBuilder = new UsersState.Builder();
 
                 crnToFmsGroup.values().stream().forEach(userStateBuilder::addGroup);
+
+                // add internal usersync group for each environment
+                FmsGroup internalUserSyncGroup = new FmsGroup();
+                internalUserSyncGroup.setName(UserServiceConstants.USERSYNC_INTERNAL_GROUP);
+                userStateBuilder.addGroup(internalUserSyncGroup);
 
                 users.stream().forEach(u -> {
                     FmsUser fmsUser = umsUserToUser(u);
@@ -140,7 +144,12 @@ public class UmsUsersStateProvider {
             rightsResponse.getGroupCrnList().stream().forEach(gcrn -> {
                 userStateBuilder.addMemberToGroup(crnToFmsGroup.get(gcrn).getName(), fmsUser.getName());
             });
+
+            // Since this user is eligible, add this user to internal group
+            userStateBuilder.addMemberToGroup(UserServiceConstants.USERSYNC_INTERNAL_GROUP, fmsUser.getName());
+
             if (isEnvironmentAdmin(environmentCrn, rightsResponse)) {
+                // TODO: introduce a flag for adding admin
                 userStateBuilder.addMemberToGroup("admins", fmsUser.getName());
             }
         }

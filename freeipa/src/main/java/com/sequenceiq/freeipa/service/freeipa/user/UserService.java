@@ -107,9 +107,7 @@ public class UserService {
             Map<String, UsersState> envToUmsStateMap = umsUsersStateProvider
                 .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter);
 
-            // TODO: fix me.
             Set<String> userIdFilter = Set.of();
-//            Set<String> userIdFilter = filterUsers ? umsState.getUsernamesFromCrns(userCrnFilter, machineUserCrnFilter) : Set.of();
 
             Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
                     .collect(Collectors.toMap(Stack::getEnvironmentCrn,
@@ -155,7 +153,7 @@ public class UserService {
         String environmentCrn = stack.getEnvironmentCrn();
         try {
             LOGGER.info("Syncing Environment {}", environmentCrn);
-            LOGGER.debug("UMS UsersState = {}", umsUsersState);
+
             if (umsUsersState.getUsers() == null || umsUsersState.getUsers().size() == 0) {
                 String message = "Failed to synchronize environment " + stack.getEnvironmentCrn() + " No User to sync for this environment";
                 LOGGER.warn(message);
@@ -165,7 +163,7 @@ public class UserService {
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
             UsersState ipaUsersState = userIdFilter.isEmpty() ? freeIpaUsersStateProvider.getUsersState(freeIpaClient)
                     : freeIpaUsersStateProvider.getFilteredUsersState(freeIpaClient, userIdFilter);
-            LOGGER.debug("IPA UsersState = {}", ipaUsersState);
+            LOGGER.debug("IPA UsersState, found {} users and {} groups", ipaUsersState.getUsers().size(), ipaUsersState.getGroups().size());
 
             UsersStateDifference stateDifference = UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState);
             LOGGER.debug("State Difference = {}", stateDifference);
@@ -174,7 +172,9 @@ public class UserService {
             addUsers(freeIpaClient, stateDifference.getUsersToAdd());
             addUsersToGroups(freeIpaClient, stateDifference.getGroupMembershipToAdd());
 
-            // TODO remove/deactivate groups/users/group membership
+            removeUsersFromGroups(freeIpaClient, stateDifference.getGroupMembershipToRemove());
+            removeUsers(freeIpaClient, stateDifference.getUsersToRemove());
+            removeGroups(freeIpaClient, stateDifference.getGroupsToRemove());
 
             return SyncStatusDetail.succeed(environmentCrn, "TODO- collect detail info");
         } catch (Exception e) {
@@ -211,6 +211,38 @@ public class UserService {
                 LOGGER.error("Failed to add {}", username, e);
             }
         }
+    }
+
+    private void removeUsers(FreeIpaClient freeIpaClient, Set<FmsUser> fmsUsers) throws FreeIpaClientException {
+        for (FmsUser fmsUser : fmsUsers) {
+            String username = fmsUser.getName();
+
+            LOGGER.debug("Removing user {}", username);
+
+            try {
+                com.sequenceiq.freeipa.client.model.User userRemove = freeIpaClient.deleteUser(username);
+                LOGGER.debug("Success: {}", userRemove);
+            } catch (FreeIpaClientException e) {
+                LOGGER.error("Failed to delete {}", username, e);
+            }
+        }
+    }
+
+    private void removeGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups) throws FreeIpaClientException {
+        for (FmsGroup fmsGroup : fmsGroups) {
+            String groupname = fmsGroup.getName();
+
+            LOGGER.debug("Removing group {}", groupname);
+
+            try {
+                // TODO: Add method to delete group
+                com.sequenceiq.freeipa.client.model.Group groupRemove = freeIpaClient.removeGroup(groupname);
+                LOGGER.debug("Success: {}", groupRemove);
+            } catch (FreeIpaClientException e) {
+                LOGGER.error("Failed to delete {}", groupname, e);
+            }
+        }
+
     }
 
     private void addUsersToGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
