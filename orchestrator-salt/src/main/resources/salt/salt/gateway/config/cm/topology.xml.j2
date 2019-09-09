@@ -173,15 +173,21 @@
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
              </param>
              {%- endif %}
-             {% if 'PROFILER_ADMIN' in exposed and 'PROFILER_ADMIN_AGENT' in salt['pillar.get']('gateway:location') -%}
+             {% if 'PROFILER-ADMIN-API' in exposed and 'PROFILER_ADMIN_AGENT' in salt['pillar.get']('gateway:location') -%}
              <param>
-                 <name>PROFILER_ADMIN</name>
+                 <name>PROFILER-ADMIN-API</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
              </param>
              {%- endif %}
-             {% if 'PROFILER_METRICS' in exposed and 'PROFILER_METRICS_AGENT' in salt['pillar.get']('gateway:location') -%}
+             {% if 'PROFILER-METRICS-API' in exposed and 'PROFILER_METRICS_AGENT' in salt['pillar.get']('gateway:location') -%}
              <param>
-                 <name>PROFILER_METRICS</name>
+                 <name>PROFILER-METRICS-API</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+             </param>
+             {%- endif %}
+             {% if 'PROFILER-SCHEDULER-API' in exposed and 'PROFILER_SCHEDULER_AGENT' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>PROFILER-SCHEDULER-API</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
              </param>
              {%- endif %}
@@ -433,22 +439,33 @@
     {%- endif %}
 
     {% if 'PROFILER_ADMIN_AGENT' in salt['pillar.get']('gateway:location') -%}
-    {% if 'PROFILER_ADMIN' in exposed -%}
+    {% if 'PROFILER-ADMIN-API' in exposed -%}
     <service>
-        <role>PROFILER_ADMIN</role>
+        <role>PROFILER-ADMIN-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['PROFILER_ADMIN_AGENT'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['PROFILER_ADMIN'] }}</url>
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['PROFILER-ADMIN-API'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
     {%- endif %}
 
     {% if 'PROFILER_METRICS_AGENT' in salt['pillar.get']('gateway:location') -%}
-    {% if 'PROFILER_METRICS' in exposed -%}
+    {% if 'PROFILER-METRICS-API' in exposed -%}
     <service>
-        <role>PROFILER_METRICS</role>
+        <role>PROFILER-METRICS-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['PROFILER_METRICS_AGENT'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['PROFILER_METRICS'] }}</url>
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['PROFILER-METRICS-API'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'PROFILER_SCHEDULER_AGENT' in salt['pillar.get']('gateway:location') -%}
+    {% if 'PROFILER-SCHEDULER-API' in exposed -%}
+    <service>
+        <role>PROFILER-SCHEDULER-API</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['PROFILER_SCHEDULER_AGENT'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['PROFILER-SCHEDULER-API'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
