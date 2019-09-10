@@ -24,7 +24,7 @@ public class FreeIpaUsersStateProvider {
     // TODO add other Cloudera-managed groups?
     // TODO handle name conflicts between ipa and ums? e.g., should ums "admins" be ipa "admins"?
     @VisibleForTesting
-    static final List<String> IPA_ONLY_GROUPS = List.of("admins", "editors", "ipausers", "trust admins");
+    static final List<String> IPA_ONLY_GROUPS = List.of("editors", "ipausers", "trust admins");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUsersStateProvider.class);
 
