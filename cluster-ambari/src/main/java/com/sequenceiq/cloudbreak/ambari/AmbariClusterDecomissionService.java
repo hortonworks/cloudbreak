@@ -97,4 +97,9 @@ public class AmbariClusterDecomissionService implements ClusterDecomissionServic
     @Override
     public void restartStaleServices() throws CloudbreakException {
     }
+
+    @Override
+    public Map<String, Map<String, String>> getStatusOfComponentsForHost(String host) {
+        return ambariDecommissioner.getStatusOfComponentsForHost(ambariClient, host);
+    }
 }

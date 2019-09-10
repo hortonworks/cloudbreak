@@ -28,4 +28,6 @@ public interface ClusterDecomissionService {
     void deleteHostFromCluster(HostMetadata data);
 
     void restartStaleServices() throws CloudbreakException;
+
+    Map<String, Map<String, String>> getStatusOfComponentsForHost(String host);
 }

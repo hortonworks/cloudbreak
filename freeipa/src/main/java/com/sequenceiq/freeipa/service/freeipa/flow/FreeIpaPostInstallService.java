@@ -32,6 +32,10 @@ public class FreeIpaPostInstallService {
 
     private static final String ADD_HOSTS_PERMISSION = "System: Add Hosts";
 
+    private static final String REMOVE_SERVICES_PERMISSION = "System: Remove Services";
+
+    private static final String REMOVE_HOSTS_PERMISSION = "System: Remove Hosts";
+
     private static final String DNS_ADMINISTRATORS_PRIVILEGE = "DNS Administrators";
 
     private static final String ENROLLMENT_ADMINISTRATOR_ROLE = "Enrollment Administrator";
@@ -61,6 +65,8 @@ public class FreeIpaPostInstallService {
         }
         freeIpaClient.addPermissionToPrivilege(USER_ADMIN_PRIVILEGE, SET_PASSWORD_EXPIRATION_PERMISSION);
         freeIpaClient.addPermissionToPrivilege(HOST_ENROLLMENT_PRIVILEGE, ADD_HOSTS_PERMISSION);
+        freeIpaClient.addPermissionToPrivilege(HOST_ENROLLMENT_PRIVILEGE, REMOVE_HOSTS_PERMISSION);
+        freeIpaClient.addPermissionToPrivilege(HOST_ENROLLMENT_PRIVILEGE, REMOVE_SERVICES_PERMISSION);
         freeIpaClient.addRolePriviliges(ENROLLMENT_ADMINISTRATOR_ROLE, Set.of(DNS_ADMINISTRATORS_PRIVILEGE));
         if (!Objects.equals(MAX_USERNAME_LENGTH, freeIpaClient.getUsernameLength())) {
             LOGGER.debug("Set maximum username length to {}", MAX_USERNAME_LENGTH);

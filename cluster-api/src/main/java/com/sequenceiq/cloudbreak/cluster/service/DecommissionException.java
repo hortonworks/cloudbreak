@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster.ambari;
+package com.sequenceiq.cloudbreak.cluster.service;
 
 public class DecommissionException extends RuntimeException {
     public DecommissionException(Throwable cause) {

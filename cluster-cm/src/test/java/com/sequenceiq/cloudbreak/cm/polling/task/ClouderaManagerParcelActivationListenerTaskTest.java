@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @ExtendWith(MockitoExtension.class)
-class ClouderaManagerDeployClientConfigListenerTaskTest {
+class ClouderaManagerParcelActivationListenerTaskTest {
 
     private static final BigDecimal COMMAND_ID = new BigDecimal(100);
 
@@ -49,7 +49,7 @@ class ClouderaManagerDeployClientConfigListenerTaskTest {
     private static final String STACK_NAME = "stack_name";
 
     @InjectMocks
-    private ClouderaManagerDeployClientConfigListenerTask underTest;
+    private ClouderaManagerParcelActivationListenerTask underTest;
 
     @Mock
     private ClouderaManagerClientFactory clouderaManagerClientFactory;

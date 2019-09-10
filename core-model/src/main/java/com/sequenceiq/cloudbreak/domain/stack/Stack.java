@@ -43,6 +43,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
@@ -684,5 +686,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public boolean isDatalake() {
         return type == StackType.DATALAKE;
+    }
+
+    public boolean hasCustomHostname() {
+        return !StringUtils.isEmpty(customHostname) || hostgroupNameAsHostname;
     }
 }
