@@ -39,7 +39,7 @@ public class CreateCertificationPoller implements AttemptMaker<List<String>> {
             return AttemptResults.finishWith(response.getCertificatesList());
         }
         if (response.getStatus().equalsIgnoreCase("FAILED")) {
-            return AttemptResults.breakFor(String.format("Certificate creation is failed for %s with status: %s ", pollerRequestId, response.getStatus()));
+            return AttemptResults.breakFor(String.format("Certificate creation is failed for %s with message: %s ", pollerRequestId, response.getError()));
         }
         LOGGER.debug("Polling continues");
         return AttemptResults.justContinue();
