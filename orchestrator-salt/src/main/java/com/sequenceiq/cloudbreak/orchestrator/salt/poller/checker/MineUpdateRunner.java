@@ -10,16 +10,16 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public class MineUpdateRunner extends BaseSaltJobRunner {
 
-    public MineUpdateRunner(Set<String> target, Set<Node> allNode) {
-        super(target, allNode);
+    public MineUpdateRunner(Set<String> targetHostnames, Set<Node> allNode) {
+        super(targetHostnames, allNode);
     }
 
     @Override
     public String submit(SaltConnector saltConnector) {
         ApplyResponse grainsResult = SaltStates.updateMine(saltConnector);
-        Set<String> strings = collectMissingNodes(collectNodes(grainsResult));
-        setTarget(strings);
-        return strings.toString();
+        Set<String> missingHostnames = collectMissingHostnames(collectSucceededNodes(grainsResult));
+        setTargetHostnames(missingHostnames);
+        return missingHostnames.toString();
     }
 
     @Override

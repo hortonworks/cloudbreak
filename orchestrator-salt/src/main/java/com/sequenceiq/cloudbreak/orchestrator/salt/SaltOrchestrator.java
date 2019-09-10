@@ -50,8 +50,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound.CompoundType;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
@@ -164,59 +163,59 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void initServiceRun(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
-        Set<String> gatewayTargets = getGatewayPrivateIps(allGateway);
-        String ambariServerAddress = primaryGateway.getPrivateAddress();
+        Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
+        Set<String> gatewayTargetHostnames = getGatewayHostnames(allGateway);
+        Set<String> serverHostname = Sets.newHashSet(primaryGateway.getHostname());
+        Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
-            OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargets, allNodes);
+            OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargetIpAddresses, allNodes);
             Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitModel);
             Future<Boolean> saltPillarRunnerFuture = parallelOrchestratorComponentRunner.submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
-                OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargets, propertiesEntry.getValue());
+                OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargetIpAddresses, propertiesEntry.getValue());
                 saltPillarRunner = runner(pillarSave, exitCriteria, exitModel);
                 saltPillarRunnerFuture = parallelOrchestratorComponentRunner.submit(saltPillarRunner);
                 saltPillarRunnerFuture.get();
             }
 
-            Set<String> server = Sets.newHashSet(ambariServerAddress);
-            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-
             // knox
             if (primaryGateway.getKnoxGatewayEnabled()) {
-                runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "gateway"), exitModel);
+                runSaltCommand(sc, new GrainAddRunner(gatewayTargetHostnames, allNodes, "gateway"), exitModel);
             }
 
-            setPostgreRoleIfNeeded(allNodes, saltConfig, exitModel, sc, server);
+            setPostgreRoleIfNeeded(allNodes, saltConfig, exitModel, sc, serverHostname);
 
             // ambari server
-            runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server_install"), exitModel);
-            runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitModel);
+            runSaltCommand(sc, new GrainAddRunner(serverHostname, allNodes, "ambari_server_install"), exitModel);
+            runSaltCommand(sc, new GrainAddRunner(serverHostname, allNodes, "ambari_server"), exitModel);
             // ambari server standby
-            Set<String> standbyServers = gatewayTargets.stream().filter(ip -> !server.contains(ip)).collect(Collectors.toSet());
-            if (!standbyServers.isEmpty()) {
-                runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "ambari_server_install"), exitModel);
-                runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "ambari_server_standby"), exitModel);
+            Set<String> standbyServerHostnames =
+                    gatewayTargetHostnames.stream().filter(hostname -> !serverHostname.contains(hostname)).collect(Collectors.toSet());
+            if (!standbyServerHostnames.isEmpty()) {
+                runSaltCommand(sc, new GrainAddRunner(standbyServerHostnames, allNodes, "ambari_server_install"), exitModel);
+                runSaltCommand(sc, new GrainAddRunner(standbyServerHostnames, allNodes, "ambari_server_standby"), exitModel);
             }
             // ambari agent
-            runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent_install"), exitModel);
-            runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent"), exitModel);
+            runSaltCommand(sc, new GrainAddRunner(allHostnames, allNodes, "ambari_agent_install"), exitModel);
+            runSaltCommand(sc, new GrainAddRunner(allHostnames, allNodes, "ambari_agent"), exitModel);
             // kerberos
             if (saltConfig.getServicePillarConfig().containsKey("kerberos")) {
-                runSaltCommand(sc, new GrainAddRunner(server, allNodes, "kerberos_server_master"), exitModel);
-                if (!standbyServers.isEmpty()) {
-                    runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "kerberos_server_slave"), exitModel);
+                runSaltCommand(sc, new GrainAddRunner(serverHostname, allNodes, "kerberos_server_master"), exitModel);
+                if (!standbyServerHostnames.isEmpty()) {
+                    runSaltCommand(sc, new GrainAddRunner(standbyServerHostnames, allNodes, "kerberos_server_slave"), exitModel);
                 }
             }
             // smartsense
             if (configureSmartSense) {
-                runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "smartsense"), exitModel);
-                runSaltCommand(sc, new GrainAddRunner(all, allNodes, "smartsense_agent_update"), exitModel);
+                runSaltCommand(sc, new GrainAddRunner(gatewayTargetHostnames, allNodes, "smartsense"), exitModel);
+                runSaltCommand(sc, new GrainAddRunner(allHostnames, allNodes, "smartsense_agent_update"), exitModel);
             }
             uploadGrains(allNodes, saltConfig.getGrainsProperties(), exitModel, sc);
 
-            runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitModel);
-            runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitModel);
+            runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitModel);
+            runSaltCommand(sc, new MineUpdateRunner(gatewayTargetHostnames, allNodes), exitModel);
 
         } catch (ExecutionException e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
@@ -237,12 +236,12 @@ public class SaltOrchestrator implements HostOrchestrator {
         LOGGER.info("Run Services on nodes: {}", allNodes);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
-            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             // YARN/SALT MAGIC: If you remove 'get role grains' before highstate, then highstate can run with defective roles,
             // so it can happen that 'ambari_agent' role will be missing on some nodes. Please do not delete only if you know what you are doing.
             Map<String, JsonNode> roles = SaltStates.getGrains(sc, "roles");
             LOGGER.info("Roles before highstate: " + roles);
-            runNewService(sc, new HighStateRunner(all, allNodes), exitModel);
+            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitModel);
         } catch (ExecutionException e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
@@ -267,10 +266,11 @@ public class SaltOrchestrator implements HostOrchestrator {
             throws ExecutionException, InterruptedException {
         if (!grainsProperties.isEmpty()) {
             for (Entry<String, Map<String, String>> hostGrains : grainsProperties.entrySet()) {
+                String hostname = hostGrains.getKey();
                 for (Entry<String, String> hostGrain : hostGrains.getValue().entrySet()) {
                     LOGGER.debug("upload grains to host: " + hostGrain);
-                    runSaltCommand(sc, new GrainAddRunner(Collections.singleton(hostGrains.getKey()), allNodes, hostGrain.getKey(), hostGrain.getValue(),
-                            CompoundType.IP), exitModel);
+                    runSaltCommand(sc, new GrainAddRunner(Collections.singleton(hostname), allNodes, hostGrain.getKey(), hostGrain.getValue()
+                    ), exitModel);
                 }
             }
         }
@@ -281,20 +281,20 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         LOGGER.info("Change primary gateway: {}", formerGateway);
-        String ambariServerAddress = newPrimaryGateway.getPrivateAddress();
+        String newAmbariServerHostname = newPrimaryGateway.getPrivateAddress();
         try (SaltConnector sc = new SaltConnector(newPrimaryGateway, restDebug)) {
             SaltStates.stopMinions(sc, Collections.singletonMap(formerGateway.getHostname(), formerGateway.getPrivateAddress()));
 
             // change ambari_server_standby role to ambari_server
-            Set<String> server = Collections.singleton(ambariServerAddress);
-            runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitCriteriaModel);
-            runSaltCommand(sc, new GrainRemoveRunner(server, allNodes, "roles", "ambari_server_standby", CompoundType.IP), exitCriteriaModel);
+            Set<String> newServerHostname = Collections.singleton(newAmbariServerHostname);
+            runSaltCommand(sc, new GrainAddRunner(newServerHostname, allNodes, "ambari_server"), exitCriteriaModel);
+            runSaltCommand(sc, new GrainRemoveRunner(newServerHostname, allNodes, "roles", "ambari_server_standby"), exitCriteriaModel);
             // add ambari_server_standby role to the standby servers and remove ambari_server role from them.
-            Set<String> standByServers = allGatewayConfigs.stream()
+            Set<String> standByServerHostnames = allGatewayConfigs.stream()
                     .filter(gwc -> !gwc.getHostname().equals(newPrimaryGateway.getHostname()) && !gwc.getHostname().equals(formerGateway.getHostname()))
-                    .map(GatewayConfig::getPrivateAddress).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(standByServers, allNodes, "ambari_server_standby"), exitCriteriaModel);
-            runSaltCommand(sc, new GrainRemoveRunner(standByServers, allNodes, "roles", "ambari_server", CompoundType.IP), exitCriteriaModel);
+                    .map(GatewayConfig::getHostname).collect(Collectors.toSet());
+            runSaltCommand(sc, new GrainAddRunner(standByServerHostnames, allNodes, "ambari_server_standby"), exitCriteriaModel);
+            runSaltCommand(sc, new GrainRemoveRunner(standByServerHostnames, allNodes, "roles", "ambari_server"), exitCriteriaModel);
 
             // remove minion key from all remaining gateway nodes
             for (GatewayConfig gatewayConfig : allGatewayConfigs) {
@@ -309,7 +309,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
 
             // salt '*' state.highstate
-            runNewService(sc, new HighStateRunner(server, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(newServerHostname, allNodes), exitCriteriaModel);
         } catch (ExecutionException e) {
             LOGGER.error("Error occurred during primary gateway change", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
@@ -329,7 +329,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             BaseSaltJobRunner baseSaltJobRunner = new BaseSaltJobRunner(target, allNodes) {
                 @Override
                 public String submit(SaltConnector saltConnector) {
-                    return SaltStates.ambariReset(saltConnector, new Compound(getTarget(), CompoundType.HOST));
+                    return SaltStates.ambariReset(saltConnector, new HostList(getTargetHostnames()));
                 }
             };
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltConnector, baseSaltJobRunner);
@@ -355,16 +355,15 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
 
             // add 'ambari_upgrade' role to all nodes
-            Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "roles", "ambari_upgrade", CompoundType.IP), exitCriteriaModel);
+            Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+            runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "roles", "ambari_upgrade"), exitCriteriaModel);
 
-            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetry, true);
+            Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+            runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, true);
 
             // remove 'ambari_upgrade' role from all nodes
-            targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "roles", "ambari_upgrade", CompoundType.IP), exitCriteriaModel);
+            runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", "ambari_upgrade"), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during ambari upgrade", e);
             throw new CloudbreakOrchestratorFailedException(e);
@@ -579,6 +578,10 @@ public class SaltOrchestrator implements HostOrchestrator {
         return allGatewayConfigs.stream().map(GatewayConfig::getPrivateAddress).collect(Collectors.toSet());
     }
 
+    private Set<String> getGatewayHostnames(Collection<GatewayConfig> allGatewayConfigs) {
+        return allGatewayConfigs.stream().map(GatewayConfig::getHostname).collect(Collectors.toSet());
+    }
+
     private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
             InterruptedException {
         runNewService(sc, baseSaltJobRunner, exitCriteriaModel, maxRetry, true);
@@ -606,35 +609,37 @@ public class SaltOrchestrator implements HostOrchestrator {
         boolean postRecipe = phase.isPostRecipe();
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             // add 'recipe' grain to all nodes
-            Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", phase.value(), CompoundType.IP), exitCriteriaModel);
+            Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+            runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel);
 
             // Add Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
             if (postRecipe) {
-                runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", RecipeExecutionPhase.POST.value(), CompoundType.IP), exitCriteriaModel);
+                runSaltCommand(sc,
+                        new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value()), exitCriteriaModel);
             } else {
-                runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", RecipeExecutionPhase.PRE.value(), CompoundType.IP), exitCriteriaModel);
+                runSaltCommand(sc,
+                        new GrainAddRunner(targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value()), exitCriteriaModel);
             }
 
-            Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            runSaltCommand(sc, new SyncAllRunner(all, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe, true);
+            Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+            runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel);
+            runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
         } catch (Exception e) {
             LOGGER.error("Error occurred during executing highstate (for recipes).", e);
             throw new CloudbreakOrchestratorFailedException(e);
         } finally {
             try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
                 // remove 'recipe' grain from all nodes
-                Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-                runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", phase.value(), CompoundType.IP), exitCriteriaModel);
+                Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+                runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel);
 
                 // Remove Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
                 if (postRecipe) {
                     runSaltCommand(sc, new GrainRemoveRunner(
-                            targets, allNodes, "recipes", RecipeExecutionPhase.POST.value(), CompoundType.IP), exitCriteriaModel);
+                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.POST.value()), exitCriteriaModel);
                 } else {
                     runSaltCommand(sc, new GrainRemoveRunner(
-                            targets, allNodes, "recipes", RecipeExecutionPhase.PRE.value(), CompoundType.IP), exitCriteriaModel);
+                            targetHostnames, allNodes, "recipes", RecipeExecutionPhase.PRE.value()), exitCriteriaModel);
                 }
             } catch (Exception e) {
                 LOGGER.error("Error occurred during removing recipe roles.", e);

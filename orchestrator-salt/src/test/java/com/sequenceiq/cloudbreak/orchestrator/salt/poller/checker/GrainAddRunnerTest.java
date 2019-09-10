@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker;
 
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 
@@ -39,9 +40,9 @@ public class GrainAddRunnerTest {
     @Test
     public void submitTest() throws SaltJobFailedException, IOException {
         Set<String> targets = new HashSet<>();
-        targets.add("10.0.0.1");
-        targets.add("10.0.0.2");
-        targets.add("10.0.0.3");
+        targets.add("10-0-0-1.example.com");
+        targets.add("10-0-0-2.example.com");
+        targets.add("10-0-0-3.example.com");
         Set<Node> allNode = new HashSet<>();
         allNode.add(new Node("10.0.0.1", "5.5.5.1", "10-0-0-1.example.com", "hg"));
         allNode.add(new Node("10.0.0.2", "5.5.5.2", "10-0-0-2.example.com", "hg"));
@@ -65,16 +66,16 @@ public class GrainAddRunnerTest {
 
         SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
         String missingIps = addRoleChecker.submit(saltConnector);
-        assertTrue(addRoleChecker.getTarget().isEmpty());
+        assertThat(addRoleChecker.getTargetHostnames(), empty());
         assertEquals(missingIps, "[]");
     }
 
     @Test
     public void submitTestWithMissingNode() throws SaltJobFailedException, IOException {
         Set<String> targets = new HashSet<>();
-        targets.add("10.0.0.1");
-        targets.add("10.0.0.2");
-        targets.add("10.0.0.3");
+        targets.add("10-0-0-1.example.com");
+        targets.add("10-0-0-2.example.com");
+        targets.add("10-0-0-3.example.com");
         Set<Node> allNode = new HashSet<>();
         allNode.add(new Node("10.0.0.1", "5.5.5.1", "10-0-0-1.example.com", "hg"));
         allNode.add(new Node("10.0.0.2", "5.5.5.2", "10-0-0-2.example.com", "hg"));

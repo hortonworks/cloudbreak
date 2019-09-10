@@ -18,8 +18,8 @@ public class SaltCommandTracker implements OrchestratorBootstrap {
     @Override
     public Boolean call() throws Exception {
         saltJobRunner.submit(saltConnector);
-        if (!saltJobRunner.getTarget().isEmpty()) {
-            throw new CloudbreakOrchestratorFailedException("There are missing nodes from job result: " + saltJobRunner.getTarget());
+        if (!saltJobRunner.getTargetHostnames().isEmpty()) {
+            throw new CloudbreakOrchestratorFailedException("There are missing nodes from job result: " + saltJobRunner.getTargetHostnames());
         }
         return true;
     }

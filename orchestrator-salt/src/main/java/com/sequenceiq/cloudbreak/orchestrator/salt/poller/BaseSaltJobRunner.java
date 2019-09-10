@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 
 public abstract class BaseSaltJobRunner implements SaltJobRunner {
 
-    private Set<String> target;
+    private Set<String> targetHostnames;
 
     private final Set<Node> allNode;
 
@@ -29,18 +29,18 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
     private Multimap<String, String> nodesWithError;
 
     protected BaseSaltJobRunner(Set<String> target, Set<Node> allNode) {
-        this.target = target;
+        this.targetHostnames = target;
         this.allNode = allNode;
     }
 
     @Override
-    public Set<String> getTarget() {
-        return target;
+    public Set<String> getTargetHostnames() {
+        return targetHostnames;
     }
 
     @Override
-    public void setTarget(Set<String> target) {
-        this.target = target;
+    public void setTargetHostnames(Set<String> newTargetHostname) {
+        this.targetHostnames = newTargetHostname;
     }
 
     @Override
@@ -78,7 +78,7 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
         return StateType.SIMPLE;
     }
 
-    public Set<String> collectNodes(ApplyResponse applyResponse) {
+    public Set<String> collectSucceededNodes(ApplyResponse applyResponse) {
         Set<String> set = new HashSet<>();
         for (Map<String, JsonNode> stringObjectMap : applyResponse.getResult()) {
             set.addAll(new ArrayList<>(stringObjectMap.keySet()));
@@ -86,10 +86,12 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
         return set;
     }
 
-    public Set<String> collectMissingNodes(Collection<String> nodes) {
-        Map<String, String> hostNames = allNode.stream().collect(Collectors.toMap(node -> getShortHostName(node.getHostname()), Node::getPrivateIp));
-        Set<String> nodesTarget = nodes.stream().map(node -> hostNames.get(getShortHostName(node))).collect(Collectors.toSet());
-        return target.stream().filter(t -> !nodesTarget.contains(t)).collect(Collectors.toSet());
+    public Set<String> collectMissingHostnames(Collection<String> succeededHostnames) {
+        Map<String, String> shortHostnameToHostnameMap =
+                allNode.stream().collect(Collectors.toMap(node -> getShortHostName(node.getHostname()), Node::getHostname));
+        Set<String> resolvedSucceededHostnames =
+                succeededHostnames.stream().map(hostname -> shortHostnameToHostnameMap.get(getShortHostName(hostname))).collect(Collectors.toSet());
+        return targetHostnames.stream().filter(t -> !resolvedSucceededHostnames.contains(t)).collect(Collectors.toSet());
     }
 
     protected Set<Node> getAllNode() {
@@ -107,7 +109,7 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
     @Override
     public String toString() {
         return "BaseSaltJobRunner{"
-                + "target=" + target
+                + "target=" + targetHostnames
                 + ", jid=" + jid
                 + ", jobState=" + jobState
                 + '}';

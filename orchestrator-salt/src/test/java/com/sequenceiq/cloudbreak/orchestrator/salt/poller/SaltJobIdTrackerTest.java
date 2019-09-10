@@ -69,7 +69,7 @@ public class SaltJobIdTrackerTest {
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");
         targets.add("10.0.0.3");
-        when(saltJobRunner.getTarget()).thenReturn(targets);
+        when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
         when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
         when(saltJobRunner.getJobState()).thenReturn(JobState.NOT_STARTED, JobState.IN_PROGRESS);
         when(saltJobRunner.submit(any(SaltConnector.class))).thenReturn(jobId);
@@ -137,7 +137,7 @@ public class SaltJobIdTrackerTest {
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");
         targets.add("10.0.0.3");
-        when(saltJobRunner.getTarget()).thenReturn(targets);
+        when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
 
         PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(true);
@@ -171,7 +171,7 @@ public class SaltJobIdTrackerTest {
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");
         targets.add("10.0.0.3");
-        when(saltJobRunner.getTarget()).thenReturn(targets);
+        when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
 
         PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
@@ -207,7 +207,7 @@ public class SaltJobIdTrackerTest {
             targets.add("10.0.0.1");
             targets.add("10.0.0.2");
             targets.add("10.0.0.3");
-            when(saltJobRunner.getTarget()).thenReturn(targets);
+            when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
 
             Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
             String missingMachine = "10.0.0.1";
@@ -250,7 +250,7 @@ public class SaltJobIdTrackerTest {
             saltJobRunner.setJobState(JobState.FAILED);
 
             Set<String> targets = Sets.newHashSet("10.0.0.1", "10.0.0.2", "10.0.0.3");
-            when(saltJobRunner.getTarget()).thenReturn(targets);
+            when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
 
             try {
                 new SaltJobIdTracker(saltConnector, saltJobRunner, false).call();
@@ -278,7 +278,7 @@ public class SaltJobIdTrackerTest {
             saltJobRunner.setJobState(JobState.NOT_STARTED);
 
             Set<String> targets = Sets.newHashSet("10.0.0.1", "10.0.0.2", "10.0.0.3");
-            when(saltJobRunner.getTarget()).thenReturn(targets);
+            when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
 
             PowerMockito.mockStatic(SaltStates.class);
             PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
