@@ -15,7 +15,8 @@ public enum CloudStorageCdpService {
     HIVE_METASTORE_EXTERNAL_WAREHOUSE,
     HIVE_REPLICA_WAREHOUSE,
     HBASE_ROOT,
-    RANGER_AUDIT;
+    RANGER_AUDIT,
+    PROFILER_SERVICE_FS_URI;
 
     @JsonIgnore
     public static String typeListing() {

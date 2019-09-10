@@ -45,6 +45,12 @@ public class CmCloudStorageConfigDetailsTest {
 
     private static final String HBASE_MASTER = "MASTER";
 
+    private static final String PROFILER_ADMIN_AGENT = "PROFILER_ADMIN_AGENT";
+
+    private static final String PROFILER_METRICS_AGENT = "PROFILER_METRICS_AGENT";
+
+    private static final String PROFILER_SCHEDULER_AGENT = "PROFILER_SCHEDULER_AGENT";
+
     private static final String CLUSTER_NAME = "bigCluster";
 
     private static final String STORAGE_NAME = "hwx-remote";
@@ -315,6 +321,43 @@ public class CmCloudStorageConfigDetailsTest {
         Assert.assertEquals(1, hbaseMaster.size());
         Assert.assertTrue(hbaseMaster.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/bigCluster/hbase"::equals));
+    }
+
+    @Test
+    public void testProfilerServicesWithAttachedCluster() {
+        prepareBlueprintProcessorFactoryMock(PROFILER_ADMIN_AGENT, PROFILER_METRICS_AGENT, PROFILER_SCHEDULER_AGENT);
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
+                .withStorageName(STORAGE_NAME)
+                .withClusterName(CLUSTER_NAME)
+                .withBlueprintText(BLUEPRINT_TEXT)
+                .withAttachedCluster(true)
+                .withFileSystemType(FileSystemType.S3.name())
+                .build();
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+        Assert.assertEquals(1L, bigCluster.size());
+
+        Set<ConfigQueryEntry> profilerAdmin = serviceEntry(bigCluster, PROFILER_ADMIN_AGENT);
+        Set<ConfigQueryEntry> profilerMetrics = serviceEntry(bigCluster, PROFILER_METRICS_AGENT);
+        Set<ConfigQueryEntry> profilerScheduler = serviceEntry(bigCluster, PROFILER_SCHEDULER_AGENT);
+
+        Assert.assertEquals(1, profilerAdmin.size());
+        Assert.assertTrue(profilerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
+                .anyMatch("hwx-remote"::equals));
+        Assert.assertTrue(profilerAdmin.stream().map(ConfigQueryEntry::getPropertyName)
+                .anyMatch("file_system_uri"::equals));
+
+
+        Assert.assertEquals(1, profilerMetrics.size());
+        Assert.assertTrue(profilerMetrics.stream().map(ConfigQueryEntry::getDefaultPath)
+                .anyMatch("hwx-remote"::equals));
+        Assert.assertTrue(profilerMetrics.stream().map(ConfigQueryEntry::getPropertyName)
+                .anyMatch("file_system_uri"::equals));
+
+        Assert.assertEquals(1, profilerScheduler.size());
+        Assert.assertTrue(profilerScheduler.stream().map(ConfigQueryEntry::getDefaultPath)
+                .anyMatch("hwx-remote"::equals));
+        Assert.assertTrue(profilerScheduler.stream().map(ConfigQueryEntry::getPropertyName)
+                .anyMatch("file_system_uri"::equals));
     }
 
     private Set<ConfigQueryEntry> serviceEntry(Set<ConfigQueryEntry> configQueryEntries, String serviceName) {
