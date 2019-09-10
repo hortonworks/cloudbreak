@@ -76,6 +76,17 @@
       "relatedServices": ["MASTER"],
       "requiredForAttachedCluster": true,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "type": "PROFILER_SERVICE_FS_URI",
+      "propertyName": "file_system_uri",
+      "propertyFile": "dpprofiler.properties",
+      "description": "This is the file system URI for Profiler Service",
+      "defaultPath": "{{{ defaultPath }}}",
+      "propertyDisplayName": "Profiler Service file system URI",
+      "relatedServices": ["PROFILER_ADMIN_AGENT", "PROFILER_METRICS_AGENT", "PROFILER_SCHEDULER_AGENT"],
+      "requiredForAttachedCluster": true,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     }
   ]
 }
