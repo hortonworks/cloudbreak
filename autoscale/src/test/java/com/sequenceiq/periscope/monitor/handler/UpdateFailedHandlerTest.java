@@ -14,7 +14,9 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -25,7 +27,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.FailedNode;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
+import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
@@ -37,6 +41,9 @@ public class UpdateFailedHandlerTest {
 
     private static final String CLOUDBREAK_STACK_CRN = "someCrn";
 
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
     @Mock
     private ClusterService clusterService;
 
@@ -45,6 +52,9 @@ public class UpdateFailedHandlerTest {
 
     @Mock
     private StackResponseUtils stackResponseUtils;
+
+    @Mock
+    private FailedNodeRepository failedNodeRepository;
 
     @InjectMocks
     private UpdateFailedHandler underTest;
@@ -63,6 +73,7 @@ public class UpdateFailedHandlerTest {
         underTest.onApplicationEvent(new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID));
 
         verify(clusterService).removeById(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository).deleteByClusterId(AUTOSCALE_CLUSTER_ID);
         verify(clusterService, never()).save(cluster);
         verify(cloudbreakCommunicator).getByCrn(CLOUDBREAK_STACK_CRN);
     }
@@ -78,6 +89,7 @@ public class UpdateFailedHandlerTest {
         verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService).findById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService, never()).removeById(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository, never()).deleteByClusterId(AUTOSCALE_CLUSTER_ID);
         verify(cloudbreakCommunicator).getByCrn(CLOUDBREAK_STACK_CRN);
     }
 
@@ -93,6 +105,7 @@ public class UpdateFailedHandlerTest {
         verify(clusterService).findById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService, never()).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository, never()).deleteByClusterId(AUTOSCALE_CLUSTER_ID);
         verify(cloudbreakCommunicator, never()).failureReport(anyString(), any());
     }
 
@@ -109,6 +122,7 @@ public class UpdateFailedHandlerTest {
         verify(clusterService, times(4)).findById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService, never()).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository, never()).deleteByClusterId(AUTOSCALE_CLUSTER_ID);
         verify(cloudbreakCommunicator, times(4)).getByCrn(CLOUDBREAK_STACK_CRN);
         verify(cloudbreakCommunicator, never()).failureReport(anyString(), any());
     }
@@ -126,8 +140,13 @@ public class UpdateFailedHandlerTest {
         verify(clusterService, times(5)).findById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository, never()).deleteByClusterId(AUTOSCALE_CLUSTER_ID);
         verify(cloudbreakCommunicator, times(5)).getByCrn(CLOUDBREAK_STACK_CRN);
         verify(cloudbreakCommunicator).failureReport(eq(CLOUDBREAK_STACK_CRN), any());
+        FailedNode failedNode = new FailedNode();
+        failedNode.setName("master");
+        failedNode.setClusterId(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository).save(failedNode);
     }
 
     @Test
@@ -143,6 +162,7 @@ public class UpdateFailedHandlerTest {
         verify(clusterService, times(5)).findById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository, never()).deleteByClusterId(AUTOSCALE_CLUSTER_ID);
         verify(cloudbreakCommunicator, times(5)).getByCrn(CLOUDBREAK_STACK_CRN);
         verify(cloudbreakCommunicator, never()).failureReport(eq(CLOUDBREAK_STACK_CRN), any());
     }
@@ -155,13 +175,21 @@ public class UpdateFailedHandlerTest {
         when(stackResponseUtils.getNotTerminatedPrimaryGateways(any())).thenReturn(getPrimaryGateway());
         doThrow(new RuntimeException("error sending failure report")).when(cloudbreakCommunicator).failureReport(anyString(), any());
 
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("error sending failure report");
+
         IntStream.range(0, 4).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID)));
         underTest.onApplicationEvent(new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID));
 
         verify(clusterService, times(5)).findById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository, never()).deleteByClusterId(AUTOSCALE_CLUSTER_ID);
         verify(cloudbreakCommunicator).failureReport(eq(CLOUDBREAK_STACK_CRN), any());
+        FailedNode failedNode = new FailedNode();
+        failedNode.setName("master");
+        failedNode.setClusterId(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository).save(failedNode);
     }
 
     @Test
@@ -177,6 +205,7 @@ public class UpdateFailedHandlerTest {
         verify(clusterService, times(4)).findById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService, never()).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository, never()).deleteByClusterId(AUTOSCALE_CLUSTER_ID);
         verify(cloudbreakCommunicator, times(4)).getByCrn(CLOUDBREAK_STACK_CRN);
         verify(cloudbreakCommunicator, never()).failureReport(anyString(), any());
     }
@@ -194,6 +223,7 @@ public class UpdateFailedHandlerTest {
         verify(clusterService, times(5)).findById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository, never()).deleteByClusterId(AUTOSCALE_CLUSTER_ID);
         verify(cloudbreakCommunicator, times(5)).getByCrn(CLOUDBREAK_STACK_CRN);
         verify(cloudbreakCommunicator, never()).failureReport(anyString(), any());
     }
@@ -211,13 +241,14 @@ public class UpdateFailedHandlerTest {
         verify(clusterService, times(5)).findById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService, never()).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(AUTOSCALE_CLUSTER_ID);
+        verify(failedNodeRepository, never()).deleteByClusterId(AUTOSCALE_CLUSTER_ID);
         verify(cloudbreakCommunicator, never()).getByCrn(CLOUDBREAK_STACK_CRN);
         verify(cloudbreakCommunicator, never()).failureReport(anyString(), any());
     }
 
     private Optional<InstanceMetaDataV4Response> getPrimaryGateway() {
         InstanceMetaDataV4Response instanceMetaDataJson = new InstanceMetaDataV4Response();
-        instanceMetaDataJson.setDiscoveryFQDN("");
+        instanceMetaDataJson.setDiscoveryFQDN("master");
         return Optional.of(instanceMetaDataJson);
     }
 

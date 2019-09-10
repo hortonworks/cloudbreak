@@ -40,7 +40,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.ChangedNodesReportV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -136,7 +136,7 @@ public class ClusterManagerHostHealthMonitorModuleTest extends RejectedThreadCon
 
         waitForTasksToFinish();
 
-        verify(autoscaleEndpoint, times(1)).failureReport(eq(stackCrn), any(FailureReportV4Request.class));
+        verify(autoscaleEndpoint, times(1)).changedNodesReport(eq(stackCrn), any(ChangedNodesReportV4Request.class));
     }
 
     @Test

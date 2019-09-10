@@ -606,6 +606,11 @@ public class ModelDescriptions {
         public static final String FAILED_NODES = "List of failed nodes";
     }
 
+    public static class NodeStatusChangeReport {
+        public static final String NEW_FAILED_NODES = "List of the new failed nodes";
+        public static final String NEW_HEALTHY_NODES = "List of the new healthy nodes";
+    }
+
     public static class RepairClusterRequest {
         public static final String HOSTGROUPS = "List of hostgroups where the failed nodes will be repaired";
         public static final String REMOVE_ONLY = "If true, the failed nodes will only be removed, otherwise the failed nodes will be removed and "

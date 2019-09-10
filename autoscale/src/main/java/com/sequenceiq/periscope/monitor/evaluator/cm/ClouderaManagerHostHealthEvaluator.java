@@ -79,12 +79,12 @@ public class ClouderaManagerHostHealthEvaluator implements ClusterManagerSpecifi
                     .peek(hn -> LOGGER.debug("Host to recover: {}", hn))
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            LOGGER.info(String.format("Failed to retrieve '%s' alerts. Original message: %s", CM_HOST_HEARTBEAT, e.getMessage()));
+            LOGGER.info("Failed to retrieve '{}' alerts. Original message: {}", CM_HOST_HEARTBEAT, e.getMessage());
             eventPublisher.publishEvent(new UpdateFailedEvent(clusterId));
+            throw new RuntimeException(e);
         } finally {
             LOGGER.debug("Finished {} for cluster {} in {} ms", CM_HOST_HEARTBEAT, clusterId, System.currentTimeMillis() - start);
         }
-        return List.of();
     }
 
     private Predicate<ApiHost> isAlertStateMet() {
