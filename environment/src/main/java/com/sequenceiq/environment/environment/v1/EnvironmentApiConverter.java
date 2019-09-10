@@ -155,7 +155,10 @@ public class EnvironmentApiConverter {
             yarnParams.setQueue(network.getYarn().getQueue());
             builder.withYarn(yarnParams);
         }
-        Optional.ofNullable(network.getSubnetIds()).ifPresent(ids -> ids.stream().collect(Collectors.toMap(id -> id, id -> new CloudSubnet(id, id))));
+        if (network.getSubnetIds() != null) {
+            builder.withSubnetMetas(network.getSubnetIds().stream()
+                .collect(Collectors.toMap(id -> id, id -> new CloudSubnet(id, id))));
+        }
         builder.withPrivateSubnetCreation(getPrivateSubnetCreation(network));
         return builder
                 .withNetworkCidr(network.getNetworkCidr())
