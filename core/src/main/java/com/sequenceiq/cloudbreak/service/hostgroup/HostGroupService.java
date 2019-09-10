@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
@@ -28,9 +27,6 @@ public class HostGroupService {
 
     @Inject
     private HostMetadataRepository hostMetadataRepository;
-
-    @Inject
-    private ConstraintRepository constraintRepository;
 
     @Inject
     private TransactionService transactionService;
@@ -89,7 +85,6 @@ public class HostGroupService {
         return transactionService.required(() -> {
             for (HostGroup hg : hostGroups) {
                 hg.setCluster(cluster);
-                hg.setConstraint(constraintRepository.save(hg.getConstraint()));
                 result.add(hostGroupRepository.save(hg));
             }
             return result;

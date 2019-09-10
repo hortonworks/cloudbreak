@@ -225,7 +225,7 @@ class BlueprintModulTestModelProvider {
 
         Set<HostGroup> groups = getHostGroups("master", "worker", "compute");
         for (HostGroup hostGroup : groups) {
-            hostGroup.getConstraint().getInstanceGroup().getTemplate().setVolumeCount(5);
+            hostGroup.getInstanceGroup().getTemplate().setVolumeCount(5);
         }
         return Builder.builder()
                 .withHostgroups(groups)

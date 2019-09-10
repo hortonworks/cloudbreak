@@ -32,7 +32,7 @@ public class AmbariDecommissionTimeCalculator {
     public void calculateDecommissioningTime(Stack stack, Collection<HostMetadata> filteredHostList, Map<String, Map<Long, Long>> dfsSpace, long usedSpace) {
         Optional<HostMetadata> aHostMetadata = filteredHostList.stream().findFirst();
         if (aHostMetadata.isPresent()) {
-            Template template = aHostMetadata.get().getHostGroup().getConstraint().getInstanceGroup().getTemplate();
+            Template template = aHostMetadata.get().getHostGroup().getInstanceGroup().getTemplate();
             int rootVolumeSize = template.getRootVolumeSize() == null
                     ? defaultRootVolumeSizeProvider.getForPlatform(stack.cloudPlatform())
                     : template.getRootVolumeSize();

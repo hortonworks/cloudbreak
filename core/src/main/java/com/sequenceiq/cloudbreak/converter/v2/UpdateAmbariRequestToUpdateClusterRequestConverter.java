@@ -7,19 +7,18 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.stack.cluster.host.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.v2.InstanceGroupV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
 public class UpdateAmbariRequestToUpdateClusterRequestConverter extends AbstractConversionServiceAwareConverter<ReinstallRequestV2, UpdateClusterJson> {
@@ -53,10 +52,7 @@ public class UpdateAmbariRequestToUpdateClusterRequestConverter extends Abstract
             hostGroupRequest.setRecoveryMode(instanceGroupV2Request.getRecoveryMode());
             hostGroupRequest.setRecipeNames(instanceGroupV2Request.getRecipeNames());
             hostGroupRequest.setName(instanceGroupV2Request.getGroup());
-            ConstraintJson constraintJson = new ConstraintJson();
-            constraintJson.setHostCount(instanceGroupV2Request.getNodeCount());
-            constraintJson.setInstanceGroupName(instanceGroupV2Request.getGroup());
-            hostGroupRequest.setConstraint(constraintJson);
+            hostGroupRequest.setInstanceGroupName(instanceGroupV2Request.getGroup());
             hostgroups.add(hostGroupRequest);
         }
         updateStackJson.setHostgroups(hostgroups);

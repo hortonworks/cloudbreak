@@ -62,7 +62,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             String hostGroupName = failedNodes.getKey();
             List<String> hostNames = failedNodes.getValue();
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), hostGroupName);
-            InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
+            InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 List<InstanceMetaData> primary = instanceMetadataRepository.findAllByInstanceGroup(instanceGroup).stream().filter(
                         imd -> hostNames.contains(imd.getDiscoveryFQDN())

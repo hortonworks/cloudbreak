@@ -59,7 +59,7 @@ public class ComponentLocatorService {
     }
 
     private void fillList(Function<InstanceMetaData, String> getterFunction, Map<String, List<String>> result, HostGroup hg, Set<String> hgComponents) {
-        List<String> attributeList = hg.getConstraint().getInstanceGroup().getNotDeletedInstanceMetaDataSet().stream()
+        List<String> attributeList = hg.getInstanceGroup().getNotDeletedInstanceMetaDataSet().stream()
                 .map(getterFunction).collect(Collectors.toList());
         for (String service : hgComponents) {
             List<String> storedAttributes = result.get(service);

@@ -184,7 +184,7 @@ public class TemplatePreparationObject {
 
         public Builder withHostgroups(Set<HostGroup> hostGroups) {
             for (HostGroup hostGroup : hostGroups) {
-                InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
+                InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
                 if (instanceGroup != null) {
                     int volumeCount = instanceGroup.getTemplate() == null ? 1 : instanceGroup.getTemplate().getVolumeCount();
                     hostgroupViews.add(new HostgroupView(hostGroup.getName(), volumeCount,

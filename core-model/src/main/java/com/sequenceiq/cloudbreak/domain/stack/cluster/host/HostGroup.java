@@ -21,16 +21,14 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
-@NamedEntityGraph(name = "HostGroup.constraint.instanceGroup.instanceMetaData",
-        attributeNodes = @NamedAttributeNode(value = "constraint", subgraph = "instanceGroup"),
+@NamedEntityGraph(name = "HostGroup.instanceGroup.instanceMetaData",
+        attributeNodes = @NamedAttributeNode(value = "instanceGroup", subgraph = "instanceMetaData"),
         subgraphs = {
-                @NamedSubgraph(name = "instanceGroup",
-                        attributeNodes = @NamedAttributeNode(value = "instanceGroup", subgraph = "instanceMetaData")),
                 @NamedSubgraph(name = "instanceMetaData", attributeNodes = @NamedAttributeNode("instanceMetaData"))
         }
 )
@@ -49,7 +47,7 @@ public class HostGroup implements ProvisionEntity {
     private Cluster cluster;
 
     @OneToOne
-    private Constraint constraint;
+    private InstanceGroup instanceGroup;
 
     @OneToMany(mappedBy = "hostGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostMetadata> hostMetadata = new HashSet<>();
@@ -88,12 +86,12 @@ public class HostGroup implements ProvisionEntity {
         this.cluster = cluster;
     }
 
-    public Constraint getConstraint() {
-        return constraint;
+    public InstanceGroup getInstanceGroup() {
+        return instanceGroup;
     }
 
-    public void setConstraint(Constraint constraint) {
-        this.constraint = constraint;
+    public void setInstanceGroup(InstanceGroup instanceGroup) {
+        this.instanceGroup = instanceGroup;
     }
 
     public Set<HostMetadata> getHostMetadata() {

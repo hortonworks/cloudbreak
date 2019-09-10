@@ -49,7 +49,7 @@ public class RecipeEngine {
         if (recipesSupportedOnOrchestrator(orchestrator)) {
             Set<HostGroup> hgs = Collections.singleton(hostGroup);
             if (recipesFound(hgs)) {
-                if (hostGroup.getConstraint().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY) {
+                if (hostGroup.getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY) {
                     orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
                 }
             }
