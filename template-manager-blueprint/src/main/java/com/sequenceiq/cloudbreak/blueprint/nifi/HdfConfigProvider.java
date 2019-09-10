@@ -61,8 +61,7 @@ public class HdfConfigProvider {
     }
 
     private Set<InstanceGroup> collectInstanceGroupsWhichContainsNifiMasters(Set<HostGroup> hostgroups, Set<String> nifiMasters) {
-        return hostgroups.stream().filter(hg -> nifiMasters.contains(hg.getName())).map(hg -> hg.getConstraint()
-            .getInstanceGroup()).collect(Collectors.toSet());
+        return hostgroups.stream().filter(hg -> nifiMasters.contains(hg.getName())).map(hg -> hg.getInstanceGroup()).collect(Collectors.toSet());
     }
 
     private Set<String> collectNifiMasters(String blueprintText) {

@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
@@ -148,17 +147,15 @@ public class StackValidationRequestToStackValidationConverter extends AbstractCo
         for (HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = new HostGroup();
             hostGroup.setName(json.getName());
-            Constraint constraint = conversionService.convert(json.getConstraint(), Constraint.class);
-            String instanceGroupName = json.getConstraint().getInstanceGroupName();
+            String instanceGroupName = json.getInstanceGroupName();
             if (instanceGroupName != null) {
                 Optional<InstanceGroup> instanceGroup =
                         instanceGroups.stream().filter(instanceGroup1 -> instanceGroup1.getGroupName().equals(instanceGroupName)).findFirst();
                 if (!instanceGroup.isPresent()) {
                     throw new BadRequestException(String.format("Cannot find instance group named '%s' in instance group list", instanceGroupName));
                 }
-                constraint.setInstanceGroup(instanceGroup.get());
+                hostGroup.setInstanceGroup(instanceGroup.get());
             }
-            hostGroup.setConstraint(constraint);
             hostGroups.add(hostGroup);
         }
         return hostGroups;

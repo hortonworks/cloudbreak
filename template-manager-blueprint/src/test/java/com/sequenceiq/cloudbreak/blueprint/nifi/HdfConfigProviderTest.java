@@ -53,7 +53,7 @@ public class HdfConfigProviderTest {
         hostGroups.add(TestUtil.hostGroup("compute", 2));
         Map<String, List<InstanceMetaData>> groupInstanes = new HashMap<>();
         for (HostGroup hg: hostGroups) {
-            groupInstanes.put(hg.getName(), new ArrayList<>(hg.getConstraint().getInstanceGroup().getAllInstanceMetaData()));
+            groupInstanes.put(hg.getName(), new ArrayList<>(hg.getInstanceGroup().getAllInstanceMetaData()));
         }
         when(blueprintProcessor.getHostGroupsWithComponent("NIFI_MASTER")).thenReturn(Sets.newHashSet("master"));
         when(blueprintProcessor.pathValue("configurations", "nifi-ambari-config", "nifi.node.ssl.port")).thenReturn(Optional.of("9091"));

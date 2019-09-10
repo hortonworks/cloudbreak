@@ -29,7 +29,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -309,9 +308,7 @@ public class BlueprintValidatorTest {
     private HostGroup createHostGroup(String groupName, InstanceGroup instanceGroup) {
         HostGroup group = new HostGroup();
         group.setName(groupName);
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(instanceGroup);
-        group.setConstraint(constraint);
+        group.setInstanceGroup(instanceGroup);
         return group;
     }
 

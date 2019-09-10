@@ -3,11 +3,9 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,13 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.filesystem.FileSystemType;
-import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -39,7 +33,6 @@ import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
-import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -49,6 +42,9 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
+import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
+import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 
 @Component
 public class ClusterTerminationService {
@@ -65,9 +61,6 @@ public class ClusterTerminationService {
 
     @Resource
     private Map<FileSystemType, FileSystemConfigurator<BaseFileSystemConfigurationsView>> fileSystemConfigurators;
-
-    @Inject
-    private ConstraintRepository constraintRepository;
 
     @Inject
     private ContainerRepository containerRepository;
@@ -163,16 +156,10 @@ public class ClusterTerminationService {
 
     private void deleteClusterHostGroupsWithItsMetadata(Cluster cluster) {
         Set<HostGroup> hostGroups = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
-        Collection<Constraint> constraintsToDelete = new LinkedList<>();
         for (HostGroup hg : hostGroups) {
             hg.getRecipes().clear();
-            Constraint constraint = hg.getConstraint();
-            if (constraint != null) {
-                constraintsToDelete.add(constraint);
-            }
         }
         hostGroupRepository.deleteAll(hostGroups);
-        constraintRepository.deleteAll(constraintsToDelete);
         cluster.getHostGroups().clear();
         cluster.getContainers().clear();
         clusterService.save(cluster);

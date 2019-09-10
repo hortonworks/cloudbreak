@@ -23,15 +23,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ComponentLocatorServiceTest {
@@ -73,12 +72,10 @@ public class ComponentLocatorServiceTest {
     private HostGroup createHostGroup(String name, Long id, String hostname, String privateIp) {
         HostGroup hg = new HostGroup();
         hg.setName(name);
-        Constraint constraint = new Constraint();
-        hg.setConstraint(constraint);
 
         InstanceGroup ig = new InstanceGroup();
         ig.setId(id);
-        constraint.setInstanceGroup(ig);
+        hg.setInstanceGroup(ig);
 
         InstanceMetaData im = new InstanceMetaData();
         im.setDiscoveryFQDN(hostname);

@@ -93,7 +93,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
@@ -138,9 +137,6 @@ public class ClusterService {
 
     @Inject
     private KerberosConfigRepository kerberosConfigRepository;
-
-    @Inject
-    private ConstraintRepository constraintRepository;
 
     @Inject
     private HostMetadataRepository hostMetadataRepository;
@@ -229,7 +225,6 @@ public class ClusterService {
             }
 
             start = System.currentTimeMillis();
-            saveAllHostGroupContraint(cluster);
             LOGGER.info("Host group constrainst saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
@@ -276,12 +271,6 @@ public class ClusterService {
             throw new BadRequestException(msg);
         }
         return savedCluster;
-    }
-
-    private void saveAllHostGroupContraint(Cluster cluster) {
-        for (HostGroup hostGroup : cluster.getHostGroups()) {
-            constraintRepository.save(hostGroup.getConstraint());
-        }
     }
 
     private boolean isMultipleGateway(Stack stack) {
@@ -551,7 +540,7 @@ public class ClusterService {
     }
 
     private boolean isGateway(HostMetadata hostMetadata) {
-        return hostMetadata.getHostGroup().getConstraint().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY;
+        return hostMetadata.getHostGroup().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY;
     }
 
     private boolean withEmbeddedAmbariDB(Cluster cluster) {
@@ -896,8 +885,8 @@ public class ClusterService {
             throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
         }
         blueprintValidator.validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, scalingAdjustment);
-        if (!downScale && hostGroup.getConstraint().getInstanceGroup() != null) {
-            validateUnusedHosts(hostGroup.getConstraint().getInstanceGroup(), scalingAdjustment);
+        if (!downScale && hostGroup.getInstanceGroup() != null) {
+            validateUnusedHosts(hostGroup.getInstanceGroup(), scalingAdjustment);
         } else {
             validateRegisteredHosts(stack, hostGroupAdjustment);
             if (hostGroupAdjustment.getWithStackUpdate() && hostGroupAdjustment.getScalingAdjustment() > 0) {

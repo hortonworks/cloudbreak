@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.api.model.v2.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -464,9 +463,7 @@ public class TestUtil {
         hostGroup.setRecipes(recipes(1));
         hostGroup.setHostMetadata(hostMetadata(hostGroup, count));
         InstanceGroup instanceGroup = instanceGroup(1L, name, InstanceGroupType.CORE, gcpTemplate(1L), count);
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(instanceGroup);
-        hostGroup.setConstraint(constraint);
+        hostGroup.setInstanceGroup(instanceGroup);
         hostGroup.setCluster(cluster(blueprint(), stack(), 1L));
         hostGroup.setRecoveryMode(RecoveryMode.MANUAL);
         return hostGroup;

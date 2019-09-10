@@ -20,7 +20,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -74,7 +73,7 @@ public class AmbariDecommissionTimeCalculatorTest {
     public void testCalculateWithNullRootVolumeSize() {
         Stack stack = TestUtil.stack();
         List<HostMetadata> hostMetadata = createHostMetadataList();
-        hostMetadata.forEach(data -> data.getHostGroup().getConstraint().getInstanceGroup().getTemplate().setRootVolumeSize(null));
+        hostMetadata.forEach(data -> data.getHostGroup().getInstanceGroup().getTemplate().setRootVolumeSize(null));
         Map<String, Map<Long, Long>> dfsSpace = createDfsSpaceMapsWithHalfUsage();
         long usedSpace = 5128 * BYTE_TO_GB;
         when(defaultRootVolumeSizeProvider.getForPlatform(anyString())).thenReturn(50);
@@ -91,10 +90,8 @@ public class AmbariDecommissionTimeCalculatorTest {
         template.setVolumeSize(1024);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setTemplate(template);
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(instanceGroup);
         HostGroup hostGroup = new HostGroup();
-        hostGroup.setConstraint(constraint);
+        hostGroup.setInstanceGroup(instanceGroup);
         HostMetadata hm = new HostMetadata();
         hm.setHostGroup(hostGroup);
         return Collections.singletonList(hm);

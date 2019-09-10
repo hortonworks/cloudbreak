@@ -40,8 +40,7 @@ public class InstanceGroupV2RequestToHostGroupRequestConverterTest extends Abstr
         Assert.assertEquals(2L, result.getRecipeNames().size());
         Assert.assertEquals(0L, result.getRecipes().size());
         Assert.assertEquals(RecoveryMode.MANUAL, result.getRecoveryMode());
-        Assert.assertEquals(4L, result.getConstraint().getHostCount().intValue());
-        Assert.assertEquals("master", result.getConstraint().getInstanceGroupName());
+        Assert.assertEquals("master", result.getInstanceGroupName());
 
 
     }

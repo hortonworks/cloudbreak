@@ -7,7 +7,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -24,8 +23,8 @@ public abstract class HostGroupBase implements JsonEntity {
 
     @Valid
     @NotNull
-    @ApiModelProperty(value = HostGroupModelDescription.CONSTRAINT, required = true)
-    private ConstraintJson constraint;
+    @ApiModelProperty(HostGroupModelDescription.INSTANCE_GROUP)
+    private String instanceGroupName;
 
     @ApiModelProperty(HostGroupModelDescription.RECIPE_IDS)
     private Set<Long> recipeIds = new HashSet<>();
@@ -41,12 +40,12 @@ public abstract class HostGroupBase implements JsonEntity {
         this.name = name;
     }
 
-    public ConstraintJson getConstraint() {
-        return constraint;
+    public String getInstanceGroupName() {
+        return instanceGroupName;
     }
 
-    public void setConstraint(ConstraintJson constraint) {
-        this.constraint = constraint;
+    public void setInstanceGroupName(String instanceGroupName) {
+        this.instanceGroupName = instanceGroupName;
     }
 
     public Set<Long> getRecipeIds() {

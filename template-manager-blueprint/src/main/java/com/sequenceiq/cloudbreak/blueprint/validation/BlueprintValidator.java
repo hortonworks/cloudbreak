@@ -73,7 +73,7 @@ public class BlueprintValidator {
         if (!instanceGroups.isEmpty()) {
             Collection<String> instanceGroupNames = new HashSet<>();
             for (HostGroup hostGroup : hostGroups) {
-                String instanceGroupName = hostGroup.getConstraint().getInstanceGroup().getGroupName();
+                String instanceGroupName = hostGroup.getInstanceGroup().getGroupName();
                 if (instanceGroupNames.contains(instanceGroupName)) {
                     throw new BlueprintValidationException(String.format(
                             "Instance group '%s' is assigned to more than one hostgroup.", instanceGroupName));
@@ -160,7 +160,7 @@ public class BlueprintValidator {
     }
 
     private void validateComponentCardinality(StackServiceComponentDescriptor componentDescriptor, HostGroup hostGroup, int adjustment) {
-        int nodeCount = hostGroup.getConstraint().getHostCount() + adjustment;
+        int nodeCount = hostGroup.getInstanceGroup().getNodeCount() + adjustment;
         int minCardinality = componentDescriptor.getMinCardinality();
         int maxCardinality = componentDescriptor.getMaxCardinality();
         if (componentDescriptor.isMaster() && !isNodeCountCorrect(nodeCount, minCardinality, maxCardinality)) {
@@ -196,7 +196,7 @@ public class BlueprintValidator {
         String componentName = componentDescriptor.getName();
         BlueprintServiceComponent blueprintServiceComponent = blueprintServiceComponentMap.get(componentName);
         if (blueprintServiceComponent == null) {
-            blueprintServiceComponent = new BlueprintServiceComponent(componentName, hostGroup.getName(), hostGroup.getConstraint().getHostCount());
+            blueprintServiceComponent = new BlueprintServiceComponent(componentName, hostGroup.getName(), hostGroup.getInstanceGroup().getNodeCount());
             blueprintServiceComponentMap.put(componentName, blueprintServiceComponent);
         } else {
             blueprintServiceComponent.update(hostGroup);
