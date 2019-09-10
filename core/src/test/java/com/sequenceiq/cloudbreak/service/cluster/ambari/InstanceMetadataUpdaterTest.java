@@ -133,7 +133,7 @@ public class InstanceMetadataUpdaterTest {
         underTest.updatePackageVersionsOnAllInstances(stack);
 
         verify(hostMetadataService, times(1)).updateHostMetaDataStatus(any(), anyString(), eq(HostMetadataState.UNHEALTHY));
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        verify(cloudbreakEventService, times(2)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         verify(cloudbreakMessagesService, times(1))
                 .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSION_CANNOT_BE_QUERIED.code()), anyCollection());
         assertEquals(InstanceStatus.ORCHESTRATION_FAILED, stack.getInstanceGroups().stream()

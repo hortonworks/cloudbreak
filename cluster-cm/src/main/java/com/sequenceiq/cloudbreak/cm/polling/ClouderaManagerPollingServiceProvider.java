@@ -13,10 +13,12 @@ import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandC
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerApplyHostTemplateListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDecommissionHostListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDeployClientConfigListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelActivationListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerGenerateCredentialsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerKerberosConfigureListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelRepoChecker;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerRefreshServiceConfigsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerRestartServicesListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerServiceStartListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStartManagementServiceListenerTask;
@@ -68,6 +70,9 @@ public class ClouderaManagerPollingServiceProvider {
     private ClouderaManagerKerberosConfigureListenerTask kerberosConfigureListenerTask;
 
     @Inject
+    private ClouderaManagerParcelActivationListenerTask parcelActivationListenerTask;
+
+    @Inject
     private ClouderaManagerDeployClientConfigListenerTask deployClientConfigListenerTask;
 
     @Inject
@@ -87,6 +92,9 @@ public class ClouderaManagerPollingServiceProvider {
 
     @Inject
     private ClouderaManagerGenerateCredentialsListenerTask generateCredentialsListenerTask;
+
+    @Inject
+    private ClouderaManagerRefreshServiceConfigsListenerTask refreshServiceConfigsListenerTask;
 
     public PollingResult clouderaManagerStartupPollerObjectPollingService(Stack stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getClusterManagerIp());
@@ -123,6 +131,11 @@ public class ClouderaManagerPollingServiceProvider {
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, kerberosConfigureListenerTask);
     }
 
+    public PollingResult parcelActivationPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+        LOGGER.debug("Waiting for Cloudera Manager to deploy client configuratuions. [Server address: {}]", stack.getClusterManagerIp());
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, parcelActivationListenerTask);
+    }
+
     public PollingResult deployClientConfigPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to deploy client configuratuions. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, deployClientConfigListenerTask);
@@ -130,7 +143,7 @@ public class ClouderaManagerPollingServiceProvider {
 
     public PollingResult refreshClusterPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to refresh cluster. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, deployClientConfigListenerTask);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, refreshServiceConfigsListenerTask);
     }
 
     public PollingResult applyHostTemplatePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {

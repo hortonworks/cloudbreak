@@ -70,7 +70,7 @@ import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.OperationException;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.DecommissionException;
+import com.sequenceiq.cloudbreak.cluster.service.DecommissionException;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -233,8 +233,8 @@ public class AmbariDecommissioner {
         }
     }
 
-    private Collection<HostMetadata> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove, Map<String, Map<String, String>> runningComponents,
-            AmbariClient ambariClient) throws IOException, URISyntaxException {
+    private Collection<HostMetadata> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove, Map<String,
+            Map<String, String>> runningComponents, AmbariClient ambariClient) throws IOException, URISyntaxException {
         Collection<HostMetadata> result = new HashSet<>();
         PollingResult pollingResult = startServicesIfNeeded(stack, ambariClient, runningComponents);
         try {

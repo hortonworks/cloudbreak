@@ -136,7 +136,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.warn("Failed to upscale: {}", e.getResponseBody(), e);
             throw new CloudbreakException("Failed to upscale", e);
         }
-
     }
 
     private List<String> getUpscaleHosts(ClustersResourceApi clustersResourceApi, String clusterName, Collection<HostMetadata> hostMetadata)
@@ -244,14 +243,21 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private void activateParcel(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
         LOGGER.debug("Deploying client configurations on upscaled hosts.");
         ApiCommand deployCommand = clustersResourceApi.deployClientConfig(stack.getName());
-        PollingResult deployPollingResult = clouderaManagerPollingServiceProvider.deployClientConfigPollingService(
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.deployClientConfigPollingService(
                 stack, client, deployCommand.getId());
-        if (isExited(deployPollingResult)) {
+        if (isExited(pollingResult)) {
             throw new CancellationException("Cluster was terminated while waiting for client configurations to deploy");
-        } else if (isTimeout(deployPollingResult)) {
+        } else if (isTimeout(pollingResult)) {
             throw new CloudbreakException("Timeout while Cloudera Manager deployed client configurations.");
         }
         LOGGER.debug("Deployed client configurations on upscaled hosts.");
+        pollingResult = clouderaManagerPollingServiceProvider.parcelActivationPollingService(stack, client, deployCommand.getId());
+        if (isExited(pollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for parcels activation");
+        } else if (isTimeout(pollingResult)) {
+            throw new CloudbreakException("Timeout while Cloudera Manager activate parcels.");
+        }
+        LOGGER.debug("Parcels are activated on upscaled hosts.");
     }
 
     private ApiHostRefList createUpscaledHostRefList(List<String> upscaleHostNames, List<ApiHost> hosts) {

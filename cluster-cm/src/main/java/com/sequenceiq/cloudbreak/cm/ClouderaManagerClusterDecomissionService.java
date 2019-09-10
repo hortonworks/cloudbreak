@@ -111,4 +111,9 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
             throw new CloudbreakException("Couldn't restart stale services", e);
         }
     }
+
+    @Override
+    public Map<String, Map<String, String>> getStatusOfComponentsForHost(String host) {
+        return Map.of();
+    }
 }
