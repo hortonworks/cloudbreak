@@ -14,8 +14,10 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.ChangedNodesReportV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
@@ -24,12 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.Certificate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
-import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.workspace.model.Tenant;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
@@ -37,6 +34,10 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -93,7 +94,12 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     public void failureReport(String crn, FailureReportV4Request failureReport) {
-        clusterService.failureReport(crn, failureReport.getFailedNodes());
+        clusterService.reportHealthChange(crn, Set.copyOf(failureReport.getFailedNodes()), Set.of());
+    }
+
+    @Override
+    public void changedNodesReport(String crn, ChangedNodesReportV4Request changedNodesReport) {
+        clusterService.reportHealthChange(crn, Set.copyOf(changedNodesReport.getNewFailedNodes()), Set.copyOf(changedNodesReport.getNewHealthyNodes()));
     }
 
     @Override

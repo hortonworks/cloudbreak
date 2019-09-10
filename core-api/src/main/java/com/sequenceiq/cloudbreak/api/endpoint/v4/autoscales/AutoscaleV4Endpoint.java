@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureReportV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.ChangedNodesReportV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
@@ -63,6 +64,13 @@ public interface AutoscaleV4Endpoint {
     @ApiOperation(value = ClusterOpDescription.FAILURE_REPORT, produces = ContentType.JSON, notes = Notes.FAILURE_REPORT_NOTES,
             nickname = "failureReportClusterForAutoscale")
     void failureReport(@PathParam("crn") String crn, FailureReportV4Request failureReport);
+
+    @POST
+    @Path("/stack/crn/{crn}/cluster/changed_nodes_report")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ClusterOpDescription.CHANGED_NODES_REPORT, produces = ContentType.JSON, notes = Notes.CHANGED_NODES_REPORT_NOTES,
+            nickname = "nodeStatusChangeReportClusterForAutoscale")
+    void changedNodesReport(@PathParam("crn") String crn, ChangedNodesReportV4Request changedNodesReport);
 
     @GET
     @Path("/stack/crn/{crn}")
