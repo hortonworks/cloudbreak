@@ -42,8 +42,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.CommandExecutionResponse;
@@ -70,7 +70,7 @@ public class SaltStatesTest {
         targets.add("10-0-0-1.example.com");
         targets.add("10-0-0-2.example.com");
         targets.add("10-0-0-3.example.com");
-        target = new Compound(targets);
+        target = new HostList(targets);
         saltConnector = mock(SaltConnector.class);
     }
 

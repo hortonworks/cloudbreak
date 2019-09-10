@@ -13,9 +13,9 @@ public interface SaltJobRunner {
 
     String submit(SaltConnector saltConnector) throws SaltJobFailedException;
 
-    Set<String> getTarget();
+    Set<String> getTargetHostnames();
 
-    void setTarget(Set<String> newTarget);
+    void setTargetHostnames(Set<String> newTargetHostname);
 
     JobId getJid();
 

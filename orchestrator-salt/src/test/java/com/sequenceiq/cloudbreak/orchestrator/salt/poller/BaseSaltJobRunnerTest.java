@@ -20,22 +20,20 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 
 public class BaseSaltJobRunnerTest {
 
-    private Set<String> targets = new HashSet<>();
+    private Set<String> targetHostnames = new HashSet<>();
 
     private BaseSaltJobRunner baseSaltJobRunner;
 
     @Before
     public void setUp() {
-        targets = new HashSet<>();
-        targets.add("10.0.0.1");
-        targets.add("10.0.0.2");
-        targets.add("10.0.0.3");
+        targetHostnames = new HashSet<>();
     }
 
     @Test
-    public void collectMissingNodesAllNodeAndSaltNodeWithPrefix() {
+    public void collectMissingNodesWhenAllNodeAndSaltNodeWithPostfix() {
+        setupTargetWithPostfix();
         Set<Node> allNode = allNodeWithPostFix();
-        baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
+        baseSaltJobRunner = new BaseSaltJobRunner(targetHostnames, allNode) {
             @Override
             public String submit(SaltConnector saltConnector) {
                 return "";
@@ -45,16 +43,17 @@ public class BaseSaltJobRunnerTest {
         Set<String> returnedNodes = new HashSet<>();
         returnedNodes.add("host-10-0-0-1.example.com");
         returnedNodes.add("host-10-0-0-2.example.com");
-        Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingNodes(returnedNodes);
+        Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingHostnames(returnedNodes);
 
         Assert.assertEquals(1L, collectedMissingNodes.size());
-        Assert.assertEquals("10.0.0.3", collectedMissingNodes.iterator().next());
+        Assert.assertEquals("host-10-0-0-3.example.com", collectedMissingNodes.iterator().next());
     }
 
     @Test
-    public void collectMissingNodesAllNodeWithoutPrefixSaltNodeWithPrefix() {
+    public void collectMissingNodesWhenAllNodeWithoutPostfixSaltNodeWithPostfix() {
+        setupTargetWithoutPostfix();
         Set<Node> allNode = allNodeWithoutPostFix();
-        baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
+        baseSaltJobRunner = new BaseSaltJobRunner(targetHostnames, allNode) {
             @Override
             public String submit(SaltConnector saltConnector) {
                 return "";
@@ -64,16 +63,17 @@ public class BaseSaltJobRunnerTest {
         Set<String> returnedNodes = new HashSet<>();
         returnedNodes.add("host-10-0-0-1.example.com");
         returnedNodes.add("host-10-0-0-2.example.com");
-        Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingNodes(returnedNodes);
+        Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingHostnames(returnedNodes);
 
         Assert.assertEquals(1L, collectedMissingNodes.size());
-        Assert.assertEquals("10.0.0.3", collectedMissingNodes.iterator().next());
+        Assert.assertEquals("host-10-0-0-3", collectedMissingNodes.iterator().next());
     }
 
     @Test
-    public void collectMissingNodesAllNodeAndSaltNodeWithoutPrefix() {
+    public void collectMissingNodesWhenAllNodeAndSaltNodeWithoutPostfix() {
+        setupTargetWithoutPostfix();
         Set<Node> allNode = allNodeWithoutPostFix();
-        baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
+        baseSaltJobRunner = new BaseSaltJobRunner(targetHostnames, allNode) {
             @Override
             public String submit(SaltConnector saltConnector) {
                 return "";
@@ -83,16 +83,17 @@ public class BaseSaltJobRunnerTest {
         Set<String> returnedNodes = new HashSet<>();
         returnedNodes.add("host-10-0-0-1");
         returnedNodes.add("host-10-0-0-2");
-        Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingNodes(returnedNodes);
+        Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingHostnames(returnedNodes);
 
         Assert.assertEquals(1L, collectedMissingNodes.size());
-        Assert.assertEquals("10.0.0.3", collectedMissingNodes.iterator().next());
+        Assert.assertEquals("host-10-0-0-3", collectedMissingNodes.iterator().next());
     }
 
     @Test
-    public void collectMissingNodesAllNodeWithPrefixAndSaltNodeWithoutPrefix() {
-        Set<Node> allNode = allNodeWithoutPostFix();
-        baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
+    public void collectMissingNodesWhenAllNodeWithPostfixAndSaltNodeWithoutPostfix() {
+        setupTargetWithPostfix();
+        Set<Node> allNode = allNodeWithPostFix();
+        baseSaltJobRunner = new BaseSaltJobRunner(targetHostnames, allNode) {
             @Override
             public String submit(SaltConnector saltConnector) {
                 return "";
@@ -102,16 +103,16 @@ public class BaseSaltJobRunnerTest {
         Set<String> returnedNodes = new HashSet<>();
         returnedNodes.add("host-10-0-0-1.example.com");
         returnedNodes.add("host-10-0-0-2.example.com");
-        Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingNodes(returnedNodes);
+        Set<String> collectedMissingNodes = baseSaltJobRunner.collectMissingHostnames(returnedNodes);
 
         Assert.assertEquals(1L, collectedMissingNodes.size());
-        Assert.assertEquals("10.0.0.3", collectedMissingNodes.iterator().next());
+        Assert.assertEquals("host-10-0-0-3.example.com", collectedMissingNodes.iterator().next());
     }
 
     @Test
-    public void collectNodesTest() throws IOException {
+    public void collectSucceededNodesTest() throws IOException {
         Set<Node> allNode = allNodeWithPostFix();
-        baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
+        baseSaltJobRunner = new BaseSaltJobRunner(targetHostnames, allNode) {
             @Override
             public String submit(SaltConnector saltConnector) {
                 return "";
@@ -126,7 +127,7 @@ public class BaseSaltJobRunnerTest {
         resultMap.put("host-10-0-0-3.example.com", objectMapper.valueToTree("10.0.0.3"));
         resultList.add(resultMap);
         applyResponse.setResult(resultList);
-        Set<String> collectedNodes = baseSaltJobRunner.collectNodes(applyResponse);
+        Set<String> collectedNodes = baseSaltJobRunner.collectSucceededNodes(applyResponse);
         Assert.assertEquals(3L, collectedNodes.size());
         Assert.assertTrue(collectedNodes.contains("host-10-0-0-1.example.com"));
         Assert.assertTrue(collectedNodes.contains("host-10-0-0-2.example.com"));
@@ -149,5 +150,17 @@ public class BaseSaltJobRunnerTest {
             allNode.add(node);
         }
         return allNode;
+    }
+
+    private void setupTargetWithPostfix() {
+        for (int i = 1; i <= 3; i++) {
+            targetHostnames.add("host-10-0-0-" + i + ".example.com");
+        }
+    }
+
+    private void setupTargetWithoutPostfix() {
+        for (int i = 1; i <= 3; i++) {
+            targetHostnames.add("host-10-0-0-" + i);
+        }
     }
 }

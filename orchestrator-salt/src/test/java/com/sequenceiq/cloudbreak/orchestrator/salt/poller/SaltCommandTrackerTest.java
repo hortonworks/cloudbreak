@@ -23,7 +23,7 @@ public class SaltCommandTrackerTest {
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");
         targets.add("10.0.0.3");
-        when(saltJobRunner.getTarget()).thenReturn(targets);
+        when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
         SaltCommandTracker saltCommandTracker = new SaltCommandTracker(saltConnector, saltJobRunner);
         try {
             saltCommandTracker.call();
@@ -40,7 +40,7 @@ public class SaltCommandTrackerTest {
         SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
         SaltJobRunner saltJobRunner = Mockito.mock(SaltJobRunner.class);
         Set<String> targets = new HashSet<>();
-        when(saltJobRunner.getTarget()).thenReturn(targets);
+        when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
         SaltCommandTracker saltCommandTracker = new SaltCommandTracker(saltConnector, saltJobRunner);
         saltCommandTracker.call();
     }

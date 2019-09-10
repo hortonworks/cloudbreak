@@ -10,8 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound.CompoundType;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
@@ -24,27 +23,24 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
 
     private final String value;
 
-    private final CompoundType compoundType;
-
     private final boolean addGrain;
 
-    protected ModifyGrainBase(Set<String> target, Set<Node> allNode, String key, String value, CompoundType type, boolean addGrain) {
+    protected ModifyGrainBase(Set<String> target, Set<Node> allNode, String key, String value, boolean addGrain) {
         super(target, allNode);
         this.key = key;
         this.value = value;
-        compoundType = type;
         this.addGrain = addGrain;
     }
 
     @Override
     public String submit(SaltConnector saltConnector) throws SaltJobFailedException {
-        Compound target = new Compound(getTarget(), compoundType);
+        HostList target = new HostList(getTargetHostnames());
         ApplyResponse response = addGrain ? SaltStates.addGrain(saltConnector, target, key, value)
                 : SaltStates.removeGrain(saltConnector, target, key, value);
-        Set<String> missingIps = collectMissingNodes(collectNodes(response));
+        Set<String> missingHostnames = collectMissingHostnames(collectSucceededNodes(response));
         Map<String, JsonNode> grains = SaltStates.getGrains(saltConnector, target, key);
         for (Node node : getAllNode()) {
-            if (getTarget().contains(node.getPrivateIp())) {
+            if (getTargetHostnames().contains(node.getHostname())) {
                 if (!grains.containsKey(node.getHostname())) {
                     throw new SaltJobFailedException("Can not find node in grains result. target=" + node.getHostname() + ", key=" + key + ", value=" + value);
                 } else {
@@ -60,8 +56,8 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
                 }
             }
         }
-        setTarget(missingIps);
-        return missingIps.toString();
+        setTargetHostnames(missingHostnames);
+        return missingHostnames.toString();
     }
 
     @Override
@@ -69,7 +65,6 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
         StringBuilder sb = new StringBuilder("ModifyGrainBase{");
         sb.append("key='").append(key).append('\'');
         sb.append(", value='").append(value).append('\'');
-        sb.append(", compoundType=").append(compoundType);
         sb.append(", addGrain=").append(addGrain);
         sb.append('}');
         return sb.toString();
