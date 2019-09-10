@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.sequenceiq.freeipa.service.freeipa.user.UserServiceConstants;
 
 public class UsersStateDifference {
     private static final Logger LOGGER = LoggerFactory.getLogger(UsersStateDifference.class);
@@ -20,14 +23,14 @@ public class UsersStateDifference {
 
     private Set<FmsGroup> groupsToRemove;
 
-    private Set<FmsUser> usersToRemove;
+    private Set<String> usersToRemove;
 
     private Multimap<String, String> groupMembershipToAdd;
 
     private Multimap<String, String> groupMembershipToRemove;
 
-    public UsersStateDifference(Set<FmsGroup> groupsToAdd, Set<FmsUser> usersToAdd, Set<FmsGroup> groupsToRemove, Set<FmsUser> usersToRemove,
-            Multimap<String, String> groupMembershipToAdd, Multimap<String, String> groupMembershipToRemove) {
+    public UsersStateDifference(Set<FmsGroup> groupsToAdd, Set<FmsUser> usersToAdd, Set<FmsGroup> groupsToRemove, Set<String> usersToRemove,
+                                Multimap<String, String> groupMembershipToAdd, Multimap<String, String> groupMembershipToRemove) {
         this.groupsToAdd = requireNonNull(groupsToAdd);
         this.usersToAdd = requireNonNull(usersToAdd);
         this.groupsToRemove = requireNonNull(groupsToRemove);
@@ -48,7 +51,7 @@ public class UsersStateDifference {
         return groupsToRemove;
     }
 
-    public Set<FmsUser> getUsersToRemove() {
+    public Set<String> getUsersToRemove() {
         return usersToRemove;
     }
 
@@ -78,28 +81,61 @@ public class UsersStateDifference {
 
         Multimap<String, String> groupMembershipToAdd = HashMultimap.create();
         umsGroupMembership.forEach((group, user) -> {
-            LOGGER.info("Evaluation group = {} and user = {}", group, user);
             if (!ipaGroupMembership.containsEntry(group, user)) {
-                LOGGER.info("adding");
+                LOGGER.debug("adding user : {} to group : {}", user, group);
                 groupMembershipToAdd.put(group, user);
             }
         });
+        LOGGER.info("groupMembershipToAdd size= {}", groupMembershipToAdd.size());
 
         Multimap<String, String> groupMembershipToRemove = HashMultimap.create();
         ipaGroupMembership.forEach((group, user) -> {
-            LOGGER.info("Evaluation group = {} and user = {}", group, user);
             if (!umsGroupMembership.containsEntry(group, user)) {
-                LOGGER.info("removing");
+                LOGGER.debug("removing user : {} to group : {}", user, group);
                 groupMembershipToRemove.put(group, user);
             }
         });
 
+        LOGGER.info("groupMembershipToRemove size= {}", groupMembershipToRemove.size());
+
+        Set<String> usersToRemove =
+            getUsersToBeRemoved(
+                umsState.getGroupMembership().get(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP),
+                ipaState.getGroupMembership().get(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP));
+        LOGGER.info("usersToRemove size= {}", usersToRemove.size());
+
+        Set<FmsGroup> groupsToBeRemoved = getGroupsToBeRemoved(umsState.getGroups(), ipaState.getGroups());
         return new UsersStateDifference(
-                Set.copyOf(Sets.difference(umsState.getGroups(), ipaState.getGroups())),
-                Set.copyOf(Sets.difference(umsState.getUsers(), ipaState.getUsers())),
-                Set.copyOf(Sets.difference(ipaState.getGroups(), umsState.getGroups())),
-                Set.copyOf(Sets.difference(ipaState.getUsers(), umsState.getUsers())),
-                groupMembershipToAdd,
-                groupMembershipToRemove);
+            Set.copyOf(Sets.difference(umsState.getGroups(), ipaState.getGroups())),
+            Set.copyOf(Sets.difference(umsState.getUsers(), ipaState.getUsers())),
+            groupsToBeRemoved,
+            usersToRemove,
+            groupMembershipToAdd,
+            groupMembershipToRemove);
+    }
+
+    private static Set<FmsGroup> getGroupsToBeRemoved(Set<FmsGroup> umsGroups, Set<FmsGroup> ipaGroups) {
+        Set<FmsGroup> groupsToBeRemoved = new HashSet<>();
+
+        ipaGroups.forEach(group -> {
+            if (!umsGroups.contains(group) && !group.getName().equals("admins")) {
+                groupsToBeRemoved.add(group);
+            }
+        });
+
+        return groupsToBeRemoved;
+
+
+    }
+
+    private static Set<String> getUsersToBeRemoved(Collection<String> umsStateUsers, Collection<String> ipaStateUsers) {
+        Set<String> usersToBeRemoved = new HashSet<>();
+
+        ipaStateUsers.forEach(ipaUser -> {
+            if (!umsStateUsers.contains(ipaUser)) {
+                usersToBeRemoved.add(ipaUser);
+            }
+        });
+        return usersToBeRemoved;
     }
 }
