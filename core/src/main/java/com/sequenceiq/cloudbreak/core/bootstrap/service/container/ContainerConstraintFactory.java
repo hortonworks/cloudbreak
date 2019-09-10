@@ -90,13 +90,12 @@ public class ContainerConstraintFactory {
         containerInstanceName = YARN.equals(hostGroup.getCluster().getStack().getOrchestrator().getType())
                 ? createContainerInstanceNameForYarn(hostGroup, AMBARI_AGENT.getName(), identifier)
                 : createContainerInstanceName(hostGroup, AMBARI_AGENT.getName(), identifier);
-        Constraint hgConstraint = hostGroup.getConstraint();
         Builder builder = new Builder()
                 .withNamePrefix(containerInstanceName)
                 .withAppName(ambariAgentApp)
                 .networkMode(HOST_NETWORK_MODE);
-        if (hgConstraint.getInstanceGroup() != null) {
-            InstanceGroup instanceGroup = hgConstraint.getInstanceGroup();
+        if (hostGroup.getInstanceGroup() != null) {
+            InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
             Map<String, String> dataVolumeBinds = new HashMap<>();
             dataVolumeBinds.put("/var/log/ambari-agent-container", CONTAINER_VOLUME_PATH);
             dataVolumeBinds.put(HADOOP_MOUNT_DIR, HADOOP_MOUNT_DIR);
@@ -151,8 +150,8 @@ public class ContainerConstraintFactory {
     private List<String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
         HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(clusterId, hostGroupName)
                 .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
-        if (hostGroup.getConstraint().getInstanceGroup() != null) {
-            Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
+        if (hostGroup.getInstanceGroup() != null) {
+            Long instanceGroupId = hostGroup.getInstanceGroup().getId();
             Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetaDataService.findUnusedHostsInInstanceGroup(instanceGroupId);
             List<String> hostNames = new ArrayList<>();
             for (InstanceMetaData instanceMetaData : unusedHostsInInstanceGroup) {

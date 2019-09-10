@@ -3,10 +3,8 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +24,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -167,16 +164,7 @@ public class ClusterTerminationService {
 
     private void deleteClusterHostGroupsWithItsMetadata(Cluster cluster) {
         Set<HostGroup> hostGroups = hostGroupService.findHostGroupsInCluster(cluster.getId());
-        Collection<Constraint> constraintsToDelete = new LinkedList<>();
-        for (HostGroup hg : hostGroups) {
-            hg.getRecipes().clear();
-            Constraint constraint = hg.getConstraint();
-            if (constraint != null) {
-                constraintsToDelete.add(constraint);
-            }
-        }
         hostGroupService.deleteAll(hostGroups);
-        constraintService.deleteAll(constraintsToDelete);
         cluster.getHostGroups().clear();
         cluster.getContainers().clear();
         clusterService.save(cluster);

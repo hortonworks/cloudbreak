@@ -144,7 +144,7 @@ class ClusterUpscaleFlowService {
         updateFailedHostMetaData(hostMetadata);
         int failedHosts = 0;
         for (HostMetadata hostMeta : hostMetadata) {
-            if (hostGroup.getConstraint().getInstanceGroup() != null) {
+            if (hostGroup.getInstanceGroup() != null) {
                 stackService.updateMetaDataStatusIfFound(stackView.getId(), hostMeta.getHostName(), InstanceStatus.REGISTERED);
             }
             hostGroupService.updateHostMetaDataStatus(hostMeta.getId(), HostMetadataState.HEALTHY);

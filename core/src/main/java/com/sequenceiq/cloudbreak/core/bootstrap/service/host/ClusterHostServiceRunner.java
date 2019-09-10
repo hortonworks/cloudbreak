@@ -643,8 +643,8 @@ public class ClusterHostServiceRunner {
     private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
         HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(clusterId, hostGroupName)
                 .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
-        if (hostGroup.getConstraint().getInstanceGroup() != null) {
-            Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
+        if (hostGroup.getInstanceGroup() != null) {
+            Long instanceGroupId = hostGroup.getInstanceGroup().getId();
             Map<String, String> hostNames = new HashMap<>();
             instanceMetaDataService.findUnusedHostsInInstanceGroup(instanceGroupId).stream()
                     .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)

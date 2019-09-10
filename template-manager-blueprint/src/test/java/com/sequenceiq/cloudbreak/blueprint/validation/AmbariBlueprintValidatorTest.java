@@ -26,14 +26,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidationException;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariBlueprintValidatorTest {
@@ -310,9 +309,6 @@ public class AmbariBlueprintValidatorTest {
     public static HostGroup createHostGroup(String groupName, InstanceGroup instanceGroup) {
         HostGroup group = new HostGroup();
         group.setName(groupName);
-        Constraint constraint = new Constraint();
-        constraint.setInstanceGroup(instanceGroup);
-        group.setConstraint(constraint);
         return group;
     }
 

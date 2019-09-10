@@ -226,7 +226,7 @@ class AmbariBlueprintModulTestModelProvider {
         for (HostGroup hostGroup : groups) {
             VolumeTemplate volumeTemplate = new VolumeTemplate();
             volumeTemplate.setVolumeCount(5);
-            hostGroup.getConstraint().getInstanceGroup().getTemplate().setVolumeTemplates(Sets.newHashSet(volumeTemplate));
+            hostGroup.getInstanceGroup().getTemplate().setVolumeTemplates(Sets.newHashSet(volumeTemplate));
         }
         return Builder.builder()
                 .withHostgroups(groups)
