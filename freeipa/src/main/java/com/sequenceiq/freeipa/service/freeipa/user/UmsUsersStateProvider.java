@@ -65,7 +65,7 @@ public class UmsUsersStateProvider {
 
                 // add internal usersync group for each environment
                 FmsGroup internalUserSyncGroup = new FmsGroup();
-                internalUserSyncGroup.setName(UserServiceConstants.USERSYNC_INTERNAL_GROUP);
+                internalUserSyncGroup.setName(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP);
                 userStateBuilder.addGroup(internalUserSyncGroup);
 
                 users.stream().forEach(u -> {
@@ -146,7 +146,7 @@ public class UmsUsersStateProvider {
             });
 
             // Since this user is eligible, add this user to internal group
-            userStateBuilder.addMemberToGroup(UserServiceConstants.USERSYNC_INTERNAL_GROUP, fmsUser.getName());
+            userStateBuilder.addMemberToGroup(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP, fmsUser.getName());
 
             if (isEnvironmentAdmin(environmentCrn, rightsResponse)) {
                 // TODO: introduce a flag for adding admin

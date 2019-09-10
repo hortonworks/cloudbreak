@@ -99,7 +99,7 @@ public class UsersStateDifference {
         LOGGER.info("groupMembershipToRemove size= {}", groupMembershipToRemove.size());
 
         Set<FmsUser> usersToRemove =
-            getUsersToBeRemoved(umsState.getGroupMembership().get(UserServiceConstants.USERSYNC_INTERNAL_GROUP),
+            getUsersToBeRemoved(umsState.getGroupMembership().get(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP),
                                 ipaState.getUsers());
         LOGGER.info("usersToRemove size= {}", usersToRemove.size());
 
