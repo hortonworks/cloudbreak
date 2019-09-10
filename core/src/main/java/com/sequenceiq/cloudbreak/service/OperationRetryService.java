@@ -6,13 +6,13 @@ import java.util.function.Function;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
