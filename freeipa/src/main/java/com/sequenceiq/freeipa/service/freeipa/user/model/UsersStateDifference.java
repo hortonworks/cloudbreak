@@ -103,13 +103,28 @@ public class UsersStateDifference {
                                 ipaState.getUsers());
         LOGGER.info("usersToRemove size= {}", usersToRemove.size());
 
+        Set<FmsGroup> groupsToBeRemoved = getGroupsToBeRemoved(umsState.getGroups(), ipaState.getGroups());
         return new UsersStateDifference(
             Set.copyOf(Sets.difference(umsState.getGroups(), ipaState.getGroups())),
             Set.copyOf(Sets.difference(umsState.getUsers(), ipaState.getUsers())),
-            Set.copyOf(Sets.difference(ipaState.getGroups(), umsState.getGroups())),
+            groupsToBeRemoved,
             usersToRemove,
             groupMembershipToAdd,
             groupMembershipToRemove);
+    }
+
+    private static Set<FmsGroup> getGroupsToBeRemoved(Set<FmsGroup> umsGroups, Set<FmsGroup> ipaGroups) {
+        Set<FmsGroup> groupsToBeRemoved = new HashSet<>();
+
+        ipaGroups.forEach(group -> {
+            if (!umsGroups.contains(group) && !group.getName().equals("admins")) {
+                groupsToBeRemoved.add(group);
+            }
+        });
+
+        return groupsToBeRemoved;
+
+
     }
 
     private static Set<FmsUser> getUsersToBeRemoved(Collection<String> users, Set<FmsUser> ipaStateUsers) {

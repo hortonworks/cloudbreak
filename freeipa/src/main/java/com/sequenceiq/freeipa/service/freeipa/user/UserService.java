@@ -236,8 +236,8 @@ public class UserService {
 
             try {
                 // TODO: Add method to delete group
-                com.sequenceiq.freeipa.client.model.Group groupRemove = freeIpaClient.removeGroup(groupname);
-                LOGGER.debug("Success: {}", groupRemove);
+                freeIpaClient.deleteGroup(groupname);
+                LOGGER.debug("Success: {}", groupname);
             } catch (FreeIpaClientException e) {
                 LOGGER.error("Failed to delete {}", groupname, e);
             }

@@ -173,10 +173,10 @@ public class FreeIpaClient {
         return (Group) invoke("group_add", flags, params, Group.class).getResult();
     }
 
-    public Group removeGroup(String group) throws FreeIpaClientException {
+    public void deleteGroup(String group) throws FreeIpaClientException {
         List<String> flags = List.of(group);
         Map<String, Object> params = Map.of();
-        return (Group) invoke("delete_group", flags, params, Group.class).getResult();
+        invoke("delete_group", flags, params, Object.class);
     }
 
     // TODO unpack response into something meaningful
