@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.certificate;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -14,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
@@ -43,8 +45,10 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.signers.PSSSigner;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
@@ -145,10 +149,11 @@ public class PkiUtil {
         }
     }
 
-    public static PKCS10CertificationRequest csr(String publicAddress) {
+    public static PKCS10CertificationRequest csr(KeyPair identity, String publicAddress) {
         try {
-            LOGGER.info("Generate csr for '{}'", publicAddress);
-            return generateCsr(generateKeypair(), publicAddress);
+            String name = String.format("C=US, CN=%s, O=Cloudera", publicAddress);
+            LOGGER.info("Generate CSR with X.500 distinguished name: '{}'", name);
+            return generateCsrWithName(identity, name);
         } catch (Exception e) {
             throw new PkiException("Failed to generate csr for the cluster!", e);
         }
@@ -200,6 +205,18 @@ public class PkiUtil {
         }
     }
 
+    public static KeyPair fromPrivateKeyPem(String privateKeyContent) {
+        BufferedReader br = new BufferedReader(new StringReader(privateKeyContent));
+        Security.addProvider(new BouncyCastleProvider());
+        try (PEMParser pp = new PEMParser(br)) {
+            PEMKeyPair pemKeyPair = (PEMKeyPair) pp.readObject();
+            return new JcaPEMKeyConverter().getKeyPair(pemKeyPair);
+        } catch (IOException e) {
+            LOGGER.info("Cannot parse KeyPair from private key pem content, skip it. {}", e.getMessage(), e);
+        }
+        return null;
+    }
+
     private static X509Certificate selfsign(PKCS10CertificationRequest inputCSR, String publicAddress, KeyPair signKey)
             throws Exception {
 
@@ -231,7 +248,12 @@ public class PkiUtil {
     }
 
     private static PKCS10CertificationRequest generateCsr(KeyPair identity, String publicAddress) throws Exception {
-        X500Principal principal = new X500Principal(String.format("CN=%s, O=Cloudera, C=US", publicAddress));
+        String name = String.format("cn=%s", publicAddress);
+        return generateCsrWithName(identity, name);
+    }
+
+    private static PKCS10CertificationRequest generateCsrWithName(KeyPair identity, String name) throws Exception {
+        X500Principal principal = new X500Principal(name);
         PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(principal, identity.getPublic());
         JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder("SHA256withRSA");
         ContentSigner signer = csBuilder.build(identity.getPrivate());
