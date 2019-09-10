@@ -25,4 +25,14 @@ public class PkiUtilTest {
         Assert.assertNotNull(cer);
 
     }
+
+    @Test
+    public void testPrivateKey() {
+        KeyPair keyPair = PkiUtil.generateKeypair();
+
+        KeyPair actual = PkiUtil.fromPrivateKeyPem(PkiUtil.convert(keyPair.getPrivate()));
+
+        Assert.assertEquals(keyPair.getPrivate(), actual.getPrivate());
+        Assert.assertEquals(keyPair.getPublic(), actual.getPublic());
+    }
 }

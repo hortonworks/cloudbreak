@@ -24,6 +24,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
@@ -181,6 +182,16 @@ public class StackCreationService {
             LOGGER.debug("Update Stack and it's SecurityConfig to use private ip when TLS is built.");
         }
         return stack;
+    }
+
+    public void generateCertAndSaveForStack(Stack stack) {
+        if (tlsSetupService.isCertGenerationEnabled()) {
+            if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
+                tlsSetupService.generateCertAndSaveForStack(stack);
+            } else {
+                LOGGER.info("CERT is already generated for stack, we don't generate a new one");
+            }
+        }
     }
 
     public void setupTls(StackContext context) throws CloudbreakException {

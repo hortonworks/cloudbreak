@@ -46,10 +46,6 @@ rest:
 cert:
   validation: true
   ignorePreValidation: false
-  base.domain.name: cloudera.site
-  polling:
-    intervall: 10
-    attempt: 20
 
 secret:
   application: cb/shared
@@ -637,3 +633,12 @@ clusterProxy:
   registerConfigPath: /rpc/forceRegisterConfig
   updateConfigPath: /rpc/updateConfig
   removeConfigPath: /rpc/removeConfig
+
+gateway:
+  cert:
+    generation.enabled: false
+    polling:
+      attempt: 50
+      intervall: 10
+    base.domain.name: cloudera.com
+
