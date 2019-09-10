@@ -1,9 +1,9 @@
 # Authorization
 ## Resource based authorization
 Resource based authorization in Cloudbreak services mean that most of the API endpoints are authorized based on environment.
-Every user who would like to do something withing an environment should get an ResourceRole in UMS for that environment.
+Every user who would like to do something within an environment should get an ResourceRole in UMS for that environment.
 
-[example class](../datalake/src/main/java/com/sequenceiq/datalake/controller/sdx/SdxController.java)
+[example:SdxController](../datalake/src/main/java/com/sequenceiq/datalake/controller/sdx/SdxController.java)
 
 ### How can I add resource based authorization for my new API?
 
@@ -85,7 +85,8 @@ In this case we are calling the method `getEnvironmentCrnByResourceName` of an i
 [ResourceNamePermissionChecker](src/main/java/com/sequenceiq/authorization/service/ResourceNamePermissionChecker.java)
 
 ### Open questions
-- how should we authorize list endpoints?
+- how should we authorize list endpoints? one possible solution could be to call UMS hasRights method to check every related environment and right in one call and sort the result of the list call by the result of the UMS call
+- is it possible to replace every environmentName parameter to environmentCrn? if yes we can remove the permission check logic by environment name (which requires integration with environment service)
 
 ## Account level authorization
 ### Open questions

@@ -2,10 +2,17 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.util.StringUtils;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationGrpc;
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 
 import io.grpc.ManagedChannel;
@@ -46,6 +53,29 @@ public class AuthorizationClient {
                         .setCheck(rightCheckBuilder.build())
                         .build()
         );
+    }
+
+    // TODO POC
+
+    public Table hasRights(String requestId, String userCrn, Map<String, List<String>> resourceRightMap) {
+        checkNotNull(requestId);
+        checkNotNull(userCrn);
+        checkNotNull(resourceRightMap);
+
+        AuthorizationProto.HasRightsRequest.Builder builder = AuthorizationProto.HasRightsRequest.newBuilder().setActorCrn(userCrn);
+        List<AuthorizationProto.RightCheck> rightChecks = Lists.newArrayList();
+        resourceRightMap.keySet().stream().forEach(resource -> resourceRightMap.get(resource).stream().forEach(right ->
+                rightChecks.add(AuthorizationProto.RightCheck.newBuilder().setRight(right).setResource(resource).build())));
+        builder.addAllCheck(rightChecks);
+
+        AuthorizationProto.HasRightsResponse hasRightsResponse = newStub(requestId).hasRights(builder.build());
+        Iterator<Boolean> resultIterator = hasRightsResponse.getResultList().iterator();
+
+        // Table <resource, right, boolean result>
+        Table<String, String, Boolean> resultTable = HashBasedTable.create();
+        resourceRightMap.keySet().stream().forEach(resource -> resourceRightMap.get(resource).stream().forEach(right ->
+                resultTable.put(resource, right, resultIterator.next())));
+        return resultTable;
     }
 
     /**
