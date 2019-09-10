@@ -46,6 +46,14 @@ public class SecurityConfig implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret userFacingCert = Secret.EMPTY;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret userFacingKey = Secret.EMPTY;
+
     public Long getId() {
         return id;
     }
@@ -121,4 +129,19 @@ public class SecurityConfig implements ProvisionEntity, WorkspaceAwareResource {
         this.usePrivateIpToTls = usePrivateIpToTls;
     }
 
+    public String getUserFacingCert() {
+        return userFacingCert.getRaw();
+    }
+
+    public void setUserFacingCert(String userFacingCert) {
+        this.userFacingCert = new Secret(userFacingCert);
+    }
+
+    public String getUserFacingKey() {
+        return userFacingKey.getRaw();
+    }
+
+    public void setUserFacingKey(String userFacingKey) {
+        this.userFacingKey = new Secret(userFacingKey);
+    }
 }
