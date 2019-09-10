@@ -84,7 +84,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             List<String> hostNames = failedNodes.getValue();
             HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName)
                     .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
-            InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
+            InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 Optional<String> primaryGatewayHostName = instanceMetaDataService.getPrimaryGatewayDiscoveryFQDNByInstanceGroup(stack.getId(),
                         instanceGroup.getId());

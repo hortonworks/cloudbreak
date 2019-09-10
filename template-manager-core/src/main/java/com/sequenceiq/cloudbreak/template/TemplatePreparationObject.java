@@ -256,7 +256,7 @@ public class TemplatePreparationObject {
 
         public Builder withHostgroups(Set<HostGroup> hostGroups) {
             for (HostGroup hostGroup : hostGroups) {
-                InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
+                InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
                 if (instanceGroup != null) {
                     Template template = instanceGroup.getTemplate();
                     int volumeCount = template == null ? 1 : template.getVolumeTemplates().stream()

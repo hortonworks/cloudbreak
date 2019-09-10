@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -54,8 +53,7 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
             StackView stackView = stackService.getViewByIdWithoutAuth(event.getResourceId());
             HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stackView.getClusterView().getId(), event.getHostGroupName())
                     .orElseThrow(NotFoundException.notFound("hostgroup", event.getHostGroupName()));
-            Constraint hostGroupConstraint = hostGroup.getConstraint();
-            String instanceGroupName = Optional.ofNullable(hostGroupConstraint.getInstanceGroup()).map(InstanceGroup::getGroupName).orElse(null);
+            String instanceGroupName = Optional.ofNullable(hostGroup.getInstanceGroup()).map(InstanceGroup::getGroupName).orElse(null);
             StackScaleTriggerEvent sste;
             sste = event.getPrivateIds() == null
                     ? new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroupName, event.getAdjustment())

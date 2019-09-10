@@ -36,7 +36,7 @@ public class BlueprintValidatorUtil {
         if (!instanceGroups.isEmpty()) {
             Collection<String> instanceGroupNames = new HashSet<>();
             for (HostGroup hostGroup : hostGroups) {
-                String instanceGroupName = hostGroup.getConstraint().getInstanceGroup().getGroupName();
+                String instanceGroupName = hostGroup.getInstanceGroup().getGroupName();
                 if (instanceGroupNames.contains(instanceGroupName)) {
                     throw new BlueprintValidationException(String.format(
                             "Instance group '%s' is assigned to more than one hostgroup.", instanceGroupName));
@@ -61,7 +61,7 @@ public class BlueprintValidatorUtil {
         List<String> failures = new LinkedList<>();
         for (HostGroup hostGroup : hostGroups) {
             InstanceCount requiredCount = blueprintHostGroupCardinality.get(hostGroup.getName());
-            int count = hostGroup.getHostCount();
+            int count = hostGroup.getInstanceGroup().getNodeCount();
             if (!requiredCount.isAcceptable(count)) {
                 failures.add(String.format("(group: '%s', required: %s, actual: %d)", hostGroup.getName(), requiredCount, count));
             }

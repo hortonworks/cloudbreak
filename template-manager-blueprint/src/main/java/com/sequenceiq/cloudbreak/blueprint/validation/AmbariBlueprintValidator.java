@@ -125,7 +125,7 @@ public class AmbariBlueprintValidator implements BlueprintValidator {
     }
 
     private void validateComponentCardinality(StackServiceComponentDescriptor componentDescriptor, HostGroup hostGroup, int adjustment) {
-        int nodeCount = hostGroup.getConstraint().getHostCount() + adjustment;
+        int nodeCount = hostGroup.getInstanceGroup().getNodeCount() + adjustment;
         int minCardinality = componentDescriptor.getMinCardinality();
         int maxCardinality = componentDescriptor.getMaxCardinality();
         if (componentDescriptor.isMaster() && !isNodeCountCorrect(nodeCount, minCardinality, maxCardinality)) {
@@ -162,7 +162,7 @@ public class AmbariBlueprintValidator implements BlueprintValidator {
         BlueprintServiceComponent blueprintServiceComponent = blueprintServiceComponentMap.get(componentName);
         if (blueprintServiceComponent == null) {
             blueprintServiceComponent = new BlueprintServiceComponent(componentName, hostGroup.getName(),
-                    hostGroup.getConstraint().getHostCount());
+                    hostGroup.getInstanceGroup().getNodeCount());
             blueprintServiceComponentMap.put(componentName, blueprintServiceComponent);
         } else {
             blueprintServiceComponent.update(hostGroup);

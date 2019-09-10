@@ -956,7 +956,7 @@ public class StackService implements ResourceIdProvider {
     private void validateHostGroupAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
         Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
-                .filter(input -> input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
+                .filter(input -> input.getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
         if (!hostGroup.isPresent()) {
             throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
                     instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));

@@ -259,7 +259,6 @@ public class ClusterService {
             }
 
             start = System.currentTimeMillis();
-            saveAllHostGroupContraint(cluster);
             LOGGER.debug("Host group constrainst saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             start = System.currentTimeMillis();
@@ -351,13 +350,6 @@ public class ClusterService {
             throw new BadRequestException(msg, ex);
         }
         return savedCluster;
-    }
-
-    private void saveAllHostGroupContraint(Cluster cluster) {
-        cluster.getHostGroups().stream()
-                .map(HostGroup::getConstraint)
-                .filter(Objects::nonNull)
-                .forEach(it -> constraintService.save(it));
     }
 
     public boolean isMultipleGateway(Stack stack) {
@@ -832,7 +824,7 @@ public class ClusterService {
     }
 
     private boolean isGateway(HostMetadata hostMetadata) {
-        return hostMetadata.getHostGroup().getConstraint().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY;
+        return hostMetadata.getHostGroup().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY;
     }
 
     private boolean withEmbeddedClusterManagerDB(Cluster cluster) {
@@ -1160,8 +1152,8 @@ public class ClusterService {
             BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(clusterDefinition);
             blueprintValidator.validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, scalingAdjustment);
         }
-        if (!downScale && hostGroup.getConstraint().getInstanceGroup() != null) {
-            validateUnusedHosts(hostGroup.getConstraint().getInstanceGroup(), scalingAdjustment);
+        if (!downScale && hostGroup.getInstanceGroup() != null) {
+            validateUnusedHosts(hostGroup.getInstanceGroup(), scalingAdjustment);
         } else {
             validateRegisteredHosts(stack, hostGroupAdjustment);
             if (hostGroupAdjustment.getWithStackUpdate() && hostGroupAdjustment.getScalingAdjustment() > 0) {

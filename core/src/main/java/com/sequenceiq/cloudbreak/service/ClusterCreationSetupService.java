@@ -24,15 +24,13 @@ import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.mpack.ManagementPackValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConfigValidator;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -48,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.Benchmark.MultiCheckedSupplier;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -130,8 +129,6 @@ public class ClusterCreationSetupService {
         Cluster clusterStub = stack.getCluster();
         stack.setCluster(null);
 
-        decorateHostGroupWithConstraint(stack, clusterStub);
-
         if (request.getCloudStorage() != null) {
             FileSystem fileSystem = cloudStorageConverter.requestToFileSystem(request.getCloudStorage());
             measure(() -> fileSystemConfigService.createWithMdcContextRestore(fileSystem, stack.getWorkspace(), stack.getCreator()),
@@ -175,17 +172,6 @@ public class ClusterCreationSetupService {
         }, LOGGER, "Cluster components saved in {} ms for stack {}", stackName);
 
         return clusterService.create(stack, cluster, components, user);
-    }
-
-    private void decorateHostGroupWithConstraint(Stack stack, Cluster cluster) {
-        stack.getInstanceGroups().forEach(ig -> cluster.getHostGroups().stream()
-                .filter(hostGroup -> hostGroup.getName().equals(ig.getGroupName()))
-                .findFirst()
-                .ifPresent(hostGroup -> {
-                    Constraint constraint = new Constraint();
-                    constraint.setInstanceGroup(ig);
-                    hostGroup.setConstraint(constraint);
-                }));
     }
 
     private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack) {
