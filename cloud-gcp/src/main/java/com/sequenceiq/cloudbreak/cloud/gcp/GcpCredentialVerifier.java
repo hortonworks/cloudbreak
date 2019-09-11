@@ -54,6 +54,6 @@ public class GcpCredentialVerifier {
             backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
     )
     public void preCheckOfGooglePermission(GcpContext gcpContext) throws IOException {
-        gcpContext.getCompute().regions().list(gcpContext.getProjectId()).executeUsingHead();
+        gcpContext.getCompute().regions().list(gcpContext.getProjectId()).execute();
     }
 }
