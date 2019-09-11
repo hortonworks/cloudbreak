@@ -172,6 +172,7 @@
                  <name>NIFI</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
              </param>
+             {%- endif %}
              {% if 'NIFI-REGISTRY' in exposed and 'NIFI_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>NIFI-REGISTRY</name>
