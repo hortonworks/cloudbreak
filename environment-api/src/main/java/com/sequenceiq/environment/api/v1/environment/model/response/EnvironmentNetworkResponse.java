@@ -26,6 +26,9 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
     @ApiModelProperty(value = EnvironmentModelDescription.SUBNET_METAS)
     private Map<String, CloudSubnet> subnetMetas;
 
+    @ApiModelProperty(value = EnvironmentModelDescription.EXISTING_NETWORK)
+    private boolean existingNetwork;
+
     public String getCrn() {
         return crn;
     }
@@ -50,6 +53,14 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         this.subnetMetas = subnetMetas;
     }
 
+    public boolean isExistingNetwork() {
+        return existingNetwork;
+    }
+
+    public void setExistingNetwork(boolean existingNetwork) {
+        this.existingNetwork = existingNetwork;
+    }
+
     public static final class EnvironmentNetworkResponseBuilder {
         private String crn;
 
@@ -60,6 +71,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         private String networkCidr;
 
         private Map<String, CloudSubnet> subnetMetas;
+
+        private boolean existingNetwork;
 
         private EnvironmentNetworkAwsParams aws;
 
@@ -94,6 +107,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return this;
         }
 
+        public EnvironmentNetworkResponseBuilder withExistingNetwork(boolean existingNetwork) {
+            this.existingNetwork = existingNetwork;
+            return this;
+        }
+
         public EnvironmentNetworkResponseBuilder withAws(EnvironmentNetworkAwsParams aws) {
             this.aws = aws;
             return this;
@@ -124,6 +142,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setAzure(azure);
             environmentNetworkResponse.setYarn(yarn);
             environmentNetworkResponse.setSubnetMetas(subnetMetas);
+            environmentNetworkResponse.setExistingNetwork(existingNetwork);
             return environmentNetworkResponse;
         }
     }

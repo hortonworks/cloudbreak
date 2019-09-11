@@ -40,7 +40,7 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
                                 subnet.getSubnetId(),
                                 subnet.getAvailabilityZone(),
                                 subnet.getCidr(),
-                                subnet.isPublicSubnet(),
+                                !subnet.isPublicSubnet(),
                                 subnet.isMapPublicIpOnLaunch(),
                                 subnet.isIgwAvailable())
                         )

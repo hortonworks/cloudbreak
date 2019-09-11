@@ -3,12 +3,12 @@ package com.sequenceiq.environment.network.dto;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 
 public class NetworkDto {
 
@@ -32,6 +32,8 @@ public class NetworkDto {
 
     private final PrivateSubnetCreation privateSubnetCreation;
 
+    private final RegistrationType registrationType;
+
     public NetworkDto(Builder builder) {
         this.id = builder.id;
         this.resourceCrn = builder.resourceCrn;
@@ -43,6 +45,7 @@ public class NetworkDto {
         this.networkCidr = builder.networkCidr;
         this.networkId = builder.networkId;
         this.privateSubnetCreation = builder.privateSubnetCreation;
+        this.registrationType = builder.registrationType;
     }
 
     public Long getId() {
@@ -77,20 +80,6 @@ public class NetworkDto {
         return subnetMetas.keySet();
     }
 
-    public Set<String> getPublicSubnetIds() {
-        return subnetMetas.values().stream()
-                .filter(CloudSubnet::isPrivateSubnet)
-                .map(CloudSubnet::getId)
-                .collect(Collectors.toSet());
-    }
-
-    public Set<String> getPrivateSubnetIds() {
-        return subnetMetas.values().stream()
-                .filter(cloudSubnet -> !cloudSubnet.isPrivateSubnet())
-                .map(CloudSubnet::getId)
-                .collect(Collectors.toSet());
-    }
-
     public String getNetworkCidr() {
         return networkCidr;
     }
@@ -109,6 +98,10 @@ public class NetworkDto {
 
     public PrivateSubnetCreation getPrivateSubnetCreation() {
         return privateSubnetCreation;
+    }
+
+    public RegistrationType getRegistrationType() {
+        return registrationType;
     }
 
     public static final class Builder {
@@ -131,6 +124,8 @@ public class NetworkDto {
         private String networkCidr;
 
         private PrivateSubnetCreation privateSubnetCreation;
+
+        private RegistrationType registrationType;
 
         private Builder() {
         }
@@ -186,6 +181,11 @@ public class NetworkDto {
 
         public Builder withPrivateSubnetCreation(PrivateSubnetCreation privateSubnetCreation) {
             this.privateSubnetCreation = privateSubnetCreation;
+            return this;
+        }
+
+        public Builder withRegistrationType(RegistrationType registrationType) {
+            this.registrationType = registrationType;
             return this;
         }
 

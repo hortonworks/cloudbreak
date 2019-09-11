@@ -2,17 +2,24 @@ package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dto.AzureParams;
+import com.sequenceiq.environment.network.service.SubnetIdProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AzureNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 
 @Component
 public class FreeIpaAzureNetworkProvider implements FreeIpaNetworkProvider {
+
+    @Inject
+    private SubnetIdProvider subnetIdProvider;
+
     @Override
     public NetworkRequest provider(EnvironmentDto environment) {
         NetworkRequest networkRequest = new NetworkRequest();
@@ -22,7 +29,7 @@ public class FreeIpaAzureNetworkProvider implements FreeIpaNetworkProvider {
         azureNetworkParameters.setNoFirewallRules(azureParams.isNoFirewallRules());
         azureNetworkParameters.setNoPublicIp(azureParams.isNoPublicIp());
         azureNetworkParameters.setResourceGroupName(azureParams.getResourceGroupName());
-        azureNetworkParameters.setSubnetId(environment.getNetwork().getPublicSubnetIds().iterator().next());
+        azureNetworkParameters.setSubnetId(subnetIdProvider.provide(environment.getNetwork()));
         networkRequest.setAzure(azureNetworkParameters);
         return networkRequest;
     }

@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.network.v1.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -139,19 +140,19 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(SUBNET_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getName());
         assertEquals(AZ_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getAvailabilityZone());
         assertEquals(SUBNET_CIDR_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getCidr());
-        assertTrue(awsNetwork.getSubnetMetas().get(SUBNET_1).isPrivateSubnet());
+        assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_1).isPrivateSubnet());
 
         assertEquals(SUBNET_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getId());
         assertEquals(SUBNET_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getName());
         assertEquals(AZ_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getAvailabilityZone());
         assertEquals(SUBNET_CIDR_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getCidr());
-        assertTrue(awsNetwork.getSubnetMetas().get(SUBNET_2).isPrivateSubnet());
+        assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_2).isPrivateSubnet());
 
         assertEquals(SUBNET_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getId());
         assertEquals(SUBNET_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getName());
         assertEquals(AZ_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getAvailabilityZone());
         assertEquals(SUBNET_CIDR_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getCidr());
-        assertTrue(awsNetwork.getSubnetMetas().get(SUBNET_3).isPrivateSubnet());
+        assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_3).isPrivateSubnet());
     }
 
     private Set<CreatedSubnet> createCreatedSubnets() {
