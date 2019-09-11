@@ -29,7 +29,7 @@ public class ClouderaManagerV1Request implements JsonEntity {
     private List<ClouderaManagerProductV1Request> products;
 
     @ApiModelProperty(ClusterModelDescription.CM_ENABLE_AUTOTLS)
-    private Boolean enableAutoTls = Boolean.TRUE;
+    private Boolean enableAutoTls = Boolean.FALSE;
 
     public ClouderaManagerRepositoryV1Request getRepository() {
         return repository;
