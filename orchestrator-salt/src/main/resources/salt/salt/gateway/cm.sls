@@ -125,7 +125,7 @@ knox-create-sign-jks:
 
 {% endif %}
 
-{% if salt['pillar.get']('gateway:userfacingcert_configured') is defined and salt['pillar.get']('gateway:userfacingcert_configured') == True and salt['pillar.get']('gateway:autotls_enabled') is defined and salt['pillar.get']('gateway:autotls_enabled') == True %}
+{% if salt['pillar.get']('gateway:userfacingcert_configured') is defined and salt['pillar.get']('gateway:userfacingcert_configured') == True %}
 
 {{ gateway.knox_data_root }}/security/keystores/userfacingkey.pem:
   file.managed:
