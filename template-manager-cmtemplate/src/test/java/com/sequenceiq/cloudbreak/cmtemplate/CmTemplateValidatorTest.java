@@ -84,7 +84,7 @@ public class CmTemplateValidatorTest {
         blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
 
         HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("master");
+        hostGroup.setName("broker");
 
         assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, -1));
     }
@@ -95,7 +95,7 @@ public class CmTemplateValidatorTest {
         blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
 
         HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("management");
+        hostGroup.setName("broker");
 
         assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, 2));
     }
