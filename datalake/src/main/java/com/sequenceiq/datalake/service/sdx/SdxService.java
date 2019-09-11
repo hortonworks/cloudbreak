@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.se
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -58,12 +59,13 @@ import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocat
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
-public class SdxService {
+public class SdxService implements ResourceIdProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
@@ -99,6 +101,9 @@ public class SdxService {
 
     @Inject
     private SdxNotificationService notificationService;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @PostConstruct
     public void initSupportedPlatforms() {
@@ -228,6 +233,18 @@ public class SdxService {
     public void syncByCrn(String userCrn, String crn) {
         SdxCluster sdxCluster = getByCrn(userCrn, crn);
         stackV4Endpoint.sync(0L, sdxCluster.getClusterName());
+    }
+
+    @Override
+    public Long getResourceIdByResourceCrn(String resourceCrn) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        return getByCrn(userCrn, resourceCrn).getId();
+    }
+
+    @Override
+    public Long getResourceIdByResourceName(String resourceName) {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        return getSdxByNameInAccount(userCrn, resourceName).getId();
     }
 
     private void createDatabaseByDefaultForAWS(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {

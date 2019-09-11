@@ -37,9 +37,10 @@ import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
+import com.sequenceiq.flow.core.ResourceIdProvider;
 
 @Service
-public class EnvironmentService {
+public class EnvironmentService implements ResourceIdProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 

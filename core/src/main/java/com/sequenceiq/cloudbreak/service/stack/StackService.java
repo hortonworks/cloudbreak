@@ -114,10 +114,11 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.domain.FlowLog;
 
 @Service
-public class StackService {
+public class StackService implements ResourceIdProvider {
 
     public static final List<String> REATTACH_COMPATIBLE_PLATFORMS = List.of(CloudConstants.AWS, CloudConstants.AZURE, CloudConstants.GCP, CloudConstants.MOCK);
 
@@ -676,6 +677,21 @@ public class StackService {
     public void updateImage(Long stackId, Long workspaceId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
         flowManager.triggerStackImageUpdate(stackId, imageId, imageCatalogName, imageCatalogUrl);
+    }
+
+    @Override
+    public Long getResourceIdByResourceCrn(String resourceCrn) {
+        return getByCrn(resourceCrn).getId();
+    }
+
+    @Override
+    public Long getResourceIdByResourceName(String resourceName) {
+        Long workspaceId = workspaceService.getForCurrentUser().getId();
+        Optional<Stack> stackByNameAndWorkspaceId = findStackByNameAndWorkspaceId(resourceName, workspaceId);
+        if (stackByNameAndWorkspaceId.isPresent()) {
+            return stackByNameAndWorkspaceId.get().getId();
+        }
+        throw new NotFoundException(String.format("Not found stack in the user's workspace with name %s", resourceName));
     }
 
     public Set<Stack> findAllForWorkspace(Long workspaceId) {
