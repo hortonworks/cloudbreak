@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.EnvironmentView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
@@ -65,6 +66,8 @@ public class TemplatePreparationObject {
 
     private final Optional<PlacementView> placementView;
 
+    private final EnvironmentView environmentView;
+
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
         rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
@@ -85,6 +88,7 @@ public class TemplatePreparationObject {
         fixInputs = builder.fixInputs;
         accountMappingView = builder.accountMappingView;
         placementView = builder.placementView;
+        environmentView = builder.environmentView;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -158,6 +162,10 @@ public class TemplatePreparationObject {
         return accountMappingView;
     }
 
+    public EnvironmentView getEnvironmentView() {
+        return environmentView;
+    }
+
     public Optional<PlacementView> getPlacementView() {
         return placementView;
     }
@@ -195,6 +203,8 @@ public class TemplatePreparationObject {
         private AccountMappingView accountMappingView;
 
         private Optional<PlacementView> placementView = Optional.empty();
+
+        private EnvironmentView environmentView;
 
         public static Builder builder() {
             return new Builder();
@@ -270,6 +280,11 @@ public class TemplatePreparationObject {
 
         public Builder withBlueprintView(BlueprintView blueprintView) {
             this.blueprintView = blueprintView;
+            return this;
+        }
+
+        public Builder withEnvironmentView(EnvironmentView environmentView) {
+            this.environmentView = environmentView;
             return this;
         }
 
