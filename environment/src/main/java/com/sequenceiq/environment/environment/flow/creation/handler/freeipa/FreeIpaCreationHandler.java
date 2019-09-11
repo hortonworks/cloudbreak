@@ -156,7 +156,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         addDnsZoneForSubnetIdsRequest.setEnvironmentCrn(environmentDto.getResourceCrn());
         AddDnsZoneNetwork addDnsZoneNetwork = new AddDnsZoneNetwork();
         addDnsZoneNetwork.setNetworkId(environmentDto.getNetwork().getNetworkId());
-        addDnsZoneNetwork.setSubnetIds(environmentDto.getNetwork().getPublicSubnetIds());
+        addDnsZoneNetwork.setSubnetIds(environmentDto.getNetwork().getSubnetIds());
         addDnsZoneForSubnetIdsRequest.setAddDnsZoneNetwork(addDnsZoneNetwork);
         return addDnsZoneForSubnetIdsRequest;
     }

@@ -4,6 +4,7 @@ public class EnvironmentModelDescription {
 
     public static final String SUBNET_IDS = "Subnet ids of the specified networks";
     public static final String SUBNET_METAS = "Subnet metadata of the specified networks";
+    public static final String EXISTING_NETWORK = "The existing network is created by the user, otherwise created by the Cloudbreak.";
     public static final String PRIVATE_SUBNET_CREATION = "A flag to enable or disable the private sutbet creation.";
     public static final String AWS_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String AZURE_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
