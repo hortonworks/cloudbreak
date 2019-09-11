@@ -64,6 +64,7 @@ public class CloudStorageDecorator {
                 if (!logConfiguredInRequest) {
                     identities.add(identity);
                 }
+                request.setIdentities(identities);
             }
             List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(environment.getCrn());
             updateCloudStorageLocations(blueprintName, clusterName, request, datalakes);
