@@ -2,36 +2,32 @@ package com.sequenceiq.cloudbreak.idbmms.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-public class IdbmmsConfigTest {
+@ExtendWith(MockitoExtension.class)
+class IdbmmsConfigTest {
 
     @InjectMocks
     private IdbmmsConfig underTest;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testIsConfiguredNullEndpoint() {
+    void isConfiguredTestNullEndpoint() {
         assertThat(underTest.isConfigured()).isFalse();
     }
 
     @Test
-    public void testIsConfiguredEmptyEndpoint() {
+    void isConfiguredTestEmptyEndpoint() {
         ReflectionTestUtils.setField(underTest, "endpoint", "");
 
         assertThat(underTest.isConfigured()).isFalse();
     }
 
     @Test
-    public void testIsConfiguredGoodEndpoint() {
+    void isConfiguredTestGoodEndpoint() {
         ReflectionTestUtils.setField(underTest, "endpoint", "myhost.com");
 
         assertThat(underTest.isConfigured()).isTrue();
