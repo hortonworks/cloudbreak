@@ -100,4 +100,26 @@ public class CmTemplateValidatorTest {
         assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, 2));
     }
 
+    @Test
+    public void testValidationIfNifiPresentedAndDownScaleThenValidationShouldThrowException() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("master");
+
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, -2));
+    }
+
+    @Test
+    public void testValidationIfNifiPresentedAndUpScaleThenValidationShouldThrowException() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("master");
+
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, 2));
+    }
+
 }
