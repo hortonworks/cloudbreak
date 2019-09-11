@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -22,7 +23,6 @@ import com.sequenceiq.environment.credential.service.CredentialDeleteService;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.notification.NotificationController;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Component
 public class CredentialV1Controller extends NotificationController implements CredentialEndpoint {
@@ -159,6 +159,22 @@ public class CredentialV1Controller extends NotificationController implements Cr
         Credential credential = credentialService.authorizeCodeGrantFlow(code, state, accountId, platform);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         return credentialConverter.convert(credential);
+    }
+
+    @Override
+    public CredentialResponse verifyByName(String name) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        Credential credential = credentialService.getByNameForAccountId(name, accountId);
+        Credential verifiedCredential = credentialService.verify(credential);
+        return credentialConverter.convert(verifiedCredential);
+    }
+
+    @Override
+    public CredentialResponse verifyByCrn(String crn) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        Credential credential = credentialService.getByCrnForAccountId(crn, accountId);
+        Credential verifiedCredential = credentialService.verify(credential);
+        return credentialConverter.convert(verifiedCredential);
     }
 
 }

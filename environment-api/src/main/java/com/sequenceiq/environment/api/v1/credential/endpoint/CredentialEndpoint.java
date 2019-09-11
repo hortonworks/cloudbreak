@@ -139,4 +139,18 @@ public interface CredentialEndpoint {
             httpMethod = "GET")
     CredentialResponse authorizeCodeGrantFlow(@PathParam("cloudPlatform") String platform,
             @QueryParam("code") String code, @QueryParam("state") String state);
+
+    @GET
+    @Path("/name/{name}/verify")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.VERIFY_BR_NAME, notes = CredentialDescriptor.CREDENTIAL_NOTES,
+            nickname = "verifyCredentialByName", httpMethod = "GET")
+    CredentialResponse verifyByName(@PathParam("name") String name);
+
+    @GET
+    @Path("/crn/{crn}/verify")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.VERIFY_BR_CRN, notes = CredentialDescriptor.CREDENTIAL_NOTES,
+            nickname = "verifyCredentialByName", httpMethod = "GET")
+    CredentialResponse verifyByCrn(@PathParam("crn") String crn);
 }

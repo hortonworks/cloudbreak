@@ -39,11 +39,19 @@ public class AwsCredentialConnector implements CredentialConnector {
     private AwsClient awsClient;
 
     @Inject
+    private AwsCredentialVerifier awsCredentialVerifier;
+
+    @Inject
     private AwsPlatformParameters awsPlatformParameters;
 
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
+        try {
+            awsCredentialVerifier.validateAws(new AwsCredentialView(credential));
+        } catch (AwsCredentialVerificationException e) {
+            return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(e.getMessage()), e.getMessage());
+        }
         LOGGER.debug("Create credential: {}", credential);
         AwsCredentialView awsCredential = new AwsCredentialView(credential);
         String roleArn = awsCredential.getRoleArn();
@@ -98,7 +106,7 @@ public class AwsCredentialConnector implements CredentialConnector {
             LOGGER.warn(errorMessage, e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
-        return new CloudCredentialStatus(cloudCredential, CredentialStatus.CREATED);
+        return new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
     }
 
     private CloudCredentialStatus verifyAccessKeySecretKeyIsAssumable(CloudCredential cloudCredential) {
@@ -119,6 +127,6 @@ public class AwsCredentialConnector implements CredentialConnector {
             LOGGER.warn(errorMessage, e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
-        return new CloudCredentialStatus(cloudCredential, CredentialStatus.CREATED);
+        return new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
     }
 }

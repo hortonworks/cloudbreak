@@ -63,6 +63,9 @@ public abstract class CredentialBase implements Serializable {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
+    @ApiModelProperty(CredentialModelDescription.VERIFICATION_STATUS_TEXT)
+    private String verificationStatusText;
+
     public MockParameters getMock() {
         return mock;
     }
@@ -133,5 +136,13 @@ public abstract class CredentialBase implements Serializable {
 
     public void setYarn(YarnParameters yarn) {
         this.yarn = yarn;
+    }
+
+    public String getVerificationStatusText() {
+        return verificationStatusText;
+    }
+
+    public void setVerificationStatusText(String verificationStatusText) {
+        this.verificationStatusText = verificationStatusText;
     }
 }

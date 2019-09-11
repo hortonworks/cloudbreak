@@ -26,6 +26,8 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -49,6 +51,12 @@ public class AwsClient {
 
     @Inject
     private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
+
+    @Inject
+    private AwsPlatformParameters awsPlatformParameters;
+
+    @Inject
+    private AwsCredentialVerifier awsCredentialVerifier;
 
     @Inject
     private Retry retry;
@@ -75,6 +83,12 @@ public class AwsClient {
         return client;
     }
 
+    public AWSSecurityTokenService createAwsSecurityTokenService(AwsCredentialView awsCredential) {
+        return isRoleAssumeRequired(awsCredential)
+                ? new AWSSecurityTokenServiceClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
+                : new AWSSecurityTokenServiceClient(createAwsCredentials(awsCredential));
+    }
+
     public AmazonIdentityManagement createAmazonIdentityManagement(AwsCredentialView awsCredential) {
         return isRoleAssumeRequired(awsCredential)
                 ? new AmazonIdentityManagementClient(credentialClient.retrieveCachedSessionCredentials(awsCredential))
@@ -83,9 +97,9 @@ public class AwsClient {
 
     public AWSKMS createAWSKMS(AwsCredentialView awsCredential, String regionName) {
         return AWSKMSClientBuilder.standard()
-                    .withCredentials(getAwsStaticCredentialsProvider(awsCredential))
-                    .withRegion(regionName)
-                    .build();
+                .withCredentials(getAwsStaticCredentialsProvider(awsCredential))
+                .withRegion(regionName)
+                .build();
     }
 
     public AWSStaticCredentialsProvider getAwsStaticCredentialsProvider(AwsCredentialView awsCredential) {

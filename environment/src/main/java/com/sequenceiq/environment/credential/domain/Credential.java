@@ -54,6 +54,9 @@ public class Credential implements Serializable, AuthResource, AccountIdAwareRes
     @Column(nullable = false)
     private String resourceCrn;
 
+    @Column
+    private String verificationStatusText;
+
     public Long getId() {
         return id;
     }
@@ -144,5 +147,13 @@ public class Credential implements Serializable, AuthResource, AccountIdAwareRes
 
     public void setCreator(String creator) {
         this.creator = creator;
+    }
+
+    public String getVerificationStatusText() {
+        return verificationStatusText;
+    }
+
+    public void setVerificationStatusText(String verificationStatusText) {
+        this.verificationStatusText = verificationStatusText;
     }
 }

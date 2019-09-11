@@ -65,6 +65,7 @@ public class CredentialToCredentialV1ResponseConverter {
         credentialValidator.validateCredentialCloudPlatform(source.getCloudPlatform());
         response.setCloudPlatform(source.getCloudPlatform());
         response.setName(source.getName());
+        response.setVerificationStatusText(source.getVerificationStatusText());
         if (source.getAttributes() != null) {
             convertAttributes(source, response);
             if (response.getAws() != null) {
@@ -104,6 +105,7 @@ public class CredentialToCredentialV1ResponseConverter {
         credential.setName(source.getName());
         credential.setDescription(source.getDescription());
         credential.setCloudPlatform(source.getCloudPlatform());
+        credential.setVerificationStatusText(source.getVerificationStatusText());
         convertAttributes(source, credential);
         if (source.getAws() != null) {
             credential.setGovCloud(source.getAws().getGovCloud());

@@ -68,7 +68,9 @@
         "elasticloadbalancing:*"
       ],
       "Effect": "Allow",
-      "Resource": "*"
+      "Resource": [
+        "*"
+      ]
     },
     {
       "Sid": "RelationalDatabaseServiceFull",
@@ -76,7 +78,9 @@
         "rds:*"
       ],
       "Effect": "Allow",
-      "Resource": "*"
+      "Resource": [
+        "*"
+      ]
     },
     {
       "Sid": "DomainNameServicesFull",
@@ -90,7 +94,9 @@
         "route53:ListResourceRecordSets"
       ],
       "Effect": "Allow",
-      "Resource": "*"
+      "Resource": [
+        "*"
+      ]
     },
     {
       "Sid": "CertificateManagerFull",
@@ -104,7 +110,9 @@
         "acm:RequestCertificate"
       ],
       "Effect": "Allow",
-      "Resource": "*"
+      "Resource": [
+        "*"
+      ]
     },
     {
       "Sid": "SimpleStorageServiceFull",
@@ -119,7 +127,9 @@
         "s3:PutObject"
       ],
       "Effect": "Allow",
-      "Resource": "*"
+      "Resource": [
+        "*"
+      ]
     },
     {
       "Sid": "ElasticFileSystemFull",
@@ -127,7 +137,9 @@
         "elasticfilesystem:*"
       ],
       "Effect": "Allow",
-      "Resource": "*"
+      "Resource": [
+        "*"
+      ]
     },
     {
       "Sid": "ElasticComputeCloudFull",
@@ -170,7 +182,7 @@
         "iam:RemoveRoleFromInstanceProfile",
         "iam:DetachRolePolicy",
         "iam:DeleteRolePolicy",
-        "iam:AttachRolePolicy"
+        "iam:SimulatePrincipalPolicy"
       ],
       "Effect": "Allow",
       "Resource": [
@@ -179,18 +191,13 @@
     },
     {
       "Sid": "IdentityAccessManagementLimited",
-      "Action": "iam:CreateServiceLinkedRole",
+      "Action": [
+        "iam:CreateServiceLinkedRole"
+      ],
       "Effect": "Allow",
-      "Resource": "*",
-      "Condition": {
-        "ForAnyValue:StringLike": {
-          "iam:AWSServiceName": [
-            "rds.amazonaws.com",
-            "elasticloadbalancing.amazonaws.com",
-            "autoscaling.amazonaws.com"
-          ]
-        }
-      }
+      "Resource": [
+        "arn:aws:iam::*:role/aws-service-role/*"
+      ]
     },
     {
       "Sid": "AutoScalingFull",
@@ -222,7 +229,9 @@
         "kms:ScheduleKeyDeletion"
       ],
       "Effect": "Allow",
-      "Resource": "*"
+      "Resource": [
+        "*"
+      ]
     }
   ],
   "Version": "2012-10-17"

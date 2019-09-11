@@ -40,6 +40,7 @@ public class CredentialV1RequestToCredentialConverter {
         credential.setName(source.getName());
         credential.setDescription(source.getDescription());
         credential.setCloudPlatform(source.getCloudPlatform());
+        credential.setVerificationStatusText(source.getVerificationStatusText());
         convertAttributes(source, credential);
         if (source.getAws() != null) {
             credential.setGovCloud(source.getAws().getGovCloud());
