@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
@@ -33,10 +34,10 @@ import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
+import com.sequenceiq.environment.credential.exception.CredentialVerificationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 @Service
 public class CredentialService extends AbstractCredentialService {
@@ -93,6 +94,16 @@ public class CredentialService extends AbstractCredentialService {
     public Map<String, String> interactiveLogin(String accountId, String userId, Credential credential) {
         validateDeploymentAddress(credential);
         return credentialAdapter.interactiveLogin(credential, accountId, userId);
+    }
+
+    public Credential verify(Credential credential) {
+        try {
+            credentialAdapter.verify(credential, credential.getAccountId());
+            credential.setVerificationStatusText(null);
+        } catch (CredentialVerificationException credentialVerificationException) {
+            credential.setVerificationStatusText(credentialVerificationException.getMessage());
+        }
+        return repository.save(credential);
     }
 
     public Credential updateByAccountId(Credential credential, String accountId) {

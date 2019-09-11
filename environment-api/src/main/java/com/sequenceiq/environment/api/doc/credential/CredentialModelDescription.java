@@ -23,6 +23,7 @@ public class CredentialModelDescription {
             + "create prerequisites for Cloudbreak credential creation. The field is base64 encoded.";
     public static final String CLOUD_PLATFORM = "type of cloud provider";
     public static final String ATTRIBUTES = "provider specific attributes of the credential";
+    public static final String VERIFICATION_STATUS_TEXT = "verification status text for credential, if empty then there is no verification issue";
     public static final String CREATOR = "crn of the creator";
 
     private CredentialModelDescription() {

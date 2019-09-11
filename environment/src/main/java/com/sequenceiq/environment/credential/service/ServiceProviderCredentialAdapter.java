@@ -28,9 +28,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.exception.CredentialVerificationException;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
-import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -75,10 +76,10 @@ public class ServiceProviderCredentialAdapter {
             LOGGER.debug("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
                 LOGGER.info(message, res.getErrorDetails());
-                throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
+                throw new CredentialVerificationException(message + res.getErrorDetails(), res.getErrorDetails());
             }
             if (CredentialStatus.FAILED.equals(res.getCloudCredentialStatus().getStatus())) {
-                throw new BadRequestException(message + res.getCloudCredentialStatus().getStatusReason(),
+                throw new CredentialVerificationException(message + res.getCloudCredentialStatus().getStatusReason(),
                         res.getCloudCredentialStatus().getException());
             }
             CloudCredential cloudCredentialResponse = res.getCloudCredentialStatus().getCloudCredential();
