@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -65,6 +66,22 @@ class CloudStorageDecoratorTest {
 
         assertNotNull(result);
         assertTrue(result.getIdentities().stream().anyMatch(id -> CloudIdentityType.LOG.equals(id.getType())));
+    }
+
+    @Test
+    void testConvertWhenIdentityIsSetToNull() {
+        CloudStorageRequest request = new CloudStorageRequest();
+        request.setIdentities(null);
+
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        TelemetryResponse telemetry = new TelemetryResponse();
+        telemetry.setLogging(new LoggingResponse());
+        environment.setTelemetry(telemetry);
+
+        CloudStorageRequest result = underTest.decorate(BLUEPRINT_NAME, CLUSTER_NAME, request, environment);
+
+        assertNotNull(result);
+        assertEquals(1, result.getIdentities().size());
     }
 
     @Test
