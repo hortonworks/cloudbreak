@@ -40,7 +40,7 @@ public class ClusterToAmbariV4RequestRequestConverter extends AbstractConversion
             }
             return null;
         } catch (IOException e) {
-            throw new BadRequestException("Cannot deserialize the compnent: " + responseClss, e);
+            throw new BadRequestException("Cannot deserialize the component: " + responseClss, e);
         }
     }
 }

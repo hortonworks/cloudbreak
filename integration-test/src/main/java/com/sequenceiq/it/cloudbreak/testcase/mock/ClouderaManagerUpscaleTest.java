@@ -4,6 +4,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +29,10 @@ import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiHostTemplateList;
 import com.cloudera.api.swagger.model.ApiParcel;
+import com.cloudera.api.swagger.model.ApiParcelList;
 import com.cloudera.api.swagger.model.ApiServiceList;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -46,6 +50,7 @@ import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.util.HostNameUtil;
+import com.sequenceiq.it.util.ResourceUtil;
 
 public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
 
@@ -69,7 +74,7 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
 
     private static final String DEPLOY_CLIENT_CONFIG = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/commands/deployClientConfig";
 
-    private static final String READ_PARCEL = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/parcels/products/:product/versions/:version";
+    private static final String READ_PARCELS = ClouderaManagerMock.API_ROOT + "/clusters/:clusterName/parcels";
 
     private static final String APPLY_HOST_TEMPLATE =
             ClouderaManagerMock.API_ROOT
@@ -97,13 +102,16 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
 
     private Stack<String> parcelStageResponses;
 
+    private Parcel parcel;
+
     @BeforeMethod
-    public void setUp() {
+    public void setUp() throws IOException {
         originalWorkerCount = 3;
         desiredWorkerCount = 15;
 
         parcelStageResponses = new Stack<>();
         prepareReadParcelStageStack();
+        parcel = getParcel();
     }
 
     private void prepareReadParcelStageStack() {
@@ -112,6 +120,22 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
         parcelStageResponses.push("DISTRIBUTING");
         parcelStageResponses.push("DISTRIBUTING");
         parcelStageResponses.push("ACTIVATING");
+    }
+
+    private Parcel getParcel() throws IOException {
+        String cmBlueprint = ResourceUtil.readResourceAsString(applicationContext, "classpath:/blueprint/clouderamanager.bp");
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode cmTemplateJson;
+        try {
+            cmTemplateJson = mapper.readTree(cmBlueprint);
+        } catch (IOException e) {
+            LOGGER.error("cannot deserialize clouderamanager.bp: " + cmBlueprint, e);
+            throw new RuntimeException("cannot deserialize clouderamanager.bp", e);
+        }
+        JsonNode product = cmTemplateJson.get("products").get(0);
+        String productName = product.get("product").asText();
+        String version = product.get("version").asText();
+        return new Parcel(productName, version);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -188,8 +212,8 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
                 (request, response) -> new ApiHostRefList().items(generateHostsRefs(testContext.getModel().getInstanceMap().values())));
         dynamicRouteStack.post(DEPLOY_CLIENT_CONFIG,
                 (request, response) -> new ApiCommand().id(DEPLOY_CLIENT_CONFIG_COMMAND_ID));
-        dynamicRouteStack.get(READ_PARCEL,
-                (request, response) -> new ApiParcel().stage(parcelStageResponses.pop()));
+        dynamicRouteStack.get(READ_PARCELS,
+                (request, response) -> getMockedApiParcelList());
         dynamicRouteStack.post(APPLY_HOST_TEMPLATE,
                 (request, response) -> new ApiCommand().id(APPLY_HOST_TEMPLATE_COMMAND_ID));
         dynamicRouteStack.post(RESTART_MGMTSERVCIES_COMMAND, (request, response) -> new ApiCommand().id(new BigDecimal(1)));
@@ -197,6 +221,14 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
         dynamicRouteStack.post(RESTART_CLUSTER_COMMAND, (request, response) -> new ApiCommand().id(new BigDecimal(1)));
         dynamicRouteStack.get(READ_HOSTTEMPLATES, (request, response) -> new ApiHostTemplateList().items(List.of()));
         dynamicRouteStack.get(CLUSTERS_SERVICES, (request, response) -> new ApiServiceList().items(List.of()));
+    }
+
+    private ApiParcelList getMockedApiParcelList() {
+        ApiParcel apiParcel = new ApiParcel()
+                .product(parcel.getProduct())
+                .version(parcel.getVersion())
+                .stage(parcelStageResponses.pop());
+        return new ApiParcelList().items(List.of(apiParcel));
     }
 
     private List<ApiHostRef> generateHostsRefs(Collection<CloudVmMetaDataStatus> cloudVmMetadataStatusList) {
@@ -246,6 +278,25 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
             pathVariableMap.entrySet()
                     .forEach(mapping -> pathTemplate = pathTemplate.replace(mapping.getKey(), mapping.getValue()));
             return pathTemplate;
+        }
+    }
+
+    static class Parcel {
+        private final String product;
+
+        private final String version;
+
+        Parcel(String product, String version) {
+            this.product = product;
+            this.version = version;
+        }
+
+        public String getProduct() {
+            return product;
+        }
+
+        public String getVersion() {
+            return version;
         }
     }
 }

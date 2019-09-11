@@ -9,14 +9,15 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
+import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.SetupCmScalingMock;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.util.cleanup.ParcelMockActivatorUtil;
 
 public class ClouderaManagerDownscaleTest extends AbstractIntegrationTest {
 
@@ -34,6 +35,9 @@ public class ClouderaManagerDownscaleTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
+    @Inject
+    private ParcelMockActivatorUtil parcelMockActivatorUtil;
+
     @BeforeMethod
     public void setUp() {
     }
@@ -45,6 +49,7 @@ public class ClouderaManagerDownscaleTest extends AbstractIntegrationTest {
             then = "stack is running")
     public void testDownscale(MockedTestContext testContext) {
         String clusterName = resourcePropertyProvider().getName();
+        parcelMockActivatorUtil.mockActivateParcels(testContext, clusterName);
         SetupCmScalingMock mock = new SetupCmScalingMock();
         mock.configure(testContext, 3, 15, 6);
         testContext
@@ -58,4 +63,5 @@ public class ClouderaManagerDownscaleTest extends AbstractIntegrationTest {
                 .await(StackTestDto.class, STACK_AVAILABLE, 3000)
                 .validate();
     }
+
 }
