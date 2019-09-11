@@ -159,13 +159,20 @@ cb:
   blueprint:
     cm:
       defaults: >
-                CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
-                CDP 1.0 - Data Engineering HA: Apache Spark, Apache Livy, Apache Zeppelin=cdp-data-engineering-ha;
-                CDP 1.0 - Data Mart: Apache Impala, Hue=cdp-data-mart;
-                CDP 1.0 - Operational Database: Apache HBase=cdp-opdb;
-                CDP 1.0 - Operational Database: Apache HBase (Custom)=cdp-opdb-custom;
-                CDP 1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
-                CDP 1.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
+                CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-700;
+                CDP 1.0 - Data Engineering HA: Apache Spark, Apache Livy, Apache Zeppelin=cdp-data-engineering-ha-700;
+                CDP 1.0 - Data Mart: Apache Impala, Hue=cdp-data-mart-700;
+                CDP 1.0 - Operational Database: Apache HBase=cdp-opdb-700;
+                CDP 1.0 - Operational Database: Apache HBase (Custom)=cdp-opdb-custom-700;
+                CDP 1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-700;
+                CDP 1.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-700;
+                CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-710;
+                CDP 1.1 - Data Engineering HA: Apache Spark, Apache Livy, Apache Zeppelin=cdp-data-engineering-ha-710;
+                CDP 1.1 - Data Mart: Apache Impala, Hue=cdp-data-mart-710;
+                CDP 1.1 - Operational Database: Apache HBase=cdp-opdb-710;
+                CDP 1.1 - Operational Database: Apache HBase (Custom)=cdp-opdb-custom-710;
+                CDP 1.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-710;
+                CDP 1.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-710;
 
     ambari:
       defaults:
@@ -280,12 +287,12 @@ cb:
             baseurl: https://archive.cloudera.com/cm6/6.2.0/redhat7/yum/
             gpgkey: https://archive.cloudera.com/cm6/6.2.0/redhat7/yum/RPM-GPG-KEY-cloudera
       7.0:
-        version: 7.0.0-1377325
+        version: 7.x.0-1406468
         repo:
           redhat7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1377325/cm7/7.0.0/redhat7/yum/
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1406468/cm7/7.x.0/redhat7/yum/
           centos7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1377325/cm7/7.0.0/redhat7/yum/
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1406468/cm7/7.x.0/redhat7/yum/
 
   cdh:
     entries:
@@ -311,13 +318,21 @@ cb:
             repoid: CDH-6.2.0
             redhat7: https://archive.cloudera.com/cdh6/6.2.0/parcels/
       "[7.0.0]":
-        version: 7.0.0-1.cdh7.0.0.p0.1376867
+        version: 7.0.0-1.cdh7.0.0.p0.1423385
         minCM: 7.0
         repo:
           stack:
             repoid: CDH-7.0.0
-            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1376867/cdh/7.x/parcels/
-            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1376867/cdh/7.x/parcels/
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1423385/cdh/7.x/parcels/
+            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1423385/cdh/7.x/parcels/
+      "[7.1.0]":
+        version: 7.1.0-1.cdh7.1.0.p0.1405891
+        minCM: 7.0
+        repo:
+          stack:
+            repoid: CDH-7.1.0
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1405891/cdh/7.x/parcels/
+            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1405891/cdh/7.x/parcels/
 
 
   ambari:
