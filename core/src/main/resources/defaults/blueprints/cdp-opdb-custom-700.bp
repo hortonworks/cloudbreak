@@ -2,7 +2,7 @@
   "description": "CDP 1.0 Operational Database with Apache HBase (custom)",
   "blueprint": {
     "cdhVersion": "7.0.0",
-    "displayName": "opdb-custom",
+    "displayName": "opdb-custom-700",
     "services": [
       {
         "refName": "zookeeper",

@@ -1,8 +1,8 @@
 {
-  "description": "CDP 1.0 Data Engineering template",
+  "description": "CDP 1.1 Data Engineering template",
   "blueprint": {
-    "cdhVersion": "7.0.0",
-    "displayName": "dataengineering",
+    "cdhVersion": "7.1.0",
+    "displayName": "dataengineering-710",
     "services": [
       {
         "refName": "zookeeper",
@@ -47,7 +47,7 @@
         "serviceConfigs": [
           {
             "name": "yarn_admin_acl",
-            "value": "yarn,hive,hdfs"
+            "value": "yarn,hive"
           }
         ],
         "roleConfigGroups": [

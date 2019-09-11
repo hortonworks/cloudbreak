@@ -345,7 +345,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         assertNotNull(entity);
         assertNotNull(entity.getResponses());
         long defaultCount = entity.getResponses().stream().filter(template -> ResourceStatus.DEFAULT.equals(template.getStatus())).count();
-        assertEquals("Should have 4 of default cluster templates", 4, defaultCount);
+        assertEquals("Should have 8 of default cluster templates", 8, defaultCount);
         return entity;
     }
 
