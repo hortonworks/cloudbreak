@@ -4827,39 +4827,21 @@ public final class IdBrokerMappingManagementProto {
 
     /**
      * <pre>
-     * The account ID.
+     * The CRN of the environment.
      * </pre>
      *
-     * <code>string accountId = 1;</code>
+     * <code>string environmentCrn = 2;</code>
      */
-    java.lang.String getAccountId();
+    java.lang.String getEnvironmentCrn();
     /**
      * <pre>
-     * The account ID.
+     * The CRN of the environment.
      * </pre>
      *
-     * <code>string accountId = 1;</code>
+     * <code>string environmentCrn = 2;</code>
      */
     com.google.protobuf.ByteString
-        getAccountIdBytes();
-
-    /**
-     * <pre>
-     * The name or CRN of the environment.
-     * </pre>
-     *
-     * <code>string environmentNameOrCrn = 2;</code>
-     */
-    java.lang.String getEnvironmentNameOrCrn();
-    /**
-     * <pre>
-     * The name or CRN of the environment.
-     * </pre>
-     *
-     * <code>string environmentNameOrCrn = 2;</code>
-     */
-    com.google.protobuf.ByteString
-        getEnvironmentNameOrCrnBytes();
+        getEnvironmentCrnBytes();
   }
   /**
    * Protobuf type {@code idbrokermappingmanagement.DeleteMappingsRequest}
@@ -4874,8 +4856,7 @@ public final class IdBrokerMappingManagementProto {
       super(builder);
     }
     private DeleteMappingsRequest() {
-      accountId_ = "";
-      environmentNameOrCrn_ = "";
+      environmentCrn_ = "";
     }
 
     @java.lang.Override
@@ -4902,16 +4883,10 @@ public final class IdBrokerMappingManagementProto {
             case 0:
               done = true;
               break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
             case 18: {
               java.lang.String s = input.readStringRequireUtf8();
 
-              environmentNameOrCrn_ = s;
+              environmentCrn_ = s;
               break;
             }
             default: {
@@ -4946,84 +4921,42 @@ public final class IdBrokerMappingManagementProto {
               com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest.class, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest.Builder.class);
     }
 
-    public static final int ACCOUNTID_FIELD_NUMBER = 1;
-    private volatile java.lang.Object accountId_;
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 2;
+    private volatile java.lang.Object environmentCrn_;
     /**
      * <pre>
-     * The account ID.
+     * The CRN of the environment.
      * </pre>
      *
-     * <code>string accountId = 1;</code>
+     * <code>string environmentCrn = 2;</code>
      */
-    public java.lang.String getAccountId() {
-      java.lang.Object ref = accountId_;
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        accountId_ = s;
+        environmentCrn_ = s;
         return s;
       }
     }
     /**
      * <pre>
-     * The account ID.
+     * The CRN of the environment.
      * </pre>
      *
-     * <code>string accountId = 1;</code>
+     * <code>string environmentCrn = 2;</code>
      */
     public com.google.protobuf.ByteString
-        getAccountIdBytes() {
-      java.lang.Object ref = accountId_;
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        accountId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int ENVIRONMENTNAMEORCRN_FIELD_NUMBER = 2;
-    private volatile java.lang.Object environmentNameOrCrn_;
-    /**
-     * <pre>
-     * The name or CRN of the environment.
-     * </pre>
-     *
-     * <code>string environmentNameOrCrn = 2;</code>
-     */
-    public java.lang.String getEnvironmentNameOrCrn() {
-      java.lang.Object ref = environmentNameOrCrn_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        environmentNameOrCrn_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The name or CRN of the environment.
-     * </pre>
-     *
-     * <code>string environmentNameOrCrn = 2;</code>
-     */
-    public com.google.protobuf.ByteString
-        getEnvironmentNameOrCrnBytes() {
-      java.lang.Object ref = environmentNameOrCrn_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        environmentNameOrCrn_ = b;
+        environmentCrn_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -5044,11 +4977,8 @@ public final class IdBrokerMappingManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
-      }
-      if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentNameOrCrn_);
+      if (!getEnvironmentCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentCrn_);
       }
       unknownFields.writeTo(output);
     }
@@ -5059,11 +4989,8 @@ public final class IdBrokerMappingManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
-      }
-      if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentNameOrCrn_);
+      if (!getEnvironmentCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentCrn_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -5081,10 +5008,8 @@ public final class IdBrokerMappingManagementProto {
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest) obj;
 
       boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getEnvironmentNameOrCrn()
-          .equals(other.getEnvironmentNameOrCrn());
+      result = result && getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -5096,10 +5021,8 @@ public final class IdBrokerMappingManagementProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
-      hash = (53 * hash) + getAccountId().hashCode();
-      hash = (37 * hash) + ENVIRONMENTNAMEORCRN_FIELD_NUMBER;
-      hash = (53 * hash) + getEnvironmentNameOrCrn().hashCode();
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -5233,9 +5156,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        accountId_ = "";
-
-        environmentNameOrCrn_ = "";
+        environmentCrn_ = "";
 
         return this;
       }
@@ -5263,8 +5184,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest buildPartial() {
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest result = new com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest(this);
-        result.accountId_ = accountId_;
-        result.environmentNameOrCrn_ = environmentNameOrCrn_;
+        result.environmentCrn_ = environmentCrn_;
         onBuilt();
         return result;
       }
@@ -5313,12 +5233,8 @@ public final class IdBrokerMappingManagementProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest other) {
         if (other == com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest.getDefaultInstance()) return this;
-        if (!other.getAccountId().isEmpty()) {
-          accountId_ = other.accountId_;
-          onChanged();
-        }
-        if (!other.getEnvironmentNameOrCrn().isEmpty()) {
-          environmentNameOrCrn_ = other.environmentNameOrCrn_;
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -5350,21 +5266,21 @@ public final class IdBrokerMappingManagementProto {
         return this;
       }
 
-      private java.lang.Object accountId_ = "";
+      private java.lang.Object environmentCrn_ = "";
       /**
        * <pre>
-       * The account ID.
+       * The CRN of the environment.
        * </pre>
        *
-       * <code>string accountId = 1;</code>
+       * <code>string environmentCrn = 2;</code>
        */
-      public java.lang.String getAccountId() {
-        java.lang.Object ref = accountId_;
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          accountId_ = s;
+          environmentCrn_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -5372,19 +5288,19 @@ public final class IdBrokerMappingManagementProto {
       }
       /**
        * <pre>
-       * The account ID.
+       * The CRN of the environment.
        * </pre>
        *
-       * <code>string accountId = 1;</code>
+       * <code>string environmentCrn = 2;</code>
        */
       public com.google.protobuf.ByteString
-          getAccountIdBytes() {
-        java.lang.Object ref = accountId_;
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          accountId_ = b;
+          environmentCrn_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -5392,138 +5308,49 @@ public final class IdBrokerMappingManagementProto {
       }
       /**
        * <pre>
-       * The account ID.
+       * The CRN of the environment.
        * </pre>
        *
-       * <code>string accountId = 1;</code>
+       * <code>string environmentCrn = 2;</code>
        */
-      public Builder setAccountId(
+      public Builder setEnvironmentCrn(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        accountId_ = value;
+        environmentCrn_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The account ID.
+       * The CRN of the environment.
        * </pre>
        *
-       * <code>string accountId = 1;</code>
+       * <code>string environmentCrn = 2;</code>
        */
-      public Builder clearAccountId() {
+      public Builder clearEnvironmentCrn() {
         
-        accountId_ = getDefaultInstance().getAccountId();
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The account ID.
+       * The CRN of the environment.
        * </pre>
        *
-       * <code>string accountId = 1;</code>
+       * <code>string environmentCrn = 2;</code>
        */
-      public Builder setAccountIdBytes(
+      public Builder setEnvironmentCrnBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
         
-        accountId_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object environmentNameOrCrn_ = "";
-      /**
-       * <pre>
-       * The name or CRN of the environment.
-       * </pre>
-       *
-       * <code>string environmentNameOrCrn = 2;</code>
-       */
-      public java.lang.String getEnvironmentNameOrCrn() {
-        java.lang.Object ref = environmentNameOrCrn_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          environmentNameOrCrn_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The name or CRN of the environment.
-       * </pre>
-       *
-       * <code>string environmentNameOrCrn = 2;</code>
-       */
-      public com.google.protobuf.ByteString
-          getEnvironmentNameOrCrnBytes() {
-        java.lang.Object ref = environmentNameOrCrn_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          environmentNameOrCrn_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The name or CRN of the environment.
-       * </pre>
-       *
-       * <code>string environmentNameOrCrn = 2;</code>
-       */
-      public Builder setEnvironmentNameOrCrn(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        environmentNameOrCrn_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The name or CRN of the environment.
-       * </pre>
-       *
-       * <code>string environmentNameOrCrn = 2;</code>
-       */
-      public Builder clearEnvironmentNameOrCrn() {
-        
-        environmentNameOrCrn_ = getDefaultInstance().getEnvironmentNameOrCrn();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The name or CRN of the environment.
-       * </pre>
-       *
-       * <code>string environmentNameOrCrn = 2;</code>
-       */
-      public Builder setEnvironmentNameOrCrnBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        environmentNameOrCrn_ = value;
+        environmentCrn_ = value;
         onChanged();
         return this;
       }
@@ -6754,24 +6581,6 @@ public final class IdBrokerMappingManagementProto {
   public interface SyncMappingsResponseOrBuilder extends
       // @@protoc_insertion_point(interface_extends:idbrokermappingmanagement.SyncMappingsResponse)
       com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <pre>
-     * A unique identifier for this sync attempt.
-     * </pre>
-     *
-     * <code>string syncId = 1;</code>
-     */
-    java.lang.String getSyncId();
-    /**
-     * <pre>
-     * A unique identifier for this sync attempt.
-     * </pre>
-     *
-     * <code>string syncId = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getSyncIdBytes();
   }
   /**
    * Protobuf type {@code idbrokermappingmanagement.SyncMappingsResponse}
@@ -6786,7 +6595,6 @@ public final class IdBrokerMappingManagementProto {
       super(builder);
     }
     private SyncMappingsResponse() {
-      syncId_ = "";
     }
 
     @java.lang.Override
@@ -6802,7 +6610,6 @@ public final class IdBrokerMappingManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -6813,12 +6620,6 @@ public final class IdBrokerMappingManagementProto {
             case 0:
               done = true;
               break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              syncId_ = s;
-              break;
-            }
             default: {
               if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -6851,48 +6652,6 @@ public final class IdBrokerMappingManagementProto {
               com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse.class, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse.Builder.class);
     }
 
-    public static final int SYNCID_FIELD_NUMBER = 1;
-    private volatile java.lang.Object syncId_;
-    /**
-     * <pre>
-     * A unique identifier for this sync attempt.
-     * </pre>
-     *
-     * <code>string syncId = 1;</code>
-     */
-    public java.lang.String getSyncId() {
-      java.lang.Object ref = syncId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        syncId_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * A unique identifier for this sync attempt.
-     * </pre>
-     *
-     * <code>string syncId = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getSyncIdBytes() {
-      java.lang.Object ref = syncId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        syncId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -6907,9 +6666,6 @@ public final class IdBrokerMappingManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getSyncIdBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, syncId_);
-      }
       unknownFields.writeTo(output);
     }
 
@@ -6919,9 +6675,6 @@ public final class IdBrokerMappingManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getSyncIdBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, syncId_);
-      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -6938,8 +6691,6 @@ public final class IdBrokerMappingManagementProto {
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse) obj;
 
       boolean result = true;
-      result = result && getSyncId()
-          .equals(other.getSyncId());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -6951,8 +6702,6 @@ public final class IdBrokerMappingManagementProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + SYNCID_FIELD_NUMBER;
-      hash = (53 * hash) + getSyncId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -7086,8 +6835,6 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        syncId_ = "";
-
         return this;
       }
 
@@ -7114,7 +6861,6 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse buildPartial() {
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse result = new com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse(this);
-        result.syncId_ = syncId_;
         onBuilt();
         return result;
       }
@@ -7163,10 +6909,6 @@ public final class IdBrokerMappingManagementProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse other) {
         if (other == com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse.getDefaultInstance()) return this;
-        if (!other.getSyncId().isEmpty()) {
-          syncId_ = other.syncId_;
-          onChanged();
-        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -7193,95 +6935,6 @@ public final class IdBrokerMappingManagementProto {
             mergeFrom(parsedMessage);
           }
         }
-        return this;
-      }
-
-      private java.lang.Object syncId_ = "";
-      /**
-       * <pre>
-       * A unique identifier for this sync attempt.
-       * </pre>
-       *
-       * <code>string syncId = 1;</code>
-       */
-      public java.lang.String getSyncId() {
-        java.lang.Object ref = syncId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          syncId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * A unique identifier for this sync attempt.
-       * </pre>
-       *
-       * <code>string syncId = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getSyncIdBytes() {
-        java.lang.Object ref = syncId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          syncId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * A unique identifier for this sync attempt.
-       * </pre>
-       *
-       * <code>string syncId = 1;</code>
-       */
-      public Builder setSyncId(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        syncId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * A unique identifier for this sync attempt.
-       * </pre>
-       *
-       * <code>string syncId = 1;</code>
-       */
-      public Builder clearSyncId() {
-        
-        syncId_ = getDefaultInstance().getSyncId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * A unique identifier for this sync attempt.
-       * </pre>
-       *
-       * <code>string syncId = 1;</code>
-       */
-      public Builder setSyncIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        syncId_ = value;
-        onChanged();
         return this;
       }
       @java.lang.Override
@@ -7376,26 +7029,6 @@ public final class IdBrokerMappingManagementProto {
      */
     com.google.protobuf.ByteString
         getEnvironmentNameOrCrnBytes();
-
-    /**
-     * <pre>
-     * Optional syncId for the sync attempt whose status is desired. If omitted,
-     * the status of the most recent sync attempt for the environment is returned.
-     * </pre>
-     *
-     * <code>string syncId = 3;</code>
-     */
-    java.lang.String getSyncId();
-    /**
-     * <pre>
-     * Optional syncId for the sync attempt whose status is desired. If omitted,
-     * the status of the most recent sync attempt for the environment is returned.
-     * </pre>
-     *
-     * <code>string syncId = 3;</code>
-     */
-    com.google.protobuf.ByteString
-        getSyncIdBytes();
   }
   /**
    * Protobuf type {@code idbrokermappingmanagement.GetMappingsSyncStatusRequest}
@@ -7412,7 +7045,6 @@ public final class IdBrokerMappingManagementProto {
     private GetMappingsSyncStatusRequest() {
       accountId_ = "";
       environmentNameOrCrn_ = "";
-      syncId_ = "";
     }
 
     @java.lang.Override
@@ -7449,12 +7081,6 @@ public final class IdBrokerMappingManagementProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               environmentNameOrCrn_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              syncId_ = s;
               break;
             }
             default: {
@@ -7573,50 +7199,6 @@ public final class IdBrokerMappingManagementProto {
       }
     }
 
-    public static final int SYNCID_FIELD_NUMBER = 3;
-    private volatile java.lang.Object syncId_;
-    /**
-     * <pre>
-     * Optional syncId for the sync attempt whose status is desired. If omitted,
-     * the status of the most recent sync attempt for the environment is returned.
-     * </pre>
-     *
-     * <code>string syncId = 3;</code>
-     */
-    public java.lang.String getSyncId() {
-      java.lang.Object ref = syncId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        syncId_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Optional syncId for the sync attempt whose status is desired. If omitted,
-     * the status of the most recent sync attempt for the environment is returned.
-     * </pre>
-     *
-     * <code>string syncId = 3;</code>
-     */
-    public com.google.protobuf.ByteString
-        getSyncIdBytes() {
-      java.lang.Object ref = syncId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        syncId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -7637,9 +7219,6 @@ public final class IdBrokerMappingManagementProto {
       if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentNameOrCrn_);
       }
-      if (!getSyncIdBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, syncId_);
-      }
       unknownFields.writeTo(output);
     }
 
@@ -7654,9 +7233,6 @@ public final class IdBrokerMappingManagementProto {
       }
       if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentNameOrCrn_);
-      }
-      if (!getSyncIdBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, syncId_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -7678,8 +7254,6 @@ public final class IdBrokerMappingManagementProto {
           .equals(other.getAccountId());
       result = result && getEnvironmentNameOrCrn()
           .equals(other.getEnvironmentNameOrCrn());
-      result = result && getSyncId()
-          .equals(other.getSyncId());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -7695,8 +7269,6 @@ public final class IdBrokerMappingManagementProto {
       hash = (53 * hash) + getAccountId().hashCode();
       hash = (37 * hash) + ENVIRONMENTNAMEORCRN_FIELD_NUMBER;
       hash = (53 * hash) + getEnvironmentNameOrCrn().hashCode();
-      hash = (37 * hash) + SYNCID_FIELD_NUMBER;
-      hash = (53 * hash) + getSyncId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -7834,8 +7406,6 @@ public final class IdBrokerMappingManagementProto {
 
         environmentNameOrCrn_ = "";
 
-        syncId_ = "";
-
         return this;
       }
 
@@ -7864,7 +7434,6 @@ public final class IdBrokerMappingManagementProto {
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusRequest result = new com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusRequest(this);
         result.accountId_ = accountId_;
         result.environmentNameOrCrn_ = environmentNameOrCrn_;
-        result.syncId_ = syncId_;
         onBuilt();
         return result;
       }
@@ -7919,10 +7488,6 @@ public final class IdBrokerMappingManagementProto {
         }
         if (!other.getEnvironmentNameOrCrn().isEmpty()) {
           environmentNameOrCrn_ = other.environmentNameOrCrn_;
-          onChanged();
-        }
-        if (!other.getSyncId().isEmpty()) {
-          syncId_ = other.syncId_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -8131,100 +7696,6 @@ public final class IdBrokerMappingManagementProto {
         onChanged();
         return this;
       }
-
-      private java.lang.Object syncId_ = "";
-      /**
-       * <pre>
-       * Optional syncId for the sync attempt whose status is desired. If omitted,
-       * the status of the most recent sync attempt for the environment is returned.
-       * </pre>
-       *
-       * <code>string syncId = 3;</code>
-       */
-      public java.lang.String getSyncId() {
-        java.lang.Object ref = syncId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          syncId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Optional syncId for the sync attempt whose status is desired. If omitted,
-       * the status of the most recent sync attempt for the environment is returned.
-       * </pre>
-       *
-       * <code>string syncId = 3;</code>
-       */
-      public com.google.protobuf.ByteString
-          getSyncIdBytes() {
-        java.lang.Object ref = syncId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          syncId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Optional syncId for the sync attempt whose status is desired. If omitted,
-       * the status of the most recent sync attempt for the environment is returned.
-       * </pre>
-       *
-       * <code>string syncId = 3;</code>
-       */
-      public Builder setSyncId(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        syncId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Optional syncId for the sync attempt whose status is desired. If omitted,
-       * the status of the most recent sync attempt for the environment is returned.
-       * </pre>
-       *
-       * <code>string syncId = 3;</code>
-       */
-      public Builder clearSyncId() {
-        
-        syncId_ = getDefaultInstance().getSyncId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Optional syncId for the sync attempt whose status is desired. If omitted,
-       * the status of the most recent sync attempt for the environment is returned.
-       * </pre>
-       *
-       * <code>string syncId = 3;</code>
-       */
-      public Builder setSyncIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        syncId_ = value;
-        onChanged();
-        return this;
-      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -8284,30 +7755,12 @@ public final class IdBrokerMappingManagementProto {
 
     /**
      * <pre>
-     * The version of the mappings.
+     * Whether a sync is needed to bring in-cluster mappings up-to-date.
      * </pre>
      *
-     * <code>int64 mappingsVersion = 1;</code>
+     * <code>bool syncNeeded = 2;</code>
      */
-    long getMappingsVersion();
-
-    /**
-     * <pre>
-     * ID of the sync attempt.
-     * </pre>
-     *
-     * <code>string syncId = 2;</code>
-     */
-    java.lang.String getSyncId();
-    /**
-     * <pre>
-     * ID of the sync attempt.
-     * </pre>
-     *
-     * <code>string syncId = 2;</code>
-     */
-    com.google.protobuf.ByteString
-        getSyncIdBytes();
+    boolean getSyncNeeded();
 
     /**
      * <pre>
@@ -8398,8 +7851,7 @@ public final class IdBrokerMappingManagementProto {
       super(builder);
     }
     private GetMappingsSyncStatusResponse() {
-      mappingsVersion_ = 0L;
-      syncId_ = "";
+      syncNeeded_ = false;
       globalStatus_ = 0;
     }
 
@@ -8427,15 +7879,9 @@ public final class IdBrokerMappingManagementProto {
             case 0:
               done = true;
               break;
-            case 8: {
+            case 16: {
 
-              mappingsVersion_ = input.readInt64();
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              syncId_ = s;
+              syncNeeded_ = input.readBool();
               break;
             }
             case 24: {
@@ -8445,10 +7891,10 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             case 34: {
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
                 statuses_ = com.google.protobuf.MapField.newMapField(
                     StatusesDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000008;
+                mutable_bitField0_ |= 0x00000004;
               }
               com.google.protobuf.MapEntry<java.lang.String, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails>
               statuses__ = input.readMessage(
@@ -8502,59 +7948,17 @@ public final class IdBrokerMappingManagementProto {
     }
 
     private int bitField0_;
-    public static final int MAPPINGSVERSION_FIELD_NUMBER = 1;
-    private long mappingsVersion_;
+    public static final int SYNCNEEDED_FIELD_NUMBER = 2;
+    private boolean syncNeeded_;
     /**
      * <pre>
-     * The version of the mappings.
+     * Whether a sync is needed to bring in-cluster mappings up-to-date.
      * </pre>
      *
-     * <code>int64 mappingsVersion = 1;</code>
+     * <code>bool syncNeeded = 2;</code>
      */
-    public long getMappingsVersion() {
-      return mappingsVersion_;
-    }
-
-    public static final int SYNCID_FIELD_NUMBER = 2;
-    private volatile java.lang.Object syncId_;
-    /**
-     * <pre>
-     * ID of the sync attempt.
-     * </pre>
-     *
-     * <code>string syncId = 2;</code>
-     */
-    public java.lang.String getSyncId() {
-      java.lang.Object ref = syncId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        syncId_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * ID of the sync attempt.
-     * </pre>
-     *
-     * <code>string syncId = 2;</code>
-     */
-    public com.google.protobuf.ByteString
-        getSyncIdBytes() {
-      java.lang.Object ref = syncId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        syncId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public boolean getSyncNeeded() {
+      return syncNeeded_;
     }
 
     public static final int GLOBALSTATUS_FIELD_NUMBER = 3;
@@ -8692,11 +8096,8 @@ public final class IdBrokerMappingManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (mappingsVersion_ != 0L) {
-        output.writeInt64(1, mappingsVersion_);
-      }
-      if (!getSyncIdBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, syncId_);
+      if (syncNeeded_ != false) {
+        output.writeBool(2, syncNeeded_);
       }
       if (globalStatus_ != com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value.UNSET.getNumber()) {
         output.writeEnum(3, globalStatus_);
@@ -8716,12 +8117,9 @@ public final class IdBrokerMappingManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (mappingsVersion_ != 0L) {
+      if (syncNeeded_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, mappingsVersion_);
-      }
-      if (!getSyncIdBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, syncId_);
+          .computeBoolSize(2, syncNeeded_);
       }
       if (globalStatus_ != com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
@@ -8753,10 +8151,8 @@ public final class IdBrokerMappingManagementProto {
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse) obj;
 
       boolean result = true;
-      result = result && (getMappingsVersion()
-          == other.getMappingsVersion());
-      result = result && getSyncId()
-          .equals(other.getSyncId());
+      result = result && (getSyncNeeded()
+          == other.getSyncNeeded());
       result = result && globalStatus_ == other.globalStatus_;
       result = result && internalGetStatuses().equals(
           other.internalGetStatuses());
@@ -8771,11 +8167,9 @@ public final class IdBrokerMappingManagementProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + MAPPINGSVERSION_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getMappingsVersion());
-      hash = (37 * hash) + SYNCID_FIELD_NUMBER;
-      hash = (53 * hash) + getSyncId().hashCode();
+      hash = (37 * hash) + SYNCNEEDED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSyncNeeded());
       hash = (37 * hash) + GLOBALSTATUS_FIELD_NUMBER;
       hash = (53 * hash) + globalStatus_;
       if (!internalGetStatuses().getMap().isEmpty()) {
@@ -8937,9 +8331,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        mappingsVersion_ = 0L;
-
-        syncId_ = "";
+        syncNeeded_ = false;
 
         globalStatus_ = 0;
 
@@ -8972,8 +8364,7 @@ public final class IdBrokerMappingManagementProto {
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse result = new com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
-        result.mappingsVersion_ = mappingsVersion_;
-        result.syncId_ = syncId_;
+        result.syncNeeded_ = syncNeeded_;
         result.globalStatus_ = globalStatus_;
         result.statuses_ = internalGetStatuses();
         result.statuses_.makeImmutable();
@@ -9026,12 +8417,8 @@ public final class IdBrokerMappingManagementProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse other) {
         if (other == com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse.getDefaultInstance()) return this;
-        if (other.getMappingsVersion() != 0L) {
-          setMappingsVersion(other.getMappingsVersion());
-        }
-        if (!other.getSyncId().isEmpty()) {
-          syncId_ = other.syncId_;
-          onChanged();
+        if (other.getSyncNeeded() != false) {
+          setSyncNeeded(other.getSyncNeeded());
         }
         if (other.globalStatus_ != 0) {
           setGlobalStatusValue(other.getGlobalStatusValue());
@@ -9068,129 +8455,40 @@ public final class IdBrokerMappingManagementProto {
       }
       private int bitField0_;
 
-      private long mappingsVersion_ ;
+      private boolean syncNeeded_ ;
       /**
        * <pre>
-       * The version of the mappings.
+       * Whether a sync is needed to bring in-cluster mappings up-to-date.
        * </pre>
        *
-       * <code>int64 mappingsVersion = 1;</code>
+       * <code>bool syncNeeded = 2;</code>
        */
-      public long getMappingsVersion() {
-        return mappingsVersion_;
+      public boolean getSyncNeeded() {
+        return syncNeeded_;
       }
       /**
        * <pre>
-       * The version of the mappings.
+       * Whether a sync is needed to bring in-cluster mappings up-to-date.
        * </pre>
        *
-       * <code>int64 mappingsVersion = 1;</code>
+       * <code>bool syncNeeded = 2;</code>
        */
-      public Builder setMappingsVersion(long value) {
+      public Builder setSyncNeeded(boolean value) {
         
-        mappingsVersion_ = value;
+        syncNeeded_ = value;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The version of the mappings.
+       * Whether a sync is needed to bring in-cluster mappings up-to-date.
        * </pre>
        *
-       * <code>int64 mappingsVersion = 1;</code>
+       * <code>bool syncNeeded = 2;</code>
        */
-      public Builder clearMappingsVersion() {
+      public Builder clearSyncNeeded() {
         
-        mappingsVersion_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object syncId_ = "";
-      /**
-       * <pre>
-       * ID of the sync attempt.
-       * </pre>
-       *
-       * <code>string syncId = 2;</code>
-       */
-      public java.lang.String getSyncId() {
-        java.lang.Object ref = syncId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          syncId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * ID of the sync attempt.
-       * </pre>
-       *
-       * <code>string syncId = 2;</code>
-       */
-      public com.google.protobuf.ByteString
-          getSyncIdBytes() {
-        java.lang.Object ref = syncId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          syncId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * ID of the sync attempt.
-       * </pre>
-       *
-       * <code>string syncId = 2;</code>
-       */
-      public Builder setSyncId(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        syncId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * ID of the sync attempt.
-       * </pre>
-       *
-       * <code>string syncId = 2;</code>
-       */
-      public Builder clearSyncId() {
-        
-        syncId_ = getDefaultInstance().getSyncId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * ID of the sync attempt.
-       * </pre>
-       *
-       * <code>string syncId = 2;</code>
-       */
-      public Builder setSyncIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        syncId_ = value;
+        syncNeeded_ = false;
         onChanged();
         return this;
       }
@@ -12889,62 +12187,60 @@ public final class IdBrokerMappingManagementProto {
       "ngsResponse.MappingsEntry\022\026\n\016dataAccessR" +
       "ole\030\003 \001(\t\022\024\n\014baselineRole\030\004 \001(\t\032/\n\rMappi" +
       "ngsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001" +
-      "\"H\n\025DeleteMappingsRequest\022\021\n\taccountId\030\001" +
-      " \001(\t\022\034\n\024environmentNameOrCrn\030\002 \001(\t\"\030\n\026De" +
-      "leteMappingsResponse\"F\n\023SyncMappingsRequ" +
-      "est\022\021\n\taccountId\030\001 \001(\t\022\034\n\024environmentNam" +
-      "eOrCrn\030\002 \001(\t\"&\n\024SyncMappingsResponse\022\016\n\006" +
-      "syncId\030\001 \001(\t\"_\n\034GetMappingsSyncStatusReq" +
-      "uest\022\021\n\taccountId\030\001 \001(\t\022\034\n\024environmentNa" +
-      "meOrCrn\030\002 \001(\t\022\016\n\006syncId\030\003 \001(\t\"\304\002\n\035GetMap" +
-      "pingsSyncStatusResponse\022\027\n\017mappingsVersi" +
-      "on\030\001 \001(\003\022\016\n\006syncId\030\002 \001(\t\022A\n\014globalStatus" +
-      "\030\003 \001(\0162+.idbrokermappingmanagement.SyncS" +
-      "tatus.Value\022X\n\010statuses\030\004 \003(\0132F.idbroker" +
-      "mappingmanagement.GetMappingsSyncStatusR" +
-      "esponse.StatusesEntry\032]\n\rStatusesEntry\022\013" +
-      "\n\003key\030\001 \001(\t\022;\n\005value\030\002 \001(\0132,.idbrokermap" +
-      "pingmanagement.SyncStatusDetails:\0028\001\"\215\001\n" +
-      "\021SyncStatusDetails\022;\n\006status\030\001 \001(\0162+.idb" +
-      "rokermappingmanagement.SyncStatus.Value\022" +
-      "\023\n\013startDateMs\030\002 \001(\004\022\021\n\tendDateMs\030\003 \001(\004\022" +
-      "\023\n\013errorDetail\030\004 \001(\t\"W\n\nSyncStatus\"I\n\005Va" +
-      "lue\022\t\n\005UNSET\020\000\022\r\n\tNEVER_RUN\020\001\022\013\n\007RUNNING" +
-      "\020\002\022\r\n\tCOMPLETED\020\003\022\n\n\006FAILED\020\004\"2\n\030GetMapp" +
-      "ingsConfigRequest\022\026\n\016environmentCrn\030\001 \001(" +
-      "\t\"\340\002\n\031GetMappingsConfigResponse\022\027\n\017mappi" +
-      "ngsVersion\030\001 \001(\003\022^\n\ractorMappings\030\002 \003(\0132" +
-      "G.idbrokermappingmanagement.GetMappingsC" +
-      "onfigResponse.ActorMappingsEntry\022^\n\rgrou" +
-      "pMappings\030\003 \003(\0132G.idbrokermappingmanagem" +
-      "ent.GetMappingsConfigResponse.GroupMappi" +
-      "ngsEntry\0324\n\022ActorMappingsEntry\022\013\n\003key\030\001 " +
-      "\001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0324\n\022GroupMappingsE" +
-      "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\0012\274\006\n" +
-      "\031IdBrokerMappingManagement\022A\n\nGetVersion" +
-      "\022\027.version.VersionRequest\032\030.version.Vers" +
-      "ionResponse\"\000\022n\n\013GetMappings\022-.idbrokerm" +
-      "appingmanagement.GetMappingsRequest\032..id" +
-      "brokermappingmanagement.GetMappingsRespo" +
-      "nse\"\000\022n\n\013SetMappings\022-.idbrokermappingma" +
-      "nagement.SetMappingsRequest\032..idbrokerma" +
-      "ppingmanagement.SetMappingsResponse\"\000\022w\n" +
-      "\016deleteMappings\0220.idbrokermappingmanagem" +
-      "ent.DeleteMappingsRequest\0321.idbrokermapp" +
-      "ingmanagement.DeleteMappingsResponse\"\000\022q" +
-      "\n\014SyncMappings\022..idbrokermappingmanageme" +
-      "nt.SyncMappingsRequest\032/.idbrokermapping" +
-      "management.SyncMappingsResponse\"\000\022\214\001\n\025Ge" +
-      "tMappingsSyncStatus\0227.idbrokermappingman" +
-      "agement.GetMappingsSyncStatusRequest\0328.i" +
-      "dbrokermappingmanagement.GetMappingsSync" +
-      "StatusResponse\"\000\022\200\001\n\021GetMappingsConfig\0223" +
-      ".idbrokermappingmanagement.GetMappingsCo" +
-      "nfigRequest\0324.idbrokermappingmanagement." +
-      "GetMappingsConfigResponse\"\000B\\\n:com.cloud" +
-      "era.thunderhead.service.idbrokermappingm" +
-      "anagementB\036IdBrokerMappingManagementProt" +
-      "ob\006proto3"
+      "\"5\n\025DeleteMappingsRequest\022\026\n\016environment" +
+      "Crn\030\002 \001(\tJ\004\010\001\020\002\"\030\n\026DeleteMappingsRespons" +
+      "e\"F\n\023SyncMappingsRequest\022\021\n\taccountId\030\001 " +
+      "\001(\t\022\034\n\024environmentNameOrCrn\030\002 \001(\t\"\026\n\024Syn" +
+      "cMappingsResponse\"O\n\034GetMappingsSyncStat" +
+      "usRequest\022\021\n\taccountId\030\001 \001(\t\022\034\n\024environm" +
+      "entNameOrCrn\030\002 \001(\t\"\265\002\n\035GetMappingsSyncSt" +
+      "atusResponse\022\022\n\nsyncNeeded\030\002 \001(\010\022A\n\014glob" +
+      "alStatus\030\003 \001(\0162+.idbrokermappingmanageme" +
+      "nt.SyncStatus.Value\022X\n\010statuses\030\004 \003(\0132F." +
+      "idbrokermappingmanagement.GetMappingsSyn" +
+      "cStatusResponse.StatusesEntry\032]\n\rStatuse" +
+      "sEntry\022\013\n\003key\030\001 \001(\t\022;\n\005value\030\002 \001(\0132,.idb" +
+      "rokermappingmanagement.SyncStatusDetails" +
+      ":\0028\001J\004\010\001\020\002\"\215\001\n\021SyncStatusDetails\022;\n\006stat" +
+      "us\030\001 \001(\0162+.idbrokermappingmanagement.Syn" +
+      "cStatus.Value\022\023\n\013startDateMs\030\002 \001(\004\022\021\n\ten" +
+      "dDateMs\030\003 \001(\004\022\023\n\013errorDetail\030\004 \001(\t\"W\n\nSy" +
+      "ncStatus\"I\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tNEVER_RU" +
+      "N\020\001\022\013\n\007RUNNING\020\002\022\r\n\tCOMPLETED\020\003\022\n\n\006FAILE" +
+      "D\020\004\"2\n\030GetMappingsConfigRequest\022\026\n\016envir" +
+      "onmentCrn\030\001 \001(\t\"\340\002\n\031GetMappingsConfigRes" +
+      "ponse\022\027\n\017mappingsVersion\030\001 \001(\003\022^\n\ractorM" +
+      "appings\030\002 \003(\0132G.idbrokermappingmanagemen" +
+      "t.GetMappingsConfigResponse.ActorMapping" +
+      "sEntry\022^\n\rgroupMappings\030\003 \003(\0132G.idbroker" +
+      "mappingmanagement.GetMappingsConfigRespo" +
+      "nse.GroupMappingsEntry\0324\n\022ActorMappingsE" +
+      "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0324\n\022" +
+      "GroupMappingsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value" +
+      "\030\002 \001(\t:\0028\0012\274\006\n\031IdBrokerMappingManagement" +
+      "\022A\n\nGetVersion\022\027.version.VersionRequest\032" +
+      "\030.version.VersionResponse\"\000\022n\n\013GetMappin" +
+      "gs\022-.idbrokermappingmanagement.GetMappin" +
+      "gsRequest\032..idbrokermappingmanagement.Ge" +
+      "tMappingsResponse\"\000\022n\n\013SetMappings\022-.idb" +
+      "rokermappingmanagement.SetMappingsReques" +
+      "t\032..idbrokermappingmanagement.SetMapping" +
+      "sResponse\"\000\022w\n\016DeleteMappings\0220.idbroker" +
+      "mappingmanagement.DeleteMappingsRequest\032" +
+      "1.idbrokermappingmanagement.DeleteMappin" +
+      "gsResponse\"\000\022q\n\014SyncMappings\022..idbrokerm" +
+      "appingmanagement.SyncMappingsRequest\032/.i" +
+      "dbrokermappingmanagement.SyncMappingsRes" +
+      "ponse\"\000\022\214\001\n\025GetMappingsSyncStatus\0227.idbr" +
+      "okermappingmanagement.GetMappingsSyncSta" +
+      "tusRequest\0328.idbrokermappingmanagement.G" +
+      "etMappingsSyncStatusResponse\"\000\022\200\001\n\021GetMa" +
+      "ppingsConfig\0223.idbrokermappingmanagement" +
+      ".GetMappingsConfigRequest\0324.idbrokermapp" +
+      "ingmanagement.GetMappingsConfigResponse\"" +
+      "\000B\\\n:com.cloudera.thunderhead.service.id" +
+      "brokermappingmanagementB\036IdBrokerMapping" +
+      "ManagementProtob\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -13006,7 +12302,7 @@ public final class IdBrokerMappingManagementProto {
     internal_static_idbrokermappingmanagement_DeleteMappingsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_idbrokermappingmanagement_DeleteMappingsRequest_descriptor,
-        new java.lang.String[] { "AccountId", "EnvironmentNameOrCrn", });
+        new java.lang.String[] { "EnvironmentCrn", });
     internal_static_idbrokermappingmanagement_DeleteMappingsResponse_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_idbrokermappingmanagement_DeleteMappingsResponse_fieldAccessorTable = new
@@ -13024,19 +12320,19 @@ public final class IdBrokerMappingManagementProto {
     internal_static_idbrokermappingmanagement_SyncMappingsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_idbrokermappingmanagement_SyncMappingsResponse_descriptor,
-        new java.lang.String[] { "SyncId", });
+        new java.lang.String[] { });
     internal_static_idbrokermappingmanagement_GetMappingsSyncStatusRequest_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_idbrokermappingmanagement_GetMappingsSyncStatusRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_idbrokermappingmanagement_GetMappingsSyncStatusRequest_descriptor,
-        new java.lang.String[] { "AccountId", "EnvironmentNameOrCrn", "SyncId", });
+        new java.lang.String[] { "AccountId", "EnvironmentNameOrCrn", });
     internal_static_idbrokermappingmanagement_GetMappingsSyncStatusResponse_descriptor =
       getDescriptor().getMessageTypes().get(9);
     internal_static_idbrokermappingmanagement_GetMappingsSyncStatusResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_idbrokermappingmanagement_GetMappingsSyncStatusResponse_descriptor,
-        new java.lang.String[] { "MappingsVersion", "SyncId", "GlobalStatus", "Statuses", });
+        new java.lang.String[] { "SyncNeeded", "GlobalStatus", "Statuses", });
     internal_static_idbrokermappingmanagement_GetMappingsSyncStatusResponse_StatusesEntry_descriptor =
       internal_static_idbrokermappingmanagement_GetMappingsSyncStatusResponse_descriptor.getNestedTypes().get(0);
     internal_static_idbrokermappingmanagement_GetMappingsSyncStatusResponse_StatusesEntry_fieldAccessorTable = new

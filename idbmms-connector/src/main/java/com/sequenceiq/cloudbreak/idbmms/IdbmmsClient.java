@@ -12,8 +12,14 @@ import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 import io.grpc.ManagedChannel;
 
 /**
- * A simple wrapper to the GRPC IDBroker Mapping Management Service. This handles setting up
- * the appropriate context-propagating interceptors and hides some boilerplate.
+ * <p>
+ *     A simple wrapper to the GRPC IDBroker Mapping Management Service. This handles setting up
+ *     the appropriate context-propagating interceptors and hides some boilerplate.
+ * </p>
+ *
+ * <p>
+ *     This class is meant to be used only by {@link GrpcIdbmmsClient}.
+ * </p>
  */
 class IdbmmsClient {
 
@@ -33,11 +39,12 @@ class IdbmmsClient {
     }
 
     /**
-     * Wraps a call to getMappingsConfig.
+     * Wraps a call to {@code GetMappingsConfig}.
      *
-     * @param requestId the request ID for the request
-     * @param environmentCrn the environment CRN
+     * @param requestId the request ID for the request; must not be {@code null}
+     * @param environmentCrn the environment CRN; must not be {@code null}
      * @return the mappings config; never {@code null}
+     * @throws NullPointerException if either argument is {@code null}
      */
     MappingsConfig getMappingsConfig(String requestId, String environmentCrn) {
         checkNotNull(requestId);
@@ -51,6 +58,23 @@ class IdbmmsClient {
         Map<String, String> actorMappings = mappingsConfig.getActorMappingsMap();
         Map<String, String> groupMappings = mappingsConfig.getGroupMappingsMap();
         return new MappingsConfig(mappingsVersion, actorMappings, groupMappings);
+    }
+
+    /**
+     * Wraps a call to {@code DeleteMappings}.
+     *
+     * @param requestId the request ID for the request; must not be {@code null}
+     * @param environmentCrn the environment CRN; must not be {@code null}
+     * @throws NullPointerException if either argument is {@code null}
+     */
+    void deleteMappings(String requestId, String environmentCrn) {
+        checkNotNull(requestId);
+        checkNotNull(environmentCrn);
+        newStub(requestId).deleteMappings(
+                IdBrokerMappingManagementProto.DeleteMappingsRequest.newBuilder()
+                        .setEnvironmentCrn(environmentCrn)
+                        .build()
+        );
     }
 
     /**

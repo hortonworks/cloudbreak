@@ -50,6 +50,7 @@ dependencies {
   compile project (":cloud-openstack")
   compile project (":cloud-cumulus-yarn")
   compile project(":core-api")
+  compile project(':idbmms-connector')
   implementation (project (":redbeams-api"))
   implementation (project (":freeipa-api"))
 

@@ -29,7 +29,7 @@ service IdBrokerMappingManagement {
     returns (SetMappingsResponse) {}
 
   // Deletes all ID Broker mappings for an environment.
-  rpc deleteMappings (DeleteMappingsRequest)
+  rpc DeleteMappings (DeleteMappingsRequest)
     returns (DeleteMappingsResponse) {}
 
   // Sync ID Broker mappings for an environment to all associated datalake clusters.
@@ -101,10 +101,9 @@ message SetMappingsResponse {
 }
 
 message DeleteMappingsRequest {
-  // The account ID.
-  string accountId = 1;
-  // The name or CRN of the environment.
-  string environmentNameOrCrn = 2;
+  reserved 1;
+  // The CRN of the environment.
+  string environmentCrn = 2;
 }
 
 message DeleteMappingsResponse {
@@ -118,8 +117,6 @@ message SyncMappingsRequest {
 }
 
 message SyncMappingsResponse {
-  // A unique identifier for this sync attempt.
-  string syncId = 1;
 }
 
 message GetMappingsSyncStatusRequest {
@@ -127,16 +124,12 @@ message GetMappingsSyncStatusRequest {
   string accountId = 1;
   // The name or CRN of the environment.
   string environmentNameOrCrn = 2;
-  // Optional syncId for the sync attempt whose status is desired. If omitted,
-  // the status of the most recent sync attempt for the environment is returned.
-  string syncId = 3;
 }
 
 message GetMappingsSyncStatusResponse {
-  // The version of the mappings.
-  int64 mappingsVersion = 1;
-  // ID of the sync attempt.
-  string syncId = 2;
+  reserved 1;
+  // Whether a sync is needed to bring in-cluster mappings up-to-date.
+  bool syncNeeded = 2;
   // The overall sync status for all datalake clusters affected by this sync attempt.
   SyncStatus.Value globalStatus = 3;
   // Map of datalake cluster CRN to detailed sync status for each datalake cluster

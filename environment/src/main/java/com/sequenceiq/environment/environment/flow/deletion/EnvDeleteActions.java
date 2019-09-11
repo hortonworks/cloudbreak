@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.deletion;
 
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_RDBMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINALIZE_ENV_DELETE_EVENT;
@@ -52,9 +53,35 @@ public class EnvDeleteActions {
         this.environmentApiConverter = environmentApiConverter;
     }
 
+    @Bean(name = "IDBROKER_MAPPINGS_DELETE_STARTED_STATE")
+    public Action<?, ?> idbmmsDeleteAction() {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                environmentService
+                        .findEnvironmentById(payload.getResourceId())
+                        .ifPresentOrElse(environment -> {
+                            environment.setStatus(EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS);
+                            Environment env = environmentService.save(environment);
+                            EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
+                            SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                            notificationService.send(ResourceEvent.ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED, simpleResponse,
+                                    context.getFlowTriggerUserCrn());
+                        }, () -> LOGGER.error("Cannot delete IDBroker mappings, because the environment does not exist: {}. "
+                                + "But the flow will continue, how can this happen?", payload.getResourceId()));
+                EnvironmentDto envDto = new EnvironmentDto();
+                envDto.setId(payload.getResourceId());
+                envDto.setResourceCrn(payload.getResourceCrn());
+                envDto.setName(payload.getResourceName());
+                LOGGER.info("Flow entered into IDBROKER_MAPPINGS_DELETE_STARTED_STATE");
+                sendEvent(context, DELETE_IDBROKER_MAPPINGS_EVENT.selector(), envDto);
+            }
+        };
+    }
+
     @Bean(name = "NETWORK_DELETE_STARTED_STATE")
     public Action<?, ?> networkDeleteAction() {
-        return new AbstractVpcDeleteAction<>(EnvDeleteEvent.class) {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
                 environmentService
@@ -70,7 +97,7 @@ public class EnvDeleteActions {
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
                 envDto.setResourceCrn(payload.getResourceCrn());
-                envDto.setResourceCrn(payload.getResourceName());
+                envDto.setName(payload.getResourceName());
                 LOGGER.info("Flow entered into NETWORK_DELETE_STARTED_STATE");
                 sendEvent(context, DELETE_NETWORK_EVENT.selector(), envDto);
             }
@@ -79,7 +106,7 @@ public class EnvDeleteActions {
 
     @Bean(name = "RDBMS_DELETE_STARTED_STATE")
     public Action<?, ?> rdbmsDeleteAction() {
-        return new AbstractVpcDeleteAction<>(EnvDeleteEvent.class) {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
                 environmentService
@@ -104,7 +131,7 @@ public class EnvDeleteActions {
 
     @Bean(name = "FREEIPA_DELETE_STARTED_STATE")
     public Action<?, ?> freeipaDeleteAction() {
-        return new AbstractVpcDeleteAction<>(EnvDeleteEvent.class) {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
                 environmentService
@@ -120,6 +147,7 @@ public class EnvDeleteActions {
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
                 envDto.setResourceCrn(payload.getResourceCrn());
+                envDto.setName(payload.getResourceName());
                 LOGGER.info("Flow entered into FREEIPA_DELETE_STARTED_STATE");
                 sendEvent(context, DELETE_FREEIPA_EVENT.selector(), envDto);
             }
@@ -128,7 +156,7 @@ public class EnvDeleteActions {
 
     @Bean(name = "ENV_DELETE_FINISHED_STATE")
     public Action<?, ?> finishedAction() {
-        return new AbstractVpcDeleteAction<>(ResourceCrnPayload.class) {
+        return new AbstractEnvDeleteAction<>(ResourceCrnPayload.class) {
             @Override
             protected void doExecute(CommonContext context, ResourceCrnPayload payload, Map<Object, Object> variables) {
                 environmentService
@@ -155,7 +183,7 @@ public class EnvDeleteActions {
 
     @Bean(name = "ENV_DELETE_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractVpcDeleteAction<>(EnvDeleteFailedEvent.class) {
+        return new AbstractEnvDeleteAction<>(EnvDeleteFailedEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn("Failed to delete environment", payload.getException());
@@ -176,10 +204,10 @@ public class EnvDeleteActions {
         };
     }
 
-    private abstract class AbstractVpcDeleteAction<P extends ResourceCrnPayload>
+    private abstract class AbstractEnvDeleteAction<P extends ResourceCrnPayload>
             extends AbstractAction<EnvDeleteState, EnvDeleteStateSelectors, CommonContext, P> {
 
-        protected AbstractVpcDeleteAction(Class<P> payloadClass) {
+        protected AbstractEnvDeleteAction(Class<P> payloadClass) {
             super(payloadClass);
         }
 

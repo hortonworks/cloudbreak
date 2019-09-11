@@ -4,6 +4,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteStat
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.ENV_DELETE_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.FINAL_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.FREEIPA_DELETE_STARTED_STATE;
+import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.IDBROKER_MAPPINGS_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.INIT_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.NETWORK_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.RDBMS_DELETE_STARTED_STATE;
@@ -11,6 +12,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.HANDLED_FAILED_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_IDBROKER_MAPPINGS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_NETWORK_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
 
@@ -39,7 +41,10 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
             .from(RDBMS_DELETE_STARTED_STATE).to(NETWORK_DELETE_STARTED_STATE)
             .event(START_NETWORK_DELETE_EVENT).defaultFailureEvent()
 
-            .from(NETWORK_DELETE_STARTED_STATE).to(ENV_DELETE_FINISHED_STATE)
+            .from(NETWORK_DELETE_STARTED_STATE).to(IDBROKER_MAPPINGS_DELETE_STARTED_STATE)
+            .event(START_IDBROKER_MAPPINGS_DELETE_EVENT).defaultFailureEvent()
+
+            .from(IDBROKER_MAPPINGS_DELETE_STARTED_STATE).to(ENV_DELETE_FINISHED_STATE)
             .event(FINISH_ENV_DELETE_EVENT).defaultFailureEvent()
 
             .from(ENV_DELETE_FINISHED_STATE).to(FINAL_STATE)

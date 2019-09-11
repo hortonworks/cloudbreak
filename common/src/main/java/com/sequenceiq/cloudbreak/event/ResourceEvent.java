@@ -68,7 +68,8 @@ public enum ResourceEvent {
 
     ENVIRONMENT_NETWORK_DELETION_STARTED("environment.network.deletion.started"),
     ENVIRONMENT_DATABASE_DELETION_STARTED("environment.database.deletion.started"),
-    ENVIRONMENT_FREEIPA_DELETION_STARTED("environment.freeipa.deletion.failed"),
+    ENVIRONMENT_FREEIPA_DELETION_STARTED("environment.freeipa.deletion.started"),
+    ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED("environment.idbroker.mappings.deletion.started"),
     ENVIRONMENT_DELETION_FINISHED("environment.deletion.finished"),
     ENVIRONMENT_DELETION_FAILED("environment.deletion.failed"),
 

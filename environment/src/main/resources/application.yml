@@ -30,6 +30,8 @@ management:
         "[http.server.requests]": "0.5, 0.95"
 
 altus:
+  idbmms:
+    host: localhost
   ums:
     host: localhost
 
