@@ -172,6 +172,11 @@
                  <name>NIFI</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
              </param>
+             {% if 'NIFI-REGISTRY' in exposed and 'NIFI_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>NIFI-REGISTRY</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+             </param>
              {%- endif %}
              {% if 'PROFILER-ADMIN-API' in exposed and 'PROFILER_ADMIN_AGENT' in salt['pillar.get']('gateway:location') -%}
              <param>
@@ -435,6 +440,17 @@
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['NIFI'] }}</url>
         {%- endfor %}
     </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'NIFI_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'NIFI-REGISTRY' in exposed -%}
+        <service>
+            <role>NIFI-REGISTRY</role>
+            {% for hostloc in salt['pillar.get']('gateway:location')['NIFI_REGISTRY_SERVER'] -%}
+            <url>{{ protocol }}://{{ hostloc }}:{{ ports['NIFI-REGISTRY'] }}</url>
+            {%- endfor %}
+        </service>
     {%- endif %}
     {%- endif %}
 
