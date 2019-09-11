@@ -15,6 +15,7 @@ import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.RoleCommandsResourceApi;
+import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -90,6 +91,10 @@ public class ClouderaManagerClientFactory {
 
     public ParcelResourceApi getParcelResourceApi(ApiClient apiClient) {
         return new ParcelResourceApi(apiClient);
+    }
+
+    public ParcelsResourceApi getParcelsResourceApi(ApiClient apiClient) {
+        return new ParcelsResourceApi(apiClient);
     }
 
     public CommandsResourceApi getCommandsResourceApi(ApiClient apiClient) {

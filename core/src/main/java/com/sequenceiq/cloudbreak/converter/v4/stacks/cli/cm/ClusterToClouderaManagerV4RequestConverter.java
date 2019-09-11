@@ -50,7 +50,7 @@ public class ClusterToClouderaManagerV4RequestConverter {
             try {
                 return attribute.get(attributeClass);
             } catch (IOException e) {
-                throw new BadRequestException("Cannot deserialize the compnent: " + attributeClass, e);
+                throw new BadRequestException("Cannot deserialize the component: " + attributeClass, e);
             }
         };
     }

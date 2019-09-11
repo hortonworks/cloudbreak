@@ -16,6 +16,13 @@ jar {
   baseName = 'cluster-cm'
 }
 
+configurations.all {
+    resolutionStrategy {
+        force 'org.ow2.asm:asm:7.1'
+        force 'net.bytebuddy:byte-buddy:1.9.13'
+    }
+}
+
 dependencies {
   compile (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: cmClientVersion) {
     transitive = false
@@ -25,9 +32,6 @@ dependencies {
   compile project(':client-cm')
   compile project(':template-manager-cmtemplate')
 
-  testCompile (group: 'junit', name: 'junit', version: junitVersion) {
-    exclude group: 'org.hamcrest'
-  }
   testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }

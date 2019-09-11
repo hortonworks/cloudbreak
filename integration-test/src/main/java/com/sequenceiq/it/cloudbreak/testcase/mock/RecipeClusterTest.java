@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
@@ -33,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.SetupCmScalingMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.util.cleanup.ParcelMockActivatorUtil;
 
 public class RecipeClusterTest extends AbstractIntegrationTest {
 
@@ -54,6 +56,12 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
+
+    @Inject
+    private ResourcePropertyProvider resourcePropertyProvider;
+
+    @Inject
+    private ParcelMockActivatorUtil parcelMockActivatorUtil;
 
     @Test(dataProvider = "dataProviderForNonPreTerminationRecipeTypes")
     public void testRecipeNotPreTerminationHasGotHighStateOnCluster(
@@ -170,6 +178,8 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             when = "upscaling cluster",
             then = "the post recipe should run on the new nodes as well")
     public void testWhenClusterGetUpScaledThenPostClusterInstallRecipeShouldBeExecuted(MockedTestContext testContext) {
+        String clusterName = resourcePropertyProvider.getName();
+        parcelMockActivatorUtil.mockActivateParcels(testContext, clusterName);
         String recipeName = resourcePropertyProvider().getName();
         SetupCmScalingMock mock = new SetupCmScalingMock();
         mock.configure(testContext, 3, 4, 4);
@@ -184,6 +194,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
                 .given(StackTestDto.class)
+                .withName(clusterName)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
@@ -201,6 +212,8 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
     public void testWhenRecipeProvidedToHostGroupAndAnotherHostGroupGetUpScaledThenThereIsNoFurtherRecipeExecutionOnTheNewNodeBesideTheDefaultOnes(
             MockedTestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
+        String clusterName = resourcePropertyProvider.getName();
+        parcelMockActivatorUtil.mockActivateParcels(testContext, clusterName);
         SetupCmScalingMock mock = new SetupCmScalingMock();
         mock.configure(testContext, 3, 4, 4);
         testContext
@@ -214,6 +227,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
                 .given(StackTestDto.class)
+                .withName(clusterName)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
@@ -228,7 +242,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             given = "a created cluster with attached recipe",
             when = "delete attached recipe",
             then = "getting BadRequestException")
-    public void testTryToDeleteAttachedRecipe(TestContext testContext) {
+    public void testTryToDeleteAttachedRecipe(MockedTestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
         String key = resourcePropertyProvider().getName();
 
