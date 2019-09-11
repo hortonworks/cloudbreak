@@ -109,6 +109,28 @@
       ]
     },
     {
+      "refName": "kudu",
+      "serviceType": "KUDU",
+      "serviceConfigs": [
+        {
+          "name": "gflagfile_service_safety_valve",
+          "value": "--use_hybrid_clock=false"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "kudu-MASTER-BASE",
+          "roleType": "KUDU_MASTER",
+          "base": true
+        },
+        {
+          "refName": "kudu-TSERVER-BASE",
+          "roleType": "KUDU_TSERVER",
+          "base": true
+        }
+      ]
+    },
+    {
       "refName": "impala",
       "serviceType": "IMPALA",
       "roleConfigGroups": [
@@ -147,7 +169,8 @@
         "impala-STATESTORE-BASE",
         "oozie-OOZIE_SERVER-BASE",
         "yarn-JOBHISTORY-BASE",
-        "yarn-RESOURCEMANAGER-BASE"
+        "yarn-RESOURCEMANAGER-BASE",
+        "kudu-MASTER-BASE"
       ]
     },
     {
@@ -157,7 +180,8 @@
         "hdfs-DATANODE-BASE",
         "hive-GATEWAY-BASE",
         "impala-IMPALAD-BASE",
-        "yarn-NODEMANAGER-WORKER"
+        "yarn-NODEMANAGER-WORKER",
+        "kudu-TSERVER-BASE"
       ]
     },
     {
