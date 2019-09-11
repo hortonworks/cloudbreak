@@ -60,14 +60,24 @@ public final class VolumeUtils {
     }
 
     private static String buildVolumePathString(int volumeCount, String directory, String dirPrefix) {
+        return buildVolumePathString(1, volumeCount, directory, dirPrefix);
+    }
+
+    private static String buildVolumePathString(int startIndex, int volumeCount, String directory, String dirPrefix) {
         StringBuilder localDirs = new StringBuilder();
-        for (int i = 1; i <= volumeCount; i++) {
+        for (int i = startIndex; i <= volumeCount; i++) {
             localDirs.append(getVolumeDir(i, dirPrefix, directory));
             if (i != volumeCount) {
                 localDirs.append(',');
             }
         }
         return localDirs.toString();
+    }
+
+    public static String buildVolumePathFromVolumeIndexZeroVolumeHandled(int startIndex, int volumeCount, String directory) {
+        String prefix = volumeCount > 0 ? VOLUME_PREFIX : ROOT_VOLUME_PREFIX;
+        int calculatedVolumeCount = volumeCount == 0 ? 1 : volumeCount;
+        return buildVolumePathString(startIndex, calculatedVolumeCount, directory, prefix);
     }
 
     private static String getVolumeDir(int volumeIndex, String dirPrefix, String directory) {
