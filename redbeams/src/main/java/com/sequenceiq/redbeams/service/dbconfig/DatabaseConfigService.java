@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -41,7 +42,7 @@ import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 import com.sequenceiq.redbeams.service.validation.DatabaseConnectionValidator;
 
 @Service
-public class DatabaseConfigService extends AbstractArchivistService<DatabaseConfig> {
+public class DatabaseConfigService extends AbstractArchivistService<DatabaseConfig> implements ResourceIdProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConfigService.class);
 

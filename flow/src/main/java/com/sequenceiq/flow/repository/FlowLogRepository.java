@@ -43,4 +43,6 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     void updateLastLogStatusInFlow(@Param("id") Long id, @Param("stateStatus") StateStatus stateStatus);
 
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long resourceId);
+
+    List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId);
 }

@@ -57,6 +57,8 @@ public class SecurityConfig {
 
         private static final String AUTOSCALE_API = API_ROOT_CONTEXT + "/autoscale/**";
 
+        private static final String FLOW_API = API_ROOT_CONTEXT + "/flow_logs/**";
+
         @Inject
         private GrpcUmsClient umsClient;
 
@@ -106,6 +108,8 @@ public class SecurityConfig {
                     .antMatchers(DISTROX_API)
                     .authenticated()
                     .antMatchers(AUTOSCALE_API)
+                    .authenticated()
+                    .antMatchers(FLOW_API)
                     .authenticated()
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()

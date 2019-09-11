@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.controller.v4.WorkspaceV4Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
+import com.sequenceiq.flow.controller.FlowController;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
@@ -75,7 +76,8 @@ public class EndpointConfig extends ResourceConfig {
             CloudbreakInfoV4Controller.class,
             DistroXV1Controller.class,
             DatalakeV4Controller.class,
-            CloudProviderServicesV4Controller.class
+            CloudProviderServicesV4Controller.class,
+            FlowController.class
     );
 
     private static final String VERSION_UNAVAILABLE = "unspecified";
@@ -119,7 +121,7 @@ public class EndpointConfig extends ResourceConfig {
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(CoreApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/hortonworks/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api,com.sequenceiq.distrox.api");
+        swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api,com.sequenceiq.distrox.api,com.sequenceiq.flow.api");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);

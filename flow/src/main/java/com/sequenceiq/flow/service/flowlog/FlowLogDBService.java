@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.service.flowlog;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,8 +17,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonWriter;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -25,6 +28,7 @@ import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdFlowAndType;
@@ -56,6 +60,9 @@ public class FlowLogDBService implements FlowLogService {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private ResourceIdProvider resourceIdProvider;
 
     public FlowLog save(FlowParameters flowParameters, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
             FlowState currentState) {
@@ -182,5 +189,30 @@ public class FlowLogDBService implements FlowLogService {
 
     public List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long id) {
         return flowLogRepository.findAllByResourceIdOrderByCreatedDesc(id);
+    }
+
+    public List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId) {
+        return flowLogRepository.findAllByFlowIdOrderByCreatedDesc(flowId);
+    }
+
+    public Long getResourceIdByCrnOrName(String resource) {
+        if (Crn.isCrn(resource)) {
+            return resourceIdProvider.getResourceIdByResourceCrn(resource);
+        }
+        return resourceIdProvider.getResourceIdByResourceName(resource);
+    }
+
+    public FlowLog getLastFlowLogByResourceCrnOrName(String resource) {
+        Long resourceId = getResourceIdByCrnOrName(resource);
+        Iterator<FlowLog> iterator = findAllByResourceIdOrderByCreatedDesc(resourceId).iterator();
+        if (iterator.hasNext()) {
+            return iterator.next();
+        }
+        throw new NotFoundException("Flow log for resource not found!");
+    }
+
+    public List<FlowLog> getFlowLogsByResourceCrnOrName(String resource) {
+        Long resourceId = getResourceIdByCrnOrName(resource);
+        return findAllByResourceIdOrderByCreatedDesc(resourceId);
     }
 }
