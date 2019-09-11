@@ -1,7 +1,6 @@
 package com.sequenceiq.it.util.cleanup;
 
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -10,10 +9,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentBaseResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.client.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.util.WaitResult;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.client.SdxClient;
 
@@ -30,6 +32,18 @@ public class CleanupWaitUtil {
     @Value("${integrationtest.testsuite.maxRetry:3000}")
     private int maxRetry;
 
+    /**
+     * Wait till all the distroxes in all the environments is going to be teminated. However not more than the "integrationtest.testsuite.maxRetry"
+     *
+     * Returns with:
+     * FAILED: At least one of the distroxes gets in DELETE_FAILED state
+     * TIMEOUT: There is at least one distrox, out of all, that is still available. However the "maxRetry" has been reached.
+     * SUCCESSFUL: All the distroxes in all the environments have been terminated successfully.
+     *
+     * @param cloudbreak    com.sequenceiq.cloudbreak.client.CloudbreakClient
+     * @param environment   com.sequenceiq.environment.client.EnvironmentClient
+     * @return              FAILED, TIMEOUT, SUCCESSFUL com.sequenceiq.it.cloudbreak.util.WaitResult
+     */
     public WaitResult waitForDistroxesCleanup(CloudbreakClient cloudbreak, EnvironmentClient environment) {
         int retryCount = 0;
         Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
@@ -53,6 +67,18 @@ public class CleanupWaitUtil {
         }
     }
 
+    /**
+     * Wait till all the sdxes in all the environments is going to be teminated. However not more than the "integrationtest.testsuite.maxRetry"
+     *
+     * Returns with:
+     * FAILED: At least one of the sdxes gets in DELETE_FAILED state
+     * TIMEOUT: There is at least one sdx, out of all, that is still available. However the "maxRetry" has been reached.
+     * SUCCESSFUL: All the sdxes in all the environments have been terminated successfully.
+     *
+     * @param sdx           com.sequenceiq.sdx.client.SdxClient
+     * @param environment   com.sequenceiq.environment.client.EnvironmentClient
+     * @return              FAILED, TIMEOUT, SUCCESSFUL com.sequenceiq.it.cloudbreak.util.WaitResult
+     */
     public WaitResult waitForSdxesCleanup(SdxClient sdx, EnvironmentClient environment) {
         int retryCount = 0;
         Map<String, String> environments = environment.environmentV1Endpoint().list().getResponses().stream()
@@ -76,6 +102,17 @@ public class CleanupWaitUtil {
         }
     }
 
+    /**
+     * Wait till all the environments is going to be teminated. However not more than the "integrationtest.testsuite.maxRetry"
+     *
+     * Returns with:
+     * FAILED: At least one of the environment gets in DELETE_FAILED state
+     * TIMEOUT: There is at least one environment, out of all, that is still available. However the "maxRetry" has been reached.
+     * SUCCESSFUL: All the environments have been terminated successfully.
+     *
+     * @param environment   com.sequenceiq.environment.client.EnvironmentClient
+     * @return              FAILED, TIMEOUT, SUCCESSFUL com.sequenceiq.it.cloudbreak.util.WaitResult
+     */
     public WaitResult waitForEnvironmentsCleanup(EnvironmentClient environment) {
         int retryCount = 0;
 
@@ -105,77 +142,108 @@ public class CleanupWaitUtil {
         }
     }
 
+    /**
+     * Checking the number of available distroxes across all the environments.
+     *
+     * Returns with:
+     * TRUE: At least one distrox is still available in one of the environment.
+     * FALSE: Distroxes cannot be found in any of the available environent.
+     *
+     * @param cloudbreak    com.sequenceiq.cloudbreak.client.CloudbreakClient
+     * @param environments  Map of available environments CRN and Name
+     * @return              TRUE or FALSE based on distroxes availability
+     */
     private boolean checkDistroxesAreAvailable(CloudbreakClient cloudbreak, Map<String, String> environments) {
-        AtomicBoolean distroxesAreAvailable = new AtomicBoolean(true);
-
-        environments.entrySet().stream().forEach(env -> {
-            Map<String, Status> distroxes = cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
-                    .collect(Collectors.toMap(response -> response.getName(), response -> response.getStatus()));
-
-            if (distroxes == null || distroxes.isEmpty()) {
-                LOG.info("All the DISTROXes have been deleted from environment with name: {}", env.getValue());
-                distroxesAreAvailable.set(false);
-            }
-        });
-        return distroxesAreAvailable.get();
+        return environments.entrySet().stream().anyMatch(env ->
+                !cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
+                        .map(StackViewV4Response::getName)
+                        .collect(Collectors.toList()).isEmpty()
+        );
     }
 
+    /**
+     * Checking the number of available sdxes across all the environments.
+     *
+     * Returns with:
+     * TRUE: At least one sdx is still available in one of the environment.
+     * FALSE: Sdxes cannot be found in any of the available environent.
+     *
+     * @param sdx           com.sequenceiq.sdx.client.SdxClient
+     * @param environments  Map of available environments CRN and Name
+     * @return              TRUE or FALSE based on sdxes availability
+     */
     private boolean checkSdxesAreAvailable(SdxClient sdx, Map<String, String> environments) {
-        AtomicBoolean sdxesAreAvailable = new AtomicBoolean(true);
-
-        environments.entrySet().stream().forEach(env -> {
-            Map<String, SdxClusterStatusResponse> sdxes = sdx.sdxEndpoint().list(env.getValue()).stream()
-                    .collect(Collectors.toMap(response -> response.getName(), response -> response.getStatus()));
-
-            if (sdxes == null || sdxes.isEmpty()) {
-                LOG.info("All the SDXes have been deleted from environment with name: {}", env.getValue());
-                sdxesAreAvailable.set(false);
-            }
-        });
-        return sdxesAreAvailable.get();
+        return environments.entrySet().stream().anyMatch(env ->
+                !sdx.sdxEndpoint().list(env.getValue()).stream()
+                        .map(SdxClusterResponse::getName)
+                        .collect(Collectors.toList()).isEmpty()
+        );
     }
 
+    /**
+     * Checking the number of available environments.
+     *
+     * Returns with:
+     * TRUE: At least one environment is still available.
+     * FALSE: Environments cannot be found.
+     *
+     * @param environment   com.sequenceiq.environment.client.EnvironmentClient
+     * @return              TRUE or FALSE based on environments availability
+     */
     private boolean checkEnvironmentsAreAvailable(EnvironmentClient environment) {
-        Map<String, EnvironmentStatus> environments = environment.environmentV1Endpoint().list().getResponses().stream()
-                .collect(Collectors.toMap(response -> response.getName(), response -> response.getEnvironmentStatus()));
-
-        return (environments == null || environments.isEmpty()) ? false : true;
+        return !environment.environmentV1Endpoint().list().getResponses().stream()
+                .map(EnvironmentBaseResponse::getName)
+                .collect(Collectors.toList()).isEmpty();
     }
 
+    /**
+     * Checking DELETE_FAILED state of available distroxes across all the environments.
+     *
+     * Returns with:
+     * TRUE: DELETE_FAILED state is available.
+     * FALSE: DELETE_FAILED state cannot be found.
+     *
+     * @param cloudbreak    com.sequenceiq.cloudbreak.client.CloudbreakClient
+     * @param environments  Map of available environments CRN and Name
+     * @return              TRUE or FALSE based on existing DELETE_FAILED status
+     */
     private boolean checkDistroxesDeleteFailedStatus(CloudbreakClient cloudbreak, Map<String, String> environments) {
-        AtomicBoolean failedIsAvailable = new AtomicBoolean(false);
-
-        environments.entrySet().stream().forEach(env -> {
-            Map<String, Status> distroxes = cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
-                    .collect(Collectors.toMap(response -> response.getName(), response -> response.getStatus()));
-
-            if (distroxes.values().stream().anyMatch(distroxStatus -> distroxStatus.equals(Status.DELETE_FAILED))) {
-                LOG.info("One or more DISTROX cannot be deleted from environment with name: {}", env.getValue());
-                failedIsAvailable.set(true);
-            }
-        });
-        return failedIsAvailable.get();
+        return environments.entrySet().stream().anyMatch(env ->
+                cloudbreak.distroXV1Endpoint().list(env.getValue(), env.getKey()).getResponses().stream()
+                        .anyMatch(response -> response.getStatus().equals(Status.DELETE_FAILED))
+        );
     }
 
+    /**
+     * Checking DELETE_FAILED state of available sdxes across all the environments.
+     *
+     * Returns with:
+     * TRUE: DELETE_FAILED state is available.
+     * FALSE: DELETE_FAILED state cannot be found.
+     *
+     * @param sdx           com.sequenceiq.sdx.client.SdxClient
+     * @param environments  Map of available environments CRN and Name
+     * @return              TRUE or FALSE based on existing DELETE_FAILED status
+     */
     private boolean checkSdxesDeleteFailedStatus(SdxClient sdx, Map<String, String> environments) {
-        AtomicBoolean failedIsAvailable = new AtomicBoolean(false);
-
-        environments.entrySet().stream().forEach(env -> {
-            Map<String, SdxClusterStatusResponse> sdxes = sdx.sdxEndpoint().list(env.getValue()).stream()
-                    .collect(Collectors.toMap(response -> response.getName(), response -> response.getStatus()));
-
-            if (sdxes.values().stream().anyMatch(sdxStatus -> sdxStatus.equals(SdxClusterStatusResponse.DELETE_FAILED))) {
-                LOG.info("One or more SDX cannot be deleted from environment with name: {}", env.getValue());
-                failedIsAvailable.set(true);
-            }
-        });
-        return failedIsAvailable.get();
+        return environments.entrySet().stream().anyMatch(env ->
+                sdx.sdxEndpoint().list(env.getValue()).stream()
+                        .anyMatch(response -> response.getStatus().equals(SdxClusterStatusResponse.DELETE_FAILED))
+        );
     }
 
+    /**
+     * Checking DELETE_FAILED state of available environments.
+     *
+     * Returns with:
+     * TRUE: DELETE_FAILED state is available.
+     * FALSE: DELETE_FAILED state cannot be found.
+     *
+     * @param environment   com.sequenceiq.environment.client.EnvironmentClient
+     * @return              TRUE or FALSE based on existing DELETE_FAILED status
+     */
     private boolean checkEnvironmentsDeleteFailedStatus(EnvironmentClient environment) {
-        Map<String, EnvironmentStatus> environments = environment.environmentV1Endpoint().list().getResponses().stream()
-                .collect(Collectors.toMap(response -> response.getName(), response -> response.getEnvironmentStatus()));
-
-        return environments.values().stream().anyMatch(environmentStatus -> environmentStatus.equals(EnvironmentStatus.DELETE_FAILED)) ? true : false;
+        return environment.environmentV1Endpoint().list().getResponses().stream()
+                .anyMatch(response -> response.getEnvironmentStatus().equals(EnvironmentStatus.DELETE_FAILED));
     }
 }
