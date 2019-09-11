@@ -13,10 +13,14 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialResponseParameters;
 import com.sequenceiq.redbeams.dto.Credential;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
+import org.springframework.retry.support.RetryTemplate;
 
 public class CredentialServiceTest {
 
@@ -29,6 +33,10 @@ public class CredentialServiceTest {
     private static final String ATTRIBUTES = "attributes";
 
     private static final String SUBSCRIPTION_ID = "subscriptionId";
+
+    @SuppressFBWarnings(value = "UrF", justification = "Gets injected into CredentialService")
+    @Spy
+    private RetryTemplate cbRetryTemplate = new RetryTemplate();
 
     @Mock
     private CredentialEndpoint credentialEndpoint;

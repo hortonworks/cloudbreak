@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.service;
 
 import javax.inject.Inject;
 
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
@@ -12,6 +13,9 @@ import com.sequenceiq.redbeams.dto.Credential;
 
 @Service
 public class CredentialService {
+
+    @Inject
+    private RetryTemplate cbRetryTemplate;
 
     @Inject
     private CredentialEndpoint credentialEndpoint;
@@ -26,7 +30,7 @@ public class CredentialService {
      * @return        environment credential
      */
     public Credential getCredentialByEnvCrn(String envCrn) {
-        CredentialResponse credentialResponse = credentialEndpoint.getByEnvironmentCrn(envCrn);
+        CredentialResponse credentialResponse = cbRetryTemplate.execute(rctx -> credentialEndpoint.getByEnvironmentCrn(envCrn));
 
         SecretResponse secretResponse = credentialResponse.getAttributes();
         String attributes = secretService.getByResponse(secretResponse);
