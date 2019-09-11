@@ -22,7 +22,7 @@ public enum ExposedService {
     NAMENODE("Name Node", "NAMENODE", "HDFSUI", "/hdfs/", true, 9870, 9871, false, false),
     RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "YARNUIV2", "/yarnuiv2/", true, 8088, 8090, false, true),
     JOB_HISTORY_SERVER("Job History Server", "JOBHISTORY", "JOBHISTORYUI", "/jobhistory/", true, 19888, 19890, false, false),
-    HIVE_SERVER("Hive Server", "HIVESERVER2", "HIVE", "/hive/", false, 10001, 10002, true, true),
+    HIVE_SERVER("Hive Server", "HIVESERVER2", "HIVE", "/hive/", false, 10001, 10001, true, true),
     HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "", "HIVE_INTERACTIVE", "/hive/", false, 10501, 10502, true, true),
     ATLAS("Atlas", "ATLAS_SERVER", "ATLAS", "/atlas/", true, 21000, 21443, false, true),
     SPARK_HISTORY_SERVER("Spark History Server", "SPARK_YARN_HISTORY_SERVER", "SPARKHISTORYUI", "/sparkhistory/", true, 18088, 18488, false, false),
