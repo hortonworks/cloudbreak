@@ -41,6 +41,10 @@ public class GeneralClusterConfigs {
 
     private String variant;
 
+    private boolean autoTlsEnabled;
+
+    private boolean knoxUserFacingCertConfigured;
+
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
     }
@@ -175,5 +179,21 @@ public class GeneralClusterConfigs {
 
     public void setVariant(String variant) {
         this.variant = variant;
+    }
+
+    public boolean getAutoTlsEnabled() {
+        return autoTlsEnabled;
+    }
+
+    public void setAutoTlsEnabled(boolean autoTlsEnabled) {
+        this.autoTlsEnabled = autoTlsEnabled;
+    }
+
+    public boolean getKnoxUserFacingCertConfigured() {
+        return knoxUserFacingCertConfigured;
+    }
+
+    public void setKnoxUserFacingCertConfigured(boolean knoxUserFacingCertConfigured) {
+        this.knoxUserFacingCertConfigured = knoxUserFacingCertConfigured;
     }
 }
