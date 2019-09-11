@@ -1,0 +1,86 @@
+{
+  "cdhVersion": "7.0.0",
+  "displayName": "Cluster 2",
+  "services": [
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "serviceConfigs": [
+        {
+          "name": "hdfs_service_config_safety_valve",
+          "value": "<property><name>dfs.datanode.keytab.file</name><value>{{CMF_CONF_DIR}}/hdfs.keytab</value></property>"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-SECONDARYNAMENODE-BASE",
+          "roleType": "SECONDARYNAMENODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "nifiregistry",
+      "serviceType": "NIFIREGISTRY",
+      "roleConfigGroups": [
+        {
+          "refName": "nifiregistry-NIFI_REGISTRY_SERVER-BASE",
+          "roleType": "NIFI_REGISTRY_SERVER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "nifi",
+      "serviceType": "NIFI",
+      "serviceConfigs": [
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "nifi-NIFI_NODE-BASE",
+          "roleType": "NIFI_NODE",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "nifi-NIFI_NODE-BASE",
+        "nifiregistry-NIFI_REGISTRY_SERVER-BASE",
+        "zookeeper-SERVER-BASE",
+        "hdfs-NAMENODE-BASE",
+        "hdfs-SECONDARYNAMENODE-BASE",
+        "hdfs-DATANODE-BASE"
+      ]
+    }
+  ]
+}

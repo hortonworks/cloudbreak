@@ -39,10 +39,16 @@ public class CmTemplateValidator implements BlueprintValidator {
     public void validateHostGroupScalingRequest(Blueprint blueprint, HostGroup hostGroup, Integer adjustment) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
         Set<String> services = templateProcessor.getComponentsByHostGroup().get(hostGroup.getName());
-        for (BlackListedDownScalingService blackListedScalingService : BlackListedDownScalingService.values()) {
-            if (services.contains(blackListedScalingService.name()) && adjustment < 0) {
+        for (BlackListedDownScaleRole role : BlackListedDownScaleRole.values()) {
+            if (services.contains(role.name()) && adjustment < 0) {
                 throw new BadRequestException(String.format("'%s' service is not enabled to scale",
-                        blackListedScalingService.name()));
+                        role.name()));
+            }
+        }
+        for (BlackListedUpScaleRole role : BlackListedUpScaleRole.values()) {
+            if (services.contains(role.name()) && adjustment > 0) {
+                throw new BadRequestException(String.format("'%s' service is not enabled to scale",
+                        role.name()));
             }
         }
     }
