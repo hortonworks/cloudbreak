@@ -18,9 +18,9 @@ public class LayoutFormatFactory {
     }
 
     private static String getProperty(String property, String defaultValue) {
-        String env = System.getenv(property.toUpperCase().replace(".", "_"));
-        if (StringUtils.isNotEmpty(env)) {
-            return System.getenv(env);
+        String envProperty = property.toUpperCase().replace(".", "_");
+        if (StringUtils.isNotEmpty(System.getenv(envProperty))) {
+            return System.getenv(envProperty);
         } else if (StringUtils.isNotEmpty(System.getProperty(property))) {
             return System.getProperty(property);
         }
