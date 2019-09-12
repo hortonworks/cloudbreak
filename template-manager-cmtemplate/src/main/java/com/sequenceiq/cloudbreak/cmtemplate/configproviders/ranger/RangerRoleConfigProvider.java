@@ -16,8 +16,6 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 @Component
 public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
 
-    private static final String CDP_PREFIX = "cdp_";
-
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
@@ -28,8 +26,7 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
                         config("ranger_database_name", rangerRdsView.getDatabaseName()),
                         config("ranger_database_type", getRangerDbType(rangerRdsView)),
                         config("ranger_database_user", rangerRdsView.getConnectionUserName()),
-                        config("ranger_database_password", rangerRdsView.getConnectionPassword()),
-                        config("ranger.default.policy.groups", CDP_PREFIX + source.getEnvironmentView().getEnvironmentName())
+                        config("ranger_database_password", rangerRdsView.getConnectionPassword())
                 );
             default:
                 return List.of();

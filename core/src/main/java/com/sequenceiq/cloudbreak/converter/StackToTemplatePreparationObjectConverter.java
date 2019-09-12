@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfiguration
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
-import com.sequenceiq.cloudbreak.template.views.EnvironmentView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -147,7 +146,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
             decorateBuilderWithPlacement(source, builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder);
-            decorateBuilderWithEnvironment(environment, builder);
 
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
@@ -183,10 +181,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
         String region = source.getRegion();
         String availabilityZone = source.getAvailabilityZone();
         builder.withPlacementView(new PlacementView(region, availabilityZone));
-    }
-
-    private void decorateBuilderWithEnvironment(DetailedEnvironmentResponse environment, Builder builder) {
-        builder.withEnvironmentView(new EnvironmentView(environment.getCrn(), environment.getName()));
     }
 
     private void decorateBuilderWithAccountMapping(Stack source, DetailedEnvironmentResponse environment, Credential credential, Builder builder) {

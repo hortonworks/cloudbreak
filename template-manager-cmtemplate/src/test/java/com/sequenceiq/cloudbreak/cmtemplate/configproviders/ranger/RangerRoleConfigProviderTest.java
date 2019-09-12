@@ -17,7 +17,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.template.views.EnvironmentView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -55,9 +54,7 @@ public class RangerRoleConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker))
-                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER)))
-                .withEnvironmentView(new EnvironmentView("testCRN", "test-environment-name"))
-                .build();
+                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER))).build();
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -68,7 +65,7 @@ public class RangerRoleConfigProviderTest {
 
         List<ApiClusterTemplateConfig> masterRangerAdmin = roleConfigs.get("ranger-RANGER_ADMIN-BASE");
 
-        assertEquals(6, masterRangerAdmin.size());
+        assertEquals(5, masterRangerAdmin.size());
 
         assertEquals("ranger_database_host", masterRangerAdmin.get(0).getName());
         assertEquals("10.1.1.1", masterRangerAdmin.get(0).getValue());
@@ -84,9 +81,6 @@ public class RangerRoleConfigProviderTest {
 
         assertEquals("ranger_database_password", masterRangerAdmin.get(4).getName());
         assertEquals("iamsoosecure", masterRangerAdmin.get(4).getValue());
-
-        assertEquals("ranger.default.policy.groups", masterRangerAdmin.get(5).getName());
-        assertEquals("cdp_test-environment-name", masterRangerAdmin.get(5).getValue());
 
     }
 
