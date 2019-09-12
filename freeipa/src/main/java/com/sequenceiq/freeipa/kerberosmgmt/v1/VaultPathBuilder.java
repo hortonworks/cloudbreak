@@ -27,6 +27,22 @@ public class VaultPathBuilder {
         }
     }
 
+    public enum SecretSubType {
+        KEYTAB("keytab"),
+        SERVICE_PRINCIPAL("serviceprincipal");
+
+        private final String value;
+
+        SecretSubType(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Service.class);
 
     private Optional<SecretType> secretType = Optional.empty();
@@ -35,7 +51,7 @@ public class VaultPathBuilder {
 
     private Optional<String> accountId = Optional.empty();
 
-    private Optional<String> subType = Optional.empty();
+    private Optional<SecretSubType> subType = Optional.empty();
 
     private Optional<String> environmentId = Optional.empty();
 
@@ -60,7 +76,7 @@ public class VaultPathBuilder {
         return this;
     }
 
-    public VaultPathBuilder withSubType(String subType) {
+    public VaultPathBuilder withSubType(SecretSubType subType) {
         this.subType = Optional.ofNullable(subType);
         return this;
     }
@@ -100,7 +116,7 @@ public class VaultPathBuilder {
         List<Optional<String>> requiredEntries = Arrays.asList(
                 accountId,
                 secretType.map(SecretType::toString),
-                subType,
+                subType.map(SecretSubType::toString),
                 environmentId
         );
 
