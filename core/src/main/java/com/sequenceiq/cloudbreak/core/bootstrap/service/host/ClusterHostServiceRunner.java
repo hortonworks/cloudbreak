@@ -543,7 +543,7 @@ public class ClusterHostServiceRunner {
     private void addGatewayUserFacingCert(GatewayConfig gatewayConfig, Cluster cluster, Map<String, Object> gateway) {
         boolean userFacingCertHasBeenGenerated = StringUtils.isNotEmpty(gatewayConfig.getUserFacingCert())
                 && StringUtils.isNotEmpty(gatewayConfig.getUserFacingKey());
-        if (!cluster.getAutoTlsEnabled() && gatewayConfig.getKnoxGatewayEnabled() && userFacingCertHasBeenGenerated) {
+        if (gatewayConfig.getKnoxGatewayEnabled() && userFacingCertHasBeenGenerated) {
             gateway.put("userfacingcert_configured", Boolean.TRUE);
             gateway.put("userfacingkey", cluster.getStack().getSecurityConfig().getUserFacingKey());
             gateway.put("userfacingcert", cluster.getStack().getSecurityConfig().getUserFacingCert());

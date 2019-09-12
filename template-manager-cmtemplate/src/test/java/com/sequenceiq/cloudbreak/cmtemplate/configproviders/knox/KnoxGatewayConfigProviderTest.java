@@ -16,13 +16,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KnoxGatewayConfigProviderTest {
@@ -161,6 +161,34 @@ public class KnoxGatewayConfigProviderTest {
                         config("gateway_signing_key_alias", "signing-identity"),
                         config("gateway_dispatch_whitelist", "^*.*$"),
                         config("conf/gateway-site.xml_role_safety_valve", gatewaySiteCustomUserFacingCertConfigValue)
+                ),
+                underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
+        );
+    }
+
+    @Test
+    public void roleConfigsWithGatewayAndUserFacingCertificationGeneratedAndAutoTlsIsEnsabled() {
+        Gateway gateway = new Gateway();
+        gateway.setKnoxMasterSecret("admin");
+        gateway.setPath("/a/b/c");
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setKnoxUserFacingCertConfigured(Boolean.TRUE);
+        generalClusterConfigs.setAutoTlsEnabled(Boolean.TRUE);
+        TemplatePreparationObject source = Builder.builder()
+                .withGateway(gateway, "key")
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .build();
+
+        assertEquals(
+                List.of(
+                        config("gateway_master_secret", gateway.getKnoxMasterSecret()),
+                        config("gateway_path", gateway.getPath()),
+                        config("gateway_signing_keystore_name", "signing.jks"),
+                        config("gateway_signing_keystore_type", "JKS"),
+                        config("gateway_signing_key_alias", "signing-identity"),
+                        config("gateway_dispatch_whitelist", "^*.*$"),
+                        config("gateway_tls_certificate_path", "/var/lib/knox/cloudbreak_resources/security/keystores/userfacing.p12"),
+                        config("gateway_tls_certificate_alias", "userfacing-identity")
                 ),
                 underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
         );
