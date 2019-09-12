@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -14,6 +15,8 @@ public class ClouderaManagerProduct implements Serializable {
     private String version;
 
     private String parcel;
+
+    private List<String> csd;
 
     public String getName() {
         return name;
@@ -39,19 +42,31 @@ public class ClouderaManagerProduct implements Serializable {
         this.parcel = parcel;
     }
 
+    public List<String> getCsd() {
+        return csd;
+    }
+
+    public void setCsd(List<String> csd) {
+        this.csd = csd;
+    }
+
     public ClouderaManagerProduct withName(String name) {
-        setName(name);
+        this.name = name;
         return this;
     }
 
     public ClouderaManagerProduct withVersion(String version) {
-        setVersion(version);
+        this.version = version;
         return this;
     }
 
     public ClouderaManagerProduct withParcel(String parcel) {
-        setParcel(parcel);
+        this.parcel = parcel;
         return this;
     }
 
+    public ClouderaManagerProduct withCsd(List<String> csd) {
+        this.csd = csd;
+        return this;
+    }
 }

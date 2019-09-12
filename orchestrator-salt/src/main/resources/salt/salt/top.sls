@@ -19,6 +19,7 @@ base:
 
   'G@roles:manager_server':
     - postgresql
+    - cloudera.csd
     - cloudera.repo
     - cloudera.manager
     - cloudera.agent

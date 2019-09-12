@@ -352,11 +352,13 @@ public class ClusterV4RequestToClusterConverterTest {
         cdp.setName("cdp");
         cdp.setParcel("cdp.parcel");
         cdp.setVersion("cdp.version");
+        cdp.setCsd(List.of("cdp.csd"));
 
         ClouderaManagerProductV4Request cdf = new ClouderaManagerProductV4Request();
         cdf.setName("cdf");
         cdf.setParcel("cdf.parcel");
         cdf.setVersion("cdf.version");
+        cdf.setCsd(List.of("cdf.csd"));
 
         List<ClouderaManagerProductV4Request> products = List.of(cdp, cdf);
         cm.setProducts(products);

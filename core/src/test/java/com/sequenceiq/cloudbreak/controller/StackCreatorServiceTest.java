@@ -49,8 +49,9 @@ public class StackCreatorServiceTest {
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerProductV4Request cdpRequest = new ClouderaManagerProductV4Request();
         cdpRequest.setName("CDP");
-        cdpRequest.setParcel("pacel");
+        cdpRequest.setParcel("parcel");
         cdpRequest.setVersion("version");
+        cdpRequest.setCsd(List.of("csd"));
         cmRequest.setProducts(List.of(cdpRequest));
         clusterV4Request.setCm(cmRequest);
 
@@ -65,8 +66,9 @@ public class StackCreatorServiceTest {
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerProductV4Request cdpRequest = new ClouderaManagerProductV4Request();
         cdpRequest.setName("CDP");
-        cdpRequest.setParcel("pacel");
+        cdpRequest.setParcel("parcel");
         cdpRequest.setVersion("version");
+        cdpRequest.setCsd(List.of("csd"));
         cmRequest.setProducts(List.of(cdpRequest));
         ClouderaManagerRepositoryV4Request cmRepoRequest = new ClouderaManagerRepositoryV4Request();
         cmRequest.setRepository(cmRepoRequest);

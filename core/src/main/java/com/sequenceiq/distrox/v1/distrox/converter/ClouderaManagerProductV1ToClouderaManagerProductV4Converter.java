@@ -21,6 +21,7 @@ public class ClouderaManagerProductV1ToClouderaManagerProductV4Converter {
         response.setName(source.getName());
         response.setParcel(source.getParcel());
         response.setVersion(source.getVersion());
+        response.setCsd(source.getCsd());
         return response;
     }
 
@@ -33,6 +34,7 @@ public class ClouderaManagerProductV1ToClouderaManagerProductV4Converter {
         response.setName(source.getName());
         response.setParcel(source.getParcel());
         response.setVersion(source.getVersion());
+        response.setCsd(source.getCsd());
         return response;
     }
 }

@@ -51,6 +51,14 @@ public class StackRepositoryTestDto extends AbstractCloudbreakTestDto<ClouderaMa
         return this;
     }
 
+    public StackRepositoryTestDto withCsd(List<String> csd) {
+        if (getRequest().getProducts() == null) {
+            getRequest().setProducts(List.of(new ClouderaManagerProductV4Request()));
+        }
+        getRequest().getProducts().get(0).setCsd(csd);
+        return this;
+    }
+
     public StackRepositoryTestDto withBaseURL(String stackBaseURL) {
         if (getRequest().getRepository() == null) {
             getRequest().setRepository(new ClouderaManagerRepositoryV4Request());

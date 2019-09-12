@@ -12,6 +12,7 @@ public final class ClouderaManagerProductToClouderaManagerProductV4Request {
         return new ClouderaManagerProductV4Request()
                 .withName(clouderaManagerProduct.getName())
                 .withParcel(clouderaManagerProduct.getParcel())
-                .withVersion(clouderaManagerProduct.getVersion());
+                .withVersion(clouderaManagerProduct.getVersion())
+                .withCsd(clouderaManagerProduct.getCsd());
     }
 }

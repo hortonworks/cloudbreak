@@ -16,6 +16,7 @@ base:
     - metadata.init
     - proxy.proxy
     - databus
+    - cloudera-manager.csd
     - fluent
     - metering
 
