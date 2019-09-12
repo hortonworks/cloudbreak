@@ -15,6 +15,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -131,6 +132,12 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     public final SdxInternalTestDto sdxInternal(SdxInternalTestDto sdxInternal) {
         sdxInternal.withStackRequest();
         return sdxInternal;
+    }
+
+    @Override
+    public final SdxRepairTestDto sdxRepair(SdxRepairTestDto sdxRepair) {
+        sdxRepair.withHostGroupName();
+        return sdxRepair;
     }
 
     protected abstract ClusterTestDto withCluster(ClusterTestDto cluster);

@@ -5,8 +5,10 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.REQUESTED;
+import static java.lang.String.format;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -30,6 +33,9 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.WaitResult;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -40,13 +46,14 @@ public class WaitUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WaitUtil.class);
 
-    private static final int MAX_RETRY = 1800;
-
     private static final com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status FREE_IPA_DELETE_COMPLETED =
             com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 
     @Value("${integrationtest.testsuite.pollingInterval:1000}")
     private long pollingInterval;
+
+    @Value("${integrationtest.testsuite.maxRetry:1800}")
+    private int maxRetry;
 
     public Pair<Status, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Status desiredStatus) {
         Pair<Status, String> ret = null;
@@ -82,10 +89,10 @@ public class WaitUtil {
         Status currentStatus = CREATE_IN_PROGRESS;
 
         int retryCount = 0;
-        while (!checkStatuses(currentStatus, desiredStatus) && !checkFailedStatuses(currentStatus) && retryCount < MAX_RETRY) {
+        while (!checkStatuses(currentStatus, desiredStatus) && !checkFailedStatuses(currentStatus) && retryCount < maxRetry) {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatus, stackName, currentStatus);
 
-            sleep();
+            sleep(pollingInterval);
             StackV4Endpoint stackV4Endpoint = cloudbreakClient.getCloudbreakClient().stackV4Endpoint();
             try {
                 var statusResult = Optional.ofNullable(stackV4Endpoint.getStatusByName(cloudbreakClient.getWorkspaceId(), stackName).getClusterStatus());
@@ -106,7 +113,7 @@ public class WaitUtil {
                 || checkNotExpectedDelete(currentStatus, desiredStatus)) {
             waitResult = WaitResult.FAILED;
             LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, stackName, currentStatus);
-        } else if (retryCount == MAX_RETRY) {
+        } else if (retryCount == maxRetry) {
             waitResult = WaitResult.TIMEOUT;
             LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, stackName, currentStatus);
         } else {
@@ -122,10 +129,10 @@ public class WaitUtil {
                 com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
 
         int retryCount = 0;
-        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < MAX_RETRY) {
+        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < maxRetry) {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatus, environmentCrn, currentStatus);
 
-            sleep();
+            sleep(pollingInterval);
             FreeIpaV1Endpoint freeIpaV1Endpoint = freeIPAClient.getFreeIpaClient().getFreeIpaV1Endpoint();
             try {
                 Optional<com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status> statusResult =
@@ -146,7 +153,7 @@ public class WaitUtil {
         if (currentStatus.name().contains("FAILED") && FREE_IPA_DELETE_COMPLETED != desiredStatus && FREE_IPA_DELETE_COMPLETED == currentStatus) {
             waitResult = WaitResult.FAILED;
             LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, environmentCrn, currentStatus);
-        } else if (retryCount == MAX_RETRY) {
+        } else if (retryCount == maxRetry) {
             waitResult = WaitResult.TIMEOUT;
             LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, environmentCrn, currentStatus);
         } else {
@@ -161,10 +168,10 @@ public class WaitUtil {
         EnvironmentStatus currentStatus = EnvironmentStatus.CREATION_INITIATED;
 
         int retryCount = 0;
-        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < MAX_RETRY) {
+        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < maxRetry) {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatus, name, currentStatus);
 
-            sleep();
+            sleep(pollingInterval);
             EnvironmentEndpoint environmentEndpoint = environmentClient.getEnvironmentClient().environmentV1Endpoint();
             try {
                 Optional<EnvironmentStatus> statusResult = Optional.ofNullable(environmentEndpoint.getByName(name).getEnvironmentStatus());
@@ -184,7 +191,7 @@ public class WaitUtil {
         if (currentStatus.name().contains("FAILED") && EnvironmentStatus.ARCHIVED != desiredStatus && EnvironmentStatus.ARCHIVED == currentStatus) {
             waitResult = WaitResult.FAILED;
             LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
-        } else if (retryCount == MAX_RETRY) {
+        } else if (retryCount == maxRetry) {
             waitResult = WaitResult.TIMEOUT;
             LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
         } else {
@@ -199,10 +206,10 @@ public class WaitUtil {
         SdxClusterStatusResponse currentStatus = REQUESTED;
 
         int retryCount = 0;
-        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < MAX_RETRY) {
+        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < maxRetry) {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatus, name, currentStatus);
 
-            sleep();
+            sleep(pollingInterval);
             SdxEndpoint sdxEndpoint = sdxClient.getSdxClient().sdxEndpoint();
             try {
                 Optional<SdxClusterStatusResponse> statusResult = Optional.ofNullable(sdxEndpoint.get(name).getStatus());
@@ -222,21 +229,13 @@ public class WaitUtil {
         if (currentStatus.name().contains("FAILED") || (DELETED != desiredStatus && DELETED == currentStatus)) {
             waitResult = WaitResult.FAILED;
             LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
-        } else if (retryCount == MAX_RETRY) {
+        } else if (retryCount == maxRetry) {
             waitResult = WaitResult.TIMEOUT;
             LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
         } else {
             LOGGER.info("{} are in desired status(es) {}", name, currentStatus);
         }
         return waitResult;
-    }
-
-    private void sleep() {
-        try {
-            Thread.sleep(pollingInterval);
-        } catch (InterruptedException e) {
-            LOGGER.warn("Ex during wait", e);
-        }
     }
 
     private boolean checkStatuses(Status currentStatus, Status desiredStatus) {
@@ -338,5 +337,54 @@ public class WaitUtil {
         }
     }
         return errors;
+    }
+
+    public SdxTestDto waitForSdxInstanceStatus(SdxTestDto sdxTestDto, SdxClient sdxClient, String hostGroup, String desiredState) {
+        int retryCount = 0;
+        String sdxName = sdxClient.getSdxClient().sdxEndpoint().get(sdxTestDto.getName()).getName();
+
+        pollingInterval = (pollingInterval < 30000) ? 30000 : pollingInterval;
+        maxRetry = (maxRetry < 3000) ? 3000 : maxRetry;
+
+        while (retryCount < maxRetry && !checkSdxInstanceGroupStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
+            LOGGER.info("Waiting for status {} in Host Group {} at {} SDX", desiredState, hostGroup, sdxName);
+            sleep(pollingInterval);
+            retryCount++;
+        }
+
+        if (checkSdxInstanceGroupStateIsAvailable(sdxClient, sdxName, hostGroup, desiredState)) {
+            Log.log(LOGGER, format(" Host Group: %s state is: %s at %s SDX OR it cannot be determine right now", hostGroup, desiredState, sdxName));
+        } else {
+            LOGGER.error("Timeout: Host Group: {} desired state: {} is NOT available at {} SDX during {} retries", hostGroup, desiredState, sdxName, maxRetry);
+            throw new TestFailException(" Timeout: Host Group: " + hostGroup + " desired state: " + desiredState
+                    + " is NOT available at " + sdxName + " SDX during " + maxRetry + " retries");
+        }
+        return sdxTestDto;
+    }
+
+    private boolean checkSdxInstanceGroupStateIsAvailable(SdxClient sdxClient, String sdxName, String hostGroup, String desiredState) {
+        InstanceMetaDataV4Response instanceMetaDataV4Response = sdxClient.getSdxClient().sdxEndpoint().getDetail(sdxName, new HashSet<>())
+                .getStackV4Response().getInstanceGroups().stream().filter(instanceGroup -> instanceGroup.getName().equals(hostGroup))
+                .findFirst()
+                .orElse(null).getMetadata().stream().findFirst().orElse(null);
+        if (instanceMetaDataV4Response != null) {
+            Log.log(LOGGER, format(" Instance Group: %s with State: %s and with Instance State: %s is available. ",
+                    instanceMetaDataV4Response.getInstanceGroup(),
+                    instanceMetaDataV4Response.getState(),
+                    instanceMetaDataV4Response.getInstanceStatus()
+            ));
+            return instanceMetaDataV4Response.getState().equalsIgnoreCase(desiredState);
+        } else {
+            Log.log(LOGGER, format(" Instance Metadata is NOT available for %s Host Group! ", hostGroup));
+            return true;
+        }
+    }
+
+    private void sleep(long pollingInterval) {
+        try {
+            Thread.sleep(pollingInterval);
+        } catch (InterruptedException e) {
+            LOGGER.warn("Exception has been occurred during wait: ", e);
+        }
     }
 }

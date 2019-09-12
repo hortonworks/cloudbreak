@@ -137,6 +137,11 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
         return this;
     }
 
+    @Override
+    public String getName() {
+        return getRequest().getName();
+    }
+
     private RecoveryMode getRecoveryModeParam(HostGroupType hostGroupType) {
         String argumentName = String.join("", hostGroupType.getName(), RECOVERY_MODE);
         String argumentValue = getTestParameter().getWithDefault(argumentName, MANUAL);

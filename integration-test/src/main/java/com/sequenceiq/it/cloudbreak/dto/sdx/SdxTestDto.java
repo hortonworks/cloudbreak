@@ -14,9 +14,12 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
@@ -24,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -31,7 +35,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @Prototype
-public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxClusterResponse, SdxTestDto> {
+public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxClusterDetailResponse, SdxTestDto> implements Purgable<SdxClusterResponse, SdxClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxTestDto.class);
 
@@ -51,6 +55,61 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                 .withClusterShape(getCloudProvider().getClusterShape())
                 .withTags(getCloudProvider().getTags());
         return getCloudProvider().sdx(this);
+    }
+
+    @Override
+    public void cleanUp(TestContext context, CloudbreakClient client) {
+        LOGGER.info("Cleaning up SDX with name: {}", getName());
+        when(sdxTestClient.delete(), key("delete-sdx-" + getName()).withSkipOnFail(false));
+        await(DELETED, new RunningParameter().withSkipOnFail(true));
+    }
+
+    @Override
+    public List<SdxClusterResponse> getAll(SdxClient client) {
+        SdxEndpoint sdxEndpoint = client.getSdxClient().sdxEndpoint();
+        return sdxEndpoint.list(getTestContext().get(EnvironmentTestDto.class).getName()).stream()
+                .filter(response -> response.getName() != null)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean deletable(SdxClusterResponse entity) {
+        return entity.getName().startsWith(getResourceProperyProvider().prefix());
+    }
+
+    @Override
+    public void delete(TestContext testContext, SdxClusterResponse entity, SdxClient client) {
+        String sdxName = entity.getName();
+        try {
+            client.getSdxClient().sdxEndpoint().delete(sdxName, true);
+            testContext.await(this, DELETED, key("wait-purge-sdx-" + entity.getName()));
+        } catch (Exception e) {
+            LOGGER.warn("Something went wrong on SDX {} purge. {}", sdxName, ResponseUtil.getErrorMessage(e), e);
+        }
+    }
+
+    @Override
+    public Class<SdxClient> client() {
+        return SdxClient.class;
+    }
+
+    @Override
+    public SdxTestDto refresh(TestContext testContext, CloudbreakClient cloudbreakClient) {
+        LOGGER.info("Refresh SDX with name: {}", getName());
+        return when(sdxTestClient.refresh(), key("refresh-sdx-" + getName()));
+    }
+
+    @Override
+    public SdxTestDto wait(Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
+        return await(desiredStatuses, runningParameter);
+    }
+
+    public SdxTestDto await(SdxClusterStatusResponse status) {
+        return await(status, emptyRunningParameter());
+    }
+
+    public SdxTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter) {
+        return getTestContext().await(this, status, runningParameter);
     }
 
     public SdxTestDto withCloudStorage() {
@@ -82,7 +141,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     public SdxTestDto withEnvironment() {
-        EnvironmentTestDto environment = getTestContext().get(EnvironmentTestDto.class);
+        EnvironmentTestDto environment = getTestContext().given(EnvironmentTestDto.class);
         if (environment == null) {
             throw new IllegalArgumentException("Environment does not exist!");
         }
@@ -119,45 +178,5 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Override
     public String getName() {
         return super.getName() == null ? DEFAULT_SDX_NAME : super.getName();
-    }
-
-    public SdxTestDto await(SdxClusterStatusResponse status) {
-        return await(status, emptyRunningParameter());
-    }
-
-    public SdxTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter) {
-        return getTestContext().await(this, status, runningParameter);
-    }
-
-    public SdxTestDto refresh(TestContext context, SdxClient client) {
-        LOGGER.info("Refresh resource with name: {}", getName());
-        return when(sdxTestClient.describe(), key("refresh-sdx-" + getName()));
-    }
-
-    public void cleanUp(TestContext context, SdxClient client) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(sdxTestClient.delete(), key("delete-sdx-" + getName()));
-        await(DELETED);
-    }
-
-    public boolean deletable() {
-        return getName().startsWith(getResourceProperyProvider().prefix());
-    }
-
-    public void delete(TestContext testContext, SdxClient client) {
-        try {
-            LOGGER.info("Delete resource with name: {}", getName());
-            client.getSdxClient().sdxEndpoint().delete(getName(), false);
-            testContext.await(this, DELETED, key("wait-purge-sdx-" + getName()));
-        } catch (Exception e) {
-            LOGGER.warn("Something went wrong on {} purge. {}", getName(), ResponseUtil.getErrorMessage(e), e);
-        }
-    }
-
-    public List<SdxClusterResponse> getAll(SdxClient client) {
-        SdxEndpoint sdxEndpoint = client.getSdxClient().sdxEndpoint();
-        return sdxEndpoint.list(getTestContext().get(EnvironmentTestDto.class).getName()).stream()
-                .filter(s -> s.getName() != null)
-                .collect(Collectors.toList());
     }
 }

@@ -26,7 +26,7 @@ public class S3ClientActions extends S3Client {
     private static final Logger LOGGER = LoggerFactory.getLogger(S3ClientActions.class);
 
     public SdxTestDto nonVersionedBucketActions(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        AmazonS3 s3Client = build3Client();
+        AmazonS3 s3Client = buildS3Client();
         String bucketName = getBucketName();
         AmazonS3URI amazonS3URI = new AmazonS3URI(getEUWestS3Uri());
         String keyPrefix = getKeyPrefix(sdxTestDto);
