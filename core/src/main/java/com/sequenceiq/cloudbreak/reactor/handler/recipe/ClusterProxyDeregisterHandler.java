@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.ClusterProxyDeregisterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.ClusterProxyDeregisterSuccess;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -36,18 +38,28 @@ public class ClusterProxyDeregisterHandler implements EventHandler<ClusterProxyD
     @Inject
     private ClusterProxyService clusterProxyService;
 
+    @Inject
+    private StackTerminationService stackTerminationService;
+
     @Override
     public void accept(Event<ClusterProxyDeregisterRequest> requestEvent) {
         ClusterProxyDeregisterRequest request = requestEvent.getData();
-        Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-        if (clusterProxyIntegrationEnabled) {
-            try {
-                clusterProxyService.deregisterCluster(stack);
-            } catch (Exception ex) {
-                LOGGER.error("Cluster proxy deregister failed", ex);
+        Selectable result;
+        try {
+            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+            if (clusterProxyIntegrationEnabled) {
+                try {
+                    clusterProxyService.deregisterCluster(stack);
+                } catch (Exception ex) {
+                    LOGGER.warn("Cluster proxy deregister failed", ex);
+                }
             }
+            stackTerminationService.deleteDnsEntry(stack, null);
+            result = new ClusterProxyDeregisterSuccess(stack.getId());
+        } catch (Exception ex) {
+            LOGGER.warn("Cluster proxy deregister failed", ex);
+            result = new StackFailureEvent(request.getResourceId(), ex);
         }
-        Selectable result = new ClusterProxyDeregisterSuccess(stack.getId());
         eventBus.notify(result.selector(), new Event<>(requestEvent.getHeaders(), result));
     }
 

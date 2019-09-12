@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
 public class CertificateCreationService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CertificateCreationService.class);
 
     private static final Integer MAX_LENGTH_OF_ENVIRONMENT = 8;
 
@@ -44,9 +48,11 @@ public class CertificateCreationService {
     private GrpcUmsClient grpcUmsClient;
 
     public List<String> create(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard, KeyPair identity) throws IOException {
+        LOGGER.info("Start cert creation");
         Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
         UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, actorCrn, requestIdOptional);
         String fullQualifiedDomainName = getFullQualifiedDomainName(endpoint, environment, account.getWorkloadSubdomain());
+        LOGGER.info("Create cert for {}", fullQualifiedDomainName);
         PKCS10CertificationRequest csr = csr(identity, fullQualifiedDomainName);
         String pollingRequestId = grpcClusterDnsClient
                 .createCertificate(actorCrn, accountId, endpoint, environment, wildcard, csr.getEncoded(), requestIdOptional);
@@ -59,6 +65,12 @@ public class CertificateCreationService {
                 .stopAfterAttempt(pollingAttempt)
                 .stopIfException(true)
                 .run(new CreateCertificationPoller(grpcClusterDnsClient, actorCrn, pollingRequestId, requestIdOptional));
+    }
+
+    public String getFqdn(String actorCrn, String endpoint, String environment) {
+        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, actorCrn, requestIdOptional);
+        return getFullQualifiedDomainName(endpoint, environment, account.getWorkloadSubdomain());
     }
 
     private String getFullQualifiedDomainName(String endpoint, String environment, String workloadSubdomain) {
