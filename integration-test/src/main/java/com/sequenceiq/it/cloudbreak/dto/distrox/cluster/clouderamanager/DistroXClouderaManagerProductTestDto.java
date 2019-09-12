@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager;
 
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.product.ClouderaManagerProductV1Request;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -31,6 +33,11 @@ public class DistroXClouderaManagerProductTestDto
 
     public DistroXClouderaManagerProductTestDto withParcel(String parcel) {
         getRequest().setParcel(parcel);
+        return this;
+    }
+
+    public DistroXClouderaManagerProductTestDto withCsd(List<String> csd) {
+        getRequest().setCsd(csd);
         return this;
     }
 }

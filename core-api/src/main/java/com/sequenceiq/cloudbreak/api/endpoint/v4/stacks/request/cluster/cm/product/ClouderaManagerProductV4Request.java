@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product;
 
+import java.util.List;
+
 import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,6 +29,9 @@ public class ClouderaManagerProductV4Request implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.PARCEL)
     private String parcel;
 
+    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.CSD)
+    private List<String> csd;
+
     public String getName() {
         return name;
     }
@@ -51,18 +56,31 @@ public class ClouderaManagerProductV4Request implements JsonEntity {
         this.parcel = parcel;
     }
 
+    public List<String> getCsd() {
+        return csd;
+    }
+
+    public void setCsd(List<String> csd) {
+        this.csd = csd;
+    }
+
     public ClouderaManagerProductV4Request withName(String name) {
-        setName(name);
+        this.name = name;
         return this;
     }
 
     public ClouderaManagerProductV4Request withVersion(String version) {
-        setVersion(version);
+        this.version = version;
         return this;
     }
 
     public ClouderaManagerProductV4Request withParcel(String parcel) {
-        setParcel(parcel);
+        this.parcel = parcel;
+        return this;
+    }
+
+    public ClouderaManagerProductV4Request withCsd(List<String> csd) {
+        this.csd = csd;
         return this;
     }
 }

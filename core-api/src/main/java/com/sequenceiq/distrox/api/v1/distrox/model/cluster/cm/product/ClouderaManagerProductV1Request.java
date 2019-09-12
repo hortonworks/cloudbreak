@@ -1,5 +1,7 @@
 package com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.product;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,6 +27,9 @@ public class ClouderaManagerProductV1Request implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.PARCEL)
     private String parcel;
 
+    @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.CSD)
+    private List<String> csd;
+
     public String getName() {
         return name;
     }
@@ -49,18 +54,32 @@ public class ClouderaManagerProductV1Request implements JsonEntity {
         this.parcel = parcel;
     }
 
+    public List<String> getCsd() {
+        return csd;
+    }
+
+    public void setCsd(List<String> csd) {
+        this.csd = csd;
+    }
+
     public ClouderaManagerProductV1Request withName(String name) {
-        setName(name);
+        this.name = name;
         return this;
     }
 
     public ClouderaManagerProductV1Request withVersion(String version) {
-        setVersion(version);
+        this.version = version;
         return this;
     }
 
     public ClouderaManagerProductV1Request withParcel(String parcel) {
-        setParcel(parcel);
+        this.parcel = parcel;
         return this;
     }
+
+    public ClouderaManagerProductV1Request withCsd(List<String> csd) {
+        this.csd = csd;
+        return this;
+    }
+
 }

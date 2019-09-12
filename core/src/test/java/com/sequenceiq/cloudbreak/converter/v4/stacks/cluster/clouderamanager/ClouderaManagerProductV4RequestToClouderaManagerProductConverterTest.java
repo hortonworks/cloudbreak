@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
@@ -16,13 +18,15 @@ public class ClouderaManagerProductV4RequestToClouderaManagerProductConverterTes
         request.setVersion("1.0");
         request.setParcel("parcel");
         request.setName("name");
+        request.setCsd(List.of("csd"));
 
         ClouderaManagerProduct product = ClouderaManagerProductV4RequestToClouderaManagerProductConverter.convert(request);
 
         assertAll(
                 () -> assertEquals(request.getName(), product.getName()),
                 () -> assertEquals(request.getVersion(), product.getVersion()),
-                () -> assertEquals(request.getParcel(), product.getParcel())
+                () -> assertEquals(request.getParcel(), product.getParcel()),
+                () -> assertEquals(request.getCsd(), product.getCsd())
         );
     }
 }

@@ -6,6 +6,7 @@ import static java.util.Collections.singletonMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -35,6 +37,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -298,6 +301,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
         decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
+        decoratePillarWithClouderaManagerCsds(cluster, servicePillar);
     }
 
     private void addAmbariConfig(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, ClusterPreCreationApi connector)
@@ -443,6 +447,13 @@ public class ClusterHostServiceRunner {
         }
         RdsView ambariRdsView = new RdsView(rdsConfigService.resolveVaultValues(ambariRdsConfig));
         servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariRdsView))));
+    }
+
+    private void decoratePillarWithClouderaManagerCsds(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+        List<String> csdUrls = getCsdUrlList(cluster);
+        servicePillar.put("csd-downloader", new SaltPillarProperties("/cloudera-manager/csd.sls",
+                singletonMap("cloudera-manager",
+                        singletonMap("csd-urls", csdUrls))));
     }
 
     private Map<String, Map<String, String>> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs, Cluster cluster) {
@@ -643,5 +654,27 @@ public class ClusterHostServiceRunner {
             Map<String, Object> jdbcConnectors = singletonMap("jdbc_connectors", connectorJarUrlsByVendor);
             servicePillar.put("jdbc-connectors", new SaltPillarProperties("/jdbc/connectors.sls", jdbcConnectors));
         }
+    }
+
+    private List<String> getCsdUrlList(Cluster cluster) {
+        List<ClouderaManagerProduct> product = clusterComponentConfigProvider.getClouderaManagerProductDetails(cluster.getId());
+        return product
+                .stream()
+                .map(ClouderaManagerProduct::getCsd)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    private <T> Function<Json, T> toAttributeClass(Class<T> attributeClass) {
+        return attribute -> {
+            try {
+                return Optional.ofNullable(attribute)
+                        .orElseThrow(() -> new CloudbreakServiceException("Cluster component attribute json cannot be null."))
+                        .get(attributeClass);
+            } catch (IOException e) {
+                throw new CloudbreakServiceException("Cannot deserialize the compnent: " + attributeClass, e);
+            }
+        };
     }
 }

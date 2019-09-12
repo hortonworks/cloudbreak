@@ -374,6 +374,7 @@ public class ModelDescriptions {
         public static final String NAME = "name of the Cloudera manager product";
         public static final String VERSION = "version of the Cloudera manager product";
         public static final String PARCEL = "parcel url of the Cloudera manager product";
+        public static final String CSD = "CSD (service descriptor) urls for the Cloudera manager product";
     }
 
     public static class AmbariDatabaseDetailsDescription {
