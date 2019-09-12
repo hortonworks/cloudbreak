@@ -33,6 +33,7 @@ public enum ExposedService {
     HBASE_UI("HBase UI", "MASTER", "HBASEUI", "/hbase/webui/master/", true, 16010, 16010, false, false),
     HBASE_REST("HBase Rest", "HBASERESTSERVER", "WEBHBASE", "/hbase/", true, 20550, 20550, true, true),
     NIFI("Nifi", "NIFI_NODE", "NIFI", "/nifi-app/nifi/", true, 8080, 8443, false, false),
+    NIFI_REST("NiFi Rest", "NIFI_NODE", "NIFI_REST", "/nifi-app/nifi-api/", true, 8080, 8443, true, true),
     IMPALA("Impala", "IMPALAD", "IMPALA", "/impala/", true, 28000, 28000, true, true),
     NAMENODE_HDFS("NameNode HDFS", "NAMENODE", "NAMENODE", "/", true, 8020, 8020, true, true),
     JOBTRACKER("Job Tracker", "RESOURCEMANAGER", "JOBTRACKER", "/", true, 8050, 8032, true, true);
