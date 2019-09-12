@@ -329,6 +329,20 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
                 .when(environmentTestClient.describe());
     }
 
+    protected void createEnvironmentForSdx(TestContext testContext) {
+        testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .given(EnvironmentTestDto.class)
+                .withNetwork()
+                .withTelemetry("telemetry")
+                .withCreateFreeIpa(Boolean.TRUE)
+                .withS3Guard()
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.describe());
+    }
+
     protected void createImageCatalog(TestContext testContext, String name) {
         testContext
                 .given(ImageCatalogTestDto.class)

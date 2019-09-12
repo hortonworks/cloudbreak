@@ -561,7 +561,7 @@ public abstract class TestContext implements ApplicationContextAware {
             String sdxName = entity.getName();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
-                awaitEntity.refresh(this, (SdxClient) null);
+                awaitEntity.refresh(this, (CloudbreakClient) null);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {

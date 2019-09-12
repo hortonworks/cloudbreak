@@ -8,9 +8,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
 
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -21,6 +24,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCh
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -45,6 +50,9 @@ public class EnvironmentTestDto
             + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
             + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
             + " centos";
+
+    @Value("${integrationtest.aws.cloudstorage.s3Guard.dynamoTableName:apitesting}")
+    private String dynamoTableName;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -156,6 +164,21 @@ public class EnvironmentTestDto
             throw new IllegalArgumentException("Environment Network does not exist!");
         }
         return withNetwork(environmentNetwork.getRequest());
+    }
+
+    public EnvironmentTestDto withS3Guard(String tableName) {
+        AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
+        S3GuardRequestParameters s3GuardRequestParameters = new S3GuardRequestParameters();
+        s3GuardRequestParameters.setDynamoDbTableName(tableName);
+        awsEnvironmentParameters.setS3guard(s3GuardRequestParameters);
+
+        getRequest().setAws(awsEnvironmentParameters);
+        return this;
+    }
+
+    public EnvironmentTestDto withS3Guard() {
+        String tableName = dynamoTableName + '-' + UUID.randomUUID().toString();
+        return withS3Guard(tableName);
     }
 
     public Collection<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {

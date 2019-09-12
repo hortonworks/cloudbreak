@@ -25,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -71,6 +72,8 @@ public interface CloudProvider {
     SdxTestDto sdx(SdxTestDto sdx);
 
     SdxInternalTestDto sdxInternal(SdxInternalTestDto sdxInternal);
+
+    SdxRepairTestDto sdxRepair(SdxRepairTestDto sdxRepair);
 
     SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage);
 

@@ -24,14 +24,6 @@ public class AwsSdxCloudStorageTests extends BasicSdxTests {
     @Inject
     private AmazonS3Util amazonS3Util;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createEnvironmentWithNetworkAndFreeIPA(testContext);
-        initializeDefaultBlueprints(testContext);
-    }
-
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak",
