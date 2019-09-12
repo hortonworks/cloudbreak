@@ -19,7 +19,11 @@ public class CleanupFreeIpaTask implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CleanupFreeIpaTask.class);
 
-    private static final String KEYTAB_USER_PREFIX = "krbbind-";
+    private static final String KERBEROS_USER_PREFIX = "krbbind-";
+
+    private static final String KEYTAB_USER_PREFIX = "kerberosbind-";
+
+    private static final String LDAP_USER_PREFIX = "ldapbind-";
 
     private static final String ROLE_NAME_PREFIX = "hadoopadminrole-";
 
@@ -50,7 +54,7 @@ public class CleanupFreeIpaTask implements Runnable {
         CleanupRequest cleanupRequest = new CleanupRequest();
         cleanupRequest.setHosts(fqdns);
         cleanupRequest.setEnvironmentCrn(stack.getEnvironmentCrn());
-        cleanupRequest.setUsers(Set.of(KEYTAB_USER_PREFIX + stack.getName()));
+        cleanupRequest.setUsers(Set.of(KERBEROS_USER_PREFIX + stack.getName(), KEYTAB_USER_PREFIX + stack.getName(), LDAP_USER_PREFIX + stack.getName()));
         cleanupRequest.setRoles(Set.of(ROLE_NAME_PREFIX + stack.getName()));
         LOGGER.info("Sending cleanup request to FreeIPA: [{}]", cleanupRequest);
         try {
