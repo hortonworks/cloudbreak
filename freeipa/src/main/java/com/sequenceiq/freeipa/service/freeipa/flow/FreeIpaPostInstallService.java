@@ -67,7 +67,7 @@ public class FreeIpaPostInstallService {
         freeIpaClient.addPermissionToPrivilege(HOST_ENROLLMENT_PRIVILEGE, ADD_HOSTS_PERMISSION);
         freeIpaClient.addPermissionToPrivilege(HOST_ENROLLMENT_PRIVILEGE, REMOVE_HOSTS_PERMISSION);
         freeIpaClient.addPermissionToPrivilege(HOST_ENROLLMENT_PRIVILEGE, REMOVE_SERVICES_PERMISSION);
-        freeIpaClient.addRolePriviliges(ENROLLMENT_ADMINISTRATOR_ROLE, Set.of(DNS_ADMINISTRATORS_PRIVILEGE));
+        freeIpaClient.addRolePrivileges(ENROLLMENT_ADMINISTRATOR_ROLE, Set.of(DNS_ADMINISTRATORS_PRIVILEGE));
         if (!Objects.equals(MAX_USERNAME_LENGTH, freeIpaClient.getUsernameLength())) {
             LOGGER.debug("Set maximum username length to {}", MAX_USERNAME_LENGTH);
             freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);

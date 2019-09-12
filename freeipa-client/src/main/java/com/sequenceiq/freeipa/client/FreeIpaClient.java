@@ -351,7 +351,7 @@ public class FreeIpaClient {
         return (Role) invoke("role_add", flags, params, Role.class).getResult();
     }
 
-    public Role addRolePriviliges(String roleName, Set<String> privilegeNames) throws FreeIpaClientException {
+    public Role addRolePrivileges(String roleName, Set<String> privilegeNames) throws FreeIpaClientException {
         List<String> flags = List.of(roleName);
         Map<String, Object> params = Map.of("privilege", privilegeNames);
         return (Role) invoke("role_add_privilege", flags, params, Role.class).getResult();
