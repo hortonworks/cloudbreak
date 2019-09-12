@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.service.UuidGeneratorService;
 
 public class CrnServiceTest {
 
@@ -33,12 +34,17 @@ public class CrnServiceTest {
     @Mock
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
+    @Mock
+    private UuidGeneratorService uuidGeneratorService;
+
     @Before
     public void setUp() {
         initMocks(this);
 
         // the provider should really store this as a CRN
         when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(CRN.toString());
+
+        when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
     }
 
     @Test
@@ -59,6 +65,7 @@ public class CrnServiceTest {
         assertEquals(Crn.Service.REDBEAMS, crn.getService());
         assertEquals(CRN.getAccountId(), crn.getAccountId());
         assertEquals(Crn.ResourceType.DATABASE, crn.getResourceType());
+        assertEquals("uuid", crn.getResource());
     }
 
     @Test
@@ -69,6 +76,7 @@ public class CrnServiceTest {
         assertEquals(Crn.Service.REDBEAMS, crn.getService());
         assertEquals(CRN.getAccountId(), crn.getAccountId());
         assertEquals(Crn.ResourceType.DATABASE_SERVER, crn.getResourceType());
+        assertEquals("uuid", crn.getResource());
     }
 
 }

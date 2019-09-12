@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.service.crn;
 
-import java.util.UUID;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -12,12 +10,16 @@ import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.service.UuidGeneratorService;
 
 @Service
 public class CrnService {
 
     @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
+    @Inject
+    private UuidGeneratorService uuidGeneratorService;
 
     public String getCurrentAccountId() {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
@@ -56,7 +58,7 @@ public class CrnService {
             throw new IllegalArgumentException("Cannot create CRN for null resource");
         }
 
-        String resourceId = UUID.randomUUID().toString();
+        String resourceId = uuidGeneratorService.randomUuid();
 
         return Crn.builder()
                 .setService(Crn.Service.REDBEAMS)

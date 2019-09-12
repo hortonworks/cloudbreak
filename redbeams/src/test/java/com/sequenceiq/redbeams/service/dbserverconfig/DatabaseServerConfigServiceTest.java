@@ -50,6 +50,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.BadRequestException;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
+import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
@@ -60,6 +61,8 @@ import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValida
 public class DatabaseServerConfigServiceTest {
 
     private static final String USERNAME = "username";
+
+    private static final String PASSWORD = "password";
 
     private static final String SERVER_NAME = "myserver";
 
@@ -116,6 +119,9 @@ public class DatabaseServerConfigServiceTest {
 
     @Mock
     private UserGeneratorService userGeneratorService;
+
+    @Mock
+    private PasswordGeneratorService passwordGeneratorService;
 
     private DatabaseServerConfig server;
 
@@ -386,6 +392,7 @@ public class DatabaseServerConfigServiceTest {
                     return invocation.getArgument(0, DatabaseConfig.class);
                 });
         when(userGeneratorService.generateUserName()).thenReturn(USERNAME);
+        when(passwordGeneratorService.generatePassword(any())).thenReturn(PASSWORD);
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
         server.setHost("myhost");
         server.setPort(5432);
@@ -408,5 +415,6 @@ public class DatabaseServerConfigServiceTest {
         String databaseUserName = db.getConnectionUserName().getRaw();
         assertEquals(USERNAME, databaseUserName);
         assertNotEquals(server.getConnectionUserName(), databaseUserName);
+        assertEquals(PASSWORD, db.getConnectionPassword().getRaw());
     }
 }

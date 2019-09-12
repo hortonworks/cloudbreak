@@ -10,8 +10,8 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -45,11 +45,12 @@ import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.service.EnvironmentService;
+import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 import com.sequenceiq.redbeams.service.network.SubnetListerService;
-import com.sequenceiq.redbeams.service.uuid.UuidGeneratorService;
+import com.sequenceiq.redbeams.service.UuidGeneratorService;
 
 @Component
 public class AllocateDatabaseServerV4RequestToDBStackConverter {
@@ -84,6 +85,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private UserGeneratorService userGeneratorService;
 
     @Inject
+    private PasswordGeneratorService passwordGeneratorService;
+
+    @Inject
     private UuidGeneratorService uuidGeneratorService;
 
     @Inject
@@ -102,7 +106,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         dbStack.setNetwork(buildNetwork(source.getNetwork(), environment, cloudPlatform));
 
         if (source.getDatabaseServer() != null) {
-            dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), source.getName(), ownerCrn, environment.getSecurityAccess()));
+            dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), cloudPlatform, source.getName(), ownerCrn,
+                environment.getSecurityAccess()));
         }
 
         Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
@@ -195,7 +200,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return network;
     }
 
-    private DatabaseServer buildDatabaseServer(DatabaseServerV4StackRequest source, String name, Crn ownerCrn, SecurityAccessResponse securityAccessResponse) {
+    private DatabaseServer buildDatabaseServer(DatabaseServerV4StackRequest source, CloudPlatform cloudPlatform, String name, Crn ownerCrn,
+        SecurityAccessResponse securityAccessResponse) {
         DatabaseServer server = new DatabaseServer();
         server.setAccountId(ownerCrn.getAccountId());
         server.setName(generateDatabaseServerName());
@@ -205,8 +211,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         server.setConnectionDriver(source.getConnectionDriver());
         server.setStorageSize(source.getStorageSize());
         server.setRootUserName(source.getRootUserName() != null ? source.getRootUserName() : userGeneratorService.generateUserName());
-        server.setRootPassword(source.getRootUserPassword() != null ? source.getRootUserPassword() : userGeneratorService.generatePassword()
-        );
+        server.setRootPassword(source.getRootUserPassword() != null ?
+            source.getRootUserPassword() : passwordGeneratorService.generatePassword(Optional.of(cloudPlatform)));
         server.setPort(source.getPort());
         server.setSecurityGroup(buildExistingSecurityGroup(source.getSecurityGroup(), securityAccessResponse));
 
@@ -266,12 +272,12 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     // Sorry, MissingResourceNameGenerator seems like overkill. Unlike other
     // converters, this converter generates names internally in the same format.
 
-    private static String generateNetworkName() {
-        return String.format("n-%s", UUID.randomUUID().toString());
+    private String generateNetworkName() {
+        return String.format("n-%s", uuidGeneratorService.randomUuid());
     }
 
-    private static String generateDatabaseServerName() {
-        return String.format("dbsvr-%s", UUID.randomUUID().toString());
+    private String generateDatabaseServerName() {
+        return String.format("dbsvr-%s", uuidGeneratorService.randomUuid());
     }
 
     private String generateDatabaseServerStackName(String environmentName) {
