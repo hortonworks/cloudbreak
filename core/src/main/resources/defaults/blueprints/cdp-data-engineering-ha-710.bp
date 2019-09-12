@@ -2,7 +2,7 @@
   "description": "CDP 1.1 (HA) Data Engineering with Spark, Livy and Zeppelin",
   "blueprint": {
     "cdhVersion": "7.1.0",
-    "displayName": "dataengineering-ha-710",
+    "displayName": "dataengineering-ha",
     "services": [
       {
         "refName": "zookeeper",

@@ -2,7 +2,7 @@
   "description": "CDP 1.1 Data Mart template with Apache Impala and Hue",
   "blueprint": {
     "cdhVersion": "7.1.0",
-    "displayName": "datamart-710",
+    "displayName": "datamart",
     "services": [
       {
         "refName": "hdfs",
