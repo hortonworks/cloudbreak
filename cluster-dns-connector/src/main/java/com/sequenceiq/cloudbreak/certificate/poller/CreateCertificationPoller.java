@@ -24,6 +24,8 @@ public class CreateCertificationPoller implements AttemptMaker<List<String>> {
 
     private Optional<String> requestId;
 
+    private int attempt;
+
     public CreateCertificationPoller(GrpcClusterDnsClient grpcClusterDnsClient, String actorCrn, String pollerRequestId, Optional<String> requestId) {
         this.grpcClusterDnsClient = grpcClusterDnsClient;
         this.actorCrn = actorCrn;
@@ -33,6 +35,7 @@ public class CreateCertificationPoller implements AttemptMaker<List<String>> {
 
     @Override
     public AttemptResult<List<String>> process() throws Exception {
+        attempt++;
         PollCertificateCreationResponse response = grpcClusterDnsClient.pollCreateCertificate(actorCrn, pollerRequestId, requestId);
         LOGGER.debug("Polling attempt result: {}", response.getStatus());
         if (response.getStatus().equalsIgnoreCase("succeeded")) {
@@ -41,7 +44,7 @@ public class CreateCertificationPoller implements AttemptMaker<List<String>> {
         if (response.getStatus().equalsIgnoreCase("FAILED")) {
             return AttemptResults.breakFor(String.format("Certificate creation is failed for %s with message: %s ", pollerRequestId, response.getError()));
         }
-        LOGGER.debug("Polling continues");
+        LOGGER.info("The certificate polls continued, attempt: {}", attempt);
         return AttemptResults.justContinue();
     }
 }

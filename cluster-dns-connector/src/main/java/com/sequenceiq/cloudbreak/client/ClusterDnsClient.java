@@ -1,10 +1,18 @@
 package com.sequenceiq.cloudbreak.client;
 
+import static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryResponse;
+import static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget;
+import static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPs;
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.List;
 
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementGrpc;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementGrpc.PublicEndpointManagementBlockingStub;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateRequest;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryRequest;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryRequest;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryResponse;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse;
 import com.google.protobuf.ByteString;
@@ -43,6 +51,39 @@ public class ClusterDnsClient {
                 .setRequestId(pollRequestId);
 
         return newStub(requestId).pollCertificateCreation(requestBuilder.build());
+    }
+
+    public CreateDnsEntryResponse createDnsEntryWithIp(String requestId, String accountId, String endpoint, String environment, boolean wildcard,
+            List<String> ips) {
+        checkNotNull(requestId);
+
+        DnsTarget dnsTarget = DnsTarget.newBuilder()
+                .setTargetIPs(IPs.newBuilder().addAllIP(ips).build())
+                .build();
+
+        CreateDnsEntryRequest.Builder requestBuilder = CreateDnsEntryRequest.newBuilder()
+                .setAddWildcard(wildcard)
+                .setDnsTarget(dnsTarget)
+                .setAccountId(accountId)
+                .setEndpoint(endpoint)
+                .setEnvironment(environment);
+
+        return newStub(requestId).createDnsEntry(requestBuilder.build());
+    }
+
+    public DeleteDnsEntryResponse deleteDnsEntryWithIp(String requestId, String accountId, String endpoint, String environment, boolean wildcard,
+            List<String> ips) {
+        checkNotNull(requestId);
+        DnsTarget dnsTarget = DnsTarget.newBuilder()
+                .setTargetIPs(IPs.newBuilder().addAllIP(ips).build())
+                .build();
+        DeleteDnsEntryRequest.Builder requestBuilder = DeleteDnsEntryRequest.newBuilder()
+                .setRemoveWildcard(wildcard)
+                .setDnsTarget(dnsTarget)
+                .setAccountId(accountId)
+                .setEndpoint(endpoint)
+                .setEnvironment(environment);
+        return newStub(requestId).deleteDnsEntry(requestBuilder.build());
     }
 
     /**

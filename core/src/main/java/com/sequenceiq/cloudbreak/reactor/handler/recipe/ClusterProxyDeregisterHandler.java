@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.ClusterProxyDeregisterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.ClusterProxyDeregisterSuccess;
@@ -36,6 +37,9 @@ public class ClusterProxyDeregisterHandler implements EventHandler<ClusterProxyD
     @Inject
     private ClusterProxyService clusterProxyService;
 
+    @Inject
+    private StackTerminationService stackTerminationService;
+
     @Override
     public void accept(Event<ClusterProxyDeregisterRequest> requestEvent) {
         ClusterProxyDeregisterRequest request = requestEvent.getData();
@@ -47,6 +51,7 @@ public class ClusterProxyDeregisterHandler implements EventHandler<ClusterProxyD
                 LOGGER.error("Cluster proxy deregister failed", ex);
             }
         }
+        stackTerminationService.deleteDnsEntry(stack, null);
         Selectable result = new ClusterProxyDeregisterSuccess(stack.getId());
         eventBus.notify(result.selector(), new Event<>(requestEvent.getHeaders(), result));
     }
