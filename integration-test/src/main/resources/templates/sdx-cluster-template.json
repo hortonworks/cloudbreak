@@ -5,7 +5,7 @@
     "databases": [],
     "cm": {},
     "executorType": "DEFAULT",
-    "blueprintName": "CDP 1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+    "blueprintName": "CDP 1.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
     "validateBlueprint": false
   },
   "network": {

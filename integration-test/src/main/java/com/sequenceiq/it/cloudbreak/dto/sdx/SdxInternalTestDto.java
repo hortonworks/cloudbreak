@@ -50,7 +50,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     private static final String DEFAULT_SDX_NAME = "test-sdx" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
 
-    private static final String DEFAULT_SDX_BLUEPRINT_NAME = "CDP 1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas";
+    private static final String DEFAULT_SDX_BLUEPRINT_NAME = "CDP 1.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas";
 
     private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
 

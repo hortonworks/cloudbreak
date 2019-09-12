@@ -159,13 +159,6 @@ cb:
   blueprint:
     cm:
       defaults: >
-                CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-700;
-                CDP 1.0 - Data Engineering HA: Apache Spark, Apache Livy, Apache Zeppelin=cdp-data-engineering-ha-700;
-                CDP 1.0 - Data Mart: Apache Impala, Hue=cdp-data-mart-700;
-                CDP 1.0 - Operational Database: Apache HBase=cdp-opdb-700;
-                CDP 1.0 - Operational Database: Apache HBase (Custom)=cdp-opdb-custom-700;
-                CDP 1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-700;
-                CDP 1.0 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-700;
                 CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-710;
                 CDP 1.1 - Data Engineering HA: Apache Spark, Apache Livy, Apache Zeppelin=cdp-data-engineering-ha-710;
                 CDP 1.1 - Data Mart: Apache Impala, Hue=cdp-data-mart-710;

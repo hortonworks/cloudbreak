@@ -5,7 +5,7 @@
   "description": "CDP 1.1 SDX template with Atlas, HMS, Ranger and other services they are dependent on",
   "blueprint": {
     "cdhVersion": "7.1.0",
-    "displayName": "datalake-710",
+    "displayName": "datalake",
     "hostTemplates": [
       {
         "cardinality": 1,

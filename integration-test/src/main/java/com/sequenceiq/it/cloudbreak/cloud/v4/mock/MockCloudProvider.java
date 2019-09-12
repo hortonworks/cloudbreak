@@ -68,7 +68,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public static final String LONDON = "London";
 
-    public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie";
+    public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie";
 
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
