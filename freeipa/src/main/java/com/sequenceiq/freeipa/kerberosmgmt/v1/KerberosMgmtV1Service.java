@@ -1,24 +1,17 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
-import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
-import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
@@ -31,8 +24,6 @@ import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Keytab;
-import com.sequenceiq.freeipa.client.model.Privilege;
-import com.sequenceiq.freeipa.client.model.Role;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -63,15 +54,9 @@ public class KerberosMgmtV1Service {
 
     private static final String KEYTAB_FETCH_FAILED = "Failed to fetch keytab.";
 
-    private static final String VAULT_UPDATE_FAILED = "Failed to update Vault.";
-
     private static final String EMPTY_REALM = "Failed to create service as realm was empty.";
 
     private static final String IPA_STACK_NOT_FOUND = "Stack for IPA server not found.";
-
-    private static final String KEYTAB_SUB_TYPE = "keytab";
-
-    private static final String PRINCIPAL_SUB_TYPE = "serviceprincipal";
 
     private static final int NOT_FOUND_ERROR_CODE = 4001;
 
@@ -87,10 +72,10 @@ public class KerberosMgmtV1Service {
     private FreeIpaClientFactory freeIpaClientFactory;
 
     @Inject
-    private SecretService secretService;
+    private KerberosMgmtRoleComponent roleComponent;
 
     @Inject
-    private StringToSecretResponseConverter stringToSecretResponseConverter;
+    private KerberosMgmtVaultComponent vaultComponent;
 
     public ServiceKeytabResponse generateServiceKeytab(ServiceKeytabRequest request, String accountId) throws FreeIpaClientException {
         LOGGER.debug("Request to generate service keytab: {}", request);
@@ -106,8 +91,8 @@ public class KerberosMgmtV1Service {
         } else {
             serviceKeytab = getKeytab(service.getKrbprincipalname(), ipaClient);
         }
-        response.setKeytab(getSecretResponseForKeytab(request, accountId, serviceKeytab));
-        response.setServicePrincipal(getSecretResponseForPrincipal(request, accountId, service.getKrbprincipalname()));
+        response.setKeytab(vaultComponent.getSecretResponseForKeytab(request, accountId, serviceKeytab));
+        response.setServicePrincipal(vaultComponent.getSecretResponseForPrincipal(request, accountId, service.getKrbprincipalname()));
         return response;
     }
 
@@ -120,8 +105,8 @@ public class KerberosMgmtV1Service {
 
         String servicePrincipal = request.getServiceName() + "/" + request.getServerHostName() + "@" + realm;
         String serviceKeytab = getExistingKeytab(servicePrincipal, ipaClient);
-        response.setKeytab(getSecretResponseForKeytab(request, accountId, serviceKeytab));
-        response.setServicePrincipal(getSecretResponseForPrincipal(request, accountId, servicePrincipal));
+        response.setKeytab(vaultComponent.getSecretResponseForKeytab(request, accountId, serviceKeytab));
+        response.setServicePrincipal(vaultComponent.getSecretResponseForPrincipal(request, accountId, servicePrincipal));
         return response;
     }
 
@@ -137,8 +122,8 @@ public class KerberosMgmtV1Service {
         } else {
             hostKeytab = getKeytab(host.getKrbprincipalname(), ipaClient);
         }
-        response.setKeytab(getSecretResponseForKeytab(request, accountId, hostKeytab));
-        response.setHostPrincipal(getSecretResponseForPrincipal(request, accountId, host.getKrbprincipalname()));
+        response.setKeytab(vaultComponent.getSecretResponseForKeytab(request, accountId, hostKeytab));
+        response.setHostPrincipal(vaultComponent.getSecretResponseForPrincipal(request, accountId, host.getKrbprincipalname()));
         return response;
     }
 
@@ -150,8 +135,8 @@ public class KerberosMgmtV1Service {
 
         String hostPrincipal = ipaClient.showHost(request.getServerHostName()).getKrbprincipalname();
         String hostKeytab = getExistingKeytab(hostPrincipal, ipaClient);
-        response.setKeytab(getSecretResponseForKeytab(request, accountId, hostKeytab));
-        response.setHostPrincipal(getSecretResponseForPrincipal(request, accountId, hostPrincipal));
+        response.setKeytab(vaultComponent.getSecretResponseForKeytab(request, accountId, hostKeytab));
+        response.setHostPrincipal(vaultComponent.getSecretResponseForPrincipal(request, accountId, hostPrincipal));
         return response;
     }
 
@@ -170,9 +155,9 @@ public class KerberosMgmtV1Service {
                 .withClusterCrn(request.getClusterCrn())
                 .withServerHostName(request.getServerHostName())
                 .withServiceName(request.getServiceName());
-        recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
-        recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
-        deleteRoleIfItIsNoLongerUsed(request.getRoleName(), ipaClient);
+        vaultComponent.recursivelyCleanupVault(vaultPathBuilder.withSubType(VaultPathBuilder.SecretSubType.SERVICE_PRINCIPAL).build());
+        vaultComponent.recursivelyCleanupVault(vaultPathBuilder.withSubType(VaultPathBuilder.SecretSubType.KEYTAB).build());
+        roleComponent.deleteRoleIfItIsNoLongerUsed(request.getRoleName(), ipaClient);
     }
 
     public void deleteHost(HostRequest request, String accountId) throws FreeIpaClientException, DeleteException {
@@ -196,10 +181,10 @@ public class KerberosMgmtV1Service {
                 .withServerHostName(request.getServerHostName());
         for (VaultPathBuilder.SecretType secretType : VaultPathBuilder.SecretType.values()) {
             vaultPathBuilder.withSecretType(secretType);
-            recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
-            recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
+            vaultComponent.recursivelyCleanupVault(vaultPathBuilder.withSubType(VaultPathBuilder.SecretSubType.SERVICE_PRINCIPAL).build());
+            vaultComponent.recursivelyCleanupVault(vaultPathBuilder.withSubType(VaultPathBuilder.SecretSubType.KEYTAB).build());
         }
-        deleteRoleIfItIsNoLongerUsed(request.getRoleName(), ipaClient);
+        roleComponent.deleteRoleIfItIsNoLongerUsed(request.getRoleName(), ipaClient);
     }
 
     public void cleanupByCluster(VaultCleanupRequest request, String accountId) throws DeleteException {
@@ -212,7 +197,7 @@ public class KerberosMgmtV1Service {
                 throw new DeleteException("Cluster CRN is required");
             }
             MDCBuilder.addResourceCrn(request.getClusterCrn());
-            cleanupSecrets(request.getEnvironmentCrn(), request.getClusterCrn(), accountId);
+            vaultComponent.cleanupSecrets(request.getEnvironmentCrn(), request.getClusterCrn(), accountId);
         } catch (DeleteException e) {
             throw e;
         } catch (Exception e) {
@@ -226,35 +211,10 @@ public class KerberosMgmtV1Service {
         try {
             MDCBuilder.addEnvCrn(environmentCrn);
             MDCBuilder.addAccountId(accountId);
-            cleanupSecrets(environmentCrn, null, accountId);
+            vaultComponent.cleanupSecrets(environmentCrn, null, accountId);
         } catch (Exception e) {
             LOGGER.error("Cleanup cluster failed " + e.getLocalizedMessage(), e);
             throw new DeleteException("Failed to cleanup " + e.getLocalizedMessage());
-        }
-    }
-
-    private void cleanupSecrets(String environmentCrn, String clusterCrn, String accountId) {
-        VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
-                .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
-                .withAccountId(accountId)
-                .withEnvironmentCrn(environmentCrn)
-                .withClusterCrn(clusterCrn);
-        for (VaultPathBuilder.SecretType secretType : VaultPathBuilder.SecretType.values()) {
-            vaultPathBuilder.withSecretType(secretType);
-            recursivelyCleanupVault(vaultPathBuilder.withSubType(PRINCIPAL_SUB_TYPE).build());
-            recursivelyCleanupVault(vaultPathBuilder.withSubType(KEYTAB_SUB_TYPE).build());
-        }
-    }
-
-    private void recursivelyCleanupVault(String path) {
-        LOGGER.debug("Cleaning vault path: " + path);
-        List<String> entries = secretService.listEntries(path);
-        if (entries.isEmpty()) {
-            secretService.cleanup(path);
-        } else {
-            entries.stream().forEach(entry -> {
-                recursivelyCleanupVault(path + "/" + entry);
-            });
         }
     }
 
@@ -284,14 +244,14 @@ public class KerberosMgmtV1Service {
             try {
                 host = ipaClient.addHost(hostname);
             } catch (FreeIpaClientException e) {
-                if (!isDuplicateEntryException(e)) {
+                if (!KerberosMgmtUtil.isDuplicateEntryException(e)) {
                     LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
                     throw new KeytabCreationException(HOST_CREATION_FAILED);
                 }
                 host = ipaClient.showHost(hostname);
             }
             allowHostKeytabRetrieval(hostname, freeIpaClientFactory.getAdminUser(), ipaClient);
-            addRoleAndPrivileges(Optional.empty(), Optional.of(host), roleRequest, ipaClient);
+            roleComponent.addRoleAndPrivileges(Optional.empty(), Optional.of(host), roleRequest, ipaClient);
         } catch (FreeIpaClientException e) {
             LOGGER.error(HOST_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
             throw new KeytabCreationException(HOST_CREATION_FAILED);
@@ -303,7 +263,7 @@ public class KerberosMgmtV1Service {
         try {
             ipaClient.deleteHost(hostname);
         } catch (FreeIpaClientException e) {
-            if (!isNotFoundException(e)) {
+            if (!KerberosMgmtUtil.isNotFoundException(e)) {
                 LOGGER.error(HOST_DELETION_FAILED + " " + e.getLocalizedMessage(), e);
                 throw new DeleteException(HOST_DELETION_FAILED);
             }
@@ -318,13 +278,13 @@ public class KerberosMgmtV1Service {
             try {
                 service = ipaClient.addService(canonicalPrincipal);
             } catch (FreeIpaClientException e) {
-                if (!isDuplicateEntryException(e)) {
+                if (!KerberosMgmtUtil.isDuplicateEntryException(e)) {
                     throw e;
                 }
                 service = ipaClient.showService(canonicalPrincipal);
             }
             allowServiceKeytabRetrieval(service.getKrbprincipalname(), freeIpaClientFactory.getAdminUser(), ipaClient);
-            addRoleAndPrivileges(Optional.of(service), Optional.empty(), request.getRoleRequest(), ipaClient);
+            roleComponent.addRoleAndPrivileges(Optional.of(service), Optional.empty(), request.getRoleRequest(), ipaClient);
         } catch (FreeIpaClientException e) {
             LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
             throw new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED);
@@ -336,47 +296,9 @@ public class KerberosMgmtV1Service {
         try {
             ipaClient.deleteService(canonicalPrincipal);
         } catch (FreeIpaClientException e) {
-            if (!isNotFoundException(e)) {
+            if (!KerberosMgmtUtil.isNotFoundException(e)) {
                 LOGGER.error(SERVICE_PRINCIPAL_DELETION_FAILED + " " + e.getLocalizedMessage(), e);
                 throw new DeleteException(SERVICE_PRINCIPAL_DELETION_FAILED);
-            }
-        }
-    }
-
-    private void addRoleAndPrivileges(Optional<com.sequenceiq.freeipa.client.model.Service> service, Optional<Host> host, RoleRequest roleRequest,
-            FreeIpaClient ipaClient)
-            throws FreeIpaClientException {
-        if (roleRequest != null && StringUtils.isNotBlank(roleRequest.getRoleName())) {
-            Set<Role> allRole = ipaClient.findAllRole();
-            Optional<Role> optionalRole = allRole.stream().filter(role -> role.getCn().equals(roleRequest.getRoleName())).findFirst();
-            Role role = optionalRole.isPresent() ? optionalRole.get() : ipaClient.addRole(roleRequest.getRoleName());
-            addPrivilegesToRole(roleRequest.getPrivileges(), ipaClient, role);
-            role = ipaClient.showRole(role.getCn());
-            Set<String> servicesToAssignRole = service.stream()
-                    .filter(s -> !s.getMemberOfRole().stream().anyMatch(member -> member.contains(roleRequest.getRoleName())))
-                    .map(com.sequenceiq.freeipa.client.model.Service::getKrbprincipalname)
-                    .collect(Collectors.toSet());
-            Set<String> hostsToAssignRole = host.stream()
-                    .filter(h -> !h.getMemberOfRole().stream().anyMatch(member -> member.contains(roleRequest.getRoleName())))
-                    .map(Host::getFqdn)
-                    .collect(Collectors.toSet());
-            ipaClient.addRoleMember(role.getCn(), null, null, hostsToAssignRole, null, servicesToAssignRole);
-        }
-    }
-
-    private void addPrivilegesToRole(Set<String> privileges, FreeIpaClient ipaClient, Role role) throws FreeIpaClientException {
-        if (privileges != null) {
-            Set<String> privilegesToAdd = privileges.stream().filter(privilegeName -> {
-                try {
-                    Privilege privilege = ipaClient.showPrivilege(privilegeName);
-                    return privilege.getMember().stream().noneMatch(member -> member.equals(role.getCn()));
-                } catch (FreeIpaClientException e) {
-                    LOGGER.error("Privilege [{}] show error", privilegeName, e);
-                    return false;
-                }
-            }).collect(Collectors.toSet());
-            if (!privilegesToAdd.isEmpty()) {
-                ipaClient.addRolePriviliges(role.getCn(), privilegesToAdd);
             }
         }
     }
@@ -419,129 +341,7 @@ public class KerberosMgmtV1Service {
         }
     }
 
-    private boolean isNotFoundException(FreeIpaClientException e) {
-        return Optional.ofNullable(e.getCause())
-                .filter(JsonRpcClientException.class::isInstance)
-                .map(JsonRpcClientException.class::cast)
-                .map(JsonRpcClientException::getCode)
-                .filter(c -> c == NOT_FOUND_ERROR_CODE)
-                .isPresent();
-    }
-
-    private boolean isDuplicateEntryException(FreeIpaClientException e) {
-        return Optional.ofNullable(e.getCause())
-                .filter(JsonRpcClientException.class::isInstance)
-                .map(JsonRpcClientException.class::cast)
-                .map(JsonRpcClientException::getCode)
-                .filter(c -> c == DUPLICATE_ENTRY_ERROR_CODE)
-                .isPresent();
-    }
-
-    private SecretResponse getSecretResponseForPrincipal(ServiceKeytabRequest request, String accountId, String principal) {
-        try {
-            String path = new VaultPathBuilder()
-                    .enableGeneratingClusterIdIfNotPresent()
-                    .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
-                    .withAccountId(accountId)
-                    .withSubType(PRINCIPAL_SUB_TYPE)
-                    .withEnvironmentCrn(request.getEnvironmentCrn())
-                    .withClusterCrn(request.getClusterCrn())
-                    .withServerHostName(request.getServerHostName())
-                    .withServiceName(request.getServiceName())
-                    .build();
-            String secret = secretService.put(path, principal);
-            return stringToSecretResponseConverter.convert(secret);
-        } catch (Exception exception) {
-            LOGGER.warn("Failure while updating vault.", exception);
-            throw new KeytabCreationException(VAULT_UPDATE_FAILED);
-        }
-    }
-
-    private SecretResponse getSecretResponseForKeytab(ServiceKeytabRequest request, String accountId, String keytab) {
-        try {
-            String path = new VaultPathBuilder()
-                    .enableGeneratingClusterIdIfNotPresent()
-                    .withSecretType(VaultPathBuilder.SecretType.SERVICE_KEYTAB)
-                    .withAccountId(accountId)
-                    .withSubType(KEYTAB_SUB_TYPE)
-                    .withEnvironmentCrn(request.getEnvironmentCrn())
-                    .withClusterCrn(request.getClusterCrn())
-                    .withServerHostName(request.getServerHostName())
-                    .withServiceName(request.getServiceName())
-                    .build();
-            String secret = secretService.put(path, keytab);
-            return stringToSecretResponseConverter.convert(secret);
-        } catch (Exception exception) {
-            LOGGER.warn("Failure while updating vault.", exception);
-            throw new KeytabCreationException(VAULT_UPDATE_FAILED);
-        }
-    }
-
-    private SecretResponse getSecretResponseForPrincipal(HostKeytabRequest request, String accountId, String principal) {
-        try {
-            String path = new VaultPathBuilder()
-                    .enableGeneratingClusterIdIfNotPresent()
-                    .withSecretType(VaultPathBuilder.SecretType.HOST_KEYTAB)
-                    .withAccountId(accountId)
-                    .withSubType(PRINCIPAL_SUB_TYPE)
-                    .withEnvironmentCrn(request.getEnvironmentCrn())
-                    .withClusterCrn(request.getClusterCrn())
-                    .withServerHostName(request.getServerHostName())
-                    .build();
-            String secret = secretService.put(path, principal);
-            return stringToSecretResponseConverter.convert(secret);
-        } catch (Exception exception) {
-            LOGGER.warn("Failure while updating vault.", exception);
-            throw new KeytabCreationException(VAULT_UPDATE_FAILED);
-        }
-    }
-
-    private SecretResponse getSecretResponseForKeytab(HostKeytabRequest request, String accountId, String keytab) {
-        try {
-            String path = new VaultPathBuilder()
-                    .enableGeneratingClusterIdIfNotPresent()
-                    .withSecretType(VaultPathBuilder.SecretType.HOST_KEYTAB)
-                    .withAccountId(accountId)
-                    .withSubType(KEYTAB_SUB_TYPE)
-                    .withEnvironmentCrn(request.getEnvironmentCrn())
-                    .withClusterCrn(request.getClusterCrn())
-                    .withServerHostName(request.getServerHostName())
-                    .build();
-            String secret = secretService.put(path, keytab);
-            return stringToSecretResponseConverter.convert(secret);
-        } catch (Exception exception) {
-            LOGGER.warn("Failure while updating vault.", exception);
-            throw new KeytabCreationException(VAULT_UPDATE_FAILED);
-        }
-    }
-
     private static String constructCanonicalPrincipal(String serviceName, String hostName, String realm) {
         return serviceName + "/" + hostName + "@" + realm;
-    }
-
-    private void deleteRoleIfItIsNoLongerUsed(String role, FreeIpaClient ipaClient) throws FreeIpaClientException {
-        if (role == null) {
-            return;
-        }
-
-        try {
-            Role ipaRole = ipaClient.showRole(role);
-            List<String> usesOfRole = new ArrayList<>();
-            usesOfRole.addAll(ipaRole.getMemberUser());
-            usesOfRole.addAll(ipaRole.getMemberGroup());
-            usesOfRole.addAll(ipaRole.getMemberHost());
-            usesOfRole.addAll(ipaRole.getMemberHostGroup());
-            usesOfRole.addAll(ipaRole.getMemberService());
-            if (usesOfRole.isEmpty()) {
-                ipaClient.deleteRole(role);
-            } else {
-                LOGGER.debug("The role {} is still in use, so it was not deleted.", role);
-            }
-        } catch (FreeIpaClientException e) {
-            if (!isNotFoundException(e)) {
-                throw e;
-            }
-            LOGGER.debug("The role {} does not exist, so it was not deleted.", role);
-        }
     }
 }
