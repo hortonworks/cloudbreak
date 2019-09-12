@@ -185,7 +185,7 @@ public class StackCreationService {
     }
 
     public void generateCertAndSaveForStackAndUpdateDnsEntry(Stack stack) {
-        if (tlsSetupService.isCertGenerationEnabled() && !stack.getCluster().getAutoTlsEnabled() && stack.getCluster().getGateway() != null) {
+        if (tlsSetupService.isCertGenerationEnabled() && stack.getCluster().getGateway() != null) {
             if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
                 tlsSetupService.generateCertAndSaveForStack(stack);
             } else {
