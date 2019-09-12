@@ -29,6 +29,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -41,6 +42,7 @@ import com.sequenceiq.redbeams.exception.ConflictException;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
+import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
@@ -84,6 +86,9 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     @Inject
     private UserGeneratorService userGeneratorService;
+
+    @Inject
+    private PasswordGeneratorService passwordGeneratorService;
 
     public Set<DatabaseServerConfig> findAll(Long workspaceId, String environmentCrn) {
         if (environmentCrn == null) {
@@ -267,9 +272,15 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         LOGGER.info("Creating database with name: {}", databaseName);
 
         DatabaseServerConfig databaseServerConfig = getByCrn(serverCrn);
+        // A database password does not necessarily need to follow cloud provider rules for the root
+        // password of a database server, but we can try to follow them anyway. A user-managed
+        // database server will not have a known cloud platform, however.
+        Optional<CloudPlatform> cloudPlatform = databaseServerConfig.getDbStack()
+            .map(DBStack::getCloudPlatform)
+            .map(CloudPlatform::valueOf);
 
         String databaseUserName = userGeneratorService.generateUserName();
-        String databasePassword = userGeneratorService.generatePassword();
+        String databasePassword = passwordGeneratorService.generatePassword(cloudPlatform);
         List<String> sqlStrings = List.of(
                 "CREATE DATABASE " + databaseName,
                 "CREATE USER " + databaseUserName + " WITH ENCRYPTED PASSWORD '" + databasePassword + "'",

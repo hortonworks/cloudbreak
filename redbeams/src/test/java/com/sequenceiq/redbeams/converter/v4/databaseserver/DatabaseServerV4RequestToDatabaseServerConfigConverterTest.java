@@ -44,5 +44,4 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverterTest {
         assertEquals(request.getEnvironmentCrn(), server.getEnvironmentId());
         assertEquals(ResourceStatus.USER_MANAGED, server.getResourceStatus());
     }
-
 }
