@@ -184,14 +184,17 @@ public class StackCreationService {
         return stack;
     }
 
-    public void generateCertAndSaveForStack(Stack stack) {
-        if (tlsSetupService.isCertGenerationEnabled()) {
+    public void generateCertAndSaveForStackAndUpdateDnsEntry(Stack stack) {
+        if (tlsSetupService.isCertGenerationEnabled() && !stack.getCluster().getAutoTlsEnabled() && stack.getCluster().getGateway() != null) {
             if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
                 tlsSetupService.generateCertAndSaveForStack(stack);
             } else {
                 LOGGER.info("CERT is already generated for stack, we don't generate a new one");
             }
+        } else {
+            LOGGER.info("Cert generation is disabled.");
         }
+        tlsSetupService.updateDnsEntry(stack);
     }
 
     public void setupTls(StackContext context) throws CloudbreakException {
