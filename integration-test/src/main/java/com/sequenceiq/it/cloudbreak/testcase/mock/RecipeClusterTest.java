@@ -103,6 +103,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
         String recipeName = resourcePropertyProvider().getName();
         String stackName = resourcePropertyProvider().getName();
         String instanceGroupName = resourcePropertyProvider().getName();
+        HostGroupType hostGroupTypeForRecipe = HostGroupType.WORKER;
 
         testContext
                 .given(recipeName, RecipeTestDto.class)
@@ -112,14 +113,15 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .when(recipeTestClient.createV4(), RunningParameter.key(recipeName))
                 .when(recipeTestClient.deleteV4(), RunningParameter.key(recipeName))
                 .given(instanceGroupName, InstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.WORKER)
+                .withHostGroup(hostGroupTypeForRecipe)
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
                 .given(stackName, StackTestDto.class)
                 .replaceInstanceGroups(instanceGroupName)
                 .when(stackTestClient.createV4(), RunningParameter.key(stackName))
                 .expect(BadRequestException.class, RunningParameter.key(stackName)
-                        .withExpectedMessage("Recipes '" + recipeName + "' not found"))
+                        .withExpectedMessage(String.format("The given recipe does not exist for the instance group \"%s\": %s",
+                                hostGroupTypeForRecipe.getName(), recipeName)))
                 .validate();
     }
 

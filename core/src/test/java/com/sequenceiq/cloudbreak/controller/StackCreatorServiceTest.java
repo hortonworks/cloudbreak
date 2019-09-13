@@ -78,4 +78,5 @@ public class StackCreatorServiceTest {
 
         assertTrue(base);
     }
+
 }
