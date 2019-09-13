@@ -36,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 
 @Component
 public class MockCloudProvider extends AbstractCloudProvider {
@@ -241,6 +242,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
+        return telemetry;
+    }
+
+    @Override
     public PlacementSettingsTestDto placement(PlacementSettingsTestDto placement) {
         return placement.withRegion(region())
                 .withAvailabilityZone(availabilityZone());
@@ -281,6 +287,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
+        return null;
+    }
+
+    @Override
+    public String getInstanceProfile() {
         return null;
     }
 }

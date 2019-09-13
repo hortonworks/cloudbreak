@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestD
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 
 @Component
 public class GcpCloudProvider extends AbstractCloudProvider {
@@ -133,6 +134,11 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
+        return telemetry;
+    }
+
+    @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
         GcpCredentialParameters parameters = new GcpCredentialParameters();
         String credentialType = gcpProperties.getCredential().getType();
@@ -176,6 +182,11 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
+        return null;
+    }
+
+    @Override
+    public String getInstanceProfile() {
         return null;
     }
 }

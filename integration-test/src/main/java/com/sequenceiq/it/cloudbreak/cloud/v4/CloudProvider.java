@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 public interface CloudProvider {
@@ -57,6 +58,8 @@ public interface CloudProvider {
 
     EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network);
 
+    TelemetryTestDto telemetry(TelemetryTestDto telemetry);
+
     StackTestDtoBase stack(StackTestDtoBase stack);
 
     ClusterTestDto cluster(ClusterTestDto cluster);
@@ -74,6 +77,8 @@ public interface CloudProvider {
     FileSystemType getFileSystemType();
 
     String getBaseLocation();
+
+    String getInstanceProfile();
 
     String getSubnetCIDR();
 

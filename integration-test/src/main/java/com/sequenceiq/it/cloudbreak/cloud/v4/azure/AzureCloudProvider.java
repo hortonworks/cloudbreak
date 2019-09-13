@@ -34,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestD
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 
 @Component
 public class AzureCloudProvider extends AbstractCloudProvider {
@@ -174,6 +175,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 
+    @Override
+    public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
+        return telemetry;
+    }
+
     public String getNetworkId() {
         return azureProperties.getNetwork().getNetworkId();
     }
@@ -234,5 +240,10 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getBaseLocation() {
         return String.join("/", azureProperties.getCloudstorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
+    }
+
+    @Override
+    public String getInstanceProfile() {
+        return null;
     }
 }

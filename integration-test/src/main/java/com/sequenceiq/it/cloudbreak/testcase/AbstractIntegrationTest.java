@@ -60,6 +60,7 @@ import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescript
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
@@ -290,8 +291,12 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     }
 
     protected void createEnvironmentWithNetworkAndFreeIPA(TestContext testContext) {
-        testContext.given(EnvironmentTestDto.class)
+        testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .given(EnvironmentTestDto.class)
                 .withNetwork()
+                .withTelemetry("telemetry")
                 .withCreateFreeIpa(Boolean.TRUE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
