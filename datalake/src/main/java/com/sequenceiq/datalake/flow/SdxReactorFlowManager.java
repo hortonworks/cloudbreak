@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.logger.ThreadBasedRequestIdProvider;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -54,11 +55,11 @@ public class SdxReactorFlowManager {
         notify(selector, new SdxEvent(selector, sdxId, userId, requestId));
     }
 
-    public void triggerSdxDeletion(Long sdxId) {
+    public void triggerSdxDeletion(Long sdxId, boolean forced) {
         String selector = SDX_DELETE_EVENT.event();
         String userId = threadBasedUserCrnProvider.getUserCrn();
         String requestId = threadBasedRequestIdProvider.getRequestId();
-        notify(selector, new SdxEvent(selector, sdxId, userId, requestId));
+        notify(selector, new SdxDeleteStartEvent(selector, sdxId, userId, requestId, forced));
     }
 
     public void triggerSdxRepairFlow(Long sdxId, SdxRepairRequest repairRequest) {

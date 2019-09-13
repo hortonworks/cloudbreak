@@ -204,22 +204,22 @@ class ProvisionerServiceTest {
 
         doThrow(new NotFoundException()).when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE));
 
-        provisionerService.startStackDeletion(id);
+        provisionerService.startStackDeletion(id, false);
         verify(stackV4Endpoint).delete(0L, null, false);
     }
 
     @Test
-    void startStackDeletionStackFound() {
+    void startForcedStackDeletionStackFound() {
         long id = 2L;
         SdxCluster sdxCluster = generateValidSdxCluster(id);
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
 
-        doNothing().when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE));
+        doNothing().when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.TRUE));
 
-        provisionerService.startStackDeletion(id);
-        verify(stackV4Endpoint).delete(0L, null, false);
+        provisionerService.startStackDeletion(id, true);
+        verify(stackV4Endpoint).delete(0L, null, true);
     }
 
     @Test
@@ -233,7 +233,7 @@ class ProvisionerServiceTest {
         doThrow(new InternalServerErrorException())
                 .when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE));
 
-        Assertions.assertThrows(InternalServerErrorException.class, () -> provisionerService.startStackDeletion(id));
+        Assertions.assertThrows(InternalServerErrorException.class, () -> provisionerService.startStackDeletion(id, false));
         verify(stackV4Endpoint).delete(0L, null, false);
     }
 

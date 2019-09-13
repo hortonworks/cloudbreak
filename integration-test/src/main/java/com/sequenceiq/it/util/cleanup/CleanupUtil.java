@@ -64,7 +64,7 @@ public class CleanupUtil extends CleanupClientUtil {
             sdxNames.stream().forEach(sdxName -> {
                 LOG.info("Deleting sdx with name: {}", sdxName);
                 try {
-                    sdx.sdxEndpoint().delete(sdxName);
+                    sdx.sdxEndpoint().delete(sdxName, false);
                 } catch (Exception e) {
                     LOG.error("Sdx with name: {} cannot be deleted, because of: {}", sdxName, e);
                 }

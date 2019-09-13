@@ -414,28 +414,32 @@ public class SdxService {
         }
     }
 
-    public void deleteSdxByClusterCrn(String userCrn, String clusterCrn) {
+    public void deleteSdxByClusterCrn(String userCrn, String clusterCrn, boolean forced) {
         LOGGER.info("Deleting SDX {}", clusterCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn).ifPresentOrElse(this::deleteSdxCluster, () -> {
+        sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn).ifPresentOrElse(sdxCluster -> {
+            deleteSdxCluster(sdxCluster, forced);
+        }, () -> {
             throw notFound("SDX cluster", clusterCrn).get();
         });
     }
 
-    public void deleteSdx(String userCrn, String name) {
+    public void deleteSdx(String userCrn, String name, boolean forced) {
         LOGGER.info("Deleting SDX {}", name);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name).ifPresentOrElse(this::deleteSdxCluster, () -> {
+        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name).ifPresentOrElse(sdxCluster -> {
+            deleteSdxCluster(sdxCluster, forced);
+        }, () -> {
             throw notFound("SDX cluster", name).get();
         });
     }
 
-    private void deleteSdxCluster(SdxCluster sdxCluster) {
+    private void deleteSdxCluster(SdxCluster sdxCluster, boolean forced) {
         checkIfSdxIsDeletable(sdxCluster);
         MDCBuilder.buildMdcContext(sdxCluster);
         sdxClusterRepository.save(sdxCluster);
         sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
-        sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
+        sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId(), forced);
         sdxReactorFlowManager.cancelRunningFlows(sdxCluster.getId());
         LOGGER.info("SDX delete triggered: {}", sdxCluster.getClusterName());
     }

@@ -280,7 +280,7 @@ class SdxServiceTest {
     @Test
     void deleteSdxWhenNotFound() {
         Assertions.assertThrows(com.sequenceiq.cloudbreak.exception.NotFoundException.class,
-                () -> sdxService.deleteSdx(USER_CRN, CLUSTER_NAME));
+                () -> sdxService.deleteSdx(USER_CRN, CLUSTER_NAME, false));
         verify(sdxClusterRepository, times(1))
                 .findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq(CLUSTER_NAME));
     }
@@ -319,8 +319,8 @@ class SdxServiceTest {
         SdxCluster sdxCluster = getSdxClusterForDeletionTest();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         mockCBCallForDistroXClusters(Sets.newHashSet());
-        sdxService.deleteSdx(USER_CRN, "sdx-cluster-name");
-        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(SDX_ID);
+        sdxService.deleteSdx(USER_CRN, "sdx-cluster-name", true);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(SDX_ID, true);
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(sdxStatusService, times(1))
@@ -337,7 +337,7 @@ class SdxServiceTest {
         mockCBCallForDistroXClusters(Sets.newHashSet(stackViewV4Response));
 
         assertThrows(BadRequestException.class,
-                () -> sdxService.deleteSdx(USER_CRN, "sdx-cluster-name"),
+                () -> sdxService.deleteSdx(USER_CRN, "sdx-cluster-name", false),
                 "The following Data Hub cluster(s) must be terminated before SDX deletion [existingDistroXCluster]");
     }
 

@@ -55,7 +55,7 @@ public class StackDeletionHandler implements EventHandler<StackDeletionWaitReque
             LOGGER.debug("Start polling stack deletion process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             provisionerService.waitCloudbreakClusterDeletion(sdxId, pollingConfig, requestId);
-            response = new StackDeletionSuccessEvent(sdxId, userId, requestId);
+            response = new StackDeletionSuccessEvent(sdxId, userId, requestId, stackDeletionWaitRequest.isForced());
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Deletion polling exited before timeout. Cause: ", userBreakException);
             response = new SdxDeletionFailedEvent(sdxId, userId, requestId, userBreakException);
