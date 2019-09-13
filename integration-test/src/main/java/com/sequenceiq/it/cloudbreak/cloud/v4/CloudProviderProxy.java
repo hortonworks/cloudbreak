@@ -34,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Component
@@ -144,6 +145,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getInstanceProfile() {
+        return delegate.getInstanceProfile();
+    }
+
+    @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
         return delegate.attachedVolume(volume);
     }
@@ -166,6 +172,11 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
         return delegate.network(network);
+    }
+
+    @Override
+    public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
+        return telemetry;
     }
 
     @Override

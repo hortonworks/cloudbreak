@@ -31,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 
 @Component
 public class YarnCloudProvider extends AbstractCloudProvider {
@@ -138,6 +139,11 @@ public class YarnCloudProvider extends AbstractCloudProvider {
                 .withYarn(environmentNetworkParameters());
     }
 
+    @Override
+    public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
+        return telemetry;
+    }
+
     private EnvironmentNetworkYarnParams environmentNetworkParameters() {
         EnvironmentNetworkYarnParams environmentNetworkYarnParams = new EnvironmentNetworkYarnParams();
         environmentNetworkYarnParams.setQueue(getQueue());
@@ -222,6 +228,11 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
+        return null;
+    }
+
+    @Override
+    public String getInstanceProfile() {
         return null;
     }
 }
