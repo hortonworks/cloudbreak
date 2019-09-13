@@ -101,6 +101,12 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
+            {% if 'NIFI_REST' in exposed and 'NIFI_NODE' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>NIFI_REST</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+             </param>
+             {%- endif %}
         </provider>
     </gateway>
 
@@ -250,6 +256,17 @@
         <role>IMPALA</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['IMPALAD'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['IMPALA'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'NIFI_NODE' in salt['pillar.get']('gateway:location') -%}
+    {% if 'NIFI_REST' in exposed -%}
+    <service>
+        <role>NIFI_REST</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['NIFI_NODE'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['NIFI_REST'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
