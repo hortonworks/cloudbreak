@@ -33,6 +33,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestD
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 
 @Component
 public class AwsCloudProvider extends AbstractCloudProvider {
@@ -133,6 +134,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
         return network.withSubnetIDs(getSubnetIDs())
                 .withAws(environmentNetworkParameters());
+    }
+
+    @Override
+    public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
+        return telemetry;
     }
 
     private EnvironmentNetworkAwsParams environmentNetworkParameters() {
@@ -244,5 +250,10 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getBaseLocation() {
         return String.join("/", awsProperties.getCloudstorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
+    }
+
+    @Override
+    public String getInstanceProfile() {
+        return awsProperties.getCloudstorage().getS3().getInstanceProfile();
     }
 }

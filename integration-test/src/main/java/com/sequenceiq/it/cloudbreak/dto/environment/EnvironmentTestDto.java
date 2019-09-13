@@ -32,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 
 @Prototype
 public class EnvironmentTestDto
@@ -101,6 +102,12 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
         getRequest().setIdBrokerMappingSource(idBrokerMappingSource);
+        return this;
+    }
+
+    public EnvironmentTestDto withTelemetry(String telemetry) {
+        TelemetryTestDto telemetryTestDto = getTestContext().get(telemetry);
+        getRequest().setTelemetry(telemetryTestDto.getRequest());
         return this;
     }
 
