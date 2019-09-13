@@ -5,6 +5,10 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -23,11 +27,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.dto.RecipeAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
@@ -51,6 +57,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
@@ -64,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClient
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
+import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -145,6 +153,9 @@ public class StackCreatorService {
     @Inject
     private ClusterComponentRepository clusterComponentRepository;
 
+    @Inject
+    private RecipeService recipeService;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest) {
         long start = System.currentTimeMillis();
         blueprintService.updateDefaultBlueprintCollection(workspace.getId());
@@ -154,6 +165,8 @@ public class StackCreatorService {
             LOGGER.debug("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+
+        validateRecipeExistenceOnInstanceGroups(stackRequest.getInstanceGroups(), workspace.getId());
 
         String stackName = stackRequest.getName();
         LOGGER.info("Check that stack with {} name does not exist.", stackName);
@@ -256,6 +269,42 @@ public class StackCreatorService {
         metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
+    }
+
+    private void validateRecipeExistenceOnInstanceGroups(final List<InstanceGroupV4Request> instanceGroupV4Requests, long workspaceId) {
+        Map<String, Set<String>> hostGroupRecipeNamePairs = new LinkedHashMap<>(instanceGroupV4Requests.size());
+
+        instanceGroupV4Requests.forEach(instanceGroupV4Request ->
+                hostGroupRecipeNamePairs.put(instanceGroupV4Request.getName(), instanceGroupV4Request.getRecipeNames()));
+
+        hostGroupRecipeNamePairs.forEach((instanceGroupName, recipeNamesForInstanceGroup) -> {
+            Set<String> missingRecipes = collectMissingRecipes(recipeNamesForInstanceGroup, workspaceId);
+            throwBadRequestIfHaveMissingRecipe(missingRecipes, instanceGroupName);
+        });
+    }
+
+    private Set<String> collectMissingRecipes(final Set<String> recipeNames, long workspaceId) {
+        Set<String> missingRecipes = new LinkedHashSet<>();
+        recipeNames.forEach(recipeName -> {
+            try {
+                recipeService.get(RecipeAccessDto.RecipeAccessDtoBuilder.aRecipeAccessDtoBuilder().withName(recipeName).build(), workspaceId);
+            } catch (NotFoundException ignore) {
+                missingRecipes.add(recipeName);
+            }
+        });
+        return missingRecipes;
+    }
+
+    private void throwBadRequestIfHaveMissingRecipe(final Set<String> missingRecipes, final String instanceGroupName) {
+        if (!missingRecipes.isEmpty()) {
+            if (missingRecipes.size() > 1) {
+                throw new BadRequestException(String.format("The given recipes does not exists for the instance group \"%s\": %s",
+                        instanceGroupName, String.join(", ", missingRecipes)));
+            } else {
+                throw new BadRequestException(String.format("The given recipe does not exist for the instance group \"%s\": %s",
+                        instanceGroupName, missingRecipes.stream().findFirst().get()));
+            }
+        }
     }
 
     private void setStackTypeAndValidateDatalake(Stack stack, Blueprint blueprint) {

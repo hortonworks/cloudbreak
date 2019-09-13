@@ -525,6 +525,11 @@ public class TestUtil {
         return hostMetadataSet;
     }
 
+    public static Recipe recipe() {
+        Set<Recipe> recipes = recipes(1);
+        return recipes.stream().findFirst().get();
+    }
+
     public static Set<Recipe> recipes(int count) {
         Set<Recipe> recipes = new HashSet<>();
         for (int i = 0; i < count; i++) {
