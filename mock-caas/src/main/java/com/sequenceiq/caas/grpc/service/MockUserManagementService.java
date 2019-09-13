@@ -213,7 +213,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         Crn actorCrn = Crn.safeFromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn());
         String userCrn = Crn.builder()
                 .setService(actorCrn.getService())
-                .setAccountId(actorCrn.getAccountId())
+                .setAccountId(accountId)
                 .setResourceType(actorCrn.getResourceType())
                 .setResource(userName)
                 .build().toString();
@@ -299,17 +299,14 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             String machineUserIdOrCrn = request.getMachineUserNameOrCrn(0);
             String[] splittedCrn = machineUserIdOrCrn.split(":");
             String userName;
-            String accountId;
+            String accountId = request.getAccountId();
             String crnString;
             if (splittedCrn.length > 1) {
                 userName = splittedCrn[6];
-                accountId = splittedCrn[4];
                 crnString = machineUserIdOrCrn;
             } else {
                 userName = machineUserIdOrCrn;
-                accountId = UUID.randomUUID().toString();
-                Crn crn = createCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn(), Crn.ResourceType.MACHINE_USER, userName);
-                accountId = crn.getAccountId();
+                Crn crn = createCrn(accountId, Crn.Service.IAM, Crn.ResourceType.MACHINE_USER, userName);
                 crnString = crn.toString();
             }
             responseObserver.onNext(
