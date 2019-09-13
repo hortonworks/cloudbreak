@@ -123,11 +123,14 @@ public class AzureTemplateBuilder {
             model.put("dbVersion", azureDatabaseServerView.getDbVersion());
             model.put("geoRedundantBackup", azureDatabaseServerView.getGeoRedundantBackup());
             model.put("location", location);
+            if (azureDatabaseServerView.getPort() != null) {
+                LOGGER.warn("Found port {} in database stack, but Azure ignores it", azureDatabaseServerView.getPort());
+            }
             model.put("serverTags", databaseStack.getTags());
-            model.put("skuCapacity", azureDatabaseServerView.getSkuCapacity().toString());
+            model.put("skuCapacity", azureDatabaseServerView.getSkuCapacity());
             model.put("skuFamily", azureDatabaseServerView.getSkuFamily());
             model.put("skuName", azureDatabaseServerView.getSkuName());
-            model.put("skuSizeMB", azureDatabaseServerView.getAllocatedStorageInMb().toString());
+            model.put("skuSizeMB", azureDatabaseServerView.getAllocatedStorageInMb());
             model.put("skuTier", azureDatabaseServerView.getSkuTier());
             model.put("storageAutoGrow", azureDatabaseServerView.getStorageAutoGrow());
             model.put("subnets", azureNetworkView.getSubnets());

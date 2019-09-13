@@ -35,7 +35,7 @@ public class AzureDatabaseServerView {
     }
 
     public Long getAllocatedStorageInMb() {
-        return databaseServer.getStorageSize() * NUM_MB_IN_GB;
+        return databaseServer.getStorageSize() != null ? databaseServer.getStorageSize() * NUM_MB_IN_GB : null;
     }
 
     public Integer getBackupRetentionDays() {
@@ -92,5 +92,9 @@ public class AzureDatabaseServerView {
 
     public String getAdminPassword() {
         return databaseServer.getRootPassword();
+    }
+
+    public Integer getPort() {
+        return databaseServer.getPort();
     }
 }

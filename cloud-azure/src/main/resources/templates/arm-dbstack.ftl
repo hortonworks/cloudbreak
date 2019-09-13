@@ -11,7 +11,7 @@
         },
         "skuTier": {
             "type": "string",
-            "defaultValue" : "${skuTier}",
+            "defaultValue" : "${skuTier!"GeneralPurpose"}",
             "allowedValues": [
                 "Basic",
                 "GeneralPurpose",
@@ -23,28 +23,30 @@
         },
         "skuFamily": {
             "type": "string",
-            "defaultValue" : "${skuFamily}",
+            "defaultValue" : "${skuFamily!"Gen5"}",
             "metadata": {
                 "description": "The family of hardware."
             }
         },
+        <#if skuCapacity??>
         "skuCapacity": {
             "type": "int",
-            "defaultValue" : ${skuCapacity},
+            "defaultValue" : ${skuCapacity?c},
             "metadata": {
                 "description": "The scale up/out capacity, representing server's compute units."
             }
         },
+        </#if>
         "skuSizeMB": {
             "type": "int",
-            "defaultValue" : ${skuSizeMB},
+            "defaultValue" : ${(skuSizeMB!10240)?c},
             "metadata": {
                 "description": "The size code, to be interpreted by resource as appropriate."
             }
         },
         "skuName": {
             "type": "string",
-            "defaultValue": "${skuName!GP_Gen5_2}",
+            "defaultValue": "${skuName!"GP_Gen5_2"}",
             "allowedValues": [
                 "GP_Gen5_2",
                 "GP_Gen5_4",
@@ -63,9 +65,9 @@
         },
         "dbVersion": {
             "type": "string",
-            "defaultValue": "${dbVersion}",
+            "defaultValue": "${dbVersion!10}",
             "metadata": {
-                "description": "Server version."
+                "description": "PostgreSQL version."
             }
         },
         "adminLoginName": {
@@ -94,7 +96,7 @@
         },
         "backupRetentionDays": {
             "type": "int",
-            "defaultValue": ${backupRetentionDays!7},
+            "defaultValue": ${(backupRetentionDays!7)?c},
             "minValue": 7,
             "maxValue": 35,
             "metadata": {
@@ -103,7 +105,7 @@
         },
         "geoRedundantBackup": {
             "type": "bool",
-            "defaultValue": ${(geoRedundantBackup!false)?c},
+            "defaultValue": ${(geoRedundantBackup!true)?c},
             "metadata": {
                 "description": "Enable Geo-redundant or not for server backup."
             }
@@ -161,7 +163,9 @@
             "sku": {
                 "name": "[parameters('skuName')]",
                 "tier": "[parameters('skuTier')]",
+                <#if skuCapacity??>
                 "capacity": "[parameters('skuCapacity')]",
+                </#if>
                 "size": "[parameters('skuSizeMB')]",
                 "family": "[parameters('skuFamily')]"
             },
