@@ -1,12 +1,12 @@
 {% set server_address = [] %}
-{%- for host, host_ips in salt['mine.get']('G@roles:ambari_server', 'network.ipaddrs', expr_form = 'compound').items() %}
+{%- for host, host_ips in salt['mine.get']('G@roles:ambari_server', 'network.ipaddrs', tgt_type = 'compound').items() %}
   {%- for ip, args in pillar.get('hosts', {}).items() %}
     {% if ip in host_ips %}
       {% do server_address.append(ip) %}
     {% endif %}
   {%- endfor %}
 {%- endfor %}
-{%- for host, host_ips in salt['mine.get']('G@roles:manager_server', 'network.ipaddrs', expr_form = 'compound').items() %}
+{%- for host, host_ips in salt['mine.get']('G@roles:manager_server', 'network.ipaddrs', tgt_type = 'compound').items() %}
   {%- for ip, args in pillar.get('hosts', {}).items() %}
     {% if ip in host_ips %}
       {% do server_address.append(ip) %}
