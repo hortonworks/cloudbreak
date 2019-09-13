@@ -237,10 +237,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            // YARN/SALT MAGIC: If you remove 'get role grains' before highstate, then highstate can run with defective roles,
-            // so it can happen that 'ambari_agent' role will be missing on some nodes. Please do not delete only if you know what you are doing.
-            Map<String, JsonNode> roles = SaltStates.getGrains(sc, "roles");
-            LOGGER.info("Roles before highstate: " + roles);
+            checkRolesBeforeHighstate(sc);
             runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitModel);
         } catch (ExecutionException e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
@@ -253,6 +250,28 @@ public class SaltOrchestrator implements HostOrchestrator {
             throw new CloudbreakOrchestratorFailedException(e);
         }
         LOGGER.info("Run services on nodes finished: {}", allNodes);
+    }
+
+    /**
+     * This method is a YARN/SALT MAGIC: If you remove 'get role grains' before highstate, then highstate can run with defective roles,
+     * so it can happen that 'ambari_agent' role will be missing on some nodes. Please do not delete only if you know what you are doing.
+     *
+     * @param sc SaltConnector
+     */
+    private void checkRolesBeforeHighstate(SaltConnector sc) {
+        int retryCount = 0;
+        int maxRetryCount = 2;
+        do {
+            retryCount++;
+            try {
+                Map<String, JsonNode> roles = SaltStates.getGrains(sc, "roles");
+                LOGGER.info("Roles before highstate: " + roles);
+                return;
+            } catch (RuntimeException e) {
+                LOGGER.info("Could not get roles: " + e);
+            }
+        } while (retryCount < maxRetryCount);
+        LOGGER.info("Could not get roles");
     }
 
     private void setPostgreRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> server)
