@@ -53,15 +53,15 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    public void delete(String name) {
+    public void delete(String name, Boolean forced) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        sdxService.deleteSdx(userCrn, name);
+        sdxService.deleteSdx(userCrn, name, forced);
     }
 
     @Override
-    public void deleteByCrn(String clusterCrn) {
+    public void deleteByCrn(String clusterCrn, Boolean forced) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        sdxService.deleteSdxByClusterCrn(userCrn, clusterCrn);
+        sdxService.deleteSdxByClusterCrn(userCrn, clusterCrn, forced);
     }
 
     @Override

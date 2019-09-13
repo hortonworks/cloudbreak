@@ -66,7 +66,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
             sdxClusterRepository.findById(sdxId).ifPresent(sdxCluster -> {
                 if (sdxCluster.isCreateDatabase() && Strings.isNotEmpty(sdxCluster.getDatabaseCrn())) {
                     LOGGER.debug("start polling database termination for sdx: {}", sdxId);
-                    databaseService.terminate(sdxCluster, requestId);
+                    databaseService.terminate(sdxCluster, requestId, rdsWaitRequest.isForced());
                 } else {
                     LOGGER.debug("skipping deletion of database for sdx: {}", sdxId);
                 }

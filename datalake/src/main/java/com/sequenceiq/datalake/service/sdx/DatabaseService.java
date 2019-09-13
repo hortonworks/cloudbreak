@@ -85,10 +85,10 @@ public class DatabaseService {
         return Strings.isNotEmpty(sdxCluster.getDatabaseCrn());
     }
 
-    public void terminate(SdxCluster sdxCluster, String requestId) {
+    public void terminate(SdxCluster sdxCluster, String requestId, boolean forced) {
         LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
         try {
-            DatabaseServerV4Response resp = databaseServerV4Endpoint.deleteByCrn(sdxCluster.getDatabaseCrn(), true);
+            DatabaseServerV4Response resp = databaseServerV4Endpoint.deleteByCrn(sdxCluster.getDatabaseCrn(), forced);
             sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
                     "External database deletion in progress", sdxCluster);
             notificationService.send(ResourceEvent.SDX_RDS_DELETION_STARTED, sdxCluster);

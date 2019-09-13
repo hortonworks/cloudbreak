@@ -56,10 +56,10 @@ public class ProvisionerService {
     @Inject
     private StackV4Endpoint stackV4Endpoint;
 
-    public void startStackDeletion(Long id) {
+    public void startStackDeletion(Long id, boolean forced) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             try {
-                stackV4Endpoint.delete(0L, sdxCluster.getClusterName(), false);
+                stackV4Endpoint.delete(0L, sdxCluster.getClusterName(), forced);
                 sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS, "Datalake deletion in progress", sdxCluster);
                 sdxClusterRepository.save(sdxCluster);
                 notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_STARTED, sdxCluster);

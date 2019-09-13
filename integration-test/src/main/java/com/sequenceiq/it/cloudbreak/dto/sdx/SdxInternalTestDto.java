@@ -232,8 +232,8 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public void delete(TestContext testContext, SdxClusterResponse entity, SdxClient client) {
         String sdxName = entity.getName();
         try {
-            client.getSdxClient().sdxEndpoint().delete(sdxName);
-            testContext.await(this, DELETED, key("wait-purge-sdx-" + sdxName));
+            client.getSdxClient().sdxEndpoint().delete(getName(), false);
+            testContext.await(this, DELETED, key("wait-purge-sdx-" + getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", sdxName, ResponseUtil.getErrorMessage(e), e);
         }

@@ -22,7 +22,7 @@ public class SdxDeleteAction implements Action<SdxTestDto, SdxClient> {
         Log.logJSON(LOGGER, " SDX delete request: ", testDto.getRequest());
         client.getSdxClient()
                 .sdxEndpoint()
-                .delete(testDto.getName());
+                .delete(testDto.getName(), false);
         Log.logJSON(LOGGER, " SDX list response: ", client.getSdxClient().sdxEndpoint().list(testContext.get(EnvironmentTestDto.class).getName()));
         return testDto;
     }

@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -46,13 +47,13 @@ public interface SdxEndpoint {
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "delete SDX cluster", produces = "application/json", nickname = "deleteSdx")
-    void delete(@PathParam("name") String name);
+    void delete(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @DELETE
     @Path("/crn/{clusterCrn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "delete SDX cluster by crn", produces = "application/json", nickname = "deleteSdxByCrn")
-    void deleteByCrn(@PathParam("clusterCrn") String clusterCrn);
+    void deleteByCrn(@PathParam("clusterCrn") String clusterCrn, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @POST
     @Path("{name}/redeploy")
