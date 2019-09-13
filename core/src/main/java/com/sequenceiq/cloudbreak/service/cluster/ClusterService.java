@@ -430,9 +430,13 @@ public class ClusterService {
 
     public Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig) {
         Cluster cluster = getCluster(clusterId);
-        cluster.setClusterManagerIp(ambariClientConfig.getApiAddress());
-        cluster = repository.save(cluster);
-        LOGGER.debug("Updated cluster: [ambariIp: '{}'].", ambariClientConfig.getApiAddress());
+        if (StringUtils.isEmpty(cluster.getClusterManagerIp())) {
+            cluster.setClusterManagerIp(ambariClientConfig.getApiAddress());
+            cluster = repository.save(cluster);
+            LOGGER.info("Updated cluster: [ambariIp: '{}'].", ambariClientConfig.getApiAddress());
+        } else {
+            LOGGER.info("Cluster manager ip has value, it does not set.");
+        }
         return cluster;
     }
 

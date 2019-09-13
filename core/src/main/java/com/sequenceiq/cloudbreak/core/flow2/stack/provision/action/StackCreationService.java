@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -54,9 +55,9 @@ import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -107,6 +108,9 @@ public class StackCreationService {
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
+
+    @Inject
+    private ClusterService clusterService;
 
     public void setupProvision(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_SETUP, "Provisioning setup");
@@ -194,7 +198,11 @@ public class StackCreationService {
         } else {
             LOGGER.info("Cert generation is disabled.");
         }
-        tlsSetupService.updateDnsEntry(stack);
+        String fqdn = tlsSetupService.updateDnsEntry(stack);
+        if (fqdn != null) {
+            stack.getCluster().setClusterManagerIp(fqdn);
+            clusterService.save(stack.getCluster());
+        }
     }
 
     public void setupTls(StackContext context) throws CloudbreakException {
