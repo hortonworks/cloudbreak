@@ -167,26 +167,8 @@ func SynchronizeAllUsers(c *cli.Context) {
 func SynchronizeCurrentUser(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "sync current user to FreeIpa")
 
-	environmentCrns := c.StringSlice(fl.FlIpaEnvironmentCrnsSlice.Name)
-	environmentNames := c.StringSlice(fl.FlIpaEnvironmentNamesOptionalSlice.Name)
-
-	envCrnSet := make(map[string]bool, 0)
-
-	for _, envName := range environmentNames {
-		envCrn := env.GetEnvCrnByName(envName, c)
-		envCrnSet[envCrn] = true
-	}
-	for _, envCrn := range environmentCrns {
-		envCrnSet[envCrn] = true
-	}
-
-	crns := make([]string, 0, len(envCrnSet))
-	for crn := range envCrnSet {
-		crns = append(crns, crn)
-	}
-
 	SynchronizeUserV1Request := freeIpaModel.SynchronizeUserV1Request{
-		Environments: crns,
+		Environments: constructEnvCrnList(c),
 	}
 
 	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
@@ -206,10 +188,9 @@ func SynchronizeCurrentUser(c *cli.Context) {
 func SetPassword(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "set user password in FreeIpa")
 
-	environments := c.StringSlice(fl.FlIpaEnvironmentCrnsSlice.Name)
 	password := c.String(fl.FlIpaUserPassword.Name)
 	SetPasswordV1Request := freeIpaModel.SetPasswordV1Request{
-		Environments: environments,
+		Environments: constructEnvCrnList(c),
 		Password:     password,
 	}
 
@@ -225,6 +206,28 @@ func SetPassword(c *cli.Context) {
 	} else {
 		writeSyncOperationStatus(c, syncOperationStatus)
 	}
+}
+
+func constructEnvCrnList(c *cli.Context) []string {
+	environmentCrns := c.StringSlice(fl.FlIpaEnvironmentCrnsSlice.Name)
+	environmentNames := c.StringSlice(fl.FlIpaEnvironmentNamesOptionalSlice.Name)
+
+	envCrnSet := make(map[string]bool, 0)
+	for _, envName := range environmentNames {
+		envCrn := env.GetEnvCrnByName(envName, c)
+		envCrnSet[envCrn] = true
+	}
+
+	for _, envCrn := range environmentCrns {
+		envCrnSet[envCrn] = true
+	}
+
+	crns := make([]string, 0, len(envCrnSet))
+	for crn := range envCrnSet {
+		crns = append(crns, crn)
+	}
+
+	return crns
 }
 
 func GetSyncOperationStatus(c *cli.Context) {
