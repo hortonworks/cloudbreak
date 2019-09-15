@@ -1,7 +1,9 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -29,6 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -55,17 +58,19 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
-public class SdxServiceTest {
+class SdxServiceTest {
 
-    public static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
-    public static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:default:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:default:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
 
-    public static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:default:datalake:e438a2db-d650-4132-ae62-242c5ba2f784";
+    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:default:datalake:e438a2db-d650-4132-ae62-242c5ba2f784";
 
     private static final Long SDX_ID = 2L;
 
     private static final String CLUSTER_NAME = "test-sdx-cluster";
+
+    private static final Set<String> SUPPORTED_PLATFORMS = Set.of("AWS");
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
@@ -103,6 +108,7 @@ public class SdxServiceTest {
     @BeforeEach
     void initMocks() {
         MockitoAnnotations.initMocks(this);
+        ReflectionTestUtils.setField(sdxService, "dbServiceSupportedPlatforms", SUPPORTED_PLATFORMS);
     }
 
     @Test
@@ -128,7 +134,7 @@ public class SdxServiceTest {
     @Test
     void getByAccountIdAndEnvNameNotFound() {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.empty());
-        Assertions.assertThrows(NotFoundException.class, () -> sdxService.getSdxByNameInAccount(USER_CRN, "env"), "Sdx cluster not found");
+        assertThrows(NotFoundException.class, () -> sdxService.getSdxByNameInAccount(USER_CRN, "env"), "Sdx cluster not found");
     }
 
     @Test
@@ -196,10 +202,10 @@ public class SdxServiceTest {
         long id = 10L;
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
-
-        Assertions.assertThrows(BadRequestException.class,
-                () -> sdxService.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null),
-                "Cannot create external database for sdx: test-sdx-cluster, for now only AWS is supported");
+        BadRequestException gotException = assertThrows(BadRequestException.class,
+                () -> sdxService.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        assertEquals(String.format("Cannot create external database for sdx: test-sdx-cluster, for now only %s is/are supported", SUPPORTED_PLATFORMS),
+                gotException.getMessage());
     }
 
     @Test
@@ -268,7 +274,7 @@ public class SdxServiceTest {
     @Test
     void listSdxWhenInvalidCrnProvided() {
         String crn = "crsdfadsfdsf sadasf3-df81ae585e10";
-        Assertions.assertThrows(BadRequestException.class, () -> sdxService.listSdx(crn, "envir"));
+        assertThrows(BadRequestException.class, () -> sdxService.listSdx(crn, "envir"));
     }
 
     @Test
@@ -330,7 +336,7 @@ public class SdxServiceTest {
         stackViewV4Response.setName("existingDistroXCluster");
         mockCBCallForDistroXClusters(Sets.newHashSet(stackViewV4Response));
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> sdxService.deleteSdx(USER_CRN, "sdx-cluster-name"),
                 "The following Data Hub cluster(s) must be terminated before SDX deletion [existingDistroXCluster]");
     }
@@ -367,4 +373,5 @@ public class SdxServiceTest {
         sdxCluster.setClusterName("sdx-cluster-name");
         return sdxCluster;
     }
+
 }

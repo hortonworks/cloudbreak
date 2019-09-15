@@ -27,7 +27,8 @@ public class DistroXClusterTestDto extends AbstractCloudbreakTestDto<DistroXClus
 
     public DistroXClusterTestDto valid() {
         return withClouderaManager(getTestContext().init(DistroXClouderaManagerTestDto.class))
-                .getCloudProvider().cluster(this);
+                .getCloudProvider().cluster(this)
+                .withValidateBlueprint(false);
     }
 
     public DistroXClusterTestDto withUserName(String userName) {
@@ -84,5 +85,11 @@ public class DistroXClusterTestDto extends AbstractCloudbreakTestDto<DistroXClus
         getRequest().setBlueprintName(blueprintName);
         return this;
     }
+
+    public DistroXClusterTestDto withValidateBlueprint(boolean validateBlueprint) {
+        getRequest().setValidateBlueprint(validateBlueprint);
+        return this;
+    }
+
 }
 

@@ -49,7 +49,6 @@ curl -k http://${PUBLIC_IP}:8087/redbeams/api/swagger.json -o ./apidefinitions/r
 curl -k http://${PUBLIC_IP}:8086/dl/api/swagger.json -o ./apidefinitions/datalake.json
 curl -k http://${PUBLIC_IP}:8085/as/api/swagger.json -o ./apidefinitions/autoscale.json
 
-docker rm -f cbreak_redbeams_1
 docker rm -f cbreak_periscope_1
 
 if [[ "$CIRCLECI" ]]; then

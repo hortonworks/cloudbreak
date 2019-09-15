@@ -50,7 +50,7 @@ public class KerberosTestDto extends AbstractFreeIPATestDto<CreateKerberosConfig
 
     @Override
     public KerberosTestDto valid() {
-        String name = resourceProperyProvider().getName();
+        String name = getResourceProperyProvider().getName();
         return withName(name).withEnvironment(EnvironmentTestDto.class);
     }
 

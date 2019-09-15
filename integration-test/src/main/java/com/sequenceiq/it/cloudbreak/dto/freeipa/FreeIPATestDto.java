@@ -56,7 +56,7 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
 
     @Override
     public FreeIPATestDto valid() {
-        return withName(resourceProperyProvider().getName())
+        return withName(getResourceProperyProvider().getName())
                 .withEnvironment(getTestContext().given(EnvironmentTestDto.class))
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()))
@@ -206,7 +206,7 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
 
     @Override
     public boolean deletable(ListFreeIpaResponse entity) {
-        return entity.getName().startsWith(resourceProperyProvider().prefix());
+        return entity.getName().startsWith(getResourceProperyProvider().prefix());
     }
 
     @Override

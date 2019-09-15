@@ -26,6 +26,11 @@ public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> exte
     }
 
     @Override
+    public int order() {
+        return 500;
+    }
+
+    @Override
     public CloudbreakTestDto valid() {
         throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
     }

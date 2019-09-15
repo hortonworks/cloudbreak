@@ -1,9 +1,11 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaulatorUtil.evaluateIfTrueDoOtherwise;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
@@ -11,10 +13,12 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.MockNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -29,28 +33,52 @@ public class NetworkV1ToNetworkV4Converter {
             key = new NetworkV1Request();
         }
 
-        NetworkV4Request response = new NetworkV4Request();
+        NetworkV4Request request = new NetworkV4Request();
 
         switch (network.getValue().getCloudPlatform()) {
             case "AWS":
-                response.setAws(getAwsNetworkParameters(Optional.ofNullable(key.getAws()), value));
+                request.setAws(getAwsNetworkParameters(Optional.ofNullable(key.getAws()), value));
                 break;
             case "AZURE":
-                response.setAzure(getAzureNetworkParameters(Optional.ofNullable(key.getAzure()), value));
+                request.setAzure(getAzureNetworkParameters(Optional.ofNullable(key.getAzure()), value));
+                break;
+            case "MOCK":
+                request.setMock(getMockNetworkParameters(Optional.ofNullable(key.getMock()), value));
                 break;
             default:
         }
-        return response;
+        return request;
+    }
+
+    private MockNetworkV4Parameters getMockNetworkParameters(Optional<MockNetworkV1Parameters> mock, EnvironmentNetworkResponse value) {
+        MockNetworkV1Parameters params = mock.orElse(new MockNetworkV1Parameters());
+        return convertToMockNetworkParams(new ImmutablePair<>(params, value));
     }
 
     private AzureNetworkV4Parameters getAzureNetworkParameters(Optional<AzureNetworkV1Parameters> azure, EnvironmentNetworkResponse value) {
         AzureNetworkV1Parameters params = azure.orElse(new AzureNetworkV1Parameters());
-        return getIfNotNull(new ImmutablePair<>(params, value), this::convertToAzureStackRequest);
+        return convertToAzureStackRequest(new ImmutablePair<>(params, value));
     }
 
     private AwsNetworkV4Parameters getAwsNetworkParameters(Optional<AwsNetworkV1Parameters> key, EnvironmentNetworkResponse value) {
         AwsNetworkV1Parameters params = key.orElse(new AwsNetworkV1Parameters());
-        return getIfNotNull(new ImmutablePair<>(params, value), this::convertToAwsStackRequest);
+        return convertToAwsStackRequest(new ImmutablePair<>(params, value));
+    }
+
+    private MockNetworkV4Parameters convertToMockNetworkParams(Pair<MockNetworkV1Parameters, EnvironmentNetworkResponse> source) {
+        EnvironmentNetworkResponse value = source.getValue();
+        MockNetworkV1Parameters key = source.getKey();
+
+        MockNetworkV4Parameters params = new MockNetworkV4Parameters();
+
+        if (key != null) {
+            String subnetId = key.getSubnetId();
+            evaluateIfTrueDoOtherwise(subnetId, StringUtils::isNotEmpty, params::setSubnetId, s -> params.setSubnetId(getFirstSubnetIdFromEnvironment(value)));
+            params.setInternetGatewayId(key.getInternetGatewayId());
+            params.setVpcId(key.getVpcId());
+        }
+
+        return params;
     }
 
     private AzureNetworkV4Parameters convertToAzureStackRequest(Pair<AzureNetworkV1Parameters, EnvironmentNetworkResponse> source) {
@@ -69,12 +97,15 @@ public class NetworkV1ToNetworkV4Converter {
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(subnetId);
             } else {
-                response.setSubnetId(source.getValue().getSubnetIds().stream().findFirst()
-                        .orElseThrow(() -> new BadRequestException("No subnet id for this environment")));
+                response.setSubnetId(getFirstSubnetIdFromEnvironment(value));
             }
         }
 
         return response;
+    }
+
+    private String getFirstSubnetIdFromEnvironment(EnvironmentNetworkResponse enr) {
+        return enr.getSubnetIds().stream().findFirst().orElseThrow(() -> new BadRequestException("No subnet id for this environment"));
     }
 
     private AwsNetworkV4Parameters convertToAwsStackRequest(Pair<AwsNetworkV1Parameters, EnvironmentNetworkResponse> source) {

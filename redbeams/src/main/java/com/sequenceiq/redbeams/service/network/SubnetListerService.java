@@ -35,6 +35,7 @@ public class SubnetListerService {
 
         switch (cloudPlatform) {
             case AWS:
+            case MOCK:
                 // IDs in metas are fine as is
                 return new ArrayList<>(environmentNetworkResponse.getSubnetMetas().values());
             case AZURE:
@@ -56,7 +57,7 @@ public class SubnetListerService {
             return credential.getAzure().get().getSubscriptionId();
         } else {
             throw new RedbeamsException(String.format("Retrieved credential {} for Azure environment {} which lacks subscription ID",
-                credential.getName(), environmentCrn));
+                    credential.getName(), environmentCrn));
         }
     }
 

@@ -215,7 +215,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         testContext.handleExecptionsDuringTest(false);
     }
 
-    public ResourcePropertyProvider resourceProperyProvider() {
+    public ResourcePropertyProvider getResourceProperyProvider() {
         return resourcePropertyProvider;
     }
 

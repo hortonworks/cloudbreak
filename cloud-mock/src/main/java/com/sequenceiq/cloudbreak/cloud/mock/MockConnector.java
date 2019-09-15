@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
+import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -51,6 +52,12 @@ public class MockConnector implements CloudConnector<Object> {
 
     @Inject
     private MockConstants mockConstants;
+
+    @Inject
+    private MockNetworkConnector mockNetworkConnector;
+
+    @Inject
+    private MockObjectStorageConnector objectStorageConnector;
 
     @Override
     public Authenticator authentication() {
@@ -114,6 +121,12 @@ public class MockConnector implements CloudConnector<Object> {
 
     @Override
     public NetworkConnector networkConnector() {
-        return null;
+        return mockNetworkConnector;
     }
+
+    @Override
+    public ObjectStorageConnector objectStorage() {
+        return objectStorageConnector;
+    }
+
 }

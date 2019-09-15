@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -59,9 +60,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     private static final DBStackStatus NEW_STATUS = new DBStackStatus();
 
-    private static final List<CloudPlatform> SUPPORTED_CLOUD_PLATFORMS = List.of(CloudPlatform.AWS, CloudPlatform.AZURE);
-
     private static final String DBSTACK_NAME_PREFIX = "dbstck-";
+
+    @Value("${cb.enabledplatforms:}")
+    private Set<String> dbServiceSupportedPlatforms;
 
     @Value("${info.app.version:}")
     private String version;
@@ -92,6 +94,13 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     @Inject
     private NetworkParameterAdder networkParameterAdder;
+
+    @PostConstruct
+    public void initSupportedPlatforms() {
+        if (dbServiceSupportedPlatforms.isEmpty()) {
+            dbServiceSupportedPlatforms = Set.of(CloudPlatform.AWS.toString(), CloudPlatform.AZURE.toString(), CloudPlatform.MOCK.toString());
+        }
+    }
 
     public DBStack convert(AllocateDatabaseServerV4Request source, String ownerCrnString) {
         Crn ownerCrn = Crn.safeFromString(ownerCrnString);
@@ -159,7 +168,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     }
 
     private void checkCloudPlatformIsSupported(CloudPlatform cloudPlatform) {
-        if (!SUPPORTED_CLOUD_PLATFORMS.contains(cloudPlatform)) {
+        if (!dbServiceSupportedPlatforms.contains(cloudPlatform.toString())) {
             throw new BadRequestException(String.format("Cloud platform %s not supported yet.", cloudPlatform));
         }
     }

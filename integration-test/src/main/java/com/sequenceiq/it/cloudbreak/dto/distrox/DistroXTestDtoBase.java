@@ -12,6 +12,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
@@ -20,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGro
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 
 public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCloudbreakTestDto<DistroXV1Request, StackV4Response, T> {
 
@@ -28,7 +30,7 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
     }
 
     public DistroXTestDtoBase<T> valid() {
-        String name = resourceProperyProvider().getName();
+        String name = getResourceProperyProvider().getName();
         withName(name)
                 .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.defaultHostGroup(getTestContext()))
                 .withCluster(getTestContext().given(DistroXClusterTestDto.class));
@@ -37,6 +39,11 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
 
     public DistroXTestDtoBase<T> withEnvironmentName(String environmentName) {
         getRequest().setEnvironmentName(environmentName);
+        return this;
+    }
+
+    public DistroXTestDtoBase<T> withGatewayPort(Integer port) {
+        getRequest().setGatewayPort(port);
         return this;
     }
 
@@ -108,6 +115,19 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
     public DistroXTestDtoBase<T> withNetwork(DistroXNetworkTestDto network) {
         getRequest().setNetwork(network.getRequest());
         return this;
+    }
+
+    public DistroXTestDtoBase<T> withSdx(SdxV1Request sdxV1Request) {
+        getRequest().setSdx(sdxV1Request);
+        return this;
+    }
+
+    public DistroXTestDtoBase<T> withInternalSdx(String key) {
+        SdxInternalClusterRequest sdxInternalClusterRequest = getTestContext().get(key);
+
+        SdxV1Request sdxRequest = new SdxV1Request();
+        sdxRequest.setName(sdxInternalClusterRequest.getStackV4Request().getName());
+        return withSdx(sdxRequest);
     }
 
     public DistroXTestDtoBase<T> withInstanceGroupsEntity(Collection<DistroXInstanceGroupTestDto> instanceGroups) {

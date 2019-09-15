@@ -452,7 +452,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
             CloudbreakClient cloudbreakClient = getCloudbreakClient(getWho(runningParameter));
             statuses.putAll(waitUtil.waitAndCheckStatuses(cloudbreakClient, awaitEntity.getName(), desiredStatuses, pollingInterval));
-            if (!desiredStatuses.values().contains(Status.DELETE_COMPLETED)) {
+            if (!desiredStatuses.containsValue(Status.DELETE_COMPLETED)) {
                 awaitEntity.refresh(this, cloudbreakClient);
             }
         } catch (Exception e) {
@@ -597,7 +597,7 @@ public abstract class TestContext implements ApplicationContextAware {
             String sdxName = entity.getName();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
-                awaitEntity.refresh(this, (SdxClient) null);
+                awaitEntity.refresh(this, (CloudbreakClient) null);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {

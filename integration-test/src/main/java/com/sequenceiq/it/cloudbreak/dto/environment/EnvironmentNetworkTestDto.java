@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -55,4 +56,10 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
         getRequest().setSubnetIds(subnetIDs);
         return this;
     }
+
+    public EnvironmentNetworkTestDto withMock(EnvironmentNetworkMockParams mock) {
+        getRequest().setMock(mock);
+        return this;
+    }
+
 }

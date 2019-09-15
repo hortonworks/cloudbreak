@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -21,6 +22,7 @@ import javax.ws.rs.WebApplicationException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -65,6 +67,9 @@ public class SdxService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
+    @Value("${cb.enabledplatforms:}")
+    private Set<String> dbServiceSupportedPlatforms;
+
     @Inject
     private SdxClusterRepository sdxClusterRepository;
 
@@ -94,6 +99,13 @@ public class SdxService {
 
     @Inject
     private SdxNotificationService notificationService;
+
+    @PostConstruct
+    public void initSupportedPlatforms() {
+        if (dbServiceSupportedPlatforms.isEmpty()) {
+            dbServiceSupportedPlatforms = Set.of("AWS");
+        }
+    }
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
@@ -219,7 +231,8 @@ public class SdxService {
     }
 
     private void createDatabaseByDefaultForAWS(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        if ("AWS".equals(environment.getCloudPlatform()) &&
+        //if (AWS.equals(environment.getCloudPlatform()) &&
+        if (dbServiceSupportedPlatforms.contains(environment.getCloudPlatform()) &&
                 (sdxClusterRequest.getExternalDatabase() == null ||
                         sdxClusterRequest.getExternalDatabase().getCreate() == null)) {
             sdxCluster.setCreateDatabase(true);
@@ -271,8 +284,9 @@ public class SdxService {
     }
 
     private void validateDatabaseRequest(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        if (sdxCluster.isCreateDatabase() && !"AWS".equals(environment.getCloudPlatform())) {
-            String message = String.format("Cannot create external database for sdx: %s, for now only AWS is supported", sdxCluster.getClusterName());
+        if (sdxCluster.isCreateDatabase() && !dbServiceSupportedPlatforms.contains(environment.getCloudPlatform())) {
+            String message = String.format("Cannot create external database for sdx: %s, for now only %s is/are supported", sdxCluster.getClusterName(),
+                    dbServiceSupportedPlatforms.toString());
             LOGGER.debug(message);
             throw new BadRequestException(message);
         }

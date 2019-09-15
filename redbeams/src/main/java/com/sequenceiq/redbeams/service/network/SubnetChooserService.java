@@ -23,6 +23,8 @@ public class SubnetChooserService {
                 return chooseSubnetsAws(subnetMetas);
             case AZURE:
                 return chooseSubnetsAzure(subnetMetas);
+            case MOCK:
+                return chooseSubnetsMock(subnetMetas);
             default:
                 throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
         }
@@ -48,6 +50,10 @@ public class SubnetChooserService {
     }
 
     private List<CloudSubnet> chooseSubnetsAzure(List<CloudSubnet> subnetMetas) {
+        return subnetMetas;
+    }
+
+    private List<CloudSubnet> chooseSubnetsMock(List<CloudSubnet> subnetMetas) {
         return subnetMetas;
     }
 }

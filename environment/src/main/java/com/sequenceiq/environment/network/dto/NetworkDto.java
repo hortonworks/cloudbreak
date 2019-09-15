@@ -26,6 +26,8 @@ public class NetworkDto {
 
     private final YarnParams yarn;
 
+    private final MockParams mock;
+
     private final String networkCidr;
 
     private final Map<String, CloudSubnet> subnetMetas;
@@ -41,6 +43,7 @@ public class NetworkDto {
         this.aws = builder.aws;
         this.azure = builder.azure;
         this.yarn = builder.yarn;
+        this.mock = builder.mock;
         this.subnetMetas = MapUtils.isEmpty(builder.subnetMetas) ? new HashMap<>() : builder.subnetMetas;
         this.networkCidr = builder.networkCidr;
         this.networkId = builder.networkId;
@@ -74,6 +77,10 @@ public class NetworkDto {
 
     public YarnParams getYarn() {
         return yarn;
+    }
+
+    public MockParams getMock() {
+        return mock;
     }
 
     public Set<String> getSubnetIds() {
@@ -119,6 +126,8 @@ public class NetworkDto {
 
         private YarnParams yarn;
 
+        private MockParams mock;
+
         private Map<String, CloudSubnet> subnetMetas;
 
         private String networkCidr;
@@ -156,6 +165,11 @@ public class NetworkDto {
 
         public Builder withYarn(YarnParams yarn) {
             this.yarn = yarn;
+            return this;
+        }
+
+        public Builder withMock(MockParams mock) {
+            this.mock = mock;
             return this;
         }
 

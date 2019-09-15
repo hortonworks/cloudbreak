@@ -14,6 +14,9 @@ public class NetworkV1Base implements Serializable {
     @ApiModelProperty(NetworkModelDescription.AZURE_PARAMETERS)
     private AzureNetworkV1Parameters azure;
 
+    @ApiModelProperty(NetworkModelDescription.MOCK_PARAMETERS)
+    private MockNetworkV1Parameters mock;
+
     public void setAws(AwsNetworkV1Parameters aws) {
         this.aws = aws;
     }
@@ -29,4 +32,13 @@ public class NetworkV1Base implements Serializable {
     public AzureNetworkV1Parameters getAzure() {
         return azure;
     }
+
+    public MockNetworkV1Parameters getMock() {
+        return mock;
+    }
+
+    public void setMock(MockNetworkV1Parameters mock) {
+        this.mock = mock;
+    }
+
 }

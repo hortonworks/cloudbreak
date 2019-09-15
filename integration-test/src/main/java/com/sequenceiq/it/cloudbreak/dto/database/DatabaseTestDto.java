@@ -48,8 +48,8 @@ public class DatabaseTestDto extends DeletableTestDto<DatabaseV4Request, Databas
     }
 
     public DatabaseTestDto valid() {
-        return withName(resourceProperyProvider().getName())
-                .withDescription(resourceProperyProvider().getDescription("database"))
+        return withName(getResourceProperyProvider().getName())
+                .withDescription(getResourceProperyProvider().getDescription("database"))
                 .withConnectionUserName("user")
                 .withConnectionPassword("password")
                 .withConnectionURL("jdbc:postgresql://somedb.com:5432/mydb")

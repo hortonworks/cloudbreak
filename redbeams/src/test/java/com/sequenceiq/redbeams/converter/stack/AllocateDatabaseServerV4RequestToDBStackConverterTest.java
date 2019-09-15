@@ -131,6 +131,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     public void setUp() throws Exception {
         initMocks(this);
         ReflectionTestUtils.setField(underTest, "version", VERSION);
+        ReflectionTestUtils.setField(underTest, "dbServiceSupportedPlatforms", Set.of("AWS", "AZURE"));
 
         allocateRequest = new AllocateDatabaseServerV4Request();
 
