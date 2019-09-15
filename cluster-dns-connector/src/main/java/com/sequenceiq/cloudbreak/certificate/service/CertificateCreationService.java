@@ -68,9 +68,14 @@ public class CertificateCreationService {
     }
 
     public String getFqdn(String actorCrn, String endpoint, String environment) {
-        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
-        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, actorCrn, requestIdOptional);
-        return getFullQualifiedDomainName(endpoint, environment, account.getWorkloadSubdomain());
+        try {
+            Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+            UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, actorCrn, requestIdOptional);
+            return getFullQualifiedDomainName(endpoint, environment, account.getWorkloadSubdomain());
+        } catch (Exception e) {
+            LOGGER.info("Cannot generate the FQDN, {}", e.getMessage(), e);
+        }
+        return null;
     }
 
     private String getFullQualifiedDomainName(String endpoint, String environment, String workloadSubdomain) {

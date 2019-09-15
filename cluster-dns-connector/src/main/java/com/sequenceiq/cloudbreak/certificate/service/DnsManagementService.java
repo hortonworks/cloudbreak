@@ -21,23 +21,27 @@ public class DnsManagementService {
     @Inject
     private GrpcClusterDnsClient grpcClusterDnsClient;
 
-    public void createDnsEntryWithIp(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard, List<String> ips) {
+    public boolean createDnsEntryWithIp(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard, List<String> ips) {
         try {
             Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
             grpcClusterDnsClient.createDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips, requestIdOptional);
             LOGGER.info("Dns entry is created with ips: {}", ips);
+            return true;
         } catch (Exception e) {
             LOGGER.info("Failed to create the dns entry with ips: {}", ips, e);
         }
+        return false;
     }
 
-    public void deleteDnsEntryWithIp(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard, List<String> ips) {
+    public boolean deleteDnsEntryWithIp(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard, List<String> ips) {
         try {
             Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
             grpcClusterDnsClient.deleteDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips, requestIdOptional);
             LOGGER.info("Dns entry is deleted with ips: {}", ips);
+            return true;
         } catch (Exception e) {
             LOGGER.info("Failed to delete the dns entry with ips: {}", ips, e);
         }
+        return false;
     }
 }

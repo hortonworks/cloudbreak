@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.component;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -76,13 +77,22 @@ public class DnsManagementServiceTest {
         String endpoint = "gtopolyai-cluster";
         String environment = "gtopolyai-without-freeipa";
         boolean wildcard = false;
-        List<String> ips = List.of("10.65.65.145");
+        List<String> ips = List.of("10.65.65.66");
         dnsManagementService.deleteDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips);
+        verifyHost(endpoint);
+        LOGGER.info("dns is deleted");
+    }
+
+    @Test
+    public void verifyHost() throws UnknownHostException {
+        verifyHost("gtopolyai-cluster");
+    }
+
+    private void verifyHost(String endpoint) throws UnknownHostException {
         InetAddress inetHost = InetAddress.getByName(endpoint + ".gtopolya.xcu2-8y8x.workload-dev.cloudera.com");
         String hostName = inetHost.getHostName();
         LOGGER.info("The host name was: " + hostName);
         LOGGER.info("The hosts IP address is: " + inetHost.getHostAddress());
-        LOGGER.info("dns is deleted");
     }
 
     @Configuration

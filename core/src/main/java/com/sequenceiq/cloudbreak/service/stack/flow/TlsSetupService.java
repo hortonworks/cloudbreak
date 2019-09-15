@@ -146,7 +146,7 @@ public class TlsSetupService {
         return certGenerationEnabled;
     }
 
-    public void updateDnsEntry(Stack stack) {
+    public String updateDnsEntry(Stack stack) {
         LOGGER.info("Update dns entry");
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         String accountId = threadBasedUserCrnProvider.getAccountId();
@@ -154,11 +154,16 @@ public class TlsSetupService {
 
         String ip = stackTerminationService.deleteDnsEntry(stack, environment.getName());
         if (ip == null) {
-            return;
+            return null;
         }
-        dnsManagementService.createDnsEntryWithIp(userCrn, accountId, stack.getName(), environment.getName(), false, List.of(ip));
-        String fullQualifiedDomainName = certificateCreationService.getFqdn(userCrn, stack.getName(), environment.getName());
-        LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", ip, fullQualifiedDomainName);
-
+        boolean success = dnsManagementService.createDnsEntryWithIp(userCrn, accountId, stack.getName(), environment.getName(), false, List.of(ip));
+        if (success) {
+            String fullQualifiedDomainName = certificateCreationService.getFqdn(userCrn, stack.getName(), environment.getName());
+            if (fullQualifiedDomainName != null) {
+                LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", ip, fullQualifiedDomainName);
+                return fullQualifiedDomainName;
+            }
+        }
+        return null;
     }
 }

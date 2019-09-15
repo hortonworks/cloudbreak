@@ -9,10 +9,15 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -22,8 +27,6 @@ import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -31,6 +34,9 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ChangePrimaryGatewayService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChangePrimaryGatewayService.class);
+
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
@@ -81,8 +87,12 @@ public class ChangePrimaryGatewayService {
                 String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(updatedStack);
 
                 Cluster cluster = updatedStack.getCluster();
-                cluster.setClusterManagerIp(gatewayIp);
-                clusterService.save(cluster);
+                if (StringUtils.isEmpty(cluster.getClusterManagerIp())) {
+                    cluster.setClusterManagerIp(gatewayIp);
+                    clusterService.save(cluster);
+                } else {
+                    LOGGER.info("Cluster manager ip has value, it does not set.");
+                }
                 return null;
             });
         } else {
