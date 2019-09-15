@@ -47,7 +47,7 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
     }
 
     public ImageCatalogTestDto valid() {
-        return getCloudProvider().imageCatalog(withName(resourceProperyProvider().getName()));
+        return getCloudProvider().imageCatalog(withName(getResourceProperyProvider().getName()));
     }
 
     public ImagesV4Response getResponseByProvider() {

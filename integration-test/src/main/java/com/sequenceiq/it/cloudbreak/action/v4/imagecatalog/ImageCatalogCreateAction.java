@@ -19,10 +19,15 @@ public class ImageCatalogCreateAction implements Action<ImageCatalogTestDto, Clo
     public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient client) throws Exception {
         Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
         Log.logJSON(LOGGER, format(" Image catalog post request:%n"), testDto.getRequest());
-        testDto.setResponse(
-                client.getCloudbreakClient()
-                        .imageCatalogV4Endpoint()
-                        .create(client.getWorkspaceId(), testDto.getRequest()));
+        try {
+            testDto.setResponse(
+                    client.getCloudbreakClient()
+                            .imageCatalogV4Endpoint()
+                            .create(client.getWorkspaceId(), testDto.getRequest()));
+        } catch (Exception e) {
+            Log.log("Unable to create image catalog!", e);
+            throw e;
+        }
         Log.logJSON(LOGGER, format(" Image catalog created  successfully:%n"), testDto.getResponse());
 
         return testDto;

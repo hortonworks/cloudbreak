@@ -29,8 +29,8 @@ public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, Proxy
 
     @Override
     public ProxyTestDto valid() {
-        return withName(resourceProperyProvider().getName())
-                .withDescription(resourceProperyProvider().getDescription("proxy"))
+        return withName(getResourceProperyProvider().getName())
+                .withDescription(getResourceProperyProvider().getDescription("proxy"))
                 .withServerHost("1.2.3.4")
                 .withServerUser("mock")
                 .withPassword("akarmi")

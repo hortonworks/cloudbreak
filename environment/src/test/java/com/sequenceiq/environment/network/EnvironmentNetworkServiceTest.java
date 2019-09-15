@@ -3,11 +3,14 @@ package com.sequenceiq.environment.network;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,12 +28,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
+import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -70,7 +75,6 @@ class EnvironmentNetworkServiceTest {
     @BeforeEach
     void before() {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
-        when(cloudConnector.networkConnector()).thenReturn(networkConnector);
     }
 
     @Test
@@ -81,6 +85,7 @@ class EnvironmentNetworkServiceTest {
         CreatedCloudNetwork createdCloudNetwork = new CreatedCloudNetwork();
         AwsEnvironmentNetworkConverter networkConverter = Mockito.mock(AwsEnvironmentNetworkConverter.class);
 
+        when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(networkCreationRequestFactory.create(environmentDto)).thenReturn(networkCreationRequest);
         when(networkConnector.createNetworkWithSubnets(networkCreationRequest)).thenReturn(createdCloudNetwork);
         when(environmentNetworkConverterMap.get(CloudPlatform.valueOf(CLOUD_PLATFORM))).thenReturn(networkConverter);
@@ -98,10 +103,25 @@ class EnvironmentNetworkServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void testCreateNetworkIfUnableToObtainNetworkConnectorThenBadRequestExceptionComes() {
+        EnvironmentDto environmentDto = EnvironmentDto.builder().withCloudPlatform(CLOUD_PLATFORM).build();
+        CloudConnector<Object> cloudConnector = mock(CloudConnector.class);
+
+        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
+        when(cloudConnector.networkConnector()).thenReturn(null);
+
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.createNetwork(environmentDto, new AzureNetwork()));
+
+        verify(cloudPlatformConnectors, times(1)).get(any());
+    }
+
+    @Test
     void testDeleteNetworkShouldDeleteTheNetwork() {
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
         EnvironmentDto environmentDto = createEnvironmentDto(null);
 
+        when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
         when(networkCreationRequestFactory.getStackName(any())).thenReturn(STACK_NAME);
 
@@ -122,6 +142,7 @@ class EnvironmentNetworkServiceTest {
         CloudCredential cloudCredential = new CloudCredential("1", "credName");
         EnvironmentDto environmentDto = createEnvironmentDto("resourceGroup");
 
+        when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
         when(networkCreationRequestFactory.getStackName(any())).thenReturn(STACK_NAME);
 

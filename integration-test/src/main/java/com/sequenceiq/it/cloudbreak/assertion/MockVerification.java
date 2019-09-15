@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -17,12 +16,11 @@ import org.springframework.http.HttpMethod;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.verification.Call;
 
 import spark.Response;
 
-public class MockVerification implements Assertion<StackTestDto, CloudbreakClient> {
+public class MockVerification<T> implements Assertion<T, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockVerification.class);
 
@@ -52,8 +50,59 @@ public class MockVerification implements Assertion<StackTestDto, CloudbreakClien
 
     public static MockVerification verifyRegEx(HttpMethod httpMethod, String path) {
         MockVerification verificator = new MockVerification(httpMethod, path, 1);
-        verificator.useRegExp = true;
+        verificator.setUseRegExp(true);
         return verificator;
+    }
+
+    @Override
+    public T doAssertion(TestContext testContext, T testDto, CloudbreakClient cloudbreakClient) {
+        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
+        Map<Call, Response> requestResponseMap = mockedTestContext.getSparkServer().getRequestResponseMap();
+        int matchesCount = getTimesMatched(requestResponseMap);
+        logVerify();
+        checkExactTimes(matchesCount);
+        checkAtLeast(matchesCount);
+        return testDto;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
+    public Integer getAtLeast() {
+        return atLeast;
+    }
+
+    public void setAtLeast(Integer atLeast) {
+        this.atLeast = atLeast;
+    }
+
+    public Integer getExactTimes() {
+        return exactTimes;
+    }
+
+    public void setExactTimes(Integer exactTimes) {
+        this.exactTimes = exactTimes;
+    }
+
+    public boolean isUseRegExp() {
+        return useRegExp;
+    }
+
+    public void setUseRegExp(boolean useRegExp) {
+        this.useRegExp = useRegExp;
+    }
+
+    public Collection<Pattern> getPatternList() {
+        return patternList;
+    }
+
+    public Map<String, Integer> getBodyContainsList() {
+        return bodyContainsList;
     }
 
     public MockVerification atLeast(int times) {
@@ -84,14 +133,7 @@ public class MockVerification implements Assertion<StackTestDto, CloudbreakClien
         return this;
     }
 
-    private void logVerify() {
-        LOGGER.info("Verification call: " + path);
-        LOGGER.info("Body must contains: " + StringUtils.join(bodyContainsList, ","));
-        List<String> patternStringList = patternList.stream().map(Pattern::pattern).collect(Collectors.toList());
-        LOGGER.info("Body must match: " + StringUtils.join(patternStringList, ","));
-    }
-
-    private void checkExactTimes(int times) {
+    protected void checkExactTimes(int times) {
         if (exactTimes != null) {
             if (exactTimes != times) {
                 throw new RuntimeException(path + " with body" + generateBodyTimesLog(bodyContainsList) + " "
@@ -100,7 +142,7 @@ public class MockVerification implements Assertion<StackTestDto, CloudbreakClien
         }
     }
 
-    private void checkAtLeast(int times) {
+    protected void checkAtLeast(int times) {
         if (atLeast != null) {
             if (times < atLeast) {
                 throw new RuntimeException(path + "with body" + generateBodyTimesLog(bodyContainsList)
@@ -109,7 +151,7 @@ public class MockVerification implements Assertion<StackTestDto, CloudbreakClien
         }
     }
 
-    private int getTimesMatched(Map<Call, Response> requestResponseMap) {
+    protected int getTimesMatched(Map<Call, Response> requestResponseMap) {
         int times = requestResponseMap.keySet().stream()
                 .filter(call -> isPathMatched(call))
                 .filter(call -> call.getMethod().equals(httpMethod.toString()))
@@ -139,7 +181,7 @@ public class MockVerification implements Assertion<StackTestDto, CloudbreakClien
     }
 
     private int getBodyContainsNumber(Call call, int bodyContainsNumber) {
-        for (Entry<String, Integer> stringIntegerEntry : bodyContainsList.entrySet()) {
+        for (Map.Entry<String, Integer> stringIntegerEntry : bodyContainsList.entrySet()) {
             int count = StringUtils.countMatches(call.getPostBody(), stringIntegerEntry.getKey());
             int required = stringIntegerEntry.getValue();
             if ((required < 0 && count > 0) || (count == required)) {
@@ -153,27 +195,23 @@ public class MockVerification implements Assertion<StackTestDto, CloudbreakClien
         return useRegExp ? Pattern.matches(path, call.getUri()) : call.getUri().contains(path);
     }
 
+    private String generateBodyTimesLog(Map<String, Integer> bodyContainsList) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Integer> entry : bodyContainsList.entrySet()) {
+            sb.append("Body: " + entry.getKey() + " Times: " + entry.getValue());
+        }
+        return sb.toString();
+    }
+
     private void logRequests(Map<Call, Response> requestResponseMap) {
         LOGGER.info("Request received: ");
         requestResponseMap.keySet().forEach(call -> LOGGER.info("Request: " + call));
     }
 
-    @Override
-    public StackTestDto doAssertion(TestContext testContext, StackTestDto testDto, CloudbreakClient cloudbreakClient) {
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
-        Map<Call, Response> requestResponseMap = mockedTestContext.getSparkServer().getRequestResponseMap();
-        int matchesCount = getTimesMatched(requestResponseMap);
-        logVerify();
-        checkExactTimes(matchesCount);
-        checkAtLeast(matchesCount);
-        return testDto;
-    }
-
-    private String generateBodyTimesLog(Map<String, Integer> bodyContainsList) {
-        StringBuilder sb = new StringBuilder();
-        for (Entry<String, Integer> entry : bodyContainsList.entrySet()) {
-            sb.append("Body: " + entry.getKey() + " Times: " + entry.getValue());
-        }
-        return sb.toString();
+    private void logVerify() {
+        LOGGER.info("Verification call: " + getPath());
+        LOGGER.info("Body must contains: " + StringUtils.join(getBodyContainsList(), ","));
+        List<String> patternStringList = getPatternList().stream().map(Pattern::pattern).collect(Collectors.toList());
+        LOGGER.info("Body must match: " + StringUtils.join(patternStringList, ","));
     }
 }

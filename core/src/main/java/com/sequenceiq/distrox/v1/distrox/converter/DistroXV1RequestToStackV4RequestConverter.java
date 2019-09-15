@@ -78,12 +78,13 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private SdxClientService sdxClientService;
 
     public StackV4Request convert(DistroXV1Request source) {
-        DetailedEnvironmentResponse environment = environmentClientService.getByName(source.getEnvironmentName());
+        DetailedEnvironmentResponse environment = Optional.ofNullable(environmentClientService.getByName(source.getEnvironmentName()))
+                .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
         if (environment != null && environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
             throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
         }
-        SdxClusterResponse sdxClusterResponse = getSdxClusterResponse(environment);
         StackV4Request request = new StackV4Request();
+        SdxClusterResponse sdxClusterResponse = getSdxClusterResponse(environment);
         request.setName(source.getName());
         request.setType(StackType.WORKLOAD);
         request.setCloudPlatform(getCloudPlatform(environment));
@@ -103,6 +104,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setCustomDomain(null);
         request.setTimeToLive(source.getTimeToLive());
         request.setTelemetry(getTelemetryRequest(source, environment, sdxClusterResponse));
+        request.setGatewayPort(source.getGatewayPort());
         return request;
     }
 
@@ -206,6 +208,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSdx(getIfNotNull(source.getSharedService(), sdxConverter::getSdx));
         request.setWorkloadAnalytics(isWorkloadAnalyticsEnabled(source, source.getTelemetry(), sdxClusterResponse));
+        request.setGatewayPort(source.getGatewayPort());
         return request;
     }
 

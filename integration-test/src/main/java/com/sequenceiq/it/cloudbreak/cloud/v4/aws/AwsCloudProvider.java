@@ -124,9 +124,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     private AwsNetworkV1Parameters distroXNetworkParameters() {
-        AwsNetworkV1Parameters awsNetworkV4Parameters = new AwsNetworkV1Parameters();
-        awsNetworkV4Parameters.setSubnetId(getSubnetId());
-        return awsNetworkV4Parameters;
+        AwsNetworkV1Parameters params = new AwsNetworkV1Parameters();
+        params.setSubnetId(getSubnetId());
+        return params;
     }
 
     @Override

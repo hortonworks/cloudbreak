@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -50,7 +51,8 @@ public class EnvironmentNetworkService {
     }
 
     public BaseNetwork createNetwork(EnvironmentDto environment, BaseNetwork baseNetwork) {
-        NetworkConnector networkConnector = getNetworkConnector(environment.getCloudPlatform());
+        NetworkConnector networkConnector = getNetworkConnector(environment.getCloudPlatform())
+                .orElseThrow(() -> new BadRequestException("No network connector for cloud platform: " + environment.getCloudPlatform()));
         NetworkCreationRequest networkCreationRequest = networkCreationRequestFactory.create(environment);
         EnvironmentNetworkConverter converter = environmentNetworkConverterMap.get(getCloudPlatform(environment));
         CreatedCloudNetwork createdCloudNetwork = networkConnector.createNetworkWithSubnets(networkCreationRequest);
@@ -58,13 +60,9 @@ public class EnvironmentNetworkService {
     }
 
     public void deleteNetwork(EnvironmentDto environment) {
-        NetworkConnector networkConnector = getNetworkConnector(environment.getCloudPlatform());
-        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(environment);
-        if (networkConnector != null) {
-            networkConnector.deleteNetworkWithSubnets(networkDeletionRequest);
-        } else {
-            LOGGER.info("No network connector for cloud platform: {}", environment.getCloudPlatform());
-        }
+        getNetworkConnector(environment.getCloudPlatform())
+                .ifPresentOrElse(connector -> connector.deleteNetworkWithSubnets(createNetworkDeletionRequest(environment)),
+                        () -> LOGGER.info("No network connector for cloud platform: {}", environment.getCloudPlatform()));
     }
 
     private NetworkDeletionRequest createNetworkDeletionRequest(EnvironmentDto environment) {
@@ -81,9 +79,9 @@ public class EnvironmentNetworkService {
         return Optional.of(networkDto).map(NetworkDto::getAzure).map(AzureParams::getResourceGroupName);
     }
 
-    private NetworkConnector getNetworkConnector(String cloudPlatform) {
+    private Optional<NetworkConnector> getNetworkConnector(String cloudPlatform) {
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.variant(cloudPlatform));
-        return cloudPlatformConnectors.get(cloudPlatformVariant).networkConnector();
+        return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant).networkConnector());
     }
 
     private CloudPlatform getCloudPlatform(EnvironmentDto environment) {

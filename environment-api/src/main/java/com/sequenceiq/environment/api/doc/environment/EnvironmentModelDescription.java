@@ -9,6 +9,7 @@ public class EnvironmentModelDescription {
     public static final String AWS_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String AZURE_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String YARN_SPECIFIC_PARAMETERS = "Yarn parameters";
+    public static final String MOCK_PARAMETERS = "Mock parameters";
     public static final String AWS_VPC_ID = "Subnet ids of the specified networks";
     public static final String AZURE_RESOURCE_GROUP_NAME = "Subnet ids of the specified networks";
     public static final String AZURE_NETWORK_ID = "Subnet ids of the specified networks";

@@ -12,7 +12,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.M
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.MockNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.mock.MockParameters;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -213,13 +215,14 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
-        return network.withSubnetCIDR(getSubnetCIDR())
+        return network
+                .withSubnetCIDR(getSubnetCIDR())
                 .withMock(networkParameters());
     }
 
     @Override
     public DistroXNetworkTestDto network(DistroXNetworkTestDto network) {
-        return network;
+        return network.withMock(distroXNetworkParameters());
     }
 
     @Override
@@ -250,6 +253,20 @@ public class MockCloudProvider extends AbstractCloudProvider {
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
         stackAuthenticationEntity.withPublicKeyId("publicKeyId");
         return stackAuthenticationEntity;
+    }
+
+    public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
+        return environmentNetwork
+                .withNetworkCIDR(getSubnetCIDR())
+                .withSubnetIDs(getSubnetIDs())
+                .withMock(environmentNetworkParameters());
+    }
+
+    private EnvironmentNetworkMockParams environmentNetworkParameters() {
+        EnvironmentNetworkMockParams params = new EnvironmentNetworkMockParams();
+        params.setVpcId(getVpcId());
+        params.setInternetGatewayId(getInternetGatewayId());
+        return params;
     }
 
     @Override
@@ -283,4 +300,13 @@ public class MockCloudProvider extends AbstractCloudProvider {
     public String getBaseLocation() {
         return null;
     }
+
+    private MockNetworkV1Parameters distroXNetworkParameters() {
+        MockNetworkV1Parameters params = new MockNetworkV1Parameters();
+        params.setSubnetId(getSubnetId());
+        params.setInternetGatewayId(getInternetGatewayId());
+        params.setVpcId(getVpcId());
+        return params;
+    }
+
 }

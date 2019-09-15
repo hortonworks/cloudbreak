@@ -1,0 +1,5 @@
+name: "mock-distrox-tests"
+tests:
+  - name: "distrox mock testcases"
+    classes:
+      - com.sequenceiq.it.cloudbreak.testcase.mock.DistroXClusterCreationTest

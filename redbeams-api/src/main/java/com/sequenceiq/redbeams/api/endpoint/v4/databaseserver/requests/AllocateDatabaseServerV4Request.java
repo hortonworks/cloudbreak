@@ -124,7 +124,10 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
     @Override
     public Mappable createMock() {
-        return null;
+        if (aws == null) {
+            aws = new AwsDBStackV4Parameters();
+        }
+        return aws;
     }
 
     public AwsDBStackV4Parameters getAws() {

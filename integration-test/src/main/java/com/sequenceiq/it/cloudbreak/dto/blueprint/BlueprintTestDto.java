@@ -35,7 +35,7 @@ public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Reque
     }
 
     public BlueprintTestDto valid() {
-        return withName(resourceProperyProvider().getName())
+        return withName(getResourceProperyProvider().getName())
                 .withBlueprint("someBlueprint");
     }
 

@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.dto.environment;
 
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.force;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.ArrayList;
@@ -13,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
@@ -74,8 +74,8 @@ public class EnvironmentTestDto
     @Override
     public EnvironmentTestDto valid() {
         return getCloudProvider()
-                .environment(withName(resourceProperyProvider().getEnvironmentName())
-                        .withDescription(resourceProperyProvider().getDescription("environment")))
+                .environment(withName(getResourceProperyProvider().getEnvironmentName())
+                        .withDescription(getResourceProperyProvider().getDescription("environment")))
                         .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
                         .withAuthentication(DUMMY_SSH_KEY)
                         .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK);
@@ -85,6 +85,11 @@ public class EnvironmentTestDto
         AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
         attachedFreeIpaRequest.setCreate(create);
         getRequest().setFreeIpa(attachedFreeIpaRequest);
+        return this;
+    }
+
+    public EnvironmentTestDto withMockIDBMS() {
+        getRequest().setIdBrokerMappingSource(IdBrokerMappingSource.MOCK);
         return this;
     }
 
@@ -130,6 +135,11 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withNetwork(EnvironmentNetworkRequest network) {
         getRequest().setNetwork(network);
+        return this;
+    }
+
+    public EnvironmentTestDto withTelemetry(TelemetryRequest telemetry) {
+        getRequest().setTelemetry(telemetry);
         return this;
     }
 
@@ -184,7 +194,7 @@ public class EnvironmentTestDto
     public void cleanUp(TestContext context, CloudbreakClient client) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         when(environmentTestClient.delete(), key("delete-environment-" + getName()).withSkipOnFail(false));
-        await(ARCHIVED, force());
+        await(ARCHIVED, new RunningParameter().withSkipOnFail(true));
     }
 
     @Override

@@ -48,6 +48,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
+    public int order() {
+        return 400;
+    }
+
+    @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         when(distroXTestClient.delete(), withoutLogError());
@@ -68,7 +73,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public boolean deletable(StackV4Response entity) {
-        return entity.getName().startsWith(resourceProperyProvider().prefix());
+        return entity.getName().startsWith(getResourceProperyProvider().prefix());
     }
 
     @Override
@@ -104,4 +109,5 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     public GeneratedBlueprintV4Response getGeneratedBlueprint() {
         return generatedBlueprint;
     }
+
 }

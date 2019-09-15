@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -38,6 +39,9 @@ public abstract class EnvironmentNetworkBase {
 
     @ApiModelProperty(EnvironmentModelDescription.YARN_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkYarnParams yarn;
+
+    @ApiModelProperty(EnvironmentModelDescription.MOCK_PARAMETERS)
+    private EnvironmentNetworkMockParams mock;
 
     public Set<String> getSubnetIds() {
         return subnetIds;
@@ -86,4 +90,13 @@ public abstract class EnvironmentNetworkBase {
     public void setYarn(EnvironmentNetworkYarnParams yarn) {
         this.yarn = yarn;
     }
+
+    public EnvironmentNetworkMockParams getMock() {
+        return mock;
+    }
+
+    public void setMock(EnvironmentNetworkMockParams mock) {
+        this.mock = mock;
+    }
+
 }

@@ -30,7 +30,7 @@ public class EnvironmentSettingsV4TestDto extends AbstractCloudbreakTestDto<Envi
 
     @Override
     public EnvironmentSettingsV4TestDto valid() {
-        return withName(resourceProperyProvider().getName());
+        return withName(getResourceProperyProvider().getName());
     }
 
     public EnvironmentSettingsV4TestDto withName(String name) {

@@ -28,6 +28,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @Prototype
 public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxClusterResponse, SdxTestDto> {
@@ -45,7 +46,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     @Override
     public SdxTestDto valid() {
-        withName(resourceProperyProvider().getName())
+        withName(getResourceProperyProvider().getName())
                 .withEnvironment(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withClusterShape(getCloudProvider().getClusterShape())
                 .withTags(getCloudProvider().getTags());
@@ -75,6 +76,11 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return this;
     }
 
+    public SdxTestDto withExternalDatabase(SdxDatabaseRequest database) {
+        getRequest().setExternalDatabase(database);
+        return this;
+    }
+
     public SdxTestDto withEnvironment() {
         EnvironmentTestDto environment = getTestContext().get(EnvironmentTestDto.class);
         if (environment == null) {
@@ -83,9 +89,26 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return withEnvironment(environment.getName());
     }
 
-    public SdxTestDto withEnvironment(String environment) {
-        getRequest().setEnvironment(environment);
+    public SdxTestDto withEnvironment(String environmentName) {
+        getRequest().setEnvironment(environmentName);
         return this;
+    }
+
+    public SdxTestDto withEnvironmentKey(String environmentKey) {
+        getRequest().setEnvironment(getTestContext().get(environmentKey).getName());
+        return this;
+    }
+
+    public SdxTestDto withEnvironment(Class<EnvironmentTestDto> environmentKey) {
+        return withEnvironment(key(environmentKey.getSimpleName()));
+    }
+
+    public SdxTestDto withEnvironment(RunningParameter environmentKey) {
+        EnvironmentTestDto env = getTestContext().get(environmentKey.getKey());
+        if (env == null) {
+            throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
+        }
+        return withEnvironment(env.getResponse().getName());
     }
 
     public SdxTestDto withName(String name) {
@@ -118,7 +141,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     public boolean deletable() {
-        return getName().startsWith(resourceProperyProvider().prefix());
+        return getName().startsWith(getResourceProperyProvider().prefix());
     }
 
     public void delete(TestContext testContext, SdxClient client) {

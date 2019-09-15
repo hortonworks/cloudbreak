@@ -14,6 +14,7 @@ import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiEcho;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
+import com.cloudera.api.swagger.model.ApiRemoteDataContext;
 import com.cloudera.api.swagger.model.ApiRoleTypeList;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceState;
@@ -65,6 +66,10 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     public static final String READ_AUTH_ROLES = API_ROOT + "/authRoles/metadata";
 
+    public static final String CDP_REMOTE_CONTEXT_BY_CLUSTER_CLUSTER_NAME = "/api/cdp/remoteContext/byCluster/:clusterName";
+
+    public static final String CDP_REMOTE_CONTEXT = "/api/cdp/remoteContext";
+
     private DynamicRouteStack dynamicRouteStack;
 
     public ClouderaManagerMock(Service sparkService, DefaultModel defaultModel) {
@@ -98,6 +103,8 @@ public class ClouderaManagerMock extends AbstractModelMock {
         listCommands();
         listActiveCommands();
         readAuthRoles();
+        getCdpRemoteContext();
+        postCdpRemoteContext();
     }
 
     private void readAuthRoles() {
@@ -200,6 +207,16 @@ public class ClouderaManagerMock extends AbstractModelMock {
         dynamicRouteStack.put(CONFIG, (request, response) -> new ApiConfigList().items(new ArrayList<>()));
     }
 
+    private void getCdpRemoteContext() {
+        dynamicRouteStack.get(CDP_REMOTE_CONTEXT_BY_CLUSTER_CLUSTER_NAME,
+                (req, res) -> new ApiRemoteDataContext());
+    }
+
+    private void postCdpRemoteContext() {
+        dynamicRouteStack.post(CDP_REMOTE_CONTEXT,
+                (req, res) -> new ApiRemoteDataContext());
+    }
+
     private void getHosts() {
         dynamicRouteStack.get(HOSTS, (request, response, model) -> {
             Map<String, CloudVmMetaDataStatus> instanceMap = model.getInstanceMap();
@@ -214,4 +231,5 @@ public class ClouderaManagerMock extends AbstractModelMock {
             return apiHostList;
         });
     }
+
 }

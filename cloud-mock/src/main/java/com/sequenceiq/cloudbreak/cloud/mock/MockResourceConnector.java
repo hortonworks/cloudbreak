@@ -29,6 +29,11 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class MockResourceConnector implements ResourceConnector<Object> {
+
+    public static final String MOCK_RDS_PORT = "1234";
+
+    public static final String MOCK_RDS_HOST = "mockrdshost";
+
     @Inject
     private MockCredentialViewFactory mockCredentialViewFactory;
 
@@ -53,8 +58,24 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-        PersistenceNotifier persistenceNotifier) {
-        List<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
+            PersistenceNotifier persistenceNotifier) {
+        CloudResourceStatus rdshost = new CloudResourceStatus(
+                new Builder()
+                        .type(ResourceType.RDS_HOSTNAME)
+                        .status(CommonStatus.CREATED)
+                        .name(MOCK_RDS_HOST)
+                        .persistent(true)
+                        .build(),
+                CREATED);
+        CloudResourceStatus rdsport = new CloudResourceStatus(
+                new Builder()
+                        .type(ResourceType.RDS_PORT)
+                        .status(CommonStatus.CREATED)
+                        .name(MOCK_RDS_PORT)
+                        .persistent(true)
+                        .build(),
+                CREATED);
+        List<CloudResourceStatus> cloudResourceStatuses = List.of(rdshost, rdsport);
         // for (Group group : stack.getGroups()) {
         //     for (int i = 0; i < group.getInstancesSize(); i++) {
         //         CloudResource cloudResource = new Builder()
@@ -149,6 +170,7 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
-        throw new TemplatingDoesNotSupportedException();
+        //throw new TemplatingDoesNotSupportedException();
+        return "BestDbStackTemplateInTheWorld";
     }
 }

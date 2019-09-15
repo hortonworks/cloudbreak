@@ -36,7 +36,7 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
     }
 
     public DistroXTemplateTestDto valid() {
-        return withName(resourceProperyProvider().getName())
+        return withName(getResourceProperyProvider().getName())
                 .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withCluster(getTestContext().init(ClusterTestDto.class).getRequest())
                 .withInstanceGroups(getTestContext().init(InstanceGroupTestDto.class).getRequest());

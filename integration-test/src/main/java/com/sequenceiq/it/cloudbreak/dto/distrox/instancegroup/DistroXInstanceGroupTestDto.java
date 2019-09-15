@@ -39,7 +39,7 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
                 .withGroup(hostGroupType.getName())
                 .withType(hostGroupType.getInstanceGroupType())
                 .withName(hostGroupType.getName())
-                .withTemplate(getTestContext().given("InstanceGroupTestDto" + hostGroupType.getName(), DistroXInstanceTemplateTestDto.class));
+                .withTemplate(getTestContext().given("DistroxInstanceGroupTestDto" + hostGroupType.getName(), DistroXInstanceTemplateTestDto.class));
     }
 
     public static DistroXInstanceGroupTestDto hostGroup(TestContext testContext, HostGroupType hostGroupType) {

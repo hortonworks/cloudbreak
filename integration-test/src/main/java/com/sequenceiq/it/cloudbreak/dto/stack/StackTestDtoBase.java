@@ -48,27 +48,19 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 
 public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends AbstractCloudbreakTestDto<StackV4Request, StackV4Response, T> {
 
+    public StackTestDtoBase(TestContext testContext) {
+        super(new StackV4Request(), testContext);
+    }
+
     public StackTestDtoBase(String newId) {
         super(newId);
         StackV4Request r = new StackV4Request();
         setRequest(r);
     }
 
-    public StackTestDtoBase(TestContext testContext) {
-        super(new StackV4Request(), testContext);
-    }
-
-    public StackTestDtoBase<T> valid() {
-        String name = resourceProperyProvider().getName();
-        withName(name)
-                .withImageSettings(getCloudProvider().imageSettings(getTestContext().given(ImageSettingsTestDto.class)))
-                .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
-                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()))
-                .withNetwork(getTestContext().given(NetworkV4TestDto.class))
-                .withStackAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
-                .withGatewayPort(getCloudProvider().gatewayPort(this))
-                .withCluster(getTestContext().given(ClusterTestDto.class).withName(name));
-        return getCloudProvider().stack(this);
+    @Override
+    public int order() {
+        return 550;
     }
 
     public StackTestDtoBase<T> withEveryProperties() {
@@ -95,6 +87,19 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
                 .withImageSettings("imageSettings");
     }
 
+    public StackTestDtoBase<T> valid() {
+        String name = getResourceProperyProvider().getName();
+        withName(name)
+                .withImageSettings(getCloudProvider().imageSettings(getTestContext().given(ImageSettingsTestDto.class)))
+                .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
+                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()))
+                .withNetwork(getTestContext().given(NetworkV4TestDto.class))
+                .withStackAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
+                .withGatewayPort(getCloudProvider().gatewayPort(this))
+                .withCluster(getTestContext().given(ClusterTestDto.class).withName(name));
+        return getCloudProvider().stack(this);
+    }
+
     public StackTestDtoBase<T> withEnvironmentCrn() {
         return withEnvironmentCrn("");
     }
@@ -109,8 +114,17 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         return this;
     }
 
-    public StackTestDtoBase<T> withEnvironment(Class<EnvironmentTestDto> environmentKey) {
-        return withEnvironmentKey(environmentKey.getSimpleName());
+    public StackTestDtoBase<T> withEnvironment(Class<EnvironmentTestDto> environmentTestDtoClass) {
+        EnvironmentTestDto env = getTestContext().get(environmentTestDtoClass);
+        if (env == null) {
+            throw new IllegalArgumentException("Environment is not given");
+        }
+        if (env.getResponse() == null) {
+            throw new IllegalArgumentException("Environment is not created, or GET response is not included");
+        }
+        String crn = env.getResponse().getCrn();
+        getRequest().setEnvironmentCrn(crn);
+        return this;
     }
 
     public StackTestDtoBase<T> withCatalog(Class<ImageCatalogTestDto> catalogKey) {

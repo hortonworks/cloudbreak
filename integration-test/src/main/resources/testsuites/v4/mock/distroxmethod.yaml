@@ -1,0 +1,5 @@
+name: "mock-tests"
+tests:
+  - name: "newway mock testcases"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.mock.DistroXClusterCreationTest

@@ -8,6 +8,7 @@ import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
 
@@ -80,6 +81,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         private EnvironmentNetworkYarnParams yarn;
 
+        private EnvironmentNetworkMockParams mock;
+
         private EnvironmentNetworkResponseBuilder() {
         }
 
@@ -132,6 +135,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return this;
         }
 
+        public EnvironmentNetworkResponseBuilder withMock(EnvironmentNetworkMockParams mock) {
+            this.mock = mock;
+            return this;
+        }
+
         public EnvironmentNetworkResponse build() {
             EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
             environmentNetworkResponse.setCrn(crn);
@@ -143,6 +151,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setYarn(yarn);
             environmentNetworkResponse.setSubnetMetas(subnetMetas);
             environmentNetworkResponse.setExistingNetwork(existingNetwork);
+            environmentNetworkResponse.setMock(mock);
             return environmentNetworkResponse;
         }
     }

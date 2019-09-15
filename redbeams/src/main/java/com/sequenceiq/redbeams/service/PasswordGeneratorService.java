@@ -47,6 +47,7 @@ public class PasswordGeneratorService {
         if (cloudPlatform.isPresent()) {
             switch (cloudPlatform.get()) {
                 case AWS:
+                case MOCK:
                     return uuidGeneratorService.uuidVariableParts(AWS_MAX_LENGTH);
                 case AZURE:
                     String candidatePassword;

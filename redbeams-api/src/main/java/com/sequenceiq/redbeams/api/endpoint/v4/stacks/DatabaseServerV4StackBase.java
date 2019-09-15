@@ -158,7 +158,10 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
 
     @Override
     public Mappable createMock() {
-        return null;
+        if (aws == null) {
+            aws = new AwsDatabaseServerV4Parameters();
+        }
+        return aws;
     }
 
     public AwsDatabaseServerV4Parameters getAws() {

@@ -15,6 +15,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,6 +37,9 @@ public class DistroXV1Request extends DistroXV1Base {
     private TagsV1Request tags;
 
     private Map<String, Object> inputs = new HashMap<>();
+
+    @ApiModelProperty(hidden = true)
+    private Integer gatewayPort;
 
     public String getEnvironmentName() {
         return environmentName;
@@ -99,5 +103,13 @@ public class DistroXV1Request extends DistroXV1Base {
 
     public void setTags(TagsV1Request tags) {
         this.tags = tags;
+    }
+
+    public Integer getGatewayPort() {
+        return gatewayPort;
+    }
+
+    public void setGatewayPort(Integer port) {
+        gatewayPort = port;
     }
 }
