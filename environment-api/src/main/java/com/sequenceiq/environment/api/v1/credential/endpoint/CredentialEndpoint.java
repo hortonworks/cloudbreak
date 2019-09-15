@@ -151,6 +151,6 @@ public interface CredentialEndpoint {
     @Path("/crn/{crn}/verify")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.VERIFY_BR_CRN, notes = CredentialDescriptor.CREDENTIAL_NOTES,
-            nickname = "verifyCredentialByName", httpMethod = "GET")
+            nickname = "verifyCredentialByCrn", httpMethod = "GET")
     CredentialResponse verifyByCrn(@PathParam("crn") String crn);
 }
