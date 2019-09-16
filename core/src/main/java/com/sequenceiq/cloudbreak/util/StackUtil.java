@@ -157,9 +157,8 @@ public class StackUtil {
     }
 
     public String extractClusterManagerIp(Stack stack) {
-        String clusterManagerIp = stack.getClusterManagerIp();
-        if (clusterManagerIp != null) {
-            return clusterManagerIp;
+        if (!StringUtils.isEmpty(stack.getClusterManagerIp())) {
+            return stack.getClusterManagerIp();
         }
         return extractClusterManagerIp(stack.getId());
     }
@@ -168,6 +167,18 @@ public class StackUtil {
         AtomicReference<String> result = new AtomicReference<>(null);
         instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId).ifPresent(imd -> result.set(imd.getPublicIpWrapper()));
         return result.get();
+    }
+
+    public String extractClusterManagerAddress(Stack stack) {
+        String fqdn = stack.getFqdn();
+        if (fqdn != null) {
+            return fqdn;
+        }
+        String clusterManagerIp = stack.getClusterManagerIp();
+        if (clusterManagerIp != null) {
+            return clusterManagerIp;
+        }
+        return extractClusterManagerIp(stack.getId());
     }
 
     public long getUptimeForCluster(Cluster cluster, boolean addUpsinceToUptime) {

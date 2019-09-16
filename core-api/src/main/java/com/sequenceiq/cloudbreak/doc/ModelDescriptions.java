@@ -161,6 +161,7 @@ public class ModelDescriptions {
         public static final String STATUS_REASON = "status message of the stack";
         public static final String STATUS_REQUEST = "status of the scale request";
         public static final String SERVER_IP = "public ambari ip of the stack";
+        public static final String SERVER_FQDN = "FQDN of the gateway node for the stack";
         public static final String SERVER_URL = "public ambari url";
         public static final String CM_MANAGEMENT_USERNAME = "CM username for shared usage";
         public static final String CM_MANAGEMENT_PASSWORD = "CM password for shared usage";
