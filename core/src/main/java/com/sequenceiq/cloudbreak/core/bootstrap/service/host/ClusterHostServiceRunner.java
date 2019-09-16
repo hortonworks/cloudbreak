@@ -558,6 +558,7 @@ public class ClusterHostServiceRunner {
             gateway.put("userfacingcert_configured", Boolean.TRUE);
             gateway.put("userfacingkey", cluster.getStack().getSecurityConfig().getUserFacingKey());
             gateway.put("userfacingcert", cluster.getStack().getSecurityConfig().getUserFacingCert());
+            gateway.put("userfacingfqdn", cluster.getFqdn());
         }
     }
 
