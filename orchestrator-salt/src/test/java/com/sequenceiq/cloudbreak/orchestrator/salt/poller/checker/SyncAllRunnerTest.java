@@ -33,9 +33,9 @@ public class SyncAllRunnerTest {
     @Test
     public void submit() {
         Set<String> targets = new HashSet<>();
-        targets.add("10.0.0.1");
-        targets.add("10.0.0.2");
-        targets.add("10.0.0.3");
+        targets.add("10-0-0-1.example.com");
+        targets.add("10-0-0-2.example.com");
+        targets.add("10-0-0-3.example.com");
         Set<Node> allNode = new HashSet<>();
         allNode.add(new Node("10.0.0.1", "5.5.5.1", "i-1234", "m5.xlarge", "10-0-0-1.example.com", "hg"));
         allNode.add(new Node("10.0.0.2", "5.5.5.2", "i-1234", "m5.xlarge", "10-0-0-2.example.com", "hg"));
@@ -56,8 +56,8 @@ public class SyncAllRunnerTest {
 
         SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
         String missingIps = syncAllRunner.submit(saltConnector);
-        assertThat(syncAllRunner.getTarget(), hasItems("10.0.0.3"));
-        assertEquals("[10.0.0.3]", missingIps);
+        assertThat(syncAllRunner.getTargetHostnames(), hasItems("10-0-0-3.example.com"));
+        assertEquals("[10-0-0-3.example.com]", missingIps);
     }
 
 }
