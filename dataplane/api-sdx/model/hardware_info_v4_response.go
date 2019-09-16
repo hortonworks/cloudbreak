@@ -52,7 +52,7 @@ type HardwareInfoV4Response struct {
 	InstanceMetadataType string `json:"instanceMetadataType,omitempty"`
 
 	// status of the instance
-	// Enum: [REQUESTED CREATED UNREGISTERED REGISTERED DECOMMISSIONED TERMINATED DELETED_ON_PROVIDER_SIDE FAILED STOPPED]
+	// Enum: [REQUESTED CREATED UNREGISTERED REGISTERED DECOMMISSIONED TERMINATED DELETED_ON_PROVIDER_SIDE FAILED STOPPED ORCHESTRATION_FAILED DECOMMISSION_FAILED]
 	InstanceStatus string `json:"instanceStatus,omitempty"`
 
 	// name of the resource
@@ -173,7 +173,7 @@ var hardwareInfoV4ResponseTypeInstanceStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["REQUESTED","CREATED","UNREGISTERED","REGISTERED","DECOMMISSIONED","TERMINATED","DELETED_ON_PROVIDER_SIDE","FAILED","STOPPED"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["REQUESTED","CREATED","UNREGISTERED","REGISTERED","DECOMMISSIONED","TERMINATED","DELETED_ON_PROVIDER_SIDE","FAILED","STOPPED","ORCHESTRATION_FAILED","DECOMMISSION_FAILED"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -209,6 +209,12 @@ const (
 
 	// HardwareInfoV4ResponseInstanceStatusSTOPPED captures enum value "STOPPED"
 	HardwareInfoV4ResponseInstanceStatusSTOPPED string = "STOPPED"
+
+	// HardwareInfoV4ResponseInstanceStatusORCHESTRATIONFAILED captures enum value "ORCHESTRATION_FAILED"
+	HardwareInfoV4ResponseInstanceStatusORCHESTRATIONFAILED string = "ORCHESTRATION_FAILED"
+
+	// HardwareInfoV4ResponseInstanceStatusDECOMMISSIONFAILED captures enum value "DECOMMISSION_FAILED"
+	HardwareInfoV4ResponseInstanceStatusDECOMMISSIONFAILED string = "DECOMMISSION_FAILED"
 )
 
 // prop value enum

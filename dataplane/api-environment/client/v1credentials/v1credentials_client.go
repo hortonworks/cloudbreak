@@ -474,6 +474,66 @@ func (a *Client) PutCredentialV1(params *PutCredentialV1Params) (*PutCredentialV
 
 }
 
+/*
+VerifyCredentialByCrn verifies permissions by crn
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) VerifyCredentialByCrn(params *VerifyCredentialByCrnParams) (*VerifyCredentialByCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewVerifyCredentialByCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "verifyCredentialByCrn",
+		Method:             "GET",
+		PathPattern:        "/v1/credentials/crn/{crn}/verify",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &VerifyCredentialByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*VerifyCredentialByCrnOK), nil
+
+}
+
+/*
+VerifyCredentialByName verifies permissions by name
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) VerifyCredentialByName(params *VerifyCredentialByNameParams) (*VerifyCredentialByNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewVerifyCredentialByNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "verifyCredentialByName",
+		Method:             "GET",
+		PathPattern:        "/v1/credentials/name/{name}/verify",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &VerifyCredentialByNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*VerifyCredentialByNameOK), nil
+
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

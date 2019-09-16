@@ -15,11 +15,8 @@ import (
 // swagger:model WorkloadAnalyticsResponse
 type WorkloadAnalyticsResponse struct {
 
-	// telemetry component custom attributes
+	// Workload analytics (telemetry) attributes.
 	Attributes map[string]interface{} `json:"attributes,omitempty"`
-
-	// telemetry - workload altus service (databus) endpoint url
-	DatabusEndpoint string `json:"databusEndpoint,omitempty"`
 }
 
 // Validate validates this workload analytics response

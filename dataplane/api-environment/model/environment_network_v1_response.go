@@ -28,6 +28,9 @@ type EnvironmentNetworkV1Response struct {
 	// id of the resource
 	Crn string `json:"crn,omitempty"`
 
+	// The existing network is created by the user, otherwise created by the Cloudbreak.
+	ExistingNetwork bool `json:"existingNetwork,omitempty"`
+
 	// name of the resource
 	// Required: true
 	Name *string `json:"name"`

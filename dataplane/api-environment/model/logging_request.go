@@ -17,9 +17,6 @@ import (
 // swagger:model LoggingRequest
 type LoggingRequest struct {
 
-	// telemetry component custom attributes
-	Attributes map[string]interface{} `json:"attributes,omitempty"`
-
 	// telemetry - logging s3 attributes
 	S3 *S3CloudStorageV1Parameters `json:"s3,omitempty"`
 

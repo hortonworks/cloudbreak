@@ -45,6 +45,9 @@ type CredentialBase struct {
 	// custom parameters for Openstack credential
 	Openstack *OpenstackV1Parameters `json:"openstack,omitempty"`
 
+	// verification status text for credential, if empty then there is no verification issue
+	VerificationStatusText string `json:"verificationStatusText,omitempty"`
+
 	// custom parameters for Yarn credential
 	Yarn *YarnV1Parameters `json:"yarn,omitempty"`
 }
