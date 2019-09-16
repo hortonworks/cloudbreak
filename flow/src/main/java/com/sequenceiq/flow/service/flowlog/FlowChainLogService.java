@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.service.flowlog;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -17,6 +18,17 @@ public class FlowChainLogService {
 
     public Optional<FlowChainLog> findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId) {
         return repository.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
+    }
+
+    public List<String> collectRelatedFlowChainIds(List<String> result, String flowChainId) {
+        result.add(flowChainId);
+        List<FlowChainLog> childFlowChainLogs = repository.findByParentFlowChainIdOrderByCreatedDesc(flowChainId);
+        childFlowChainLogs.stream().forEach(flowChainLog -> {
+            if (!result.contains(flowChainLog.getFlowChainId())) {
+                collectRelatedFlowChainIds(result, flowChainLog.getFlowChainId());
+            }
+        });
+        return result;
     }
 
     public int purgeOrphanFLowChainLogs() {

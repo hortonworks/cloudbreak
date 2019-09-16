@@ -31,12 +31,15 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
-import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.api.model.StateStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
@@ -63,6 +66,9 @@ public class SdxRepairService {
     @Inject
     private StackV4Endpoint stackV4Endpoint;
 
+    @Inject
+    private FlowEndpoint flowEndpoint;
+
     public void triggerRepairByCrn(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(cluster);
@@ -87,6 +93,7 @@ public class SdxRepairService {
         try {
             LOGGER.info("Triggering repair flow for cluster {} with hostgroups {}", sdxCluster.getClusterName(), repairRequest.getHostGroupName());
             stackV4Endpoint.repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
+            sdxCluster.setRepairFlowChainId(flowEndpoint.getLastFlowByResourceName(sdxCluster.getClusterName()).getFlowChainId());
             sdxClusterRepository.save(sdxCluster);
             notificationService.send(ResourceEvent.SDX_REPAIR_STARTED, sdxCluster);
             sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.REPAIR_IN_PROGRESS,
@@ -127,26 +134,47 @@ public class SdxRepairService {
                 LOGGER.info("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
                 return AttemptResults.breakFor("Repair polling cancelled in inmemory store, id: " + sdxCluster.getId());
             }
-            StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
-            LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
-            ClusterV4Response cluster = stackV4Response.getCluster();
-            if (stackAndClusterAvailable(stackV4Response, cluster)) {
-                return AttemptResults.finishWith(stackV4Response);
+            if (hasActiveFlow(sdxCluster)) {
+                LOGGER.info("Repair polling will continue, cluster has an active flow in Cloudbreak, id: " + sdxCluster.getId());
+                return AttemptResults.justContinue();
             } else {
-                if (Status.UPDATE_FAILED.equals(stackV4Response.getStatus())) {
-                    LOGGER.info("Stack repair failed for Stack {} with status {}", stackV4Response.getName(), stackV4Response.getStatus());
-                    return sdxRepairFailed(sdxCluster, stackV4Response.getStatusReason());
-                } else if (Status.UPDATE_FAILED.equals(stackV4Response.getCluster().getStatus())) {
-                    LOGGER.info("Cluster repair failed for Cluster {} status {}", stackV4Response.getCluster().getName(),
-                            stackV4Response.getCluster().getStatus());
-                    return sdxRepairFailed(sdxCluster, stackV4Response.getCluster().getStatusReason());
-                } else {
-                    return AttemptResults.justContinue();
-                }
+                return getStackResponseAttemptResult(sdxCluster);
             }
         } catch (NotFoundException e) {
             LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
             return AttemptResults.breakFor("Stack not found on CB side " + sdxCluster.getClusterName());
+        }
+    }
+
+    private boolean hasActiveFlow(SdxCluster sdxCluster) {
+        try {
+            List<FlowLogResponse> flowLogsByResourceNameAndChainId =
+                    flowEndpoint.getFlowLogsByResourceNameAndChainId(sdxCluster.getClusterName(), sdxCluster.getRepairFlowChainId());
+            return flowLogsByResourceNameAndChainId.stream()
+                    .anyMatch(flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized());
+        } catch (Exception e) {
+            LOGGER.error("Exception occured during getting flow logs from CB: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster) throws JsonProcessingException {
+        StackV4Response stackV4Response = stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet());
+        LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
+        ClusterV4Response cluster = stackV4Response.getCluster();
+        if (stackAndClusterAvailable(stackV4Response, cluster)) {
+            return AttemptResults.finishWith(stackV4Response);
+        } else {
+            if (Status.UPDATE_FAILED.equals(stackV4Response.getStatus())) {
+                LOGGER.info("Stack repair failed for Stack {} with status {}", stackV4Response.getName(), stackV4Response.getStatus());
+                return sdxRepairFailed(sdxCluster, stackV4Response.getStatusReason());
+            } else if (Status.UPDATE_FAILED.equals(stackV4Response.getCluster().getStatus())) {
+                LOGGER.info("Cluster repair failed for Cluster {} status {}", stackV4Response.getCluster().getName(),
+                        stackV4Response.getCluster().getStatus());
+                return sdxRepairFailed(sdxCluster, stackV4Response.getCluster().getStatusReason());
+            } else {
+                return AttemptResults.justContinue();
+            }
         }
     }
 

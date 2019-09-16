@@ -144,6 +144,17 @@ public class FlowLogDBServiceTest {
     }
 
     @Test
+    public void testGetFlowLogsWithChainId() {
+        when(resourceIdProvider.getResourceIdByResourceName(anyString())).thenReturn(1L);
+        when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(anyLong())).thenReturn(Lists.newArrayList(new FlowLog(), createFlowLog("flow")));
+
+        assertEquals(1, underTest.getFlowLogsByResourceAndChainId("stackName", Lists.newArrayList("flowchain")).size());
+
+        verify(resourceIdProvider, times(1)).getResourceIdByResourceName(anyString());
+        verify(resourceIdProvider, never()).getResourceIdByResourceCrn(anyString());
+    }
+
+    @Test
     public void testGetLastFlowLogWhenThereIsNoFlow() {
         when(resourceIdProvider.getResourceIdByResourceCrn(anyString())).thenReturn(1L);
         when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(anyLong())).thenReturn(Lists.newArrayList());
@@ -168,6 +179,7 @@ public class FlowLogDBServiceTest {
     private FlowLog createFlowLog(String flowId) {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowId(flowId);
+        flowLog.setFlowChainId(flowId + "chain");
         return flowLog;
     }
 }
