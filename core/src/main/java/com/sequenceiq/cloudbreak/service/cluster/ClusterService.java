@@ -718,7 +718,7 @@ public class ClusterService {
                             || DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER.name().equals(type))
                     .distinct()
                     .count();
-            return cmRdsCount == REQUIRED_CM_DATABASE_COUNT;
+            return cmRdsCount == REQUIRED_CM_DATABASE_COUNT || cluster.getDatabaseServerCrn() != null;
         }
     }
 
@@ -816,7 +816,7 @@ public class ClusterService {
             databaseType = DatabaseType.AMBARI;
         }
         RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), databaseType);
-        return rdsConfig == null || DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine();
+        return (rdsConfig == null && cluster.getDatabaseServerCrn() == null) || DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine();
     }
 
     private void updateHosts(Cluster cluster, Set<String> hostNames, HostMetadataState expectedState, HostMetadataState newState,
