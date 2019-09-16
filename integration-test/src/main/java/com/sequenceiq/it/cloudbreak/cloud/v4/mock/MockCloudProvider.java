@@ -319,5 +319,4 @@ public class MockCloudProvider extends AbstractCloudProvider {
         params.setVpcId(getVpcId());
         return params;
     }
-
 }
