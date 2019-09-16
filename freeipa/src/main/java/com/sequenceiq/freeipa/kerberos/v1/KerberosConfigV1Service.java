@@ -19,6 +19,7 @@ import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.service.config.KerberosConfigRegisterService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaPermissionService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -43,6 +44,9 @@ public class KerberosConfigV1Service {
 
     @Inject
     private KerberosConfigRegisterService kerberosConfigRegisterService;
+
+    @Inject
+    private FreeIpaPermissionService freeIpaPermissionService;
 
     public DescribeKerberosConfigResponse post(CreateKerberosConfigRequest createKerberosConfigRequest) {
         KerberosConfig kerberosConfig = createKerberosConfigRequestToKerberosConfigConverter.convert(createKerberosConfigRequest);
@@ -101,6 +105,7 @@ public class KerberosConfigV1Service {
                 String password = PasswordUtil.generatePassword();
                 freeIpaClient.userSetPassword(user.getUid(), password);
                 freeIpaClient.addRoleMember("Enrollment Administrator", Set.of(user.getUid()), null, null, null, null);
+                freeIpaPermissionService.setPermissions(freeIpaClient);
                 kerberosConfig = kerberosConfigRegisterService.createKerberosConfig(stack.get().getId(), user.getUid(), password, clusterName);
             }
             return convertKerberosConfigToDescribeKerberosConfigResponse(kerberosConfig);

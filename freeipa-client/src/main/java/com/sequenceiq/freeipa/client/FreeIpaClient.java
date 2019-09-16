@@ -290,9 +290,13 @@ public class FreeIpaClient {
     }
 
     public void addPermissionToPrivilege(String privilege, String permission) throws FreeIpaClientException {
+        addPermissionsToPrivilege(privilege, List.of(permission));
+    }
+
+    public void addPermissionsToPrivilege(String privilege, List<String> permissions) throws FreeIpaClientException {
         List<String> flags = List.of(privilege);
         Map<String, Object> params = Map.of(
-                "permission", List.of(permission)
+                "permission", permissions
         );
         invoke("privilege_add_permission", flags, params, Object.class);
     }
