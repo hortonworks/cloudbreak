@@ -2695,6 +2695,191 @@ public final class UserManagementGrpc {
      }
      return getSetWorkloadSubdomainMethod;
   }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getCreateWorkloadMachineUserMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> METHOD_CREATE_WORKLOAD_MACHINE_USER = getCreateWorkloadMachineUserMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> getCreateWorkloadMachineUserMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> getCreateWorkloadMachineUserMethod() {
+    return getCreateWorkloadMachineUserMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> getCreateWorkloadMachineUserMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> getCreateWorkloadMachineUserMethod;
+    if ((getCreateWorkloadMachineUserMethod = UserManagementGrpc.getCreateWorkloadMachineUserMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getCreateWorkloadMachineUserMethod = UserManagementGrpc.getCreateWorkloadMachineUserMethod) == null) {
+          UserManagementGrpc.getCreateWorkloadMachineUserMethod = getCreateWorkloadMachineUserMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "CreateWorkloadMachineUser"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateWorkloadMachineUser"))
+                  .build();
+          }
+        }
+     }
+     return getCreateWorkloadMachineUserMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getDeleteWorkloadMachineUserMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> METHOD_DELETE_WORKLOAD_MACHINE_USER = getDeleteWorkloadMachineUserMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> getDeleteWorkloadMachineUserMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> getDeleteWorkloadMachineUserMethod() {
+    return getDeleteWorkloadMachineUserMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> getDeleteWorkloadMachineUserMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> getDeleteWorkloadMachineUserMethod;
+    if ((getDeleteWorkloadMachineUserMethod = UserManagementGrpc.getDeleteWorkloadMachineUserMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getDeleteWorkloadMachineUserMethod = UserManagementGrpc.getDeleteWorkloadMachineUserMethod) == null) {
+          UserManagementGrpc.getDeleteWorkloadMachineUserMethod = getDeleteWorkloadMachineUserMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "DeleteWorkloadMachineUser"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteWorkloadMachineUser"))
+                  .build();
+          }
+        }
+     }
+     return getDeleteWorkloadMachineUserMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGetWorkloadAdministrationGroupNameMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> METHOD_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = getGetWorkloadAdministrationGroupNameMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> getGetWorkloadAdministrationGroupNameMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> getGetWorkloadAdministrationGroupNameMethod() {
+    return getGetWorkloadAdministrationGroupNameMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> getGetWorkloadAdministrationGroupNameMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> getGetWorkloadAdministrationGroupNameMethod;
+    if ((getGetWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getGetWorkloadAdministrationGroupNameMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getGetWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getGetWorkloadAdministrationGroupNameMethod) == null) {
+          UserManagementGrpc.getGetWorkloadAdministrationGroupNameMethod = getGetWorkloadAdministrationGroupNameMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "GetWorkloadAdministrationGroupName"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetWorkloadAdministrationGroupName"))
+                  .build();
+          }
+        }
+     }
+     return getGetWorkloadAdministrationGroupNameMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getSetWorkloadAdministrationGroupNameMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> METHOD_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = getSetWorkloadAdministrationGroupNameMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> getSetWorkloadAdministrationGroupNameMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> getSetWorkloadAdministrationGroupNameMethod() {
+    return getSetWorkloadAdministrationGroupNameMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> getSetWorkloadAdministrationGroupNameMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> getSetWorkloadAdministrationGroupNameMethod;
+    if ((getSetWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getSetWorkloadAdministrationGroupNameMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getSetWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getSetWorkloadAdministrationGroupNameMethod) == null) {
+          UserManagementGrpc.getSetWorkloadAdministrationGroupNameMethod = getSetWorkloadAdministrationGroupNameMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "SetWorkloadAdministrationGroupName"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetWorkloadAdministrationGroupName"))
+                  .build();
+          }
+        }
+     }
+     return getSetWorkloadAdministrationGroupNameMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getDeleteWorkloadAdministrationGroupNameMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> METHOD_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = getDeleteWorkloadAdministrationGroupNameMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> getDeleteWorkloadAdministrationGroupNameMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> getDeleteWorkloadAdministrationGroupNameMethod() {
+    return getDeleteWorkloadAdministrationGroupNameMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> getDeleteWorkloadAdministrationGroupNameMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> getDeleteWorkloadAdministrationGroupNameMethod;
+    if ((getDeleteWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getDeleteWorkloadAdministrationGroupNameMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getDeleteWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getDeleteWorkloadAdministrationGroupNameMethod) == null) {
+          UserManagementGrpc.getDeleteWorkloadAdministrationGroupNameMethod = getDeleteWorkloadAdministrationGroupNameMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "DeleteWorkloadAdministrationGroupName"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteWorkloadAdministrationGroupName"))
+                  .build();
+          }
+        }
+     }
+     return getDeleteWorkloadAdministrationGroupNameMethod;
+  }
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -3462,6 +3647,69 @@ public final class UserManagementGrpc {
       asyncUnimplementedUnaryCall(getSetWorkloadSubdomainMethodHelper(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * Create a machine-user, assign the resource roles and roles to it, create
+     * an access key for it, and return it. This is exposed as a convenience method
+     * for applications. Callers must be internal actors. The call is idempotent
+     * and safe to be called multiple times. Machine users created through this
+     * interface should be deleted by called DeleteWorkloadMachineUser.
+     * </pre>
+     */
+    public void createWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getCreateWorkloadMachineUserMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Delete the workload machine user, all the role and resource role assignments,
+     * as well as any access keys. This is a convenience method for application who
+     * created a machine user using CreateWorkloadMachineUser.
+     * </pre>
+     */
+    public void deleteWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getDeleteWorkloadMachineUserMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Returns the the workload administration group name for the
+     * (account, right, resource) tuple. Will throw NOT_FOUND exception if no name
+     * for the workload administration group has been set yet.
+     * </pre>
+     */
+    public void getWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetWorkloadAdministrationGroupNameMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Sets the workload administration group name for the (account, right, resource)
+     * tuple. If the name was already set for the workload administration group
+     * this is a no-op and the name generated for the workload administration group
+     * will be returned.
+     * </pre>
+     */
+    public void setWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetWorkloadAdministrationGroupNameMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Deletes the workload administration group name for the (account, right, resource)
+     * tuple. Throws a NOT_FOUND exception if no such workload administration group
+     * can be found.
+     * </pre>
+     */
+    public void deleteWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getDeleteWorkloadAdministrationGroupNameMethodHelper(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -3968,6 +4216,41 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse>(
                   this, METHODID_SET_WORKLOAD_SUBDOMAIN)))
+          .addMethod(
+            getCreateWorkloadMachineUserMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse>(
+                  this, METHODID_CREATE_WORKLOAD_MACHINE_USER)))
+          .addMethod(
+            getDeleteWorkloadMachineUserMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse>(
+                  this, METHODID_DELETE_WORKLOAD_MACHINE_USER)))
+          .addMethod(
+            getGetWorkloadAdministrationGroupNameMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse>(
+                  this, METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
+          .addMethod(
+            getSetWorkloadAdministrationGroupNameMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse>(
+                  this, METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
+          .addMethod(
+            getDeleteWorkloadAdministrationGroupNameMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse>(
+                  this, METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
           .build();
     }
   }
@@ -4800,6 +5083,74 @@ public final class UserManagementGrpc {
       asyncUnaryCall(
           getChannel().newCall(getSetWorkloadSubdomainMethodHelper(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Create a machine-user, assign the resource roles and roles to it, create
+     * an access key for it, and return it. This is exposed as a convenience method
+     * for applications. Callers must be internal actors. The call is idempotent
+     * and safe to be called multiple times. Machine users created through this
+     * interface should be deleted by called DeleteWorkloadMachineUser.
+     * </pre>
+     */
+    public void createWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getCreateWorkloadMachineUserMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Delete the workload machine user, all the role and resource role assignments,
+     * as well as any access keys. This is a convenience method for application who
+     * created a machine user using CreateWorkloadMachineUser.
+     * </pre>
+     */
+    public void deleteWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getDeleteWorkloadMachineUserMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Returns the the workload administration group name for the
+     * (account, right, resource) tuple. Will throw NOT_FOUND exception if no name
+     * for the workload administration group has been set yet.
+     * </pre>
+     */
+    public void getWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Sets the workload administration group name for the (account, right, resource)
+     * tuple. If the name was already set for the workload administration group
+     * this is a no-op and the name generated for the workload administration group
+     * will be returned.
+     * </pre>
+     */
+    public void setWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Deletes the workload administration group name for the (account, right, resource)
+     * tuple. Throws a NOT_FOUND exception if no such workload administration group
+     * can be found.
+     * </pre>
+     */
+    public void deleteWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getDeleteWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -5557,6 +5908,69 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse setWorkloadSubdomain(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request) {
       return blockingUnaryCall(
           getChannel(), getSetWorkloadSubdomainMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create a machine-user, assign the resource roles and roles to it, create
+     * an access key for it, and return it. This is exposed as a convenience method
+     * for applications. Callers must be internal actors. The call is idempotent
+     * and safe to be called multiple times. Machine users created through this
+     * interface should be deleted by called DeleteWorkloadMachineUser.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse createWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getCreateWorkloadMachineUserMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Delete the workload machine user, all the role and resource role assignments,
+     * as well as any access keys. This is a convenience method for application who
+     * created a machine user using CreateWorkloadMachineUser.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse deleteWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getDeleteWorkloadMachineUserMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Returns the the workload administration group name for the
+     * (account, right, resource) tuple. Will throw NOT_FOUND exception if no name
+     * for the workload administration group has been set yet.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse getWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the workload administration group name for the (account, right, resource)
+     * tuple. If the name was already set for the workload administration group
+     * this is a no-op and the name generated for the workload administration group
+     * will be returned.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse setWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes the workload administration group name for the (account, right, resource)
+     * tuple. Throws a NOT_FOUND exception if no such workload administration group
+     * can be found.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse deleteWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getDeleteWorkloadAdministrationGroupNameMethodHelper(), getCallOptions(), request);
     }
   }
 
@@ -6388,6 +6802,74 @@ public final class UserManagementGrpc {
       return futureUnaryCall(
           getChannel().newCall(getSetWorkloadSubdomainMethodHelper(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Create a machine-user, assign the resource roles and roles to it, create
+     * an access key for it, and return it. This is exposed as a convenience method
+     * for applications. Callers must be internal actors. The call is idempotent
+     * and safe to be called multiple times. Machine users created through this
+     * interface should be deleted by called DeleteWorkloadMachineUser.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> createWorkloadMachineUser(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getCreateWorkloadMachineUserMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Delete the workload machine user, all the role and resource role assignments,
+     * as well as any access keys. This is a convenience method for application who
+     * created a machine user using CreateWorkloadMachineUser.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> deleteWorkloadMachineUser(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getDeleteWorkloadMachineUserMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Returns the the workload administration group name for the
+     * (account, right, resource) tuple. Will throw NOT_FOUND exception if no name
+     * for the workload administration group has been set yet.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> getWorkloadAdministrationGroupName(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the workload administration group name for the (account, right, resource)
+     * tuple. If the name was already set for the workload administration group
+     * this is a no-op and the name generated for the workload administration group
+     * will be returned.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> setWorkloadAdministrationGroupName(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Deletes the workload administration group name for the (account, right, resource)
+     * tuple. Throws a NOT_FOUND exception if no such workload administration group
+     * can be found.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> deleteWorkloadAdministrationGroupName(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getDeleteWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_INTERACTIVE_LOGIN = 0;
@@ -6462,6 +6944,11 @@ public final class UserManagementGrpc {
   private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 69;
   private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 70;
   private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 71;
+  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 72;
+  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 73;
+  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 74;
+  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 75;
+  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 76;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -6768,6 +7255,26 @@ public final class UserManagementGrpc {
           serviceImpl.setWorkloadSubdomain((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse>) responseObserver);
           break;
+        case METHODID_CREATE_WORKLOAD_MACHINE_USER:
+          serviceImpl.createWorkloadMachineUser((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse>) responseObserver);
+          break;
+        case METHODID_DELETE_WORKLOAD_MACHINE_USER:
+          serviceImpl.deleteWorkloadMachineUser((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse>) responseObserver);
+          break;
+        case METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME:
+          serviceImpl.getWorkloadAdministrationGroupName((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse>) responseObserver);
+          break;
+        case METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME:
+          serviceImpl.setWorkloadAdministrationGroupName((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse>) responseObserver);
+          break;
+        case METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME:
+          serviceImpl.deleteWorkloadAdministrationGroupName((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -6901,6 +7408,11 @@ public final class UserManagementGrpc {
               .addMethod(getGetIdPMetadataForWorkloadSSOMethodHelper())
               .addMethod(getProcessWorkloadSSOAuthnReqMethodHelper())
               .addMethod(getSetWorkloadSubdomainMethodHelper())
+              .addMethod(getCreateWorkloadMachineUserMethodHelper())
+              .addMethod(getDeleteWorkloadMachineUserMethodHelper())
+              .addMethod(getGetWorkloadAdministrationGroupNameMethodHelper())
+              .addMethod(getSetWorkloadAdministrationGroupNameMethodHelper())
+              .addMethod(getDeleteWorkloadAdministrationGroupNameMethodHelper())
               .build();
         }
       }
