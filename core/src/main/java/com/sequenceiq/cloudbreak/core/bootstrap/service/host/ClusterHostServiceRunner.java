@@ -461,7 +461,7 @@ public class ClusterHostServiceRunner {
         for (GatewayConfig gatewayConfig : gatewayConfigs) {
             Map<String, String> hostGrain = new HashMap<>();
             hostGrain.put("gateway-address", gatewayConfig.getPublicAddress());
-            grainProperties.put(gatewayConfig.getPrivateAddress(), hostGrain);
+            grainProperties.put(gatewayConfig.getHostname(), hostGrain);
         }
         Map<String, List<String>> serviceLocations =
                 componentLocator.getComponentLocationByPrivateIp(cluster, List.of(ExposedService.NAMENODE.getServiceName()));

@@ -194,11 +194,11 @@ public class SaltApiRunPostResponse extends ITResponse {
     }
 
     protected Object grainRemove(String body) throws IOException {
-        Matcher targetMatcher = Pattern.compile(".*(tgt=S%40([^&]+)).*").matcher(body);
+        Matcher targetMatcher = Pattern.compile(".*(tgt=([^&]+)).*").matcher(body);
         Matcher argMatcher = Pattern.compile(".*(arg=([^&]+)).*(arg=([^&]+)).*").matcher(body);
         Map<String, JsonNode> hostMap = new HashMap<>();
         if (targetMatcher.matches() && argMatcher.matches()) {
-            String[] targets = targetMatcher.group(2).split("\\+or\\+S%40");
+            String[] targets = targetMatcher.group(2).split("%2C");
             String key = argMatcher.group(2);
             String value = argMatcher.group(4);
             for (String target : targets) {
