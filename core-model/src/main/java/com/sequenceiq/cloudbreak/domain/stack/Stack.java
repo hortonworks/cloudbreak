@@ -509,6 +509,10 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return cluster == null ? null : cluster.getClusterManagerIp();
     }
 
+    public String getFqdn() {
+        return cluster == null ? null : cluster.getFqdn();
+    }
+
     public boolean isAvailable() {
         return AVAILABLE.equals(getStatus());
     }

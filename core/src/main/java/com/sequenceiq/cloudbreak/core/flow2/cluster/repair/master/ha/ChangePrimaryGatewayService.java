@@ -9,7 +9,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -30,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -61,6 +61,9 @@ public class ChangePrimaryGatewayService {
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private TlsSetupService tlsSetupService;
+
     public void changePrimaryGatewayStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Changing gateway.");
@@ -68,6 +71,7 @@ public class ChangePrimaryGatewayService {
     }
 
     public void primaryGatewayChanged(long stackId, String newPrimaryGatewayFQDN) throws CloudbreakException, TransactionExecutionException {
+        LOGGER.info("Update primary gateway ip");
         Set<InstanceMetaData> imds = instanceMetaDataService.findNotTerminatedForStack(stackId);
         Optional<InstanceMetaData> formerPrimaryGateway =
                 imds.stream().filter(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY).findFirst();
@@ -87,11 +91,10 @@ public class ChangePrimaryGatewayService {
                 String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(updatedStack);
 
                 Cluster cluster = updatedStack.getCluster();
-                if (StringUtils.isEmpty(cluster.getClusterManagerIp())) {
-                    cluster.setClusterManagerIp(gatewayIp);
-                    clusterService.save(cluster);
-                } else {
-                    LOGGER.info("Cluster manager ip has value, it does not set.");
+                cluster.setClusterManagerIp(gatewayIp);
+                clusterService.save(cluster);
+                if (tlsSetupService.isCertGenerationEnabled()) {
+                    tlsSetupService.updateDnsEntry(updatedStack);
                 }
                 return null;
             });

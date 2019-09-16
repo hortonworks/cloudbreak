@@ -75,7 +75,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
                 "fileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
-                "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn"));
+                "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn"));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
                 "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "extendedBlueprintText",
-                "environmentCrn", "variant", "description", "databaseServerCrn"));
+                "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn"));
     }
 
     @Test
@@ -109,7 +109,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
                 "fileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn",
-                "extendedBlueprintText", "gateway", "environmentCrn", "variant", "description", "databaseServerCrn"));
+                "extendedBlueprintText", "gateway", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn"));
         assertNull(result.getGateway());
     }
 

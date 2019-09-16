@@ -98,6 +98,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     private String clusterManagerIp;
 
+    private String fqdn;
+
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret userName = Secret.EMPTY;
@@ -548,6 +550,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setAutoTlsEnabled(Boolean autoTlsEnabled) {
         this.autoTlsEnabled = autoTlsEnabled;
+    }
+
+    public String getFqdn() {
+        return fqdn;
+    }
+
+    public void setFqdn(String fqdn) {
+        this.fqdn = fqdn;
     }
 
     @Override

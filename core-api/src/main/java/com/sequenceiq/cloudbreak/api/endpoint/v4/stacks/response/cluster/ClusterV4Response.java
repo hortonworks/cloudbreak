@@ -109,6 +109,9 @@ public class ClusterV4Response implements JsonEntity {
     @ApiModelProperty(StackModelDescription.SERVER_IP)
     private String serverIp;
 
+    @ApiModelProperty(StackModelDescription.SERVER_FQDN)
+    private String serverFqdn;
+
     @ApiModelProperty(StackModelDescription.SERVER_URL)
     private String serverUrl;
 
@@ -326,5 +329,13 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setProxyConfigName(String proxyConfigName) {
         this.proxyConfigName = proxyConfigName;
+    }
+
+    public String getServerFqdn() {
+        return serverFqdn;
+    }
+
+    public void setServerFqdn(String serverFqdn) {
+        this.serverFqdn = serverFqdn;
     }
 }

@@ -195,13 +195,13 @@ public class StackCreationService {
             } else {
                 LOGGER.info("CERT is already generated for stack, we don't generate a new one");
             }
+            String fqdn = tlsSetupService.updateDnsEntry(stack);
+            if (fqdn != null) {
+                stack.getCluster().setFqdn(fqdn);
+                clusterService.save(stack.getCluster());
+            }
         } else {
             LOGGER.info("Cert generation is disabled.");
-        }
-        String fqdn = tlsSetupService.updateDnsEntry(stack);
-        if (fqdn != null) {
-            stack.getCluster().setClusterManagerIp(fqdn);
-            clusterService.save(stack.getCluster());
         }
     }
 
