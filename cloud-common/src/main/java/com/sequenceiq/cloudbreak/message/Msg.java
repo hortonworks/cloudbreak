@@ -103,7 +103,8 @@ public enum Msg {
     MAINTENANCE_MODE_VALIDATION_STARTED("maintenance.mode.validation.started"),
     MAINTENANCE_MODE_VALIDATION_FINISHED_FOUND_WARNINGS("maintenance.mode.validation.finished.warn"),
     MAINTENANCE_MODE_VALIDATION_FINISHED_NO_WARNINGS("maintenance.mode.validation.finished.nowarn"),
-    MAINTENANCE_MODE_VALIDATION_FAILED("maintenance.mode.validation.failed");
+    MAINTENANCE_MODE_VALIDATION_FAILED("maintenance.mode.validation.failed"),
+    STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.failed");
 
     private final String code;
 

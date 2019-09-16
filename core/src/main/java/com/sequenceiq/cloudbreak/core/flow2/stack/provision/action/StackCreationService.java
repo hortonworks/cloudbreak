@@ -191,7 +191,10 @@ public class StackCreationService {
     public void generateCertAndSaveForStackAndUpdateDnsEntry(Stack stack) {
         if (tlsSetupService.isCertGenerationEnabled() && stack.getCluster().getGateway() != null) {
             if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
-                tlsSetupService.generateCertAndSaveForStack(stack);
+                boolean certGeneratedAndSaved = tlsSetupService.generateCertAndSaveForStack(stack);
+                if (!certGeneratedAndSaved) {
+                    flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_GATEWAY_CERTIFICATE_CREATE_FAILED, CREATE_IN_PROGRESS.name());
+                }
             } else {
                 LOGGER.info("CERT is already generated for stack, we don't generate a new one");
             }
