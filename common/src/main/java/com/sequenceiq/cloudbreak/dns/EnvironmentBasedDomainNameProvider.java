@@ -20,7 +20,9 @@ public class EnvironmentBasedDomainNameProvider {
 
     private static final int MAX_SIZE_OF_DOMAIN = 62;
 
-    @Value("${cb.dns.root.domain:cloudera.site}")
+    private static final Integer MAX_LENGTH_OF_ENVIRONMENT = 8;
+
+    @Value("${gateway.cert.base.domain.name:cloudera.site}")
     private String rootDomain;
 
     public String getDomain(String environmentName, String accountName) {
@@ -31,7 +33,7 @@ public class EnvironmentBasedDomainNameProvider {
 
         LOGGER.info("Generating domain with environment name: '{}', account name: '{}' and root domain: '{}'", environmentName, accountName, rootDomain);
         StringBuilder sb = new StringBuilder()
-                .append(environmentName)
+                .append(truncateEnvironment(environmentName))
                 .append(DOMAIN_PART_DELIMITER)
                 .append(accountName);
 
@@ -60,9 +62,20 @@ public class EnvironmentBasedDomainNameProvider {
             LOGGER.warn(msg);
             throw new IllegalStateException(msg);
         } else if (result.length() > MAX_SIZE_OF_DOMAIN) {
-            String msg = String.format("The length of the generated domain('%s') is longer than the allowed 62 characters", result);
+            String msg = String.format("The length of the generated domain('%s') is longer than the allowed %s characters", result, MAX_SIZE_OF_DOMAIN);
             LOGGER.warn(msg);
             throw new IllegalStateException(msg);
         }
+    }
+
+    private String truncateEnvironment(String environment) {
+        int truncatePoint = environment.length();
+        if (truncatePoint > MAX_LENGTH_OF_ENVIRONMENT) {
+            truncatePoint = MAX_LENGTH_OF_ENVIRONMENT;
+        }
+        if (environment.charAt(truncatePoint - 1) == '-') {
+            truncatePoint--;
+        }
+        return environment.substring(0, truncatePoint);
     }
 }
