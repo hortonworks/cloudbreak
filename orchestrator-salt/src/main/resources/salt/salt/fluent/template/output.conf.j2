@@ -8,6 +8,7 @@
     path "{{fluent.logFolderName}}/{{fluent.serviceLogPathSuffix}}"
     s3_object_key_format %{path}-%{index}.%{file_extension}
     auto_create_bucket false
+    check_apikey_on_start false
 
     <buffer tag,time>
       @type file
@@ -29,6 +30,7 @@
     path "{{fluent.logFolderName}}/{{fluent.cmCommandLogPathSuffix}}"
     s3_object_key_format %{path}-%{index}.%{file_extension}
     auto_create_bucket false
+    check_apikey_on_start false
 
     <buffer tag,time>
       @type file
