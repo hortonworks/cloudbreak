@@ -198,10 +198,11 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 .addPolicy(powerUserPolicy)
                 .build();
         RoleAssignment roleAssignment = RoleAssignment.newBuilder().setRole(powerUserRole).build();
-        responseObserver.onNext(
-                GetRightsResponse.newBuilder()
-                        .addGroupCrn(group.getCrn())
-                        .addRoleAssignment(roleAssignment).build());
+        GetRightsResponse.Builder responseBuilder = GetRightsResponse.newBuilder()
+                .addGroupCrn(group.getCrn())
+                .addRoleAssignment(roleAssignment)
+                .addWorkloadAdministrationGroupName("mockworkloadadministrationgroup0");
+        responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
 
