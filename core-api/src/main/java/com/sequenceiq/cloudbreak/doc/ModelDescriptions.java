@@ -184,6 +184,7 @@ public class ModelDescriptions {
         public static final String PLACEMENT_SETTINGS = "placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')";
         public static final String SHARED_SERVICE_REQUEST = "Shared service request";
         public static final String TERMINATED = "termination completion time of stack in long";
+        public static final String UNHEALTHY = "unhealthy node count";
     }
 
     public static class ClusterModelDescription {

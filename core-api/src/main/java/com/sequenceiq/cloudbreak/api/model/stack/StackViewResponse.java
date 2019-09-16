@@ -45,6 +45,9 @@ public class StackViewResponse implements JsonEntity {
     @ApiModelProperty(StackModelDescription.TERMINATED)
     private Long terminated;
 
+    @ApiModelProperty(StackModelDescription.UNHEALTHY)
+    private Integer unhealthyNodeCount;
+
     public Long getId() {
         return id;
     }
@@ -131,5 +134,13 @@ public class StackViewResponse implements JsonEntity {
 
     public void setTerminated(Long terminated) {
         this.terminated = terminated;
+    }
+
+    public void setUnhealthyNodeCount(Integer unhealthyNodeCount) {
+        this.unhealthyNodeCount = unhealthyNodeCount;
+    }
+
+    public Integer getUnhealthyNodeCount() {
+        return unhealthyNodeCount;
     }
 }

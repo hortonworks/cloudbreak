@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
@@ -147,4 +148,11 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @DisableCheckPermissions
     @Query("SELECT s.workspace.id FROM Stack s where s.id = :id")
     Long findWorkspaceIdById(@Param("id") Long id);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT s.id as id, s.name as name, b.name as blueprintName, b.stackType as stackType, b.stackVersion as stackVersion, ss.status as stackStatus, "
+            + "s.platformVariant as cloudPlatform, c.status as clusterStatus, s.created as created "
+            + "FROM Stack s LEFT JOIN s.cluster c LEFT JOIN c.blueprint b LEFT JOIN s.stackStatus ss "
+            + "WHERE s.workspace.id= :id AND s.terminated = null")
+    Set<StackListItem> findByWorkspaceId(@Param("id") Long id);
 }

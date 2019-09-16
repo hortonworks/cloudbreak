@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
@@ -393,6 +394,11 @@ public class OfflineStateGenerator {
 
         @Override
         public Long findWorkspaceIdById(Long id) {
+            return null;
+        }
+
+        @Override
+        public Set<StackListItem> findByWorkspaceId(Long id) {
             return null;
         }
 
