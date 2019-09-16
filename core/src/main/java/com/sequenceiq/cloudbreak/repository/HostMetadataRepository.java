@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
+import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
@@ -32,4 +34,10 @@ public interface HostMetadataRepository extends DisabledBaseRepository<HostMetad
     @Query("SELECT COUNT(h) FROM HostMetadata h "
             + "WHERE h.hostGroup.cluster.id= :clusterId AND h.hostGroup.name = :hostGroupName")
     Long countByClusterIdAndHostGroupName(@Param("clusterId") Long id, @Param("hostGroupName") String hostGroupName);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT s.id as stackId, COUNT(h) as instanceCount "
+            + "FROM HostMetadata h JOIN h.hostGroup hg JOIN hg.cluster c JOIN c.stack s WHERE s.workspace.id= :id AND h.hostMetadataState = 'UNHEALTHY' "
+            + "GROUP BY s.id")
+    Set<StackInstanceCount> countUnhealthyByWorkspaceId(@Param("id")Long workspaceId);
 }

@@ -50,7 +50,12 @@ public class OperationRetryService {
     private List<FlowConfiguration<?>> flowConfigs;
 
     public void retry(Stack stack) {
-        List<FlowLog> flowLogs = getFlowLogsForStack(stack);
+        List<FlowLog> flowLogs = flowLogRepository.findAllByStackIdOrderByCreatedDesc(stack.getId());
+        if (isFlowPending(flowLogs)) {
+            LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stack.getId());
+            throw new BadRequestException("Retry cannot be performed, because there is already an active flow.");
+        }
+
         List<RetryableFlow> retryableFlows = getRetryableFlows(flowLogs);
         if (CollectionUtils.isEmpty(retryableFlows)) {
             LOGGER.info("Retry cannot be performed. The last flow did not fail or not retryable. stackId: {}", stack.getId());
@@ -65,15 +70,6 @@ public class OperationRetryService {
         Optional<FlowLog> failedFlowLog = getMostRecentFailedLog(flowLogs);
         failedFlowLog.map(log -> getLastSuccessfulStateLog(log.getCurrentState(), flowLogs))
                 .ifPresent(flow2Handler::restartFlow);
-    }
-
-    private List<FlowLog> getFlowLogsForStack(Stack stack) {
-        List<FlowLog> flowLogs = flowLogRepository.findAllByStackIdOrderByCreatedDesc(stack.getId());
-        if (isFlowPending(flowLogs)) {
-            LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stack.getId());
-            throw new BadRequestException("Retry cannot be performed, because there is already an active flow.");
-        }
-        return flowLogs;
     }
 
     private FlowLog getLastSuccessfulStateLog(String failedState, List<FlowLog> flowLogs) {
@@ -97,7 +93,11 @@ public class OperationRetryService {
     }
 
     public List<RetryableFlow> getRetryableFlows(Stack stack) {
-        List<FlowLog> flowLogs = getFlowLogsForStack(stack);
+        List<FlowLog> flowLogs = flowLogRepository.findAllByStackIdOrderByCreatedDesc(stack.getId());
+        if (isFlowPending(flowLogs)) {
+            LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stack.getId());
+            return List.of();
+        }
         return getRetryableFlows(flowLogs);
     }
 
