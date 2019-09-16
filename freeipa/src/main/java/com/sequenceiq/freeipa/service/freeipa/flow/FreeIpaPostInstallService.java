@@ -55,6 +55,9 @@ public class FreeIpaPostInstallService {
     @Inject
     private PasswordPolicyService passwordPolicyService;
 
+    @Inject
+    private FreeIpaPermissionService freeIpaPermissionService;
+
     public void postInstallFreeIpa(Long stackId) throws Exception {
         LOGGER.debug("Performing post-install configuration for stack {}", stackId);
         Stack stack = stackService.getStackById(stackId);
@@ -64,10 +67,7 @@ public class FreeIpaPostInstallService {
             freeIpaClient.addPasswordExpirationPermission(SET_PASSWORD_EXPIRATION_PERMISSION);
         }
         freeIpaClient.addPermissionToPrivilege(USER_ADMIN_PRIVILEGE, SET_PASSWORD_EXPIRATION_PERMISSION);
-        freeIpaClient.addPermissionToPrivilege(HOST_ENROLLMENT_PRIVILEGE, ADD_HOSTS_PERMISSION);
-        freeIpaClient.addPermissionToPrivilege(HOST_ENROLLMENT_PRIVILEGE, REMOVE_HOSTS_PERMISSION);
-        freeIpaClient.addPermissionToPrivilege(HOST_ENROLLMENT_PRIVILEGE, REMOVE_SERVICES_PERMISSION);
-        freeIpaClient.addRolePrivileges(ENROLLMENT_ADMINISTRATOR_ROLE, Set.of(DNS_ADMINISTRATORS_PRIVILEGE));
+        freeIpaPermissionService.setPermissions(freeIpaClient);
         if (!Objects.equals(MAX_USERNAME_LENGTH, freeIpaClient.getUsernameLength())) {
             LOGGER.debug("Set maximum username length to {}", MAX_USERNAME_LENGTH);
             freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);
