@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
@@ -101,7 +102,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setPlacement(preparePlacement(environment));
         request.setSharedService(sdxConverter.getSharedService(source.getSdx(), environment.getCrn()));
-        request.setCustomDomain(null);
+        request.setCustomDomain(createDistroXCustomDomain());
         request.setTimeToLive(source.getTimeToLive());
         request.setTelemetry(getTelemetryRequest(source, environment, sdxClusterResponse));
         request.setGatewayPort(source.getGatewayPort());
@@ -140,6 +141,13 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setTimeToLive(source.getTimeToLive());
         request.setTelemetry(getTelemetryRequest(source, environment, sdxClusterResponse));
         return request;
+    }
+
+    private CustomDomainSettingsV4Request createDistroXCustomDomain() {
+        CustomDomainSettingsV4Request customDomainSettingsV4Request = new CustomDomainSettingsV4Request();
+        customDomainSettingsV4Request.setClusterNameAsSubdomain(true);
+        customDomainSettingsV4Request.setHostgroupNameAsHostname(true);
+        return customDomainSettingsV4Request;
     }
 
     private TelemetryRequest getTelemetryRequest(DistroXV1Request source, DetailedEnvironmentResponse environment,

@@ -5,7 +5,8 @@
   },
   "customDomain": {
     "domainName": "cloudera.site",
-    "hostgroupNameAsHostname": true
+    "hostgroupNameAsHostname": true,
+    "clusterNameAsSubdomain": true
   },
   "instanceGroups": [
     {

@@ -44,7 +44,7 @@ removing_dns_entries:
 
 add_dns_record:
   cmd.run:
-    - name: echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa dnsrecord-add {{salt['pillar.get']('sssd-ipa:domain')}}. $(hostname) --a-rec=$(hostname -i) --a-create-reverse
+    - name: echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa dnsrecord-add {{salt['pillar.get']('sssd-ipa:domain')}}. $(hostname){{ ipa.subdomain }} --a-rec=$(hostname -i) --a-create-reverse
     - unless: echo $PW | kinit {{salt['pillar.get']('sssd-ipa:principal')}} && ipa dnsrecord-find {{salt['pillar.get']('sssd-ipa:domain')}} --a-rec=$(hostname -i)
     - env:
         - PW: {{salt['pillar.get']('sssd-ipa:password')}}

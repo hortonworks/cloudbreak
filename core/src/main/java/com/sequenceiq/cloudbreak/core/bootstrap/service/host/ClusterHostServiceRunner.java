@@ -247,7 +247,7 @@ public class ClusterHostServiceRunner {
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
         saveSssdAdPillar(cluster, servicePillar, kerberosConfig);
-        saveSssdIpaPillar(servicePillar, kerberosConfig, serviceLocations);
+        saveSssdIpaPillar(stack, servicePillar, kerberosConfig, serviceLocations);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
         ldapView.ifPresent(ldap -> saveLdapsAdPillar(ldap, servicePillar, connector));
@@ -350,13 +350,14 @@ public class ClusterHostServiceRunner {
         return parameters;
     }
 
-    private void saveSssdIpaPillar(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig,
+    private void saveSssdIpaPillar(Stack stack, Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig,
             Map<String, List<String>> serviceLocations) {
         if (kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             Map<String, Object> sssdConnfig = new HashMap<>();
             sssdConnfig.put("principal", kerberosConfig.getPrincipal());
             sssdConnfig.put("realm", kerberosConfig.getRealm().toUpperCase());
             sssdConnfig.put("domain", kerberosConfig.getDomain());
+            sssdConnfig.put("subdomain", stack.isClusterNameAsSubdomain() ? stack.getName() : "");
             sssdConnfig.put("password", kerberosConfig.getPassword());
             sssdConnfig.put("server", kerberosConfig.getUrl());
             // enumeration has performance impacts so it's only enabled if Ranger is installed on the cluster
