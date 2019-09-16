@@ -6,12 +6,61 @@ package options;
 
 option java_package = "com.cloudera.thunderhead.service.common.options";
 option java_outer_classname = "Options";
+option go_package = "com/cloudera/cdp/protobuf";
 
-extend google.protobuf.FieldOptions {
-  // The field is sensitive. It will not be logged and may receive other special
-  // handling in the future.
-  bool sensitive = 50000;
-  // The field should not be logged. This may be useful on fields that have very
-  // large values.
-  bool skipLogging = 50001;
+message FieldExtension {
+  extend google.protobuf.FieldOptions {
+    // The field is sensitive. It will not be logged and may receive other special
+    // handling in the future.
+    bool sensitive = 50000;
+    // The field should not be logged. This may be useful on fields that have very
+    // large values.
+    bool skipLogging = 50001;
+    // This field controls the page size.
+    bool pagingPageSize = 50002;
+    // This field is the input paging token.
+    bool pagingInputToken = 50003;
+    // This field contains a page of results.
+    bool pagingResult = 50004;
+    // This field is the output paging token.
+    bool pagingOutputToken = 50005;
+    // This field is a date time.
+    bool datetime = 50006;
+    // This field is hidden.
+    bool hidden = 50007;
+    // The reason this field is hidden.
+    string hiddenReason = 50008;
+    // This conditions under which this hidden field is made visible.
+    string hiddenRetention = 50009;
+  }
+}
+
+message MethodExtension {
+  extend google.protobuf.MethodOptions {
+    // This method requires the specified right.
+    string right = 60000;
+    // This method requires the specified entitlement.
+    string entitlement = 60001;
+    // This method returnes paginated results.
+    bool paginates = 60002;
+    // This default number of max items for auto-pagination to fetch.
+    int32 pagingDefaultMaxItems = 60003;
+    // This method is hidden.
+    bool hidden = 60004;
+    // The reason this method is hidden.
+    string hiddenReason = 60005;
+    // This conditions under which this hidden method is made visible.
+    string hiddenRetention = 60006;
+  }
+}
+
+message MessageExtension {
+  extend google.protobuf.MessageOptions {
+    // This message is hidden.
+    bool hidden = 70000;
+    // The reason this message is hidden.
+    string hiddenReason = 70001;
+    // This conditions under this hidden message is made visible.
+    string hiddenRetention = 70002;
+  }
 }

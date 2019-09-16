@@ -319,6 +319,39 @@ service UserManagement {
   // been set for a different account before.
   rpc SetWorkloadSubdomain(SetWorkloadSubdomainRequest)
     returns (SetWorkloadSubdomainResponse) {}
+
+  // Create a machine-user, assign the resource roles and roles to it, create
+  // an access key for it, and return it. This is exposed as a convenience method
+  // for applications. Callers must be internal actors. The call is idempotent
+  // and safe to be called multiple times. Machine users created through this
+  // interface should be deleted by called DeleteWorkloadMachineUser.
+  rpc CreateWorkloadMachineUser(CreateWorkloadMachineUserRequest)
+    returns (CreateWorkloadMachineUserResponse) {}
+
+  // Delete the workload machine user, all the role and resource role assignments,
+  // as well as any access keys. This is a convenience method for application who
+  // created a machine user using CreateWorkloadMachineUser.
+  rpc DeleteWorkloadMachineUser(DeleteWorkloadMachineUserRequest)
+    returns (DeleteWorkloadMachineUserResponse) {}
+
+  // Returns the the workload administration group name for the
+  // (account, right, resource) tuple. Will throw NOT_FOUND exception if no name
+  // for the workload administration group has been set yet.
+  rpc GetWorkloadAdministrationGroupName(GetWorkloadAdministrationGroupNameRequest)
+    returns (GetWorkloadAdministrationGroupNameResponse) {}
+
+  // Sets the workload administration group name for the (account, right, resource)
+  // tuple. If the name was already set for the workload administration group
+  // this is a no-op and the name generated for the workload administration group
+  // will be returned.
+  rpc SetWorkloadAdministrationGroupName(SetWorkloadAdministrationGroupNameRequest)
+    returns (SetWorkloadAdministrationGroupNameResponse) {}
+
+  // Deletes the workload administration group name for the (account, right, resource)
+  // tuple. Throws a NOT_FOUND exception if no such workload administration group
+  // can be found.
+  rpc DeleteWorkloadAdministrationGroupName(DeleteWorkloadAdministrationGroupNameRequest)
+    returns (DeleteWorkloadAdministrationGroupNameResponse) {}
 }
 
 // An User is the Altus identity corresponding to an external SFDC contact. Users
@@ -449,7 +482,7 @@ message ClusterSshPrivateKey {
   string clusterSshPrivateKeyId = 2;
   // This is the contents of a PEM file containing a PKCS#8 private key for SSHing to
   // clusters.
-  string encryptedClusterSshPrivateKey = 3 [(options.sensitive) = true];
+  string encryptedClusterSshPrivateKey = 3 [(options.FieldExtension.sensitive) = true];
   string awsAccountId = 4;
   string awsRegion = 5;
   // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
@@ -483,6 +516,10 @@ message InteractiveLoginRequest {
   string firstName = 5;
   // This may be an empty string.
   string lastName = 6;
+  // Optional. The InResponseTo field, which is included in the AuthnResponse by
+  // the IdP during an SP-initiated login. For an IdP-initiated login this will
+  // be an empty string.
+  string inResponseTo = 10;
 }
 
 // The message to verify if the given account has been verified with
@@ -513,9 +550,18 @@ message InteractiveLoginResponse {
   string accessKeyId = 2;
   // See AccessKeyKeyPairGenerator.AccessKeyPair.
   // Ed25519 private key is 32 bytes encoded in base64
-  string privateKey = 3 [(options.sensitive) = true];
+  string privateKey = 3 [(options.FieldExtension.sensitive) = true];
   // A session token that can be used by consoles to authenticate users.
-  string sessionToken = 7 [(options.sensitive) = true];
+  string sessionToken = 7 [(options.FieldExtension.sensitive) = true];
+  // Optional. A SAML AuthnResponse that should be sent to the to the workload
+  // cluster. Will be empty if we are not forwarding the user to a workload
+  // cluster.
+  WorkloadSamlAuthnResponse workloadResponse = 8;
+  // True if the InteractiveLoginRequest contained an InResponseTo that did not
+  // exist in the cache (i.e. we got the request back after the cache TTL
+  // expired). Will be false if we are not forwarding the user to a workload
+  // cluster
+  bool unknownInResponseTo = 9;
 }
 
 message InteractiveLoginTrialRequest {
@@ -544,9 +590,9 @@ message InteractiveLoginTrialResponse {
   string accessKeyId = 2;
   // See AccessKeyKeyPairGenerator.AccessKeyPair.
   // Ed25519 private key is 32 bytes encoded in base64
-  string privateKey = 3 [(options.sensitive) = true];
+  string privateKey = 3 [(options.FieldExtension.sensitive) = true];
   // A session token that can be used by consoles to authenticate users.
-  string sessionToken = 6 [(options.sensitive) = true];
+  string sessionToken = 6 [(options.FieldExtension.sensitive) = true];
 }
 
 message InteractiveLogin3rdPartyRequest {
@@ -565,6 +611,10 @@ message InteractiveLogin3rdPartyRequest {
   string firstName = 5;
   // This may be an empty string.
   string lastName = 6;
+  // Optional. The InResponseTo field, which is included in the AuthnResponse by
+  // the IdP during an SP-initiated login. For an IdP-initiated login this will
+  // be an empty string.
+  string inResponseTo = 7;
 }
 
 message InteractiveLogin3rdPartyResponse {
@@ -573,9 +623,19 @@ message InteractiveLogin3rdPartyResponse {
   string accessKeyId = 2;
   // See AccessKeyKeyPairGenerator.AccessKeyPair.
   // Ed25519 private key is 32 bytes encoded in base64
-  string privateKey = 3 [(options.sensitive) = true];
+  string privateKey = 3 [(options.FieldExtension.sensitive) = true];
   // A session token that can be used by consoles to authenticate users.
-  string sessionToken = 4 [(options.sensitive) = true];
+  string sessionToken = 4 [(options.FieldExtension.sensitive) = true];
+  // Optional. A SAML AuthnResponse that should be sent to the to the workload
+  // cluster. Will be empty if we are not forwarding the user to a workload
+  // cluster.
+  WorkloadSamlAuthnResponse workloadResponse = 5;
+  // True if the InteractiveLogin3rdPartyRequest contained an InResponseTo that
+  // did not exist in the cache (i.e. we got the request back after the cache
+  // TTL expired). Will be false if we are not forwarding the user to a workload
+  // cluster
+  bool unknownInResponseTo = 6;
+
 }
 
 // Note that this intentionally lacks a request context as this is called during
@@ -598,12 +658,12 @@ message GetAccessKeyVerificationDataResponse {
   string actorCrn = 7;
   AccessKeyType.Value type = 9;
   // See AccessKeyType for key format
-  bytes publicKey = 6 [(options.skipLogging) = true];
+  bytes publicKey = 6 [(options.FieldExtension.skipLogging) = true];
 }
 
 message VerifyInteractiveUserSessionTokenRequest {
   // The interactive user's session token.
-  string sessionToken = 1 [(options.sensitive) = true];
+  string sessionToken = 1 [(options.FieldExtension.sensitive) = true];
 }
 
 message VerifyInteractiveUserSessionTokenResponse {
@@ -622,16 +682,16 @@ message VerifyInteractiveUserSessionTokenResponse {
 message AccessKeyRequestSigningV1AuthRequest {
   // The authentication header as was received from the caller in the
   // x-altus-auth-header HTTP header.
-  string authHeader = 1 [(options.skipLogging) = true];
+  string authHeader = 1 [(options.FieldExtension.skipLogging) = true];
   // The message that was signed. For V1 this includes the HTTP method, content
   // type, date, and path of the request. See V1Authenticator for more details.
-  string msgToVerify = 2 [(options.skipLogging) = true];
+  string msgToVerify = 2 [(options.FieldExtension.skipLogging) = true];
 }
 
 // A request to authenticate a session token.
 message SessionTokenAuthRequest {
   // The session token to authenticate.
-  string sessionToken = 1 [(options.sensitive) = true];
+  string sessionToken = 1 [(options.FieldExtension.sensitive) = true];
 }
 
 message AuthenticateRequest {
@@ -754,7 +814,7 @@ message CreateAccessKeyRequest {
 message CreateAccessKeyResponse {
   AccessKey accessKey = 1;
   // See AccessKeyType for key format
-  string privateKey = 2 [(options.sensitive) = true];
+  string privateKey = 2 [(options.FieldExtension.sensitive) = true];
 }
 
 message UpdateAccessKeyRequest {
@@ -892,7 +952,7 @@ message Account {
   // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
   uint64 creationDateMs = 7;
   // May be empty string
-  string clouderaManagerLicenseKey = 4 [(options.skipLogging) = true];
+  string clouderaManagerLicenseKey = 4 [(options.FieldExtension.skipLogging) = true];
   string externalIdForAWSDelegatedAccess = 5;
   // Contains account-wide user configurable messages
   AccountMessages accountMessages = 10;
@@ -949,7 +1009,7 @@ message DeleteAccountResponse {
 message GetRightsRequest {
   string actorCrn = 1;
   // To collect rights relevant to a specific resource specify the
-  // resource CRN. To collect rights relevent to resource indepedent
+  // resource CRN. To collect rights relevant to resource independent
   // service rights pass '*' (Resource.WILDCARD).
   string resourceCrn = 2;
 }
@@ -1012,10 +1072,17 @@ message ResourceAssignee {
 }
 
 message GetRightsResponse {
+  // A list of resource role assignments.
   repeated ResourceRoleAssignment resourceRolesAssignment = 1;
+  // A list of RoleAssignments.
   repeated RoleAssignment roleAssignment = 2;
+  // Whether the actor is a thunderhead admin or not.
   bool thunderheadAdmin = 3;
+  // A list of group CRNs the actor is a member of.
   repeated string groupCrn = 4;
+  // A list of workload administration group names the actor
+  // is a member of.
+  repeated string workloadAdministrationGroupName = 5;
 }
 
 message RightsCheck {
@@ -1034,7 +1101,7 @@ message CheckRightsResponse {
 
 message CreateAccountRequest {
   string externalAccountId = 1;
-  string clouderaManagerLicenseKey = 2 [(options.skipLogging) = true];
+  string clouderaManagerLicenseKey = 2 [(options.FieldExtension.skipLogging) = true];
   // if none is passed, the default cloudera provider id will be used
   string identityProviderId = 3;
 }
@@ -1280,7 +1347,7 @@ message RedisAccessKeyCacheEntry {
   // The type of altus account.
   AccountType accountType = 10;
   AccessKeyType.Value accessKeyType = 11;
-  bytes publicKey = 3 [(options.skipLogging) = true];
+  bytes publicKey = 3 [(options.FieldExtension.skipLogging) = true];
   int64 lastAccessed = 4;
   int32 inactivityDurationSec = 5;
   // Marks the entry as a "do not use" entry. Used by the UMS to prevent
@@ -1296,6 +1363,37 @@ message RedisActorTombstoneCacheEntry {
   // have to some mbmer that we set to a non default value. Let's use a bool for
   // that. This is always set to 'true' and the actual value is ignored.
   bool created = 1;
+}
+
+// A structure that contains information about SSO session that was initiated
+// by a workload cluster SP.
+message SSOForWorkloadClusterDetails {
+  // The account ID for which this SSO request is for.
+  string accountId = 1;
+  // The workload cluster service provider (SP) AuthnRequest ID.
+  string workloadClusterAuthnRequestId = 2;
+  // The workload cluster assertion consumer service (ACS) URL.
+  string workloadClusterAcs = 3;
+  // The workload cluster assertion consumer service protocol binding to use.
+  string workloadClusterAcsProtocolBinding = 4;
+  // The relay state passed to us as part of the workload cluster service
+  // provider (SP) AuthnRequest.
+  string workloadClusterRelayState = 5;
+}
+
+// This structure is used to serialize the redis cache entry for workload
+// clusters authn requests while waiting for the user to login using the idp
+// for the account. It contains information that is needed to complete the
+// AuthResponse to the workload cluster SP.
+message RedisSSOCacheEntry {
+  // The AuthnRequest ID of the control plane AuthnRequest to the IdP the user
+  // needs to authenticate with. It is used as the key of the cache entry as
+  // this is what we get back from the IdP in the InResponseTo field.
+  string controlPlaneAuthnRequestId = 1;
+  oneof ssoDetails {
+    // Covers SAML provider attributes.
+    SSOForWorkloadClusterDetails forWorkloadClusters = 2;
+  }
 }
 
 message SessionTokenVerificationAlgorithm {
@@ -1320,7 +1418,7 @@ message RedisSessionTokenCacheEntry {
   // The verification algorithm to use.
   SessionTokenVerificationAlgorithm.Value verificationAlgo = 3;
   // The public key to use to verify the session token.
-  bytes publicKey = 4 [(options.skipLogging) = true];
+  bytes publicKey = 4 [(options.FieldExtension.skipLogging) = true];
   int64 lastAccessed = 5;
   int32 inactivityDurationSec = 6;
 }
@@ -1799,14 +1897,14 @@ message SamlCert {
   // The type of the certificate;
   SamlCertType.Value type = 1;
   // The X.509 PEM encoded public key.
-  string cert = 2 [(options.skipLogging) = true];
+  string cert = 2 [(options.FieldExtension.skipLogging) = true];
 }
 
 // The IdP connector details for a SAML typed connector. Used only for
 // dynamo db storage
 message SamlIdpDetails {
   // The original metadata xml provided to us when the IdP connector was defined.
-  string metadataXml = 1 [(options.skipLogging) = true];
+  string metadataXml = 1 [(options.FieldExtension.skipLogging) = true];
   // The certs provided to us in the IdP metadata xml.
   repeated SamlCert certs = 2;
 }
@@ -1879,7 +1977,7 @@ message WorkloadSamlAuthnResponse {
   // 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
   string binding = 2;
   // A SAML 2.0 signed authn response.
-  string authnResponse = 3 [(options.skipLogging) = true];
+  string authnResponse = 3 [(options.FieldExtension.skipLogging) = true];
   // The relay state, if any, that was passed to us in the original authn
   // request.
   string relayState = 4;
@@ -1894,7 +1992,7 @@ message IdpAuthnRequest {
   // 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
   string binding = 2;
   // The authn response - a SAML 2.0 signed authn response.
-  string authnRequest = 3 [(options.skipLogging) = true];
+  string authnRequest = 3 [(options.FieldExtension.skipLogging) = true];
 }
 
 message ProcessWorkloadSSOAuthnReqRequest {
@@ -1902,9 +2000,9 @@ message ProcessWorkloadSSOAuthnReqRequest {
   string accountId = 1;
   // The deflated base64 encoded SAML2.0 payload as was received from the
   // workload cluster.
-  string authnRequest = 2 [(options.skipLogging) = true];
+  string authnRequest = 2 [(options.FieldExtension.skipLogging) = true];
   // The session-token if one was received.
-  string sessionToken = 3 [(options.sensitive) = true];
+  string sessionToken = 3 [(options.FieldExtension.sensitive) = true];
   // The relay state provided by the workload SP. May be empty.
   string relayState = 4;
 }
@@ -1926,4 +2024,101 @@ message SetWorkloadSubdomainRequest {
 }
 
 message SetWorkloadSubdomainResponse {
+}
+
+message CreateWorkloadMachineUserRequest {
+  // The account ID for which the machine user is needed.
+  string accountId = 1;
+  // The machine user name. This must be unique name for the username in the
+  // account. In case a machine-user with this name already exists the UMS will
+  // assume that the machine-user the caller wants to use had already been
+  // created before and no error will be thrown.
+  string machineUserName = 2;
+  // A list of resource assignments to use. May be empty.
+  repeated ResourceAssignment resourceAssignment = 3;
+  // A list of role roles to use. May be empty
+  repeated string roleCrn = 4;
+}
+
+message CreateWorkloadMachineUserResponse {
+  // The CRN for the machine user created.
+  string machineUserCrn = 1;
+  // The access key ID. Since the rpc is idempotent a new key will be generated
+  // for each successful call. Old keys are not removed by this call and will
+  // only be removed by calling DeleteWorkloadMachineUser.
+  string accessKeyId = 2;
+  // The private key for the machine user. This is an Ed25519 private key and is
+  // 32 bytes encoded in base64 that should be used to sign requests.
+  string privateKey = 3 [(options.FieldExtension.sensitive) = true];
+}
+
+message DeleteWorkloadMachineUserRequest {
+  // The account ID from which to delete the machine user.
+  string accountId = 1;
+  // The machine user name or CRN to delete.
+  string machineUserNameOrCrn = 2;
+}
+
+message DeleteWorkloadMachineUserResponse {
+}
+
+message GetWorkloadAdministrationGroupNameRequest {
+  // The account ID for the workload administration group.
+  string accountId = 1;
+  // The name of the right associated with this workload administration group.
+  string rightName = 2;
+  // The resource on which the above right was granted, e.g., the environment CRN.
+  // The resource should be a unique, immutable, and stable over time.
+  string resource = 3;
+}
+
+message GetWorkloadAdministrationGroupNameResponse {
+  // The workload administration group name.
+  string workloadAdministrationGroupName = 1;
+}
+
+message SetWorkloadAdministrationGroupNameRequest {
+  reserved 4;
+  // The account ID for the workload administration group.
+  string accountId = 1;
+  // The name of the right associated with this workload administration group.
+  string rightName = 2;
+  // The resource on which the above right was granted, e.g., the environment CRN.
+  // The resource should be a unique, immutable, and stable over time.
+  string resource = 3;
+}
+
+message SetWorkloadAdministrationGroupNameResponse {
+  // The workload administration group name.
+  string workloadAdministrationGroupName = 1;
+}
+
+message DeleteWorkloadAdministrationGroupNameRequest {
+  // The account ID for the workload administration group.
+  string accountId = 1;
+  // The name of the right associated with this workload administration group.
+  string rightName = 2;
+  // The resource on which the above right was granted, e.g., the environment CRN.
+  // This should be the same resource identifier as the resource identifier used
+  // in the SetWorkloadAdministrationGroupName request.
+  string resource = 3;
+}
+
+message DeleteWorkloadAdministrationGroupNameResponse {
+}
+
+// A representation of a kerberos key. This does not exactly reflect the formal
+// ASN.1 structure; that seemed gratuitous.
+message KerberosKey {
+    int32 keyType = 1;
+    bytes encryptedKeyValue = 2 [(options.FieldExtension.skipLogging) = true];
+    int32 saltType = 3;
+    string saltValue = 4;
+}
+
+// This is used to serialize all the Actor dynamoDB related information that is
+// not indexed.
+message ActorDetails {
+    string encryptedPasswordHash = 1 [(options.FieldExtension.skipLogging) = true];
+    repeated KerberosKey kerberosKeys = 2;
 }
