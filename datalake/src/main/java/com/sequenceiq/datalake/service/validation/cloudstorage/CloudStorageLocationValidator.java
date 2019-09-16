@@ -48,14 +48,17 @@ public class CloudStorageLocationValidator {
     }
 
     private Optional<FileSystemType> getFileSystemType(DetailedEnvironmentResponse environment) {
-        LoggingResponse logging = environment.getTelemetry().getLogging();
-        if (logging.getS3() != null) {
-            return Optional.of(logging.getS3().getType());
+        Optional<FileSystemType> response = Optional.empty();
+        if (environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null) {
+            LoggingResponse logging = environment.getTelemetry().getLogging();
+            if (logging.getS3() != null) {
+                return Optional.of(logging.getS3().getType());
+            }
+            if (logging.getWasb() != null) {
+                return Optional.of(logging.getWasb().getType());
+            }
         }
-        if (logging.getWasb() != null) {
-            return Optional.of(logging.getWasb().getType());
-        }
-        return Optional.empty();
+        return response;
     }
 
     private String getBucketName(Optional<FileSystemType> fileSystemType, String storageLocation) {
