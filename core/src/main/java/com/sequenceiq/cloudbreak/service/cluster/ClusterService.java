@@ -40,7 +40,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -713,6 +712,7 @@ public class ClusterService {
                     .anyMatch(rdsConfig -> DatabaseType.AMBARI.name().equals(rdsConfig.getType()) && ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus()));
         } else {
             long cmRdsCount = cluster.getRdsConfigs().stream()
+                    .filter(rds -> rds.getStatus() == ResourceStatus.USER_MANAGED)
                     .map(RDSConfig::getType)
                     .filter(type -> DatabaseType.CLOUDERA_MANAGER.name().equals(type)
                             || DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER.name().equals(type))
@@ -816,7 +816,7 @@ public class ClusterService {
             databaseType = DatabaseType.AMBARI;
         }
         RDSConfig rdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), databaseType);
-        return (rdsConfig == null && cluster.getDatabaseServerCrn() == null) || DatabaseVendor.EMBEDDED == rdsConfig.getDatabaseEngine();
+        return (rdsConfig == null || ResourceStatus.DEFAULT == rdsConfig.getStatus()) && cluster.getDatabaseServerCrn() == null;
     }
 
     private void updateHosts(Cluster cluster, Set<String> hostNames, HostMetadataState expectedState, HostMetadataState newState,
