@@ -148,6 +148,13 @@ public class UmsUsersStateProvider {
             // Since this user is eligible, add this user to internal group
             userStateBuilder.addMemberToGroup(UserServiceConstants.CDP_USERSYNC_INTERNAL_GROUP, fmsUser.getName());
 
+            List<String> workloadAdministrationGroupNames = rightsResponse.getWorkloadAdministrationGroupNameList();
+            LOGGER.debug("workloadAdministrationGroupNameList = {}", workloadAdministrationGroupNames);
+            workloadAdministrationGroupNames.forEach(groupName -> {
+                userStateBuilder.addGroup(nameToGroup(groupName));
+                userStateBuilder.addMemberToGroup(groupName, fmsUser.getName());
+            });
+
             if (isEnvironmentAdmin(environmentCrn, rightsResponse)) {
                 // TODO: introduce a flag for adding admin
                 userStateBuilder.addMemberToGroup("admins", fmsUser.getName());
@@ -161,6 +168,12 @@ public class UmsUsersStateProvider {
         fmsUser.setFirstName(getOrDefault(umsUser.getFirstName(), "None"));
         fmsUser.setLastName(getOrDefault(umsUser.getLastName(), "None"));
         return fmsUser;
+    }
+
+    private FmsGroup nameToGroup(String name) {
+        FmsGroup fmsGroup = new FmsGroup();
+        fmsGroup.setName(name);
+        return fmsGroup;
     }
 
     private String getOrDefault(String value, String other) {
