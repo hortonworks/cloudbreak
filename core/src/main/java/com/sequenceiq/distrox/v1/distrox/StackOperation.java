@@ -236,7 +236,7 @@ public class StackOperation {
     public StackStatusV4Response getStatusByCrn(@NotNull StackAccessDto stackAccessDto, Long workspaceId) {
         Stack stack;
         if (isNotEmpty(stackAccessDto.getName())) {
-            stack = stackService.getByCrnInWorkspace(stackAccessDto.getName(), workspaceId);
+            stack = stackService.getByNameInWorkspace(stackAccessDto.getName(), workspaceId);
         } else {
             stack = stackService.getByCrnInWorkspace(stackAccessDto.getCrn(), workspaceId);
         }
