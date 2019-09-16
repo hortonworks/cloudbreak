@@ -49,7 +49,19 @@ class EnvironmentBasedDomainNameProviderTest {
 
         String result = underTest.getDomain(envName, accountName);
 
-        String expected = String.format("%s.%s.cloudera.site", envName, accountName);
+        String expected = String.format("%s.%s.cloudera.site", "an-env-n", accountName);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testGetDomainwhenDashIn8thChar() {
+        String envName = "an-envi-name";
+        String accountName = "an-account-name";
+        ReflectionTestUtils.setField(underTest, "rootDomain", "cloudera.site");
+
+        String result = underTest.getDomain(envName, accountName);
+
+        String expected = String.format("%s.%s.cloudera.site", "an-envi", accountName);
         assertEquals(expected, result);
     }
 
@@ -61,7 +73,7 @@ class EnvironmentBasedDomainNameProviderTest {
 
         String result = underTest.getDomain(envName, accountName);
 
-        String expected = String.format("%s.%s.mytest.local", envName, accountName);
+        String expected = String.format("%s.%s.mytest.local", "an-env-n", accountName);
         assertEquals(expected, result);
     }
 
@@ -95,7 +107,7 @@ class EnvironmentBasedDomainNameProviderTest {
     void testGetDomainWhenTheGeneratedDomainLongerThen62Chars() {
         String envName = "an-loooooooooong-env-name";
         String accountName = "an-loooooooooooooong-account-name";
-        ReflectionTestUtils.setField(underTest, "rootDomain", ".mytest.local");
+        ReflectionTestUtils.setField(underTest, "rootDomain", "some-subdomain.mytest.local");
 
         IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.getDomain(envName, accountName));
 

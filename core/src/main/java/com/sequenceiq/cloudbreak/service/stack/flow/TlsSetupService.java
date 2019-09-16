@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationService;
+import com.sequenceiq.cloudbreak.dns.EnvironmentBasedDomainNameProvider;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -84,6 +85,9 @@ public class TlsSetupService {
 
     @Inject
     private StackTerminationService stackTerminationService;
+
+    @Inject
+    private EnvironmentBasedDomainNameProvider environmentBasedDomainNameProvider;
 
     public void generateCertAndSaveForStack(Stack stack) {
         LOGGER.info("Generate cert and save for stack");
@@ -158,7 +162,7 @@ public class TlsSetupService {
         }
         boolean success = dnsManagementService.createDnsEntryWithIp(userCrn, accountId, stack.getName(), environment.getName(), false, List.of(ip));
         if (success) {
-            String fullQualifiedDomainName = certificateCreationService.getFqdn(userCrn, stack.getName(), environment.getName());
+            String fullQualifiedDomainName = environmentBasedDomainNameProvider.getDomainName(userCrn, stack.getName(), environment.getName());
             if (fullQualifiedDomainName != null) {
                 LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", ip, fullQualifiedDomainName);
                 return fullQualifiedDomainName;
