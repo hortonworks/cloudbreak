@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.delete.handler;
 
+import static com.sequenceiq.datalake.service.sdx.DatabaseService.DURATION_IN_MINUTES_FOR_DB_POLLING;
+
 import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
@@ -78,7 +80,8 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
             response = new SdxDeletionFailedEvent(sdxId, userId, requestId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, pollerStoppedException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId,
+                    new PollerStoppedException("Database deletion timed out after " + DURATION_IN_MINUTES_FOR_DB_POLLING + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Database polling failed for sdx: {}", sdxId, exception);
             response = new SdxDeletionFailedEvent(sdxId, userId, requestId, exception);

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -35,17 +34,15 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
 public class DatabaseService {
+
+    public static final int SLEEP_TIME_IN_SEC_FOR_DB_POLLING = 10;
+
+    public static final int DURATION_IN_MINUTES_FOR_DB_POLLING = 60;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseService.class);
-
-    private static final int SLEEP_TIME_IN_SEC_FOR_ENV_POLLING = 10;
-
-    private static final int DURATION_IN_MINUTES_FOR_ENV_POLLING = 60;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
-
-    @Inject
-    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Inject
     private SdxNotificationService notificationService;
@@ -127,8 +124,8 @@ public class DatabaseService {
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn,
             SdxDatabaseOperation sdxDatabaseOperation, String requestId, boolean cancellable) {
-        PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
-                DURATION_IN_MINUTES_FOR_ENV_POLLING, TimeUnit.MINUTES);
+        PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_DB_POLLING, TimeUnit.SECONDS,
+                DURATION_IN_MINUTES_FOR_DB_POLLING, TimeUnit.MINUTES);
         return waitAndGetDatabase(sdxCluster, databaseCrn, pollingConfig, sdxDatabaseOperation, requestId, cancellable);
     }
 

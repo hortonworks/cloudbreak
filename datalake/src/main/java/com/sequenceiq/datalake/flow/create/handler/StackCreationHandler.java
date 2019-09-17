@@ -25,10 +25,10 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationHandler.class);
 
-    @Value("${sdx.provision.sleeptime_sec:10}")
+    @Value("${sdx.stack.provision.sleeptime_sec:10}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.provision.duration_min:120}")
+    @Value("${sdx.stack.provision.duration_min:120}")
     private int durationInMinutes;
 
     @Inject
@@ -63,7 +63,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Poller stopped for SDX: {}", sdxId, pollerStoppedException);
             response = new SdxCreateFailedEvent(sdxId, userId, requestId,
-                    new PollerStoppedException("SDX cluster creation timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Datalake stack creation timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Polling failed for stack: {}", sdxId, exception);
             response = new SdxCreateFailedEvent(sdxId, userId, requestId, exception);
