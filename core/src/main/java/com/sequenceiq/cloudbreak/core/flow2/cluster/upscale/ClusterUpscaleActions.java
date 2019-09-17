@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -50,6 +51,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesRequest;
@@ -69,8 +72,11 @@ public class ClusterUpscaleActions {
     @Inject
     private ClusterUpscaleFlowService clusterUpscaleFlowService;
 
-    @Bean(name = "UPLOAD_UPSCALE_RECIPES_STATE")
-    public Action<?, ?> uploadUpscaleRecipesAction() {
+    @Inject
+    private ClusterProxyService clusterProxyService;
+
+    @Bean(name = "RE_REGISTER_WITH_CLUSTER_PROXY_STATE")
+    public Action<?, ?> reRegisterWithClusterProxy() {
         return new AbstractClusterUpscaleAction<>(ClusterScaleTriggerEvent.class) {
             @Override
             protected void prepareExecution(ClusterScaleTriggerEvent payload, Map<Object, Object> variables) {
@@ -93,6 +99,22 @@ public class ClusterUpscaleActions {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, ClusterScaleTriggerEvent payload, Map<Object, Object> variables) {
+                clusterUpscaleFlowService.reRegisterWithClusterProxy(context.getStackId());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterUpscaleContext context) {
+                return new ClusterProxyReRegistrationRequest(context.getStackId(), context.getHostGroupName());
+            }
+        };
+    }
+
+    @Bean(name = "UPLOAD_UPSCALE_RECIPES_STATE")
+    public Action<?, ?> uploadUpscaleRecipesAction() {
+        return new AbstractClusterUpscaleAction<>(ClusterProxyReRegistrationResult.class) {
+            @Override
+            protected void doExecute(ClusterUpscaleContext context, ClusterProxyReRegistrationResult payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.upscalingClusterManager(context.getStackId());
                 sendEvent(context);
             }

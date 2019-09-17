@@ -33,6 +33,8 @@ public class FlowChainTriggers {
 
     public static final String CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT = "CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT";
 
+    public static final String CLUSTER_PROXY_RE_REGISTER_EVENT = "CLUSTER_PROXY_RE_REGISTER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

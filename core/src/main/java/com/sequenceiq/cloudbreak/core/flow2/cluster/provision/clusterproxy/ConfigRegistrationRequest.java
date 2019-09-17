@@ -12,14 +12,27 @@ class ConfigRegistrationRequest {
     @JsonProperty
     private List<ClusterServiceConfig> services;
 
+    @JsonProperty
+    private String uriOfKnox;
+
     @JsonCreator
     ConfigRegistrationRequest(String clusterCrn, List<ClusterServiceConfig> services) {
         this.clusterCrn = clusterCrn;
         this.services = services;
     }
 
+    @JsonCreator
+    ConfigRegistrationRequest(String clusterCrn, String knoxUrl, List<ClusterServiceConfig> services) {
+        this(clusterCrn, services);
+        this.uriOfKnox = knoxUrl;
+    }
+
     @Override
     public String toString() {
-        return "ConfigRegistrationRequest{clusterCrn='" + clusterCrn + '\'' + ", services=" + services + '}';
+        return "ConfigRegistrationRequest{" +
+                "clusterCrn='" + clusterCrn + '\'' +
+                ", services=" + services +
+                ", uriOfKnox='" + uriOfKnox + '\'' +
+                '}';
     }
 }

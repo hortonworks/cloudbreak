@@ -73,6 +73,7 @@ public enum Msg {
     CLUSTER_BUILT("cluster.built"),
     CLUSTER_CREATE_FAILED("cluster.create.failed"),
     CLUSTER_SCALING_UP("cluster.scaling.up"),
+    RE_REGISTER_WITH_CLUSTER_PROXY("re.register.with.cluster.proxy"),
     CLUSTER_SCALED_UP("cluster.scaled.up"),
     CLUSTER_SCALING_DOWN("cluster.scaling.down"),
     CLUSTER_SCALED_DOWN("cluster.scaled.down"),
