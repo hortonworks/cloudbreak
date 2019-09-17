@@ -20,48 +20,11 @@ join_ipa:
         runuser -l root -c 'ipa-client-install --server={{salt['pillar.get']('sssd-ipa:server')}} --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
           --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
           --password {{salt['pillar.get']('sssd-ipa:password')}} --unattended --force-join --ssh-trust-dns --force-ntpd --unattended'
-{% endif %}
+{% endif%}
     - unless: ipa env
     - runas: root
     - env:
         - PW: {{salt['pillar.get']('sssd-ipa:password')}}
-
-replace_ntp_conf:
-  file.managed:
-    - source: salt://sssd/template/ntp_conf.j2
-    - name: /etc/ntp.conf
-    - template: jinja
-    - require:
-      - cmd: join_ipa
-
-replace_sysconfig_ntpd:
-  file.managed:
-    - source: salt://sssd/ntp/sysconfig_ntpd
-    - name: /etc/sysconfig/ntpd
-    - require:
-      - cmd: join_ipa
-
-{% if salt['file.directory_exists']('/yarn-private') %}
-
-force_restart_ntpd:
-  cmd.run:
-    - name: runuser -l root -c 'systemctl restart ntpd'
-    - runas: root
-    - require:
-      - file: replace_ntp_conf
-      - file: replace_sysconfig_ntpd
-
-{% else %}
-
-restart_ntpd_if_reconfigured:
-  service.running:
-    - enable: True
-    - name: ntpd
-    - watch:
-      - file: /etc/ntp.conf
-      - file: /etc/sysconfig/ntpd
-
-{% endif %}
 
 {% if salt['file.directory_exists']('/yarn-private') %}
 dns_remove_script:
@@ -77,7 +40,7 @@ removing_dns_entries:
   cmd.run:
     - name: runuser -l root -c '/opt/salt/scripts/dns_cleanup.sh 2>&1 | tee -a /var/log/dns_cleanup.log'
     - unless: test -f /var/log/dns_cleanup.log
-{% endif %}
+{% endif%}
 
 add_dns_record:
   cmd.run:
@@ -88,7 +51,7 @@ add_dns_record:
 
 {% if not salt['file.directory_exists']('/yarn-private') %}
 
-restart_sssd_if_reconfigured:
+restart-sssd-if-reconfigured:
   service.running:
     - enable: True
     - name: sssd
@@ -107,7 +70,7 @@ restart_sssd_if_reconfigured:
 
 {% if salt['file.directory_exists']('/yarn-private') %}
 
-backup_systemctl:
+backup-systemctl:
   file.copy:
     - name: /usr/bin/systemctl.bak
     - source: /usr/bin/systemctl.orig
