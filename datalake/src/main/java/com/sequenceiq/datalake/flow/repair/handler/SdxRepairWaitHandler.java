@@ -61,7 +61,8 @@ public class SdxRepairWaitHandler implements EventHandler<SdxRepairWaitRequest> 
             response = new SdxRepairFailedEvent(sdxId, userId, requestId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Repair poller stopped for stack: {}", sdxId);
-            response = new SdxRepairFailedEvent(sdxId, userId, requestId, pollerStoppedException);
+            response = new SdxRepairFailedEvent(sdxId, userId, requestId,
+                    new PollerStoppedException("Datalake repair timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Repair polling failed for stack: {}", sdxId);
             response = new SdxRepairFailedEvent(sdxId, userId, requestId, exception);
