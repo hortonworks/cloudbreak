@@ -13,6 +13,8 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
+import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.EntityType;
@@ -69,4 +71,10 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
 
     @Query("SELECT max(imd.privateId) FROM InstanceMetaData imd WHERE imd.instanceGroup IN :instanceGroups")
     Long getMaxPrivateId(@Param("instanceGroups") List<InstanceGroup> instanceGroups);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
+            + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id AND i.instanceStatus <> 'TERMINATED' "
+            + "GROUP BY s.id")
+    Set<StackInstanceCount> countByWorkspaceId(@Param("id") Long id);
 }
