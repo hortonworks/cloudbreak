@@ -170,11 +170,15 @@ public class TlsSetupService {
         }
         boolean success = dnsManagementService.createDnsEntryWithIp(userCrn, accountId, stack.getName(), environment.getName(), false, List.of(ip));
         if (success) {
-            String fullQualifiedDomainName = environmentBasedDomainNameProvider
-                    .getDomainName(stack.getName(), environment.getName(), getWorkloadSubdomain(userCrn));
-            if (fullQualifiedDomainName != null) {
-                LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", ip, fullQualifiedDomainName);
-                return fullQualifiedDomainName;
+            try {
+                String fullQualifiedDomainName = environmentBasedDomainNameProvider
+                        .getDomainName(stack.getName(), environment.getName(), getWorkloadSubdomain(userCrn));
+                if (fullQualifiedDomainName != null) {
+                    LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", ip, fullQualifiedDomainName);
+                    return fullQualifiedDomainName;
+                }
+            } catch (Exception e) {
+                LOGGER.info("Cannot generate fqdn.", e.getMessage(), e);
             }
         }
         return null;
