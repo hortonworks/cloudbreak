@@ -162,7 +162,7 @@ public class TlsSetupService {
         }
         boolean success = dnsManagementService.createDnsEntryWithIp(userCrn, accountId, stack.getName(), environment.getName(), false, List.of(ip));
         if (success) {
-            String fullQualifiedDomainName = environmentBasedDomainNameProvider.getDomainName(userCrn, stack.getName(), environment.getName());
+            String fullQualifiedDomainName = environmentBasedDomainNameProvider.getDomainName(stack.getName(), environment.getName(), accountId);
             if (fullQualifiedDomainName != null) {
                 LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", ip, fullQualifiedDomainName);
                 return fullQualifiedDomainName;
