@@ -6,6 +6,7 @@ import java.security.KeyPair;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
@@ -20,8 +21,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.certificate.service.CertificateCreationService;
 import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
@@ -32,6 +35,8 @@ import com.sequenceiq.cloudbreak.dns.EnvironmentBasedDomainNameProvider;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.polling.nginx.NginxCertListenerTask;
 import com.sequenceiq.cloudbreak.polling.nginx.NginxPollerObject;
@@ -88,6 +93,9 @@ public class TlsSetupService {
 
     @Inject
     private EnvironmentBasedDomainNameProvider environmentBasedDomainNameProvider;
+
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
 
     public void generateCertAndSaveForStack(Stack stack) {
         LOGGER.info("Generate cert and save for stack");
@@ -162,12 +170,19 @@ public class TlsSetupService {
         }
         boolean success = dnsManagementService.createDnsEntryWithIp(userCrn, accountId, stack.getName(), environment.getName(), false, List.of(ip));
         if (success) {
-            String fullQualifiedDomainName = environmentBasedDomainNameProvider.getDomainName(stack.getName(), environment.getName(), accountId);
+            String fullQualifiedDomainName = environmentBasedDomainNameProvider
+                    .getDomainName(stack.getName(), environment.getName(), getWorkloadSubdomain(userCrn));
             if (fullQualifiedDomainName != null) {
                 LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", ip, fullQualifiedDomainName);
                 return fullQualifiedDomainName;
             }
         }
         return null;
+    }
+
+    private String getWorkloadSubdomain(String actorCrn) {
+        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, actorCrn, requestIdOptional);
+        return account.getWorkloadSubdomain();
     }
 }
