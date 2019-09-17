@@ -34,7 +34,7 @@ public interface StackApiViewRepository extends WorkspaceResourceRepository<Stac
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s FROM StackApiView s LEFT JOIN FETCH s.cluster c LEFT JOIN FETCH c.blueprint "
             + "LEFT JOIN FETCH c.hostGroups hg LEFT JOIN FETCH hg.hostMetadata "
-            + "LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData im "
-            + "WHERE s.workspace.id= :id AND s.terminated = null AND im.instanceStatus <> 'TERMINATED'")
+            + "LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.stackStatus "
+            + "WHERE s.workspace.id= :id AND s.terminated = null")
     Set<StackApiView> findByWorkspaceId(@Param("id") Long id);
 }

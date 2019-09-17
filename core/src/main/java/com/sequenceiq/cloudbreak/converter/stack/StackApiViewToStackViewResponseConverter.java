@@ -26,6 +26,19 @@ public class StackApiViewToStackViewResponseConverter extends AbstractConversion
 
     @Override
     public StackViewResponse convert(StackApiView source) {
+        int nodeCount = getNodeCount(source);
+        return convert(source, nodeCount);
+    }
+
+    private int getNodeCount(StackApiView source) {
+        int nodeCount = 0;
+        for (InstanceGroupView instanceGroupView : source.getInstanceGroups()) {
+            nodeCount += instanceGroupView.getNodeCount();
+        }
+        return nodeCount;
+    }
+
+    public StackViewResponse convert(StackApiView source, Integer nodeCount) {
         StackViewResponse stackViewResponse = new StackViewResponse();
         stackViewResponse.setId(source.getId());
         stackViewResponse.setName(source.getName());
@@ -33,7 +46,7 @@ public class StackApiViewToStackViewResponseConverter extends AbstractConversion
         if (source.getCluster() != null) {
             stackViewResponse.setCluster(conversionService.convert(source.getCluster(), ClusterViewResponse.class));
         }
-        addNodeCount(source, stackViewResponse);
+        stackViewResponse.setNodeCount(nodeCount);
         stackViewResponse.setCloudPlatform(source.getCloudPlatform());
         stackViewResponse.setPlatformVariant(source.getPlatformVariant());
         stackViewResponse.setStatus(source.getStatus());
@@ -41,13 +54,4 @@ public class StackApiViewToStackViewResponseConverter extends AbstractConversion
         stackViewResponse.setTerminated(source.getTerminated());
         return stackViewResponse;
     }
-
-    private void addNodeCount(StackApiView source, StackViewResponse stackViewResponse) {
-        int nodeCount = 0;
-        for (InstanceGroupView instanceGroupView : source.getInstanceGroups()) {
-            nodeCount += instanceGroupView.getNodeCount();
-        }
-        stackViewResponse.setNodeCount(nodeCount);
-    }
-
 }
