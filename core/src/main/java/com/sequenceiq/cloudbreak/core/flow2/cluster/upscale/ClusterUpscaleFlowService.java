@@ -75,6 +75,11 @@ class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
     }
 
+    void reRegisterWithClusterProxy(long stackId) {
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Re-registering with Cluster Proxy service.");
+        flowMessageService.fireEventAndLog(stackId, Msg.RE_REGISTER_WITH_CLUSTER_PROXY, UPDATE_IN_PROGRESS.name());
+    }
+
     void stopClusterManagementServer(long stackId) {
         sendMessage(stackId, Msg.CLUSTER_STOP_MANAGEMENT_SERVER_STARTED, "Stopping cluster management server.");
     }
