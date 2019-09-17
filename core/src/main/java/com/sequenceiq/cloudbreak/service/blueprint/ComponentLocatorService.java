@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -38,6 +39,18 @@ public class ComponentLocatorService {
 
     public Map<String, List<String>> getComponentLocation(Cluster cluster, Collection<String> componentNames) {
         return getComponentAttribute(cluster, componentNames, InstanceMetaData::getDiscoveryFQDN);
+    }
+
+    public Map<String, List<String>> getImpalaComponentServiceLocation(Cluster cluster) {
+        Map<String, List<String>> result = new HashMap<>();
+        String blueprintText = cluster.getBlueprint().getBlueprintText();
+        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
+
+        for (HostGroup hg : hostGroupService.getByCluster(cluster.getId())) {
+            Set<String> hgComponents = new HashSet<>(processor.getImpalaComponentsInHostGroup(hg.getName()));
+            fillList(InstanceMetaData::getDiscoveryFQDN, result, hg, hgComponents);
+        }
+        return result;
     }
 
     public Map<String, List<String>> getComponentLocationByHostname(Cluster cluster, Collection<String> componentNames) {

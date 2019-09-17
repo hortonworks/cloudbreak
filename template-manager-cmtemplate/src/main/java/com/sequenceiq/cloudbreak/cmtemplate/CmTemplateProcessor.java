@@ -124,6 +124,11 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     @Override
+    public Set<String> getImpalaComponentsInHostGroup(String name) {
+        return getImpalaServiceComponentsByHostGroup().getOrDefault(name, Set.of());
+    }
+
+    @Override
     public BlueprintTextProcessor extendBlueprintHostGroupConfiguration(HostgroupConfigurations hostgroupConfigurations, boolean b) {
         throw new NotImplementedException("");
     }
@@ -150,7 +155,20 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     public Map<String, Set<ServiceComponent>> getServiceComponentsByHostGroup() {
         Map<String, ServiceComponent> rolesByRoleRef = mapRoleRefsToServiceComponents();
+        return collectServiceComponentsByHostGroup(rolesByRoleRef);
+    }
 
+    private Map<String, Set<String>> getImpalaServiceComponentsByHostGroup() {
+        Map<String, ServiceComponent> rolesByRoleRef = getImpalaServiceComponents();
+        return collectServiceComponentsByHostGroup(rolesByRoleRef).entrySet().stream()
+                .collect(toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().stream()
+                                .map(ServiceComponent::getComponent)
+                                .collect(toSet())));
+    }
+
+    private Map<String, Set<ServiceComponent>> collectServiceComponentsByHostGroup(Map<String, ServiceComponent> rolesByRoleRef) {
         Map<String, Set<ServiceComponent>> result = new HashMap<>();
         List<ApiClusterTemplateHostTemplate> hostTemplates = Optional.ofNullable(cmTemplate.getHostTemplates()).orElse(List.of());
         for (ApiClusterTemplateHostTemplate apiClusterTemplateHostTemplate : hostTemplates) {
@@ -405,11 +423,27 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     Map<String, ServiceComponent> mapRoleRefsToServiceComponents() {
         return Optional.ofNullable(cmTemplate.getServices()).orElse(List.of()).stream()
                 .filter(service -> service.getRoleConfigGroups() != null)
-                .flatMap(service -> service.getRoleConfigGroups().stream().map(rcg -> Pair.of(service.getServiceType(), rcg)))
+                .flatMap(service -> service.getRoleConfigGroups().stream()
+                .map(rcg -> Pair.of(service.getServiceType(), rcg)))
                 .collect(toMap(
                         pair -> pair.getRight().getRefName(),
-                        pair -> ServiceComponent.of(pair.getLeft(), pair.getRight().getRoleType())
-                ));
+                        pair -> ServiceComponent.of(pair.getLeft(), pair.getRight().getRoleType())));
+    }
+
+    Map<String, ServiceComponent> getImpalaServiceComponents() {
+        return Optional.ofNullable(cmTemplate.getServices()).orElse(List.of()).stream()
+                .filter(service -> service.getRoleConfigGroups() != null)
+                .flatMap(service -> service.getRoleConfigGroups().stream()
+                        .filter(filterNonCoordinatorImpalaRole())
+                        .map(rcg -> Pair.of(service.getServiceType(), rcg)))
+                .collect(toMap(
+                        pair -> pair.getRight().getRefName(),
+                        pair -> ServiceComponent.of(pair.getLeft(), pair.getRight().getRoleType())));
+    }
+
+    private Predicate<ApiClusterTemplateRoleConfigGroup> filterNonCoordinatorImpalaRole() {
+        return roleConfigGroup -> roleConfigGroup.getRoleType().equals("IMPALAD") &&
+                roleConfigGroup.getConfigs().stream().anyMatch(config -> config.getValue().equals("COORDINATOR_ONLY"));
     }
 
     public void removeDanglingVariableReferences() {
@@ -432,8 +466,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     private List<ApiClusterTemplateConfig> removeDanglingVariableReferences(
-            List<ApiClusterTemplateConfig> configs, Set<String> existingVariables, String refName
-    ) {
+            List<ApiClusterTemplateConfig> configs, Set<String> existingVariables, String refName) {
         if (configs != null) {
             for (Iterator<ApiClusterTemplateConfig> iter = configs.iterator(); iter.hasNext();) {
                 ApiClusterTemplateConfig config = iter.next();
@@ -456,7 +489,6 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                         .filter(rcg -> Objects.equals(roleType, rcg.getRoleType()))
                         .flatMap(rcg -> Optional.ofNullable(rcg.getConfigs()).orElseGet(List::of).stream())
                         .filter(config -> configName.equals(config.getName()))
-                        .findAny()
-        );
+                        .findAny());
     }
 }

@@ -266,6 +266,11 @@ public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
         return services;
     }
 
+    @Override
+    public Set<String> getImpalaComponentsInHostGroup(String name) {
+        return Collections.emptySet();
+    }
+
     public AmbariBlueprintTextProcessor extendBlueprintHostGroupConfiguration(HostgroupConfigurations hostGroupConfig, boolean forced) {
         ArrayNode configurations = getArrayFromNodeByNodeName(blueprint, CONFIGURATIONS_NODE);
         ArrayNode hostgroups = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);
