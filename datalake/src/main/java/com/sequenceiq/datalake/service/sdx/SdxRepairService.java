@@ -8,6 +8,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -95,8 +96,11 @@ public class SdxRepairService {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (ClientErrorException e) {
             String errorMessage = ClientErrorExceptionHandler.getErrorMessage(e);
-            LOGGER.info("Can not delete stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
-            throw new RuntimeException("Can not delete stack, client error happened on Cloudbreak side: " + errorMessage);
+            LOGGER.info("Can not repair stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
+            throw new RuntimeException("Can not repair stack, client error happened on Cloudbreak side: " + errorMessage);
+        } catch (WebApplicationException e) {
+            LOGGER.info("Can not repair stack {} from cloudbreak: {}", sdxCluster.getStackId(), e.getMessage(), e);
+            throw new RuntimeException("Can not repair stack, client error happened on Cloudbreak side: " + e.getMessage());
         }
     }
 
