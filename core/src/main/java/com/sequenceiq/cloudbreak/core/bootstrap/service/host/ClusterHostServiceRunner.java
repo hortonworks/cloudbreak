@@ -565,7 +565,13 @@ public class ClusterHostServiceRunner {
 
     private Map<String, List<String>> getServiceLocations(Cluster cluster) {
         List<String> serviceNames = ExposedService.getAllServiceName();
-        return componentLocator.getComponentLocation(cluster, serviceNames);
+        Map<String, List<String>> componentLocation = componentLocator.getComponentLocation(cluster, serviceNames);
+        if (componentLocation.containsKey(ExposedService.IMPALA.getServiceName())) {
+            Map<String, List<String>> impalaLocations = componentLocator.getImpalaComponentServiceLocation(cluster);
+            List<String> locations = impalaLocations.values().stream().flatMap(List::stream).collect(Collectors.toList());
+            componentLocation.replace(ExposedService.IMPALA.getServiceName(), locations);
+        }
+        return componentLocation;
     }
 
     private List<String> getSingleRangerFqdn(String primaryGatewayFqdn, List<String> rangerLocations) {

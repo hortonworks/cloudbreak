@@ -47,6 +47,8 @@ public interface BlueprintTextProcessor {
 
     Set<String> getComponentsInHostGroup(String name);
 
+    Set<String> getImpalaComponentsInHostGroup(String name);
+
     Map<String, InstanceCount> getCardinalityByHostGroup();
 
     GatewayRecommendation recommendGateway();
