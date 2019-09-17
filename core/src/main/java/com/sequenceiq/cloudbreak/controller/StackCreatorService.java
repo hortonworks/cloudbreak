@@ -37,9 +37,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
-import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -69,6 +66,9 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
+import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -227,12 +227,11 @@ public class StackCreatorService {
 
                 LOGGER.info("Get image catalog for stack {}.", stackName);
                 StatedImage imgFromCatalog = getImageCatalog(imgFromCatalogFuture);
-
                 Stack newStack = stackService.create(stack, platformString, imgFromCatalog, user, workspace);
 
                 try {
                     LOGGER.info("Create cluster enity in the database with name {}.", stackName);
-                    createClusterIfNeed(user, workspace, stackRequest, newStack, stackName, blueprint);
+                    createClusterIfNeed(user, stackRequest, newStack, stackName, blueprint);
                 } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
@@ -303,7 +302,7 @@ public class StackCreatorService {
         return stack;
     }
 
-    private void createClusterIfNeed(User user, Workspace workspace, StackV4Request stackRequest, Stack stack, String stackName,
+    private void createClusterIfNeed(User user, StackV4Request stackRequest, Stack stack, String stackName,
             Blueprint blueprint) throws CloudbreakImageNotFoundException, IOException, TransactionExecutionException {
         if (stackRequest.getCluster() != null) {
             long start = System.currentTimeMillis();

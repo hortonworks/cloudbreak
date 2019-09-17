@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.model.catalog;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -33,6 +36,10 @@ public class Image {
 
     private final Map<String, String> packageVersions;
 
+    private final List<List<String>> preWarmParcels;
+
+    private final List<String> preWarmCsd;
+
     @JsonCreator
     public Image(
             @JsonProperty(value = "date", required = true) String date,
@@ -44,7 +51,9 @@ public class Image {
             @JsonProperty(value = "images", required = true) Map<String, Map<String, String>> imageSetsByProvider,
             @JsonProperty("stack-details") StackDetails stackDetails,
             @JsonProperty("os_type") String osType,
-            @JsonProperty("package-versions") Map<String, String> packageVersions) {
+            @JsonProperty("package-versions") Map<String, String> packageVersions,
+            @JsonProperty("pre_warm_parcels") List<List<String>> preWarmParcels,
+            @JsonProperty("pre_warm_csd") List<String> preWarmCsd) {
         this.date = date;
         this.description = description;
         this.os = os;
@@ -55,6 +64,8 @@ public class Image {
         this.stackDetails = stackDetails;
         this.osType = osType;
         this.packageVersions = packageVersions;
+        this.preWarmParcels = preWarmParcels == null ? Collections.emptyList() : preWarmParcels;
+        this.preWarmCsd = preWarmCsd == null ? Collections.emptyList() : preWarmCsd;
     }
 
     public String getDate() {
@@ -109,6 +120,14 @@ public class Image {
         return stackDetails != null && stackDetails.getRepo() != null && stackDetails.getRepo().getStack() != null;
     }
 
+    public List<List<String>> getPreWarmParcels() {
+        return preWarmParcels;
+    }
+
+    public List<String> getPreWarmCsd() {
+        return preWarmCsd;
+    }
+
     @Override
     public String toString() {
         return "Image{"
@@ -120,6 +139,8 @@ public class Image {
                 + ", version='" + version + '\''
                 + ", default='" + defaultImage + '\''
                 + ", packageVersions='" + packageVersions + '\''
+                + ", preWarmParcels='" + preWarmParcels.stream().flatMap(Collection::stream).collect(Collectors.joining(", ")) + '\''
+                + ", preWarmCsd='" + String.join(", ", preWarmCsd) + '\''
                 + '}';
     }
 

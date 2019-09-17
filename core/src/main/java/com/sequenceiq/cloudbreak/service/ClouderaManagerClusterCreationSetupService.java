@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,8 +71,9 @@ public class ClouderaManagerClusterCreationSetupService {
             cmRepoConfig = cluster.getComponents().stream().
                     filter(component -> ComponentType.CM_REPO_DETAILS.equals(component.getComponentType())).findFirst().orElse(null);
         }
-        Optional<List<ClouderaManagerProductV4Request>> products = Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getProducts);
-        if (products.isEmpty() || products.get().isEmpty()) {
+        List<ClouderaManagerProductV4Request> products = Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getProducts)
+                .orElse(Collections.emptyList());
+        if (products.isEmpty()) {
             List<ClusterComponent> cdhProductRepoConfig = determineCdhRepoConfig(cluster, stackCdhRepoConfig, stackImageComponent, blueprintCdhVersion);
             components.addAll(cdhProductRepoConfig);
         }

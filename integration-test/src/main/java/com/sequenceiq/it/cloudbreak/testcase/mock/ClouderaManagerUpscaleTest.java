@@ -224,10 +224,11 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
     }
 
     private ApiParcelList getMockedApiParcelList() {
+        String stage = parcelStageResponses.empty() ? "ACTIVATED" : parcelStageResponses.pop();
         ApiParcel apiParcel = new ApiParcel()
                 .product(parcel.getProduct())
                 .version(parcel.getVersion())
-                .stage(parcelStageResponses.pop());
+                .stage(stage);
         return new ApiParcelList().items(List.of(apiParcel));
     }
 
