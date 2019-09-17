@@ -1,8 +1,8 @@
 {
-  "description": "CDP 1.1 Operational Database with Apache HBase (custom)",
+  "description": "CDP 1.1 Operational Database with Apache HBase",
   "blueprint": {
-    "cdhVersion": "7.1.0",
-    "displayName": "opdb-custom",
+    "cdhVersion": "7.0.1",
+    "displayName": "opdb",
     "services": [
       {
         "refName": "zookeeper",
@@ -11,6 +11,16 @@
           {
             "refName": "zookeeper-SERVER-BASE",
             "roleType": "SERVER",
+            "configs": [
+              {
+                "name": "zookeeper_server_java_heapsize",
+                "value": "8589934592"
+              },
+              {
+                "name": "maxClientCnxns",
+                "value": "200"
+              }
+            ],
             "base": true
           }
         ]
@@ -70,6 +80,12 @@
           {
             "refName": "hbase-MASTER-BASE",
             "roleType": "MASTER",
+            "configs": [
+              {
+                "name": "hbase_master_java_heapsize",
+                "value": "4294967296"
+              }
+            ],
             "base": true
           },
           {
@@ -82,8 +98,36 @@
             "roleType": "REGIONSERVER",
             "configs": [
               {
+                "name": "hbase_regionserver_java_heapsize",
+                "value": "17179869184"
+              },
+              {
+                "name": "hbase_bucketcache_ioengine",
+                "value": "offheap"
+              },
+              {
+                "name": "hbase_regionserver_global_memstore_upperLimit",
+                "value": "0.25"
+              },
+              {
+                "name": "hfile_block_cache_size",
+                "value": "0.12"
+              },
+              {
+                "name": "hbase_bucketcache_size",
+                "value": "12288"
+              },
+              {
+                "name": "hbase_regionserver_handler_count",
+                "value": "60"
+              },
+              {
                 "name": "hbase_regionserver_maxlogs",
                 "value": "100"
+              },
+              {
+                "name": "hbase_hregion_memstore_block_multiplier",
+                "value": "4"
               }
             ],
             "base": true

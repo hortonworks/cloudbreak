@@ -1,7 +1,7 @@
 {
   "description": "CDP 1.1 Data Science template with Spark and Hive",
   "blueprint": {
-    "cdhVersion": "7.1.0",
+    "cdhVersion": "7.0.1",
     "displayName": "datascience",
     "services": [
       {
