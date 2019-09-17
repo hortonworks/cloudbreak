@@ -272,4 +272,15 @@
     {%- endif %}
     {%- endif %}
 
+    {% if 'SMM-API' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SMM-API' in exposed -%}
+    <service>
+        <role>SMM-API</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['SMM-API'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SMM-API'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
 </topology>
