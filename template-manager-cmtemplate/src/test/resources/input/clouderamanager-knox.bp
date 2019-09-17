@@ -224,7 +224,10 @@
           "roleType": "IMPALAD",
           "base": true,
           "displayName": null,
-          "configs": null
+          "configs" : [ {
+            "name" : "impalad_specialization",
+            "value" : "COORDINATOR_ONLY"
+          } ]
         },
         {
           "refName": "impala-STATESTORE-BASE",

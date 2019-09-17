@@ -386,11 +386,18 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     Map<String, ServiceComponent> mapRoleRefsToServiceComponents() {
         return Optional.ofNullable(cmTemplate.getServices()).orElse(List.of()).stream()
                 .filter(service -> service.getRoleConfigGroups() != null)
-                .flatMap(service -> service.getRoleConfigGroups().stream().map(rcg -> Pair.of(service.getServiceType(), rcg)))
+                .flatMap(service -> service.getRoleConfigGroups().stream()
+                .filter(filterNonCoordinatorImpalaRole())
+                .map(rcg -> Pair.of(service.getServiceType(), rcg)))
                 .collect(toMap(
                         pair -> pair.getRight().getRefName(),
                         pair -> ServiceComponent.of(pair.getLeft(), pair.getRight().getRoleType())
                 ));
+    }
+
+    private Predicate<ApiClusterTemplateRoleConfigGroup> filterNonCoordinatorImpalaRole() {
+        return roleConfigGroup -> !(roleConfigGroup.getRoleType().equals("IMPALAD") &&
+                roleConfigGroup.getConfigs().stream().noneMatch(config -> config.getValue().equals("COORDINATOR_ONLY")));
     }
 
     public void removeDanglingVariableReferences() {

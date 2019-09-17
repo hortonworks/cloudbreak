@@ -206,6 +206,10 @@
         {
           "refName": "impala-IMPALAD-BASE",
           "roleType": "IMPALAD",
+          "configs" : [ {
+            "name" : "impalad_specialization",
+            "value" : "COORDINATOR_ONLY"
+          } ],
           "base": true
         },
         {
