@@ -159,13 +159,13 @@ cb:
   blueprint:
     cm:
       defaults: >
-                CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-710;
-                CDP 1.1 - Data Engineering HA: Apache Spark, Apache Livy, Apache Zeppelin=cdp-data-engineering-ha-710;
-                CDP 1.1 - Data Mart: Apache Impala, Hue=cdp-data-mart-710;
-                CDP 1.1 - Operational Database: Apache HBase=cdp-opdb-710;
-                CDP 1.1 - Operational Database: Apache HBase (Custom)=cdp-opdb-custom-710;
-                CDP 1.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-710;
-                CDP 1.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-710;
+                CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-701;
+                CDP 1.1 - Data Engineering HA: Apache Spark, Apache Livy, Apache Zeppelin=cdp-data-engineering-ha-701;
+                CDP 1.1 - Data Mart: Apache Impala, Hue=cdp-data-mart-701;
+                CDP 1.1 - Operational Database: Apache HBase=cdp-opdb-701;
+                CDP 1.1 - Operational Database: Apache HBase (Custom)=cdp-opdb-custom-701;
+                CDP 1.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-701;
+                CDP 1.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-701;
 
     ambari:
       defaults:
@@ -280,12 +280,12 @@ cb:
             baseurl: https://archive.cloudera.com/cm6/6.2.0/redhat7/yum/
             gpgkey: https://archive.cloudera.com/cm6/6.2.0/redhat7/yum/RPM-GPG-KEY-cloudera
       7.0:
-        version: 7.x.0-1425569
+        version: 7.0.1-1440373
         repo:
           redhat7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1425569/cm7/7.x.0/redhat7/yum/
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1440373/cm7/7.0.1/redhat7/yum/
           centos7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1425569/cm7/7.x.0/redhat7/yum/
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1440373/cm7/7.0.1/redhat7/yum/
 
   cdh:
     entries:
@@ -318,14 +318,14 @@ cb:
             repoid: CDH-7.0.0
             redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1423385/cdh/7.x/parcels/
             centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1423385/cdh/7.x/parcels/
-      "[7.1.0]":
-        version: 7.1.0-1.cdh7.1.0.p0.1425634
+      "[7.0.1]":
+        version: 7.0.1-1.cdh7.0.1.p0.1439930
         minCM: 7.0
         repo:
           stack:
-            repoid: CDH-7.1.0
-            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1425634/cdh/7.x/parcels/
-            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1425634/cdh/7.x/parcels/
+            repoid: CDH-7.0.1
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1439930/cdh/7.x/parcels/
+            centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1439930/cdh/7.x/parcels/
 
 
   ambari:

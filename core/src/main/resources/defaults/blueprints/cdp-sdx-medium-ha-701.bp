@@ -4,7 +4,7 @@
   },
   "description": "CDP 1.1 SDX-HA template with Atlas, HMS, Ranger and other services they are dependent on. Services like HDFS, HBASE have HA",
   "blueprint": {
-    "cdhVersion": "7.1.0",
+    "cdhVersion": "7.0.1",
     "displayName": "ha-datalake",
     "hostTemplates": [
       {
