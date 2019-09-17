@@ -87,7 +87,8 @@ public class MaintenanceModeValidationServiceTest {
         cluster.setStack(stack);
 
         image = new Image("asdf", "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
-                Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions);
+                Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions,
+                Collections.emptyList(), Collections.emptyList());
 
         statedImage = StatedImage.statedImage(image, "url", "name");
         warnings = new ArrayList<Warning>();

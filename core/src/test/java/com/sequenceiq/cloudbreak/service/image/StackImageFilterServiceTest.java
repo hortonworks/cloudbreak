@@ -236,7 +236,8 @@ public class StackImageFilterServiceTest {
     private Image getImage(String os, String id) {
         Map<String, Map<String, String>> imageSetsByProvider = new HashMap<>();
         imageSetsByProvider.put(PROVIDER_AWS, null);
-        return new Image("", "", os, id, "", Collections.emptyMap(), imageSetsByProvider, null, "", Collections.emptyMap());
+        return new Image("", "", os, id, "", Collections.emptyMap(), imageSetsByProvider, null, "", Collections.emptyMap(),
+                Collections.emptyList(), Collections.emptyList());
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image getImage(String id) {
