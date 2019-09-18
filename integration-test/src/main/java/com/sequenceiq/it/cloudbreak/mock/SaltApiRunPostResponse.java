@@ -194,11 +194,11 @@ public class SaltApiRunPostResponse extends ITResponse {
     }
 
     protected Object grainRemove(String body) throws IOException {
-        Matcher targetMatcher = Pattern.compile(".*(tgt=S%40([^&]+)).*").matcher(body);
+        Matcher targetMatcher = Pattern.compile(".*(tgt=([^&]+)).*").matcher(body);
         Matcher argMatcher = Pattern.compile(".*(arg=([^&]+)).*(arg=([^&]+)).*").matcher(body);
         Map<String, JsonNode> hostMap = new HashMap<>();
         if (targetMatcher.matches() && argMatcher.matches()) {
-            String[] targets = targetMatcher.group(2).split("\\+or\\+S%40");
+            String[] targets = targetMatcher.group(2).split("%2C");
             String key = argMatcher.group(2);
             String value = argMatcher.group(4);
             for (String target : targets) {
@@ -206,18 +206,18 @@ public class SaltApiRunPostResponse extends ITResponse {
                     Multimap<String, String> grainsForTarget = grains.get(target);
                     grainsForTarget.remove(key, value);
                 }
-                hostMap.put("host-" + target.replace(".", "-"), objectMapper.valueToTree(grains.get(target).entries()));
+                hostMap.put(target, objectMapper.valueToTree(grains.get(target).entries()));
             }
         }
         return createGrainsModificationResponse(hostMap);
     }
 
     protected Object grainAppend(String body) throws IOException {
-        Matcher targetMatcher = Pattern.compile(".*(tgt=S%40([^&]+)).*").matcher(body);
+        Matcher targetMatcher = Pattern.compile(".*(tgt=([^&]+)).*").matcher(body);
         Matcher argMatcher = Pattern.compile(".*(arg=([^&]+)).*(arg=([^&]+)).*").matcher(body);
         Map<String, JsonNode> hostMap = new HashMap<>();
         if (targetMatcher.matches() && argMatcher.matches()) {
-            String[] targets = targetMatcher.group(2).split("\\+or\\+S%40");
+            String[] targets = targetMatcher.group(2).split("%2C");
             String key = argMatcher.group(2);
             String value = argMatcher.group(4);
             for (String target : targets) {
@@ -229,7 +229,7 @@ public class SaltApiRunPostResponse extends ITResponse {
                     Multimap<String, String> grainsForTarget = grains.get(target);
                     grainsForTarget.put(key, value);
                 }
-                hostMap.put("host-" + target.replace(".", "-"), objectMapper.valueToTree(grains.get(target).values()));
+                hostMap.put(target, objectMapper.valueToTree(grains.get(target).values()));
             }
         }
         return createGrainsModificationResponse(hostMap);
@@ -245,11 +245,11 @@ public class SaltApiRunPostResponse extends ITResponse {
             CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
-                if (grains.containsKey(privateIp)) {
+                String hostname = "host-" + privateIp.replace(".", "-") + ".example.com";
+                if (grains.containsKey(hostname)) {
                     Matcher argMatcher = Pattern.compile(".*(arg=([^&]+)).*").matcher(body);
                     if (argMatcher.matches()) {
-                        hostMap.put("host-" + privateIp.replace(".", "-") + ".example.com",
-                                objectMapper.valueToTree(grains.get(privateIp).get(argMatcher.group(2))));
+                        hostMap.put(hostname, objectMapper.valueToTree(grains.get(hostname).get(argMatcher.group(2))));
                     }
                 }
             }
