@@ -46,7 +46,7 @@ integrationtest:
 
   # aws parameters
   aws:
-    defaultBlueprintName: "CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     region: eu-west-1
     location: eu-west-1
     availabilityZone: eu-west-1a
@@ -70,7 +70,7 @@ integrationtest:
       redhat7:
         imageId: ee68297d-59b3-4cb0-419a-f9e00763bdb4
         blueprints:
-          - "CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+          - "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     cloudstorage:
       s3:
         instanceProfile:
@@ -79,7 +79,7 @@ integrationtest:
 
   # azure parameters
   azure:
-    defaultBlueprintName: "CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     availabilityZone:
     region: West Europe
     location: West Europe
@@ -108,7 +108,7 @@ integrationtest:
 
   # gcp parameters
   gcp:
-    defaultBlueprintName: "CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
@@ -128,7 +128,7 @@ integrationtest:
 
   # openstack parameters
   openstack:
-    defaultBlueprintName: "CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     availabilityZone: nova
     region: RegionOne
     location: Texas
@@ -147,7 +147,7 @@ integrationtest:
 
   # yarn parameters
   yarn:
-    defaultBlueprintName: "CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     availabilityZone:
     region: default
     location: Frankfurt
