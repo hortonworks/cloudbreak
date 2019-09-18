@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.SdkBaseException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
@@ -47,11 +48,6 @@ public class AwsCredentialConnector implements CredentialConnector {
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
-        try {
-            awsCredentialVerifier.validateAws(new AwsCredentialView(credential));
-        } catch (AwsCredentialVerificationException e) {
-            return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(e.getMessage()), e.getMessage());
-        }
         LOGGER.debug("Create credential: {}", credential);
         AwsCredentialView awsCredential = new AwsCredentialView(credential);
         String roleArn = awsCredential.getRoleArn();
@@ -106,6 +102,13 @@ public class AwsCredentialConnector implements CredentialConnector {
             LOGGER.warn(errorMessage, e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
+        try {
+            awsCredentialVerifier.validateAws(awsCredential);
+        } catch (AwsPermissionMissingException e) {
+            return new CloudCredentialStatus(cloudCredential, CredentialStatus.PERMISSIONS_MISSING, new Exception(e.getMessage()), e.getMessage());
+        } catch (SdkBaseException e) {
+            LOGGER.error("AWS credential validation failed", e);
+        }
         return new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
     }
 
@@ -126,6 +129,11 @@ public class AwsCredentialConnector implements CredentialConnector {
                     awsCredential.getAccessKey(), e.getMessage());
             LOGGER.warn(errorMessage, e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
+        }
+        try {
+            awsCredentialVerifier.validateAws(awsCredential);
+        } catch (AwsPermissionMissingException e) {
+            return new CloudCredentialStatus(cloudCredential, CredentialStatus.PERMISSIONS_MISSING, new Exception(e.getMessage()), e.getMessage());
         }
         return new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
     }

@@ -33,7 +33,7 @@ public class AwsCredentialVerifier {
     @Inject
     private AwsClient awsClient;
 
-    public void validateAws(AwsCredentialView awsCredential) throws AwsCredentialVerificationException {
+    public void validateAws(AwsCredentialView awsCredential) throws AwsPermissionMissingException {
         String policies = new String(Base64.getDecoder().decode(awsPlatformParameters.getCredentialPoliciesJson()));
         try {
             Map<String, List<String>> resourcesWithActions = getRequiredActions(policies);
@@ -60,7 +60,7 @@ public class AwsCredentialVerifier {
                         .forEach(failedActionList::add);
             }
             if (!failedActionList.isEmpty()) {
-                throw new AwsCredentialVerificationException("You don't have permission for these actions which are required: " + failedActionList);
+                throw new AwsPermissionMissingException("You don't have permission for these actions which are required: " + failedActionList);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Can not parse aws policy json", e);
