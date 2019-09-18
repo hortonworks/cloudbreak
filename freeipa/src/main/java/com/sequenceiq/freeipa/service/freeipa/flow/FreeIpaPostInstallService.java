@@ -1,7 +1,9 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -73,8 +75,9 @@ public class FreeIpaPostInstallService {
             freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);
         }
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
+        // TODO: Get the Request Id from header
         userService.synchronizeUsers(
-            threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
+            threadBasedUserCrnProvider.getAccountId(), threadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of(), Optional.of(UUID.randomUUID().toString()));
 
     }
 }

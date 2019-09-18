@@ -10,6 +10,8 @@ public class FmsUser {
 
     private String lastName;
 
+    private WorkloadCredential creds;
+
     public String getName() {
         return name;
     }
@@ -33,6 +35,15 @@ public class FmsUser {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
+    public WorkloadCredential getCreds() {
+        return creds;
+    }
+
+    public void setCreds(WorkloadCredential creds) {
+        this.creds = creds;
+    }
+
 
     @Override
     public boolean equals(Object o) {

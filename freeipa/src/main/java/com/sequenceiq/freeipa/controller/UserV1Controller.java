@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.controller;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -59,8 +61,9 @@ public class UserV1Controller implements UserV1Endpoint {
             default:
                 throw new BadRequestException(String.format("UserCrn %s is not of resoure type USER or MACHINE_USER", userCrn));
         }
+        // TODO: Get the Request Id from header
         return checkOperationRejected(userService.synchronizeUsers(accountId, userCrn, environmentCrnFilter,
-                userCrnFilter, machineUserCrnFilter));
+                                                                   userCrnFilter, machineUserCrnFilter, Optional.of(UUID.randomUUID().toString())));
     }
 
     @Override
@@ -69,8 +72,9 @@ public class UserV1Controller implements UserV1Endpoint {
         String accountId = threadBaseUserCrnProvider.getAccountId();
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
+        // TODO: Get the Request Id from header
         return checkOperationRejected(userService.synchronizeUsers(accountId, userCrn, nullToEmpty(request.getEnvironments()),
-                nullToEmpty(request.getUsers()), nullToEmpty(request.getMachineUsers())));
+                                                                   nullToEmpty(request.getUsers()), nullToEmpty(request.getMachineUsers()), Optional.of(UUID.randomUUID().toString())));
     }
 
     @Override
