@@ -181,7 +181,7 @@ public class TlsSetupService {
                     return fullQualifiedDomainName;
                 }
             } catch (Exception e) {
-                LOGGER.info("Cannot generate fqdn.", e.getMessage(), e);
+                LOGGER.info("Cannot generate fqdn: {}", e.getMessage(), e);
             }
         }
         return null;
