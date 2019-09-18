@@ -68,10 +68,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         String stackStatus = getStackStatus(stackResponse);
         if (stackStatus.startsWith(DELETE_STATUSES_PREFIX)) {
             clusterService.removeById(autoscaleClusterId);
-            long deletedFailedNodeRecords = failedNodeRepository.deleteByClusterId(autoscaleClusterId);
-            LOGGER.debug("Delete cluster {} due to failing update attempts and Cloudbreak stack status. {} deleted failed node records.",
-                    autoscaleClusterId,
-                    deletedFailedNodeRecords);
+            LOGGER.debug("Delete cluster {} due to failing update attempts and Cloudbreak stack status.", autoscaleClusterId);
             return;
         }
         Integer failed = updateFailures.get(autoscaleClusterId);

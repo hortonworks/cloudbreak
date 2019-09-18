@@ -20,13 +20,14 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
-import com.sequenceiq.periscope.domain.ClusterManager;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterManager;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.repository.ClusterRepository;
+import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
@@ -37,6 +38,9 @@ public class ClusterService {
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private FailedNodeRepository failedNodeRepository;
 
     @Inject
     private SecurityConfigRepository securityConfigRepository;
@@ -125,6 +129,7 @@ public class ClusterService {
 
     public void removeById(Long clusterId) {
         Cluster cluster = findById(clusterId);
+        failedNodeRepository.deleteByClusterId(clusterId);
         clusterRepository.delete(cluster);
         calculateClusterStateMetrics();
     }
