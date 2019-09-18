@@ -137,7 +137,9 @@ public class EnvCreationActions {
                             environment.setStatusReason(payload.getException().getMessage());
                             environment.setStatus(EnvironmentStatus.CREATE_FAILED);
                             environmentService.save(environment);
-                            notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FAILED, context.getFlowTriggerUserCrn());
+                            EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
+                            SimpleEnvironmentResponse simpleResponse = environmentApiConverter.dtoToSimpleResponse(environmentDto);
+                            notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FAILED, simpleResponse, context.getFlowTriggerUserCrn());
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_CREATION_FAILED_STATE");
