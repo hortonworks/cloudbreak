@@ -40,7 +40,7 @@
                 <value>/tmp/sp-metadata.xml</value>
             </param>
 
-            {% if salt['pillar.get']('gateway:userfacingcert_configured') is defined and salt['pillar.get']('gateway:userfacingcert_configured') == True %}
+            {% if salt['pillar.get']('gateway:userfacingfqdn') is defined and salt['pillar.get']('gateway:userfacingfqdn')|length > 1 %}
             <param>
                 <name>pac4j.callbackUrl</name>
                 <value>https://{{ salt['pillar.get']('gateway:userfacingfqdn') }}:8443/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso</value>
