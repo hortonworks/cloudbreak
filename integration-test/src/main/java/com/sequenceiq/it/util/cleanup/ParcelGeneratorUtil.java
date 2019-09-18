@@ -16,12 +16,16 @@ public class ParcelGeneratorUtil {
      * @return a minimal configuration of a CDH ApiParcel instance
      */
     public ApiParcel getActivatedCDHParcel() {
+        return getActivatedCDHParcelWithVersion("someParcelVersion");
+    }
+
+    public ApiParcel getActivatedCDHParcelWithVersion(String version) {
         ApiParcel parcel = new ApiParcel();
         ApiParcelState state = new ApiParcelState();
         state.setCount(new BigDecimal(0));
         parcel.setProduct("CDH");
         parcel.setState(state);
-        parcel.setVersion("7.0.1-1.cdh7.0.1.p0.1443705");
+        parcel.setVersion(version);
         parcel.setStage("ACTIVATED");
         return parcel;
     }
