@@ -14,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.cloudera.api.swagger.model.ApiParcel;
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
@@ -28,12 +29,16 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.SetupCmScalingMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.util.cleanup.ParcelGeneratorUtil;
 import com.sequenceiq.it.util.cleanup.ParcelMockActivatorUtil;
 
 public class RecipeClusterTest extends AbstractIntegrationTest {
@@ -62,6 +67,9 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
 
     @Inject
     private ParcelMockActivatorUtil parcelMockActivatorUtil;
+
+    @Inject
+    private ParcelGeneratorUtil parcelGeneratorUtil;
 
     @Test(dataProvider = "dataProviderForNonPreTerminationRecipeTypes")
     public void testRecipeNotPreTerminationHasGotHighStateOnCluster(
@@ -180,8 +188,9 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             when = "upscaling cluster",
             then = "the post recipe should run on the new nodes as well")
     public void testWhenClusterGetUpScaledThenPostClusterInstallRecipeShouldBeExecuted(MockedTestContext testContext) {
+        ApiParcel parcel = parcelGeneratorUtil.getActivatedCDHParcel();
         String clusterName = resourcePropertyProvider.getName();
-        parcelMockActivatorUtil.mockActivateParcels(testContext, clusterName);
+        parcelMockActivatorUtil.mockActivateParcels(testContext, clusterName, parcel);
         String recipeName = resourcePropertyProvider().getName();
         SetupCmScalingMock mock = new SetupCmScalingMock();
         mock.configure(testContext, 3, 4, 4);
@@ -195,9 +204,18 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .withHostGroup(HostGroupType.WORKER)
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
+                .given("cmpkey", ClouderaManagerProductTestDto.class)
+                .withParcel("someParcel")
+                .withName(parcel.getProduct())
+                .withVersion(parcel.getVersion())
+                .given("cmanager", ClouderaManagerTestDto.class)
+                .withClouderaManagerProduct("cmpkey")
+                .given("cmpclusterkey", ClusterTestDto.class)
+                .withClouderaManager("cmanager")
                 .given(StackTestDto.class)
                 .withName(clusterName)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
+                .withCluster("cmpclusterkey")
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
@@ -213,9 +231,10 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             then = "the post recipe should not run on the new nodes because those recipe not configured on the upscaled hostgroup")
     public void testWhenRecipeProvidedToHostGroupAndAnotherHostGroupGetUpScaledThenThereIsNoFurtherRecipeExecutionOnTheNewNodeBesideTheDefaultOnes(
             MockedTestContext testContext) {
+        ApiParcel parcel = parcelGeneratorUtil.getActivatedCDHParcel();
         String recipeName = resourcePropertyProvider().getName();
         String clusterName = resourcePropertyProvider.getName();
-        parcelMockActivatorUtil.mockActivateParcels(testContext, clusterName);
+        parcelMockActivatorUtil.mockActivateParcel(testContext, clusterName, parcel);
         SetupCmScalingMock mock = new SetupCmScalingMock();
         mock.configure(testContext, 3, 4, 4);
         testContext
@@ -228,9 +247,18 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .withHostGroup(HostGroupType.COMPUTE)
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
+                .given("cmpkey", ClouderaManagerProductTestDto.class)
+                .withParcel("someParcel")
+                .withName(parcel.getProduct())
+                .withVersion(parcel.getVersion())
+                .given("cmanager", ClouderaManagerTestDto.class)
+                .withClouderaManagerProduct("cmpkey")
+                .given("cmpclusterkey", ClusterTestDto.class)
+                .withClouderaManager("cmanager")
                 .given(StackTestDto.class)
                 .withName(clusterName)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
+                .withCluster("cmpclusterkey")
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
