@@ -82,6 +82,9 @@ public class ServiceProviderCredentialAdapter {
                 throw new CredentialVerificationException(message + res.getCloudCredentialStatus().getStatusReason(),
                         res.getCloudCredentialStatus().getException());
             }
+            if (CredentialStatus.PERMISSIONS_MISSING.equals(res.getCloudCredentialStatus().getStatus())) {
+                credential.setVerificationStatusText(res.getCloudCredentialStatus().getStatusReason());
+            }
             CloudCredential cloudCredentialResponse = res.getCloudCredentialStatus().getCloudCredential();
             mergeCloudProviderParameters(credential, cloudCredentialResponse, Collections.singleton(SMART_SENSE_ID));
         } catch (InterruptedException e) {

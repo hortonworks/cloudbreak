@@ -34,7 +34,6 @@ import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
-import com.sequenceiq.environment.credential.exception.CredentialVerificationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.notification.NotificationSender;
@@ -97,12 +96,7 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public Credential verify(Credential credential) {
-        try {
-            credentialAdapter.verify(credential, credential.getAccountId());
-            credential.setVerificationStatusText(null);
-        } catch (CredentialVerificationException credentialVerificationException) {
-            credential.setVerificationStatusText(credentialVerificationException.getMessage());
-        }
+        credentialAdapter.verify(credential, credential.getAccountId());
         return repository.save(credential);
     }
 

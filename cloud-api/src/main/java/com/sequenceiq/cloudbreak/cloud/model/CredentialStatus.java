@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 public enum CredentialStatus {
 
     CREATED(),
+    PERMISSIONS_MISSING(),
     VERIFIED(),
     DELETED(),
     UPDATED(),
