@@ -46,6 +46,7 @@ public class DriverWithConnectivity implements Driver {
         Properties connectionProps = new Properties();
         connectionProps.setProperty("user", databaseServerConfig.getConnectionUserName());
         connectionProps.setProperty("password", databaseServerConfig.getConnectionPassword());
+        connectionProps.setProperty("sslmode", "allow");
 
         return connect(connectionUrl, connectionProps);
     }

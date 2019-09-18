@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.handler;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -19,6 +21,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateDatabaseServerRegistrationSuccess;
+import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 
 import reactor.bus.Event;
@@ -40,6 +43,9 @@ public class UpdateDatabaseServerRegistrationHandler implements EventHandler<Upd
     @Inject
     private CloudResourceHelper cloudResourceHelper;
 
+    @Inject
+    private UserGeneratorService userGeneratorService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(UpdateDatabaseServerRegistrationRequest.class);
@@ -60,9 +66,13 @@ public class UpdateDatabaseServerRegistrationHandler implements EventHandler<Upd
                     .orElseThrow(() -> new IllegalStateException("DB hostname not found for allocated database."));
             CloudResource dbPort = cloudResourceHelper.getResourceTypeFromList(ResourceType.RDS_PORT, dbResources)
                     .orElseThrow(() -> new IllegalStateException("DB port not found for allocated database."));
+            CloudPlatform cloudPlatform = CloudPlatform.valueOf(dbStack.getCloudPlatform());
 
-            dbServerConfig.setHost(dbHostname.getName());
+            String dbHostnameString = dbHostname.getName();
+            dbServerConfig.setHost(dbHostnameString);
             dbServerConfig.setPort(Integer.parseInt(dbPort.getName()));
+            String updatedUserName = userGeneratorService.updateUserName(dbServerConfig.getConnectionUserName(), Optional.of(cloudPlatform), dbHostnameString);
+            dbServerConfig.setConnectionUserName(updatedUserName);
 
             databaseServerConfigService.update(dbServerConfig);
             response = new UpdateDatabaseServerRegistrationSuccess(request.getResourceId());
