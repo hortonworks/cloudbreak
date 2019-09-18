@@ -60,12 +60,13 @@ public class CleanupService {
                 removeDnsEntries(client, request, cleanupResponse, freeIpa.getDomain());
                 removeVaultEntries(client, request, cleanupResponse, stack.getEnvironmentCrn());
             }
-            if (!CollectionUtils.isEmpty(request.getUsers())) {
-                removeUsers(client, request, cleanupResponse);
-            }
-            if (!CollectionUtils.isEmpty(request.getRoles())) {
-                removeRoles(client, request, cleanupResponse);
-            }
+//             TODO: https://jira.cloudera.com/browse/CB-3581
+//            if (!CollectionUtils.isEmpty(request.getUsers())) {
+//                removeUsers(client, request, cleanupResponse);
+//            }
+//            if (!CollectionUtils.isEmpty(request.getRoles())) {
+//                removeRoles(client, request, cleanupResponse);
+//            }
         }
         return cleanupResponse;
     }
@@ -176,8 +177,7 @@ public class CleanupService {
         });
     }
 
-    private void removeVaultEntries(FreeIpaClient client, CleanupRequest request, CleanupResponse response, String environmentCrn)
-            throws FreeIpaClientException {
+    private void removeVaultEntries(FreeIpaClient client, CleanupRequest request, CleanupResponse response, String environmentCrn) {
         for (String host : request.getHosts()) {
             if (!response.getHostCleanupFailed().containsKey(host)) {
                 try {
