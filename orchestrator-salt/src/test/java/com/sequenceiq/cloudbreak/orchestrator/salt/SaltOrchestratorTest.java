@@ -190,18 +190,18 @@ public class SaltOrchestratorTest {
                 .withArguments(eq(pillarSave), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
 
         // verify ambari server role
-        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getPrivateAddress())),
+        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getHostname())),
                 eq(targets), eq("ambari_server_install"));
         // verify ambari server role
-        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getPrivateAddress())),
+        verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(Sets.newHashSet(gatewayConfig.getHostname())),
                 eq(targets), eq("ambari_server"));
 
         // verify ambari agent role
-        Set<String> allNodes = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+        Set<String> allNodes = targets.stream().map(Node::getHostname).collect(Collectors.toSet());
         verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(allNodes),
                 eq(targets), eq("ambari_agent_install"));
         // verify ambari agent role
-        allNodes = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+        allNodes = targets.stream().map(Node::getHostname).collect(Collectors.toSet());
         verifyNew(GrainAddRunner.class, times(1)).withArguments(eq(allNodes),
                 eq(targets), eq("ambari_agent"));
         // verify two role command (amabari server, ambari agent)

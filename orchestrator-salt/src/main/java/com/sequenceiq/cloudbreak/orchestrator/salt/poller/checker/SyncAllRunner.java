@@ -10,15 +10,15 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public class SyncAllRunner extends BaseSaltJobRunner {
 
-    public SyncAllRunner(Set<String> target, Set<Node> allNode) {
-        super(target, allNode);
+    public SyncAllRunner(Set<String> targetHostnames, Set<Node> allNode) {
+        super(targetHostnames, allNode);
     }
 
     @Override
     public String submit(SaltConnector saltConnector) {
         ApplyResponse grainsResult = SaltStates.syncAll(saltConnector);
-        Set<String> strings = collectMissingNodes(collectNodes(grainsResult));
-        setTarget(strings);
+        Set<String> strings = collectMissingHostnames(collectSucceededNodes(grainsResult));
+        setTargetHostnames(strings);
         return strings.toString();
     }
 

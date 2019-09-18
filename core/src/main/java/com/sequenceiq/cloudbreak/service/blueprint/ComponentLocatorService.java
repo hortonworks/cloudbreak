@@ -40,8 +40,8 @@ public class ComponentLocatorService {
         return getComponentAttribute(cluster, componentNames, InstanceMetaData::getDiscoveryFQDN);
     }
 
-    public Map<String, List<String>> getComponentLocationByPrivateIp(Cluster cluster, Collection<String> componentNames) {
-        return getComponentAttribute(cluster, componentNames, InstanceMetaData::getPrivateIp);
+    public Map<String, List<String>> getComponentLocationByHostname(Cluster cluster, Collection<String> componentNames) {
+        return getComponentAttribute(cluster, componentNames, InstanceMetaData::getDiscoveryFQDN);
     }
 
     public Map<String, List<String>> getComponentLocation(Long clusterId, BlueprintTextProcessor blueprintTextProcessor,

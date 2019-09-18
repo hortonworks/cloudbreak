@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -84,6 +85,7 @@ public class SaltConnector implements Closeable {
         }
     }
 
+    @Measure(SaltConnector.class)
     public GenericResponse health() {
         Response response = saltTarget.path(SaltEndpoint.BOOT_HEALTH.getContextPath()).request().get();
         GenericResponse responseEntity = JaxRSUtil.response(response, GenericResponse.class);
@@ -91,6 +93,7 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
+    @Measure(SaltConnector.class)
     public GenericResponses pillar(Iterable<String> targets, Pillar pillar) {
         Response distributeResponse = saltTarget.path(SaltEndpoint.BOOT_PILLAR_DISTRIBUTE.getContextPath()).request()
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
@@ -112,6 +115,7 @@ public class SaltConnector implements Closeable {
         return JaxRSUtil.response(distributeResponse, GenericResponses.class);
     }
 
+    @Measure(SaltConnector.class)
     public GenericResponses action(SaltAction saltAction) {
         Response response = saltTarget.path(SaltEndpoint.BOOT_ACTION_DISTRIBUTE.getContextPath()).request()
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(saltAction).getBytes()))
@@ -125,6 +129,7 @@ public class SaltConnector implements Closeable {
         return run(null, fun, clientType, clazz, arg);
     }
 
+    @Measure(SaltConnector.class)
     public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
         Form form = new Form();
         form = addAuth(form)
@@ -157,6 +162,7 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
+    @Measure(SaltConnector.class)
     public <T> T wheel(String fun, Collection<String> match, Class<T> clazz) {
         Form form = new Form();
         form = addAuth(form)
@@ -173,6 +179,7 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
+    @Measure(SaltConnector.class)
     public GenericResponses upload(Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
         Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, content);
         if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
@@ -208,6 +215,7 @@ public class SaltConnector implements Closeable {
         }
     }
 
+    @Measure(SaltConnector.class)
     public Map<String, String> members(List<String> privateIps) throws CloudbreakOrchestratorFailedException {
         Map<String, List<String>> clients = singletonMap("clients", privateIps);
         Response response = saltTarget.path(BOOT_HOSTNAME_ENDPOINT.getContextPath()).request()

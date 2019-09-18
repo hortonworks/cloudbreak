@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound.CompoundType;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
@@ -29,21 +29,18 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
 
     private final String value;
 
-    private final CompoundType compoundType;
-
     private final boolean addGrain;
 
-    protected ModifyGrainBase(Set<String> target, Set<Node> allNode, String key, String value, CompoundType type, boolean addGrain) {
+    protected ModifyGrainBase(Set<String> target, Set<Node> allNode, String key, String value, boolean addGrain) {
         super(target, allNode);
         this.key = key;
         this.value = value;
-        compoundType = type;
         this.addGrain = addGrain;
     }
 
     @Override
     public String submit(SaltConnector saltConnector) throws SaltJobFailedException {
-        Compound target = new Compound(getTarget(), compoundType);
+        Target<String> target = new HostList(getTargetHostnames());
         LOGGER.info("Starting salt modify grain process. {}", this);
         ApplyResponse response = modifyGrain(saltConnector, target);
         Map<String, JsonNode> grains = SaltStates.getGrains(saltConnector, target, key);
@@ -51,12 +48,12 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
             LOGGER.info("Modify grain process failed. Starting to retry. {}", this);
             response = retryModification(saltConnector, target, response);
         }
-        Set<String> missingIps = collectMissingNodes(collectNodes(response));
-        setTarget(missingIps);
-        return missingIps.toString();
+        Set<String> missingHostnames = collectMissingHostnames(collectSucceededNodes(response));
+        setTargetHostnames(missingHostnames);
+        return missingHostnames.toString();
     }
 
-    private ApplyResponse retryModification(SaltConnector saltConnector, Compound target, ApplyResponse response) throws SaltJobFailedException {
+    private ApplyResponse retryModification(SaltConnector saltConnector, Target<String> target, ApplyResponse response) throws SaltJobFailedException {
         boolean modificationFailed = true;
         Map<String, JsonNode> grains = new HashMap<>();
         int retryCounter;
@@ -77,7 +74,7 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
         return response;
     }
 
-    private ApplyResponse modifyGrain(SaltConnector saltConnector, Compound target) {
+    private ApplyResponse modifyGrain(SaltConnector saltConnector, Target<String> target) {
         return addGrain ? SaltStates.addGrain(saltConnector, target, key, value)
                 : SaltStates.removeGrain(saltConnector, target, key, value);
     }
@@ -85,7 +82,7 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
     private boolean isModificationFailed(Map<String, JsonNode> grains) throws SaltJobFailedException {
         boolean modificationFailed = false;
         for (Node node : getAllNode()) {
-            if (getTarget().contains(node.getPrivateIp())) {
+            if (getTargetHostnames().contains(node.getHostname())) {
                 if (!grains.containsKey(node.getHostname())) {
                     throw new SaltJobFailedException("Can not find node in grains result. target="
                             + node.getHostname() + ", key=" + key + ", value=" + value);
@@ -121,7 +118,7 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
     private void checkFinalModification(Map<String, JsonNode> grains) throws SaltJobFailedException {
         final Map<String, JsonNode> finalGrains = new HashMap<>(grains);
         for (Node node : getAllNode()) {
-            if (getTarget().contains(node.getPrivateIp())) {
+            if (getTargetHostnames().contains(node.getHostname())) {
                 if (!finalGrains.containsKey(node.getHostname())) {
                     throw new SaltJobFailedException("Can not find node in grains result. target="
                             + node.getHostname() + ", key=" + key + ", value=" + value);
@@ -151,7 +148,6 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
         StringBuilder sb = new StringBuilder("ModifyGrainBase{");
         sb.append("key='").append(key).append('\'');
         sb.append(", value='").append(value).append('\'');
-        sb.append(", compoundType=").append(compoundType);
         sb.append(", addGrain=").append(addGrain);
         sb.append('}');
         return sb.toString();
