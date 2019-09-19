@@ -51,12 +51,14 @@ public class CreateCertificationTest {
         KeyPair keyPair = PkiUtil.generateKeypair();
         LOGGER.info("Key: \n{}", PkiUtil.convert(keyPair.getPrivate()));
         LOGGER.info("Pub: \n{}", PkiUtil.convert(keyPair.getPublic()));
+        String internalFQDN = "ip-10-97-110-78.cloudera.site";
         List<String> strings = certificateCreationService.create(actorCrn,
                 accountId,
                 "cluster-tb",
                 "env-tb",
                 false,
-                keyPair);
+                keyPair,
+                internalFQDN);
         LOGGER.info("CERT: \n" + String.join("\n", strings));
     }
 

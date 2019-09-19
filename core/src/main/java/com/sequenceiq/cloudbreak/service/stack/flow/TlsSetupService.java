@@ -115,8 +115,10 @@ public class TlsSetupService {
             }
         }
         try {
+            String internalFQDN = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
-            List<String> certs = certificateCreationService.create(userCrn, accountId, stack.getName(), environment.getName(), false, keyPair);
+            List<String> certs = certificateCreationService.create(userCrn, accountId, stack.getName(), environment.getName(), false, keyPair,
+                    internalFQDN);
             securityConfig.setUserFacingCert(String.join("", certs));
             securityConfigService.save(securityConfig);
             success = true;
