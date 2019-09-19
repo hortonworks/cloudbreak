@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -13,6 +14,8 @@ import com.sequenceiq.flow.domain.FlowChainLog;
 
 @Transactional(TxType.REQUIRED)
 public interface FlowChainLogRepository extends CrudRepository<FlowChainLog, Long> {
+
+    List<FlowChainLog> findByParentFlowChainIdOrderByCreatedDesc(String parentFlowChainId);
 
     Optional<FlowChainLog> findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId);
 

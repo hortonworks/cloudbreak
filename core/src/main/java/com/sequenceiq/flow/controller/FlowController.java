@@ -10,28 +10,33 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.BadRequestException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
+import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
-import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 @Controller
 public class FlowController implements FlowEndpoint {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowController.class);
+
     @Inject
     private FlowLogDBService flowLogDBService;
 
     @Inject
-    @Named("conversionService")
-    private ConversionService conversionService;
+    private FlowChainLogService flowChainLogService;
 
     @Inject
-    private ResourceIdProvider resourceIdProvider;
+    @Named("conversionService")
+    private ConversionService conversionService;
 
     @Override
     public FlowLogResponse getLastFlowById(String flowId) {
@@ -71,6 +76,13 @@ public class FlowController implements FlowEndpoint {
     public List<FlowLogResponse> getFlowLogsByResourceName(String resourceName) {
         checkState(!Crn.isCrn(resourceName));
         List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByResourceCrnOrName(resourceName);
+        return flowLogs.stream().map(flowLog -> conversionService.convert(flowLog, FlowLogResponse.class)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<FlowLogResponse> getFlowLogsByResourceNameAndChainId(String resourceName, String chainId) {
+        List<String> relatedChainIds = flowChainLogService.collectRelatedFlowChainIds(Lists.newArrayList(), chainId);
+        List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByResourceAndChainId(resourceName, relatedChainIds);
         return flowLogs.stream().map(flowLog -> conversionService.convert(flowLog, FlowLogResponse.class)).collect(Collectors.toList());
     }
 }
