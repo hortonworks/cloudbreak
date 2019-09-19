@@ -71,7 +71,7 @@ public class AzureNetworkConnector implements NetworkConnector {
             throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", networkRequest.getStackName(), e.getMessage()));
         }
         Map<String, Map> outputMap = (HashMap) templateDeployment.outputs();
-        String networkName = (String) outputMap.get(NETWORK_ID_KEY).get("value");
+        String networkName = cropId((String) outputMap.get(NETWORK_ID_KEY).get("value"));
         Set<CreatedSubnet> subnets = createSubnets(networkRequest.getSubnetCidrs().size(), outputMap, networkRequest.getRegion().value());
         return new CreatedCloudNetwork(networkRequest.getStackName(), networkName, subnets,
                 createProperties(resourceGroup.name(), networkRequest.getStackName()));
@@ -112,7 +112,7 @@ public class AzureNetworkConnector implements NetworkConnector {
         for (int i = 0; i < numberOfSubnets; i++) {
             if (outputMap.containsKey(SUBNET_ID_KEY + i)) {
                 CreatedSubnet createdSubnet = new CreatedSubnet();
-                createdSubnet.setSubnetId((String) outputMap.get(SUBNET_ID_KEY + i).get("value"));
+                createdSubnet.setSubnetId(cropId((String) outputMap.get(SUBNET_ID_KEY + i).get("value")));
                 createdSubnet.setCidr((String) outputMap.get(SUBNET_CIDR_KEY + i).get("value"));
                 createdSubnet.setAvailabilityZone(region);
                 createdSubnets.add(createdSubnet);
@@ -121,6 +121,15 @@ public class AzureNetworkConnector implements NetworkConnector {
             }
         }
         return createdSubnets;
+    }
+
+    private String cropId(String id) {
+        String result = id;
+        int loc = id.lastIndexOf("/");
+        if (loc > 0) {
+            result = id.substring(loc + 1);
+        }
+        return result;
     }
 
     private Map<String, Object> createProperties(String resourceGroupName, String stackName) {
