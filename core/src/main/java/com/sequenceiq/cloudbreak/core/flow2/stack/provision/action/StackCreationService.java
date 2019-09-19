@@ -192,19 +192,26 @@ public class StackCreationService {
         if (tlsSetupService.isCertGenerationEnabled() && stack.getCluster().getGateway() != null) {
             if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
                 boolean certGeneratedAndSaved = tlsSetupService.generateCertAndSaveForStack(stack);
-                if (!certGeneratedAndSaved) {
+                if (certGeneratedAndSaved) {
+                    updateDnsEntryForCluster(stack);
+                } else {
                     flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_GATEWAY_CERTIFICATE_CREATE_FAILED, CREATE_IN_PROGRESS.name());
                 }
             } else {
                 LOGGER.info("CERT is already generated for stack, we don't generate a new one");
-            }
-            String fqdn = tlsSetupService.updateDnsEntry(stack);
-            if (fqdn != null) {
-                stack.getCluster().setFqdn(fqdn);
-                clusterService.save(stack.getCluster());
+                updateDnsEntryForCluster(stack);
             }
         } else {
             LOGGER.info("Cert generation is disabled.");
+        }
+    }
+
+    private void updateDnsEntryForCluster(Stack stack) {
+        String fqdn = tlsSetupService.updateDnsEntry(stack);
+        if (fqdn != null) {
+            stack.getCluster().setFqdn(fqdn);
+            clusterService.save(stack.getCluster());
+            LOGGER.info("The '{}' domain name has been generated, registered through PEM service and saved for the cluster.", fqdn);
         }
     }
 
