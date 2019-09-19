@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -74,11 +72,11 @@ public class UserService {
     private SyncOperationToSyncOperationStatus syncOperationToSyncOperationStatus;
 
     public SyncOperationStatus synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
-                                                Set<String> userCrnFilter, Set<String> machineUserCrnFilter, Optional<String> requestId) {
+                                                Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
 
         validateParameters(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
-        LOGGER.debug("RequestId: {}, Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
-                     requestId, accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
+        LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
+                accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
 
         List<Stack> stacks = getStacks(accountId, environmentCrnFilter);
         LOGGER.debug("Found {} stacks", stacks.size());
@@ -95,7 +93,7 @@ public class UserService {
         if (syncOperation.getStatus() == SynchronizationStatus.RUNNING) {
             MDCBuilder.addFlowId(syncOperation.getOperationId());
             asyncTaskExecutor.submit(() -> asyncSynchronizeUsers(
-                syncOperation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, requestId));
+                syncOperation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter));
         }
 
         return syncOperationToSyncOperationStatus.convert(syncOperation);
@@ -103,11 +101,11 @@ public class UserService {
 
     private void asyncSynchronizeUsers(
         String operationId, String accountId, String actorCrn, List<Stack> stacks,
-        Set<String> userCrnFilter, Set<String> machineUserCrnFilter, Optional<String> requestId) {
+        Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
         try {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
             Map<String, UsersState> envToUmsStateMap = umsUsersStateProvider
-                .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter, requestId);
+                .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter);
 
             Set<String> userIdFilter = Set.of();
 

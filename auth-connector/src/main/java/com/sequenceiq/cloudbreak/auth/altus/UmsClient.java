@@ -465,7 +465,7 @@ public class UmsClient {
         checkNotNull(userCrn);
         return newStub(requestId).getActorWorkloadCredentials(
             GetActorWorkloadCredentialsRequest.newBuilder()
-                .setActorCrn(Crn.fromString(userCrn).getAccountId())
+                .setActorCrn(userCrn)
                 .build()
         );
     }

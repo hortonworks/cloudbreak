@@ -24,6 +24,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleA
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
@@ -34,40 +36,38 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 public class UmsUsersStateProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsUsersStateProvider.class);
 
+    private static ThreadLocal<String> requestIdThreadLocal = new ThreadLocal<>();
+
     @Inject
     private GrpcUmsClient grpcUmsClient;
 
     public Map<String, UsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
-                                                            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestId) {
+                                                            Set<String> userCrns, Set<String> machineUserCrns) {
         try {
-            final Optional<String> requestIdNewIfEmpty;
-            if (!requestId.isPresent()) {
-                requestIdNewIfEmpty = Optional.of(UUID.randomUUID().toString());
-                LOGGER.debug("Environment Crns: {}, no requestId found. Setting request id to new UUID [{}]", environmentCrns, requestIdNewIfEmpty);
+            final Optional<String> requestIdOptional;
+            if (!Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString())).isPresent()) {
+                requestIdOptional = Optional.of(UUID.randomUUID().toString());
+                LOGGER.debug("No requestId found. Setting request id to new UUID [{}]", requestIdOptional);
             } else {
-                requestIdNewIfEmpty = requestId;
+                requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
             }
-            LOGGER.debug("Getting UMS state for environments {} with requestId {}", environmentCrns, requestIdNewIfEmpty);
+            requestIdThreadLocal.set(requestIdOptional.get());
+            LOGGER.debug("Getting UMS state for environments {} with requestId {}", environmentCrns, requestIdOptional);
 
             Map<String, UsersState> envUsersStateMap = new HashMap<>();
 
-            List<User> users = userCrns.isEmpty() ? grpcUmsClient.listAllUsers(actorCrn, accountId, requestIdNewIfEmpty)
-                : grpcUmsClient.listUsers(actorCrn, accountId, List.copyOf(userCrns), requestIdNewIfEmpty);
+            List<User> users = userCrns.isEmpty() ? grpcUmsClient.listAllUsers(actorCrn, accountId, requestIdOptional)
+                : grpcUmsClient.listUsers(actorCrn, accountId, List.copyOf(userCrns), requestIdOptional);
 
-            List<MachineUser> machineUsers = machineUserCrns.isEmpty() ? grpcUmsClient.listAllMachineUsers(actorCrn, accountId, requestIdNewIfEmpty)
-                : grpcUmsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns), requestIdNewIfEmpty);
-
-
-//            // get users hashed password
-//            Map<String, WorkloadCredential> usersWorkloadCredentialMap = new HashMap<>();
-//            populateWorkloadCredentialMap(actorCrn, usersWorkloadCredentialMap, users, machineUsers, requestId);
+            List<MachineUser> machineUsers = machineUserCrns.isEmpty() ? grpcUmsClient.listAllMachineUsers(actorCrn, accountId, requestIdOptional)
+                : grpcUmsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns), requestIdOptional);
 
 
-            Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdNewIfEmpty).stream()
+            Map<String, FmsGroup> crnToFmsGroup = grpcUmsClient.listGroups(actorCrn, accountId, List.of(), requestIdOptional).stream()
                     .collect(Collectors.toMap(Group::getCrn, this::umsGroupToGroup));
 
             environmentCrns.stream().forEach(environmentCrn -> {
-                UsersState.Builder userStateBuilder = new UsersState.Builder();
+                Builder userStateBuilder = new Builder();
 
                 crnToFmsGroup.values().stream().forEach(userStateBuilder::addGroup);
 
@@ -78,12 +78,12 @@ public class UmsUsersStateProvider {
 
                 users.stream().forEach(u -> {
                     FmsUser fmsUser = umsUserToUser(u);
-                    handleUser(userStateBuilder, crnToFmsGroup, actorCrn, u.getCrn(), fmsUser, environmentCrn, requestIdNewIfEmpty);
+                    handleUser(userStateBuilder, crnToFmsGroup, actorCrn, u.getCrn(), fmsUser, environmentCrn, requestIdOptional);
                 });
 
                 machineUsers.stream().forEach(mu -> {
                     FmsUser fmsUser = umsMachineUserToUser(mu);
-                    handleUser(userStateBuilder, crnToFmsGroup, actorCrn, mu.getCrn(), fmsUser, environmentCrn, requestIdNewIfEmpty);
+                    handleUser(userStateBuilder, crnToFmsGroup, actorCrn, mu.getCrn(), fmsUser, environmentCrn, requestIdOptional);
                 });
 
                 envUsersStateMap.put(environmentCrn, userStateBuilder.build());
@@ -100,28 +100,6 @@ public class UmsUsersStateProvider {
         String hashedPassword = response.getPasswordHash();
         List<ActorKerberosKey> keys = response.getKerberosKeysList();
         return new WorkloadCredential(hashedPassword, keys);
-    }
-
-    private void populateWorkloadCredentialMap(String actorCrn, Map<String, WorkloadCredential> usersWorkloadCredentialMap, List<User> users, List<MachineUser> machineUsers, Optional<String> requestId) {
-
-        users.forEach(u -> {
-            GetActorWorkloadCredentialsResponse response = grpcUmsClient.getActorWorkloadCredentials(actorCrn, u.getCrn(), requestId);
-            String hashedPassword = response.getPasswordHash();
-            List<ActorKerberosKey> keys = response.getKerberosKeysList();
-            WorkloadCredential userCreds = new WorkloadCredential(hashedPassword, keys);
-
-            usersWorkloadCredentialMap.put(u.getCrn(), userCreds);
-        });
-
-        machineUsers.forEach(mu -> {
-            GetActorWorkloadCredentialsResponse response = grpcUmsClient.getActorWorkloadCredentials(actorCrn, mu.getCrn(), requestId);
-            String hashedPassword = response.getPasswordHash();
-            List<ActorKerberosKey> keys = response.getKerberosKeysList();
-            WorkloadCredential userCreds = new WorkloadCredential(hashedPassword, keys);
-
-            usersWorkloadCredentialMap.put(mu.getCrn(), userCreds);
-        });
-
     }
 
     private boolean isEnvironmentUser(String enviromentCrn, GetRightsResponse rightsResponse) {
@@ -195,8 +173,7 @@ public class UmsUsersStateProvider {
             }
 
             // get credentials
-            WorkloadCredential creds = getCredentials(actorCrn, memberCrn, requestId);
-            fmsUser.setCreds(creds);
+            userStateBuilder.addWorkloadCredentials(fmsUser.getName(), getCredentials(actorCrn, memberCrn, requestId));
         }
     }
 

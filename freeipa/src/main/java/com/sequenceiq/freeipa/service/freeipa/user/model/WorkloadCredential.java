@@ -10,8 +10,7 @@ public class WorkloadCredential {
 
     private List<ActorKerberosKey> keys;
 
-
-    public  WorkloadCredential(String hashedPassword, List<ActorKerberosKey> keys){
+    public WorkloadCredential(String hashedPassword, List<ActorKerberosKey> keys) {
         this.hashedPassword = hashedPassword;
         this.keys = keys;
     }

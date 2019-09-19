@@ -2,7 +2,9 @@ package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
@@ -15,10 +17,14 @@ public class UsersState {
 
     private Multimap<String, String> groupMembership;
 
-    public UsersState(Set<FmsGroup> groups, Set<FmsUser> users, Multimap<String, String> groupMembership) {
+    private Map<String, WorkloadCredential> usersWorkloadCredentialMap;
+
+    public UsersState(
+        Set<FmsGroup> groups, Set<FmsUser> users, Multimap<String, String> groupMembership, Map<String, WorkloadCredential> usersWorkloadCredentialMap) {
         this.groups = requireNonNull(groups);
         this.users = requireNonNull(users);
         this.groupMembership = requireNonNull(groupMembership);
+        this.usersWorkloadCredentialMap = usersWorkloadCredentialMap;
     }
 
     public Set<FmsGroup> getGroups() {
@@ -49,6 +55,8 @@ public class UsersState {
 
         private Multimap<String, String> groupMembership = HashMultimap.create();
 
+        private Map<String, WorkloadCredential> workloadCredentialMap = new HashMap<>();
+
         public void addGroup(FmsGroup fmsGroup) {
             fmsGroups.add(fmsGroup);
         }
@@ -61,8 +69,12 @@ public class UsersState {
             groupMembership.put(group, user);
         }
 
+        public void addWorkloadCredentials(String userName, WorkloadCredential creds) {
+            workloadCredentialMap.put(userName, creds);
+        }
+
         public UsersState build() {
-            return new UsersState(fmsGroups, fmsUsers, groupMembership);
+            return new UsersState(fmsGroups, fmsUsers, groupMembership, workloadCredentialMap);
         }
     }
 }
