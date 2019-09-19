@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -275,7 +276,7 @@ public class StackCreatorService {
         Map<String, Set<String>> hostGroupRecipeNamePairs = new LinkedHashMap<>(instanceGroupV4Requests.size());
 
         instanceGroupV4Requests.forEach(instanceGroupV4Request ->
-                hostGroupRecipeNamePairs.put(instanceGroupV4Request.getName(), instanceGroupV4Request.getRecipeNames()));
+                hostGroupRecipeNamePairs.put(instanceGroupV4Request.getName(), getRecipeNamesIfExists(instanceGroupV4Request)));
 
         hostGroupRecipeNamePairs.forEach((instanceGroupName, recipeNamesForInstanceGroup) -> {
             Set<String> missingRecipes = collectMissingRecipes(recipeNamesForInstanceGroup, workspaceId);
@@ -293,6 +294,10 @@ public class StackCreatorService {
             }
         });
         return missingRecipes;
+    }
+
+    private Set<String> getRecipeNamesIfExists(final InstanceGroupV4Request instanceGroupV4Request) {
+        return Optional.ofNullable(instanceGroupV4Request.getRecipeNames()).orElse(new HashSet<>());
     }
 
     private void throwBadRequestIfHaveMissingRecipe(final Set<String> missingRecipes, final String instanceGroupName) {

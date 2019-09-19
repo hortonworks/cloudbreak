@@ -177,6 +177,20 @@ class StackCreatorServiceRecipeValidationTest {
         verify(recipeService, times(1)).get(any(RecipeAccessDto.class), anyLong());
     }
 
+    @Test
+    void voidTestIfRecipeDoesNotExistInInstanceGroupV4RequestThenEverythingShouldGoFine() throws TransactionExecutionException {
+        StackV4Request request = new StackV4Request();
+        request.setInstanceGroups(List.of(getInstanceGroupWithRecipe(INSTANCE_GROUP_MASTER, null),
+                getInstanceGroupWithRecipe(INSTANCE_GROUP_COMPUTE, null)));
+
+        when(converterUtil.convert(request, Stack.class)).thenReturn(TestUtil.stack());
+        when(transactionService.required(any())).thenReturn(TestUtil.stack());
+
+        underTest.createStack(user, workspace, request);
+
+        verify(recipeService, times(0)).get(any(RecipeAccessDto.class), anyLong());
+    }
+
     private Answer<Recipe> withNotFoundExceptionIfRecipeNameMatchesOtherwiseGiveRecipe(String recipeNameForMatch) {
         return invocation -> {
             if (recipeNameForMatch.equals(((RecipeAccessDto) invocation.getArgument(0)).getName())) {
