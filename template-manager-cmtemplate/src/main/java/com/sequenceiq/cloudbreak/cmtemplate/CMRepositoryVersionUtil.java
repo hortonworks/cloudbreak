@@ -11,8 +11,6 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_6_4_0 = () -> "6.4.0";
 
-    public static final Versioned CLOUDERAMANAGER_VERSION_7_0_1 = () -> "7.0.1";
-
     private CMRepositoryVersionUtil() {
     }
 
@@ -31,9 +29,5 @@ public class CMRepositoryVersionUtil {
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(currentVersion, limitedAPIVersion) > -1;
-    }
-
-    public static boolean isVersionNewerOrEqualThanLimited(String currentVersion, Versioned limitedAPIVersion) {
-        return isVersionNewerOrEqualThanLimited(() -> currentVersion, limitedAPIVersion);
     }
 }

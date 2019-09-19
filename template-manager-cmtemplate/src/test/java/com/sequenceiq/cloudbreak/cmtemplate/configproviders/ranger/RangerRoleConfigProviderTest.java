@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfigBuilder;
 import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -18,16 +17,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
-import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RangerRoleConfigProviderTest {
@@ -54,61 +50,13 @@ public class RangerRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetRangerAdminDefaultPolicyGroups() {
-        validateGetRangerAdminDefaultPolicyGroups("6.9.0", 5);
-        validateGetRangerAdminDefaultPolicyGroups("6.x.0", 5);
-        validateGetRangerAdminDefaultPolicyGroups("7.0.0", 5);
-        validateGetRangerAdminDefaultPolicyGroups("", 5);
-
-        validateGetRangerAdminDefaultPolicyGroups("7.x.0", 6);
-        validateGetRangerAdminDefaultPolicyGroups("7.0.1", 6);
-        validateGetRangerAdminDefaultPolicyGroups("7.1.0", 6);
-        validateGetRangerAdminDefaultPolicyGroups("7.2.0", 6);
-        validateGetRangerAdminDefaultPolicyGroups("7.3.1", 6);
-        validateGetRangerAdminDefaultPolicyGroups("8.1.0", 6);
-    }
-
-    private void validateGetRangerAdminDefaultPolicyGroups(String cdhVersion, int expectedConfigCount) {
-        HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
-        HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
-
-        String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        cmTemplateProcessor.setCdhVersion(cdhVersion);
-
-        String ldapAdminGroup = "cdh_test";
-        LdapView ldapView = ldapConfigBuilder()
-                .withDirectoryType(DirectoryType.LDAP)
-                .withAdminGroup(ldapAdminGroup)
-                .build();
-
-        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
-                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER)))
-                .withLdapConfig(ldapView)
-                .build();
-
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
-        List<ApiClusterTemplateConfig> masterRangerAdmin = roleConfigs.get("ranger-RANGER_ADMIN-BASE");
-        assertEquals(expectedConfigCount, masterRangerAdmin.size());
-
-        if (expectedConfigCount == 6) {
-            assertEquals("ranger.default.policy.groups", masterRangerAdmin.get(5).getName());
-            assertEquals(ldapAdminGroup, masterRangerAdmin.get(5).getValue());
-        }
-    }
-
-    @Test
     public void testGetRoleConfigsWithSingleRolesPerHostGroup() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
+        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker))
+                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER))).build();
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker))
-                .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
-                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER)))
-                .build();
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
 
@@ -133,6 +81,7 @@ public class RangerRoleConfigProviderTest {
 
         assertEquals("ranger_database_password", masterRangerAdmin.get(4).getName());
         assertEquals("iamsoosecure", masterRangerAdmin.get(4).getValue());
+
     }
 
     @Test
