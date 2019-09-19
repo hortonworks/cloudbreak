@@ -68,8 +68,10 @@ public class CredentialPrerequisiteService {
     public Credential decorateCredential(Credential credential) {
         CredentialAttributes credentialAttributes = getCredentialAttributes(credential);
         if (isRoleArnSet(credentialAttributes)) {
-            credentialAttributes.getAws().getRoleBased().setExternalId(userPreferencesService.getExternalIdForCurrentUser());
-            saveNewAttributesToCredential(credential, credentialAttributes);
+            if (credentialAttributes.getAws().getRoleBased().getExternalId() == null) {
+                credentialAttributes.getAws().getRoleBased().setExternalId(userPreferencesService.getExternalIdForCurrentUser());
+                saveNewAttributesToCredential(credential, credentialAttributes);
+            }
         }
         return credential;
     }
