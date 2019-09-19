@@ -2,7 +2,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "Deploys a Hortonworks Data Platform cluster on AWS.",
+  "Description" : "Deploys a Cloudera Data Platform cluster on AWS.",
 
   "Parameters" : {
 

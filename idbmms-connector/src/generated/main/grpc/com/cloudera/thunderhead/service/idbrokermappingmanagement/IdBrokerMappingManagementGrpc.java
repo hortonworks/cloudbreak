@@ -170,13 +170,13 @@ public final class IdBrokerMappingManagementGrpc {
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(
-                  "idbrokermappingmanagement.IdBrokerMappingManagement", "deleteMappings"))
+                  "idbrokermappingmanagement.IdBrokerMappingManagement", "DeleteMappings"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new IdBrokerMappingManagementMethodDescriptorSupplier("deleteMappings"))
+                  .setSchemaDescriptor(new IdBrokerMappingManagementMethodDescriptorSupplier("DeleteMappings"))
                   .build();
           }
         }
