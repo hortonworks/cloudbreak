@@ -31,7 +31,7 @@
           }
         ],
         "rootVolume": {
-          "size": 30
+          "size": 50
         }
       },
       "nodeCount": 1,
@@ -51,7 +51,7 @@
           }
         ],
         "rootVolume": {
-          "size": 30
+          "size": 50
         }
       },
       "nodeCount": 1,
