@@ -31,6 +31,9 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.RegionUtils;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
+import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
@@ -65,6 +68,7 @@ import com.amazonaws.services.kms.model.ListAliasesRequest;
 import com.amazonaws.services.kms.model.ListAliasesResult;
 import com.amazonaws.services.kms.model.ListKeysRequest;
 import com.amazonaws.services.kms.model.ListKeysResult;
+import com.amazonaws.util.StringUtils;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -103,6 +107,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecifications;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSshKeyFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceVpcFilterView;
@@ -658,5 +664,28 @@ public class AwsPlatformResources implements PlatformResources {
             throw new CloudConnectorException(queryFailedMessage + e.getMessage(), e);
         }
         return cloudEncryptionKeys;
+    }
+
+    @Override
+    public CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        List<CloudNoSqlTable> noSqlTables = new ArrayList<>();
+        AmazonDynamoDB dynamoDbClient = getAmazonDynamoDB(cloudCredential, region);
+        ListTablesRequest listTablesRequest = new ListTablesRequest();
+        ListTablesResult listTablesResult = null;
+        boolean first = true;
+        while (first || !StringUtils.isNullOrEmpty(listTablesResult.getLastEvaluatedTableName())) {
+            first = false;
+            listTablesRequest.setExclusiveStartTableName(listTablesResult == null ? null : listTablesResult.getLastEvaluatedTableName());
+            listTablesResult = dynamoDbClient.listTables(listTablesRequest);
+            List<String> partialTableNames = listTablesResult.getTableNames();
+            List<CloudNoSqlTable> partialResult = partialTableNames.stream().map(CloudNoSqlTable::new).collect(Collectors.toList());
+            noSqlTables.addAll(partialResult);
+        }
+        return new CloudNoSqlTables(noSqlTables);
+    }
+
+    private AmazonDynamoDB getAmazonDynamoDB(CloudCredential cloudCredential, Region region) {
+        AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
+        return awsClient.createDynamoDbClient(awsCredentialView, region.value());
     }
 }

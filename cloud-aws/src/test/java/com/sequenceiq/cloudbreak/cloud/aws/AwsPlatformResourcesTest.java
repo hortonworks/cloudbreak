@@ -4,11 +4,13 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
@@ -26,6 +28,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
+import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AvailabilityZone;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
@@ -54,6 +59,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -97,6 +104,9 @@ public class AwsPlatformResourcesTest {
 
     @Mock
     private AvailabilityZone availabilityZone;
+
+    @Mock
+    private AmazonDynamoDB amazonDynamoDB;
 
     @Before
     public void setUp() {
@@ -281,5 +291,21 @@ public class AwsPlatformResourcesTest {
         aliasListEntry.setAliasName(String.format("%s", i));
         aliasListEntry.setTargetKeyId(String.format("%s", i));
         return aliasListEntry;
+    }
+
+    @Test
+    public void noSqlTables() {
+        when(awsClient.createDynamoDbClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonDynamoDB);
+        when(amazonDynamoDB.listTables(any(ListTablesRequest.class))).thenReturn(
+                new ListTablesResult().withTableNames("a", "b").withLastEvaluatedTableName("b"),
+                new ListTablesResult().withTableNames("c", "d")
+        );
+
+        CloudNoSqlTables cloudNoSqlTables = underTest.noSqlTables(new CloudCredential(), region("region"), null);
+        assertThat(cloudNoSqlTables.getCloudNoSqlTables()).hasSameElementsAs(List.of(
+                new CloudNoSqlTable("a"),
+                new CloudNoSqlTable("b"),
+                new CloudNoSqlTable("c"),
+                new CloudNoSqlTable("d")));
     }
 }

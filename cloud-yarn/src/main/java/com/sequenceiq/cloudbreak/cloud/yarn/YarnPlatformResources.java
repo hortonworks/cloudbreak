@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,8 +32,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
-import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @Service
 public class YarnPlatformResources implements PlatformResources {
@@ -111,5 +113,11 @@ public class YarnPlatformResources implements PlatformResources {
     @Override
     public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudEncryptionKeys(new HashSet<>());
+    }
+
+    @Override
+    public CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        LOGGER.warn("NoSQL table list is not supported on 'YARN'");
+        return new CloudNoSqlTables(new ArrayList<>());
     }
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.amazonaws.retry.PredefinedRetryPolicies.DEFAULT_RETRY_CONDITION;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -13,12 +14,17 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.RegionUtils;
+import com.amazonaws.retry.PredefinedBackoffStrategies.EqualJitterBackoffStrategy;
+import com.amazonaws.retry.RetryPolicy;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
@@ -136,6 +142,21 @@ public class AwsClient {
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(getAwsStaticCredentialsProvider(awsCredential))
                 .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
+                .build();
+    }
+
+    public AmazonDynamoDB createDynamoDbClient(AwsCredentialView awsCredential, String region) {
+        final int baseDelay = 100;
+        final int maxDelay = 2000;
+        final int maxRetries = 30;
+        EqualJitterBackoffStrategy backoffStrategy = new EqualJitterBackoffStrategy(baseDelay, maxDelay);
+        ClientConfiguration clientConfig = new ClientConfiguration()
+                .withRetryPolicy(new RetryPolicy(DEFAULT_RETRY_CONDITION, backoffStrategy, maxRetries, true))
+                .withMaxErrorRetry(maxRetries);
+        return AmazonDynamoDBClientBuilder.standard()
+                .withCredentials(getAwsStaticCredentialsProvider(awsCredential))
+                .withRegion(region)
+                .withClientConfiguration(clientConfig)
                 .build();
     }
 

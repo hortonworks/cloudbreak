@@ -25,8 +25,17 @@ dependencies {
     compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
     compile group: 'com.google.code.findbugs',      name: 'jsr305',                         version: '3.0.1'
 
+    testCompile group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
     testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-    testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
+    testCompile group: 'org.junit.vintage',         name: 'junit-vintage-engine',           version: junitJupiterVersion
+    testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
+    testRuntime group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+}
+
+test{
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter', 'junit-vintage'
+    }
 }

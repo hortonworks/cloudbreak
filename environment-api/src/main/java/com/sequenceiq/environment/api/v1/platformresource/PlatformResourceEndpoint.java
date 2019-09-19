@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.platformresource;
 
 import static com.sequenceiq.environment.api.doc.ModelDescriptions.CONNECTOR_NOTES;
 
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -16,6 +17,7 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformEncrypti
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGatewaysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNetworksResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNoSqlTablesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSecurityGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSshKeysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
@@ -151,4 +153,16 @@ public interface PlatformResourceEndpoint {
     @ApiOperation(value = OpDescription.GET_TAG_SPECIFICATIONS, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
             nickname = "getTagSpecifications")
     TagSpecificationsResponse getTagSpecifications();
+
+    @GET
+    @Path("nosql_tables")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OpDescription.GET_NOSQL_TABLES, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
+            nickname = "getNoSqlTables")
+    PlatformNoSqlTablesResponse getNoSqlTables(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") @NotEmpty String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 }
