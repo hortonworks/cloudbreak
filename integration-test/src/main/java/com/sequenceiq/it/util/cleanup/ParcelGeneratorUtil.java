@@ -21,7 +21,7 @@ public class ParcelGeneratorUtil {
         state.setCount(new BigDecimal(0));
         parcel.setProduct("CDH");
         parcel.setState(state);
-        parcel.setVersion("7.0.1-1.cdh7.0.1.p0.1439930");
+        parcel.setVersion("7.0.1-1.cdh7.0.1.p0.1443705");
         parcel.setStage("ACTIVATED");
         return parcel;
     }
