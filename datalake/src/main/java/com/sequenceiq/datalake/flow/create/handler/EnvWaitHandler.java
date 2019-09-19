@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.create.handler;
 
+import static com.sequenceiq.datalake.service.sdx.EnvironmentService.DURATION_IN_MINUTES_FOR_ENV_POLLING;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -52,7 +54,8 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
             response = new SdxCreateFailedEvent(sdxId, userId, requestId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Env poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, pollerStoppedException);
+            response = new SdxCreateFailedEvent(sdxId, userId, requestId,
+                    new PollerStoppedException("Env wait timed out after " + DURATION_IN_MINUTES_FOR_ENV_POLLING + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Env polling failed for sdx: {}", sdxId, exception);
             response = new SdxCreateFailedEvent(sdxId, userId, requestId, exception);

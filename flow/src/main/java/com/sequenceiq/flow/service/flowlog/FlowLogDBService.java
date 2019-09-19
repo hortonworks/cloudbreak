@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonWriter;
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -214,5 +215,10 @@ public class FlowLogDBService implements FlowLogService {
     public List<FlowLog> getFlowLogsByResourceCrnOrName(String resource) {
         Long resourceId = getResourceIdByCrnOrName(resource);
         return findAllByResourceIdOrderByCreatedDesc(resourceId);
+    }
+
+    public List<FlowLog> getFlowLogsByResourceAndChainId(String resource, List<String> relatedChainIds) {
+        LOGGER.info("Getting flow logs by these chain ids: {}", Joiner.on(",").join(relatedChainIds));
+        return getFlowLogsByResourceCrnOrName(resource).stream().filter(log -> relatedChainIds.contains(log.getFlowChainId())).collect(Collectors.toList());
     }
 }

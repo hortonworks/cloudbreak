@@ -89,7 +89,7 @@ public class AwsCredentialVerifierTest {
         try {
             awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential));
             fail("It shoud throw verification exception");
-        } catch (AwsCredentialVerificationException e) {
+        } catch (AwsPermissionMissingException e) {
             Assert.assertThat(e.getMessage(), CoreMatchers.containsString("denied_action1"));
             Assert.assertThat(e.getMessage(), CoreMatchers.containsString("denied_action2"));
             Assert.assertThat(e.getMessage(), CoreMatchers.containsString("denied_action3"));
@@ -105,7 +105,7 @@ public class AwsCredentialVerifierTest {
     }
 
     @Test
-    public void verifyCredentialTest() throws IOException, AwsCredentialVerificationException {
+    public void verifyCredentialTest() throws IOException, AwsPermissionMissingException {
         URL url = Resources.getResource("definitions/aws-cb-policy.json");
         String awsCbPolicy = Resources.toString(url, Charsets.UTF_8);
         when(awsPlatformParameters.getCredentialPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsCbPolicy.getBytes()));

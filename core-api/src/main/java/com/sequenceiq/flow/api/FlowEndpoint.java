@@ -60,4 +60,11 @@ public interface FlowEndpoint {
     @ApiOperation(value = "Get flow logs for resource by resource CRN", produces = "application/json", notes = "Flow log operations",
             nickname = "getFlowLogsByResourceCrn")
     List<FlowLogResponse> getFlowLogsByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
+
+    @GET
+    @Path("/resource/name/{resourceName}/{chainId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Get flow logs for resource name and chain id", produces = "application/json", notes = "Flow log operations",
+            nickname = "getFlowLogsByResourceNameAndChainId")
+    List<FlowLogResponse> getFlowLogsByResourceNameAndChainId(@PathParam("resourceName") String resourceName, @PathParam("chainId") String chainId);
 }

@@ -28,11 +28,11 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 @Service
 public class EnvironmentService {
 
+    public static final int SLEEP_TIME_IN_SEC_FOR_ENV_POLLING = 10;
+
+    public static final int DURATION_IN_MINUTES_FOR_ENV_POLLING = 60;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
-
-    private static final int SLEEP_TIME_IN_SEC_FOR_ENV_POLLING = 10;
-
-    private static final int DURATION_IN_MINUTES_FOR_ENV_POLLING = 60;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;

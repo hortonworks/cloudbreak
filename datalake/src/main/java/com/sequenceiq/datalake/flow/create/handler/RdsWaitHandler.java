@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow.create.handler;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.datalake.service.sdx.DatabaseService.DURATION_IN_MINUTES_FOR_DB_POLLING;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,7 +75,8 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
             sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId, userBreakException), event);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId, pollerStoppedException), event);
+            sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId,
+                    new PollerStoppedException("Database creation timed out after " + DURATION_IN_MINUTES_FOR_DB_POLLING + " minutes")), event);
         } catch (PollerException exception) {
             LOGGER.info("Database polling failed for sdx: {}", sdxId, exception);
             sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId, exception), event);

@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.dyngr.exception.PollerException;
@@ -26,11 +27,13 @@ import reactor.bus.EventBus;
 @Component
 public class StackDeletionHandler implements EventHandler<StackDeletionWaitRequest> {
 
-    public static final int SLEEP_TIME_IN_SEC = 10;
-
-    public static final int DURATION_IN_MINUTES = 20;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDeletionHandler.class);
+
+    @Value("${sdx.stack.deletion.sleeptime_sec:10}")
+    private int sleepTimeInSec;
+
+    @Value("${sdx.stack.deletion.duration_min:60}")
+    private int durationInMinutes;
 
     @Inject
     private EventBus eventBus;
@@ -53,7 +56,7 @@ public class StackDeletionHandler implements EventHandler<StackDeletionWaitReque
         Selectable response;
         try {
             LOGGER.debug("Start polling stack deletion process for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             provisionerService.waitCloudbreakClusterDeletion(sdxId, pollingConfig, requestId);
             response = new StackDeletionSuccessEvent(sdxId, userId, requestId, stackDeletionWaitRequest.isForced());
         } catch (UserBreakException userBreakException) {
@@ -61,7 +64,8 @@ public class StackDeletionHandler implements EventHandler<StackDeletionWaitReque
             response = new SdxDeletionFailedEvent(sdxId, userId, requestId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Deletion poller stopped for stack: {}", sdxId);
-            response = new SdxDeletionFailedEvent(sdxId, userId, requestId, pollerStoppedException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, requestId,
+                    new PollerStoppedException("Datalake stack deletion timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Deletion polling failed for stack: {}", sdxId);
             response = new SdxDeletionFailedEvent(sdxId, userId, requestId, exception);
