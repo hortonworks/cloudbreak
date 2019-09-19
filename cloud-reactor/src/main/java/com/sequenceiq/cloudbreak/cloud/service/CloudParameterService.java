@@ -30,6 +30,8 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupPa
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupParameterResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNoSqlTablesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNoSqlTablesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequest;
@@ -68,6 +70,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
@@ -409,7 +412,7 @@ public class CloudParameterService {
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public Map<String, InstanceGroupParameterResponse> getInstanceGroupParameters(ExtendedCloudCredential cloudCredential,
             Set<InstanceGroupParameterRequest> instanceGroups) {
-        LOGGER.debug("Get platform getInstanceGroupParameters");
+        LOGGER.debug("Get platform instanceGroupParameters");
 
         GetPlatformInstanceGroupParameterRequest getPlatformInstanceGroupParameterRequest =
                 new GetPlatformInstanceGroupParameterRequest(cloudCredential, cloudCredential, instanceGroups, null);
@@ -419,12 +422,33 @@ public class CloudParameterService {
             LOGGER.debug("Platform instanceGroupParameterResult result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform instanceGroupParameterResult", res.getErrorDetails());
-                throw new GetCloudParameterException(String.format("Failed to instance group parameters for the cloud provider: %s. %s",
+                throw new GetCloudParameterException(String.format("Failed to get instance group parameters for the cloud provider: %s. %s",
                         res.getStatusReason(), getCauseMessages(res.getErrorDetails())), res.getErrorDetails());
             }
             return res.getInstanceGroupParameterResponses();
         } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform publicIpPools", e);
+            LOGGER.error("Error while getting the platform instanceGroupParameterResult", e);
+            throw new OperationException(e);
+        }
+    }
+
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public CloudNoSqlTables getNoSqlTables(ExtendedCloudCredential cloudCredential, String region, String platformVariant, Map<String, String> filters) {
+        LOGGER.debug("Get platform noSqlTables");
+
+        GetPlatformNoSqlTablesRequest request = new GetPlatformNoSqlTablesRequest(cloudCredential, cloudCredential, platformVariant, region, null);
+        eventBus.notify(request.selector(), Event.wrap(request));
+        try {
+            GetPlatformNoSqlTablesResult result = request.await();
+            LOGGER.debug("Platform NoSqlTablesResult result: {}", result);
+            if (result.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.debug("Failed to get platform NoSqlTablesResult", result.getErrorDetails());
+                throw new GetCloudParameterException(String.format("Failed to get no SQL tables for the cloud provider: %s. %s",
+                        result.getStatusReason(), getCauseMessages(result.getErrorDetails())), result.getErrorDetails());
+            }
+            return result.getNoSqlTables();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform NoSqlTablesResult", e);
             throw new OperationException(e);
         }
     }
@@ -440,5 +464,4 @@ public class CloudParameterService {
         }
         return "";
     }
-
 }

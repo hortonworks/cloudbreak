@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDisksResponse;
@@ -30,6 +31,7 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformEncrypti
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGatewaysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNetworksResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNoSqlTablesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSecurityGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSshKeysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
@@ -233,6 +235,26 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     public TagSpecificationsResponse getTagSpecifications() {
         Map<Platform, PlatformParameters> platformParameters = platformParameterService.getPlatformParameters();
         return convertersionService.convert(platformParameters, TagSpecificationsResponse.class);
+    }
+
+    @Override
+    public PlatformNoSqlTablesResponse getNoSqlTables(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone) {
+
+        String accountId = getAccountId();
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
+                availabilityZone);
+        CloudNoSqlTables noSqlTables = platformParameterService.getNoSqlTables(request);
+        return convertersionService.convert(noSqlTables, PlatformNoSqlTablesResponse.class);
     }
 
     private String getAccountId() {

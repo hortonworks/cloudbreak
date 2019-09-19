@@ -188,6 +188,12 @@ class PlatformParameterServiceTest {
         verify(cloudParameterService).getPlatformParameters();
     }
 
+    @Test
+    void getNoSqlTables() {
+        platformParameterServiceUnderTest.getNoSqlTables(request);
+        verify(cloudParameterService).getNoSqlTables(any(), eq(REGION), eq(PLATFORM_VARIANT), any());
+    }
+
     @Configuration
     @Import(PlatformParameterService.class)
     static class Config {

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
@@ -116,6 +117,11 @@ public class PlatformParameterService {
 
     public CloudAccessConfigs getAccessConfigs(PlatformResourceRequest request) {
         return cloudParameterService.getCloudAccessConfigs(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
+                request.getPlatformVariant(), request.getFilters());
+    }
+
+    public CloudNoSqlTables getNoSqlTables(PlatformResourceRequest request) {
+        return cloudParameterService.getNoSqlTables(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters());
     }
 

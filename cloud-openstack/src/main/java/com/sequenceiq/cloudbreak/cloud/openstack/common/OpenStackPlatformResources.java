@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.values;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,6 +60,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
+import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
@@ -340,6 +342,12 @@ public class OpenStackPlatformResources implements PlatformResources {
     @Override
     public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudEncryptionKeys(new HashSet<>());
+    }
+
+    @Override
+    public CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        LOGGER.warn("NoSQL table list is not supported on 'OPENSTACK'");
+        return new CloudNoSqlTables(new ArrayList<>());
     }
 
     private VolumeParameterConfig volumeParameterConfig(VolumeParameterType volumeParameterType) {
