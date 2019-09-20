@@ -1,0 +1,196 @@
+{
+  "cdhVersion": "7.0.0",
+  "displayName": "datamart",
+  "services": [
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-SECONDARYNAMENODE-BASE",
+          "roleType": "SECONDARYNAMENODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-BALANCER-BASE",
+          "roleType": "BALANCER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "yarn",
+      "serviceType": "YARN",
+      "roleConfigGroups": [
+        {
+          "refName": "yarn-RESOURCEMANAGER-BASE",
+          "roleType": "RESOURCEMANAGER",
+          "base": true
+        },
+        {
+          "refName": "yarn-NODEMANAGER-WORKER",
+          "roleType": "NODEMANAGER",
+          "base": false
+        },
+        {
+          "refName": "yarn-NODEMANAGER-COMPUTE",
+          "roleType": "NODEMANAGER",
+          "base": false
+        },
+        {
+          "refName": "yarn-JOBHISTORY-BASE",
+          "roleType": "JOBHISTORY",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hive",
+      "serviceType": "HIVE",
+      "roleConfigGroups": [
+        {
+          "refName": "hive-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "hive-HIVESERVER2-BASE",
+          "roleType": "HIVESERVER2",
+          "configs": [
+            {
+              "name": "hs2_execution_engine",
+              "value": "mr"
+            }
+          ],
+          "base": true
+        },
+        {
+          "refName": "hive-HIVEMETASTORE-BASE",
+          "roleType": "HIVEMETASTORE",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hue",
+      "serviceType": "HUE",
+      "roleConfigGroups": [
+        {
+          "refName": "hue-HUE_SERVER-BASE",
+          "roleType": "HUE_SERVER",
+          "base": true
+        },
+        {
+          "refName": "hue-HUE_LOAD_BALANCER-BASE",
+          "roleType": "HUE_LOAD_BALANCER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "oozie",
+      "serviceType": "OOZIE",
+      "roleConfigGroups": [
+        {
+          "refName": "oozie-OOZIE_SERVER-BASE",
+          "roleType": "OOZIE_SERVER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "kudu",
+      "serviceType": "KUDU",
+      "serviceConfigs": [
+        {
+          "name": "gflagfile_service_safety_valve",
+          "value": "--use_hybrid_clock=false"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "kudu-MASTER-BASE",
+          "roleType": "KUDU_MASTER",
+          "base": true
+        },
+        {
+          "refName": "kudu-TSERVER-BASE",
+          "roleType": "KUDU_TSERVER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "impala",
+      "serviceType": "IMPALA",
+      "roleConfigGroups": [
+        {
+          "refName": "impala-IMPALAD-BASE",
+          "roleType": "IMPALAD",
+          "base": true
+        },
+        {
+          "refName": "impala-STATESTORE-BASE",
+          "roleType": "STATESTORE",
+          "base": true
+        },
+        {
+          "refName": "impala-CATALOGSERVER-BASE",
+          "roleType": "CATALOGSERVER",
+          "base": true
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "hdfs-BALANCER-BASE",
+        "hdfs-NAMENODE-BASE",
+        "hdfs-SECONDARYNAMENODE-BASE",
+        "hive-GATEWAY-BASE",
+        "hive-HIVEMETASTORE-BASE",
+        "hive-HIVESERVER2-BASE",
+        "hue-HUE_LOAD_BALANCER-BASE",
+        "hue-HUE_SERVER-BASE",
+        "impala-CATALOGSERVER-BASE",
+        "impala-STATESTORE-BASE",
+        "oozie-OOZIE_SERVER-BASE",
+        "yarn-JOBHISTORY-BASE",
+        "yarn-RESOURCEMANAGER-BASE",
+        "kudu-MASTER-BASE"
+      ]
+    },
+    {
+      "refName": "worker",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "hdfs-DATANODE-BASE",
+        "hive-GATEWAY-BASE",
+        "impala-IMPALAD-BASE",
+        "yarn-NODEMANAGER-WORKER",
+        "kudu-TSERVER-BASE"
+      ]
+    },
+    {
+      "refName": "master",
+      "cardinality": 0,
+      "roleConfigGroupsRefNames": [
+        "hive-GATEWAY-BASE",
+        "yarn-NODEMANAGER-COMPUTE"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "host_groups": [
+    {
+      "name": "master",
+      "components": [
+        {
+          "name": "NAMENODE"
+        }
+      ],
+      "cardinality": "1"
+    },
+    {
+      "name": "slave_1",
+      "components": [
+        {
+          "name": "DATANODE"
+        }
+      ],
+      "cardinality": "2"
+    },
+    {
+      "name": "master",
+      "components": [
+        {
+          "name": "HDFS_CLIENT"
+        }
+      ],
+      "cardinality": "2"
+    }
+  ],
+  "Blueprints": {
+    "blueprint_name": "multi-node-hdfs-yarn",
+    "stack_name": "HDP",
+    "stack_version": "2.3"
+  }
+}

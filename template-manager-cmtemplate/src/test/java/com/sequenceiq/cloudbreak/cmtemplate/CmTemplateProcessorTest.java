@@ -440,6 +440,13 @@ public class CmTemplateProcessorTest {
         assertEquals(new GatewayRecommendation(Set.of()), underTest.recommendGateway());
     }
 
+    @Test
+    public void getHostTemplates() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/cdp-invalid-multi-host-template-name.bp"));
+        assertEquals(3, underTest.getHostTemplateNames().size());
+        assertEquals(2, underTest.getHostTemplateNames().stream().filter("master"::equals).count());
+    }
+
     private static void assertSortedEquals(Set<?> expected, Set<?> actual) {
         assertEquals(new TreeSet<>(expected), new TreeSet<>(actual));
     }

@@ -477,6 +477,17 @@ public class AmbariBlueprintTextProcessorTest {
         assertEquals(new GatewayRecommendation(Set.of()), subject.recommendGateway());
     }
 
+    @Test
+    public void getHostTemplates() throws IOException {
+        AmbariBlueprintTextProcessor subject = underTest.get(FileReaderUtils
+                .readFileFromClasspath("blueprints-jackson/test-bp-non-unique-host-group-name.bp"));
+
+        List<String> hostTemplateNames = subject.getHostTemplateNames();
+
+        assertEquals(3, hostTemplateNames.size());
+        assertEquals(2, hostTemplateNames.stream().filter("master"::equals).count());
+    }
+
     private boolean isComponentExistsInHostgroup(String component, JsonNode hostGroupNode) {
         boolean componentExists = false;
         Iterator<JsonNode> components = hostGroupNode.path("components").elements();
