@@ -19,7 +19,7 @@ VERSION="V1.0"
 mount_remaining() {
       local hadoop_fs_dir_counter=$1
       local return_value=0
-      not_mounted_volume_names=$(lsblk_command --noheadings --raw -o NAME,MOUNTPOINT | awk '$1~/[[:digit:]]/ && $2 == ""')
+      not_mounted_volume_names=$(lsblk_command | grep -v / | grep ^[a-z] | cut -f1 -d' ')
       log $LOG_FILE remaining not mounted volumes: $not_mounted_volume_names
       root_disk=$(get_root_disk)
       for volume in $not_mounted_volume_names; do
