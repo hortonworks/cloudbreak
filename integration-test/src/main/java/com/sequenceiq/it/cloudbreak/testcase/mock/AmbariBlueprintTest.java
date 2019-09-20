@@ -4,7 +4,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMess
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,14 +21,8 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class BlueprintTest extends AbstractIntegrationTest {
-
-    private static final String VALID_CD = "{\"Blueprints\":{\"blueprint_name\":\"ownbp\",\"stack_name\":\"HDP\",\"stack_version\":\"2.6\"},\"settings\""
-            + ":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\":\"master\""
-            + ",\"configurations\":[],\"components\":[{\"name\":\"HIVE_METASTORE\"}],\"cardinality\":\"1"
-            + "\"}]}";
+public class AmbariBlueprintTest extends BlueprintTestBase {
 
     @Inject
     private BlueprintTestClient blueprintTestClient;
@@ -42,9 +35,9 @@ public class BlueprintTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
-            when = "a valid blueprint create request is sent",
+            when = "a valid Ambari blueprint create request is sent",
             then = "the blueprint should be in the response")
-    public void testCreateBlueprint(TestContext testContext) {
+    public void testCreateAmbariBlueprint(TestContext testContext) {
         String blueprintName = resourcePropertyProvider().getName();
         List<String> keys = Arrays.asList("key_1", "key_2", "key_3");
         List<Object> values = Arrays.asList("value_1", "value_2", "value_3");
@@ -52,13 +45,13 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .withName(blueprintName)
                 .withDescription(blueprintName)
                 .withTag(keys, values)
-                .withBlueprint(VALID_CD)
+                .withBlueprint(super.getValidAmbariBlueprintText())
                 .when(blueprintTestClient.createV4(), key(blueprintName))
                 .then((tc, entity, cc) -> {
                     CBAssertion.assertEquals(blueprintName, entity.getName());
                     CBAssertion.assertEquals(blueprintName, entity.getDescription());
-                    CBAssertion.assertTrue(assertList(entity.getTag().keySet(), keys));
-                    CBAssertion.assertTrue(assertList(entity.getTag().values(), values));
+                    CBAssertion.assertTrue(super.assertList(entity.getTag().keySet(), keys));
+                    CBAssertion.assertTrue(super.assertList(entity.getTag().values(), values));
                     return entity;
                 })
                 .validate();
@@ -77,7 +70,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .withName(blueprintName)
                 .withDescription(blueprintName)
                 .withTag(keys, values)
-                .withBlueprint(VALID_CD)
+                .withBlueprint(super.getValidAmbariBlueprintText())
                 .when(blueprintTestClient.createV4(), key(blueprintName))
                 .when(blueprintTestClient.listV4())
                 .then((tc, entity, cc) -> {
@@ -96,7 +89,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
         String blueprintName = resourcePropertyProvider().getInvalidName();
         testContext.given(BlueprintTestDto.class)
                 .withName(blueprintName)
-                .withBlueprint(VALID_CD)
+                .withBlueprint(super.getValidAmbariBlueprintText())
                 .when(blueprintTestClient.createV4(), key(blueprintName))
                 .expect(BadRequestException.class, expectedMessage("must match ").withKey(blueprintName))
                 .validate();
@@ -125,7 +118,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
     public void testListBlueprint(TestContext testContext) {
         testContext.given(BlueprintTestDto.class)
                 .when(blueprintTestClient.listV4())
-                .then(BlueprintTest::checkDefaultBlueprintsIsListed)
+                .then(AmbariBlueprintTest::checkDefaultBlueprintsIsListed)
                 .validate();
     }
 
@@ -138,7 +131,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
         String blueprintName = resourcePropertyProvider().getName();
         testContext.given(BlueprintTestDto.class)
                 .withName(blueprintName)
-                .withBlueprint(VALID_CD)
+                .withBlueprint(super.getValidAmbariBlueprintText())
                 .when(blueprintTestClient.createV4(), key(blueprintName))
                 .when(blueprintTestClient.getV4(), key(blueprintName))
                 .then((tc, entity, cc) -> {
@@ -156,7 +149,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
     public void testGetDefaultBlueprint(TestContext testContext) {
         testContext.given(BlueprintTestDto.class)
                 .when(blueprintTestClient.listV4())
-                .then(BlueprintTest::useFirstDefaultBlueprintAsEntity)
+                .then(AmbariBlueprintTest::useFirstDefaultBlueprintAsEntity)
                 .when(blueprintTestClient.getV4())
                 .then((tc, entity, cc) -> {
                     CBAssertion.assertEquals(entity.getResponse().getName(), entity.getName());
@@ -174,7 +167,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
         String blueprintName = resourcePropertyProvider().getName();
         testContext.given(BlueprintTestDto.class)
                 .withName(blueprintName)
-                .withBlueprint(VALID_CD)
+                .withBlueprint(super.getValidAmbariBlueprintText())
                 .when(blueprintTestClient.createV4(), key(blueprintName))
                 .when(blueprintTestClient.deleteV4(), key(blueprintName))
                 .then((tc, entity, cc) -> {
@@ -182,7 +175,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
                     return entity;
                 })
                 .when(blueprintTestClient.listV4())
-                .then(BlueprintTest::checkBlueprintDoesNotExistInTheList)
+                .then(AmbariBlueprintTest::checkBlueprintDoesNotExistInTheList)
                 .validate();
     }
 
@@ -205,11 +198,11 @@ public class BlueprintTest extends AbstractIntegrationTest {
         testContext
                 .given(BlueprintTestDto.class)
                 .withName(blueprintName)
-                .withBlueprint(VALID_CD)
+                .withBlueprint(super.getValidAmbariBlueprintText())
                 .when(blueprintTestClient.createV4(), key(blueprintName))
                 .when(blueprintTestClient.requestV4(), key(blueprintName))
                 .then((tc, entity, cc) -> {
-                    CBAssertion.assertEquals(entity.getRequest().getBlueprint(), VALID_CD);
+                    CBAssertion.assertEquals(entity.getRequest().getBlueprint(), super.getValidAmbariBlueprintText());
                     CBAssertion.assertEquals(blueprintName, entity.getName());
                     return entity;
                 })
@@ -238,7 +231,4 @@ public class BlueprintTest extends AbstractIntegrationTest {
         return blueprint;
     }
 
-    private <O extends Object> boolean assertList(Collection<O> result, Collection<O> expected) {
-        return result.containsAll(expected) && result.size() == expected.size();
-    }
 }

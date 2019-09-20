@@ -48,11 +48,11 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 
@@ -164,6 +164,16 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     @Override
+    public String getHostGroupPropertyIdentifier() {
+        return "template";
+    }
+
+    @Override
+    public Optional<String> getVersion() {
+        return Optional.ofNullable(cmTemplate.getCdhVersion());
+    }
+
+    @Override
     public Map<String, Set<String>> getComponentsByHostGroup() {
         return getServiceComponentsByHostGroup().entrySet().stream()
                 .collect(toMap(
@@ -197,6 +207,15 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     @Override
     public String getStackVersion() {
         return cmTemplate.getCdhVersion();
+    }
+
+    @Override
+    public List<String> getHostTemplateNames() {
+        return Optional.ofNullable(cmTemplate.getHostTemplates())
+                .orElse(List.of())
+                .stream()
+                .map(ApiClusterTemplateHostTemplate::getRefName)
+                .collect(Collectors.toList());
     }
 
     public Set<ServiceComponent> getAllComponents() {

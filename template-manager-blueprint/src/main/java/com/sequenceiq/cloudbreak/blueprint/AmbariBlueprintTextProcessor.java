@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.blueprint;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,9 +37,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.processor.configuration.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfiguration;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
@@ -137,6 +138,20 @@ public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
     @Override
     public ClusterManagerType getClusterManagerType() {
         return ClusterManagerType.AMBARI;
+    }
+
+    @Override
+    public String getHostGroupPropertyIdentifier() {
+        return "group";
+    }
+
+    @Override
+    public Optional<String> getVersion() {
+        try {
+            return Optional.ofNullable(getArrayFromJsonNodeByPath(blueprint, "blueprints").get("stack_version").asText());
+        } catch (BlueprintProcessingException ignore) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -708,6 +723,16 @@ public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
     public String getStackVersion() {
         ObjectNode blueprintsNode = (ObjectNode) blueprint.path(BLUEPRINTS);
         return blueprintsNode.get(STACK_VERSION).asText();
+    }
+
+    @Override
+    public List<String> getHostTemplateNames() {
+        ArrayNode hostGroups = getArrayFromJsonNodeByPath(blueprint, "host_groups");
+        List<String> hostGroupNames = new ArrayList<>(hostGroups.size());
+        for (int i = 0; i < hostGroups.size(); i++) {
+            hostGroupNames.add(hostGroups.get(i).get("name").textValue());
+        }
+        return hostGroupNames;
     }
 
     public AmbariBlueprintTextProcessor modifyHdpVersion(String hdpVersion) {

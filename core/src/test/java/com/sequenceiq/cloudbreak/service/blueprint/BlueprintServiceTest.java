@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -41,6 +42,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -64,6 +69,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 public class BlueprintServiceTest {
 
     private static final String INVALID_DTO_MESSAGE = "One and only one value of the crn and name should be filled!";
+
+    private static final List<String> INVALID_HOST_GROUP_NAME_LIST = List.of("master", "worker", "master");
 
     private static final String NULL_DTO_EXCEPTION_MESSAGE = "BlueprintAccessDto should not be null";
 
@@ -101,6 +108,18 @@ public class BlueprintServiceTest {
     @Mock
     private User user;
 
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Mock
+    private CmTemplateProcessor cmTemplateProcessor;
+
+    @Mock
+    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
+
+    @Mock
+    private AmbariBlueprintTextProcessor ambariBlueprintTextProcessor;
+
     @InjectMocks
     private BlueprintService underTest;
 
@@ -112,6 +131,8 @@ public class BlueprintServiceTest {
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         when(workspaceService.get(1L, user)).thenReturn(getWorkspace());
+        when(cmTemplateProcessor.getHostGroupPropertyIdentifier()).thenReturn("template");
+        when(ambariBlueprintTextProcessor.getHostGroupPropertyIdentifier()).thenReturn("group");
     }
 
     @Test
@@ -429,6 +450,58 @@ public class BlueprintServiceTest {
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
         assertEquals(1, result.size());
         assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).contains("bp1"));
+    }
+
+    @Test
+    public void testIfHostTemplateNamesAreNotUniqueThenBadRequestExceptionShouldCome() {
+        String someBlueprintText = "someText";
+
+        when(cmTemplateProcessorFactory.get(someBlueprintText)).thenReturn(cmTemplateProcessor);
+        when(cmTemplateProcessor.getVersion()).thenReturn(Optional.of("7.0.0"));
+        when(cmTemplateProcessor.getHostTemplateNames()).thenReturn(INVALID_HOST_GROUP_NAME_LIST);
+
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(someBlueprintText);
+
+        exceptionRule.expect(BadRequestException.class);
+        exceptionRule.expectMessage("Host template names must be unique! The following host template names are invalid due to their multiple " +
+                "occurrence: master");
+        underTest.createForLoggedInUser(blueprint, 1L, "someAccountId", "someone");
+
+        verify(cmTemplateProcessorFactory, times(1)).get(anyString());
+        verify(cmTemplateProcessorFactory, times(1)).get(someBlueprintText);
+        verify(cmTemplateProcessor, times(1)).getVersion();
+        verify(cmTemplateProcessor, times(1)).getHostTemplateNames();
+        verify(ambariBlueprintTextProcessor, times(0)).getVersion();
+        verify(ambariBlueprintTextProcessor, times(0)).getHostTemplateNames();
+    }
+
+    @Test
+    public void testIfHostGroupNamesAreNotUniqueThenBadRequestExceptionShouldCome() {
+        String someBlueprintText = "someText";
+
+        when(cmTemplateProcessorFactory.get(someBlueprintText)).thenReturn(cmTemplateProcessor);
+        when(cmTemplateProcessor.getVersion()).thenReturn(Optional.empty());
+        when(ambariBlueprintProcessorFactory.get(someBlueprintText)).thenReturn(ambariBlueprintTextProcessor);
+        when(ambariBlueprintTextProcessor.getHostTemplateNames()).thenReturn(INVALID_HOST_GROUP_NAME_LIST);
+
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(someBlueprintText);
+
+        exceptionRule.expect(BadRequestException.class);
+        exceptionRule.expectMessage("Host group names must be unique! The following host group names are invalid due to their multiple " +
+                "occurrence: master");
+
+        underTest.createForLoggedInUser(blueprint, 1L, "someAccountId", "someone");
+
+        verify(cmTemplateProcessorFactory, times(1)).get(anyString());
+        verify(cmTemplateProcessorFactory, times(1)).get(someBlueprintText);
+        verify(cmTemplateProcessor, times(1)).getVersion();
+        verify(cmTemplateProcessor, times(0)).getHostTemplateNames();
+        verify(ambariBlueprintProcessorFactory, times(1)).get(anyString());
+        verify(ambariBlueprintProcessorFactory, times(1)).get(someBlueprintText);
+        verify(ambariBlueprintTextProcessor, times(1)).getVersion();
+        verify(ambariBlueprintTextProcessor, times(1)).getHostTemplateNames();
     }
 
     private Cluster getCluster(String name, Long id, Blueprint blueprint, Status clusterStatus, Status stackStatus) {

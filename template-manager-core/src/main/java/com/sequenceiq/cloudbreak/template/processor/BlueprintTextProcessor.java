@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.template.processor;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -12,6 +14,15 @@ import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfi
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 
 public interface BlueprintTextProcessor {
+
+    /**
+     * Returns a single word which distinguishes the host node's type based on the stack (Ambari/CM/..)
+     * @return stack based word
+     */
+    String getHostGroupPropertyIdentifier();
+
+    Optional<String> getVersion();
+
     Map<String, Set<String>> getComponentsByHostGroup();
 
     ClusterManagerType getClusterManagerType();
@@ -41,4 +52,7 @@ public interface BlueprintTextProcessor {
     GatewayRecommendation recommendGateway();
 
     String getStackVersion();
+
+    List<String> getHostTemplateNames();
+
 }
