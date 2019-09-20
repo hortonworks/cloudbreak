@@ -22,8 +22,10 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Machi
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ResourceRoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
+import com.sequenceiq.cloudbreak.auth.security.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
@@ -37,6 +39,8 @@ public class UmsUsersStateProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsUsersStateProvider.class);
 
     private static ThreadLocal<String> requestIdThreadLocal = new ThreadLocal<>();
+
+    private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
@@ -95,8 +99,8 @@ public class UmsUsersStateProvider {
         }
     }
 
-    private WorkloadCredential getCredentials(String actorCrn, String userCrn, Optional<String> requestId) {
-        GetActorWorkloadCredentialsResponse response = grpcUmsClient.getActorWorkloadCredentials(actorCrn, userCrn, requestId);
+    private WorkloadCredential getCredentials(String userCrn, Optional<String> requestId) {
+        GetActorWorkloadCredentialsResponse response = grpcUmsClient.getActorWorkloadCredentials(IAM_INTERNAL_ACTOR_CRN, userCrn, requestId);
         String hashedPassword = response.getPasswordHash();
         List<ActorKerberosKey> keys = response.getKerberosKeysList();
         return new WorkloadCredential(hashedPassword, keys);
@@ -173,7 +177,7 @@ public class UmsUsersStateProvider {
             }
 
             // get credentials
-            userStateBuilder.addWorkloadCredentials(fmsUser.getName(), getCredentials(actorCrn, memberCrn, requestId));
+            userStateBuilder.addWorkloadCredentials(fmsUser.getName(), getCredentials(memberCrn, requestId));
         }
     }
 
