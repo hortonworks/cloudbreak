@@ -84,6 +84,8 @@ public class ServiceProviderCredentialAdapter {
             }
             if (CredentialStatus.PERMISSIONS_MISSING.equals(res.getCloudCredentialStatus().getStatus())) {
                 credential.setVerificationStatusText(res.getCloudCredentialStatus().getStatusReason());
+            } else {
+                credential.setVerificationStatusText(null);
             }
             CloudCredential cloudCredentialResponse = res.getCloudCredentialStatus().getCloudCredential();
             mergeCloudProviderParameters(credential, cloudCredentialResponse, Collections.singleton(SMART_SENSE_ID));
