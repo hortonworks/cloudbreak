@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
@@ -28,21 +27,24 @@ public class SubnetChooserServiceTest {
 
     private static final String SUBNET_2 = "subnet-2";
 
+    private static final String SUBNET_3 = "subnet-3";
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     private final SubnetChooserService underTest = new SubnetChooserService();
 
     @Test
-    public void testChooseSubnetsAwsFromDifferentAzs() {
+    public void testChooseSubnetsAwsSuccess() {
         List<CloudSubnet> subnets = List.of(
                 new CloudSubnet(SUBNET_1, "", AVAILABILITY_ZONE_A, ""),
-                new CloudSubnet(SUBNET_2, "", AVAILABILITY_ZONE_B, "")
+                new CloudSubnet(SUBNET_2, "", AVAILABILITY_ZONE_B, ""),
+                new CloudSubnet(SUBNET_3, "", AVAILABILITY_ZONE_B, "")
         );
 
         List<CloudSubnet> chosenSubnets = underTest.chooseSubnets(subnets, CloudPlatform.AWS);
 
-        assertThat(chosenSubnets, hasSize(2));
+        assertThat(chosenSubnets, hasSize(3));
         assertThat(chosenSubnets, hasItem(hasProperty("availabilityZone", is(AVAILABILITY_ZONE_A))));
         assertThat(chosenSubnets, hasItem(hasProperty("availabilityZone", is(AVAILABILITY_ZONE_B))));
     }
@@ -72,7 +74,7 @@ public class SubnetChooserServiceTest {
                 new CloudSubnet(SUBNET_2, "", AVAILABILITY_ZONE_A, "")
         );
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("All subnets in the same availability zone");
+        thrown.expectMessage("All subnets are in the same availability zone");
 
         underTest.chooseSubnets(subnets, CloudPlatform.AWS);
     }
@@ -90,10 +92,7 @@ public class SubnetChooserServiceTest {
 
         List<CloudSubnet> chosenSubnets = underTest.chooseSubnets(subnets, CloudPlatform.AWS);
 
-        assertThat(chosenSubnets, hasSize(2));
-        String az1 = chosenSubnets.get(0).getAvailabilityZone();
-        String az2 = chosenSubnets.get(1).getAvailabilityZone();
-        assertNotEquals(az1, az2);
+        assertThat(chosenSubnets, hasSize(6));
     }
 
     // ---
