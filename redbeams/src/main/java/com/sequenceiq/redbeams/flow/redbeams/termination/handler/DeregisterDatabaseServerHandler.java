@@ -45,7 +45,7 @@ public class DeregisterDatabaseServerHandler implements EventHandler<DeregisterD
 
         try {
             databaseServerConfigService.getByCrn(dbStack.getResourceCrn())
-                    .ifPresent(dsc -> databaseServerConfigService.archive(dsc));
+                    .ifPresent(dsc -> databaseServerConfigService.delete(dsc));
             eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
         } catch (Exception e) {
             DeregisterDatabaseServerFailed failure = new DeregisterDatabaseServerFailed(request.getResourceId(), e);
