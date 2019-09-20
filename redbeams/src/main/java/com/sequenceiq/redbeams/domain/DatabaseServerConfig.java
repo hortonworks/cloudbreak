@@ -243,6 +243,7 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
 
     @Override
     public void unsetRelationsToEntitiesToBeDeleted() {
+        dbStack = null;
     }
 
     public String getEnvironmentId() {

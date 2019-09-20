@@ -170,15 +170,6 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         }
     }
 
-    public void archive(DatabaseServerConfig resource) {
-        for (DatabaseConfig dbConfig : resource.getDatabases()) {
-            databaseConfigService.archive(dbConfig);
-        }
-        resource.setArchived(true);
-        resource.setDbStack(null);
-        repository.save(resource);
-    }
-
     public DatabaseServerConfig getByName(Long workspaceId, String environmentCrn, String name) {
         Optional<DatabaseServerConfig> resourceOpt = repository.findByNameAndWorkspaceIdAndEnvironmentId(name, workspaceId, environmentCrn);
         if (resourceOpt.isEmpty()) {
