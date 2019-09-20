@@ -54,7 +54,7 @@ public class CloudbreakServer {
         checkNonEmpty("integrationtest.cloudbreak.server", server);
         checkNonEmpty("server.contextPath", cbRootContextPath);
         checkNonEmpty("integrationtest.user.accesskey", accessKey);
-        checkNonEmpty("integrationtest.user.privatekey", secretKey);
+        checkNonEmpty("integrationtest.user.secretkey", secretKey);
 
         testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
         testParameter.put(CloudbreakTest.ACCESS_KEY, accessKey);
