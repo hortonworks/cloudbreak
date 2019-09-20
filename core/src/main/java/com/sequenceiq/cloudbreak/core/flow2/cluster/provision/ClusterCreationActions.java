@@ -99,6 +99,7 @@ public class ClusterCreationActions {
         return new AbstractStackCreationAction<>(HostMetadataSetupSuccess.class) {
             @Override
             protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.generateCertAndDnsEntryForGateway(context.getStack());
                 clusterCreationService.mountDisks(context.getStack());
                 sendEvent(context);
             }

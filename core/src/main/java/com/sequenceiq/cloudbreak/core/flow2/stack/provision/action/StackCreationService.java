@@ -24,7 +24,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
@@ -57,7 +56,6 @@ import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -108,9 +106,6 @@ public class StackCreationService {
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
-
-    @Inject
-    private ClusterService clusterService;
 
     public void setupProvision(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_SETUP, "Provisioning setup");
@@ -186,33 +181,6 @@ public class StackCreationService {
             LOGGER.debug("Update Stack and it's SecurityConfig to use private ip when TLS is built.");
         }
         return stack;
-    }
-
-    public void generateCertAndSaveForStackAndUpdateDnsEntry(Stack stack) {
-        if (tlsSetupService.isCertGenerationEnabled() && stack.getCluster().getGateway() != null) {
-            if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
-                boolean certGeneratedAndSaved = tlsSetupService.generateCertAndSaveForStack(stack);
-                if (certGeneratedAndSaved) {
-                    updateDnsEntryForCluster(stack);
-                } else {
-                    flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_GATEWAY_CERTIFICATE_CREATE_FAILED, CREATE_IN_PROGRESS.name());
-                }
-            } else {
-                LOGGER.info("CERT is already generated for stack, we don't generate a new one");
-                updateDnsEntryForCluster(stack);
-            }
-        } else {
-            LOGGER.info("Cert generation is disabled.");
-        }
-    }
-
-    private void updateDnsEntryForCluster(Stack stack) {
-        String fqdn = tlsSetupService.updateDnsEntry(stack);
-        if (fqdn != null) {
-            stack.getCluster().setFqdn(fqdn);
-            clusterService.save(stack.getCluster());
-            LOGGER.info("The '{}' domain name has been generated, registered through PEM service and saved for the cluster.", fqdn);
-        }
     }
 
     public void setupTls(StackContext context) throws CloudbreakException {

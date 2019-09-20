@@ -27,9 +27,9 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.gateway.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -62,7 +62,7 @@ public class ChangePrimaryGatewayService {
     private TransactionService transactionService;
 
     @Inject
-    private TlsSetupService tlsSetupService;
+    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
 
     public void changePrimaryGatewayStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
@@ -93,8 +93,8 @@ public class ChangePrimaryGatewayService {
                 Cluster cluster = updatedStack.getCluster();
                 cluster.setClusterManagerIp(gatewayIp);
                 clusterService.save(cluster);
-                if (tlsSetupService.isCertGenerationEnabled()) {
-                    tlsSetupService.updateDnsEntry(updatedStack);
+                if (gatewayPublicEndpointManagementService.isCertGenerationEnabled()) {
+                    gatewayPublicEndpointManagementService.updateDnsEntry(updatedStack);
                 }
                 return null;
             });

@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -16,12 +14,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.Msg;
@@ -29,11 +25,10 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.gateway.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 
 @Service
@@ -69,10 +64,7 @@ public class StackTerminationService {
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Inject
-    private DnsManagementService dnsManagementService;
-
-    @Inject
-    private EnvironmentClientService environmentClientService;
+    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
 
     public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload) {
         LOGGER.debug("Terminate stack result: {}", payload);
@@ -111,25 +103,7 @@ public class StackTerminationService {
         flowMessageService.fireEventAndLog(stackView.getId(), eventMessage, status.name(), stackUpdateMessage);
     }
 
-    public String deleteDnsEntry(Stack stack, String environmentName) {
-        String actorCrn = threadBasedUserCrnProvider.getUserCrn();
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        if (environmentName == null) {
-            DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
-            environmentName = environment.getName();
-        }
-        Optional<InstanceMetaData> gateway = stack.getGatewayInstanceMetadata().stream()
-                .filter(it -> !it.isTerminated())
-                .findFirst();
-        if (!gateway.isPresent()) {
-            LOGGER.info("No running gateway or all node is terminated, we skip the dns entry deletion.");
-            return null;
-        }
-        String ip = gateway.get().getPublicIpWrapper();
-        if (ip == null) {
-            return null;
-        }
-        dnsManagementService.deleteDnsEntryWithIp(actorCrn, accountId, stack.getName(), environmentName, false, List.of(ip));
-        return ip;
+    public void deleteDnsEntry(Stack stack) {
+        gatewayPublicEndpointManagementService.deleteDnsEntry(stack, null);
     }
 }
