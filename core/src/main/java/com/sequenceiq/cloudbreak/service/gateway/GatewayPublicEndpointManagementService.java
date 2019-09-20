@@ -68,7 +68,10 @@ public class GatewayPublicEndpointManagementService {
 
     public boolean generateCertAndSaveForStackAndUpdateDnsEntry(Stack stack) {
         boolean certGeneratedAndSaved = false;
-        if (isCertGenerationEnabled() && stack.getCluster().getGateway() != null) {
+        if (isCertGenerationEnabled()
+                && stack != null
+                && stack.getCluster() != null
+                && stack.getCluster().getGateway() != null) {
             if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
                 certGeneratedAndSaved = generateCertAndSaveForStack(stack);
                 if (certGeneratedAndSaved) {
@@ -150,10 +153,8 @@ public class GatewayPublicEndpointManagementService {
             }
         }
         try {
-            String internalFQDN = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
-            List<String> certs = certificateCreationService.create(userCrn, accountId, stack.getName(), environment.getName(), false, keyPair,
-                    internalFQDN);
+            List<String> certs = certificateCreationService.create(userCrn, accountId, stack.getName(), environment.getName(), false, keyPair);
             securityConfig.setUserFacingCert(String.join("", certs));
             securityConfigService.save(securityConfig);
             success = true;

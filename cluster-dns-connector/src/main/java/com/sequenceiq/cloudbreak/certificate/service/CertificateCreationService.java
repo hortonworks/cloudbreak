@@ -44,14 +44,14 @@ public class CertificateCreationService {
     @Inject
     private EnvironmentBasedDomainNameProvider environmentBasedDomainNameProvider;
 
-    public List<String> create(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard, KeyPair identity, String internalFQDN)
+    public List<String> create(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard, KeyPair identity)
             throws IOException {
         LOGGER.info("Start cert creation");
         Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
         UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, actorCrn, requestIdOptional);
         String externalFQDN = environmentBasedDomainNameProvider.getDomainName(endpoint, environment, account.getWorkloadSubdomain());
         LOGGER.info("Create cert for {}", externalFQDN);
-        PKCS10CertificationRequest csr = PkiUtil.csr(identity, externalFQDN, internalFQDN);
+        PKCS10CertificationRequest csr = PkiUtil.csr(identity, externalFQDN);
         String pollingRequestId = grpcClusterDnsClient
                 .createCertificate(actorCrn, accountId, endpoint, environment, wildcard, csr.getEncoded(), requestIdOptional);
         return polling(actorCrn, pollingRequestId);
