@@ -57,8 +57,7 @@ public class CreateCertificationTest {
                 "cluster-tb",
                 "env-tb",
                 false,
-                keyPair,
-                internalFQDN);
+                keyPair);
         LOGGER.info("CERT: \n" + String.join("\n", strings));
     }
 

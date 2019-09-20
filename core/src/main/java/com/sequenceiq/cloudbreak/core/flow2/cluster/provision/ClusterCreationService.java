@@ -75,7 +75,7 @@ public class ClusterCreationService {
 
     public void generateCertAndDnsEntryForGateway(Stack stack) {
         boolean success = gatewayPublicEndpointManagementService.generateCertAndSaveForStackAndUpdateDnsEntry(stack);
-        if (success) {
+        if (!success) {
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_GATEWAY_CERTIFICATE_CREATE_FAILED, UPDATE_IN_PROGRESS.name());
         }
     }

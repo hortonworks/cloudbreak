@@ -34,7 +34,6 @@ import java.util.Map;
 import javax.security.auth.x500.X500Principal;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -157,13 +156,13 @@ public class PkiUtil {
         }
     }
 
-    public static PKCS10CertificationRequest csr(KeyPair identity, String externalAddress, String internalFQDN) {
+    public static PKCS10CertificationRequest csr(KeyPair identity, String externalAddress) {
+        if (identity == null) {
+            throw new PkiException("Failed to generate CSR because KeyPair hasn't been specified for the method!");
+        }
         try {
             String name = String.format("C=US, CN=%s, O=Cloudera", externalAddress);
-            List<String> sanList = List.of("localhost");
-            if (StringUtils.isNotEmpty(internalFQDN)) {
-                sanList = List.of(internalFQDN, "localhost");
-            }
+            List<String> sanList = List.of();
             LOGGER.info("Generate CSR with X.500 distinguished name: '{}' and list of SAN: '{}'", name, String.join(",", sanList));
             return generateCsrWithName(identity, name, sanList);
         } catch (Exception e) {
