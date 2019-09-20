@@ -284,6 +284,13 @@ public class FreeIpaClient {
         return config.getIpamaxusernamelength();
     }
 
+    public Config getConfig() throws FreeIpaClientException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("all", Boolean.TRUE);
+        Config config = (Config) invoke("config_show", List.of(), params, Config.class).getResult();
+        return config;
+    }
+
     public void setUsernameLength(int length) throws FreeIpaClientException {
         Map<String, Object> params = Map.of("ipamaxusernamelength", length);
         invoke("config_mod", List.of(), params, Object.class);

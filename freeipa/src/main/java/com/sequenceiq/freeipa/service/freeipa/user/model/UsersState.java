@@ -39,6 +39,10 @@ public class UsersState {
         return groupMembership;
     }
 
+    public Map<String, WorkloadCredential> getUsersWorkloadCredentialMap() {
+        return usersWorkloadCredentialMap;
+    }
+
     @Override
     public String toString() {
         return "UsersState{"

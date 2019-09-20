@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -31,6 +32,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
@@ -43,6 +45,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
+import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -175,6 +178,19 @@ public class UserService {
             removeUsersFromGroups(freeIpaClient, stateDifference.getGroupMembershipToRemove());
             removeUsers(freeIpaClient, stateDifference.getUsersToRemove());
             removeGroups(freeIpaClient, stateDifference.getGroupsToRemove());
+
+            // Check for the password related attribute (cdpUserAttr) existence.
+            Config config = freeIpaClient.getConfig();
+            if (config.getIpauserobjectclasses() != null && config.getIpauserobjectclasses().contains(Config.CDP_USER_ATTRIBUTE)) {
+                stateDifference.getUsersToAdd().forEach(u -> {
+                    // TODO: Go for password sync
+                    WorkloadCredential workloadCredential = umsUsersState.getUsersWorkloadCredentialMap().get(u.getName());
+//                    if (workloadCredential != null && !StringUtils.isEmpty(workloadCredential.getHashedPassword()) && workloadCredential.getKeys() != null) {
+//                        // TODO: call freeipa client for user mod for password and log
+                          // Call ASN_1 Encoder for envoding hashed password and then call user mod
+//                    }
+                });
+            }
 
             return SyncStatusDetail.succeed(environmentCrn, "TODO- collect detail info");
         } catch (Exception e) {
