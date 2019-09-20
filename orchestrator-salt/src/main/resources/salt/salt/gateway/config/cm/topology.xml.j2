@@ -455,22 +455,22 @@
     {%- endif %}
     {%- endif %}
 
-     {% if 'SMM-UI' in salt['pillar.get']('gateway:location') -%}
+     {% if 'STREAMS_MESSAGING_MANAGER_UI' in salt['pillar.get']('gateway:location') -%}
         {% if 'SMM-UI' in exposed -%}
             <service>
                 <role>SMM-UI</role>
-                {% for hostloc in salt['pillar.get']('gateway:location')['SMM-UI'] -%}
+                {% for hostloc in salt['pillar.get']('gateway:location')['STREAMS_MESSAGING_MANAGER_UI'] -%}
                 <url>{{ protocol }}://{{ hostloc }}:{{ ports['SMM-UI'] }}</url>
                 {%- endfor %}
             </service>
         {%- endif %}
      {%- endif %}
 
-     {% if 'SCHEMA-REGISTRY' in salt['pillar.get']('gateway:location') -%}
+     {% if 'SCHEMA_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
         {% if 'SCHEMA-REGISTRY' in exposed -%}
             <service>
                 <role>SCHEMA-REGISTRY</role>
-                {% for hostloc in salt['pillar.get']('gateway:location')['SCHEMA-REGISTRY'] -%}
+                {% for hostloc in salt['pillar.get']('gateway:location')['SCHEMA_REGISTRY_SERVER'] -%}
                 <url>{{ protocol }}://{{ hostloc }}:{{ ports['SCHEMA-REGISTRY'] }}</url>
                 {%- endfor %}
             </service>

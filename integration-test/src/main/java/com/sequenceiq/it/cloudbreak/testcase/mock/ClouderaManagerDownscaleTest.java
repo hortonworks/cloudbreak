@@ -9,14 +9,19 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.cloudera.api.swagger.model.ApiParcel;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.SetupCmScalingMock;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.util.cleanup.ParcelGeneratorUtil;
 import com.sequenceiq.it.util.cleanup.ParcelMockActivatorUtil;
 
 public class ClouderaManagerDownscaleTest extends AbstractIntegrationTest {
@@ -38,6 +43,9 @@ public class ClouderaManagerDownscaleTest extends AbstractIntegrationTest {
     @Inject
     private ParcelMockActivatorUtil parcelMockActivatorUtil;
 
+    @Inject
+    private ParcelGeneratorUtil parcelGeneratorUtil;
+
     @BeforeMethod
     public void setUp() {
     }
@@ -48,13 +56,23 @@ public class ClouderaManagerDownscaleTest extends AbstractIntegrationTest {
             when = "upscale to 15 it downscale to 6",
             then = "stack is running")
     public void testDownscale(MockedTestContext testContext) {
+        ApiParcel parcel = parcelGeneratorUtil.getActivatedCDHParcel();
         String clusterName = resourcePropertyProvider().getName();
-        parcelMockActivatorUtil.mockActivateParcels(testContext, clusterName);
+        parcelMockActivatorUtil.mockActivateParcel(testContext, clusterName, parcel);
         SetupCmScalingMock mock = new SetupCmScalingMock();
         mock.configure(testContext, 3, 15, 6);
         testContext
+                .given("cmpkey", ClouderaManagerProductTestDto.class)
+                .withParcel("someParcel")
+                .withName(parcel.getProduct())
+                .withVersion(parcel.getVersion())
+                .given("cmanager", ClouderaManagerTestDto.class)
+                .withClouderaManagerProduct("cmpkey")
+                .given("cmpclusterkey", ClusterTestDto.class)
+                .withClouderaManager("cmanager")
                 .given(StackTestDto.class)
                 .withName(clusterName)
+                .withCluster("cmpclusterkey")
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))

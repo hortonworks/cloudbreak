@@ -10,20 +10,24 @@ class ConfigRegistrationRequest {
     private String clusterCrn;
 
     @JsonProperty
-    private List<ClusterServiceConfig> services;
-
-    @JsonProperty
     private String uriOfKnox;
 
+    @JsonProperty
+    private List<String> aliases;
+
+    @JsonProperty
+    private List<ClusterServiceConfig> services;
+
     @JsonCreator
-    ConfigRegistrationRequest(String clusterCrn, List<ClusterServiceConfig> services) {
+    ConfigRegistrationRequest(String clusterCrn, List<String> aliases, List<ClusterServiceConfig> services) {
         this.clusterCrn = clusterCrn;
+        this.aliases = aliases;
         this.services = services;
     }
 
     @JsonCreator
-    ConfigRegistrationRequest(String clusterCrn, String knoxUrl, List<ClusterServiceConfig> services) {
-        this(clusterCrn, services);
+    ConfigRegistrationRequest(String clusterCrn, String knoxUrl, List<String> aliases, List<ClusterServiceConfig> services) {
+        this(clusterCrn, aliases, services);
         this.uriOfKnox = knoxUrl;
     }
 
@@ -31,6 +35,7 @@ class ConfigRegistrationRequest {
     public String toString() {
         return "ConfigRegistrationRequest{" +
                 "clusterCrn='" + clusterCrn + '\'' +
+                ", aliases=" + aliases +
                 ", services=" + services +
                 ", uriOfKnox='" + uriOfKnox + '\'' +
                 '}';

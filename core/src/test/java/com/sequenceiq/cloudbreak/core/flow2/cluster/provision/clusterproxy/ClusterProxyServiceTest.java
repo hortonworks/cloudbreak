@@ -80,15 +80,9 @@ public class ClusterProxyServiceTest {
     public void shouldRegisterProxyConfigurationWithClusterProxy() throws URISyntaxException, JsonProcessingException {
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setX509Unwrapped("X509PublicKey");
-        mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REGISTER_CONFIG_PATH)))
-                .andExpect(content().json(configRegistrationRequest("1000")))
-                .andExpect(method(HttpMethod.POST))
-                .andRespond(withStatus(HttpStatus.OK)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(JsonUtil.writeValueAsStringSilent(response)));
 
         mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REGISTER_CONFIG_PATH)))
-                .andExpect(content().json(configRegistrationRequest("stack-crn")))
+                .andExpect(content().json(configRegistrationRequest()))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withStatus(HttpStatus.OK)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,10 +102,6 @@ public class ClusterProxyServiceTest {
     @Test
     public void shouldUpdateKnoxUrlWithClusterProxy() throws URISyntaxException, JsonProcessingException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithKnox());
-        mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + UPDATE_CONFIG_PATH)))
-                .andExpect(content().json(configUpdateRequest(String.valueOf(CLUSTER_ID))))
-                .andExpect(method(HttpMethod.POST))
-                .andRespond(withStatus(HttpStatus.OK));
 
         mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + UPDATE_CONFIG_PATH)))
                 .andExpect(content().json(configUpdateRequest("stack-crn")))
@@ -135,11 +125,6 @@ public class ClusterProxyServiceTest {
     @Test
     public void shouldDeregisterClsuter() throws URISyntaxException, JsonProcessingException {
         mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REMOVE_CONFIG_PATH)))
-                .andExpect(content().json(JsonUtil.writeValueAsStringSilent(of("clusterCrn", String.valueOf(CLUSTER_ID)))))
-                .andExpect(method(HttpMethod.POST))
-                .andRespond(withStatus(HttpStatus.OK));
-
-        mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REMOVE_CONFIG_PATH)))
                 .andExpect(content().json(JsonUtil.writeValueAsStringSilent(of("clusterCrn", "stack-crn"))))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withStatus(HttpStatus.OK));
@@ -147,12 +132,12 @@ public class ClusterProxyServiceTest {
         service.deregisterCluster(testStack());
     }
 
-    private String configRegistrationRequest(String clusterIdentifier) {
+    private String configRegistrationRequest() {
         ClusterServiceCredential cloudbreakUser = new ClusterServiceCredential("cloudbreak", "/cb/test-data/secret/cbpassword:secret");
         ClusterServiceCredential dpUser = new ClusterServiceCredential("cmmgmt", "/cb/test-data/secret/dppassword:secret", true);
         ClusterServiceConfig service = new ClusterServiceConfig("cloudera-manager",
                 List.of("https://10.10.10.10/clouderamanager"), asList(cloudbreakUser, dpUser));
-        return JsonUtil.writeValueAsStringSilent(new ConfigRegistrationRequest(clusterIdentifier, List.of(service)));
+        return JsonUtil.writeValueAsStringSilent(new ConfigRegistrationRequest("stack-crn", List.of(String.valueOf(CLUSTER_ID)), List.of(service)));
     }
 
     private String configUpdateRequest(String clusterIdentifier) {

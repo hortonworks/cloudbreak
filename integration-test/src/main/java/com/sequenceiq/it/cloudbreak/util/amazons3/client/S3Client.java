@@ -26,7 +26,7 @@ public class S3Client {
     public S3Client() {
     }
 
-    public AmazonS3 build3Client() {
+    public AmazonS3 buildS3Client() {
         String accessKeyId = awsProperties.getCredential().getAccessKeyId();
         String secretKey = awsProperties.getCredential().getSecretKey();
         String region = awsProperties.getRegion();
