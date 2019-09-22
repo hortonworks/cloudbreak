@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.mock;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -33,7 +31,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
@@ -47,34 +44,13 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public static final String MOCK_CAPITAL = "MOCK";
 
-    public static final String MOCK_CLUSTER_DEFAULT_NAME = "autotesting-mock-cluster";
-
-    public static final String KEY_BASED_CREDENTIAL = "key";
-
-    public static final String CREDENTIAL_DEFAULT_NAME = "autotesting-mock-cred";
-
-    public static final String NETWORK_DEFAULT_NAME = "autotesting-aws-net";
-
-    public static final String VPC_DEFAULT_ID = "vpc-e623b28d";
-
-    public static final String INTERNET_GATEWAY_ID = "igw-b55b26dd";
-
-    public static final String SUBNET_DEFAULT_ID = "subnet-83901cfe";
-
-    public static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting mock network";
-
     public static final String EUROPE = "Europe";
-
-    public static final Set<String> VALID_REGION = Collections.singleton(EUROPE);
-
-    public static final String AVAILABILITY_ZONE = "London";
-
-    public static final String LONDON = "London";
-
-    public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie";
 
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
+
+    @Inject
+    private MockProperties mockProperties;
 
     @Override
     public CredentialTestDto credential(CredentialTestDto credentialEntity) {
@@ -116,42 +92,33 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String availabilityZone() {
-        String availabilityZone = "eu-west-1a";
-        String availabilityZoneParam = getTestParameter().get("mockAvailabilityZone");
-
-        return availabilityZoneParam == null ? availabilityZone : availabilityZoneParam;
+        return mockProperties.getAvailabilityZone();
     }
 
     @Override
     public String region() {
-        String regionParam = getTestParameter().get("mockRegion");
-        return regionParam == null ? EUROPE : regionParam;
+        return mockProperties.getRegion();
     }
 
     public String location() {
-        String locationParam = getTestParameter().get("mockLocation");
-        return locationParam == null ? LONDON : locationParam;
+        return mockProperties.getLocation();
     }
 
     public String getVpcId() {
-        String vpcId = getTestParameter().get("mockVcpId");
-        return vpcId == null ? VPC_DEFAULT_ID : vpcId;
-    }
-
-    public String getSubnetId() {
-        String subnetId = getTestParameter().get("mockSubnetId");
-        return subnetId == null ? SUBNET_DEFAULT_ID : subnetId;
+        return mockProperties.getVpcId();
     }
 
     public Set<String> getSubnetIDs() {
-        Set<String> subnetIDAsSet = new HashSet<>();
-        subnetIDAsSet.add(getSubnetId());
-        return subnetIDAsSet;
+        return mockProperties.getSubnetIds();
+    }
+
+    public String getSubnetId() {
+        Set<String> subnetIDs = mockProperties.getSubnetIds();
+        return subnetIDs.iterator().next();
     }
 
     public String getInternetGatewayId() {
-        String gatewayId = getTestParameter().get("mockInternetGatewayId");
-        return gatewayId == null ? INTERNET_GATEWAY_ID : gatewayId;
+        return mockProperties.getInternetGateway();
     }
 
     public MockNetworkV4Parameters networkParameters() {
@@ -229,19 +196,20 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
         return network.withNetworkCIDR(getSubnetCIDR())
-                .withSubnetIDs(getSubnetIDs());
+                .withSubnetIDs(getSubnetIDs())
+                .withMock(getMockNetworkParams());
+    }
+
+    private EnvironmentNetworkMockParams getMockNetworkParams() {
+        EnvironmentNetworkMockParams environmentNetworkMockParams = new EnvironmentNetworkMockParams();
+        environmentNetworkMockParams.setVpcId(getVpcId());
+        environmentNetworkMockParams.setInternetGatewayId(getInternetGatewayId());
+        return environmentNetworkMockParams;
     }
 
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.MOCK;
-    }
-
-    @Override
-    public EnvironmentTestDto environment(EnvironmentTestDto environment) {
-        return environment
-                .withRegions(VALID_REGION)
-                .withLocation(LONDON);
     }
 
     @Override
@@ -257,7 +225,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        stackAuthenticationEntity.withPublicKeyId("publicKeyId");
+        stackAuthenticationEntity.withPublicKeyId(mockProperties.getPublicKeyId());
         return stackAuthenticationEntity;
     }
 
@@ -289,7 +257,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBlueprintName() {
-        return DEFAULT_CLUSTER_DEFINTION_NAME;
+        return mockProperties.getDefaultBlueprintName();
     }
 
     @Override
