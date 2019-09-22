@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientRetryer;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -75,6 +76,9 @@ public class AmbariClusterModificationServiceTest {
     @Mock
     private AmbariPollingServiceProvider ambariPollingServiceProvider;
 
+    @Mock
+    private AmbariClientRetryer ambariClientRetryer;
+
     @InjectMocks
     private AmbariClusterModificationService ambariClusterModificationService;
 
@@ -85,7 +89,7 @@ public class AmbariClusterModificationServiceTest {
         stack.setCluster(cluster);
 
         AmbariClient ambariClient = mock(AmbariClient.class);
-        when(ambariClient.getClusterHosts()).thenReturn(cluster.getHostGroups().stream()
+        when(ambariClientRetryer.getClusterHosts(any())).thenReturn(cluster.getHostGroups().stream()
                 .flatMap(hostGroup -> hostGroup.getHostNames().stream())
                 .collect(Collectors.toList()));
         when(clientFactory.getAmbariClient(any(), any())).thenReturn(ambariClient);
@@ -119,8 +123,9 @@ public class AmbariClusterModificationServiceTest {
         rackMap.put("host1", "myrack");
         rackMap.put("host2", "myrack");
 
-        verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
-        verify(ambariClient, times(0)).addHostsWithBlueprint(anyString(), anyString(), any());
+        verify(ambariClientRetryer, times(1))
+                .addHostsAndRackInfoWithBlueprint(any(AmbariClient.class), eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
+        verify(ambariClientRetryer, times(0)).addHostsWithBlueprint(any(AmbariClient.class), anyString(), anyString(), any());
         verify(ambariClient, never()).updateRack(anyString(), anyString());
     }
 
@@ -131,7 +136,7 @@ public class AmbariClusterModificationServiceTest {
         stack.setCluster(cluster);
 
         AmbariClient ambariClient = mock(AmbariClient.class);
-        when(ambariClient.getClusterHosts()).thenReturn(cluster.getHostGroups().stream()
+        when(ambariClientRetryer.getClusterHosts(any(AmbariClient.class))).thenReturn(cluster.getHostGroups().stream()
                 .flatMap(hostGroup -> hostGroup.getHostNames().stream())
                 .collect(Collectors.toList()));
         when(clientFactory.getAmbariClient(any(), any())).thenReturn(ambariClient);
@@ -165,8 +170,10 @@ public class AmbariClusterModificationServiceTest {
         rackMap.put("host1", "myrack");
         rackMap.put("host2", "myrack");
 
-        verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
-        verify(ambariClient, times(0)).addHostsWithBlueprint(anyString(), anyString(), any());
+        verify(ambariClientRetryer, times(1))
+                .addHostsAndRackInfoWithBlueprint(any(AmbariClient.class), eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
+        verify(ambariClientRetryer, times(0))
+                .addHostsWithBlueprint(any(AmbariClient.class), anyString(), anyString(), any());
         verify(ambariClient, never()).updateRack(anyString(), anyString());
     }
 
@@ -177,7 +184,7 @@ public class AmbariClusterModificationServiceTest {
         stack.setCluster(cluster);
 
         AmbariClient ambariClient = mock(AmbariClient.class);
-        when(ambariClient.getClusterHosts()).thenReturn(cluster.getHostGroups().stream()
+        when(ambariClientRetryer.getClusterHosts(any(AmbariClient.class))).thenReturn(cluster.getHostGroups().stream()
                 .flatMap(hostGroup -> hostGroup.getHostNames().stream())
                 .collect(Collectors.toList()));
         when(clientFactory.getAmbariClient(any(), any())).thenReturn(ambariClient);
@@ -207,8 +214,10 @@ public class AmbariClusterModificationServiceTest {
 
         List<String> candidateHostNames = List.of("host1", "host2");
 
-        verify(ambariClient, times(0)).addHostsAndRackInfoWithBlueprint(anyString(), anyString(), any());
-        verify(ambariClient, times(1)).addHostsWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(candidateHostNames));
+        verify(ambariClientRetryer, times(0))
+                .addHostsAndRackInfoWithBlueprint(any(AmbariClient.class), anyString(), anyString(), any());
+        verify(ambariClientRetryer, times(1))
+                .addHostsWithBlueprint(any(AmbariClient.class), eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(candidateHostNames));
         verify(ambariClient, never()).updateRack(anyString(), anyString());
     }
 
@@ -219,7 +228,7 @@ public class AmbariClusterModificationServiceTest {
         stack.setCluster(cluster);
 
         AmbariClient ambariClient = mock(AmbariClient.class);
-        when(ambariClient.getClusterHosts()).thenReturn(cluster.getHostGroups().stream()
+        when(ambariClientRetryer.getClusterHosts(any())).thenReturn(cluster.getHostGroups().stream()
                 .flatMap(hostGroup -> hostGroup.getHostNames().stream())
                 .collect(Collectors.toList()));
         when(clientFactory.getAmbariClient(any(), any())).thenReturn(ambariClient);
@@ -252,8 +261,10 @@ public class AmbariClusterModificationServiceTest {
         rackMap.put("host1", "/default-rack");
         rackMap.put("host2", "myrack");
 
-        verify(ambariClient, times(1)).addHostsAndRackInfoWithBlueprint(eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
-        verify(ambariClient, times(0)).addHostsWithBlueprint(anyString(), anyString(), any());
+        verify(ambariClientRetryer, times(1))
+                .addHostsAndRackInfoWithBlueprint(any(AmbariClient.class), eq(cluster.getBlueprint().getName()), eq(hostGroup.getName()), eq(rackMap));
+        verify(ambariClientRetryer, times(0))
+                .addHostsWithBlueprint(any(AmbariClient.class), anyString(), anyString(), any());
         verify(ambariClient, never()).updateRack(anyString(), anyString());
     }
 }

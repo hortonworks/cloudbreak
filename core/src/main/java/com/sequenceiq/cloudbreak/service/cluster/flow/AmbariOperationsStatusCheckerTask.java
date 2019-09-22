@@ -43,25 +43,29 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
         Map<String, Integer> installRequests = t.getRequests();
         boolean allFinished = true;
         for (Entry<String, Integer> request : installRequests.entrySet()) {
-            AmbariClient ambariClient = t.getAmbariClient();
-            BigDecimal installProgress = getInstallProgressFromAmbari(request, ambariClient);
-            LOGGER.info("Ambari operation: '{}', Progress: {}", request.getKey(), installProgress);
-            notificationSender.send(getAmbariProgressNotification(installProgress.longValue(), t.getStack(), t.getAmbariOperationType()));
-            if (FAILED.compareTo(installProgress) == 0) {
-                boolean failed = true;
-                for (int i = 0; i < MAX_RETRY; i++) {
-                    if (getInstallProgressFromAmbari(request, ambariClient).compareTo(FAILED) != 0) {
-                        failed = false;
-                        break;
+            if (request.getValue() != 0) {
+                AmbariClient ambariClient = t.getAmbariClient();
+                BigDecimal installProgress = getInstallProgressFromAmbari(request, ambariClient);
+                LOGGER.info("Ambari operation: '{}', requestId: '{}', progress: {}", request.getKey(), request.getValue(), installProgress);
+                notificationSender.send(getAmbariProgressNotification(installProgress.longValue(), t.getStack(), t.getAmbariOperationType()));
+                if (FAILED.compareTo(installProgress) == 0) {
+                    boolean failed = true;
+                    for (int i = 0; i < MAX_RETRY; i++) {
+                        if (getInstallProgressFromAmbari(request, ambariClient).compareTo(FAILED) != 0) {
+                            failed = false;
+                            break;
+                        }
+                    }
+                    if (failed) {
+                        notificationSender.send(getAmbariProgressNotification(Long.parseLong("100"), t.getStack(), t.getAmbariOperationType()));
+                        throw new AmbariOperationFailedException(String.format("Ambari operation failed: [component: '%s', requestID: '%s']", request.getKey(),
+                                request.getValue()));
                     }
                 }
-                if (failed) {
-                    notificationSender.send(getAmbariProgressNotification(Long.parseLong("100"), t.getStack(), t.getAmbariOperationType()));
-                    throw new AmbariOperationFailedException(String.format("Ambari operation failed: [component: '%s', requestID: '%s']", request.getKey(),
-                            request.getValue()));
-                }
+                allFinished = allFinished && COMPLETED.compareTo(installProgress) == 0;
+            } else {
+                LOGGER.info("We are not tracking Ambari request id 0, Ambari operation: '{}', requestId: '{}'", request.getKey(), request.getValue());
             }
-            allFinished = allFinished && COMPLETED.compareTo(installProgress) == 0;
         }
         return allFinished;
     }
