@@ -261,7 +261,7 @@ cb:
     port: 5432
 
   cm:
-    admin.role: "ROLE_CONFIGURATOR"
+    admin.role: "ROLE_ADMIN"
     user.role: "ROLE_USER"
 
   clouderamanager:
