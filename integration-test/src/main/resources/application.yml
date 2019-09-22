@@ -162,6 +162,38 @@ integrationtest:
     imageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json
     imageId: 16ad7759-83b1-42aa-aadf-0e3a6e7b5444
 
+  # mock parameters
+  mock:
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    region: Europe
+    location: London
+    availabilityZone: London
+    vpcId: vpc1
+    subnetIds:
+      - net1
+      - net2
+    publicKeyId: publicKeyId
+    internetGateway: "1.1.1.1"
+    credential:
+      type: key
+      roleArn:
+      accessKeyId:
+      secretKey:
+    instance:
+      type: m5.2xlarge
+      volumeSize: 100
+      volumeCount: 1
+      volumeType: gp2
+    baseimage:
+      redhat7:
+        imageId: ee68297d-59b3-4cb0-419a-f9e00763bdb4
+        blueprints:
+          - "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    cloudstorage:
+      s3:
+        instanceProfile:
+      baseLocation:
+      fileSystemType: S3
 # ---------- old test parameters: ---------- #
 
   outputdir: .

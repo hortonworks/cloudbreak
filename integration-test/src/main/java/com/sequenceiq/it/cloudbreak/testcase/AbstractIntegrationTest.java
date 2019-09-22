@@ -32,8 +32,6 @@ import org.testng.annotations.DataProvider;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
@@ -149,7 +147,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createDefaultEnvironment(testContext);
+        createDefaultEnvironmentWithNetwork(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
@@ -238,7 +236,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void createDefaultEnvironment(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
-                .withNetwork(environmentNetwork())
                 .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
@@ -390,16 +387,4 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     protected CommonCloudProperties commonCloudProperties() {
         return commonCloudProperties;
     }
-
-    protected EnvironmentNetworkRequest environmentNetwork() {
-        EnvironmentNetworkRequest networkReq = new EnvironmentNetworkRequest();
-        networkReq.setNetworkCidr("0.0.0.0/0");
-        EnvironmentNetworkMockParams mockReq = new EnvironmentNetworkMockParams();
-        mockReq.setVpcId("vepeceajdi");
-        mockReq.setInternetGatewayId("1.1.1.1");
-        networkReq.setMock(mockReq);
-        networkReq.setSubnetIds(Set.of("net1", "net2"));
-        return networkReq;
-    }
-
 }

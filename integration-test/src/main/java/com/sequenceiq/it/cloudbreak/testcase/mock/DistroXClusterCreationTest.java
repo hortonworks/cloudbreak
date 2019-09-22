@@ -28,6 +28,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -136,15 +137,16 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     public void testDistroxCloudStorage(MockedTestContext testContext) {
         String storageEnvKey = resourcePropertyProvider().getName();
 
-        String sdxInternal = resourcePropertyProvider().getName() + "-lofaszdoktor";
+        String sdxInternal = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
 
         testContext
+                .given(EnvironmentNetworkTestDto.class)
                 .given(storageEnvKey, EnvironmentTestDto.class)
                 .withDescription("Env with telemetry")
                 .withLocation(ENVIRONMENT_LOCATION)
-                .withNetwork(environmentNetwork())
+                .withNetwork()
                 .withTelemetry(telemetry())
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withMockIDBMS()
@@ -197,8 +199,9 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         String cluster = "cmcluster";
 
         testContext
+                .given(EnvironmentNetworkTestDto.class)
                 .given(envKey, EnvironmentTestDto.class)
-                .withNetwork(environmentNetwork())
+                .withNetwork()
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(envName)
                 .when(getEnvironmentTestClient().create())
