@@ -4,7 +4,7 @@
   file.managed:
     - makedirs: True
     - source: salt://nginx/conf/ssl.conf
-    - replace: False
+    - replace: True
 
 # when gateway is defined, we do NOT config user facing cert and ssl for port 443, because services are available through knox on 8443
 # we still config ssl for port 9443 (for internal communication with ambari)
