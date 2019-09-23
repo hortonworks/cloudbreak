@@ -17,6 +17,13 @@ execute-ambari-server-init:
     - name: /opt/ambari-server/ambari-server-init.sh 2>&1 | tee -a /var/log/ambari-server-init.log && exit ${PIPESTATUS[0]}
     - unless: test -f /var/ambari-init-executed
 
+remove-rca-properties:
+  file.replace:
+    - name: /etc/ambari-server/conf/ambari.properties
+    - pattern: "server\\.jdbc\\.rca.*"
+    - repl: ""
+    - ignore_if_missing: True
+
 {% if ambari.is_systemd %}
 
 /etc/systemd/system/ambari-server.service:
