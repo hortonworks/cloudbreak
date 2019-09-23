@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
-import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -31,7 +30,6 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConvert
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -173,20 +171,17 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withLdapConfig(ldapConfig)
+                    .withCustomInputs(source.getInputs())
                     .withKerberosConfig(getKerberosConfig(source));
 
             SharedServiceV4Request sharedService = source.getSharedService();
             if (sharedService != null && StringUtils.isNotBlank(sharedService.getDatalakeName())) {
                 DatalakeResources datalakeResource = datalakeResourcesService.getByNameForWorkspace(source.getSharedService().getDatalakeName(), workspace);
                 if (datalakeResource != null) {
-                    DatalakeConfigApi connector = getDatalakeConnector(datalakeResource);
                     SharedServiceConfigsView sharedServiceConfigsView = ambariDatalakeConfigProvider.createSharedServiceConfigView(datalakeResource);
-                    Map<String, String> blueprintConfigParams =
-                            ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResource, blueprint, connector);
                     Map<String, String> additionalParams = ambariDatalakeConfigProvider.getAdditionalParameters(source, datalakeResource);
                     builder.withSharedServiceConfigs(sharedServiceConfigsView)
-                            .withFixInputs((Map) additionalParams)
-                            .withCustomInputs((Map) blueprintConfigParams);
+                            .withFixInputs((Map) additionalParams);
                 } else {
                     throw new CloudbreakServiceException("Cannot collect shared service resources from datalake!");
                 }
@@ -198,15 +193,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             return builder.build();
         } catch (BlueprintProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
-        }
-    }
-
-    public DatalakeConfigApi getDatalakeConnector(DatalakeResources datalakeResources) {
-        if (datalakeResources.getDatalakeStackId() != null) {
-            Stack datalakeStack = stackService.getById(datalakeResources.getDatalakeStackId());
-            return datalakeConfigApiConnector.getConnector(datalakeStack);
-        } else {
-            throw new CloudbreakServiceException("Can not create Ambari Clientas there is no Datalake Stack and the credential is not for Cumulus");
         }
     }
 
