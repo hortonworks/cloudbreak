@@ -24,6 +24,11 @@ spring:
     prefer-file-system-access: false
   datasource:
     maxActive: 30
+  data:
+    web:
+      pageable:
+        default-page-size: 100
+        max-page-size: 1000
 rest:
   debug: false
 cert:

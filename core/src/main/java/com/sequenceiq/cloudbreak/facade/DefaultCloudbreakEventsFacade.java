@@ -6,6 +6,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
@@ -36,10 +38,10 @@ public class DefaultCloudbreakEventsFacade implements CloudbreakEventsFacade {
     }
 
     @Override
-    public List<CloudbreakEventsJson> retrieveEventsByStack(Long stackId) {
-        List<StructuredNotificationEvent> cloudbreakEvents = cloudbreakEventService.cloudbreakEventsForStack(stackId);
+    public Page<CloudbreakEventsJson> retrieveEventsByStack(Long stackId, Pageable pageable) {
+        Page<StructuredNotificationEvent> cloudbreakEvents = cloudbreakEventService.cloudbreakEventsForStack(stackId, pageable);
         LOGGER.debug("Convert notification events for stack [{}]", stackId);
-        List<CloudbreakEventsJson> cloudbreakEventsJsons = eventJsonConverter.convertAllForSameStack(cloudbreakEvents);
+        Page<CloudbreakEventsJson> cloudbreakEventsJsons = eventJsonConverter.convertAllForSameStack(cloudbreakEvents);
         LOGGER.debug("Convert notification events for stack [{}] is done", stackId);
         return cloudbreakEventsJsons;
     }

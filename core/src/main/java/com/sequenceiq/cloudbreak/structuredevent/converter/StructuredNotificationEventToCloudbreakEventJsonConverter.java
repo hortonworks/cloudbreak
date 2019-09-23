@@ -1,16 +1,12 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.stack.StackViewResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
@@ -59,18 +55,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
         return cloudbreakEvent;
     }
 
-    public List<CloudbreakEventsJson> convertAllForSameStack(List<StructuredNotificationEvent> events) {
-        if (events.isEmpty()) {
-            return Collections.emptyList();
-        } else {
-            Long stackId = events.get(0).getNotificationDetails().getStackId();
-            StackViewResponse stackViewResponse = stackApiViewService.retrieveById(stackId);
-            return events.stream()
-                    .map(event -> getCloudbreakEventsJson(event.getNotificationDetails(), event.getOperation()))
-                    .map(event -> {
-                        event.setStackView(stackViewResponse);
-                        return event;
-                    }).collect(Collectors.toList());
-        }
+    public Page<CloudbreakEventsJson> convertAllForSameStack(Page<StructuredNotificationEvent> events) {
+            return events.map(event -> getCloudbreakEventsJson(event.getNotificationDetails(), event.getOperation()));
     }
 }

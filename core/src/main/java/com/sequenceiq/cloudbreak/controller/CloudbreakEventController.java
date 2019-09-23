@@ -10,6 +10,8 @@ import javax.transaction.Transactional.TxType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
@@ -27,6 +29,8 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 @Controller
 @Transactional(TxType.NEVER)
 public class CloudbreakEventController implements EventEndpoint {
+
+    private static final int NOTIFICATION_EVENT_LIMIT = 100;
 
     @Inject
     private CloudbreakEventsFacade cloudbreakEventsFacade;
@@ -52,7 +56,8 @@ public class CloudbreakEventController implements EventEndpoint {
 
     @Override
     public List<CloudbreakEventsJson> getCloudbreakEventsByStack(Long stackId) {
-        return cloudbreakEventsFacade.retrieveEventsByStack(stackId);
+        PageRequest defaultPage = PageRequest.of(0, NOTIFICATION_EVENT_LIMIT, Sort.by("timestamp").descending());
+        return cloudbreakEventsFacade.retrieveEventsByStack(stackId, defaultPage).getContent();
     }
 
     @Override

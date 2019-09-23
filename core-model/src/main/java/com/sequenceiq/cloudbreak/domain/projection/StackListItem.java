@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.projection;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 
 public interface StackListItem {
 
@@ -9,6 +10,8 @@ public interface StackListItem {
     String getName();
 
     String getBlueprintName();
+
+    Json getBlueprintTags();
 
     Status getStackStatus();
 
@@ -21,4 +24,8 @@ public interface StackListItem {
     String getStackVersion();
 
     String getCloudPlatform();
+
+    Boolean getGovCloud();
+
+    Long getSharedClusterId();
 }

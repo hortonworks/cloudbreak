@@ -13,6 +13,9 @@ import javax.transaction.Transactional.TxType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventV3Endpoint;
@@ -62,8 +65,9 @@ public class CloudbreakEventV3Controller implements EventV3Endpoint {
     }
 
     @Override
-    public List<CloudbreakEventsJson> getCloudbreakEventsByStack(Long workspaceId, String name) {
-        return cloudbreakEventsFacade.retrieveEventsByStack(getStackIfAvailable(workspaceId, name).getId());
+    public Page<CloudbreakEventsJson> getCloudbreakEventsByStack(Long workspaceId, String name, Integer page, Integer size) {
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
+        return cloudbreakEventsFacade.retrieveEventsByStack(getStackIdIfAvailable(workspaceId, name), pageable);
     }
 
     @Override
@@ -90,5 +94,9 @@ public class CloudbreakEventV3Controller implements EventV3Endpoint {
 
     private Stack getStackIfAvailable(Long workspaceId, String name) {
         return Optional.ofNullable(stackService.getByNameInWorkspace(name, workspaceId)).orElseThrow(notFound("stack", name));
+    }
+
+    private Long getStackIdIfAvailable(Long workspaceId, String name) {
+        return Optional.ofNullable(stackService.getIdByNameInWorkspace(name, workspaceId)).orElseThrow(notFound("stack", name));
     }
 }

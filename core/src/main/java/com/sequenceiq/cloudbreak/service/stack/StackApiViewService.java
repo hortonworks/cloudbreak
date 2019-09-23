@@ -60,7 +60,11 @@ public class StackApiViewService {
                 .collect(Collectors.toMap(StackInstanceCount::getStackId, StackInstanceCount::getInstanceCount));
         Set<StackListItem> stackList = stackRepository.findByWorkspaceId(workspaceId);
         return stackList.stream()
-                .map(item -> stackListItemToStackViewResponseConverter.convert(item, stackInstanceCounts, stackUnhealthyInstanceCounts))
+                .map(item -> {
+                    String sharedClusterName = Optional.ofNullable(item.getSharedClusterId())
+                            .map(sharedClusterId -> stackRepository.findNameByIdAndWorkspaceId(sharedClusterId, workspaceId)).orElse(null);
+                    return stackListItemToStackViewResponseConverter.convert(item, stackInstanceCounts, stackUnhealthyInstanceCounts, sharedClusterName);
+                })
                 .collect(Collectors.toSet());
     }
 
