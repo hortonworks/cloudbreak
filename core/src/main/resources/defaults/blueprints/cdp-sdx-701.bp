@@ -69,13 +69,7 @@
           {
             "base": true,
             "refName": "ranger-RANGER_TAGSYNC-BASE",
-            "roleType": "RANGER_TAGSYNC",
-            "configs": [
-              {
-                 "name": "ranger.tagsync.source.atlas",
-                 "value": "true"
-              }
-            ]
+            "roleType": "RANGER_TAGSYNC"
           },
           {
             "base": true,
