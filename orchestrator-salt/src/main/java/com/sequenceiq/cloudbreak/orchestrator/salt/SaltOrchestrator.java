@@ -724,6 +724,9 @@ public class SaltOrchestrator implements HostOrchestrator {
                     String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
                     LOGGER.debug("Applying role '{}' on nodes: [{}]", identityRole, responsiveNodes);
                     runSaltCommand(sc, new GrainAddRunner(targets, responsiveNodes, "roles", identityRole, CompoundType.IP), exitCriteriaModel);
+                    String removeIdentityRole = adJoinable ? "ad_member" : "ipa_member";
+                    LOGGER.debug("Removing role '{}' on nodes: [{}]", removeIdentityRole, responsiveNodes);
+                    runSaltCommand(sc, new GrainRemoveRunner(targets, responsiveNodes, "roles", removeIdentityRole, CompoundType.IP), exitCriteriaModel);
                 }
 
                 Set<String> all = responsiveNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
