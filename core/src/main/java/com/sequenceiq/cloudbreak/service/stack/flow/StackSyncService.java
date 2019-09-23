@@ -1,13 +1,11 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.WAIT_FOR_SYNC;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.INSTANCE_NAME;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -159,8 +157,6 @@ public class StackSyncService {
             LOGGER.debug("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
             instance.setInstanceStatus(InstanceStatus.STOPPED);
             instanceMetaDataService.save(instance);
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_UPDATED.code(), Arrays.asList(instance.getInstanceId(), "stopped")));
         }
     }
 
@@ -171,8 +167,6 @@ public class StackSyncService {
                     instance.getInstanceId());
             instance.setInstanceStatus(InstanceStatus.FAILED);
             instanceMetaDataService.save(instance);
-            eventService.fireCloudbreakEvent(stack.getId(), CREATE_FAILED.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_FAILED.code(), Collections.singletonList(instance.getDiscoveryFQDN())));
         } else if (!instance.isRunning() && !instance.isDecommissioned() && !instance.isCreated() && !instance.isFailed()) {
             LOGGER.debug("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
             updateMetaDataToRunning(stack.getId(), stack.getCluster(), instance);
@@ -268,8 +262,6 @@ public class StackSyncService {
             instanceMetaData.setInstanceStatus(InstanceStatus.UNREGISTERED);
         }
         instanceMetaDataService.save(instanceMetaData);
-        eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
-                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_UPDATED.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN(), "running")));
     }
 
     private enum Msg {
@@ -284,8 +276,6 @@ public class StackSyncService {
         STACK_SYNC_HOST_UPDATED("stack.sync.host.updated"),
         STACK_SYNC_INSTANCE_TERMINATED("stack.sync.instance.terminated"),
         STACK_SYNC_INSTANCE_DELETED_CBMETADATA("stack.sync.instance.deleted.cbmetadata"),
-        STACK_SYNC_INSTANCE_UPDATED("stack.sync.instance.updated"),
-        STACK_SYNC_INSTANCE_FAILED("stack.sync.instance.failed"),
         CLUSTER_FAILED_NODES_REPORTED("cluster.failednodes.reported");
 
         private final String code;
