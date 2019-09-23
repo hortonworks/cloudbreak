@@ -44,9 +44,8 @@ public class HiveMetastoreCloudStorageServiceConfigProviderTest {
         assertEquals("hive_warehouse_external_directory", serviceConfigs.get(1).getName());
         assertEquals("s3a://bucket/hive/warehouse/external", serviceConfigs.get(1).getValue());
 
-        assertEquals("hive_service_replication_config_safety_valve", serviceConfigs.get(2).getName());
-        assertEquals("<property><name>hive.repl.replica.functions.root.dir</name><value>" +
-                "s3a://bucket/hive/replica</value></property>", serviceConfigs.get(2).getValue());
+        assertEquals("hive_repl_replica_functions_root_dir", serviceConfigs.get(2).getName());
+        assertEquals("s3a://bucket/hive/replica", serviceConfigs.get(2).getValue());
     }
 
     @Test
