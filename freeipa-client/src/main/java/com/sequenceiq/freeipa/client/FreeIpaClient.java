@@ -167,6 +167,11 @@ public class FreeIpaClient {
         return (User) invoke("user_mod", flags, params, User.class).getResult();
     }
 
+    public User userMod(String user, Map<String, Object> params) throws FreeIpaClientException {
+        List<String> flags = List.of(user);
+        return (User) invoke("user_mod", flags, params, User.class).getResult();
+    }
+
     public Group groupAdd(String group) throws FreeIpaClientException {
         List<String> flags = List.of(group);
         Map<String, Object> params = Map.of();

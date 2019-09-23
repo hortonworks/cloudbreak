@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
@@ -47,6 +49,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.util.WorkloadCredentialsUtils;
 
 @Service
 public class UserService {
@@ -179,23 +182,39 @@ public class UserService {
             removeUsers(freeIpaClient, stateDifference.getUsersToRemove());
             removeGroups(freeIpaClient, stateDifference.getGroupsToRemove());
 
-            // Check for the password related attribute (cdpUserAttr) existence.
-            Config config = freeIpaClient.getConfig();
-            if (config.getIpauserobjectclasses() != null && config.getIpauserobjectclasses().contains(Config.CDP_USER_ATTRIBUTE)) {
-                stateDifference.getUsersToAdd().forEach(u -> {
-                    // TODO: Go for password sync
-                    WorkloadCredential workloadCredential = umsUsersState.getUsersWorkloadCredentialMap().get(u.getName());
-//                    if (workloadCredential != null && !StringUtils.isEmpty(workloadCredential.getHashedPassword()) && workloadCredential.getKeys() != null) {
-//                        // TODO: call freeipa client for user mod for password and log
-                          // Call ASN_1 Encoder for envoding hashed password and then call user mod
-//                    }
-                });
-            }
+            // Check for the password related attribute (cdpUserAttr) existence and go for password sync.
+            processUsersWorkloadCredentials(stack.getEnvironmentCrn(), umsUsersState, freeIpaClient);
 
             return SyncStatusDetail.succeed(environmentCrn, "TODO- collect detail info");
         } catch (Exception e) {
             LOGGER.warn("Failed to synchronize environment {}", stack.getEnvironmentCrn(), e);
             return SyncStatusDetail.fail(environmentCrn, e.getLocalizedMessage());
+        }
+    }
+
+    private void processUsersWorkloadCredentials(String environmentCrn, UsersState umsUsersState, FreeIpaClient freeIpaClient) throws Exception {
+        Config config = freeIpaClient.getConfig();
+        if (config.getIpauserobjectclasses() != null && config.getIpauserobjectclasses().contains(Config.CDP_USER_ATTRIBUTE)) {
+            // found the attribute, password sync can be performed
+            LOGGER.debug("Going for Credentials Sync, seems new image FreeIPA Server, having config attribute");
+
+            // Should sync for all users and not just diff. At present there is no way to identify that there is a change in password for a user
+            for (FmsUser u : umsUsersState.getUsers()) {
+                WorkloadCredential workloadCredential = umsUsersState.getUsersWorkloadCredentialMap().get(u.getName());
+                if (workloadCredential != null
+                    && !StringUtils.isEmpty(workloadCredential.getHashedPassword())
+                    && CollectionUtils.isEmpty(workloadCredential.getKeys())) {
+
+                    // Call ASN_1 Encoder for encoding hashed password and then call user mod for password
+                    LOGGER.debug("Found Credentials for user {}", u.getName());
+                    String ansEncodedKrbPrincipalKey = WorkloadCredentialsUtils.getEncodedKrbPrincipalKey(workloadCredential.getKeys());
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("cdpHashedPassword", workloadCredential.getHashedPassword());
+                    params.put("cdpUnencryptedKrbPrincipalKey", ansEncodedKrbPrincipalKey);
+                    freeIpaClient.userMod(u.getName(), params);
+                    LOGGER.debug("Password synced for the user:{}, for the environment: {}", u.getName(), environmentCrn);
+                }
+            }
         }
     }
 
@@ -278,7 +297,7 @@ public class UserService {
     private void removeUsersFromGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
         for (String group : groupMapping.keySet()) {
             Set<String> users = Set.copyOf(groupMapping.get(group));
-            LOGGER.debug("removing users {} to group {}", users, group);
+            LOGGER.debug("removing users {} from group {}", users, group);
 
             try {
                 // TODO specialize response object
