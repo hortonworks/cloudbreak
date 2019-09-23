@@ -403,6 +403,16 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Long findIdByNameAndWorkspaceId(String name, Long workspaceId) {
+            return null;
+        }
+
+        @Override
+        public String findNameByIdAndWorkspaceId(Long sharedClusterId, Long workspaceId) {
+            return null;
+        }
+
+        @Override
         public <S extends Stack> S save(S entity) {
             return entity;
         }

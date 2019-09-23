@@ -2,18 +2,21 @@ package com.sequenceiq.cloudbreak.structuredevent.db;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
@@ -32,6 +35,9 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
 
     @Inject
     private StructuredEventRepository structuredEventRepository;
+
+    @Inject
+    private PagingStructuredEventRepository pagingStructuredEventRepository;
 
     @Override
     public void storeStructuredEvent(StructuredEvent structuredEvent) {
@@ -79,6 +85,14 @@ public class StructuredEventDBService extends AbstractWorkspaceAwareResourceServ
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
+    }
+
+    @Override
+    public <T extends StructuredEvent> Page<T> getEventsLimitedWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId,
+            Pageable pageable) {
+        Page<StructuredEventEntity> events = pagingStructuredEventRepository
+                .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass), resourceType, resourceId, pageable);
+        return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> conversionService.convert(event, StructuredEvent.class));
     }
 
     @Override

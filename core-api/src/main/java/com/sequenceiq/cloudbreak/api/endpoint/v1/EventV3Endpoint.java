@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v1;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -10,6 +11,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.springframework.data.domain.Page;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -36,8 +39,12 @@ public interface EventV3Endpoint {
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EventOpDescription.GET_BY_NAME, produces = ContentType.JSON, notes = Notes.EVENT_NOTES,
-            nickname = "getEventsByStackIdInWorkspace")
-    List<CloudbreakEventsJson> getCloudbreakEventsByStack(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+            nickname = "getEventsByStackNameInWorkspace")
+    Page<CloudbreakEventsJson> getCloudbreakEventsByStack(
+            @PathParam("workspaceId") Long workspaceId,
+            @PathParam("name") String name,
+            @QueryParam("page") @DefaultValue("0") Integer page,
+            @QueryParam("size") @DefaultValue("100") Integer size);
 
     @GET
     @Path("struct/{name}")

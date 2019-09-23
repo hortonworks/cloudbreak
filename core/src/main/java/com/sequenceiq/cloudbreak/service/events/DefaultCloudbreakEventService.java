@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.service.events;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -24,6 +26,8 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakEventService.class);
 
     private static final String CLOUDBREAK_EVENT = "CLOUDBREAK_EVENT";
+
+    private static final Integer NOTIFICATION_EVEN_LIMIT = 100;
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
@@ -69,11 +73,9 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public List<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId) {
-        List<StructuredNotificationEvent> events = new ArrayList<>();
-        if (stackId != null) {
-            events = structuredEventService.getEventsWithTypeAndResourceId(StructuredNotificationEvent.class, "stacks", stackId);
-        }
-        return events;
+    public Page<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId, Pageable pageable) {
+        return Optional.ofNullable(stackId)
+                .map(id -> structuredEventService.getEventsLimitedWithTypeAndResourceId(StructuredNotificationEvent.class, "stacks", id, pageable))
+                .orElse(Page.empty());
     }
 }

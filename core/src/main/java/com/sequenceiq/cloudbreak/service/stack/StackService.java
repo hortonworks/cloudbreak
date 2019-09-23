@@ -413,6 +413,14 @@ public class StackService {
         return stack;
     }
 
+    public Long getIdByNameInWorkspace(String name, Long workspaceId) {
+        Long stackId = stackRepository.findIdByNameAndWorkspaceId(name, workspaceId);
+        if (stackId == null) {
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
+        }
+        return stackId;
+    }
+
     public Stack getByNameInWorkspaceWithLists(String name, Long workspaceId) {
         return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
