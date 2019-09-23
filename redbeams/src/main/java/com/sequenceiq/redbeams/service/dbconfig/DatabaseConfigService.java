@@ -108,11 +108,6 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         }
     }
 
-    public void archive(DatabaseConfig databaseConfig) {
-        databaseConfig.setArchived(true);
-        repository.save(databaseConfig);
-    }
-
     public DatabaseConfig getByCrn(String resourceCrn) {
         Crn crn = Crn.safeFromString(resourceCrn);
         Optional<DatabaseConfig> resourceOpt = repository.findByResourceCrn(crn);
@@ -150,18 +145,18 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
                     String.format("Database(s) not found: %s", String.join(", ", notFoundDatabaseConfigs)));
         }
         return foundDatabaseConfigs.stream()
-                .map(this::deleteOne)
+                .map(this::delete)
                 .collect(Collectors.toSet());
     }
 
     public DatabaseConfig deleteByCrn(String resourceCrn) {
         DatabaseConfig resource = getByCrn(resourceCrn);
-        return deleteOne(resource);
+        return delete(resource);
     }
 
     public DatabaseConfig deleteByName(String name, String environmentCrn) {
         DatabaseConfig resource = getByName(name, environmentCrn);
-        return deleteOne(resource);
+        return delete(resource);
     }
 
     public String testConnection(String databaseConfigName, String environmentCrn) {
@@ -180,17 +175,46 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
                 .collect(Collectors.joining("; "));
     }
 
-    private DatabaseConfig deleteOne(DatabaseConfig databaseConfig) {
+    @Override
+    public DatabaseConfig delete(DatabaseConfig databaseConfig) {
+        return delete(databaseConfig, false, false);
+    }
+
+    /**
+     * Deletes a database configuration. If the database is service-managed,
+     * then also deletes the database from its home server unless
+     * <code>skipDeletionOnServer</code> is true. If deletion from the server
+     * fails, deletion fails unless <code>force</code> is true. (Currently,
+     * deletion from the server is the only action that <code>force</code>
+     * applies to.)
+     *
+     * @param  databaseConfig       database to delete
+     * @param  force                whether to force deletion
+     * @param  skipDeletionOnServer whether to skip deleting the database on its server
+     * @return                      deleted database
+     */
+    public DatabaseConfig delete(DatabaseConfig databaseConfig, boolean force, boolean skipDeletionOnServer) {
         LOGGER.info("Deleting database with name: {}", databaseConfig.getName());
 
-        DatabaseConfig deletedConfig = delete(databaseConfig);
-
-        // Only delete database from server if successfully removed from redbeams
         if (databaseConfig.getStatus() == ResourceStatus.SERVICE_MANAGED) {
-            deleteServiceManagedDatabase(databaseConfig);
+            if (!skipDeletionOnServer) {
+                // Only delete database from redbeams once successfully removed from server
+                try {
+                    deleteServiceManagedDatabase(databaseConfig);
+                } catch (RuntimeException e) {
+                    if (force) {
+                        LOGGER.warn("Deletion for database '{}' failed, continuing because termination is forced",
+                                databaseConfig.getName(), e);
+                    } else {
+                        throw e;
+                    }
+                }
+            } else {
+                LOGGER.debug("Skipping deletion on server");
+            }
         }
 
-        return deletedConfig;
+        return super.delete(databaseConfig);
     }
 
     private void deleteServiceManagedDatabase(DatabaseConfig databaseConfig) {

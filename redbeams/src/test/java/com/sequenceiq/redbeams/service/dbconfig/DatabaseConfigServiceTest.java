@@ -9,6 +9,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -248,6 +250,64 @@ public class DatabaseConfigServiceTest {
         verify(repository).save(databaseConfig);
 
         verify(driverFunctions).execWithDatabaseDriver(eq(server), any());
+    }
+
+    @Test
+    public void testDeleteCreatedDatabaseForce() {
+        DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
+        DatabaseServerConfig server = new DatabaseServerConfig();
+        server.setId(1L);
+        server.setName("myserver");
+
+        databaseConfig.setServer(server);
+        when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.of(databaseConfig));
+
+        doThrow(new RuntimeException()).when(driverFunctions).execWithDatabaseDriver(eq(server), any());
+
+        underTest.delete(databaseConfig, true, true);
+
+        assertTrue(databaseConfig.isArchived());
+        verify(repository).save(databaseConfig);
+    }
+
+    @Test
+    public void testDeleteCreatedDatabaseNoForce() {
+        thrown.expect(RuntimeException.class);
+
+        DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
+        DatabaseServerConfig server = new DatabaseServerConfig();
+        server.setId(1L);
+        server.setName("myserver");
+
+        databaseConfig.setServer(server);
+        when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.of(databaseConfig));
+
+        doThrow(new RuntimeException()).when(driverFunctions).execWithDatabaseDriver(eq(server), any());
+
+        try {
+            underTest.delete(databaseConfig, false, false);
+        } finally {
+            assertFalse(databaseConfig.isArchived());
+            verify(repository, never()).save(databaseConfig);
+        }
+    }
+
+    @Test
+    public void testDeleteCreatedDatabaseSkipDeletionOnServer() {
+        DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
+        DatabaseServerConfig server = new DatabaseServerConfig();
+        server.setId(1L);
+        server.setName("myserver");
+
+        databaseConfig.setServer(server);
+        when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.of(databaseConfig));
+
+        underTest.delete(databaseConfig, false, true);
+
+        assertTrue(databaseConfig.isArchived());
+        verify(repository).save(databaseConfig);
+
+        verify(driverFunctions, never()).execWithDatabaseDriver(eq(server), any());
     }
 
     @Test

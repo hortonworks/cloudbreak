@@ -18,6 +18,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -307,6 +308,27 @@ public class DatabaseServerConfigServiceTest {
         when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.empty());
 
         underTest.deleteByCrn(server.getResourceCrn().toString());
+    }
+
+    @Test
+    public void testDeleteCreatedServerWithDatabases() {
+        when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.of(server));
+
+        server.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
+
+        DatabaseConfig databaseConfig1 = new DatabaseConfig();
+        databaseConfig1.setId(1L);
+        DatabaseConfig databaseConfig2 = new DatabaseConfig();
+        databaseConfig2.setId(2L);
+        Set<DatabaseConfig> databases = new HashSet<>();
+        databases.add(databaseConfig1);
+        databases.add(databaseConfig2);
+        server.setDatabases(databases);
+
+        underTest.delete(server);
+
+        verify(databaseConfigService).delete(databaseConfig1, true, true);
+        verify(databaseConfigService).delete(databaseConfig2, true, true);
     }
 
     @Test

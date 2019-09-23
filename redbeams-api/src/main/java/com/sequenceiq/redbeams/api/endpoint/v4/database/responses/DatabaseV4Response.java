@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.database.responses;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
@@ -34,6 +35,9 @@ public class DatabaseV4Response extends DatabaseV4Base {
 
     @ApiModelProperty(Database.PASSWORD)
     private SecretResponse connectionPassword;
+
+    @ApiModelProperty(Database.RESOURCE_STATUS)
+    private ResourceStatus resourceStatus;
 
     public Long getCreationDate() {
         return creationDate;
@@ -89,5 +93,13 @@ public class DatabaseV4Response extends DatabaseV4Base {
 
     public void setConnectionPassword(SecretResponse connectionPassword) {
         this.connectionPassword = connectionPassword;
+    }
+
+    public ResourceStatus getResourceStatus() {
+        return resourceStatus;
+    }
+
+    public void setResourceStatus(ResourceStatus resourceStatus) {
+        this.resourceStatus = resourceStatus;
     }
 }

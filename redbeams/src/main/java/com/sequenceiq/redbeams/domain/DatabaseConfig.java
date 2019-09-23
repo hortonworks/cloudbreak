@@ -216,6 +216,7 @@ public class DatabaseConfig implements ArchivableResource, AccountIdAwareResourc
 
     @Override
     public void unsetRelationsToEntitiesToBeDeleted() {
+        server = null;
     }
 
     public void setDeletionTimestamp(Long deletionTimestamp) {
