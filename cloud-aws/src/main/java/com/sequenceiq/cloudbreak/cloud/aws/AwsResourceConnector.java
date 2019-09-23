@@ -81,9 +81,9 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
@@ -119,6 +119,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     private static final int INCREMENT_HOST_NUM = 256;
 
     private static final int CIDR_PREFIX = 24;
+
+    private static final int MAX_DETACH_INSTANCE_SIZE = 20;
 
     private static final List<String> UPSCALE_PROCESSES = singletonList("Launch");
 
@@ -702,13 +704,11 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             }
             String asGroupName = cfStackUtil.getAutoscalingGroupName(auth, vms.get(0).getTemplate().getGroupName(),
                     auth.getCloudContext().getLocation().getRegion().value());
-            DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceIds)
-                    .withShouldDecrementDesiredCapacity(true);
             AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(auth.getCloudCredential()),
                     auth.getCloudContext().getLocation().getRegion().value());
-            detachInstances(instanceIds, detachInstancesRequest, amazonASClient);
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(auth.getCloudCredential()),
                     auth.getCloudContext().getLocation().getRegion().value());
+            detachInstances(asGroupName, instanceIds, amazonASClient);
             terminateInstances(instanceIds, amazonEC2Client);
             LOGGER.info("Terminated instances in stack '{}': '{}'", auth.getCloudContext().getId(), instanceIds);
             try {
@@ -733,9 +733,14 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
     }
 
-    private void detachInstances(List<String> instanceIds, DetachInstancesRequest detachInstancesRequest, AmazonAutoScalingRetryClient amazonASClient) {
+    private void detachInstances(String asGroupName, List<String> instanceIds, AmazonAutoScalingRetryClient amazonASClient) {
         try {
-            amazonASClient.detachInstances(detachInstancesRequest);
+            for (int i = 0; i < instanceIds.size(); i += MAX_DETACH_INSTANCE_SIZE) {
+                List<String> idPartition = instanceIds.subList(i, i + Math.min(instanceIds.size() - i, MAX_DETACH_INSTANCE_SIZE));
+                DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(idPartition)
+                        .withShouldDecrementDesiredCapacity(true);
+                amazonASClient.detachInstances(detachInstancesRequest);
+            }
         } catch (AmazonServiceException e) {
             if (!"ValidationError".equals(e.getErrorCode())
                     || !e.getErrorMessage().contains("not part of Auto Scaling")
