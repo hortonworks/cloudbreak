@@ -47,7 +47,7 @@
         "serviceConfigs": [
           {
             "name": "yarn_admin_acl",
-            "value": "yarn,hive"
+            "value": "yarn,hive,hdfs"
           }
         ],
         "roleConfigGroups": [
