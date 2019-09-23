@@ -8,6 +8,53 @@ logging:
     path: ${integrationtest.outputdir}
 
 integrationtest:
+  cdhParcels:
+    "[7.0.0]":
+      parcels:
+        - name: SCHEMAREGISTRY
+          parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel
+          version: 0.8.0.3.0.0.0-21
+          csd:
+            - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/SCHEMAREGISTRY-0.8.0.jar
+        - name: STREAMS_MESSAGING_MANAGER
+          parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel
+          version: 2.1.0.3.0.0.0-21
+          csd:
+            - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar
+        - name: CFM
+          parcel: http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel
+          version: 2.0.0.0
+          csd:
+            - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFI-1.10.0.2.0.0.0-22.jar
+            - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFICA-1.10.0.2.0.0.0-22.jar
+            - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-22.jar
+      version: 7.0.0-1.cdh7.0.0.p0.1423385
+      minCM: 7.0
+      repo:
+        stack:
+          repoid: CDH-7.0.0
+          redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1423385/cdh/7.x/parcels/
+          centos7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1423385/cdh/7.x/parcels/
+    "[7.0.1]":
+      parcels:
+        - name: SCHEMAREGISTRY
+          parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel
+          version: 0.8.0.3.0.0.0-21
+          csd:
+            - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/SCHEMAREGISTRY-0.8.0.jar
+        - name: STREAMS_MESSAGING_MANAGER
+          parcel: http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel
+          version: 2.1.0.3.0.0.0-21
+          csd:
+            - http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar
+        - name: CFM
+          parcel: http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel
+          version: 2.0.0.0
+          csd:
+            - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFI-1.10.0.2.0.0.0-22.jar
+            - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFICA-1.10.0.2.0.0.0-22.jar
+            - http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-22/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-22.jar
+
   user:
     accessKey:
     secretKey:
@@ -47,6 +94,7 @@ integrationtest:
   # aws parameters
   aws:
     defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.0.1
     region: eu-west-1
     location: eu-west-1
     availabilityZone: eu-west-1a
@@ -80,6 +128,7 @@ integrationtest:
   # azure parameters
   azure:
     defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.0.1
     availabilityZone:
     region: West Europe
     location: West Europe
@@ -109,6 +158,7 @@ integrationtest:
   # gcp parameters
   gcp:
     defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.0.1
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
@@ -129,6 +179,7 @@ integrationtest:
   # openstack parameters
   openstack:
     defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.0.1
     availabilityZone: nova
     region: RegionOne
     location: Texas
@@ -148,6 +199,7 @@ integrationtest:
   # yarn parameters
   yarn:
     defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    blueprintCdhVersion: 7.0.1
     availabilityZone:
     region: default
     location: Frankfurt

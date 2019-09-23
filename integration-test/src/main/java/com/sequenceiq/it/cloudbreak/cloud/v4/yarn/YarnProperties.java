@@ -21,6 +21,8 @@ public class YarnProperties {
 
     private String imageId;
 
+    private String blueprintCdhVersion;
+
     private final Credential credential = new Credential();
 
     private final Instance instance = new Instance();
@@ -87,6 +89,14 @@ public class YarnProperties {
 
     public Instance getInstance() {
         return instance;
+    }
+
+    public String getBlueprintCdhVersion() {
+        return blueprintCdhVersion;
+    }
+
+    public void setBlueprintCdhVersion(String blueprintCdhVersion) {
+        this.blueprintCdhVersion = blueprintCdhVersion;
     }
 
     public static class Credential {

@@ -73,6 +73,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie";
 
+    public static final String DEFAULT_BLUEPRINT_CDH_VERSION = "7.0.1";
+
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
 
@@ -290,6 +292,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public String getBlueprintName() {
         return DEFAULT_CLUSTER_DEFINTION_NAME;
+    }
+
+    @Override
+    public String getBlueprintCdhVersion() {
+        return DEFAULT_BLUEPRINT_CDH_VERSION;
     }
 
     @Override

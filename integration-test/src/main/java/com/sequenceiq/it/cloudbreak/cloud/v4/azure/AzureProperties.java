@@ -17,6 +17,8 @@ public class AzureProperties {
 
     private String location;
 
+    private String blueprintCdhVersion;
+
     private final Credential credential = new Credential();
 
     private final Instance instance = new Instance();
@@ -71,6 +73,14 @@ public class AzureProperties {
 
     public Network getNetwork() {
         return network;
+    }
+
+    public String getBlueprintCdhVersion() {
+        return blueprintCdhVersion;
+    }
+
+    public void setBlueprintCdhVersion(String blueprintCdhVersion) {
+        this.blueprintCdhVersion = blueprintCdhVersion;
     }
 
     public static class Credential {

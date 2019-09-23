@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.ClouderaManagerV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.product.ClouderaManagerProductV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.repository.ClouderaManagerRepositoryV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
@@ -60,8 +59,6 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
         ClouderaManagerV1Request cm = new ClouderaManagerV1Request();
         ClouderaManagerRepositoryV1Request repository = new ClouderaManagerRepositoryV1Request();
         cm.setRepository(repository);
-        ClouderaManagerProductV1Request product = new ClouderaManagerProductV1Request();
-        cm.setProducts(List.of(product));
         cluster.setCm(cm);
         getRequest().setCluster(cluster);
         return this;
