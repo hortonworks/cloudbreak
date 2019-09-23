@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.model.component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -11,6 +15,8 @@ public class DefaultCDHInfo implements Versioned {
     private ClouderaManagerDefaultStackRepoDetails repo;
 
     private String minCM;
+
+    private List<ClouderaManagerProduct> parcels;
 
     @Override
     public String getVersion() {
@@ -38,6 +44,17 @@ public class DefaultCDHInfo implements Versioned {
 
     public void setRepo(ClouderaManagerDefaultStackRepoDetails repo) {
         this.repo = repo;
+    }
+
+    public List<ClouderaManagerProduct> getParcels() {
+        if (parcels == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(parcels);
+    }
+
+    public void setParcels(List<ClouderaManagerProduct> parcels) {
+        this.parcels = parcels;
     }
 
     @Override

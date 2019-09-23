@@ -27,6 +27,8 @@ public class OpenStackProperties {
 
     private final Prewarmed prewarmed = new Prewarmed();
 
+    private String blueprintCdhVersion;
+
     public String getAvailabilityZone() {
         return availabilityZone;
     }
@@ -85,6 +87,14 @@ public class OpenStackProperties {
 
     public Prewarmed getPrewarmed() {
         return prewarmed;
+    }
+
+    public String getBlueprintCdhVersion() {
+        return blueprintCdhVersion;
+    }
+
+    public void setBlueprintCdhVersion(String blueprintCdhVersion) {
+        this.blueprintCdhVersion = blueprintCdhVersion;
     }
 
     public static class Instance {

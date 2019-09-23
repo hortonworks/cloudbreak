@@ -24,6 +24,8 @@ public class AwsProperties {
 
     private String defaultBlueprintName;
 
+    private String blueprintCdhVersion;
+
     private final Instance instance = new Instance();
 
     private final Credential credential = new Credential();
@@ -86,6 +88,14 @@ public class AwsProperties {
 
     public void setDefaultBlueprintName(String defaultBlueprintName) {
         this.defaultBlueprintName = defaultBlueprintName;
+    }
+
+    public String getBlueprintCdhVersion() {
+        return blueprintCdhVersion;
+    }
+
+    public void setBlueprintCdhVersion(String blueprintCdhVersion) {
+        this.blueprintCdhVersion = blueprintCdhVersion;
     }
 
     public Instance getInstance() {
