@@ -22,10 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
-import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
-import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.Credential;
 import com.sequenceiq.datalake.service.validation.converter.CredentialToCloudCredentialConverter;
@@ -64,18 +60,6 @@ public class CloudStorageLocationValidatorTest {
     @Mock
     private DetailedEnvironmentResponse environment;
 
-    @Mock
-    private TelemetryResponse environmentTelemetry;
-
-    @Mock
-    private LoggingResponse environmentLogging;
-
-    @Mock
-    private S3CloudStorageV1Parameters s3;
-
-    @Mock
-    private WasbCloudStorageV1Parameters wasb;
-
     @InjectMocks
     private CloudStorageLocationValidator underTest;
 
@@ -85,16 +69,11 @@ public class CloudStorageLocationValidatorTest {
         when(environment.getLocation()).thenReturn(locationResponse);
         when(environment.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(environment.getCredential()).thenReturn(new CredentialResponse());
-        when(environment.getTelemetry()).thenReturn(environmentTelemetry);
-        when(environmentTelemetry.getLogging()).thenReturn(environmentLogging);
         when(credentialToCloudCredentialConverter.convert(any(Credential.class))).thenReturn(CLOUD_CREDENTIAL);
     }
 
     @Test
     public void validateS3() {
-        when(environmentLogging.getS3()).thenReturn(s3);
-        when(s3.getType()).thenReturn(FileSystemType.S3);
-
         ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder()
                 .withCloudPlatform(CLOUD_PLATFORM)
                 .withCredential(CLOUD_CREDENTIAL)
@@ -104,16 +83,13 @@ public class CloudStorageLocationValidatorTest {
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        underTest.validate(S3_OBJECT_PATH, environment, validationResultBuilder);
+        underTest.validate(S3_OBJECT_PATH, FileSystemType.S3, environment, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }
 
     @Test
     public void validateWasb() {
-        when(environmentLogging.getWasb()).thenReturn(wasb);
-        when(wasb.getType()).thenReturn(FileSystemType.WASB);
-
         ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder()
                 .withCloudPlatform(CLOUD_PLATFORM)
                 .withCredential(CLOUD_CREDENTIAL)
@@ -123,7 +99,7 @@ public class CloudStorageLocationValidatorTest {
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        underTest.validate(WASB_OBJECT_PATH, environment, validationResultBuilder);
+        underTest.validate(WASB_OBJECT_PATH, FileSystemType.WASB, environment, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }
@@ -139,7 +115,7 @@ public class CloudStorageLocationValidatorTest {
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        underTest.validate(OBJECT_PATH, environment, validationResultBuilder);
+        underTest.validate(OBJECT_PATH, FileSystemType.S3, environment, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }
@@ -155,7 +131,7 @@ public class CloudStorageLocationValidatorTest {
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        underTest.validate(OBJECT_PATH, environment, validationResultBuilder);
+        underTest.validate(OBJECT_PATH, FileSystemType.S3, environment, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }
@@ -171,7 +147,7 @@ public class CloudStorageLocationValidatorTest {
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        underTest.validate(OBJECT_PATH, environment, validationResultBuilder);
+        underTest.validate(OBJECT_PATH, FileSystemType.S3, environment, validationResultBuilder);
         ValidationResult result = validationResultBuilder.build();
 
         assertTrue(result.hasError());
