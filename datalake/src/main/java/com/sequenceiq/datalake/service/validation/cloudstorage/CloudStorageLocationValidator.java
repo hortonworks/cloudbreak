@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.service.validation.cloudstorage;
 
-import java.util.Optional;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
@@ -11,7 +9,6 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse.ResponseStatus;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.Credential;
 import com.sequenceiq.datalake.service.validation.converter.CredentialToCloudCredentialConverter;
@@ -33,8 +30,7 @@ public class CloudStorageLocationValidator {
         this.cloudProviderServicesV4Endopint = cloudProviderServicesV4Endopint;
     }
 
-    public void validate(String storageLocation, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder) {
-        Optional<FileSystemType> fileSystemType = getFileSystemType(environment);
+    public void validate(String storageLocation, FileSystemType fileSystemType, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder) {
         String bucketName = getBucketName(fileSystemType, storageLocation);
         Credential credential = getCredential(environment);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
@@ -47,24 +43,8 @@ public class CloudStorageLocationValidator {
                         environment.getLocation().getName()));
     }
 
-    private Optional<FileSystemType> getFileSystemType(DetailedEnvironmentResponse environment) {
-        Optional<FileSystemType> response = Optional.empty();
-        if (environment.getTelemetry() != null && environment.getTelemetry().getLogging() != null) {
-            LoggingResponse logging = environment.getTelemetry().getLogging();
-            if (logging.getS3() != null) {
-                return Optional.of(logging.getS3().getType());
-            }
-            if (logging.getWasb() != null) {
-                return Optional.of(logging.getWasb().getType());
-            }
-        }
-        return response;
-    }
-
-    private String getBucketName(Optional<FileSystemType> fileSystemType, String storageLocation) {
-        if (fileSystemType.isPresent()) {
-            storageLocation = storageLocation.replace(fileSystemType.get().getProtocol() + "://", "");
-        }
+    private String getBucketName(FileSystemType fileSystemType, String storageLocation) {
+        storageLocation = storageLocation.replace(fileSystemType.getProtocol() + "://", "");
         return storageLocation.split("/")[0];
     }
 

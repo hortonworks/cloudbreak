@@ -268,7 +268,7 @@ public class SdxService implements ResourceIdProvider {
                     validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.S3.getProtocol()),
                             String.format("'baseLocation' must start with '%s' if 'fileSystemType' is 'S3'!", FileSystemType.S3.getProtocol()));
                     validationBuilder.ifError(() -> cloudStorage.getS3() == null, "'s3' must be set if 'fileSystemType' is 'S3'!");
-                    cloudStorageLocationValidator.validate(cloudStorage.getBaseLocation(), environment, validationBuilder);
+                    cloudStorageLocationValidator.validate(cloudStorage.getBaseLocation(), FileSystemType.S3, environment, validationBuilder);
                 }
                 if (FileSystemType.ADLS.equals(cloudStorage.getFileSystemType())) {
                     validationBuilder.ifError(() -> !cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS.getProtocol()),
