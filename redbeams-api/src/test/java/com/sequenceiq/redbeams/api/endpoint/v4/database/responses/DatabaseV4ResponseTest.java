@@ -1,36 +1,42 @@
-package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
+package com.sequenceiq.redbeams.api.endpoint.v4.database.responses;
 
 import static org.junit.Assert.assertEquals;
 
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
-import com.sequenceiq.redbeams.api.model.common.Status;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class DatabaseServerV4ResponseTest {
+public class DatabaseV4ResponseTest {
 
-    private DatabaseServerV4Response response;
+    private DatabaseV4Response response;
 
     @Before
     public void setUp() {
-        response = new DatabaseServerV4Response();
+        response = new DatabaseV4Response();
     }
 
     @Test
     public void testGettersAndSetters() {
-        response.setId(1L);
-        assertEquals(1L, response.getId().longValue());
+        response.setCrn("crn:mydb");
+        assertEquals("crn:mydb", response.getCrn());
 
-        response.setCrn("crn:myserver");
-        assertEquals("crn:myserver", response.getCrn());
+        response.setType("hive");
+        assertEquals("hive", response.getType());
 
-        response.setDatabaseVendorDisplayName("PostgreSQL");
-        assertEquals("PostgreSQL", response.getDatabaseVendorDisplayName());
+        long now = System.currentTimeMillis();
+        response.setCreationDate(now);
+        assertEquals(now, response.getCreationDate().longValue());
+
+        response.setDatabaseEngine("postgres");
+        assertEquals("postgres", response.getDatabaseEngine());
 
         response.setConnectionDriver("postgresql.jar");
         assertEquals("postgresql.jar", response.getConnectionDriver());
+
+        response.setDatabaseEngineDisplayName("PostgreSQL");
+        assertEquals("PostgreSQL", response.getDatabaseEngineDisplayName());
 
         SecretResponse username = new SecretResponse("engine", "username");
         response.setConnectionUserName(username);
@@ -40,18 +46,8 @@ public class DatabaseServerV4ResponseTest {
         response.setConnectionPassword(password);
         verifyEqualSecretResponses(password, response.getConnectionPassword());
 
-        long now = System.currentTimeMillis();
-        response.setCreationDate(now);
-        assertEquals(now, response.getCreationDate().longValue());
-
         response.setResourceStatus(ResourceStatus.USER_MANAGED);
         assertEquals(ResourceStatus.USER_MANAGED, response.getResourceStatus());
-
-        response.setStatus(Status.AVAILABLE);
-        assertEquals(Status.AVAILABLE, response.getStatus());
-
-        response.setStatusReason("because");
-        assertEquals("because", response.getStatusReason());
     }
 
     private static void verifyEqualSecretResponses(SecretResponse expected, SecretResponse actual) {

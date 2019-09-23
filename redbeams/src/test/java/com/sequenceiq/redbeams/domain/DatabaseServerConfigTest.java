@@ -5,7 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.hibernate.annotations.Where;
 import org.junit.Before;
@@ -82,9 +84,6 @@ public class DatabaseServerConfigTest {
         config.setEnvironmentId("myenvironment");
         assertEquals("myenvironment", config.getEnvironmentId());
 
-        config.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
-        assertEquals(ResourceStatus.SERVICE_MANAGED, config.getResourceStatus());
-
         config.setDbStack(new DBStack());
         assertTrue(config.getDbStack().isPresent());
     }
@@ -139,9 +138,13 @@ public class DatabaseServerConfigTest {
     @Test
     public void testUnsetRelationsToEntitiesToBeDeleted() {
         config.setDbStack(new DBStack());
+        Set<DatabaseConfig> databases = new HashSet<>();
+        databases.add(new DatabaseConfig());
+        config.setDatabases(databases);
 
         config.unsetRelationsToEntitiesToBeDeleted();
 
         assertFalse(config.getDbStack().isPresent());
+        assertTrue(config.getDatabases().isEmpty());
     }
 }
