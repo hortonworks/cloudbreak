@@ -22,7 +22,9 @@ public class HiveMetastoreCloudStorageServiceConfigProvider implements CmTemplat
 
     public static final String HMS_METASTORE_EXTERNAL_DIR = "hive.metastore.warehouse.external.dir";
 
-    public static final String HMS_METASTORE_REPLICA_DIR = "hive.repl.replica.functions.root.dir";
+    public static final String HMS_METASTORE_REPLICA_DIR_TEMPLATE_LOCATION = "hive.repl.replica.functions.root.dir";
+
+    public static final String HMS_METASTORE_REPLICA_DIR = "hive_repl_replica_functions_root_dir";
 
     public static final String HMS_METASTORE_DIR_TEMPLATE_PARAM = "hive_warehouse_directory";
 
@@ -37,10 +39,8 @@ public class HiveMetastoreCloudStorageServiceConfigProvider implements CmTemplat
         ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_EXTERNAL_DIR)
                 .ifPresent(location -> hmsConfigs.add(config(HMS_METASTORE_EXTERNAL_DIR_TEMPLATE_PARAM, location.getValue())));
 
-
-        ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_REPLICA_DIR)
-                .ifPresent(location -> hmsConfigs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE,
-                        ConfigUtils.getSafetyValveProperty(HMS_METASTORE_REPLICA_DIR, location.getValue()))));
+        ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_REPLICA_DIR_TEMPLATE_LOCATION)
+                .ifPresent(location -> hmsConfigs.add(config(HMS_METASTORE_REPLICA_DIR, location.getValue())));
 
         return hmsConfigs;
     }
