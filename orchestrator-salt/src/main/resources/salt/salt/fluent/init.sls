@@ -217,6 +217,11 @@ fluentd_start_with_update_systemd_units:
     - watch:
        - file: /etc/systemd/system/td-agent.service
 {% else %}
+
+fs.file-max:
+  sysctl.present:
+    - value: 100000
+
 fluent_start:
   cmd.run:
     - name: "/etc/init.d/td-agent start"
