@@ -37,6 +37,8 @@ import com.sequenceiq.it.cloudbreak.SshService;
 import com.sequenceiq.it.cloudbreak.SshUtil;
 import com.sequenceiq.it.cloudbreak.newway.action.ActionV2;
 import com.sequenceiq.it.cloudbreak.newway.action.StackPostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.StackStartAction;
+import com.sequenceiq.it.cloudbreak.newway.action.StackStopAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackPostV3Strategy;
@@ -84,8 +86,16 @@ public class Stack extends StackEntity {
         return entity;
     }
 
-    public static ActionV2<StackEntity> postV2() {
+    public static ActionV2<StackEntity> postV3() {
         return new StackPostAction();
+    }
+
+    public static ActionV2<StackEntity> stop() {
+        return new StackStopAction();
+    }
+
+    public static ActionV2<StackEntity> start() {
+        return new StackStartAction();
     }
 
     public static <O> ActionV2<StackEntity> deleteInstance(String instanceId) {

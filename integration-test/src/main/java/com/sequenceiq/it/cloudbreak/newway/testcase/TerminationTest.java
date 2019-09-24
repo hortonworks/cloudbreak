@@ -40,7 +40,7 @@ public class TerminationTest extends AbstractIntegrationTest {
                 // create stack
                 .given("ig", InstanceGroupEntity.class).withHostGroup(HostGroupType.WORKER).withNodeCount(3)
                 .given(StackEntity.class).replaceInstanceGroups("ig")
-                .when(Stack.postV2(), key("stack-post"))
+                .when(Stack.postV3(), key("stack-post"))
                 .await(STACK_AVAILABLE)
                 //select an instance id
                 .select(s -> s.getInstanceId(HostGroupType.WORKER.getName()), key(StackDeleteInstanceAction.INSTANCE_ID))
@@ -57,7 +57,7 @@ public class TerminationTest extends AbstractIntegrationTest {
                 // create stack
                 .given("ig", InstanceGroupEntity.class).withHostGroup(HostGroupType.WORKER).withNodeCount(2)
                 .given(StackEntity.class).replaceInstanceGroups("ig")
-                .when(Stack.postV2(), key("stack-post"))
+                .when(Stack.postV3(), key("stack-post"))
                 .await(STACK_AVAILABLE)
                 .select(s -> s.getInstanceId("worker"), key(StackDeleteInstanceAction.INSTANCE_ID))
                 .when(new StackDeleteInstanceAction(), key("deleteInstance"))
@@ -72,7 +72,7 @@ public class TerminationTest extends AbstractIntegrationTest {
         testContext
                 // create stack
                 .given(StackEntity.class)
-                .when(Stack.postV2(), key("stack-post"))
+                .when(Stack.postV3(), key("stack-post"))
                 .await(STACK_AVAILABLE)
                 .select(s -> s.getInstanceId("worker"), key(StackDeleteInstanceAction.INSTANCE_ID))
                 .select(s -> true, key("forced"))

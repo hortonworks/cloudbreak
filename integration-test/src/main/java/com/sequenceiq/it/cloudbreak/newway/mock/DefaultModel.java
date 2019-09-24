@@ -36,7 +36,7 @@ public class DefaultModel extends MockModel {
     @Override
     public void startModel(Service sparkService, String mockServerAddress) {
         setMockServerAddress(mockServerAddress);
-        initInstanceMap(20);
+        initInstanceMap(200);
 
         ambariMock = new AmbariMock(sparkService, this);
         spiMock = new SPIMock(sparkService, this);
@@ -96,6 +96,28 @@ public class DefaultModel extends MockModel {
             CloudVmMetaDataStatus cloudVmMetaDataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
             instanceMap.put(instanceId, cloudVmMetaDataStatus);
         });
+    }
+
+    public void stopAllInstances() {
+        for (Map.Entry<String, CloudVmMetaDataStatus> entry : instanceMap.entrySet()) {
+            CloudVmMetaDataStatus currentVmMeta = entry.getValue();
+            CloudVmInstanceStatus currentInstance = currentVmMeta.getCloudVmInstanceStatus();
+            CloudVmInstanceStatus newInstanceStatus = new CloudVmInstanceStatus(currentInstance.getCloudInstance(), InstanceStatus.STOPPED);
+            CloudInstanceMetaData currentInstanceMeta = currentVmMeta.getMetaData();
+            CloudVmMetaDataStatus newVmMetaData = new CloudVmMetaDataStatus(newInstanceStatus, currentVmMeta.getMetaData());
+            entry.setValue(newVmMetaData);
+        }
+    }
+
+    public void startAllInstances() {
+        for (Map.Entry<String, CloudVmMetaDataStatus> entry : instanceMap.entrySet()) {
+            CloudVmMetaDataStatus currentVmMeta = entry.getValue();
+            CloudVmInstanceStatus currentInstance = currentVmMeta.getCloudVmInstanceStatus();
+            CloudVmInstanceStatus newInstanceStatus = new CloudVmInstanceStatus(currentInstance.getCloudInstance(), InstanceStatus.STOPPED);
+            CloudInstanceMetaData currentInstanceMeta = currentVmMeta.getMetaData();
+            CloudVmMetaDataStatus newVmMetaData = new CloudVmMetaDataStatus(newInstanceStatus, currentVmMeta.getMetaData());
+            entry.setValue(newVmMetaData);
+        }
     }
 
     public void terminateInstance(Map<String, CloudVmMetaDataStatus> instanceMap, String instanceId) {

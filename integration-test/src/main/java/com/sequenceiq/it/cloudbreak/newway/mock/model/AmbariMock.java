@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway.mock.model;
 import static com.sequenceiq.it.cloudbreak.newway.Mock.responseFromJsonFile;
 import static com.sequenceiq.it.spark.ITResponse.AMBARI_API_ROOT;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -24,6 +25,7 @@ import com.sequenceiq.it.spark.ambari.AmbariVersionDefinitionResponse;
 import com.sequenceiq.it.spark.ambari.AmbariViewResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
+import com.sequenceiq.it.spark.ambari.model.Requests;
 import com.sequenceiq.it.spark.ambari.v2.AmbariCategorizedHostComponentStateResponse;
 import com.sequenceiq.it.util.HostNameUtil;
 
@@ -48,6 +50,8 @@ public class AmbariMock extends AbstractModelMock {
     public static final String CLUSTERS_CLUSTER_HOSTS_HOSTNAME = CLUSTERS_CLUSTER + "/hosts/:hostname";
 
     public static final String CLUSTERS_CLUSTER_SERVICES = CLUSTERS_CLUSTER + "/services/*";
+
+    public static final String CLUSTERS_CLUSTER_SERVICES_STARTSTOP = CLUSTERS_CLUSTER + "/services";
 
     public static final String CLUSTERS_CLUSTER_SERVICES_HDFS_COMPONENTS_NAMENODE = CLUSTERS_CLUSTER + "/services/HDFS/components/NAMENODE";
 
@@ -116,6 +120,8 @@ public class AmbariMock extends AbstractModelMock {
         deleteClusterHostComponents();
         deleteAmbariClusterHost();
         getAmbariViews();
+
+        putAmbariClusterServicesOtherState();
     }
 
     public DynamicRouteStack getDynamicRouteStack() {
@@ -203,6 +209,17 @@ public class AmbariMock extends AbstractModelMock {
 
     private void putAmbariClusterServices() {
         dynamicRouteStack.put(CLUSTERS_CLUSTER_SERVICES, new AmbariClusterRequestsResponse());
+    }
+
+    private void putAmbariClusterServicesOtherState() {
+        dynamicRouteStack.put(CLUSTERS_CLUSTER_SERVICES_STARTSTOP, (request, response, model) -> {
+            model.stopAllInstances();
+            response.type("text/plain");
+            ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
+            Requests requests = new Requests(66, "INSTALLED", 100);
+            rootNode.set("Requests", new ObjectMapper().valueToTree(requests));
+            return rootNode.toString();
+        });
     }
 
     public void getAmbariCluster() {

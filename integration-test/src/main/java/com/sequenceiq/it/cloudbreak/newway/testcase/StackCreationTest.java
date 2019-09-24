@@ -26,7 +26,7 @@ public class StackCreationTest extends AbstractIntegrationTest {
     @Test(dataProvider = "testContext")
     public void testCreateNewRegularCluster(TestContext testContext) {
         testContext.given(StackEntity.class)
-                .when(Stack.postV2())
+                .when(Stack.postV3())
                 .await(STACK_AVAILABLE)
                 .validate();
     }
@@ -34,6 +34,6 @@ public class StackCreationTest extends AbstractIntegrationTest {
     @AfterMethod(alwaysRun = true)
     public void tear(Object[] data) {
         TestContext testContext = (TestContext) data[0];
-        testContext.cleanupTestContextEntity();
+        //testContext.cleanupTestContextEntity();
     }
 }

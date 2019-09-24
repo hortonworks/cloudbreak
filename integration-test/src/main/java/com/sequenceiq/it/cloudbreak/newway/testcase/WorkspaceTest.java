@@ -29,7 +29,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         createDefaultImageCatalog(testContext);
 
         testContext.given(StackEntity.class)
-                .when(Stack.postV2())
+                .when(Stack.postV3())
                 .await(STACK_AVAILABLE);
     }
 
