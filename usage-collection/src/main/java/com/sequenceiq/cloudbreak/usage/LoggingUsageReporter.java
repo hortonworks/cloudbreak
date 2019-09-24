@@ -1,20 +1,24 @@
 package com.sequenceiq.cloudbreak.usage;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.google.common.io.BaseEncoding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.time.Instant;
 import java.util.UUID;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.google.common.io.BaseEncoding;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 /**
  * A usage reporter that logs usage events.
  */
 public class LoggingUsageReporter implements UsageReporter {
     private static final Logger BINARY_EVENT_LOGGER = LoggerFactory.getLogger("CDP_BINARY_USAGE_EVENT");
+
+    private static final String USAGE_EVENT_MDC_NAME = "binaryUsageEvent";
 
     @Override
     public void cdpDatahubClusterRequested(long timestamp, UsageProto.CDPDatahubClusterRequested details) {
@@ -58,6 +62,9 @@ public class LoggingUsageReporter implements UsageReporter {
     }
 
     void log(UsageProto.Event event) {
-        BINARY_EVENT_LOGGER.info(BaseEncoding.base64().encode(event.toByteArray()));
+        String binaryUsageEvent = BaseEncoding.base64().encode(event.toByteArray());
+        MDCBuilder.addMdcField(USAGE_EVENT_MDC_NAME, binaryUsageEvent);
+        BINARY_EVENT_LOGGER.info(binaryUsageEvent);
+        MDCBuilder.removeMdcField(USAGE_EVENT_MDC_NAME);
     }
 }
