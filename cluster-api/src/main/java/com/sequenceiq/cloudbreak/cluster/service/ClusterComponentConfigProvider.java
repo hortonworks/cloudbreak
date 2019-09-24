@@ -21,14 +21,14 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Service
 public class ClusterComponentConfigProvider {
@@ -49,8 +49,12 @@ public class ClusterComponentConfigProvider {
         return componentRepository.findComponentByClusterIdComponentTypeName(clusterId, componentType, name);
     }
 
-    public Set<ClusterComponent> getComponentList(Long clusterId, ComponentType componentType) {
+    public Set<ClusterComponent> getComponentListByTypeAndName(Long clusterId, ComponentType componentType) {
         return componentRepository.findComponentsByClusterIdComponentTypeName(clusterId, componentType, componentType.name());
+    }
+
+    public Set<ClusterComponent> getComponentListByType(Long clusterId, ComponentType componentType) {
+        return componentRepository.findComponentsByClusterIdAndComponentType(clusterId, componentType);
     }
 
     public ClusterComponentView getComponentView(Long clusterId, ComponentType componentType) {
@@ -67,10 +71,10 @@ public class ClusterComponentConfigProvider {
     }
 
     public List<ClouderaManagerProduct> getClouderaManagerProductDetails(Long clusterId) {
-        Set<ClusterComponent> components = getComponentList(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
-        return Optional.of(components.stream().map(component ->
+        Set<ClusterComponent> components = getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
+        return components.stream().map(component ->
                 retrieveFromAttribute(component, ClouderaManagerProduct.class))
-                .collect(Collectors.toList())).orElse(null);
+                .collect(Collectors.toList());
     }
 
     public StackRepoDetails getHDPRepo(Long clusterId) {

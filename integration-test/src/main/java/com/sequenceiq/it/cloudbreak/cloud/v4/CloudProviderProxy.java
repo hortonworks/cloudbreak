@@ -251,6 +251,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getBlueprintCdhVersion() {
+        return delegate.getBlueprintCdhVersion();
+    }
+
+    @Override
     public StackV4ParameterBase stackParameters() {
         return delegate.stackParameters();
     }

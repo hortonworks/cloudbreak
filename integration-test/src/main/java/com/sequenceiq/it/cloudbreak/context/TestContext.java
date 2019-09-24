@@ -731,4 +731,8 @@ public abstract class TestContext implements ApplicationContextAware {
     public void shutdown() {
         setShutdown(true);
     }
+
+    public CloudProviderProxy getCloudProvider() {
+        return cloudProvider;
+    }
 }

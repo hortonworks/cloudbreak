@@ -63,12 +63,16 @@ public class ShowTerminatedClusterConfigService {
     }
 
     public ShowTerminatedClustersConfig getConfig() {
-        ShowTerminatedClustersPreferences showTerminatedClustersPreferences =
-                userProfileService.getOrCreateForLoggedInUser().getShowTerminatedClustersPreferences();
-        if (showTerminatedClustersPreferences == null) {
+        if (showTerminatedOn) {
+            ShowTerminatedClustersPreferences showTerminatedClustersPreferences =
+                    userProfileService.getOrCreateForLoggedInUser().getShowTerminatedClustersPreferences();
+            if (showTerminatedClustersPreferences == null) {
+                return defaultShowTerminatedClustersConfig;
+            }
+            return new ShowTerminatedClustersConfig(showTerminatedClustersPreferences.isActive(), showTerminatedClustersPreferences.getTimeout(), true);
+        } else {
             return defaultShowTerminatedClustersConfig;
         }
-        return new ShowTerminatedClustersConfig(showTerminatedClustersPreferences.isActive(), showTerminatedClustersPreferences.getTimeout(), true);
     }
 
     public void set(ShowTerminatedClustersConfig newConfig) {

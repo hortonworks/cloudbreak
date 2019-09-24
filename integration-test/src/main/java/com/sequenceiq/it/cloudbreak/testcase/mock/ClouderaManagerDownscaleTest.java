@@ -58,7 +58,7 @@ public class ClouderaManagerDownscaleTest extends AbstractIntegrationTest {
     public void testDownscale(MockedTestContext testContext) {
         ApiParcel parcel = parcelGeneratorUtil.getActivatedCDHParcel();
         String clusterName = resourcePropertyProvider().getName();
-        parcelMockActivatorUtil.mockActivateParcel(testContext, clusterName, parcel);
+        parcelMockActivatorUtil.mockActivateWithDefaultParcels(testContext, clusterName, parcel);
         SetupCmScalingMock mock = new SetupCmScalingMock();
         mock.configure(testContext, 3, 15, 6);
         testContext

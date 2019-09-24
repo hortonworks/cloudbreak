@@ -24,16 +24,17 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClouderaManagerProductV4RequestToClouderaManagerProductConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClouderaManagerRepositoryV4RequestToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
@@ -195,11 +196,24 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
                 .map(ClouderaManagerV4Request::getProducts)
                 .orElseGet(List::of)
                 .stream()
-                .map(ClouderaManagerProductV4RequestToClouderaManagerProductConverter::convert)
-                .map(toJsonWrapException())
-                .map(cmRepoJson -> new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, cmRepoJson, cluster))
+                .map(this::convertCMProductRequestToCMProduct)
+                .map(product -> {
+                    Json json = toJsonWrapException().apply(product);
+                    return new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, product.getName(), json, cluster);
+                })
                 .forEach(components::add);
         cluster.setComponents(components);
+    }
+
+    private ClouderaManagerProduct convertCMProductRequestToCMProduct(ClouderaManagerProductV4Request request) {
+        if (StringUtils.isEmpty(request.getName())) {
+            throw new BadRequestException("Name of the ClouderaManagerProduct cannot be empty.");
+        }
+        return new ClouderaManagerProduct()
+                .withName(request.getName())
+                .withParcel(request.getParcel())
+                .withVersion(request.getVersion())
+                .withCsd(request.getCsd());
     }
 
     private <T> Function<T, Json> toJsonWrapException() {

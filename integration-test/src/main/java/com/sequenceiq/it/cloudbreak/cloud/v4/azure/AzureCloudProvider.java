@@ -206,6 +206,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getBlueprintCdhVersion() {
+        return azureProperties.getBlueprintCdhVersion();
+    }
+
+    @Override
     public SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage) {
         return cloudStorage
                 .withFileSystemType(getFileSystemType())

@@ -207,6 +207,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         return awsProperties.getDefaultBlueprintName();
     }
 
+    @Override
+    public String getBlueprintCdhVersion() {
+        return awsProperties.getBlueprintCdhVersion();
+    }
+
     public AwsCredentialParameters awsCredentialDetailsArn() {
         AwsCredentialParameters parameters = new AwsCredentialParameters();
         RoleBasedParameters roleBasedCredentialParameters = new RoleBasedParameters();

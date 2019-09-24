@@ -45,6 +45,14 @@ public class Json implements Serializable {
         return JsonUtil.readValue(value, valueType);
     }
 
+    public <T> T getSilent(Class<T> valueType) {
+        try {
+            return JsonUtil.readValue(value, valueType);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public <T> T get(TypeReference<T> valueType) throws IOException {
         return JsonUtil.readValue(value, valueType);
     }
