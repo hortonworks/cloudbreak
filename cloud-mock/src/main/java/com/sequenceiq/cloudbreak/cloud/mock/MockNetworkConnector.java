@@ -5,6 +5,8 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
@@ -36,6 +38,11 @@ public class MockNetworkConnector implements NetworkConnector {
     @Override
     public void deleteNetworkWithSubnets(NetworkDeletionRequest networkDeletionRequest) {
 
+    }
+
+    @Override
+    public String getNetworkCidr(Network network, CloudCredential credential) {
+        return "0.0.0.0/0";
     }
 
     @Override

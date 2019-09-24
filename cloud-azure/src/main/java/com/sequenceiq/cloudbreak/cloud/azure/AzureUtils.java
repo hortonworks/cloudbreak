@@ -48,9 +48,9 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class AzureUtils {
-    private static final String RG_NAME = "resourceGroupName";
+    public static final String RG_NAME = "resourceGroupName";
 
-    private static final String NETWORK_ID = "networkId";
+    public static final String NETWORK_ID = "networkId";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureUtils.class);
 

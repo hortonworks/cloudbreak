@@ -15,7 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -166,6 +168,18 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(AZ_3, actual.getSubnetMetas().get(SUBNET_3).getAvailabilityZone());
         assertEquals(SUBNET_CIDR_3, actual.getSubnetMetas().get(SUBNET_3).getCidr());
         assertTrue(actual.getSubnetMetas().get(SUBNET_3).isPrivateSubnet());
+    }
+
+    @Test
+    void testConvertToNetwork() {
+        AzureNetwork azureNetwork = new AzureNetwork();
+        azureNetwork.setNetworkId(NETWORK_ID);
+        azureNetwork.setResourceGroupName(RESOURCE_GROUP_NAME);
+
+        Network network = underTest.convertToNetwork(azureNetwork);
+
+        assertEquals(RESOURCE_GROUP_NAME, network.getStringParameter(AzureUtils.RG_NAME));
+        assertEquals(NETWORK_ID, network.getStringParameter(AzureUtils.NETWORK_ID));
     }
 
     private Set<CreatedSubnet> createCreatedSubnets() {

@@ -3,11 +3,13 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,8 @@ import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
@@ -44,6 +48,9 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     @Inject
     private AzureNetworkTemplateBuilder azureNetworkTemplateBuilder;
+
+    @Inject
+    private AzureUtils azureUtils;
 
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
@@ -95,6 +102,24 @@ public class AzureNetworkConnector implements NetworkConnector {
 
         }
 
+    }
+
+    @Override
+    public String getNetworkCidr(Network network, CloudCredential credential) {
+        AzureClient azureClient = azureClientService.getClient(credential);
+        String resourceGroupName = azureUtils.getCustomResourceGroupName(network);
+        String networkId = azureUtils.getCustomNetworkId(network);
+        com.microsoft.azure.management.network.Network networkByResourceGroup = azureClient.getNetworkByResourceGroup(resourceGroupName, networkId);
+        if (networkByResourceGroup == null || networkByResourceGroup.addressSpaces().isEmpty()) {
+            throw new BadRequestException(String.format("Network could not be fetch from Azure with resource group name: %s and network id: %s",
+                    resourceGroupName, networkId));
+        }
+        List<String> networkCidrs = networkByResourceGroup.addressSpaces();
+        if (networkCidrs.size() > 1) {
+            LOGGER.info("More than one network cidrs for resource group name: {} and network id: {}. We will use the first one: {}",
+                    resourceGroupName, networkId, networkCidrs.get(0));
+        }
+        return networkCidrs.get(0);
     }
 
     @Override
