@@ -10,13 +10,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -32,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterFlowConfig;
@@ -64,6 +68,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.CommonContext;
@@ -76,6 +81,29 @@ import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.ha.NodeConfig;
 
 public class OfflineStateGenerator {
+
+    private static final String INDEX_HTML_TEMPLATE = "<!DOCTYPE html>\n" +
+            "<html lang=\"en\">\n" +
+            "<head>\n" +
+            "<meta charset=\"UTF-8\">\n" +
+            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n" +
+            "<title>Title</title>\n" +
+            "<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css\">\n" +
+            "<script defer src=\"https://use.fontawesome.com/releases/v5.3.1/js/all.js\"></script>\n" +
+            "<script src=\"https://d3js.org/d3.v4.min.js\"></script>\n" +
+            "<script src=\"https://unpkg.com/viz.js@1.8.1/viz.js\" type=\"javascript/worker\"></script>\n" +
+            "<script src=\"https://unpkg.com/d3-graphviz@2.6.1/build/d3-graphviz.js\"></script>\n" +
+            "<style>.graph { height: 800px; } .graph svg { height: 100%; width: 1500px; font-family: monospace }</style>" +
+            "</head>\n" +
+            "<body>\n" +
+            "<h1 class=\"container title has-text-black is-1\">Cloudbreak Flow</h1>\n" +
+            "<section class=\"section\"><div class=\"container\"><ul>TABLE_OF_CONTENT</ul></div></section>" +
+            "FLOW_CHART_DIVS\n" +
+            "<script>\n" +
+            "GRAPH_SCRIPTS\n" +
+            "</script>\n" +
+            "</body>\n" +
+            "</html>";
 
     private static final String OUT_PATH = "build/diagrams/flow";
 
@@ -118,18 +146,46 @@ public class OfflineStateGenerator {
     }
 
     public static void main(String[] args) throws Exception {
+        Map<String, String> graphsByFlowConfig = new LinkedHashMap<>();
         for (FlowConfiguration<?> flowConfiguration : CONFIGS) {
-            new OfflineStateGenerator(flowConfiguration).generate();
+            graphsByFlowConfig.put(flowConfiguration.getClass().getSimpleName(), new OfflineStateGenerator(flowConfiguration).generate());
         }
+        createSvgGraph(graphsByFlowConfig);
     }
 
-    private void generate() throws Exception {
-        StringBuilder builder = new StringBuilder("digraph {\n");
+    private static void createSvgGraph(Map<String, String> graphsByFlowConfig) throws IOException {
+        String tableOfContent = graphsByFlowConfig
+                .keySet()
+                .stream()
+                .map(flowConfigClassName -> "<li><a href=\"#" + flowConfigClassName + "Title\">" + flowConfigClassName + "</a></li>")
+                .collect(Collectors.joining(System.lineSeparator()));
+        String flowDivs = graphsByFlowConfig
+                .keySet()
+                .stream()
+                .map(flowConfigClassName -> "<section class=\"section\"><div class=\"container is-fluid\"><h1 style=\"padding: 16px;\" id=\""
+                        + flowConfigClassName + "Title\" class=\"title has-background-black has-text-white\">" + flowConfigClassName
+                        + "</h1><div class=\"graph has-text-centered\" id=\"" + flowConfigClassName + "\"></div></div></section>")
+                .collect(Collectors.joining(System.lineSeparator()));
+        String flowScripts = graphsByFlowConfig
+                .entrySet()
+                .stream()
+                .map(flowGraph -> "d3.select(\"#" + flowGraph.getKey() + "\").graphviz().fade(false).dot('"
+                        + StringEscapeUtils.escapeJavaScript(flowGraph.getValue()) + "').fit(true).render();")
+                .collect(Collectors.joining(System.lineSeparator()));
+        String indexHtml = INDEX_HTML_TEMPLATE
+                .replace("TABLE_OF_CONTENT", tableOfContent)
+                .replace("FLOW_CHART_DIVS", flowDivs)
+                .replace("GRAPH_SCRIPTS", flowScripts);
+        Files.write(Paths.get(OUT_PATH, "index.html"), indexHtml.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String generate() throws Exception {
+        StringBuilder graphBuild = new StringBuilder("digraph {\n");
         inject(flowConfiguration, "applicationContext", APP_CONTEXT);
         Flow flow = initializeFlow();
         StateMachine<FlowState, FlowEvent> stateMachine = getStateMachine(flow);
         FlowState init = stateMachine.getInitialState().getId();
-        builder.append(generateStartPoint(init, flowConfiguration.getClass().getSimpleName())).append('\n');
+        graphBuild.append(generateStartPoint(init, flowConfiguration.getClass().getSimpleName())).append('\n');
         List<Transition<FlowState, FlowEvent>> transitions = (List<Transition<FlowState, FlowEvent>>) stateMachine.getTransitions();
         Map<String, FlowState> transitionsAlreadyDefined = new HashMap<>();
         transitionsAlreadyDefined.put(init.toString(), init);
@@ -137,20 +193,22 @@ public class OfflineStateGenerator {
             for (Transition<FlowState, FlowEvent> transition : new ArrayList<>(transitions)) {
                 FlowState source = transition.getSource().getId();
                 FlowState target = transition.getTarget().getId();
-                if (transitionsAlreadyDefined.values().contains(source)) {
+                if (transitionsAlreadyDefined.containsValue(source)) {
                     String id = generateTransitionId(source, target, transition.getTrigger().getEvent());
-                    if (!transitionsAlreadyDefined.keySet().contains(id)) {
-                        if (target.action() != null && !transitionsAlreadyDefined.values().contains(target)) {
-                            builder.append(generateState(target, target.action().getSimpleName())).append('\n');
+                    if (!transitionsAlreadyDefined.containsKey(id)) {
+                        if (target.action() != null && !transitionsAlreadyDefined.containsValue(target)) {
+                            graphBuild.append(generateState(target, target.action().getSimpleName())).append('\n');
                         }
-                        builder.append(generateTransition(source, target, transition.getTrigger().getEvent())).append('\n');
+                        graphBuild.append(generateTransition(source, target, transition.getTrigger().getEvent())).append('\n');
                         transitionsAlreadyDefined.put(id, target);
                     }
                     transitions.remove(transition);
                 }
             }
         }
-        saveToFile(builder.append('}').toString());
+        String graph = graphBuild.append('}').toString();
+        saveToFile(graph);
+        return graph;
     }
 
     private String generateTransitionId(FlowState source, FlowState target, FlowEvent event) {
@@ -262,10 +320,11 @@ public class OfflineStateGenerator {
             });
             StructuredFlowEventFactory factory = new StructuredFlowEventFactory();
             inject(bean, "structuredFlowEventFactory", factory);
-            inject(factory, "cloudbreakNodeConfig", new NodeConfig());
+            inject(factory, "nodeConfig", new NodeConfig());
             inject(factory, "conversionService", new CustomConversionService());
             StackService stackService = new StackService();
             inject(factory, "stackService", stackService);
+            inject(factory, "clock", new Clock());
             inject(stackService, "stackRepository", new CustomStackRepository());
             inject(stackService, "transactionService", new CustomTransactionService());
 
@@ -473,7 +532,9 @@ public class OfflineStateGenerator {
         @Override
         public Optional<Stack> findById(Long aLong) {
             Stack stack = new Stack();
-            stack.setWorkspace(new Workspace());
+            Workspace workspace = new Workspace();
+            workspace.setTenant(new Tenant());
+            stack.setWorkspace(workspace);
             stack.setCreator(new User());
             return Optional.of(stack);
         }

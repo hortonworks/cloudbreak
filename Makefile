@@ -8,7 +8,7 @@ beautify:
 	 ./gradlew jsformatter
 
 generate-flow-graphs:
-	 ./gradlew -PmainClass=com.sequenceiq.flow.core.config.generator.OfflineStateGenerator -q :core:execute
+	 ./gradlew -PmainClass=com.sequenceiq.cloudbreak.core.flow2.config.generator.OfflineStateGenerator -q :core:execute
 
 build-rc:
 	 ./scripts/build-rc.sh
