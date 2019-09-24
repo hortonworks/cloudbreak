@@ -92,10 +92,10 @@ public class OperationRetryService {
                 .anyMatch(fl -> StateStatus.PENDING.equals(fl.getStateStatus()));
     }
 
-    public List<RetryableFlow> getRetryableFlows(Stack stack) {
-        List<FlowLog> flowLogs = flowLogRepository.findAllByStackIdOrderByCreatedDesc(stack.getId());
+    public List<RetryableFlow> getRetryableFlows(Long stackId) {
+        List<FlowLog> flowLogs = flowLogRepository.findAllByStackIdOrderByCreatedDesc(stackId);
         if (isFlowPending(flowLogs)) {
-            LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stack.getId());
+            LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stackId);
             return List.of();
         }
         return getRetryableFlows(flowLogs);
