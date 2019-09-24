@@ -1,8 +1,6 @@
 package com.sequenceiq.freeipa.controller;
 
-import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -13,8 +11,6 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -48,13 +44,7 @@ public class UserV1Controller implements UserV1Endpoint {
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
         String userCrn = checkUserCrn();
         String accountId = threadBaseUserCrnProvider.getAccountId();
-        Optional<String> requestId = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
-        if (!requestId.isPresent()) {
-            requestId = Optional.of(UUID.randomUUID().toString());
-            LOGGER.debug("No requestId found. Setting request id to new UUID [{}]", requestId);
-        }
-        LOGGER.debug("synchronizeUser() requested for account:{}, actor:{}, requestId: {}", accountId, userCrn, requestId);
-
+        LOGGER.debug("synchronizeUser() requested for user {} in account {}", userCrn, accountId);
         Set<String> environmentCrnFilter = request == null ? Set.of() : nullToEmpty(request.getEnvironments());
         Set<String> userCrnFilter = Set.of();
         Set<String> machineUserCrnFilter = Set.of();
@@ -69,24 +59,18 @@ public class UserV1Controller implements UserV1Endpoint {
             default:
                 throw new BadRequestException(String.format("UserCrn %s is not of resoure type USER or MACHINE_USER", userCrn));
         }
-        return checkOperationRejected(
-            userService.synchronizeUsers(accountId, userCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter));
+        return checkOperationRejected(userService.synchronizeUsers(accountId, userCrn, environmentCrnFilter,
+                userCrnFilter, machineUserCrnFilter));
     }
 
     @Override
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkUserCrn();
         String accountId = threadBaseUserCrnProvider.getAccountId();
-        Optional<String> requestId = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
-        if (!requestId.isPresent()) {
-            requestId = Optional.of(UUID.randomUUID().toString());
-            LOGGER.debug("No requestId found. Setting request id to new UUID [{}]", requestId);
-        }
+        LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
-        LOGGER.debug("synchronizeAllUsers() requested for account:{}, actor:{}, requestId: {}", accountId, userCrn, requestId);
-
-        return checkOperationRejected(userService.synchronizeUsers(
-            accountId, userCrn, nullToEmpty(request.getEnvironments()), nullToEmpty(request.getUsers()), nullToEmpty(request.getMachineUsers())));
+        return checkOperationRejected(userService.synchronizeUsers(accountId, userCrn, nullToEmpty(request.getEnvironments()),
+                nullToEmpty(request.getUsers()), nullToEmpty(request.getMachineUsers())));
     }
 
     @Override

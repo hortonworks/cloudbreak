@@ -49,7 +49,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.util.WorkloadCredentialsUtils;
+import com.sequenceiq.freeipa.util.ASNEncoder;
 
 @Service
 public class UserService {
@@ -196,21 +196,23 @@ public class UserService {
         Config config = freeIpaClient.getConfig();
         if (config.getIpauserobjectclasses() != null && config.getIpauserobjectclasses().contains(Config.CDP_USER_ATTRIBUTE)) {
             // found the attribute, password sync can be performed
-            LOGGER.debug("Going for Credentials Sync, seems new image FreeIPA Server, having config attribute");
+            LOGGER.debug("Having config attribute, going for credentials sync");
 
             // Should sync for all users and not just diff. At present there is no way to identify that there is a change in password for a user
             for (FmsUser u : umsUsersState.getUsers()) {
                 WorkloadCredential workloadCredential = umsUsersState.getUsersWorkloadCredentialMap().get(u.getName());
                 if (workloadCredential != null
                     && !StringUtils.isEmpty(workloadCredential.getHashedPassword())
-                    && CollectionUtils.isEmpty(workloadCredential.getKeys())) {
+                    && !CollectionUtils.isEmpty(workloadCredential.getKeys())) {
 
                     // Call ASN_1 Encoder for encoding hashed password and then call user mod for password
                     LOGGER.debug("Found Credentials for user {}", u.getName());
-                    String ansEncodedKrbPrincipalKey = WorkloadCredentialsUtils.getEncodedKrbPrincipalKey(workloadCredential.getKeys());
+                    String ansEncodedKrbPrincipalKey = ASNEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
                     Map<String, Object> params = new HashMap<>();
-                    params.put("cdpHashedPassword", workloadCredential.getHashedPassword());
-                    params.put("cdpUnencryptedKrbPrincipalKey", ansEncodedKrbPrincipalKey);
+                    List<String> attr = new ArrayList<>();
+                    attr.add("cdpHashedPassword=" + workloadCredential.getHashedPassword());
+                    attr.add("cdpUnencryptedKrbPrincipalKey=" + ansEncodedKrbPrincipalKey);
+                    params.put("setattr", attr);
                     freeIpaClient.userMod(u.getName(), params);
                     LOGGER.debug("Password synced for the user:{}, for the environment: {}", u.getName(), environmentCrn);
                 }

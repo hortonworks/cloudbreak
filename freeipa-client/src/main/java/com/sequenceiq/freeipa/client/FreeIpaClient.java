@@ -164,7 +164,7 @@ public class FreeIpaClient {
         Map<String, Object> params = Map.of(
                 key, value
         );
-        return (User) invoke("user_mod", flags, params, User.class).getResult();
+        return userMod(user, params);
     }
 
     public User userMod(String user, Map<String, Object> params) throws FreeIpaClientException {

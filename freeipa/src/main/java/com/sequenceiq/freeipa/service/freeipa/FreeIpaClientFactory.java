@@ -58,9 +58,7 @@ public class FreeIpaClientFactory {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
 
         try {
-//            return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
-//                    httpClientConfig, stack.getGatewayport().toString()).build();
-            return new FreeIpaClientBuilder(ADMIN_USER, "6gk4dta3f3deb3mig3jmhum5dj", freeIpa.getDomain().toUpperCase(),
+            return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
                     httpClientConfig, stack.getGatewayport().toString()).build();
         } catch (Exception e) {
             throw new FreeIpaClientException("Couldn't build FreeIPA client. "
