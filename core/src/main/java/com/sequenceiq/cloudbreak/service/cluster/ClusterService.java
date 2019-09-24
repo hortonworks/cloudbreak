@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.MPACK_TAG;
@@ -438,8 +437,10 @@ public class ClusterService {
         try {
             transactionService.required(() -> {
                 Stack stack = stackService.getById(stackId);
-                if (!stack.getStatus().equals(UPDATE_IN_PROGRESS)) {
+                if (!stack.getStatus().isInProgress()) {
                     handleFailedNodes(stackId, failedNodes, stack);
+                } else {
+                    LOGGER.debug("Stack [{}] status is {}, thus we do not handle failure report.", stack.getName(), stack.getStatus());
                 }
                 return null;
             });
