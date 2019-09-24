@@ -43,7 +43,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.ambari.client.services.ServiceAndHostService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -77,6 +76,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientRetryer;
 import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.service.cluster.NotRecommendedNodeRemovalException;
 import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
@@ -88,7 +88,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.DNDecommissionStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RSDecommissionStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 
@@ -114,7 +113,7 @@ public class AmbariDecommissioner {
     private static final Map<String, String> COMPONENTS_NEED_TO_DECOMMISSION = new HashMap<>();
 
     @Inject
-    private StackService stackService;
+    private AmbariClientRetryer ambariClientRetryer;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -200,8 +199,9 @@ public class AmbariDecommissioner {
 
         Map<String, HostMetadata> unhealthyHosts = new HashMap<>();
         Map<String, HostMetadata> healthyHosts = new HashMap<>();
+        Map<String, String> hostStatuses = ambariClientRetryer.getHostStatuses(ambariClient);
         for (Entry<String, HostMetadata> hostToRemove : hostsToRemove.entrySet()) {
-            if ("UNKNOWN".equals(ambariClient.getHostState(hostToRemove.getKey()))) {
+            if (hostStatuses.get(hostToRemove.getKey()) == null || "UNKNOWN".equals(hostStatuses.get(hostToRemove.getKey()))) {
                 unhealthyHosts.put(hostToRemove.getKey(), hostToRemove.getValue());
             } else {
                 healthyHosts.put(hostToRemove.getKey(), hostToRemove.getValue());
@@ -209,7 +209,7 @@ public class AmbariDecommissioner {
         }
 
         Set<String> deletedHosts = new HashSet<>();
-        Map<String, Map<String, String>> runningComponents = ambariClient.getHostComponentsStates();
+        Map<String, Map<String, String>> runningComponents = ambariClientRetryer.getHostComponentsStates(ambariClient);
         if (!unhealthyHosts.isEmpty()) {
             for (Entry<String, HostMetadata> host : unhealthyHosts.entrySet()) {
                 deleteHostFromAmbari(host.getValue(), runningComponents, ambariClient);
@@ -236,7 +236,7 @@ public class AmbariDecommissioner {
             LOGGER.warn("Not all the hosts found in the given host group.");
         }
         AmbariClient ambariClient = getAmbariClient(stack);
-        List<String> runningHosts = ambariClient.getClusterHosts();
+        List<String> runningHosts = ambariClientRetryer.getClusterHosts(ambariClient);
         if (runningHosts == null) {
             throw new OperationException("Running hosts is null");
         }
@@ -250,7 +250,7 @@ public class AmbariDecommissioner {
 
     public boolean deleteHostFromAmbari(Stack stack, HostMetadata data) throws IOException, URISyntaxException {
         AmbariClient ambariClient = getAmbariClient(stack);
-        Map<String, Map<String, String>> runningComponents = ambariClient.getHostComponentsStates();
+        Map<String, Map<String, String>> runningComponents = ambariClientRetryer.getHostComponentsStates(ambariClient);
         return deleteHostFromAmbari(data, runningComponents, ambariClient);
     }
 
@@ -273,11 +273,11 @@ public class AmbariDecommissioner {
         return select;
     }
 
-    private boolean deleteHostFromAmbari(HostMetadata data, Map<String, Map<String, String>> runningComponents, ServiceAndHostService ambariClient)
+    private boolean deleteHostFromAmbari(HostMetadata data, Map<String, Map<String, String>> runningComponents, AmbariClient ambariClient)
             throws IOException, URISyntaxException {
         boolean hostDeleted = false;
-        if (ambariClient.getClusterHosts().contains(data.getHostName())) {
-            String hostState = ambariClient.getHostState(data.getHostName());
+        if (ambariClientRetryer.getClusterHosts(ambariClient).contains(data.getHostName())) {
+            String hostState = ambariClientRetryer.getHostState(ambariClient, data.getHostName());
             if ("UNKNOWN".equals(hostState)) {
                 deleteHosts(singletonList(data.getHostName()), runningComponents, ambariClient);
                 hostDeleted = true;
@@ -289,8 +289,8 @@ public class AmbariDecommissioner {
         return hostDeleted;
     }
 
-    private Collection<String> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove, Map<String, Map<String, String>> runningComponents,
-            AmbariClient ambariClient) throws IOException, URISyntaxException {
+    private Collection<String>  decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove, Map<String, Map<String, String>> runningComponents,
+            AmbariClient ambariClient) {
         Collection<String> result = new HashSet<>();
         PollingResult pollingResult = startServicesIfNeeded(stack, ambariClient, runningComponents);
         try {
@@ -332,15 +332,7 @@ public class AmbariDecommissioner {
     }
 
     private Map<String, Map<String, String>> getComponentStatusesForHostes(AmbariClient ambariClient, List<String> hostList, String component) {
-        return hostList.stream().collect(toMap(k -> k, h -> ambariClient.getComponentStates(h, component)));
-    }
-
-    public Map<String, Map<String, Map<String, String>>> getStatusOfComponents(Stack stack, Collection<String> hosts) {
-        return getStatusOfComponents(getAmbariClient(stack), hosts);
-    }
-
-    public Map<String, Map<String, Map<String, String>>> getStatusOfComponents(AmbariClient ambariClient, Collection<String> hosts) {
-        return hosts.stream().collect(toMap(k -> k, host -> getStatusOfComponentsForHost(ambariClient, host)));
+        return hostList.stream().collect(toMap(k -> k, h -> ambariClientRetryer.getComponentStates(ambariClient, h, component)));
     }
 
     public Map<String, Map<String, String>> getStatusOfComponentsForHost(Stack stack, String host) {
@@ -348,17 +340,17 @@ public class AmbariDecommissioner {
     }
 
     public Map<String, Map<String, String>> getStatusOfComponentsForHost(AmbariClient ambariClient, String host) {
-        return ambariClient.getHostComponentsMap(host).keySet()
+        return ambariClientRetryer.getHostComponentsMap(ambariClient, host).keySet()
                 .stream()
                 .filter(s -> COMPONENTS_NEED_TO_DECOMMISSION.keySet().contains(s))
-                .collect(toMap(k -> k, v -> ambariClient.getComponentStates(host, v)));
+                .collect(toMap(k -> k, v -> ambariClientRetryer.getComponentStates(ambariClient, host, v)));
     }
 
-    private void deleteHosts(Iterable<String> hosts, Map<String, Map<String, String>> components, ServiceAndHostService client)
+    private void deleteHosts(Iterable<String> hosts, Map<String, Map<String, String>> components, AmbariClient client)
             throws IOException, URISyntaxException {
         for (String hostName : hosts) {
-            client.deleteHostComponents(hostName, new ArrayList<>(components.get(hostName).keySet()));
-            client.deleteHost(hostName);
+            ambariClientRetryer.deleteHostComponents(client, hostName, new ArrayList<>(components.get(hostName).keySet()));
+            ambariClientRetryer.deleteHost(client, hostName);
         }
     }
 
@@ -371,7 +363,7 @@ public class AmbariDecommissioner {
         int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
         String blueprintName = cluster.getBlueprint().getAmbariName();
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
-        Map<String, List<String>> blueprintMap = ambariClient.getBlueprintMap(blueprintName);
+        Map<String, List<String>> blueprintMap = ambariClientRetryer.getBlueprintMap(ambariClient, blueprintName);
         if (hostGroupNodesAreDataNodes(blueprintMap, hostGroupName)) {
             int replication = getReplicationFactor(ambariClient, hostGroupName);
             if (!forced) {
@@ -393,7 +385,7 @@ public class AmbariDecommissioner {
         AmbariClient ambariClient = getAmbariClient(stack);
         Cluster cluster = stack.getCluster();
         String blueprintName = cluster.getBlueprint().getAmbariName();
-        Map<String, List<String>> blueprintMap = ambariClient.getBlueprintMap(blueprintName);
+        Map<String, List<String>> blueprintMap = ambariClientRetryer.getBlueprintMap(ambariClient, blueprintName);
 
         List<InstanceMetaData> instancesWithHostName = instanceMetaDataList.stream()
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
@@ -626,7 +618,7 @@ public class AmbariDecommissioner {
                 case NODEMANAGER:
                     action = h -> {
                         try {
-                            return ambariClient.decommissionNodeManagers(h);
+                            return ambariClientRetryer.decommissionNodeManagers(ambariClient, h);
                         } catch (URISyntaxException | IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -635,7 +627,7 @@ public class AmbariDecommissioner {
                 case DATANODE:
                     action = h -> {
                         try {
-                            return ambariClient.decommissionDataNodes(h);
+                            return ambariClientRetryer.decommissionDataNodes(ambariClient, h);
                         } catch (URISyntaxException | IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -644,8 +636,8 @@ public class AmbariDecommissioner {
                 case HBASE_REGIONSERVER:
                     action = l -> {
                         try {
-                            ambariClient.setHBaseRegionServersToMaintenance(l, true);
-                            return ambariClient.decommissionHBaseRegionServers(l);
+                            ambariClientRetryer.setHBaseRegionServersToMaintenance(ambariClient, l, true);
+                            return ambariClientRetryer.decommissionHBaseRegionServers(ambariClient, l);
                         } catch (URISyntaxException | IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -662,10 +654,11 @@ public class AmbariDecommissioner {
         return decommissionRequests;
     }
 
-    private Integer decommissionComponent(ServiceAndHostService ambariClient, Collection<String> hosts, String component,
+    private Integer decommissionComponent(AmbariClient ambariClient, Collection<String> hosts, String component,
             Function<List<String>, Integer> action) {
         List<String> hostsToDecommission = hosts.stream()
-                .filter(h -> "INSERVICE".equals(ambariClient.getComponentStates(h, component).get("desired_admin_state"))).collect(Collectors.toList());
+                .filter(h -> "INSERVICE".equals(ambariClientRetryer.getComponentStates(ambariClient, h, component).get("desired_admin_state")))
+                .collect(Collectors.toList());
         if (!hostsToDecommission.isEmpty()) {
             return action.apply(hostsToDecommission);
         }
@@ -677,7 +670,7 @@ public class AmbariDecommissioner {
             hosts = hosts.stream()
                     .filter(hn -> !runningComponents.get(hn).isEmpty()).collect(Collectors.toList());
             if (!hosts.isEmpty()) {
-                int requestId = ambariClient.stopAllComponentsOnHosts(hosts);
+                int requestId = ambariClientRetryer.stopAllComponentsOnHosts(ambariClient, hosts);
                 return ambariOperationService.waitForOperations(stack, ambariClient, singletonMap("Stopping components on the decommissioned hosts", requestId),
                         STOP_SERVICES_AMBARI_PROGRESS_STATE).getLeft();
             }
@@ -694,7 +687,7 @@ public class AmbariDecommissioner {
         Map<String, Integer> requests = new HashMap<>();
         try {
             for (String service : collectServicesToStart(ambariClient, runningComponents)) {
-                int requestId = ambariClient.startService(service);
+                int requestId = ambariClientRetryer.startService(ambariClient, service);
                 if (requestId != -1) {
                     requests.put(service + "_START", requestId);
                 }
@@ -708,13 +701,13 @@ public class AmbariDecommissioner {
                 : ambariOperationService.waitForOperations(stack, ambariClient, requests, START_SERVICES_AMBARI_PROGRESS_STATE).getLeft();
     }
 
-    private Iterable<String> collectServicesToStart(ServiceAndHostService ambariClient, Map<String, Map<String, String>> runningComponents) {
+    private Iterable<String> collectServicesToStart(AmbariClient ambariClient, Map<String, Map<String, String>> runningComponents) {
         Collection<String> services = new HashSet<>();
         for (Entry<String, Map<String, String>> hostComponentsEntry : runningComponents.entrySet()) {
             for (Entry<String, String> componentStateEntry : hostComponentsEntry.getValue().entrySet()) {
                 String component = componentStateEntry.getKey();
                 if (!"STARTED".equals(componentStateEntry.getValue()) && COMPONENTS_NEED_TO_DECOMMISSION.keySet().contains(component)) {
-                    Map<String, String> componentStates = ambariClient.getComponentStates(hostComponentsEntry.getKey(), component);
+                    Map<String, String> componentStates = ambariClientRetryer.getComponentStates(ambariClient, hostComponentsEntry.getKey(), component);
                     if ("DECOMMISSIONED".equals(componentStates.get("desired_admin_state"))) {
                         LOGGER.info("No need to start ambari service {} on host {}", component, hostComponentsEntry.getKey());
                     } else {
