@@ -58,6 +58,11 @@ public class AmbariClientRetryer {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Map<String, List<String>> getBlueprintMap(AmbariClient ambariClient, String blueprintName) {
+        return ambariClient.getBlueprintMap(blueprintName);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Map<String, String> getBlueprintsMap(AmbariClient ambariClient) {
         LOGGER.info("trying to get blueprints map, ambari URI: {}", ambariClient.getAmbari().getUri());
         return ambariClient.getBlueprintsMap();
@@ -74,5 +79,60 @@ public class AmbariClientRetryer {
             throws IOException, URISyntaxException {
         LOGGER.info("trying to add hosts and rack info with blueprint, ambari URI: {}", ambariClient.getAmbari().getUri());
         return ambariClient.addHostsAndRackInfoWithBlueprint(bpName, hostGroup, hostsWithRackInfo);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteHostComponents(AmbariClient ambariClient, String hostName, List<String> components) throws IOException, URISyntaxException {
+        ambariClient.deleteHostComponents(hostName, components);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteHost(AmbariClient ambariClient, String hostName) throws IOException, URISyntaxException {
+        ambariClient.deleteHost(hostName);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public int decommissionNodeManagers(AmbariClient ambariClient, List<String> hosts) throws IOException, URISyntaxException {
+        return ambariClient.decommissionNodeManagers(hosts);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public int decommissionDataNodes(AmbariClient ambariClient, List<String> hosts) throws IOException, URISyntaxException {
+        return ambariClient.decommissionDataNodes(hosts);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void setHBaseRegionServersToMaintenance(AmbariClient ambariClient, List<String> hostNames, boolean mode) throws IOException, URISyntaxException {
+        ambariClient.setHBaseRegionServersToMaintenance(hostNames, mode);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public int decommissionHBaseRegionServers(AmbariClient ambariClient, List<String> hosts) throws IOException, URISyntaxException {
+        return ambariClient.decommissionHBaseRegionServers(hosts);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Map<String, String> getComponentStates(AmbariClient ambariClient, String hostName, String component) {
+        return ambariClient.getComponentStates(hostName, component);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Map<String, String> getHostComponentsMap(AmbariClient ambariClient, String host) {
+        return ambariClient.getHostComponentsMap(host);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public int stopAllComponentsOnHosts(AmbariClient ambariClient, List<String> hostNames) throws IOException, URISyntaxException {
+        return ambariClient.stopAllComponentsOnHosts(hostNames);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public int startService(AmbariClient ambariClient, String service) throws IOException, URISyntaxException {
+        return ambariClient.startService(service);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public String getHostState(AmbariClient ambariClient, String host) {
+        return ambariClient.getHostState(host);
     }
 }
