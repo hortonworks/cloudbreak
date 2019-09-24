@@ -89,13 +89,8 @@ public class VaultPathBuilder {
     }
 
     public VaultPathBuilder withClusterCrn(String clusterCrn) {
-        this.clusterId = Optional.ofNullable(clusterCrn).map((String crnString) -> {
-            Crn crn = Crn.fromString(crnString);
-            if (crn == null) {
-                LOGGER.debug("An invalid cluster CRN was provided, it will be ignored.");
-                return null;
-            }
-            return crn.getResource();
+        this.clusterId = Optional.ofNullable(clusterCrn).map((String crn) -> {
+            return Crn.safeFromString(crn).getResource();
         });
         return this;
     }
