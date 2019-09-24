@@ -26,6 +26,14 @@ public class MDCBuilder {
         buildMdcContext(null);
     }
 
+    public static void addMdcField(String field, String value) {
+        MDC.put(field, value);
+    }
+
+    public static void removeMdcField(String field) {
+        MDC.remove(field);
+    }
+
     public static void addFlowId(String flowId) {
         MDC.put(LoggerContextKey.FLOW_ID.toString(), flowId);
     }
