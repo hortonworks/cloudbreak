@@ -113,7 +113,7 @@ public class DefaultModel extends MockModel {
         for (Map.Entry<String, CloudVmMetaDataStatus> entry : instanceMap.entrySet()) {
             CloudVmMetaDataStatus currentVmMeta = entry.getValue();
             CloudVmInstanceStatus currentInstance = currentVmMeta.getCloudVmInstanceStatus();
-            CloudVmInstanceStatus newInstanceStatus = new CloudVmInstanceStatus(currentInstance.getCloudInstance(), InstanceStatus.STOPPED);
+            CloudVmInstanceStatus newInstanceStatus = new CloudVmInstanceStatus(currentInstance.getCloudInstance(), InstanceStatus.STARTED);
             CloudInstanceMetaData currentInstanceMeta = currentVmMeta.getMetaData();
             CloudVmMetaDataStatus newVmMetaData = new CloudVmMetaDataStatus(newInstanceStatus, currentVmMeta.getMetaData());
             entry.setValue(newVmMetaData);

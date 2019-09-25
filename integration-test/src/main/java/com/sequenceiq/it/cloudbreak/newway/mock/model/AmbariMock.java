@@ -213,7 +213,6 @@ public class AmbariMock extends AbstractModelMock {
 
     private void putAmbariClusterServicesOtherState() {
         dynamicRouteStack.put(CLUSTERS_CLUSTER_SERVICES_STARTSTOP, (request, response, model) -> {
-            model.stopAllInstances();
             response.type("text/plain");
             ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
             Requests requests = new Requests(66, "INSTALLED", 100);

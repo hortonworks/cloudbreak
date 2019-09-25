@@ -37,6 +37,14 @@ public class MockInstanceConnector implements InstanceConnector {
             CloudVmInstanceStatus instanceStatus = new CloudVmInstanceStatus(instance, InstanceStatus.CREATED);
             cloudVmInstanceStatuses.add(instanceStatus);
         }
+
+        MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
+        LOGGER.info("stop instance statuses to mock spi, server address: " + mockCredentialView.getMockEndpoint());
+        try {
+            Unirest.post(mockCredentialView.getMockEndpoint() + "/spi/start_instances").asString();
+        } catch (UnirestException e) {
+            LOGGER.error("Error when instances got started", e);
+        }
         return cloudVmInstanceStatuses;
     }
 
@@ -47,6 +55,15 @@ public class MockInstanceConnector implements InstanceConnector {
             CloudVmInstanceStatus instanceStatus = new CloudVmInstanceStatus(instance, InstanceStatus.STOPPED);
             cloudVmInstanceStatuses.add(instanceStatus);
         }
+
+        MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
+        LOGGER.info("stop instance statuses to mock spi, server address: " + mockCredentialView.getMockEndpoint());
+        try {
+            Unirest.post(mockCredentialView.getMockEndpoint() + "/spi/stop_instances").asString();
+        } catch (UnirestException e) {
+            LOGGER.error("Error when instances got stopped", e);
+        }
+
         return cloudVmInstanceStatuses;
     }
 

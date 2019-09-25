@@ -25,6 +25,10 @@ public class SPIMock extends AbstractModelMock {
 
     public static final String CLOUD_METADATA_STATUSES = "/cloud_metadata_statuses";
 
+    public static final String START_INSTANCES = "/start_instances";
+
+    public static final String STOP_INSTANCES = "/stop_instances";
+
     public SPIMock(Service sparkService, DefaultModel defaultModel) {
         super(sparkService, defaultModel);
     }
@@ -35,6 +39,8 @@ public class SPIMock extends AbstractModelMock {
         postMockProviderMetadataStatus(sparkService, instanceMap);
         postMockProviderInstanceStatus(sparkService, instanceMap);
         postMockProviderTerminateInstance(sparkService, instanceMap);
+        postMockProviderStartInstance(sparkService, getDefaultModel());
+        postMockProviderStopInstance(sparkService, getDefaultModel());
     }
 
     private void postMockProviderTerminateInstance(Service sparkService, Map<String, CloudVmMetaDataStatus> instanceMap) {
@@ -44,6 +50,20 @@ public class SPIMock extends AbstractModelMock {
             cloudInstances.forEach(cloudInstance -> getDefaultModel().terminateInstance(instanceMap, cloudInstance.getInstanceId()));
             return null;
         }, gson()::toJson);
+    }
+
+    private void postMockProviderStartInstance(Service spark, DefaultModel model) {
+        spark.post(MOCK_ROOT + START_INSTANCES, (request, response) -> {
+            model.startAllInstances();
+            return null;
+        });
+    }
+
+    private void postMockProviderStopInstance(Service spark, DefaultModel model) {
+        spark.post(MOCK_ROOT + STOP_INSTANCES, (request, response) -> {
+            model.stopAllInstances();
+            return null;
+        });
     }
 
     private void postMockProviderInstanceStatus(Service sparkService, Map<String, CloudVmMetaDataStatus> instanceMap) {
