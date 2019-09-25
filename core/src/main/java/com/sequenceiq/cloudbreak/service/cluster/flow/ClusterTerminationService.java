@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.StateLog;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -154,8 +155,9 @@ public class ClusterTerminationService {
             deleteFileSystemResources(stackId, fs);
         }
         cluster.setBlueprint(null);
-        cluster.setStack(null);
         cluster.setStatus(DELETE_COMPLETED);
+        StateLog.logClusterChange(cluster);
+        cluster.setStack(null);
         cluster.setFileSystem(null);
         transactionService.required(() -> {
             deleteClusterHostGroupsWithItsMetadata(cluster);

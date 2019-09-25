@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.StateLog;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
@@ -41,6 +42,7 @@ public class ClusterStatusUpdater {
             if ((stack.isStackInStopPhase() || stack.isDeleteCompleted()) && cluster != null) {
                 updateClusterStatus(stack.getId(), cluster, stack.getStatus());
                 cluster.setStatus(stack.getStatus());
+                StateLog.logClusterChange(cluster);
             }
             String msg = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_COULD_NOT_SYNC.code(), Arrays.asList(stack.getStatus(),
                     cluster == null ? "" : cluster.getStatus()));

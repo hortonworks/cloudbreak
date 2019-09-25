@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.StateLog;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -13,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.repository.FlowLogRepository;
 
 @Component
 public class StackUpdater {
@@ -25,6 +28,14 @@ public class StackUpdater {
 
     @Inject
     private SecurityConfigService securityConfigService;
+
+    @Inject
+    private FlowLogRepository flowLogRepository;
+
+    @PostConstruct
+    public void init() {
+        StateLog.init(flowLogRepository);
+    }
 
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus) {
         return doUpdateStackStatus(stackId, detailedStatus, "");
@@ -45,6 +56,7 @@ public class StackUpdater {
         Status status = detailedStatus.getStatus();
         if (!stack.isDeleteCompleted()) {
             stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
+            StateLog.logStackChange(stack);
             if (status.isRemovableStatus()) {
                 InMemoryStateStore.deleteStack(stackId);
                 if (stack.getCluster() != null && stack.getCluster().getStatus().isRemovableStatus()) {

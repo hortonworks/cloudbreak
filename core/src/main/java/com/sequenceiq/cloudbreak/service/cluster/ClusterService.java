@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.StateLog;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -898,6 +899,7 @@ public class ClusterService {
             Status clusterOldStatus = cluster.get().getStatus();
             cluster.get().setStatus(status);
             cluster.get().setStatusReason(statusReason);
+            StateLog.logClusterChange(cluster.get());
             cluster = Optional.ofNullable(repository.save(cluster.get()));
             if (cluster.isPresent()) {
                 usageLoggingUtil.logClusterStatusChangeUsageEvent(clusterOldStatus, cluster.get());

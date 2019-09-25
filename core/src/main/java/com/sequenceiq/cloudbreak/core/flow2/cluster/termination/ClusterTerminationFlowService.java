@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.StateLog;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -71,6 +72,7 @@ public class ClusterTerminationFlowService {
         if (cluster.isPresent()) {
             cluster.get().setStatus(DELETE_FAILED);
             cluster.get().setStatusReason(errorDetails.getMessage());
+            StateLog.logClusterChange(cluster.get());
             clusterService.updateCluster(cluster.get());
             flowMessageService.fireEventAndLog(cluster.get().getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), errorDetails.getMessage());
         }

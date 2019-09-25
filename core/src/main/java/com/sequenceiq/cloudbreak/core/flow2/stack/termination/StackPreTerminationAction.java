@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.StateLog;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -76,6 +77,7 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
             cluster.setStatus(DELETE_IN_PROGRESS);
+            StateLog.logClusterChange(cluster);
             clusterService.updateCluster(cluster);
         }
     }

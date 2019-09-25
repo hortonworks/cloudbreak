@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.StateLog;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -139,6 +140,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setDatalakeResourceId(getDatalakeResourceId(source, workspace));
         stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
+        StateLog.logStackChange(stack);
         stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         updateCluster(source, stack, workspace);

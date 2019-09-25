@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.StateLog;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
@@ -267,6 +268,7 @@ public class ClusterCommonService {
     private void saveAndFireEventOnClusterStatusChange(Cluster cluster, Long stackId, Status status, ResourceEvent event) {
         if (!status.equals(cluster.getStatus())) {
             cluster.setStatus(status);
+            StateLog.logClusterChange(cluster);
             clusterService.save(cluster);
             cloudbreakEventService.fireCloudbreakEvent(stackId, event.name(), messagesService.getMessage(event.getMessage()));
         }

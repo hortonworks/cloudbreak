@@ -22,6 +22,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.StateLog;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -117,6 +118,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
                     if (!Status.WAIT_FOR_SYNC.equals(c.getStatus())) {
                         loggingStatusChange("Cluster", c.getId(), c.getStatus(), Status.WAIT_FOR_SYNC);
                         c.setStatus(Status.WAIT_FOR_SYNC);
+                        StateLog.logClusterChange(c);
                         clusterService.save(c);
                     }
                 }).filter(c -> !isStackToSyncContainsCluster(stacksToSync, c)).collect(Collectors.toList());
