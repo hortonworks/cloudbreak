@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.logger.format;
 
-import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,9 +31,6 @@ public class CustomJsonLayout extends JsonLayout {
         add(LOGGER_ATTR_NAME, this.includeLoggerName, event.getLoggerName(), map);
         if (event.getMDCPropertyMap() != null && !event.getMDCPropertyMap().isEmpty()) {
             map.put(contextName, event.getMDCPropertyMap());
-        }
-        if (loggerNameFilter != null && event.getLoggerName().startsWith(loggerNameFilter)) {
-            fullLogMessage = anonymize(fullLogMessage);
         }
         add(FORMATTED_MESSAGE_ATTR_NAME, true, fullLogMessage, map);
         return map;
