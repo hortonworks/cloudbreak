@@ -428,6 +428,7 @@ identity:
 
 cloudbreak:
     environment:
+        - AMBARI_CLIENT_LOG_LEVEL=$AMBARI_CLIENT_LOG_LEVEL
         - AWS_ACCESS_KEY_ID
         - AWS_SECRET_ACCESS_KEY
         - AWS_GOV_ACCESS_KEY_ID

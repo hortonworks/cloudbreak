@@ -12,3 +12,6 @@ Profile*
 *.yaml
 *.yml
 *.log
+.cbd_history
+.cbd_output_history
+.starttime

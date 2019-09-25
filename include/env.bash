@@ -53,6 +53,7 @@ env-export() {
 _env-description() {
 echo '''
 ADDRESS_RESOLVING_TIMEOUT - DNS lookup timeout for internal service discovery
+AMBARI_CLIENT_LOG_LEVEL - Sets the log level of the Ambari client
 AWS_ACCESS_KEY_ID - Access key of the AWS account
 AWS_ROLE_NAME - Name of the AWS role for the `cbd aws [generate-rol, show role]` commands
 AWS_SECRET_ACCESS_KEY - Secret access key of the AWS account
