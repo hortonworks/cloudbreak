@@ -164,6 +164,11 @@ public class FreeIpaClient {
         Map<String, Object> params = Map.of(
                 key, value
         );
+        return userMod(user, params);
+    }
+
+    public User userMod(String user, Map<String, Object> params) throws FreeIpaClientException {
+        List<String> flags = List.of(user);
         return (User) invoke("user_mod", flags, params, User.class).getResult();
     }
 
@@ -282,6 +287,13 @@ public class FreeIpaClient {
     public int getUsernameLength() throws FreeIpaClientException {
         Config config = (Config) invoke("config_show", List.of(), Map.of(), Config.class).getResult();
         return config.getIpamaxusernamelength();
+    }
+
+    public Config getConfig() throws FreeIpaClientException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("all", Boolean.TRUE);
+        Config config = (Config) invoke("config_show", List.of(), params, Config.class).getResult();
+        return config;
     }
 
     public void setUsernameLength(int length) throws FreeIpaClientException {

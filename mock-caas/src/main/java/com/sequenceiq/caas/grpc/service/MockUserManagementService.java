@@ -37,6 +37,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
@@ -503,6 +504,34 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Override
     public void listRoles(UserManagementProto.ListRolesRequest request, StreamObserver<UserManagementProto.ListRolesResponse> responseObserver) {
         responseObserver.onNext(UserManagementProto.ListRolesResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
+                                            io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement
+                                                .UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
+
+        final int keyType17 = 17;
+        final int keyType18 = 18;
+        final int saltType = 4;
+        GetActorWorkloadCredentialsResponse.Builder respBuilder = GetActorWorkloadCredentialsResponse.getDefaultInstance().toBuilder();
+        respBuilder.addKerberosKeysBuilder(0)
+            .setSaltType(saltType)
+            .setKeyType(keyType17)
+            .setKeyValue("testKeyValue17")
+            .setSaltValue("NonIodizedGrainOfSalt")
+            .build();
+
+        respBuilder.addKerberosKeysBuilder(1)
+            .setSaltType(saltType)
+            .setKeyType(keyType18)
+            .setKeyValue("testKeyValue18")
+            .setSaltValue("IodizedGrainOfSalt")
+            .build();
+
+        respBuilder.setPasswordHash("015353916be1489289e59166124bbcf21c78595f3717f71b079c469c513e05e7");
+        responseObserver.onNext(respBuilder.build());
         responseObserver.onCompleted();
     }
 

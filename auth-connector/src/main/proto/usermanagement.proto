@@ -337,21 +337,25 @@ service UserManagement {
   // Returns the the workload administration group name for the
   // (account, right, resource) tuple. Will throw NOT_FOUND exception if no name
   // for the workload administration group has been set yet.
-  rpc GetWorkloadAdministrationGroupName(GetWorkloadAdministrationGroupNameRequest)
-    returns (GetWorkloadAdministrationGroupNameResponse) {}
+  rpc GetWorkloadAdministrationGroupName (GetWorkloadAdministrationGroupNameRequest)
+  returns (GetWorkloadAdministrationGroupNameResponse) {}
 
   // Sets the workload administration group name for the (account, right, resource)
   // tuple. If the name was already set for the workload administration group
   // this is a no-op and the name generated for the workload administration group
   // will be returned.
-  rpc SetWorkloadAdministrationGroupName(SetWorkloadAdministrationGroupNameRequest)
-    returns (SetWorkloadAdministrationGroupNameResponse) {}
+  rpc SetWorkloadAdministrationGroupName (SetWorkloadAdministrationGroupNameRequest) returns (SetWorkloadAdministrationGroupNameResponse) {
+  }
 
   // Deletes the workload administration group name for the (account, right, resource)
   // tuple. Throws a NOT_FOUND exception if no such workload administration group
   // can be found.
-  rpc DeleteWorkloadAdministrationGroupName(DeleteWorkloadAdministrationGroupNameRequest)
-    returns (DeleteWorkloadAdministrationGroupNameResponse) {}
+  rpc DeleteWorkloadAdministrationGroupName (DeleteWorkloadAdministrationGroupNameRequest) returns (DeleteWorkloadAdministrationGroupNameResponse) {
+  }
+
+  // Retrieves the actor workload credentials.
+  rpc GetActorWorkloadCredentials (GetActorWorkloadCredentialsRequest) returns (GetActorWorkloadCredentialsResponse) {
+  }
 }
 
 // An User is the Altus identity corresponding to an external SFDC contact. Users
@@ -2109,16 +2113,46 @@ message DeleteWorkloadAdministrationGroupNameResponse {
 
 // A representation of a kerberos key. This does not exactly reflect the formal
 // ASN.1 structure; that seemed gratuitous.
-message KerberosKey {
-    int32 keyType = 1;
-    bytes encryptedKeyValue = 2 [(options.FieldExtension.skipLogging) = true];
-    int32 saltType = 3;
-    string saltValue = 4;
+message StoredKerberosKey {
+  // The key type
+  int32 keyType = 1;
+  // The encrypted value as was returned from the AWS kms client
+  string encryptedKeyValue = 2 [(options.FieldExtension.sensitive) = true];
+  // The salt type
+  int32 saltType = 3;
+  // The salt value
+  string saltValue = 4;
+}
+
+// Definition of a Kerberos Key used in rpc calls (vs storage)
+message ActorKerberosKey {
+  // The key type
+  int32 keyType = 1;
+  // The key value, base64 encoded
+  string keyValue = 2 [(options.FieldExtension.sensitive) = true];
+  // The salt type
+  int32 saltType = 3;
+  // The salt value
+  string saltValue = 4;
 }
 
 // This is used to serialize all the Actor dynamoDB related information that is
 // not indexed.
 message ActorDetails {
-    string encryptedPasswordHash = 1 [(options.FieldExtension.skipLogging) = true];
-    repeated KerberosKey kerberosKeys = 2;
+  // The cdp workload password hash, encrypted.
+  string encryptedPasswordHash = 1 [(options.FieldExtension.sensitive) = true];
+  // A list of kerberos keys for the actor.
+  repeated StoredKerberosKey kerberosKeys = 2;
+}
+
+message GetActorWorkloadCredentialsRequest {
+  // The actor CRN
+  string actorCrn = 1;
+}
+
+message GetActorWorkloadCredentialsResponse {
+  // The password hash.
+  string passwordHash = 1 [(options.FieldExtension.sensitive) = true];
+  // A list of kerberos keys for the actor.
+  repeated ActorKerberosKey kerberosKeys = 2;
 }
