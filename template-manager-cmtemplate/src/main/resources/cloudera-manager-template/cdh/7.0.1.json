@@ -87,6 +87,14 @@
     {
       "name": "NIFIREGISTRY",
       "version": "0.4.0"
+    },
+    {
+      "name": "SCHEMAREGISTRY",
+      "version": "4.0.0"
+    },
+    {
+      "name": "STREAMS_MESSAGING_MANAGER",
+      "version": "1.0.0"
     }
   ],
   "version": "7.0.1",

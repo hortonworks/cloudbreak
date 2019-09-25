@@ -395,6 +395,35 @@
         }
       ],
       "dependencies": ["ZOOKEEPER", "NIFI"]
+    },
+    {
+      "name": "SCHEMAREGISTRY",
+      "displayName": "Schema Registry",
+      "components": [
+        {
+          "name": "SCHEMA_REGISTRY_SERVER",
+          "groups": ["master"],
+          "base": true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER"]
+    },
+    {
+      "name": "STREAMS_MESSAGING_MANAGER",
+      "displayName": "SMM",
+      "components": [
+        {
+          "name": "STREAMS_MESSAGING_MANAGER_SERVER",
+          "groups": ["master"],
+          "base": true
+        },
+        {
+          "name": "STREAMS_MESSAGING_MANAGER_UI",
+          "groups": ["master"],
+          "base": true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER"]
     }
   ]
 }
