@@ -4,7 +4,7 @@
 
     <logger name="org.springframework.boot.autoconfigure.security.AuthenticationManagerConfiguration" level="ERROR"/>
     <logger name="org.springframework.statemachine.support" level="ERROR"/>
-    <logger name="com.sequenceiq.ambari.client.AmbariClientUtils" level="ERROR"/>
+    <logger name="com.sequenceiq.ambari.client.AmbariClientUtils" level="${AMBARI_CLIENT_LOG_LEVEL:-ERROR}"/>
     <logger name="com.amazonaws.request" level="DEBUG"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
