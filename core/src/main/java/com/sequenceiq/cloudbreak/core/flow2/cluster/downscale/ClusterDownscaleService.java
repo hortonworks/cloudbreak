@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -100,8 +99,6 @@ public class ClusterDownscaleService {
             Stack stack = stackService.getByIdWithListsInTransaction(payload.getStackId());
             InstanceStatus status = getStatus(payload.getErrorPhase());
             for (String hostName : payload.getHostNames()) {
-                Map<String, Map<String, String>> statusOfComponents = ambariDecommissioner.getStatusOfComponentsForHost(stack, hostName);
-                LOGGER.info("State of '{}': {}", hostName, statusOfComponents);
                 stackService.updateMetaDataStatusIfFound(payload.getStackId(), hostName, status);
                 hostGroupService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY);
             }
@@ -114,8 +111,6 @@ public class ClusterDownscaleService {
     public void updateMetadataStatus(RemoveHostsFailed payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getStackId());
         for (String hostName : payload.getFailedHostNames()) {
-            Map<String, Map<String, String>> statusOfComponents = ambariDecommissioner.getStatusOfComponentsForHost(stack, hostName);
-            LOGGER.info("State of '{}': {}", hostName, statusOfComponents);
             stackService.updateMetaDataStatusIfFound(payload.getStackId(), hostName, InstanceStatus.ORCHESTRATION_FAILED);
             hostGroupService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY);
         }

@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -67,13 +68,15 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
             hostNames = getHostNamesForPrivateIds(request, stack);
-            Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames);
-            Set<String> decommissionedHostNames;
-            if (skipAmbariDecomission(request, hostsToRemove)) {
-                decommissionedHostNames = hostNames;
-            } else {
-                executePreTerminationRecipes(stack, request.getHostGroupName(), hostsToRemove.keySet());
-                decommissionedHostNames = ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove);
+            Set<String> decommissionedHostNames = hostNames;
+            if (!skipAmbariDecomission(request)) {
+                LOGGER.debug("Downscale is not forced. Collecting nodes for decommission.");
+                Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames);
+                if (!CollectionUtils.isEmpty(hostsToRemove)) {
+                    LOGGER.debug("Hosts about to be removed are present in Ambari. Proceeding with decommission.");
+                    executePreTerminationRecipes(stack, request.getHostGroupName(), hostsToRemove.keySet());
+                    decommissionedHostNames = ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove);
+                }
             }
             result = new DecommissionResult(request, decommissionedHostNames);
         } catch (DecommissionException e) {
@@ -84,8 +87,8 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
-    private boolean skipAmbariDecomission(DecommissionRequest request, Map<String, HostMetadata> hostsToRemove) {
-        return hostsToRemove.isEmpty() || request.getDetails() != null && request.getDetails().isForced();
+    private boolean skipAmbariDecomission(DecommissionRequest request) {
+        return request.getDetails() != null && request.getDetails().isForced();
     }
 
     private Set<String> getHostNamesForPrivateIds(DecommissionRequest request, Stack stack) {

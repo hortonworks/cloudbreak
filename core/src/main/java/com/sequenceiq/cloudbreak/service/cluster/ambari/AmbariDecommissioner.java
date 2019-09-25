@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -367,20 +368,37 @@ public class AmbariDecommissioner {
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithHostMetadata(cluster.getId(), hostGroupName);
         Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
-        List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(cluster, hostsInHostGroup, hostGroupName);
-        int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
-        String blueprintName = cluster.getBlueprint().getAmbariName();
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
-        Map<String, List<String>> blueprintMap = ambariClient.getBlueprintMap(blueprintName);
-        if (hostGroupNodesAreDataNodes(blueprintMap, hostGroupName)) {
-            int replication = getReplicationFactor(ambariClient, hostGroupName);
-            if (!forced) {
-                verifyNodeCount(replication, scalingAdjustment, filteredHostList.size(), reservedInstances);
+        try {
+            List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(cluster, hostsInHostGroup, hostGroupName);
+            int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
+            String blueprintName = cluster.getBlueprint().getAmbariName();
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
+            Map<String, List<String>> blueprintMap = ambariClient.getBlueprintMap(blueprintName);
+            if (hostGroupNodesAreDataNodes(blueprintMap, hostGroupName)) {
+                int replication = getReplicationFactor(ambariClient, hostGroupName);
+                if (!forced) {
+                    verifyNodeCount(replication, scalingAdjustment, filteredHostList.size(), reservedInstances);
+                }
+                downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication, scalingAdjustment, filteredHostList, forced);
+            } else {
+                verifyNodeCount(NO_REPLICATION, scalingAdjustment, filteredHostList.size(), reservedInstances);
+                downScaleCandidates = filteredHostList;
             }
-            downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication, scalingAdjustment, filteredHostList, forced);
-        } else {
-            verifyNodeCount(NO_REPLICATION, scalingAdjustment, filteredHostList.size(), reservedInstances);
-            downScaleCandidates = filteredHostList;
+        } catch (Exception e) {
+            if (!forced) {
+                throw e;
+            }
+
+            LOGGER.warn("An error occured while collecting downscale candidates: {} "
+                    + "Downscale is forced, proceeding with candidate collection using stored metadata.", e.getMessage());
+            downScaleCandidates = hostsInHostGroup.stream()
+                    .filter(host -> HostMetadataState.UNHEALTHY.equals(host.getHostMetadataState())).limit(scalingAdjustment).collect(Collectors.toList());
+            if (downScaleCandidates.size() != scalingAdjustment) {
+                List<HostMetadata> remainingCandidates = hostsInHostGroup.stream()
+                        .sorted(Comparator.comparing(HostMetadata::getId).reversed())
+                        .limit(scalingAdjustment - downScaleCandidates.size()).collect(Collectors.toList());
+                downScaleCandidates.addAll(remainingCandidates);
+            }
         }
         return downScaleCandidates;
     }
