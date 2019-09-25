@@ -59,4 +59,14 @@ public class TransactionRuntimeExecutionExceptionMapper extends SendNotification
                 .map(mapper -> mapper.getErrorMessageFromThrowable(deepest.getOriginalCause()))
                 .findFirst().orElse(deepest.getOriginalCause().getMessage());
     }
+
+    @Override
+    protected boolean logException() {
+        boolean logException = true;
+        TransactionRuntimeExecutionException deepest = getDeepestTransactionException(CURRENT_EXCEPTION.get());
+        if (deepest.getOriginalCause().getClass().getSimpleName().contains("NotFound")) {
+            logException = false;
+        }
+        return logException;
+    }
 }
