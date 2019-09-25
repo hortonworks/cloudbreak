@@ -1,12 +1,18 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationDetails implements Serializable {
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss Z");
 
     private StructuredEventType eventType;
 
@@ -99,6 +105,14 @@ public class OperationDetails implements Serializable {
 
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getUTCDateTime() {
+        if (timestamp != null) {
+            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC).format(DATE_TIME_FORMATTER);
+        } else {
+            return "";
+        }
     }
 
     public String getUserIdV3() {
