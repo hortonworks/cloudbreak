@@ -159,7 +159,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                     dbStackService.delete(dbStack.get());
                     resource.setDbStack(null);
                 } else {
-                    LOGGER.info("Database stack missing for {}, continuing anyway");
+                    LOGGER.info("Database stack missing for crn: '{}', continuing anyway", resourceCrn);
                 }
 
                 resource.setResourceStatus(ResourceStatus.USER_MANAGED);
