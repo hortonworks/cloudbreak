@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
@@ -109,6 +110,24 @@ public class GrpcUmsClient {
             User user = client.getUser(requestId.orElse(UUID.randomUUID().toString()), userCrn);
             LOGGER.debug("User information retrieved for userCrn: {}", user.getCrn());
             return user;
+        }
+    }
+
+    /**
+     * Retrieves user Workload Credentials.
+     *
+     * @param actorCrn  the CRN of the actor
+     * @param userCrn   the CRN of the user
+     * @param requestId an optional request Id
+     * @return the user associated with this user CRN
+     */
+    public GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String actorCrn, String userCrn, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Getting user's: {}, workload Credentials for using request ID {}", userCrn, requestId);
+            GetActorWorkloadCredentialsResponse response = client.getActorWorkloadCredentials(requestId.orElse(UUID.randomUUID().toString()), userCrn);
+            LOGGER.debug("User's: {}, workload Credentials retrieved for using request ID {}", userCrn, requestId);
+            return response;
         }
     }
 
