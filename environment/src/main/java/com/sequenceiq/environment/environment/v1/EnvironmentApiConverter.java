@@ -7,6 +7,8 @@ import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCreden
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -44,6 +46,7 @@ import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
+import com.sequenceiq.environment.network.dto.MockParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
@@ -57,6 +60,10 @@ public class EnvironmentApiConverter {
             + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
             + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
             + "centos";
+
+    private static final String NETWORK_CONVERT_MESSAGE_TEMPLATE = "Setting up {} network param(s) for environment related dto..";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentApiConverter.class);
 
     private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
@@ -138,13 +145,16 @@ public class EnvironmentApiConverter {
     }
 
     public NetworkDto networkRequestToDto(EnvironmentNetworkRequest network) {
+        LOGGER.debug("Converting network request to dto");
         NetworkDto.Builder builder = NetworkDto.Builder.aNetworkDto();
         if (network.getAws() != null) {
+            LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "AWS");
             AwsParams awsParams = new AwsParams();
             awsParams.setVpcId(network.getAws().getVpcId());
             builder.withAws(awsParams);
         }
         if (network.getAzure() != null) {
+            LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Azure");
             AzureParams azureParams = new AzureParams();
             azureParams.setNetworkId(network.getAzure().getNetworkId());
             azureParams.setNoFirewallRules(network.getAzure().getNoFirewallRules());
@@ -153,6 +163,7 @@ public class EnvironmentApiConverter {
             builder.withAzure(azureParams);
         }
         if (network.getYarn() != null) {
+            LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Yarn");
             YarnParams yarnParams = new YarnParams();
             yarnParams.setQueue(network.getYarn().getQueue());
             builder.withYarn(yarnParams);
@@ -160,6 +171,13 @@ public class EnvironmentApiConverter {
         if (network.getSubnetIds() != null) {
             builder.withSubnetMetas(network.getSubnetIds().stream()
                 .collect(Collectors.toMap(id -> id, id -> new CloudSubnet(id, id))));
+        }
+        if (network.getMock() != null) {
+            LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Mock");
+            MockParams mockParams = new MockParams();
+            mockParams.setInternetGatewayId(network.getMock().getInternetGatewayId());
+            mockParams.setVpcId(network.getMock().getVpcId());
+            builder.withMock(mockParams);
         }
         builder.withPrivateSubnetCreation(getPrivateSubnetCreation(network));
         return builder
