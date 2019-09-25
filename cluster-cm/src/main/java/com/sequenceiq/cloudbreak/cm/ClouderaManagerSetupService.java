@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
@@ -164,7 +165,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                     clouderaManagerProductDetails, sdxContextName);
 
             cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
-            LOGGER.info("Generated Cloudera cluster template: {}", cluster.getExtendedBlueprintText());
+            LOGGER.info("Generated Cloudera cluster template: {}", AnonymizerUtil.anonymize(cluster.getExtendedBlueprintText()));
             ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
 
             removeRemoteParcelRepos(clouderaManagerResourceApi);
