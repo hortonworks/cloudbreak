@@ -110,7 +110,7 @@ public class ClusterDownscaleService {
                 Map<String, Map<String, String>> statusOfComponents = clusterDecomissionService.getStatusOfComponentsForHost(hostName);
                 LOGGER.info("State of '{}': {}", hostName, statusOfComponents);
                 stackService.updateMetaDataStatusIfFound(payload.getResourceId(), hostName, status);
-                hostMetadataService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY);
+                hostMetadataService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY, payload.getErrorDetails().getMessage());
             }
             String errorDetailes = String.format("The following hosts are in '%s': %s", status, String.join(", ", payload.getHostNames()));
             flowMessageService.fireEventAndLog(payload.getResourceId(),
@@ -125,7 +125,7 @@ public class ClusterDownscaleService {
             Map<String, Map<String, String>> statusOfComponents = clusterDecomissionService.getStatusOfComponentsForHost(hostName);
             LOGGER.info("State of '{}': {}", hostName, statusOfComponents);
             stackService.updateMetaDataStatusIfFound(payload.getResourceId(), hostName, InstanceStatus.ORCHESTRATION_FAILED);
-            hostMetadataService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY);
+            hostMetadataService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY, payload.getException().getMessage());
         }
         String errorDetailes = String.format("The following hosts are in '%s': %s",
                 InstanceStatus.ORCHESTRATION_FAILED, String.join(", ", payload.getFailedHostNames()));

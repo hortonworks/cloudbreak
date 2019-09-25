@@ -245,6 +245,7 @@ public class StackSyncService {
         hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN())
                 .ifPresent(hm -> {
                     hm.setHostMetadataState(HostMetadataState.UNHEALTHY);
+                    hm.setStatusReason("Host is reported as deleted on the cloud provider.");
                     hostMetadataService.save(hm);
                 });
         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
