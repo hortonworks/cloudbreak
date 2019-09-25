@@ -3,10 +3,12 @@ package com.sequenceiq.cloudbreak.ambari.status;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ import com.sequenceiq.cloudbreak.ambari.AmbariClusterStatusFactory;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataExtendedState;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
@@ -60,6 +63,13 @@ public class AmbariClusterStatusService implements ClusterStatusService {
             hostMetadataStateMap.put(entry.getKey(), state);
         }
         return hostMetadataStateMap;
+    }
+
+    @Override
+    public Map<String, HostMetadataExtendedState> getExtendedHostStatuses() {
+        return getHostStatuses().entrySet().stream()
+                .map(entry -> Pair.of(entry.getKey(), new HostMetadataExtendedState(entry.getValue(), null)))
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     }
 
     @Override

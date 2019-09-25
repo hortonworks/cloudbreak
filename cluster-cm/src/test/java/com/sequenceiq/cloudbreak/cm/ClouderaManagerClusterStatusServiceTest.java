@@ -12,7 +12,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -42,6 +44,7 @@ import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataExtendedState;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -215,6 +218,31 @@ public class ClouderaManagerClusterStatusServiceTest {
         );
         Map<String, HostMetadataState> actual = new TreeMap<>(subject.getHostStatuses());
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void collectsExtendedHostHealthIfAvailable() throws ApiException {
+        hostsAre(
+                new ApiHost().hostname("host1").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD)),
+                new ApiHost().hostname("host2").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.CONCERNING)),
+                new ApiHost().hostname("host3").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.BAD)
+                        .explanation("explanation")),
+                new ApiHost().hostname("host4").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.NOT_AVAILABLE)),
+                new ApiHost().hostname("host5").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.HISTORY_NOT_AVAILABLE)),
+                new ApiHost().hostname("host6").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED))
+        );
+
+        Map<String, HostMetadataState> expected = ImmutableMap.of(
+                "host1", HostMetadataState.HEALTHY,
+                "host2", HostMetadataState.HEALTHY,
+                "host3", HostMetadataState.UNHEALTHY
+        );
+        Map<String, HostMetadataExtendedState> extendedStateMap = subject.getExtendedHostStatuses();
+        Map<String, HostMetadataState> actual = new TreeMap<>(extendedStateMap.entrySet().stream()
+                .map(e -> Pair.of(e.getKey(), e.getValue().getHostMetadataState()))
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight)));
+        assertEquals(expected, actual);
+        assertEquals("HOST_SCM_HEALTH: BAD. Reason: explanation", extendedStateMap.get("host3").getExplanation());
     }
 
     @Test

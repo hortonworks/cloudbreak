@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.mapping;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataExtendedState;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -112,6 +114,22 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         } else {
             return ClusterStatusResult.of(ClusterStatus.AMBARISERVER_RUNNING);
         }
+    }
+
+    @Override
+    public Map<String, HostMetadataExtendedState> getExtendedHostStatuses() {
+        Map<String, HostMetadataExtendedState> result = new HashMap<>();
+        getHostHealth().forEach((hostname, health) ->
+                result.put(hostname, new HostMetadataExtendedState(healthSummaryToState(health.getSummary()),
+                        getHostHealthMessage(health.getSummary(), health.getExplanation()))));
+        return result;
+    }
+
+    private String getHostHealthMessage(ApiHealthSummary healthSummary, String explanation) {
+        if (healthSummaryToState(healthSummary) == HostMetadataState.UNHEALTHY) {
+            return String.format("%s: %s. Reason: %s", HOST_SCM_HEALTH, healthSummary.name(), ofNullable(explanation).orElse(""));
+        }
+        return null;
     }
 
     @Override
@@ -224,6 +242,23 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
                             .map(ApiHealthCheck::getSummary)
                             .filter(healthSummary -> !IGNORED_HEALTH_SUMMARIES.contains(healthSummary))
                             .map(healthSummary -> Pair.of(host.getHostname(), healthSummary))
+                    )
+                    .collect(toMap(Pair::getLeft, Pair::getRight));
+        } catch (ApiException e) {
+            LOGGER.info("Failed to get hosts from CM", e);
+            throw new RuntimeException("Failed to get hosts from CM due to: " + e.getMessage(), e);
+        }
+    }
+
+    private Map<String, ApiHealthCheck> getHostHealth() {
+        HostsResourceApi api = clouderaManagerClientFactory.getHostsResourceApi(client);
+        try {
+            return api.readHosts(FULL_VIEW).getItems().stream()
+                    .filter(host -> host.getHealthChecks() != null)
+                    .flatMap(host -> host.getHealthChecks().stream()
+                            .filter(check -> HOST_SCM_HEALTH.equals(check.getName()))
+                            .filter(check -> !IGNORED_HEALTH_SUMMARIES.contains(check.getSummary()))
+                            .map(check -> Pair.of(host.getHostname(), check))
                     )
                     .collect(toMap(Pair::getLeft, Pair::getRight));
         } catch (ApiException e) {

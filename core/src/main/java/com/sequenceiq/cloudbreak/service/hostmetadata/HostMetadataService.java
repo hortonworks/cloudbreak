@@ -58,10 +58,11 @@ public class HostMetadataService {
         return repository.findHostInClusterByName(cluster.getId(), hostName);
     }
 
-    public void updateHostMetaDataStatus(Cluster cluster, String hostName, HostMetadataState status) {
+    public void updateHostMetaDataStatus(Cluster cluster, String hostName, HostMetadataState status, String explanation) {
         Optional<HostMetadata> hostMetadata = getHostMetadataByClusterAndHostName(cluster, hostName);
         hostMetadata.ifPresent(hmd -> {
             hmd.setHostMetadataState(status);
+            hmd.setStatusReason(explanation);
             repository.save(hmd);
         });
     }

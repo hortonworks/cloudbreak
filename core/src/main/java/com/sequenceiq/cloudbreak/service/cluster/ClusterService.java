@@ -75,6 +75,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataExtendedState;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
@@ -823,6 +824,7 @@ public class ClusterService {
             for (HostMetadata host : hosts) {
                 if (host.getHostMetadataState() == expectedState && hostNames.contains(host.getHostName())) {
                     host.setHostMetadataState(newState);
+                    host.setStatusReason(recoveryMessage);
                     changedHosts.add(host);
                 }
             }
@@ -941,15 +943,16 @@ public class ClusterService {
     public Cluster updateClusterMetadata(Long stackId) {
         Stack stack = stackService.getById(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Map<String, HostMetadataState> hostStatuses = connector.clusterStatusService().getHostStatuses();
+        Map<String, HostMetadataExtendedState> hostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
         Set<HostMetadata> hosts = hostMetadataService.findHostsInCluster(stack.getCluster().getId());
         try {
             return transactionService.required(() -> {
                 for (HostMetadata host : hosts) {
                     if (hostStatuses.containsKey(host.getHostName())) {
-                        HostMetadataState newState = hostStatuses.get(host.getHostName());
-                        boolean stateChanged = updateHostMetadataByHostState(stack, host.getHostName(), newState);
-                        if (stateChanged && HostMetadataState.HEALTHY == newState) {
+                        HostMetadataExtendedState newState = hostStatuses.get(host.getHostName());
+                        boolean stateChanged = updateHostMetadataByHostState(stack, host.getHostName(),
+                                newState.getHostMetadataState(), newState.getExplanation());
+                        if (stateChanged && HostMetadataState.HEALTHY == newState.getHostMetadataState()) {
                             updateInstanceMetadataStateToRegistered(stackId, host);
                         }
                     }
@@ -1195,7 +1198,7 @@ public class ClusterService {
         return hostGroup.get();
     }
 
-    private boolean updateHostMetadataByHostState(Stack stack, String hostName, HostMetadataState newState) {
+    private boolean updateHostMetadataByHostState(Stack stack, String hostName, HostMetadataState newState, String statusReason) {
         boolean stateChanged = false;
         HostMetadata hostMetadata = hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), hostName)
                 .orElseThrow(NotFoundException.notFound("hostmetadata", hostName));
@@ -1203,6 +1206,7 @@ public class ClusterService {
         if (!oldState.equals(newState)) {
             stateChanged = true;
             hostMetadata.setHostMetadataState(newState);
+            hostMetadata.setStatusReason(statusReason);
             hostMetadataService.save(hostMetadata);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));

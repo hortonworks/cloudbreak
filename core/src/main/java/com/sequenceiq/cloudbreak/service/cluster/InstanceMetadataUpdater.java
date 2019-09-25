@@ -126,7 +126,8 @@ public class InstanceMetadataUpdater {
                 im.setImage(new Json(image));
                 im.setInstanceStatus(InstanceStatus.ORCHESTRATION_FAILED);
                 instanceMetaDataService.save(im);
-                hostMetadataService.updateHostMetaDataStatus(stack.getCluster(), im.getDiscoveryFQDN(), HostMetadataState.UNHEALTHY);
+                hostMetadataService.updateHostMetaDataStatus(stack.getCluster(), im.getDiscoveryFQDN(),
+                        HostMetadataState.UNHEALTHY, "Version query is failed on host");
             }
         }
         return failedVersionQueriesByHost;

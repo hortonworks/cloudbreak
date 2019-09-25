@@ -169,6 +169,7 @@ class ClusterUpscaleFlowService {
         for (HostMetadata metaData : hostMetadata) {
             if (!successHosts.contains(metaData.getHostName())) {
                 metaData.setHostMetadataState(HostMetadataState.UNHEALTHY);
+                metaData.setStatusReason("Cluster upscale failed. Host failed to upscale.");
                 hostMetadataService.save(metaData);
             }
         }
