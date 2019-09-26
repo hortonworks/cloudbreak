@@ -275,14 +275,19 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     @Override
+    public Blueprint getByNameForWorkspace(String name, Workspace workspace) {
+        return getByNameForWorkspaceAndLoadDefaultsIfNecessary(name, workspace);
+    }
+
+    @Override
     public Blueprint delete(Blueprint blueprint) {
         LOGGER.debug("Deleting blueprint with name: {}", blueprint.getName());
         prepareDeletion(blueprint);
         if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
             blueprintRepository.delete(blueprint);
         } else {
-            blueprint.setStatus(ResourceStatus.DEFAULT_DELETED);
-            blueprint = blueprintRepository.save(blueprint);
+            LOGGER.error("Tried to delete DEFAULT blueprint");
+            throw new BadRequestException("deletion of DEFAULT blueprint is not allowed");
         }
         return blueprint;
     }
@@ -350,7 +355,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             boolean secure, Long workspaceId) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        Blueprint blueprint = getByNameForWorkspace(blueprintName, workspace);
+        Blueprint blueprint = getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace);
         String blueprintText = blueprint.getBlueprintText();
         // Not necessarily the best way to figure out whether a DL or not. At the moment, DLs cannot be launched as
         // workloads, so works fine. Would be better to get this information from the invoking context itself.
