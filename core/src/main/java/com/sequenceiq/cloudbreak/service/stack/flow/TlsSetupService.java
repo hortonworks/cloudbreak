@@ -161,23 +161,28 @@ public class TlsSetupService {
         return certGenerationEnabled;
     }
 
-    public String updateDnsEntry(Stack stack) {
+    public String updateDnsEntry(Stack stack, String gatewayIp) {
         LOGGER.info("Update dns entry");
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         String accountId = threadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
 
-        String ip = stackTerminationService.deleteDnsEntry(stack, environment.getName());
-        if (ip == null) {
-            return null;
+        if (StringUtils.isEmpty(gatewayIp)) {
+            Optional<InstanceMetaData> gateway = Optional.ofNullable(stack.getPrimaryGatewayInstance());
+            if (gateway.isEmpty()) {
+                LOGGER.info("No running gateway or all node is terminated, we skip the dns entry deletion.");
+                return null;
+            } else {
+                gatewayIp = gateway.get().getPublicIpWrapper();
+            }
         }
-        boolean success = dnsManagementService.createDnsEntryWithIp(userCrn, accountId, stack.getName(), environment.getName(), false, List.of(ip));
+        boolean success = dnsManagementService.createDnsEntryWithIp(userCrn, accountId, stack.getName(), environment.getName(), false, List.of(gatewayIp));
         if (success) {
             try {
                 String fullQualifiedDomainName = environmentBasedDomainNameProvider
                         .getDomainName(stack.getName(), environment.getName(), getWorkloadSubdomain(userCrn));
                 if (fullQualifiedDomainName != null) {
-                    LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", ip, fullQualifiedDomainName);
+                    LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", gatewayIp, fullQualifiedDomainName);
                     return fullQualifiedDomainName;
                 }
             } catch (Exception e) {

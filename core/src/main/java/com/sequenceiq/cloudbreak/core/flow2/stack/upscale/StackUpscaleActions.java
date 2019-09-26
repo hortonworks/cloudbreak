@@ -13,8 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
@@ -30,7 +28,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -42,6 +41,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRequest;
@@ -50,12 +50,13 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRe
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.MountDisksOnNewHostsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.MountDisksOnNewHostsResult;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Configuration
 public class StackUpscaleActions {
@@ -84,6 +85,9 @@ public class StackUpscaleActions {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private TlsSetupService tlsSetupService;
 
     @Bean(name = "UPSCALE_PREVALIDATION_STATE")
     public Action<?, ?> prevalidate() {
@@ -206,6 +210,11 @@ public class StackUpscaleActions {
                     Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
                     InstanceMetaData gatewayMetaData = stack.getPrimaryGatewayInstance();
                     CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
+                    if (tlsSetupService.isCertGenerationEnabled()) {
+                        String ipWrapper = gatewayMetaData.getPublicIpWrapper();
+                        LOGGER.info("Gateway's DNS entry needs to be updated because primary gateway IP has been updated to: '{}'", ipWrapper);
+                        tlsSetupService.updateDnsEntry(stack, ipWrapper);
+                    }
                     Selectable sshFingerPrintReq = new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(),
                             context.getCloudCredential(), gatewayInstance);
                     sendEvent(context, sshFingerPrintReq);

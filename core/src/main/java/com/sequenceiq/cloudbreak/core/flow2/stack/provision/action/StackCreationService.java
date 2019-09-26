@@ -207,7 +207,7 @@ public class StackCreationService {
     }
 
     private void updateDnsEntryForCluster(Stack stack) {
-        String fqdn = tlsSetupService.updateDnsEntry(stack);
+        String fqdn = tlsSetupService.updateDnsEntry(stack, null);
         if (fqdn != null) {
             stack.getCluster().setFqdn(fqdn);
             clusterService.save(stack.getCluster());

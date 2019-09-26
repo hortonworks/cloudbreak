@@ -92,9 +92,10 @@ public class ChangePrimaryGatewayService {
 
                 Cluster cluster = updatedStack.getCluster();
                 cluster.setClusterManagerIp(gatewayIp);
+                LOGGER.info("Primary gateway IP has been updated to: '{}'", gatewayIp);
                 clusterService.save(cluster);
                 if (tlsSetupService.isCertGenerationEnabled()) {
-                    tlsSetupService.updateDnsEntry(updatedStack);
+                    tlsSetupService.updateDnsEntry(updatedStack, gatewayIp);
                 }
                 return null;
             });
