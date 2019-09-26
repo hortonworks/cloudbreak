@@ -2,15 +2,13 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 
-@Service
-public class ClouderaManagerParcelRepoChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+public class ClouderaManagerParcelRepositoryRefreshChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelRepoChecker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelRepositoryRefreshChecker.class);
 
     @Override
     public void handleTimeout(ClouderaManagerCommandPollerObject clouderaManagerPollerObject) {

@@ -16,11 +16,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
 
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -32,8 +28,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
-@ExtendWith(MockitoExtension.class)
-class ClouderaManagerTemplateInstallCheckerTest {
+class ClouderaManagerTemplateInstallationCheckerTest {
 
     private static final BigDecimal TEMPLATE_INSTALL_ID = new BigDecimal(1);
 
@@ -51,23 +46,18 @@ class ClouderaManagerTemplateInstallCheckerTest {
 
     private static final String FIRST_RUN_NAME = "First Run";
 
-    @InjectMocks
-    private ClouderaManagerTemplateInstallChecker underTest;
+    private ApiClient apiClient = Mockito.mock(ApiClient.class);
 
-    @Mock
-    private ApiClient apiClient;
+    private ClouderaManagerClientFactory clouderaManagerClientFactory = Mockito.mock(ClouderaManagerClientFactory.class);
 
-    @Mock
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private CommandsResourceApi commandsResourceApi = Mockito.mock(CommandsResourceApi.class);
 
-    @Mock
-    private CommandsResourceApi commandsResourceApi;
+    private ClouderaManagerTemplateInstallationChecker underTest = new ClouderaManagerTemplateInstallationChecker(clouderaManagerClientFactory);
 
     private ClouderaManagerCommandPollerObject pollerObject;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
         when(clouderaManagerClientFactory.getCommandsResourceApi(eq(apiClient))).thenReturn(commandsResourceApi);
         pollerObject = new ClouderaManagerCommandPollerObject(new Stack(), apiClient, TEMPLATE_INSTALL_ID);
     }

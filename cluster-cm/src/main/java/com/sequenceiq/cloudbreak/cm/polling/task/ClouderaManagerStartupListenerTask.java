@@ -5,7 +5,6 @@ import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -15,7 +14,6 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 
-@Service
 public class ClouderaManagerStartupListenerTask extends ClusterBasedStatusCheckerTask<ClouderaManagerPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerStartupListenerTask.class);

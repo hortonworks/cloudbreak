@@ -25,7 +25,7 @@ public class PollingService<T> {
         return pollWithTimeout(statusCheckerTask, t, interval, new AttemptBasedTimeoutChecker(maxAttempts), maxFailure);
     }
 
-    public Pair<PollingResult, Exception> pollWithAbsolutTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval, long waitSec, int maxFailure) {
+    public Pair<PollingResult, Exception> pollWithAbsoluteTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval, long waitSec, int maxFailure) {
         return pollWithTimeout(statusCheckerTask, t, interval, new AbsolutTimeBasedTimeoutChecker(waitSec), maxFailure);
     }
 
@@ -69,7 +69,7 @@ public class PollingService<T> {
     }
 
     public PollingResult pollWithTimeoutSingleFailure(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
-        return pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, 1).getLeft();
+        return pollWithAbsoluteTimeout(statusCheckerTask, t, interval, maxAttempts, 1).getLeft();
     }
 
     private void sleep(long duration) {

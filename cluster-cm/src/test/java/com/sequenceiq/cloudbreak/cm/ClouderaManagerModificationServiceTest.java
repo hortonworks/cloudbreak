@@ -161,7 +161,7 @@ class ClouderaManagerModificationServiceTest {
 
         when(clouderaManagerClientFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
-        when(clouderaManagerPollingServiceProvider.deployClientConfigPollingService(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID))
+        when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID))
                 .thenReturn(PollingResult.SUCCESS);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
         setUpListClusterHosts();
@@ -232,7 +232,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerClientFactory.getHostTemplatesResourceApi(eq(apiClientMock))).thenReturn(hostTemplatesResourceApi);
 
         PollingResult applyTemplatePollingResult = PollingResult.SUCCESS;
-        when(clouderaManagerPollingServiceProvider.applyHostTemplatePollingService(eq(stack), eq(apiClientMock), eq(applyHostTemplateCommandId)))
+        when(clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(eq(stack), eq(apiClientMock), eq(applyHostTemplateCommandId)))
                 .thenReturn(applyTemplatePollingResult);
 
         underTest.upscaleCluster(hostGroup, hostMetadataList, instaneMetadata);
@@ -256,14 +256,14 @@ class ClouderaManagerModificationServiceTest {
         BigDecimal restartMgmtCommandId = new BigDecimal(300);
         when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(restartMgmtCommandId));
         PollingResult restartMgmtCommandResult = PollingResult.SUCCESS;
-        when(clouderaManagerPollingServiceProvider.restartServicesPollingService(eq(stack), eq(apiClientMock), eq(restartMgmtCommandId)))
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(eq(stack), eq(apiClientMock), eq(restartMgmtCommandId)))
                 .thenReturn(restartMgmtCommandResult);
 
         ArgumentCaptor<ApiRestartClusterArgs> apiRestartClusterArgs = ArgumentCaptor.forClass(ApiRestartClusterArgs.class);
         BigDecimal restartClusterCommandId = new BigDecimal(400);
         when(clustersResourceApi.restartCommand(eq(STACK_NAME), apiRestartClusterArgs.capture())).thenReturn(new ApiCommand().id(restartClusterCommandId));
         PollingResult restartClusterCommandResult = PollingResult.SUCCESS;
-        when(clouderaManagerPollingServiceProvider.restartServicesPollingService(eq(stack), eq(apiClientMock), eq(restartClusterCommandId)))
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(eq(stack), eq(apiClientMock), eq(restartClusterCommandId)))
                 .thenReturn(restartClusterCommandResult);
         return apiRestartClusterArgs;
     }
@@ -279,7 +279,7 @@ class ClouderaManagerModificationServiceTest {
         BigDecimal deployClientCommandId = new BigDecimal(100);
         when(clustersResourceApi.deployClientConfig(eq(STACK_NAME))).thenReturn(new ApiCommand().id(deployClientCommandId));
 
-        when(clouderaManagerPollingServiceProvider.deployClientConfigPollingService(eq(stack), eq(apiClientMock), eq(deployClientCommandId)))
+        when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(eq(stack), eq(apiClientMock), eq(deployClientCommandId)))
                 .thenReturn(success);
     }
 }
