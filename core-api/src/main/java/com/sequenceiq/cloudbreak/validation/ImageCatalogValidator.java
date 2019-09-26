@@ -22,7 +22,7 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
 
     public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response by the specified URL '%s' due to: '%s'!";
 
-    public static final String FAILED_TO_GET_WITH_EXCEPTION = "Failed to get response by the specified URL!";
+    public static final String FAILED_TO_GET_WITH_EXCEPTION = "Failed to get response by the specified URL '%s'!";
 
     public static final String INVALID_JSON_IN_RESPONSE = "The file on the specified URL couldn't be parsed as JSON!";
 
@@ -53,7 +53,7 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
             String msg = String.format(FAILED_TO_GET_BY_FAMILY_TYPE, value, content.getKey().getReasonPhrase());
             context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
         } catch (Throwable throwable) {
-            context.buildConstraintViolationWithTemplate(FAILED_TO_GET_WITH_EXCEPTION).addConstraintViolation();
+            context.buildConstraintViolationWithTemplate(String.format(FAILED_TO_GET_WITH_EXCEPTION, value)).addConstraintViolation();
             LOGGER.debug("Failed to validate the specified image catalog URL: " + value, throwable);
         }
         return false;

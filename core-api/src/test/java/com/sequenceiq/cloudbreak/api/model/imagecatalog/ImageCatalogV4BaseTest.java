@@ -123,7 +123,7 @@ public class ImageCatalogV4BaseTest {
     }
 
     @Test
-    public void testWhenWebTargetFailesWithException() {
+    public void testWhenWebTargetFailsWithException() {
         when(httpHelper.getContent(anyString())).thenThrow(ProcessingException.class);
 
         ImageCatalogV4Base i = new ImageCatalogV4Base();
@@ -133,7 +133,8 @@ public class ImageCatalogV4BaseTest {
         Set<ConstraintViolation<ImageCatalogV4Base>> violations = validator.validate(i);
 
         assertEquals(2L, violations.size());
-        assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) || cv.getMessage().equals(FAILED_TO_GET_WITH_EXCEPTION)));
+        String failsWithExceptionMessage = String.format(FAILED_TO_GET_WITH_EXCEPTION, i.getUrl());
+        assertTrue(violations.stream().allMatch(cv -> cv.getMessage().equals(INVALID_MESSAGE) || cv.getMessage().equals(failsWithExceptionMessage)));
     }
 
     @Test
