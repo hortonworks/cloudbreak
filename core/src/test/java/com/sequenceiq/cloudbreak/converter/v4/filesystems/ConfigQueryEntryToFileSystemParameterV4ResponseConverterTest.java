@@ -50,6 +50,7 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
         expected.setPropertyDisplayName(TEST_DISPLAY_NAME);
         expected.setPropertyFile(TEST_PROPERTY_FILE);
         expected.setPropertyName(TEST_PROPERTY_NAME);
+        expected.setRelatedMissingServices(new HashSet<>(Arrays.asList(TEST_RELATED_SERVICE, TEST_RELATED_SERVICE2)));
         expected.setRelatedServices(new HashSet<>(Arrays.asList(TEST_RELATED_SERVICE, TEST_RELATED_SERVICE2)));
 
         FileSystemParameterV4Response result = underTest.convert(createConfigQueryEntry());
@@ -66,6 +67,7 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
         entry.setPropertyDisplayName(TEST_DISPLAY_NAME);
         entry.setPropertyFile(TEST_PROPERTY_FILE);
         entry.setPropertyName(TEST_PROPERTY_NAME);
+        entry.setRelatedMissingServices(new HashSet<>(Arrays.asList(TEST_RELATED_SERVICE, TEST_RELATED_SERVICE2)));
         entry.setRelatedServices(new HashSet<>(Arrays.asList(TEST_RELATED_SERVICE, TEST_RELATED_SERVICE2)));
         entry.setSupportedStorages(Collections.singleton(TEST_STORAGE));
         return entry;

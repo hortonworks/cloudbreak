@@ -18,6 +18,7 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverter
         fileSystemParameterV4Response.setDescription(source.getDescription());
         fileSystemParameterV4Response.setPropertyName(source.getPropertyName());
         fileSystemParameterV4Response.setRelatedServices(source.getRelatedServices());
+        fileSystemParameterV4Response.setRelatedMissingServices(source.getRelatedMissingServices());
         fileSystemParameterV4Response.setPropertyFile(source.getPropertyFile());
         fileSystemParameterV4Response.setProtocol(source.getProtocol());
         fileSystemParameterV4Response.setPropertyDisplayName(source.getPropertyDisplayName());

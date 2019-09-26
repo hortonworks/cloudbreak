@@ -87,4 +87,8 @@ public class AdlsFileSystemConfigurationsView extends BaseFileSystemConfiguratio
         this.adlsTrackingClusterTypeKey = adlsTrackingClusterTypeKey;
     }
 
+    @Override
+    public String getProtocol() {
+        return FileSystemType.ADLS.getProtocol();
+    }
 }

@@ -22,6 +22,8 @@ public class FileSystemParameterV4Response implements JsonEntity {
 
     private Set<String> relatedServices;
 
+    private Set<String> relatedMissingServices;
+
     private String propertyFile;
 
     private String protocol;
@@ -102,6 +104,14 @@ public class FileSystemParameterV4Response implements JsonEntity {
         this.secure = secure;
     }
 
+    public Set<String> getRelatedMissingServices() {
+        return relatedMissingServices;
+    }
+
+    public void setRelatedMissingServices(Set<String> relatedMissingServices) {
+        this.relatedMissingServices = relatedMissingServices;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -113,9 +123,9 @@ public class FileSystemParameterV4Response implements JsonEntity {
         FileSystemParameterV4Response that = (FileSystemParameterV4Response) o;
         return secure == that.secure
                 && Objects.equals(propertyName, that.propertyName)
-                && Objects.equals(description, that.description)
                 && Objects.equals(defaultPath, that.defaultPath)
                 && Objects.equals(relatedServices, that.relatedServices)
+                && Objects.equals(relatedMissingServices, that.relatedMissingServices)
                 && Objects.equals(propertyFile, that.propertyFile)
                 && Objects.equals(protocol, that.protocol)
                 && Objects.equals(propertyDisplayName, that.propertyDisplayName);
@@ -123,7 +133,7 @@ public class FileSystemParameterV4Response implements JsonEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(propertyName, description, defaultPath, relatedServices, propertyFile, protocol,
-                propertyDisplayName, secure);
+        return Objects.hash(propertyName, description, defaultPath, relatedServices, relatedMissingServices,
+                propertyFile, protocol, propertyDisplayName, secure);
     }
 }

@@ -23,4 +23,9 @@ public class GcsFileSystemConfigurationsView extends BaseFileSystemConfiguration
     public void setServiceAccountEmail(String serviceAccountEmail) {
         this.serviceAccountEmail = serviceAccountEmail;
     }
+
+    @Override
+    public String getProtocol() {
+        return FileSystemType.GCS.getProtocol();
+    }
 }

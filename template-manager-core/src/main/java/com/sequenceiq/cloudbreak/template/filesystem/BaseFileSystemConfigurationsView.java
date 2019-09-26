@@ -27,6 +27,10 @@ public class BaseFileSystemConfigurationsView implements ProvisionEntity {
         this.locations = locations;
     }
 
+    public String getBaseLocation() {
+        return String.format("%s://%s", getProtocol(), storageContainer);
+    }
+
     public String getStorageContainer() {
         return storageContainer;
     }
@@ -45,6 +49,10 @@ public class BaseFileSystemConfigurationsView implements ProvisionEntity {
 
     public String getType() {
         return type;
+    }
+
+    public String getProtocol() {
+        return "";
     }
 }
 

@@ -33,6 +33,8 @@ public class ConfigQueryEntry {
 
     private boolean secure;
 
+    private Set<String> relatedMissingServices = new HashSet<>();
+
     private Set<String> supportedStorages = new HashSet<>();
 
     public CloudStorageCdpService getType() {
@@ -115,6 +117,14 @@ public class ConfigQueryEntry {
         this.requiredForAttachedCluster = requiredForAttachedCluster;
     }
 
+    public Set<String> getRelatedMissingServices() {
+        return relatedMissingServices;
+    }
+
+    public void setRelatedMissingServices(Set<String> relatedMissingServices) {
+        this.relatedMissingServices = relatedMissingServices;
+    }
+
     public boolean isSecure() {
         return secure;
     }
@@ -136,6 +146,7 @@ public class ConfigQueryEntry {
         configQueryEntry.requiredForAttachedCluster = requiredForAttachedCluster;
         configQueryEntry.secure = secure;
         configQueryEntry.supportedStorages = new HashSet<>(supportedStorages);
+        configQueryEntry.relatedMissingServices = relatedMissingServices;
         return configQueryEntry;
     }
 
@@ -157,6 +168,7 @@ public class ConfigQueryEntry {
                 .append(description)
                 .append(defaultPath)
                 .append(relatedServices)
+                .append(relatedMissingServices)
                 .append(propertyFile)
                 .append(protocol)
                 .append(propertyDisplayName)

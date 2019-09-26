@@ -67,4 +67,9 @@ public class WasbFileSystemConfigurationsView extends BaseFileSystemConfiguratio
         this.storageContainerName = storageContainerName;
     }
 
+    @Override
+    public String getProtocol() {
+        return FileSystemType.WASB.getProtocol();
+    }
+
 }

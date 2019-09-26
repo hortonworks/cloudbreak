@@ -47,6 +47,8 @@ public class CmCloudStorageConfigDetailsTest {
 
     private static final String PROFILER_ADMIN_AGENT = "PROFILER_ADMIN_AGENT";
 
+    private static final String NAMENODE = "NAMENODE";
+
     private static final String PROFILER_METRICS_AGENT = "PROFILER_METRICS_AGENT";
 
     private static final String PROFILER_SCHEDULER_AGENT = "PROFILER_SCHEDULER_AGENT";
@@ -75,7 +77,7 @@ public class CmCloudStorageConfigDetailsTest {
 
     @Test
     public void testWhenHiveMetasoreRangerAdminZeppelinRMIsPresentedAndNotAttachedThenShouldReturnWithBothConfigs() {
-        prepareBlueprintProcessorFactoryMock(HIVE_METASTORE, RANGER_ADMIN, RESOURCEMANAGER, ZEPPELIN_SERVER);
+        prepareBlueprintProcessorFactoryMock(HIVE_METASTORE, RANGER_ADMIN, RESOURCEMANAGER, ZEPPELIN_SERVER, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
@@ -114,7 +116,7 @@ public class CmCloudStorageConfigDetailsTest {
     @Test
     public void testWhenHiveMetasoreAndRangerAdminIsPresentedDoubleAndNotAttachedThenShouldReturnWithRangerConfigs() {
         Map<String, Set<String>> map = new HashMap<>();
-        map.put("master", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN));
+        map.put("master", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN, NAMENODE));
         map.put("slave_1", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN));
 
         prepareBlueprintProcessorFactoryMock(map);
@@ -146,7 +148,7 @@ public class CmCloudStorageConfigDetailsTest {
     @Test
     public void testWhenHiveMetasoreAndRangerAdminIsPresentedDoubleAndAttachedThenShouldReturnWithRangerConfigs() {
         Map<String, Set<String>> map = new HashMap<>();
-        map.put("master", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN));
+        map.put("master", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN, NAMENODE));
         map.put("slave_1", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN));
 
         prepareBlueprintProcessorFactoryMock(map);
@@ -170,7 +172,7 @@ public class CmCloudStorageConfigDetailsTest {
 
     @Test
     public void testWhenOnlyRangerAdminIsPresentedThenShouldReturnWithOnlyRangerAdminConfigs() {
-        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN);
+        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
@@ -192,7 +194,7 @@ public class CmCloudStorageConfigDetailsTest {
 
     @Test
     public void testWhenAttachedClusterAndHiveMetastorePresentedThenShouldReturnWithNothing() {
-        prepareBlueprintProcessorFactoryMock(HIVE_METASTORE);
+        prepareBlueprintProcessorFactoryMock(HIVE_METASTORE, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
@@ -207,7 +209,7 @@ public class CmCloudStorageConfigDetailsTest {
 
     @Test
     public void testWhenNotAttachedClusterAndOnlyHiveMetastoreIsPresentedThenShouldReturnWithOnlyHiveMetastoreConfigs() {
-        prepareBlueprintProcessorFactoryMock(HIVE_METASTORE);
+        prepareBlueprintProcessorFactoryMock(HIVE_METASTORE, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
@@ -232,7 +234,7 @@ public class CmCloudStorageConfigDetailsTest {
 
     @Test
     public void testDatalakeClusterPaths() {
-        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, RESOURCEMANAGER);
+        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, RESOURCEMANAGER, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
@@ -257,7 +259,7 @@ public class CmCloudStorageConfigDetailsTest {
 
     @Test
     public void testStandaloneClusterPaths() {
-        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, ZEPPELIN_SERVER, HBASE_MASTER);
+        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, ZEPPELIN_SERVER, HBASE_MASTER, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
@@ -289,7 +291,7 @@ public class CmCloudStorageConfigDetailsTest {
 
     @Test
     public void testAttachedClusterPaths() {
-        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, RESOURCEMANAGER, ZEPPELIN_SERVER, HBASE_MASTER);
+        prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, RESOURCEMANAGER, ZEPPELIN_SERVER, HBASE_MASTER, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
@@ -325,7 +327,7 @@ public class CmCloudStorageConfigDetailsTest {
 
     @Test
     public void testProfilerServicesWithAttachedCluster() {
-        prepareBlueprintProcessorFactoryMock(PROFILER_ADMIN_AGENT, PROFILER_METRICS_AGENT, PROFILER_SCHEDULER_AGENT);
+        prepareBlueprintProcessorFactoryMock(PROFILER_ADMIN_AGENT, PROFILER_METRICS_AGENT, PROFILER_SCHEDULER_AGENT, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
                 .withClusterName(CLUSTER_NAME)
@@ -360,8 +362,35 @@ public class CmCloudStorageConfigDetailsTest {
                 .anyMatch("file_system_uri"::equals));
     }
 
+    @Test
+    public void testBasePathWhenNoHDFSServicesWithAttachedCluster() {
+        prepareBlueprintProcessorFactoryMock();
+        FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
+                .withStorageName(STORAGE_NAME)
+                .withClusterName(CLUSTER_NAME)
+                .withBlueprintText(BLUEPRINT_TEXT)
+                .withAttachedCluster(true)
+                .withFileSystemType(FileSystemType.S3.name())
+                .build();
+        Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
+        Assert.assertEquals(1L, bigCluster.size());
+
+        Set<ConfigQueryEntry> defaultFS = missingServiceEntry(bigCluster, NAMENODE);
+
+        Assert.assertEquals(1, defaultFS.size());
+        Assert.assertTrue(defaultFS.stream().map(ConfigQueryEntry::getDefaultPath)
+                .anyMatch("hwx-remote/bigCluster"::equals));
+        Assert.assertTrue(defaultFS.stream().map(ConfigQueryEntry::getPropertyName)
+                .anyMatch("core_defaultfs"::equals));
+    }
+
     private Set<ConfigQueryEntry> serviceEntry(Set<ConfigQueryEntry> configQueryEntries, String serviceName) {
         return configQueryEntries.stream().filter(b -> b.getRelatedServices().stream()
+                .anyMatch(service -> service.equals(serviceName))).collect(Collectors.toSet());
+    }
+
+    private Set<ConfigQueryEntry> missingServiceEntry(Set<ConfigQueryEntry> configQueryEntries, String serviceName) {
+        return configQueryEntries.stream().filter(b -> b.getRelatedMissingServices().stream()
                 .anyMatch(service -> service.equals(serviceName))).collect(Collectors.toSet());
     }
 

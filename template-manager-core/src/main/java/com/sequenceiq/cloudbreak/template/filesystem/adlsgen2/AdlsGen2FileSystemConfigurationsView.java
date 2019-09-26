@@ -69,4 +69,9 @@ public class AdlsGen2FileSystemConfigurationsView extends BaseFileSystemConfigur
     public void setSecure(boolean secure) {
         this.secure = secure;
     }
+
+    @Override
+    public String getProtocol() {
+        return FileSystemType.ADLS_GEN_2.getProtocol();
+    }
 }
