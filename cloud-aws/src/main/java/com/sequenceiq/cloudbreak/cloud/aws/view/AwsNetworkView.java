@@ -11,6 +11,8 @@ public class AwsNetworkView {
 
     public static final String VPC_ID = "vpcId";
 
+    public static final String REGION = "region";
+
     @VisibleForTesting
     static final String VPC_CIDR = "vpcCidr";
 

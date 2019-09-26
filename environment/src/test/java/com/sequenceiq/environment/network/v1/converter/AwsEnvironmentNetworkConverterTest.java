@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.v1.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
@@ -159,8 +160,11 @@ class AwsEnvironmentNetworkConverterTest {
 
     @Test
     void testConvertToNetwork() {
+        EnvironmentView environment = new EnvironmentView();
+        environment.setLocation(LOCATION);
         AwsNetwork awsNetwork = new AwsNetwork();
         awsNetwork.setVpcId(VPC_ID);
+        awsNetwork.setEnvironments(Set.of(environment));
 
         Network network = underTest.convertToNetwork(awsNetwork);
 

@@ -91,6 +91,7 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
         AwsNetwork awsNetwork = (AwsNetwork) baseNetwork;
         Map<String, Object> param = new HashMap<>();
         param.put(AwsNetworkView.VPC_ID, awsNetwork.getVpcId());
+        param.put(AwsNetworkView.REGION, awsNetwork.getEnvironments().stream().findFirst().get().getLocation());
         return new Network(null, param);
     }
 }
