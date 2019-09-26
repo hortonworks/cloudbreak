@@ -104,7 +104,8 @@ public class AwsNetworkConnector implements NetworkConnector {
 
     @Override
     public String getNetworkCidr(Network network, CloudCredential credential) {
-        AmazonEC2Client awsClientAccess = awsClient.createAccess(credential);
+        AwsCredentialView awsCredentialView = new AwsCredentialView(credential);
+        AmazonEC2Client awsClientAccess = awsClient.createAccess(awsCredentialView, network.getStringParameter(AwsNetworkView.REGION));
         AwsNetworkView awsNetworkView = new AwsNetworkView(network);
         String existingVpc = awsNetworkView.getExistingVpc();
         DescribeVpcsResult describeVpcsResult = awsClientAccess.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc));

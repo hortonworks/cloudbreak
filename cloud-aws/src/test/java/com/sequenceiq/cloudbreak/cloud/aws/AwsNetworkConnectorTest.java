@@ -215,12 +215,12 @@ public class AwsNetworkConnectorTest {
         String existingVpc = "vpc-1";
         String cidrBlock = "10.0.0.0/16";
 
-        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc));
+        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc, "region", "us-west-2"));
         CloudCredential credential = new CloudCredential();
         AmazonEC2Client amazonEC2Client = mock(AmazonEC2Client.class);
         DescribeVpcsResult describeVpcsResult = describeVpcsResult(cidrBlock);
 
-        when(awsClient.createAccess(credential)).thenReturn(amazonEC2Client);
+        when(awsClient.createAccess(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
         when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
 
         String result = underTest.getNetworkCidr(network, credential);
@@ -231,12 +231,12 @@ public class AwsNetworkConnectorTest {
     public void testGetNetworkCidrWithoutResult() {
         String existingVpc = "vpc-1";
 
-        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc));
+        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc, "region", "us-west-2"));
         CloudCredential credential = new CloudCredential();
         AmazonEC2Client amazonEC2Client = mock(AmazonEC2Client.class);
         DescribeVpcsResult describeVpcsResult = describeVpcsResult();
 
-        when(awsClient.createAccess(credential)).thenReturn(amazonEC2Client);
+        when(awsClient.createAccess(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
         when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
 
         thrown.expect(BadRequestException.class);
@@ -251,12 +251,12 @@ public class AwsNetworkConnectorTest {
         String cidrBlock1 = "10.0.0.0/16";
         String cidrBlock2 = "10.23.0.0/16";
 
-        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc));
+        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc, "region", "us-west-2"));
         CloudCredential credential = new CloudCredential();
         AmazonEC2Client amazonEC2Client = mock(AmazonEC2Client.class);
         DescribeVpcsResult describeVpcsResult = describeVpcsResult(cidrBlock1, cidrBlock2);
 
-        when(awsClient.createAccess(credential)).thenReturn(amazonEC2Client);
+        when(awsClient.createAccess(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
         when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
 
         String result = underTest.getNetworkCidr(network, credential);
