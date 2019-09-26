@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.model.objectstorage;
 
 import java.util.Objects;
 
+import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
+
 public class ObjectStorageMetadataResponse {
 
     private String region;
@@ -81,10 +83,5 @@ public class ObjectStorageMetadataResponse {
         public ObjectStorageMetadataResponse build() {
             return new ObjectStorageMetadataResponse(this);
         }
-    }
-
-    public enum ResponseStatus {
-        OK,
-        ACCESS_DENIED
     }
 }

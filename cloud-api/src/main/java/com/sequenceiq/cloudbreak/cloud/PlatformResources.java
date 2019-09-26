@@ -98,7 +98,7 @@ public interface PlatformResources {
      * @param cloudCredential credentials to connect to the cloud provider
      * @param region region of the resources
      * @param filters not used (reserved)
-     * @return the {@link CloudNoSqlTables} contains every No SQL table metadata per region
+     * @return the {@link CloudNoSqlTables} contains every No SQL table for the specified region
      */
     CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters);
 

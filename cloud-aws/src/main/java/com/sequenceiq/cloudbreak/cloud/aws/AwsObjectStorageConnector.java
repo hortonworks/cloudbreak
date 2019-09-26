@@ -9,9 +9,9 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
-import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse.ResponseStatus;
 
 @Service
 public class AwsObjectStorageConnector implements ObjectStorageConnector {

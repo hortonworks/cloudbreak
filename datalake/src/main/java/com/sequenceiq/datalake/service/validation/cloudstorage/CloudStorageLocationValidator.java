@@ -4,9 +4,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
-import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse.ResponseStatus;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.FileSystemType;

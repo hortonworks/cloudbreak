@@ -84,9 +84,10 @@ public class EnvironmentCreationService {
         validateCreation(creationDto, environment, cloudRegions);
         Map<String, CloudSubnet> subnetMetas = networkService.retrieveSubnetMetadata(environment, creationDto.getNetwork());
         validateNetworkRequest(environment, creationDto.getNetwork(), subnetMetas);
+        validateAndDetermineAwsParameters(environment, creationDto.getParameters());
         environment = environmentService.save(environment);
         environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(), subnetMetas);
-        createAndSetParameters(environment, creationDto.getParameters(), creationDto.getAccountId());
+        createAndSetParameters(environment, creationDto.getParameters());
         environmentService.save(environment);
         reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
         return environmentDtoConverter.environmentToDto(environment);
@@ -111,7 +112,7 @@ public class EnvironmentCreationService {
             Map<String, Long> zones = subnetMetas.values().stream()
                     .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
             if (zones.size() < 2) {
-                message = String.format("Cannot create environment, the subnets in the vpc should be at least in two different availabilityzones");
+                message = "Cannot create environment, the subnets in the vpc should be at least in two different availabilityzones";
                 LOGGER.debug(message);
                 errors.error(message);
             }
@@ -130,6 +131,15 @@ public class EnvironmentCreationService {
             }
         }
         return diff;
+    }
+
+    private void validateAndDetermineAwsParameters(Environment environment, ParametersDto parametersDto) {
+        if (parametersDto != null && parametersDto.getAwsParametersDto() != null) {
+            ValidationResult validationResult = validatorService.validateAndDetermineAwsParameters(environment, parametersDto.getAwsParametersDto());
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
+        }
     }
 
     private Environment initializeEnvironment(EnvironmentCreationDto creationDto) {
@@ -161,8 +171,8 @@ public class EnvironmentCreationService {
         }
     }
 
-    private void createAndSetParameters(Environment environment, ParametersDto parameters, String accountId) {
-        environment.setParameters(parametersService.saveParameters(environment, parameters, accountId));
+    private void createAndSetParameters(Environment environment, ParametersDto parameters) {
+        environment.setParameters(parametersService.saveParameters(environment, parameters));
     }
 
     private String createCrn(@Nonnull String accountId) {

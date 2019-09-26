@@ -18,6 +18,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
+import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
 
 public class EnvironmentTestData {
     public static final String ACCOUNT_ID = "accid";
@@ -111,6 +112,7 @@ public class EnvironmentTestData {
         awsParameters.setId(10L);
         awsParameters.setName(ENVIRONMENT_NAME);
         awsParameters.setS3guardTableName(S3_GUARD_TABLE_NAME);
+        awsParameters.setS3guardTableCreation(S3GuardTableCreation.CREATE_NEW);
         return awsParameters;
     }
 

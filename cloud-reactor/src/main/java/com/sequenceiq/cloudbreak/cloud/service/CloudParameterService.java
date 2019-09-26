@@ -443,7 +443,7 @@ public class CloudParameterService {
             LOGGER.debug("Platform NoSqlTablesResult result: {}", result);
             if (result.getStatus().equals(EventStatus.FAILED)) {
                 LOGGER.debug("Failed to get platform NoSqlTablesResult", result.getErrorDetails());
-                throw new GetCloudParameterException(String.format("Failed to get no SQL tables for the cloud provider: %s. %s",
+                throw new GetCloudParameterException(String.format("Failed to get NoSQL tables for the cloud provider: %s. %s",
                         result.getStatusReason(), getCauseMessages(result.getErrorDetails())), result.getErrorDetails());
             }
             return result.getNoSqlTables();

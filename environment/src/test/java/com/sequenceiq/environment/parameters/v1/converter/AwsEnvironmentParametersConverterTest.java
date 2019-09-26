@@ -16,6 +16,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.v1.EnvironmentViewConverter;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
@@ -55,6 +56,7 @@ class AwsEnvironmentParametersConverterTest {
                 .withId(ID)
                 .withAwsParameters(AwsParametersDto.builder()
                         .withDynamoDbTableName(TABLE_NAME)
+                        .withDynamoDbTableCreation(S3GuardTableCreation.CREATE_NEW)
                         .build())
                 .build();
         Environment environment = new Environment();
@@ -70,6 +72,7 @@ class AwsEnvironmentParametersConverterTest {
         assertEquals(ENVIRONMENT_VIEW, awsResult.getEnvironment());
         assertEquals(ID, awsResult.getId());
         assertEquals(TABLE_NAME, awsResult.getS3guardTableName());
+        assertEquals(S3GuardTableCreation.CREATE_NEW, awsResult.getS3guardTableCreation());
     }
 
     @Test
@@ -81,6 +84,7 @@ class AwsEnvironmentParametersConverterTest {
         parameters.setId(ID);
         parameters.setName(ENV_NAME);
         parameters.setS3guardTableName(TABLE_NAME);
+        parameters.setS3guardTableCreation(S3GuardTableCreation.CREATE_NEW);
 
         ParametersDto result = underTest.convertToDto(parameters);
 
@@ -88,5 +92,6 @@ class AwsEnvironmentParametersConverterTest {
         assertEquals(ID, result.getId());
         assertEquals(ENV_NAME, result.getName());
         assertEquals(TABLE_NAME, result.getAwsParametersDto().getS3GuardTableName());
+        assertEquals(S3GuardTableCreation.CREATE_NEW, result.getAwsParametersDto().getDynamoDbTableCreation());
     }
 }

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.IdentityService;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
+import com.sequenceiq.cloudbreak.cloud.NoSqlConnector;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
@@ -69,6 +70,9 @@ public class AwsConnector implements CloudConnector<Object> {
 
     @Inject
     private AwsObjectStorageConnector awsObjectStorageConnector;
+
+    @Inject
+    private AwsNoSqlConnector awsNoSqlConnector;
 
     @Override
     public Platform platform() {
@@ -143,5 +147,10 @@ public class AwsConnector implements CloudConnector<Object> {
     @Override
     public ObjectStorageConnector objectStorage() {
         return awsObjectStorageConnector;
+    }
+
+    @Override
+    public NoSqlConnector noSql() {
+        return awsNoSqlConnector;
     }
 }

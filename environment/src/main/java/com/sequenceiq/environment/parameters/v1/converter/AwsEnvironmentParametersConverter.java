@@ -29,9 +29,13 @@ public class AwsEnvironmentParametersConverter extends BaseEnvironmentParameters
     protected void postConvert(BaseParameters baseParameters, Environment environment, ParametersDto parametersDto) {
         super.postConvert(baseParameters, environment, parametersDto);
         AwsParameters awsParameters = (AwsParameters) baseParameters;
-        awsParameters.setS3guardTableName(Optional.of(parametersDto)
-                .map(ParametersDto::getAwsParametersDto)
+        Optional<AwsParametersDto> awsParametersDto = Optional.of(parametersDto)
+                .map(ParametersDto::getAwsParametersDto);
+        awsParameters.setS3guardTableName(awsParametersDto
                 .map(AwsParametersDto::getS3GuardTableName)
+                .orElse(null));
+        awsParameters.setS3guardTableCreation(awsParametersDto
+                .map(AwsParametersDto::getDynamoDbTableCreation)
                 .orElse(null));
     }
 
@@ -41,6 +45,7 @@ public class AwsEnvironmentParametersConverter extends BaseEnvironmentParameters
         AwsParameters awsParameters = (AwsParameters) source;
         builder.withAwsParameters(AwsParametersDto.builder()
                 .withDynamoDbTableName(awsParameters.getS3guardTableName())
+                .withDynamoDbTableCreation(awsParameters.getS3guardTableCreation())
                 .build());
     }
 }

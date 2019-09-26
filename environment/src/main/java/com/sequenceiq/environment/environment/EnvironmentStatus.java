@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment;
 
 import java.util.List;
+import java.util.Set;
 
 public enum EnvironmentStatus {
 
@@ -24,6 +25,13 @@ public enum EnvironmentStatus {
     CREATE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.CREATE_FAILED),
     DELETE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DELETE_FAILED),
     UPDATE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPDATE_FAILED);
+
+    public static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(
+            CREATION_INITIATED,
+            UPDATE_INITIATED,
+            NETWORK_CREATION_IN_PROGRESS,
+            FREEIPA_CREATION_IN_PROGRESS,
+            AVAILABLE);
 
     private final com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus responseStatus;
 

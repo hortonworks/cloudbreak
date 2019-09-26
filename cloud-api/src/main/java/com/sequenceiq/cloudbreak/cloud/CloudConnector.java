@@ -103,4 +103,13 @@ public interface CloudConnector<R> extends CloudPlatformAware {
     default ObjectStorageConnector objectStorage() {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
+
+    /**
+     * Access to the {@link NoSqlConnector} object.
+     *
+     * @return the {@link NoSqlConnector} object
+     */
+    default NoSqlConnector noSql() {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 }
