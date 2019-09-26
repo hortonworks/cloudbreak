@@ -51,7 +51,7 @@ public class MockScalingTest extends StackScalingV2Test {
         });
     }
 
-    @Test
+    @Test(enabled = false)
     @Parameters({"hostGroup", "desiredCount", "checkAmbari"})
     public void testStackScaling(String hostGroup, int desiredCount, @Optional("false") boolean checkAmbari) throws Exception {
         // GIVEN

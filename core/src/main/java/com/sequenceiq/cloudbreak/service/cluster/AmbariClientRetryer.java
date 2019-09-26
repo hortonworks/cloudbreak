@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
+import com.sequenceiq.ambari.client.model.HostStatus;
 
 @Service
 public class AmbariClientRetryer {
@@ -46,7 +47,19 @@ public class AmbariClientRetryer {
     }
 
     @Retryable(exclude = AmbariConnectionException.class, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public java.util.Map<String, java.util.Map<String, String>> getHostComponentsStates(AmbariClient ambariClient) {
+    public java.util.Map<String, HostStatus> getHostsStatuses(AmbariClient ambariClient, List<String> hosts) {
+        LOGGER.info("trying to get hosts states and their components states, ambari URI: {}", ambariClient.getAmbari().getUri());
+        return ambariClient.getHostsStatuses(hosts);
+    }
+
+    @Retryable(exclude = AmbariConnectionException.class, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public java.util.Map<String, HostStatus> getHostComponentStatuses(AmbariClient ambariClient, List<String> hosts, List<String> components) {
+        LOGGER.info("trying to get hosts states and their components states, ambari URI: {}", ambariClient.getAmbari().getUri());
+        return ambariClient.getHostComponentStatuses(hosts, components);
+    }
+
+    @Retryable(exclude = AmbariConnectionException.class, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public java.util.Map<String, Map<String, String>> getHostComponentsStates(AmbariClient ambariClient) {
         LOGGER.info("trying to get components states, ambari URI: {}", ambariClient.getAmbari().getUri());
         return ambariClient.getHostComponentsStates();
     }
@@ -89,6 +102,11 @@ public class AmbariClientRetryer {
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public void deleteHost(AmbariClient ambariClient, String hostName) throws IOException, URISyntaxException {
         ambariClient.deleteHost(hostName);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteHosts(AmbariClient ambariClient, List<String> hostNames) throws IOException, URISyntaxException {
+        ambariClient.deleteHosts(hostNames);
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)

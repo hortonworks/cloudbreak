@@ -67,6 +67,7 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientRetryer;
 import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.service.cluster.NotRecommendedNodeRemovalException;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
@@ -123,6 +124,9 @@ public class AmbariDecommissionerTest {
 
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private AmbariClientRetryer ambariClientRetryer;
 
     @Before
     public void setUp() throws Exception {
@@ -285,7 +289,7 @@ public class AmbariDecommissionerTest {
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
                 .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
-        when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
+        when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
         when(ambariClientPollingService.pollWithTimeoutSingleFailure(any(), any(), anyInt(), anyInt())).thenReturn(PollingResult.SUCCESS);
@@ -349,7 +353,7 @@ public class AmbariDecommissionerTest {
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
                 .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
-        when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
+        when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
 
@@ -415,7 +419,7 @@ public class AmbariDecommissionerTest {
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
                 .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
-        when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
+        when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
 
@@ -480,7 +484,7 @@ public class AmbariDecommissionerTest {
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
                 .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
-        when(ambariClient.getBlueprintMap(ambariName)).thenReturn(blueprintMap);
+        when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
         when(ambariClientPollingService.pollWithTimeoutSingleFailure(any(), any(), anyInt(), anyInt())).thenReturn(PollingResult.SUCCESS);

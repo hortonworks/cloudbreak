@@ -170,7 +170,8 @@ public class ScalingMock extends MockServer {
         });
         sparkService.put(AMBARI_API_ROOT + "/clusters/:cluster/host_components", new AmbariClusterRequestsResponse());
         sparkService.delete(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname/host_components/*", new EmptyAmbariResponse());
-        sparkService.delete(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname", new AmbariClusterRequestsResponse());
+//        sparkService.delete(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname", new AmbariClusterRequestsResponse());
+        sparkService.delete(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClusterRequestsResponse());
         sparkService.post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
     }
 
@@ -220,10 +221,11 @@ public class ScalingMock extends MockServer {
             verifyRegexpPath(AMBARI_API_ROOT + "/blueprints/.*", "GET").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/configurations/service_config_versions", "GET").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").atLeast(1).verify();
-            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/.*", "GET").atLeast(adjustment * 2).verify();
-            verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "GET").exactTimes(1).verify();
-            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/.*/host_components/.*", "DELETE").exactTimes(adjustment * 2).verify();
-            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/((?!/).)*$", "DELETE").exactTimes(adjustment).verify();
+            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/.*", "GET").atLeast(2).verify();
+            verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "GET").exactTimes(6).verify();
+//            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/.*/host_components/.*", "DELETE").exactTimes(adjustment * 2).verify();
+//            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/((?!/).)*$", "DELETE").exactTimes(adjustment).verify();
+            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "DELETE").exactTimes(6).verify();
             verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/.*/host_components/.*", "GET").atLeast(adjustment * 2).verify();
             verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/services/.*", "PUT").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/requests", "POST").bodyContains("DECOMMISSION").exactTimes(2).verify();
