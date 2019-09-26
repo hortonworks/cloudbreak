@@ -8,11 +8,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -30,15 +27,17 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 
-@Service
 public class ClouderaManagerParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelActivationListenerTask.class);
 
     private static final String PARCEL_ACTIVATED_STAGE = "ACTIVATED";
 
-    @Inject
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private final ClouderaManagerClientFactory clouderaManagerClientFactory;
+
+    public ClouderaManagerParcelActivationListenerTask(ClouderaManagerClientFactory clouderaManagerClientFactory) {
+        this.clouderaManagerClientFactory = clouderaManagerClientFactory;
+    }
 
     @Override
     public boolean checkStatus(ClouderaManagerCommandPollerObject clouderaManagerPollerObject) {

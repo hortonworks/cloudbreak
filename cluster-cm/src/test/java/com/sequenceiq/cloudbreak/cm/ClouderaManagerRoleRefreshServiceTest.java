@@ -55,13 +55,13 @@ public class ClouderaManagerRoleRefreshServiceTest {
         when(clouderaManagerResourceApi.listActiveCommands(DataView.SUMMARY.name())).thenReturn(apiCommandList);
         when(clouderaManagerClientFactory.getClustersResourceApi(apiClient)).thenReturn(clustersResourceApi);
         when(clustersResourceApi.refresh(CLUSTER_NAME)).thenReturn(apiCommand);
-        when(clouderaManagerPollingServiceProvider.refreshClusterPollingService(stack, apiClient, COMMAND_ID)).thenReturn(PollingResult.SUCCESS);
+        when(clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, apiClient, COMMAND_ID)).thenReturn(PollingResult.SUCCESS);
 
         underTest.refreshClusterRoles(apiClient, stack);
 
-        verify(clouderaManagerPollingServiceProvider).refreshClusterPollingService(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerPollingServiceProvider).startPollingCmConfigurationRefresh(stack, apiClient, COMMAND_ID);
         verify(clustersResourceApi).refresh(CLUSTER_NAME);
-        verify(clouderaManagerPollingServiceProvider).refreshClusterPollingService(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerPollingServiceProvider).startPollingCmConfigurationRefresh(stack, apiClient, COMMAND_ID);
     }
 
     private ApiCommand createApiCommand() {

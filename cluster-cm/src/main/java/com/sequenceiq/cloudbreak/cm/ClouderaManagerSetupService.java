@@ -122,7 +122,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.clouderaManagerStartupPollerObjectPollingService(stack, client);
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, client);
         if (isSuccess(pollingResult)) {
             LOGGER.debug("Cloudera Manager server has successfully started! Polling result: {}", pollingResult);
         } else if (isExited(pollingResult)) {
@@ -231,7 +231,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 throw new ClouderaManagerOperationFailedException(msg, e);
             }
         }
-        clusterInstallCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, cmd.getId()));
+        clusterInstallCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, client, cmd.getId()));
     }
 
     private void removeRemoteParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi) {
@@ -248,7 +248,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     private void refreshParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi) {
         try {
             ApiCommand apiCommand = clouderaManagerResourceApi.refreshParcelRepos();
-            clouderaManagerPollingServiceProvider.parcelRepoRefreshCheckerService(stack, client, apiCommand.getId());
+            clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, client, apiCommand.getId());
         } catch (ApiException e) {
             LOGGER.info("Unable to refresh parcel repo", e);
             throw new CloudbreakServiceException(e);
@@ -279,7 +279,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
-        clouderaManagerPollingServiceProvider.hostsPollingService(stack, client);
+        clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, client);
     }
 
     @Override

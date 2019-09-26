@@ -177,7 +177,7 @@ public class ClouderaManagerDecomissioner {
             ClouderaManagerResourceApi apiInstance = new ClouderaManagerResourceApi(client);
             ApiHostNameList body = new ApiHostNameList().items(stillAvailableRemovableHosts);
             ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider.decommissionHostPollingService(stack, client, apiCommand.getId());
+            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmHostDecommissioning(stack, client, apiCommand.getId());
             if (isExited(pollingResult)) {
                 throw new CancellationException("Cluster was terminated while waiting for host decommission");
             } else if (isTimeout(pollingResult)) {
@@ -250,7 +250,7 @@ public class ClouderaManagerDecomissioner {
             ApiHostNameList body = new ApiHostNameList().addItemsItem(hostMetadata.getHostName());
             try {
                 ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
-                PollingResult pollingResult = clouderaManagerPollingServiceProvider.decommissionHostPollingService(stack, client, apiCommand.getId());
+                PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmHostDecommissioning(stack, client, apiCommand.getId());
                 if (isExited(pollingResult)) {
                     throw new CancellationException("Cluster was terminated while waiting for host decommission");
                 } else if (isTimeout(pollingResult)) {
@@ -288,7 +288,7 @@ public class ClouderaManagerDecomissioner {
         ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
         try {
             ApiCommand command = clouderaManagerResourceApi.deleteCredentialsCommand("unused");
-            clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, command.getId());
+            clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, command.getId());
         } catch (ApiException e) {
             LOGGER.error("Failed to delete credentials of host: {}", data.getHostName(), e);
             throw new CloudbreakServiceException(e.getMessage(), e);
@@ -339,7 +339,7 @@ public class ClouderaManagerDecomissioner {
     public void stopAndRemoveMgmtService(Stack stack, ApiClient client) {
         MgmtServiceResourceApi mgmtServiceResourceApi = new MgmtServiceResourceApi(client);
         try {
-            clouderaManagerPollingServiceProvider.stopManagementServicePollingService(stack,
+            clouderaManagerPollingServiceProvider.startPollingCmManagementServiceShutdown(stack,
                     client, mgmtServiceResourceApi.stopCommand().getId());
             mgmtServiceResourceApi.deleteCMS();
         } catch (ApiException e) {
