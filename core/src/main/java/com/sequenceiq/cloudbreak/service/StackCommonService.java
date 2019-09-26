@@ -271,8 +271,8 @@ public class StackCommonService implements StackEndpoint {
     public void retryInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
-        operationRetryService.retry(stack);
+        Long stackId = stackService.getIdByNameInWorkspace(name, workspaceId);
+        operationRetryService.retry(stackId);
     }
 
     public List<RetryableFlow> getRetryableFlows(String name, Long workspaceId) {

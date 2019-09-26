@@ -21,10 +21,10 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
@@ -78,15 +78,13 @@ public class OperationRetryServiceTest {
 
     @Test(expected = BadRequestException.class)
     public void retryPending() {
-        when(stackMock.getId()).thenReturn(STACK_ID);
-
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
                 createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, Instant.now().toEpochMilli(), START_CREATION_EVENT.event()),
                 createFlowLog("START_STATE", StateStatus.PENDING, Instant.now().toEpochMilli(), VALIDATION_FINISHED_EVENT.event())
                 );
-        when(flowLogRepository.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(pendingFlowLogs);
+        when(flowLogRepository.findAllByStackIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
         try {
-            underTest.retry(stackMock);
+            underTest.retry(STACK_ID);
         } finally {
             verify(flow2Handler, times(0)).restartFlow(any(FlowLog.class));
         }
@@ -102,8 +100,6 @@ public class OperationRetryServiceTest {
 
     @Test
     public void retry() {
-        when(stackMock.getId()).thenReturn(STACK_ID);
-
         FlowLog lastSuccessfulState = createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 5, VALIDATION_FINISHED_EVENT.event());
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
                 createFlowLog("FINISHED", StateStatus.SUCCESSFUL, 7, null),
@@ -114,25 +110,22 @@ public class OperationRetryServiceTest {
                 createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 2, VALIDATION_FINISHED_EVENT.event()),
                 createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, 1, START_CREATION_EVENT.event())
                 );
-        when(flowLogRepository.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(pendingFlowLogs);
-        when(stackMock.getStatus()).thenReturn(Status.CREATE_FAILED);
-        underTest.retry(stackMock);
+        when(flowLogRepository.findAllByStackIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
+        underTest.retry(STACK_ID);
 
         verify(flow2Handler, times(1)).restartFlow(ArgumentMatchers.eq(lastSuccessfulState));
     }
 
     @Test(expected = BadRequestException.class)
     public void retryNoFailed() {
-        when(stackMock.getId()).thenReturn(STACK_ID);
-
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
                 createFlowLog("FINISHED", StateStatus.SUCCESSFUL, 4, null),
                 createFlowLog("NEXT_STATE", StateStatus.FAILED, 3, SETUP_FINISHED_EVENT.event()),
                 createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 2, VALIDATION_FINISHED_EVENT.event()),
                 createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, 1, START_CREATION_EVENT.event())
         );
-        when(flowLogRepository.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(pendingFlowLogs);
-        underTest.retry(stackMock);
+        when(flowLogRepository.findAllByStackIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
+        underTest.retry(STACK_ID);
 
         verify(flow2Handler, never()).restartFlow(any(FlowLog.class));
     }

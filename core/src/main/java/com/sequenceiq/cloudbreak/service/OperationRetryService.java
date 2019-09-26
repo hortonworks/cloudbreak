@@ -9,15 +9,16 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow.RetryableFlowBuilder;
@@ -30,6 +31,8 @@ public class OperationRetryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationRetryService.class);
 
     private static final int INDEX_BEFORE_FINISHED_STATE = 1;
+
+    private static final int LAST_FIFTY_FLOWLOGS = 50;
 
     @Inject
     private Flow2Handler flow2Handler;
@@ -49,23 +52,23 @@ public class OperationRetryService {
     @Resource
     private List<FlowConfiguration<?>> flowConfigs;
 
-    public void retry(Stack stack) {
-        List<FlowLog> flowLogs = flowLogRepository.findAllByStackIdOrderByCreatedDesc(stack.getId());
-        if (isFlowPending(flowLogs)) {
-            LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stack.getId());
+    public void retry(Long stackId) {
+        if (isFlowPending(stackId)) {
+            LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stackId);
             throw new BadRequestException("Retry cannot be performed, because there is already an active flow.");
         }
 
+        List<FlowLog> flowLogs = flowLogRepository.findAllByStackIdOrderByCreatedDesc(stackId, PageRequest.of(0, LAST_FIFTY_FLOWLOGS));
         List<RetryableFlow> retryableFlows = getRetryableFlows(flowLogs);
         if (CollectionUtils.isEmpty(retryableFlows)) {
-            LOGGER.info("Retry cannot be performed. The last flow did not fail or not retryable. stackId: {}", stack.getId());
+            LOGGER.info("Retry cannot be performed. The last flow did not fail or not retryable. stackId: {}", stackId);
             throw new BadRequestException("Retry cannot be performed. The last flow did not fail or not retryable.");
         }
 
         String name = retryableFlows.get(0).getName();
         String statusDesc = cloudbreakMessagesService.getMessage(Msg.RETRY_FLOW_START.code(), List.of(name));
         LOGGER.info(statusDesc);
-        eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
+        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), statusDesc);
 
         Optional<FlowLog> failedFlowLog = getMostRecentFailedLog(flowLogs);
         failedFlowLog.map(log -> getLastSuccessfulStateLog(log.getCurrentState(), flowLogs))
@@ -87,17 +90,16 @@ public class OperationRetryService {
                 .findFirst();
     }
 
-    private boolean isFlowPending(List<FlowLog> flowLogs) {
-        return flowLogs.stream()
-                .anyMatch(fl -> StateStatus.PENDING.equals(fl.getStateStatus()));
+    private Boolean isFlowPending(Long stackId) {
+        return flowLogRepository.findAnyByStackIdAndStateStatus(stackId, StateStatus.PENDING);
     }
 
     public List<RetryableFlow> getRetryableFlows(Long stackId) {
-        List<FlowLog> flowLogs = flowLogRepository.findAllByStackIdOrderByCreatedDesc(stackId);
-        if (isFlowPending(flowLogs)) {
+        if (isFlowPending(stackId)) {
             LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stackId);
             return List.of();
         }
+        List<FlowLog> flowLogs = flowLogRepository.findAllByStackIdOrderByCreatedDesc(stackId, PageRequest.of(0, LAST_FIFTY_FLOWLOGS));
         return getRetryableFlows(flowLogs);
     }
 
