@@ -124,9 +124,9 @@ public class GrpcUmsClient {
     public GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String actorCrn, String userCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
-            LOGGER.debug("Getting user's: {}, workload Credentials for using request ID {}", userCrn, requestId);
+            LOGGER.debug("Getting workload credentials for user {}", userCrn);
             GetActorWorkloadCredentialsResponse response = client.getActorWorkloadCredentials(requestId.orElse(UUID.randomUUID().toString()), userCrn);
-            LOGGER.debug("User's: {}, workload Credentials retrieved for using request ID {}", userCrn, requestId);
+            LOGGER.debug("Got workload credentials for user {}", userCrn);
             return response;
         }
     }

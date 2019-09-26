@@ -14,11 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.sequenceiq.caas.util.JsonUtil;
-
-import io.grpc.stub.StreamObserver;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MockUserManagementServiceTest {
@@ -65,69 +61,4 @@ public class MockUserManagementServiceTest {
 
         Assert.assertEquals(expected, underTest.sanitizeWorkloadUsername(username));
     }
-
-    @Test
-    public void testgetActorWorkloadCredentials() {
-        GetActorWorkloadCredentialsRequest req = GetActorWorkloadCredentialsRequest.getDefaultInstance();
-        GetActorWorkloadCredentialsResponse expected;
-        final int keyType17 = 17;
-        final int keyType18 = 18;
-        final int saltType = 4;
-
-        GetActorWorkloadCredentialsResponse.Builder respBuilder = GetActorWorkloadCredentialsResponse.getDefaultInstance().toBuilder();
-        respBuilder.addKerberosKeysBuilder(0)
-            .setSaltType(saltType)
-            .setKeyType(keyType17)
-            .setKeyValue("testKeyValue17")
-            .setSaltValue("NonIodizedGrainOfSalt")
-            .build();
-
-        respBuilder.addKerberosKeysBuilder(1)
-            .setSaltType(saltType)
-            .setKeyType(keyType18)
-            .setKeyValue("testKeyValue18")
-            .setSaltValue("IodizedGrainOfSalt")
-            .build();
-
-        respBuilder.setPasswordHash("015353916be1489289e59166124bbcf21c78595f3717f71b079c469c513e05e7");
-        expected = respBuilder.build();
-
-        MockUMSServiceCallStreamObserverImpl<GetActorWorkloadCredentialsRequest, GetActorWorkloadCredentialsResponse> responseObserver
-            = new MockUMSServiceCallStreamObserverImpl();
-
-
-        underTest.getActorWorkloadCredentials(req, responseObserver);
-        GetActorWorkloadCredentialsResponse actualResp = responseObserver.getResponse();
-        Assert.assertEquals(expected, actualResp);
-    }
-
-    private static class MockUMSServiceCallStreamObserverImpl<T, R> implements StreamObserver {
-        R response;
-
-        @Override
-        public void onNext(Object value) {
-            response = (R) value;
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            throw new RuntimeException(t);
-
-        }
-
-        @Override
-        public void onCompleted() {
-            if (response == null) {
-                throw new RuntimeException("Response is not being set properly");
-            }
-        }
-
-        public R getResponse() {
-            if (response == null) {
-                throw new RuntimeException("Response is not being set properly");
-            }
-            return response;
-        }
-    }
-
 }

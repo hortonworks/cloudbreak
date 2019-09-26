@@ -1,18 +1,19 @@
 package com.sequenceiq.freeipa.service.freeipa.user.model;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
+import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
 public class WorkloadCredential {
 
-    private String hashedPassword;
+    private final String hashedPassword;
 
-    private List<ActorKerberosKey> keys;
+    private final ImmutableList<ActorKerberosKey> keys;
 
     public WorkloadCredential(String hashedPassword, List<ActorKerberosKey> keys) {
         this.hashedPassword = hashedPassword;
-        this.keys = keys;
+        this.keys = ImmutableList.copyOf(keys);
     }
 
     public String getHashedPassword() {

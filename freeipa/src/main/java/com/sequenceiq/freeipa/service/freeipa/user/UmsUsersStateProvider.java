@@ -38,8 +38,6 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 public class UmsUsersStateProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsUsersStateProvider.class);
 
-    private static ThreadLocal<String> requestIdThreadLocal = new ThreadLocal<>();
-
     private static final String IAM_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     @Inject
@@ -48,14 +46,14 @@ public class UmsUsersStateProvider {
     public Map<String, UsersState> getEnvToUmsUsersStateMap(String accountId, String actorCrn, Set<String> environmentCrns,
                                                             Set<String> userCrns, Set<String> machineUserCrns) {
         try {
-            final Optional<String> requestIdOptional;
-            if (!Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString())).isPresent()) {
-                requestIdOptional = Optional.of(UUID.randomUUID().toString());
-                LOGGER.debug("No requestId found. Setting request id to new UUID [{}]", requestIdOptional);
-            } else {
-                requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
-            }
-            requestIdThreadLocal.set(requestIdOptional.get());
+            final Optional<String> requestIdOptional = Optional.of(
+                Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()))
+                    .orElseGet(() -> {
+                String requestId = UUID.randomUUID().toString();
+                LOGGER.debug("No requestId found. Setting request id to new UUID [{}]", requestId);
+                return requestId;
+            }));
+
             LOGGER.debug("Getting UMS state for environments {} with requestId {}", environmentCrns, requestIdOptional);
 
             Map<String, UsersState> envUsersStateMap = new HashMap<>();
