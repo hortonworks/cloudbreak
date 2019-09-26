@@ -24,7 +24,7 @@ public class NotificationAssemblingService {
     private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
 
     public Notification<CloudbreakNotification> createNotification(CloudbreakNotification notification) {
-        return new Notification(notification);
+        return new Notification<>(notification);
     }
 
     public Notification<CloudbreakNotification> createNotification(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload) {
@@ -38,7 +38,7 @@ public class NotificationAssemblingService {
             notification.setPayload(JsonUtil.convertToTree(payload));
             notification.setPayloadType(payload.getClass().getSimpleName());
         }
-        return new Notification(notification);
+        return new Notification<>(notification);
     }
 
     public Notification<CloudbreakNotification> createNotification(ResourceEvent resourceEvent, Collection<?> messageArgs, Object payload, String userId) {

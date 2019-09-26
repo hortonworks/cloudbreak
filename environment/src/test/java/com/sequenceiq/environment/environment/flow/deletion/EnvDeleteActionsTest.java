@@ -107,12 +107,10 @@ class EnvDeleteActionsTest {
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
 
     @Mock
-    private Event event;
+    private Event<Object> event;
 
     @InjectMocks
     private EnvDeleteActions underTest;
-
-    private FlowParameters flowParameters;
 
     private EnvDeleteEvent actionPayload;
 
@@ -122,10 +120,10 @@ class EnvDeleteActionsTest {
     private ArgumentCaptor<String> selectorArgumentCaptor;
 
     @Captor
-    private ArgumentCaptor<Event> eventArgumentCaptor;
+    private ArgumentCaptor<Event<?>> eventArgumentCaptor;
 
     @Captor
-    private ArgumentCaptor<Map> headersArgumentCaptor;
+    private ArgumentCaptor<Map<String, Object>> headersArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<Object> payloadArgumentCaptor;
@@ -133,7 +131,7 @@ class EnvDeleteActionsTest {
     @SuppressWarnings("unchecked")
     @BeforeEach
     void setUp() {
-        flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN);
+        FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN);
         when(context.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
         actionPayload = new EnvDeleteEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN);
         when(context.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actionPayload);
