@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.task;
 
 import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -51,5 +52,12 @@ public class PollInstancesStateTask extends AbstractPollTask<InstancesStatusResu
             }
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", PollInstancesStateTask.class.getSimpleName() + "[", "]")
+                .add("instances=" + instances)
+                .toString();
     }
 }

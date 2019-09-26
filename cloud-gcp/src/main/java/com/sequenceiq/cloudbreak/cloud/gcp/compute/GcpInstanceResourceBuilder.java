@@ -194,8 +194,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         String email = cloudFileSystem.getServiceAccountEmail();
         return StringUtils.isEmpty(email) ? null
                 : singletonList(new ServiceAccount()
-                        .setEmail(email)
-                        .setScopes(singletonList("https://www.googleapis.com/auth/cloud-platform")));
+                .setEmail(email)
+                .setScopes(singletonList("https://www.googleapis.com/auth/cloud-platform")));
     }
 
     @Override
@@ -213,18 +213,21 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public List<CloudVmInstanceStatus> checkInstances(GcpContext context, AuthenticatedContext auth, List<CloudInstance> instances) {
-        CloudInstance cloudInstance = instances.get(0);
-        try {
-            LOGGER.info("Checking instance: {}", cloudInstance);
-            Operation operation = check(context, cloudInstance);
-            boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
-            InstanceStatus status = finished ? context.isBuild() ? InstanceStatus.STARTED : InstanceStatus.STOPPED : InstanceStatus.IN_PROGRESS;
-            LOGGER.info("Instance: {} status: {}", instances, status);
-            return singletonList(new CloudVmInstanceStatus(cloudInstance, status));
-        } catch (Exception ignored) {
-            LOGGER.info("Failed to check instance state of {}", cloudInstance);
-            return singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
+        List<CloudVmInstanceStatus> result = new ArrayList<>();
+        for (CloudInstance instance : instances) {
+            try {
+                LOGGER.info("Checking instance: {}", instance);
+                Operation operation = check(context, instance);
+                boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
+                InstanceStatus status = finished ? context.isBuild() ? InstanceStatus.STARTED : InstanceStatus.STOPPED : InstanceStatus.IN_PROGRESS;
+                LOGGER.info("Instance: {} status: {}", instances, status);
+                result.add(new CloudVmInstanceStatus(instance, status));
+            } catch (Exception ignored) {
+                LOGGER.info("Failed to check instance state of {}", instance);
+                result.add(new CloudVmInstanceStatus(instance, InstanceStatus.IN_PROGRESS));
+            }
         }
+        return result;
     }
 
     @Override
