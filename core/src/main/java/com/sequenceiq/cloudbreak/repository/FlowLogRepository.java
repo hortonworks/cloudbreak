@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -55,5 +56,8 @@ public interface FlowLogRepository extends DisabledBaseRepository<FlowLog, Long>
     @Query("UPDATE FlowLog fl SET fl.stateStatus = :stateStatus WHERE fl.id = :id")
     void updateLastLogStatusInFlow(@Param("id") Long id, @Param("stateStatus") StateStatus stateStatus);
 
-    List<FlowLog> findAllByStackIdOrderByCreatedDesc(Long stackId);
+    List<FlowLog> findAllByStackIdOrderByCreatedDesc(Long stackId, Pageable page);
+
+    @Query("SELECT COUNT(fl.id) > 0 FROM FlowLog fl WHERE fl.stackId = :stackId AND fl.stateStatus = :status")
+    Boolean findAnyByStackIdAndStateStatus(@Param("stackId") Long stackId, @Param("status") StateStatus status);
 }
