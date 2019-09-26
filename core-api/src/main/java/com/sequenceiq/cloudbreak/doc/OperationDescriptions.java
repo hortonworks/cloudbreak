@@ -102,6 +102,7 @@ public class OperationDescriptions {
         public static final String SET_MAINTENANCE_MODE = "set maintenance mode for the cluster";
         public static final String GET_CLUSTER_PROPERTIES = "get cluster properties with blueprint outputs";
         public static final String FAILURE_REPORT = "failure report";
+        public static final String CHANGED_NODES_REPORT = "changed nodes report";
         public static final String REPAIR_CLUSTER = "repair the cluster";
     }
 

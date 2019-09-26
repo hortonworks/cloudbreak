@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
+import com.sequenceiq.cloudbreak.api.model.ChangedNodesReport;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
@@ -94,8 +95,14 @@ public class AutoscaleController implements AutoscaleEndpoint {
 
     @Override
     public Response failureReport(Long stackId, FailureReport failureReport) {
-        clusterService.failureReport(stackId, failureReport.getFailedNodes());
-        return Response.accepted().build();
+        return clusterService.reportHealthChange(stackId, Set.copyOf(failureReport.getFailedNodes()), Set.of());
+    }
+
+    @Override
+    public Response changedNodesReport(Long stackId, ChangedNodesReport changedNodesReport) {
+        return clusterService.reportHealthChange(stackId,
+                Set.copyOf(changedNodesReport.getNewFailedNodes()),
+                Set.copyOf(changedNodesReport.getNewHealthyNodes()));
     }
 
     @Override

@@ -14,8 +14,10 @@ import java.util.stream.IntStream;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -24,8 +26,10 @@ import com.sequenceiq.cloudbreak.api.model.stack.cluster.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.FailedNode;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
+import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
@@ -42,6 +46,9 @@ public class UpdateFailedHandlerTest {
 
     @Mock
     private StackResponseUtils stackResponseUtils;
+
+    @Mock
+    private FailedNodeRepository failedNodeRepository;
 
     @InjectMocks
     private UpdateFailedHandler underTest;
@@ -115,7 +122,8 @@ public class UpdateFailedHandlerTest {
         Cluster cluster = getARunningCluster();
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getById(anyLong())).thenReturn(getStackResponse(Status.AVAILABLE, Status.AVAILABLE));
-        when(stackResponseUtils.getNotTerminatedPrimaryGateways(any())).thenReturn(getPrimaryGateway());
+        Optional<InstanceMetaDataJson> primaryGateway = getPrimaryGateway();
+        when(stackResponseUtils.getNotTerminatedPrimaryGateways(any())).thenReturn(primaryGateway);
 
         IntStream.range(0, 4).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID)));
         underTest.onApplicationEvent(new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID));
@@ -124,7 +132,12 @@ public class UpdateFailedHandlerTest {
         verify(clusterService).setState(cluster, ClusterState.SUSPENDED);
         verify(clusterService, never()).removeById(AUTOSCALE_CLUSTER_ID);
         verify(cloudbreakCommunicator, times(5)).getById(CLOUDBREAK_STACK_ID);
-        verify(cloudbreakCommunicator).failureReport(eq(CLOUDBREAK_STACK_ID), any());
+        InOrder inOrder = Mockito.inOrder(cloudbreakCommunicator, failedNodeRepository);
+        inOrder.verify(cloudbreakCommunicator).failureReport(eq(CLOUDBREAK_STACK_ID), any());
+        FailedNode failedNode = new FailedNode();
+        failedNode.setClusterId(AUTOSCALE_CLUSTER_ID);
+        failedNode.setName("nodeFQDN");
+        inOrder.verify(failedNodeRepository).save(failedNode);
     }
 
     @Test
@@ -214,7 +227,7 @@ public class UpdateFailedHandlerTest {
 
     private Optional<InstanceMetaDataJson> getPrimaryGateway() {
         InstanceMetaDataJson instanceMetaDataJson = new InstanceMetaDataJson();
-        instanceMetaDataJson.setDiscoveryFQDN("");
+        instanceMetaDataJson.setDiscoveryFQDN("nodeFQDN");
         return Optional.of(instanceMetaDataJson);
     }
 

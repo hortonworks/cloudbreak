@@ -17,8 +17,10 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetaDataJson;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.FailedNode;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
+import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
@@ -42,6 +44,9 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     @Inject
     private CloudbreakCommunicator cloudbreakCommunicator;
 
+    @Inject
+    private FailedNodeRepository failedNodeRepository;
+
     private final Map<Long, Integer> updateFailures = new ConcurrentHashMap<>();
 
     @Override
@@ -62,7 +67,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         String stackStatus = getStackStatus(stackResponse);
         if (stackStatus.startsWith(DELETE_STATUSES_PREFIX)) {
             clusterService.removeById(autoscaleClusterId);
-            LOGGER.info("Delete cluster {} due to failing update attempts and Cloudbreak stack status", autoscaleClusterId);
+            LOGGER.info("Delete cluster {} due to failing update attempts and Cloudbreak stack status.", autoscaleClusterId);
             return;
         }
         Integer failed = updateFailures.get(autoscaleClusterId);
@@ -75,18 +80,16 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
                 if (stackStatus.equals(AVAILABLE) && clusterStatus.equals(AVAILABLE)) {
                     // Ambari server is unreacheable but the stack and cluster statuses are "AVAILABLE"
                     reportAmbariServerFailure(cluster, stackResponse);
-                    suspendCluster(cluster);
                     LOGGER.info("Suspend cluster monitoring for cluster {} due to failing update attempts and Cloudbreak stack status {}",
                             autoscaleClusterId, stackStatus);
                 } else {
-                    suspendCluster(cluster);
                     LOGGER.info("Suspend cluster monitoring for cluster {}", autoscaleClusterId);
                 }
             } catch (Exception ex) {
                 LOGGER.warn("Problem when verifying cluster status. Original message: {}",
                         ex.getMessage());
-                suspendCluster(cluster);
             }
+            suspendCluster(cluster);
             updateFailures.remove(autoscaleClusterId);
         } else {
             int value = failed + 1;
@@ -120,8 +123,13 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
             failureReport.setFailedNodes(Collections.singletonList(pgw.get().getDiscoveryFQDN()));
             try {
                 cloudbreakCommunicator.failureReport(cluster.getStackId(), failureReport);
+                FailedNode failedNode = new FailedNode();
+                failedNode.setClusterId(cluster.getId());
+                failedNode.setName(pgw.get().getDiscoveryFQDN());
+                failedNodeRepository.save(failedNode);
             } catch (Exception e) {
                 LOGGER.warn("Exception during failure report. Original message: {}", e.getMessage());
+                throw new RuntimeException(e);
             }
         }
     }
