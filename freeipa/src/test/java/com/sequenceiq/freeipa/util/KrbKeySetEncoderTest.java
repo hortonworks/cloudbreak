@@ -6,7 +6,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAc
 
 import org.junit.jupiter.api.Test;
 
-public class ASNEncoderTest {
+public class KrbKeySetEncoderTest {
 
     @Test
     void testASNEncoderGetASNEncodedKrbPrincipalKey() throws Exception {
@@ -31,7 +31,7 @@ public class ASNEncoderTest {
 
             String expectedValue = "MIGLoAMCAQGhAwIBAaIDAgEBowMCAQGkdTBzMDmgIDAeoAMCAQShFwQVTm9uSW9kaXplZE" +
                 "dyYWluT2ZTYWx0oRUwE6ADAgERoQwECrXrLSnslWpbntcwNqAdMBugAwIBBKEUBBJJb2RpemVkR3JhaW5PZlNhbHShFTAToAMCARKhDAQKtestKeyValue1w==";
-            String encodedValue = ASNEncoder.getASNEncodedKrbPrincipalKey(respBuilder.getKerberosKeysList());
+            String encodedValue = KrbKeySetEncoder.getASNEncodedKrbPrincipalKey(respBuilder.getKerberosKeysList());
             assertEquals(expectedValue, encodedValue, "Must be equal");
     }
 }

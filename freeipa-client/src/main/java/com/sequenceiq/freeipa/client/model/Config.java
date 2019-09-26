@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.client.model;
 
-import java.util.List;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -40,7 +39,7 @@ public class Config {
     public String toString() {
         return new StringJoiner(", ", Config.class.getSimpleName() + "[", "]")
                 .add("ipamaxusernamelength=" + ipamaxusernamelength)
-                .add(String.format("ipauserobjectclasses={}",ipauserobjectclasses.toString()))
+                .add(String.format("ipauserobjectclasses={}", ipauserobjectclasses.toString()))
                 .toString();
     }
 }

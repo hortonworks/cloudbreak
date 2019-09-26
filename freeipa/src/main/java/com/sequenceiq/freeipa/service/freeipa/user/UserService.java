@@ -2,9 +2,9 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
@@ -49,7 +51,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.util.ASNEncoder;
+import com.sequenceiq.freeipa.util.KrbKeySetEncoder;
 
 @Service
 public class UserService {
@@ -192,31 +194,37 @@ public class UserService {
         }
     }
 
-    private void processUsersWorkloadCredentials(String environmentCrn, UsersState umsUsersState, FreeIpaClient freeIpaClient) throws Exception {
+    private void processUsersWorkloadCredentials(
+        String environmentCrn, UsersState umsUsersState, FreeIpaClient freeIpaClient) throws IOException, FreeIpaClientException {
         Config config = freeIpaClient.getConfig();
-        if (config.getIpauserobjectclasses() != null && config.getIpauserobjectclasses().contains(Config.CDP_USER_ATTRIBUTE)) {
-            // found the attribute, password sync can be performed
-            LOGGER.debug("Having config attribute, going for credentials sync");
+        if (config.getIpauserobjectclasses() == null || !config.getIpauserobjectclasses().contains(Config.CDP_USER_ATTRIBUTE)) {
+            LOGGER.debug("Does't seems like having config attribute, no credentials sync required for env:{}", environmentCrn);
+            return;
+        }
 
-            // Should sync for all users and not just diff. At present there is no way to identify that there is a change in password for a user
-            for (FmsUser u : umsUsersState.getUsers()) {
-                WorkloadCredential workloadCredential = umsUsersState.getUsersWorkloadCredentialMap().get(u.getName());
-                if (workloadCredential != null
-                    && !StringUtils.isEmpty(workloadCredential.getHashedPassword())
-                    && !CollectionUtils.isEmpty(workloadCredential.getKeys())) {
+        // found the attribute, password sync can be performed
+        LOGGER.debug("Having config attribute, going for credentials sync");
 
-                    // Call ASN_1 Encoder for encoding hashed password and then call user mod for password
-                    LOGGER.debug("Found Credentials for user {}", u.getName());
-                    String ansEncodedKrbPrincipalKey = ASNEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
-                    Map<String, Object> params = new HashMap<>();
-                    List<String> attr = new ArrayList<>();
-                    attr.add("cdpHashedPassword=" + workloadCredential.getHashedPassword());
-                    attr.add("cdpUnencryptedKrbPrincipalKey=" + ansEncodedKrbPrincipalKey);
-                    params.put("setattr", attr);
-                    freeIpaClient.userMod(u.getName(), params);
-                    LOGGER.debug("Password synced for the user:{}, for the environment: {}", u.getName(), environmentCrn);
-                }
+        // Should sync for all users and not just diff. At present there is no way to identify that there is a change in password for a user
+        for (FmsUser u : umsUsersState.getUsers()) {
+            WorkloadCredential workloadCredential = umsUsersState.getUsersWorkloadCredentialMap().get(u.getName());
+            if (workloadCredential == null
+                || StringUtils.isEmpty(workloadCredential.getHashedPassword())
+                || CollectionUtils.isEmpty(workloadCredential.getKeys())) {
+                continue;
             }
+
+            // Call ASN_1 Encoder for encoding hashed password and then call user mod for password
+            LOGGER.debug("Found Credentials for user {}", u.getName());
+            String ansEncodedKrbPrincipalKey = KrbKeySetEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
+
+            Map<String, Object> params =
+                ImmutableMap.of("setattr", ImmutableList.of(
+                    "cdpHashedPassword=" + workloadCredential.getHashedPassword(),
+                    "cdpUnencryptedKrbPrincipalKey=" + ansEncodedKrbPrincipalKey));
+
+            freeIpaClient.userMod(u.getName(), params);
+            LOGGER.debug("Password synced for the user:{}, for the environment: {}", u.getName(), environmentCrn);
         }
     }
 

@@ -507,6 +507,12 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         responseObserver.onCompleted();
     }
 
+    /**
+     * NOTE: This is a mock implementation and meant only for testing.
+     * This implementation returns hard coded pre-defined set of response for workload credentials.
+     * For any integration test of debugging purpose, this should not be used and intent is purely mock.
+     * Hashed value used internally is sha256 hash of <i>Password123!</i>.
+     */
     @Override
     public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
                                             io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement
@@ -530,7 +536,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             .setSaltValue("IodizedGrainOfSalt")
             .build();
 
-        respBuilder.setPasswordHash("015353916be1489289e59166124bbcf21c78595f3717f71b079c469c513e05e7");
+        // sha256 hashed value of "Password123!"
+        respBuilder.setPasswordHash("e512ca494a454a47ad102dd3f05d48e0e647c8619e734621a760da360c198f32");
         responseObserver.onNext(respBuilder.build());
         responseObserver.onCompleted();
     }
