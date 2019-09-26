@@ -16,7 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -153,6 +155,16 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(AZ_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getAvailabilityZone());
         assertEquals(SUBNET_CIDR_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getCidr());
         assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_3).isPrivateSubnet());
+    }
+
+    @Test
+    void testConvertToNetwork() {
+        AwsNetwork awsNetwork = new AwsNetwork();
+        awsNetwork.setVpcId(VPC_ID);
+
+        Network network = underTest.convertToNetwork(awsNetwork);
+
+        assertEquals(VPC_ID, network.getStringParameter(AwsNetworkView.VPC_ID));
     }
 
     private Set<CreatedSubnet> createCreatedSubnets() {

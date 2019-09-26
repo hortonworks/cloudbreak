@@ -1,11 +1,15 @@
 package com.sequenceiq.environment.network.v1.converter;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.environment.CloudPlatform;
@@ -86,5 +90,14 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     @Override
     public boolean hasExistingNetwork(BaseNetwork baseNetwork) {
         return Optional.ofNullable((AzureNetwork) baseNetwork).map(AzureNetwork::getNetworkId).isPresent();
+    }
+
+    @Override
+    public Network convertToNetwork(BaseNetwork baseNetwork) {
+        AzureNetwork azureNetwork = (AzureNetwork) baseNetwork;
+        Map<String, Object> param = new HashMap<>();
+        param.put(AzureUtils.RG_NAME, azureNetwork.getResourceGroupName());
+        param.put(AzureUtils.NETWORK_ID, azureNetwork.getNetworkId());
+        return new Network(null, param);
     }
 }

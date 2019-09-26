@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -158,7 +159,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             String blueprintText = blueprint.getBlueprintText();
             String extendedAmbariBlueprint = ambariBlueprintProcessorFactory.get(blueprintText)
                     .extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(configs), false).asText();
-            LOGGER.debug("Extended blueprint result: {}", extendedAmbariBlueprint);
+            LOGGER.debug("Extended blueprint result: {}", AnonymizerUtil.anonymize(extendedAmbariBlueprint));
             blueprint.setBlueprintText(extendedAmbariBlueprint);
         }
         try {

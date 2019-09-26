@@ -13,8 +13,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +29,18 @@ import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.OnFailure;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
+import com.amazonaws.services.ec2.model.DescribeVpcsResult;
+import com.amazonaws.services.ec2.model.Vpc;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
@@ -92,6 +100,22 @@ public class AwsNetworkConnector implements NetworkConnector {
                 throw new CloudConnectorException("Failed to create network.", e);
             }
         }
+    }
+
+    @Override
+    public String getNetworkCidr(Network network, CloudCredential credential) {
+        AmazonEC2Client awsClientAccess = awsClient.createAccess(credential);
+        AwsNetworkView awsNetworkView = new AwsNetworkView(network);
+        String existingVpc = awsNetworkView.getExistingVpc();
+        DescribeVpcsResult describeVpcsResult = awsClientAccess.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc));
+        List<String> vpcCidrs = describeVpcsResult.getVpcs().stream().map(Vpc::getCidrBlock).collect(Collectors.toList());
+        if (vpcCidrs.isEmpty()) {
+            throw new BadRequestException("VPC cidr could not fetch from AWS: " + existingVpc);
+        }
+        if (vpcCidrs.size() > 1) {
+            LOGGER.info("More than one vpc cidrs for VPC {}. We will use the first one: {}", existingVpc, vpcCidrs.get(0));
+        }
+        return vpcCidrs.get(0);
     }
 
     private boolean networkDoesNotExist(AmazonServiceException e) {

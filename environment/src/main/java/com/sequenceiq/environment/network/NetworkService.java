@@ -18,9 +18,11 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dao.repository.BaseNetworkRepository;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -37,27 +39,36 @@ public class NetworkService {
 
     private final PlatformParameterService platformParameterService;
 
+    private final EnvironmentNetworkService environmentNetworkService;
+
     public NetworkService(BaseNetworkRepository baseNetworkRepository,
             Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap,
-            PlatformParameterService platformParameterService) {
+            PlatformParameterService platformParameterService,
+            EnvironmentNetworkService environmentNetworkService) {
         this.networkRepository = baseNetworkRepository;
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.platformParameterService = platformParameterService;
+        this.environmentNetworkService = environmentNetworkService;
     }
 
     public BaseNetwork saveNetwork(Environment environment, NetworkDto networkDto, String accountId, Map<String, CloudSubnet> subnetMetas) {
-        BaseNetwork network = null;
+        BaseNetwork baseNetwork = null;
         if (networkDto != null) {
             EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(getCloudPlatform(environment));
             if (environmentNetworkConverter != null) {
-                BaseNetwork baseNetwork = environmentNetworkConverter.convert(environment, networkDto, subnetMetas);
+                baseNetwork = environmentNetworkConverter.convert(environment, networkDto, subnetMetas);
                 baseNetwork.setId(getIfNotNull(networkDto, NetworkDto::getId));
                 baseNetwork.setResourceCrn(createCRN(accountId));
                 baseNetwork.setAccountId(accountId);
-                network = save(baseNetwork);
+                if (baseNetwork.getRegistrationType() == RegistrationType.EXISTING) {
+                    Network network = environmentNetworkConverter.convertToNetwork(baseNetwork);
+                    String networkCidr = environmentNetworkService.getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());
+                    baseNetwork.setNetworkCidr(networkCidr);
+                }
+                baseNetwork = save(baseNetwork);
             }
         }
-        return network;
+        return baseNetwork;
     }
 
     private CloudPlatform getCloudPlatform(Environment environment) {

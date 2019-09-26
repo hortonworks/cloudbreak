@@ -9,8 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 public class AwsNetworkView {
 
-    @VisibleForTesting
-    static final String VPC_ID = "vpcId";
+    public static final String VPC_ID = "vpcId";
 
     @VisibleForTesting
     static final String VPC_CIDR = "vpcCidr";

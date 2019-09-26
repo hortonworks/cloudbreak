@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -53,7 +54,7 @@ public class DefaultBlueprintCache {
             try {
                 String[] split = blueprintText.trim().split("=");
                 if (blueprintUtils.isBlueprintNamePreConfigured(blueprintText, split)) {
-                    LOGGER.debug("Load default validation '{}'.", blueprintText);
+                    LOGGER.debug("Load default validation '{}'.", AnonymizerUtil.anonymize(blueprintText));
                     BlueprintV4Request blueprintJson = new BlueprintV4Request();
                     blueprintJson.setName(split[0].trim());
                     JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(blueprintUtils.readDefaultBlueprintFromFile(split));
