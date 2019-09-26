@@ -118,9 +118,7 @@ public class StackTerminationService {
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             environmentName = environment.getName();
         }
-        Optional<InstanceMetaData> gateway = stack.getGatewayInstanceMetadata().stream()
-                .filter(it -> !it.isTerminated())
-                .findFirst();
+        Optional<InstanceMetaData> gateway = Optional.ofNullable(stack.getPrimaryGatewayInstance());
         if (!gateway.isPresent()) {
             LOGGER.info("No running gateway or all node is terminated, we skip the dns entry deletion.");
             return null;
