@@ -10,11 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -30,9 +33,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
+import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -40,6 +46,11 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class ComputeResourceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputeResourceService.class);
+
+    private static final int RESOURCE_REQUEST_CHUNK_SIZE = 30;
+
+    @Value("${cb.gcp.stopStart.batch.size}")
+    private Integer stopStartBatchSize;
 
     @Inject
     private AsyncTaskExecutor resourceBuilderExecutor;
@@ -52,6 +63,12 @@ public class ComputeResourceService {
 
     @Inject
     private CloudFailureHandler cloudFailureHandler;
+
+    @Inject
+    private SyncPollingScheduler<List<CloudVmInstanceStatus>> syncVMPollingScheduler;
+
+    @Inject
+    private ResourcePollTaskFactory resourcePollTaskFactory;
 
     public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
             AdjustmentType adjustmentType, Long threshold) {
@@ -88,41 +105,60 @@ public class ComputeResourceService {
     }
 
     public List<CloudVmInstanceStatus> stopInstances(ResourceBuilderContext context, AuthenticatedContext auth,
-            Iterable<CloudResource> resources, Iterable<CloudInstance> cloudInstances) {
+            List<CloudResource> resources, List<CloudInstance> cloudInstances) {
         return stopStart(context, auth, resources, cloudInstances);
     }
 
     public List<CloudVmInstanceStatus> startInstances(ResourceBuilderContext context, AuthenticatedContext auth,
-            Iterable<CloudResource> resources, Iterable<CloudInstance> cloudInstances) {
+            List<CloudResource> resources, List<CloudInstance> cloudInstances) {
         return stopStart(context, auth, resources, cloudInstances);
     }
 
     private List<CloudVmInstanceStatus> stopStart(ResourceBuilderContext context,
-            AuthenticatedContext auth, Iterable<CloudResource> resources, Iterable<CloudInstance> instances) {
+            AuthenticatedContext auth, List<CloudResource> resources, List<CloudInstance> instances) {
         List<CloudVmInstanceStatus> results = new ArrayList<>();
-        Collection<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
         Platform platform = auth.getCloudContext().getPlatform();
         List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(platform);
         if (!context.isBuild()) {
             Collections.reverse(builders);
         }
+
         for (ComputeResourceBuilder<?> builder : builders) {
             List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
-            for (CloudResource cloudResource : resourceList) {
-                CloudInstance instance = getCloudInstance(cloudResource, instances);
-                if (instance != null) {
-                    ResourceStopStartThread thread = createThread(ResourceStopStartThread.NAME, context, auth, cloudResource, instance, builder);
+            List<CloudInstance> allInstances = getCloudInstances(resourceList, instances);
+
+            if (!allInstances.isEmpty()) {
+                LOGGER.debug("Split {} instances to {} chunks to execute the stop/start operation parallel", allInstances.size(), stopStartBatchSize);
+                AtomicInteger counter = new AtomicInteger();
+                Collection<List<CloudInstance>> instancesChunks = allInstances.stream()
+                        .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / stopStartBatchSize)).values();
+
+                Collection<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
+                for (List<CloudInstance> instancesChunk : instancesChunks) {
+                    ResourceStopStartThread thread = createThread(ResourceStopStartThread.NAME, context, auth, instancesChunk, builder);
                     Future<ResourceRequestResult<List<CloudVmInstanceStatus>>> future = resourceBuilderExecutor.submit(thread);
                     futures.add(future);
-                    if (isRequestFull(futures.size(), context)) {
-                        results.addAll(flatVmList(waitForRequests(futures).get(FutureResult.SUCCESS)));
-                    }
-                } else {
-                    break;
                 }
+
+                if (!futures.isEmpty()) {
+                    List<List<CloudVmInstanceStatus>> instancesStatuses = waitForRequests(futures).get(FutureResult.SUCCESS);
+                    for (List<CloudVmInstanceStatus> vmStatuses : instancesStatuses) {
+                        List<CloudInstance> checkInstances = vmStatuses.stream().map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
+                        PollTask<List<CloudVmInstanceStatus>> pollTasks = resourcePollTaskFactory
+                                .newPollComputeStatusTask(builder, auth, context, checkInstances);
+                        try {
+                            List<CloudVmInstanceStatus> statuses = syncVMPollingScheduler.schedule(pollTasks);
+                            results.addAll(statuses);
+                        } catch (Exception e) {
+                            LOGGER.debug("Failed to poll the instances status of {}", pollTasks, e);
+                        }
+                    }
+
+                }
+            } else {
+                LOGGER.debug("Cloud resources are not instances so they cannot be stopped or started, skipping builder type {}", builder.resourceType());
             }
         }
-        results.addAll(flatVmList(waitForRequests(futures).get(FutureResult.SUCCESS)));
         return results;
     }
 
@@ -171,19 +207,14 @@ public class ComputeResourceService {
         return (T) applicationContext.getBean(name, args);
     }
 
-    private CloudInstance getCloudInstance(CloudResource cloudResource, Iterable<CloudInstance> instances) {
-        for (CloudInstance instance : instances) {
-            if (instance.getInstanceId().equalsIgnoreCase(cloudResource.getName()) || instance.getInstanceId().equalsIgnoreCase(cloudResource.getReference())) {
-                return instance;
+    private List<CloudInstance> getCloudInstances(List<CloudResource> cloudResource, List<CloudInstance> instances) {
+        List<CloudInstance> result = new ArrayList<>();
+        for (CloudResource resource : cloudResource) {
+            for (CloudInstance instance : instances) {
+                if (instance.getInstanceId().equalsIgnoreCase(resource.getName()) || instance.getInstanceId().equalsIgnoreCase(resource.getReference())) {
+                    result.add(instance);
+                }
             }
-        }
-        return null;
-    }
-
-    private Collection<CloudVmInstanceStatus> flatVmList(Iterable<List<CloudVmInstanceStatus>> lists) {
-        Collection<CloudVmInstanceStatus> result = new ArrayList<>();
-        for (List<CloudVmInstanceStatus> list : lists) {
-            result.addAll(list);
         }
         return result;
     }
