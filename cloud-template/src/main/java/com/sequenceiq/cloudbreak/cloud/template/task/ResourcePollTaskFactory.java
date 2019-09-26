@@ -28,8 +28,8 @@ public class ResourcePollTaskFactory {
     }
 
     public PollTask<List<CloudVmInstanceStatus>> newPollComputeStatusTask(ComputeResourceBuilder<?> builder, AuthenticatedContext authenticatedContext,
-            ResourceBuilderContext context, CloudInstance instance) {
-        return createPollTask(PollComputeStatusTask.NAME, authenticatedContext, builder, context, instance);
+            ResourceBuilderContext context, List<CloudInstance> instances) {
+        return createPollTask(PollComputeStatusTask.NAME, authenticatedContext, builder, context, instances);
     }
 
     @SuppressWarnings("unchecked")
