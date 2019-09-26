@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_S3GUARD_TABLE_DELETE_EVENT;
 
 import java.util.Optional;
 
@@ -61,7 +61,7 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
                     .withResourceId(environmentDto.getResourceId())
                     .withResourceName(environmentDto.getName())
                     .withResourceCrn(environmentDto.getResourceCrn())
-                    .withSelector(FINISH_ENV_DELETE_EVENT.selector())
+                    .withSelector(START_S3GUARD_TABLE_DELETE_EVENT.selector())
                     .build();
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
