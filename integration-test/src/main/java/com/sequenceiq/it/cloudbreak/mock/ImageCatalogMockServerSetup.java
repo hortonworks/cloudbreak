@@ -77,6 +77,7 @@ public class ImageCatalogMockServerSetup implements AutoCloseable {
             response.header("Content-Length", String.valueOf(patchCbVersion(jsonCatalogResponse, testParameter).length()));
             return "";
         });
+        LOGGER.info("Prewarmed ImageCatalog has started at: {}", sparkServer.getEndpoint() + IMAGE_CATALOG_PREWARMED);
         return String.join("", sparkServer.getEndpoint(), IMAGE_CATALOG_PREWARMED);
     }
 

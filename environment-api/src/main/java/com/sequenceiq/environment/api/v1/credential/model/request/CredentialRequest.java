@@ -29,4 +29,12 @@ public class CredentialRequest extends CredentialBase {
     public void setAzure(AzureCredentialRequestParameters azure) {
         this.azure = azure;
     }
+
+    @Override
+    public String toString() {
+        return "CredentialRequest{"
+            + "name='" + getName()
+            + "',cloudPlatform='" + getCloudPlatform()
+            + "'}";
+    }
 }

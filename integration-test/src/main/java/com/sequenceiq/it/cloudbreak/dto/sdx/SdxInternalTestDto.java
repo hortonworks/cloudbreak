@@ -70,8 +70,8 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
-    public SdxInternalTestDto(TestContext testContex) {
-        super(new SdxInternalClusterRequest(), testContex);
+    public SdxInternalTestDto(TestContext testContext) {
+        super(new SdxInternalClusterRequest(), testContext);
     }
 
     @Override
