@@ -1,7 +1,11 @@
 package com.sequenceiq.periscope.monitor.handler;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
@@ -11,6 +15,8 @@ import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfigurat
 
 @Service
 public class CloudbreakCommunicator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakCommunicator.class);
 
     @Inject
     private CloudbreakClientConfiguration cloudbreakClientConfiguration;
@@ -22,6 +28,12 @@ public class CloudbreakCommunicator {
 
     public void failureReport(long stackId, FailureReport failureReport) {
         CloudbreakClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
-        cloudbreakClient.autoscaleEndpoint().failureReport(stackId, failureReport);
+        try (Response response = cloudbreakClient.autoscaleEndpoint().failureReport(stackId, failureReport)) {
+            if (Status.ACCEPTED.getStatusCode() != response.getStatus()) {
+                String message = "Couldn't send failure report to cloudbreak";
+                LOGGER.error(message);
+                throw new RuntimeException(message);
+            }
+        }
     }
 }

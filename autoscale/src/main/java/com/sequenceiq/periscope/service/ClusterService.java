@@ -21,11 +21,13 @@ import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.FailedNode;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.repository.ClusterRepository;
+import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.repository.UserRepository;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
@@ -52,6 +54,9 @@ public class ClusterService {
 
     @Inject
     private MetricService metricService;
+
+    @Inject
+    private FailedNodeRepository failedNodeRepository;
 
     public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
         return create(new Cluster(), user, stack, clusterState);
@@ -129,6 +134,8 @@ public class ClusterService {
 
     public void removeById(Long clusterId) {
         Cluster cluster = findById(clusterId);
+        List<FailedNode> failedNodes = failedNodeRepository.findByClusterId(clusterId);
+        failedNodeRepository.deleteAll(failedNodes);
         clusterRepository.delete(cluster);
         calculateClusterStateMetrics();
     }

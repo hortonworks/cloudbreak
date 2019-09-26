@@ -41,7 +41,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
-import com.sequenceiq.cloudbreak.api.model.FailureReport;
+import com.sequenceiq.cloudbreak.api.model.ChangedNodesReport;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -136,7 +136,7 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
 
         waitForTasksToFinish();
 
-        verify(autoscaleEndpoint, times(1)).failureReport(eq(stackId), any(FailureReport.class));
+        verify(autoscaleEndpoint, times(1)).changedNodesReport(eq(stackId), any(ChangedNodesReport.class));
     }
 
     @Test

@@ -26,6 +26,7 @@ import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.monitor.executor.LoggedExecutorService;
 import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHandler;
+import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.service.AmbariClientProvider;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
@@ -55,7 +56,8 @@ public class RejectedThreadContext {
                             Clock.class
                     })
     )
-    @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, MetricUtils.class, LoggerUtils.class})
+    @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, MetricUtils.class, LoggerUtils.class,
+            FailedNodeRepository.class})
     @EnableAsync
     public static class SpringConfig implements AsyncConfigurer {
 
