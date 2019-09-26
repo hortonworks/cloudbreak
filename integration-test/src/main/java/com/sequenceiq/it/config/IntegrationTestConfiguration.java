@@ -75,7 +75,8 @@ public class IntegrationTestConfiguration {
                     LOGGER.info("processing property source ::: " + propertySource.getName());
                     for (String key : ((EnumerablePropertySource) propertySource).getPropertyNames()) {
                         String value = propertySource.getProperty(key).toString();
-                        if (!StringUtils.isEmpty(value)) {
+                        LOGGER.debug("{} = {}", key, value);
+                        if (!StringUtils.isEmpty(value) && !rtn.containsKey(key)) {
                             rtn.put(key, propertySource.getProperty(key).toString());
                         }
                     }
