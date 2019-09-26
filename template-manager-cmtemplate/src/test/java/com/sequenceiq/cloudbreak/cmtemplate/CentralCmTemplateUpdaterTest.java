@@ -7,8 +7,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -25,18 +27,27 @@ import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.StorageLocation;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;
+import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
+import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CentralCmTemplateUpdaterTest {
@@ -156,6 +167,37 @@ public class CentralCmTemplateUpdaterTest {
         String generated = generator.getBlueprintText(templatePreparationObject);
         Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-without-hosts.bp")).getTemplate().toString(),
                 new CmTemplateProcessor(generated).getTemplate().toString());
+    }
+
+    @Test
+    public void getKafkaPropertiesWhenNoHdfsInClusterShouldPresentCoreSettings() {
+        List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(new CoreConfigProvider());
+        ReflectionTestUtils.setField(cmTemplateComponentConfigProviderProcessor, "providers", cmTemplateComponentConfigProviders);
+        S3FileSystem s3FileSystem = new S3FileSystem();
+        s3FileSystem.setInstanceProfile("profile");
+        s3FileSystem.setS3GuardDynamoTableName("cb-table");
+        s3FileSystem.setStorageContainer("cloudbreak-bucket");
+
+        StorageLocation storageLocation = new StorageLocation();
+        storageLocation.setProperty("core_defaultfs");
+        storageLocation.setValue("s3a://cloudbreak-bucket/kafka");
+        storageLocation.setConfigFile("core_settings");
+        StorageLocationView storageLocationView = new StorageLocationView(storageLocation);
+
+        BaseFileSystemConfigurationsView baseFileSystemConfigurationsView =
+                new S3FileSystemConfigurationsView(s3FileSystem, Sets.newHashSet(storageLocationView), false);
+        when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(Optional.of(baseFileSystemConfigurationsView));
+        when(templatePreparationObject.getGatewayView()).thenReturn(new GatewayView(new Gateway(), "signkey"));
+        Set<HostgroupView> hostgroupViews = new HashSet<>();
+        hostgroupViews.add(new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1));
+        when(templatePreparationObject.getHostgroupViews()).thenReturn(hostgroupViews);
+        when(templatePreparationObject.getGatewayView()).thenReturn(new GatewayView(new Gateway(), "signkey"));
+
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/kafka-without-hdfs.bp"));
+        String generated = generator.getBlueprintText(templatePreparationObject);
+        String expected = new CmTemplateProcessor(getBlueprintText("output/kafka-without-hdfs.bp")).getTemplate().toString();
+        String output = new CmTemplateProcessor(generated).getTemplate().toString();
+        Assert.assertEquals(expected, output);
     }
 
     private void assertMatchesBlueprintAtPath(String path, ApiClusterTemplate generated) {

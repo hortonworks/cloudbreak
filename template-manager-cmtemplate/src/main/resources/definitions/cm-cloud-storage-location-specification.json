@@ -87,6 +87,17 @@
       "relatedServices": ["PROFILER_ADMIN_AGENT", "PROFILER_METRICS_AGENT", "PROFILER_SCHEDULER_AGENT"],
       "requiredForAttachedCluster": true,
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "type": "DEFAULT_FS",
+      "propertyName": "core_defaultfs",
+      "propertyFile": "core_settings",
+      "description": "This is the directory where all of service configured if HDFS does not exist on the cluster",
+      "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}",
+      "propertyDisplayName": "Default FS",
+      "relatedMissingServices": ["NAMENODE"],
+      "requiredForAttachedCluster": true,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     }
   ]
 }

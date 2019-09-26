@@ -23,4 +23,9 @@ public class S3FileSystemConfigurationsView extends BaseFileSystemConfigurations
     public void setS3GuardDynamoTableName(String s3GuardDynamoTableName) {
         this.s3GuardDynamoTableName = s3GuardDynamoTableName;
     }
+
+    @Override
+    public String getProtocol() {
+        return FileSystemType.S3.getProtocol();
+    }
 }

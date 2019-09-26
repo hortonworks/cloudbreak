@@ -46,7 +46,6 @@ public class CloudStorageConfigDetails {
                             if ((configQueryEntry.isRequiredForAttachedCluster() && attachedCluster) || !attachedCluster) {
                                 return true;
                             }
-                            LOGGER.debug("sdfsdfsdfdsf");
                             return false;
                         })
                         .filter(configQueryEntry -> configQueryEntry.getSupportedStorages().contains(request.getFileSystemType().toUpperCase()))
@@ -55,6 +54,11 @@ public class CloudStorageConfigDetails {
             }
         }
 
+        Set<ConfigQueryEntry> collectedEntries = configQueryEntries.getEntries()
+                .stream()
+                .filter(configQueryEntry -> blueprintDoesNotContainActual(configQueryEntry.getRelatedMissingServices(), componentsByHostGroup))
+                .collect(Collectors.toSet());
+        filtered.addAll(collectedEntries);
         String fileSystemTypeRequest = request.getFileSystemType();
         FileSystemType fileSystemType = FileSystemType.valueOf(fileSystemTypeRequest);
         String protocol = fileSystemType.getProtocol();
@@ -70,6 +74,26 @@ public class CloudStorageConfigDetails {
         }
         filtered = filtered.stream().sorted(Comparator.comparing(ConfigQueryEntry::getPropertyName)).collect(Collectors.toCollection(LinkedHashSet::new));
         return filtered;
+    }
+
+    private boolean blueprintDoesNotContainActual(Set<String> relatedMissingServices, Map<String, Set<String>> componentsByHostGroup) {
+        boolean contains = false;
+        if (!relatedMissingServices.isEmpty()) {
+            for (Map.Entry<String, Set<String>> stringSetEntry : componentsByHostGroup.entrySet()) {
+                for (String service : stringSetEntry.getValue()) {
+                    for (String relatedMissingService : relatedMissingServices) {
+                        if (relatedMissingService.equalsIgnoreCase(service)) {
+                            contains = true;
+                            break;
+                        }
+                    }
+
+                }
+            }
+        } else {
+            contains = true;
+        }
+        return !contains;
     }
 
     private String generateConfigWithParameters(String sourceTemplate, FileSystemType fileSystemType, Map<String, Object> templateObject) throws IOException {

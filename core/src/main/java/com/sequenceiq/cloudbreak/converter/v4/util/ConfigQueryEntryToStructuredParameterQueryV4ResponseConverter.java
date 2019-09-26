@@ -18,6 +18,7 @@ public class ConfigQueryEntryToStructuredParameterQueryV4ResponseConverter
         structuredParameterQueryV4Response.setDescription(source.getDescription());
         structuredParameterQueryV4Response.setPropertyName(source.getPropertyName());
         structuredParameterQueryV4Response.setRelatedServices(source.getRelatedServices());
+        structuredParameterQueryV4Response.setRelatedMissingServices(source.getRelatedMissingServices());
         structuredParameterQueryV4Response.setPropertyFile(source.getPropertyFile());
         structuredParameterQueryV4Response.setProtocol(source.getProtocol());
         structuredParameterQueryV4Response.setPropertyDisplayName(source.getPropertyDisplayName());
