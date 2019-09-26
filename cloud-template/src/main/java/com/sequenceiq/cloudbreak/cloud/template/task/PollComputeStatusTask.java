@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.template.task;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.context.annotation.Scope;
@@ -22,19 +21,19 @@ public class PollComputeStatusTask extends AbstractPollTask<List<CloudVmInstance
 
     private final ResourceBuilderContext context;
 
-    private final CloudInstance instance;
+    private final List<CloudInstance> instances;
 
-    public PollComputeStatusTask(AuthenticatedContext auth, ComputeResourceBuilder<ResourceBuilderContext> builder, ResourceBuilderContext context,
-            CloudInstance instance) {
+    public PollComputeStatusTask(AuthenticatedContext auth, ComputeResourceBuilder<ResourceBuilderContext> builder,
+            ResourceBuilderContext context, List<CloudInstance> instances) {
         super(auth);
         this.builder = builder;
         this.context = context;
-        this.instance = instance;
+        this.instances = instances;
     }
 
     @Override
     protected List<CloudVmInstanceStatus> doCall() {
-        return builder.checkInstances(context, getAuthenticatedContext(), Collections.singletonList(instance));
+        return builder.checkInstances(context, getAuthenticatedContext(), instances);
     }
 
     @Override
