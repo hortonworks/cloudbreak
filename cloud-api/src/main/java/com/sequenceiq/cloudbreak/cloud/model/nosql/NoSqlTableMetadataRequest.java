@@ -1,29 +1,32 @@
-package com.sequenceiq.cloudbreak.cloud.model.objectstorage;
+package com.sequenceiq.cloudbreak.cloud.model.nosql;
 
 import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.model.base.RegionAndCredentialAwareRequestBase;
 
-public class ObjectStorageMetadataRequest implements CloudPlatformAware {
+public class NoSqlTableMetadataRequest extends RegionAndCredentialAwareRequestBase {
 
     private @NotNull CloudCredential credential;
 
+    private @NotNull String region;
+
     private @NotNull String cloudPlatform;
 
-    private @NotNull String objectStoragePath;
+    private @NotNull String tableName;
 
-    public ObjectStorageMetadataRequest() {
+    public NoSqlTableMetadataRequest() {
     }
 
-    public ObjectStorageMetadataRequest(Builder builder) {
+    public NoSqlTableMetadataRequest(Builder builder) {
         this.credential = builder.credential;
+        this.region = builder.region;
         this.cloudPlatform = builder.cloudPlatform;
-        this.objectStoragePath = builder.objectStoragePath;
+        this.tableName = builder.tableName;
     }
 
     public static Builder builder() {
@@ -46,12 +49,20 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
         this.credential = credential;
     }
 
-    public String getObjectStoragePath() {
-        return objectStoragePath;
+    public String getTableName() {
+        return tableName;
     }
 
-    public void setObjectStoragePath(String objectStoragePath) {
-        this.objectStoragePath = objectStoragePath;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     @Override
@@ -62,22 +73,25 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
         if (o == null || !getClass().equals(o.getClass())) {
             return false;
         }
-        ObjectStorageMetadataRequest request = (ObjectStorageMetadataRequest) o;
+        NoSqlTableMetadataRequest request = (NoSqlTableMetadataRequest) o;
         return Objects.equals(credential, request.credential) &&
+                Objects.equals(region, request.region) &&
                 Objects.equals(cloudPlatform, request.cloudPlatform) &&
-                Objects.equals(objectStoragePath, request.objectStoragePath);
+                Objects.equals(tableName, request.tableName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(credential, cloudPlatform, objectStoragePath);
+        return Objects.hash(credential, region, cloudPlatform, tableName);
     }
 
     @Override
     public String toString() {
-        return "ObjectStorageMetadataRequest{" +
+        return "NoSqlTableMetadataRequest{" +
+                "credential=" + credential +
+                ", region='" + region + '\'' +
                 ", cloudPlatform='" + cloudPlatform + '\'' +
-                ", objectStoragePath='" + objectStoragePath + '\'' +
+                ", tableName='" + tableName + '\'' +
                 '}';
     }
 
@@ -95,12 +109,19 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
 
         private CloudCredential credential;
 
+        private String region;
+
         private String cloudPlatform;
 
-        private String objectStoragePath;
+        private String tableName;
 
         public Builder withCredential(CloudCredential credential) {
             this.credential = credential;
+            return this;
+        }
+
+        public Builder withRegion(String region) {
+            this.region = region;
             return this;
         }
 
@@ -109,13 +130,13 @@ public class ObjectStorageMetadataRequest implements CloudPlatformAware {
             return this;
         }
 
-        public Builder withObjectStoragePath(String objectStoragePath) {
-            this.objectStoragePath = objectStoragePath;
+        public Builder withTableName(String tableName) {
+            this.tableName = tableName;
             return this;
         }
 
-        public ObjectStorageMetadataRequest build() {
-            return new ObjectStorageMetadataRequest(this);
+        public NoSqlTableMetadataRequest build() {
+            return new NoSqlTableMetadataRequest(this);
         }
     }
 }

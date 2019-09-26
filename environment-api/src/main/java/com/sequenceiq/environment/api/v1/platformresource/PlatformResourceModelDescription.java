@@ -17,19 +17,19 @@ public class PlatformResourceModelDescription {
     public static final String JSON_CONTENT_TYPE = "application/json";
 
     public static class OpDescription {
-        public static final String GET_DISK_TYPES = "retrive available disk types";
-        public static final String GET_REGION_R_BY_TYPE = "retrive regions by type";
+        public static final String GET_DISK_TYPES = "retrieve available disk types";
+        public static final String GET_REGION_R_BY_TYPE = "retrieve regions by type";
         public static final String GET_RECOMMENDATION = "creates a recommendation that advises cloud resources for the given blueprint";
-        public static final String GET_TAG_SPECIFICATIONS = "retrive tag specifications";
-        public static final String GET_NETWORKS = "retrive network properties";
-        public static final String GET_SECURITYGROUPS = "retrive securitygroups properties";
-        public static final String GET_SSHKEYS = "retrive sshkeys properties";
-        public static final String GET_VMTYPES_BY_CREDENTIAL = "retrive vmtype properties by credential";
-        public static final String GET_GATEWAYS = "retrive gateways with properties";
-        public static final String GET_IPPOOLS = "retrive ip pools with properties";
-        public static final String GET_ACCESSCONFIGS = "retrive access configs with properties";
-        public static final String GET_ENCRYPTIONKEYS = "retrive encryption keys with properties";
-        public static final String GET_NOSQL_TABLES = "retrive nosql tables";
+        public static final String GET_TAG_SPECIFICATIONS = "retrieve tag specifications";
+        public static final String GET_NETWORKS = "retrieve network properties";
+        public static final String GET_SECURITYGROUPS = "retrieve securitygroups properties";
+        public static final String GET_SSHKEYS = "retrieve sshkeys properties";
+        public static final String GET_VMTYPES_BY_CREDENTIAL = "retrieve vmtype properties by credential";
+        public static final String GET_GATEWAYS = "retrieve gateways with properties";
+        public static final String GET_IPPOOLS = "retrieve ip pools with properties";
+        public static final String GET_ACCESSCONFIGS = "retrieve access configs with properties";
+        public static final String GET_ENCRYPTIONKEYS = "retrieve encryption keys with properties";
+        public static final String GET_NOSQL_TABLES = "retrieve nosql tables";
     }
 
     private PlatformResourceModelDescription() {

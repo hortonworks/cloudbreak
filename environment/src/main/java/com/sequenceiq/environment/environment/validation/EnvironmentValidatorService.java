@@ -13,6 +13,8 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageLocationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
+import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameters.validation.validators.AwsParameterValidator;
 
 @Service
 public class EnvironmentValidatorService {
@@ -23,11 +25,14 @@ public class EnvironmentValidatorService {
 
     private final EnvironmentLogStorageLocationValidator logStorageLocationValidator;
 
+    private final AwsParameterValidator awsParameterValidator;
+
     public EnvironmentValidatorService(EnvironmentCreationValidator creationValidator, EnvironmentRegionValidator regionValidator,
-            EnvironmentLogStorageLocationValidator logStorageLocationValidator) {
+            EnvironmentLogStorageLocationValidator logStorageLocationValidator, AwsParameterValidator awsParameterValidator) {
         this.creationValidator = creationValidator;
         this.regionValidator = regionValidator;
         this.logStorageLocationValidator = logStorageLocationValidator;
+        this.awsParameterValidator = awsParameterValidator;
     }
 
     public ValidationResult validateCreation(Environment environment, EnvironmentCreationDto request, CloudRegions cloudRegions) {
@@ -46,5 +51,9 @@ public class EnvironmentValidatorService {
 
     public ValidationResult validateTelemetryLoggingStorageLocation(Environment environment) {
         return logStorageLocationValidator.validateTelemetryLoggingStorageLocation(environment);
+    }
+
+    public ValidationResult validateAndDetermineAwsParameters(Environment environment, AwsParametersDto awsParameters) {
+        return awsParameterValidator.validateAndDetermineAwsParameters(environment, awsParameters);
     }
 }

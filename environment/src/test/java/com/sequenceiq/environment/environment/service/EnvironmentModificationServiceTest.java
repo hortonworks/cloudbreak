@@ -286,7 +286,7 @@ class EnvironmentModificationServiceTest {
     }
 
     @Test
-    public void editByNameParameters() {
+    public void editByNameParametersNotExisted() {
         String dynamotable = "dynamotable";
         ParametersDto parameters = ParametersDto.builder()
                 .withAccountId(ACCOUNT_ID)
@@ -299,16 +299,80 @@ class EnvironmentModificationServiceTest {
                 .withParameters(parameters)
                 .build();
         Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
         BaseParameters baseParameters = new AwsParameters();
 
         when(environmentRepository
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
-        when(parametersService.saveParameters(environment, parameters, ACCOUNT_ID)).thenReturn(baseParameters);
+        when(parametersService.saveParameters(environment, parameters)).thenReturn(baseParameters);
 
         environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
 
-        verify(parametersService).saveParameters(environment, parameters, ACCOUNT_ID);
+        verify(parametersService).saveParameters(environment, parameters);
         assertEquals(baseParameters, environment.getParameters());
+    }
+
+    @Test
+    public void editByNameParametersExistedAndValid() {
+        String dynamotable = "dynamotable";
+        ParametersDto parameters = ParametersDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withAwsParameters(AwsParametersDto.builder()
+                        .withDynamoDbTableName(dynamotable)
+                        .build())
+                .build();
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
+                .withAccountId(ACCOUNT_ID)
+                .withParameters(parameters)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        AwsParameters awsParameters = new AwsParameters();
+        awsParameters.setS3guardTableName("existingTable");
+        BaseParameters baseParameters = awsParameters;
+
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(validatorService.validateAndDetermineAwsParameters(any(), any())).thenReturn(validationResult);
+        when(validationResult.hasError()).thenReturn(false);
+        when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
+        when(parametersService.saveParameters(environment, parameters)).thenReturn(baseParameters);
+        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+
+        verify(parametersService).saveParameters(environment, parameters);
+        assertEquals(baseParameters, environment.getParameters());
+    }
+
+    @Test
+    public void editByNameParametersExistedAndNotValid() {
+        String dynamotable = "dynamotable";
+        ParametersDto parameters = ParametersDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withAwsParameters(AwsParametersDto.builder()
+                        .withDynamoDbTableName(dynamotable)
+                        .build())
+                .build();
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
+                .withAccountId(ACCOUNT_ID)
+                .withParameters(parameters)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        AwsParameters awsParameters = new AwsParameters();
+        awsParameters.setS3guardTableName("existingTable");
+        BaseParameters baseParameters = awsParameters;
+
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(validatorService.validateAndDetermineAwsParameters(any(), any())).thenReturn(validationResult);
+        when(validationResult.hasError()).thenReturn(true);
+        when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
+        when(environmentRepository
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
+        when(parametersService.saveParameters(environment, parameters)).thenReturn(baseParameters);
+        assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
+
+        verify(parametersService, never()).saveParameters(environment, parameters);
     }
 
     @Test

@@ -32,9 +32,11 @@ import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
+import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
@@ -248,10 +250,26 @@ public class EnvironmentModificationService {
         ParametersDto parametersDto = editDto.getParameters();
         if (parametersDto != null) {
             Optional<BaseParameters> original = parametersService.findByEnvironment(environment.getId());
-            original.ifPresent(parameters -> editDto.getParameters().setId(parameters.getId()));
-            BaseParameters parameters = parametersService.saveParameters(environment, parametersDto, editDto.getAccountId());
+            if (original.isPresent()) {
+                BaseParameters originalParameters = original.get();
+                parametersDto.setId(originalParameters.getId());
+                if (originalParameters instanceof AwsParameters) {
+                    validateAwsParameters(environment, parametersDto);
+                }
+            }
+            BaseParameters parameters = parametersService.saveParameters(environment, parametersDto);
             if (parameters != null) {
                 environment.setParameters(parameters);
+            }
+        }
+    }
+
+    private void validateAwsParameters(Environment environment, ParametersDto parametersDto) {
+        if (parametersDto.getAwsParametersDto() != null) {
+            EnvironmentValidatorService validatorService = environmentService.getValidatorService();
+            ValidationResult validationResult = validatorService.validateAndDetermineAwsParameters(environment, parametersDto.getAwsParametersDto());
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
             }
         }
     }

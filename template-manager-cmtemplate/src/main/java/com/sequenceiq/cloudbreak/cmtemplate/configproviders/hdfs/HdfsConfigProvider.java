@@ -43,6 +43,10 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
 
     private static final String S3GUARD_AUTHORITATIVE_PATH_PARAM = "fs.s3a.authoritative.path";
 
+    private static final String S3GUARD_TABLE_TAG_PARAM = "fs.s3a.s3guard.ddb.table.tag.cdp_table_role";
+
+    private static final String S3GUARD_TABLE_TAG_VALUE = "s3guard";
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
@@ -94,6 +98,8 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
         if (isS3GuardTableConfigured(s3FileSystemConfigurationsView)) {
             hdfsCoreSiteSafetyValveValue.append(ConfigUtils
                     .getSafetyValveProperty(S3GUARD_METADATASTORE_IMPL_PARAM, S3GUARD_METADATASTORE_IMPL_VALUE));
+            hdfsCoreSiteSafetyValveValue.append(ConfigUtils
+                    .getSafetyValveProperty(S3GUARD_TABLE_TAG_PARAM, S3GUARD_TABLE_TAG_VALUE));
             hdfsCoreSiteSafetyValveValue.append(ConfigUtils
                     .getSafetyValveProperty(S3GUARD_TABLE_CREATE_PARAM, S3GUARD_TABLE_CREATE_VALUE));
             hdfsCoreSiteSafetyValveValue.append(ConfigUtils
