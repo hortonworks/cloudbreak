@@ -50,7 +50,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     @Override
     public SdxTestDto valid() {
-        withName(getResourceProperyProvider().getName())
+        withName(getResourcePropertyProvider().getName())
                 .withEnvironment(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withClusterShape(getCloudProvider().getClusterShape())
                 .withTags(getCloudProvider().getTags());
@@ -74,7 +74,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     @Override
     public boolean deletable(SdxClusterResponse entity) {
-        return entity.getName().startsWith(getResourceProperyProvider().prefix());
+        return entity.getName().startsWith(getResourcePropertyProvider().prefix());
     }
 
     @Override

@@ -83,8 +83,8 @@ public class EnvironmentTestDto
     @Override
     public EnvironmentTestDto valid() {
         return getCloudProvider()
-                .environment(withName(getResourceProperyProvider().getEnvironmentName())
-                        .withDescription(getResourceProperyProvider().getDescription("environment")))
+                .environment(withName(getResourcePropertyProvider().getEnvironmentName())
+                        .withDescription(getResourcePropertyProvider().getDescription("environment")))
                         .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
                         .withAuthentication(DUMMY_SSH_KEY)
                         .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK);

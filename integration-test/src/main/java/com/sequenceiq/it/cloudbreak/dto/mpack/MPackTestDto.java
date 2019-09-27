@@ -18,9 +18,9 @@ public class MPackTestDto extends DeletableTestDto<ManagementPackV4Request, Mana
     }
 
     public MPackTestDto valid() {
-        return withName(getResourceProperyProvider().getName())
+        return withName(getResourcePropertyProvider().getName())
                 .witMpackUrl("http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz")
-                .withDescription(getResourceProperyProvider().getDescription("management pack"));
+                .withDescription(getResourcePropertyProvider().getDescription("management pack"));
     }
 
     public MPackTestDto withName(String name) {

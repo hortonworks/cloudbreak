@@ -30,7 +30,7 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
     }
 
     public DistroXTestDtoBase<T> valid() {
-        String name = getResourceProperyProvider().getName();
+        String name = getResourcePropertyProvider().getName();
         withName(name)
                 .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.defaultHostGroup(getTestContext()))
                 .withCluster(getTestContext().given(DistroXClusterTestDto.class));

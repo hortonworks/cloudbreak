@@ -212,10 +212,10 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public void validate() {
-        testContext.handleExecptionsDuringTest(false);
+        testContext.handleExceptionsDuringTest(false);
     }
 
-    public ResourcePropertyProvider getResourceProperyProvider() {
+    public ResourcePropertyProvider getResourcePropertyProvider() {
         return resourcePropertyProvider;
     }
 
