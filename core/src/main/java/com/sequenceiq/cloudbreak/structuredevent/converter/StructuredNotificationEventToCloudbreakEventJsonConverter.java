@@ -1,14 +1,11 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import javax.inject.Inject;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
@@ -17,16 +14,12 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 public class StructuredNotificationEventToCloudbreakEventJsonConverter
         extends AbstractConversionServiceAwareConverter<StructuredNotificationEvent, CloudbreakEventsJson> {
 
-    @Inject
-    private StackApiViewService stackApiViewService;
-
     @Override
     public CloudbreakEventsJson convert(StructuredNotificationEvent source) {
         NotificationDetails notificationDetails = source.getNotificationDetails();
         OperationDetails operationDetails = source.getOperation();
-        CloudbreakEventsJson cloudbreakEvent = getCloudbreakEventsJson(notificationDetails, operationDetails);
-        cloudbreakEvent.setStackView(stackApiViewService.retrieveById(notificationDetails.getStackId()));
-        return cloudbreakEvent;
+        //        cloudbreakEvent.setStackView(stackApiViewService.retrieveById(notificationDetails.getStackId()));
+        return getCloudbreakEventsJson(notificationDetails, operationDetails);
     }
 
     private CloudbreakEventsJson getCloudbreakEventsJson(NotificationDetails notificationDetails, OperationDetails operationDetails) {
