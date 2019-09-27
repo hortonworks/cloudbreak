@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.orchestrator;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -80,6 +82,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         Exception actualException = null;
         String type = orchestratorBootstrap.getClass().getSimpleName().replace("Bootstrap", "");
         long initialStartTime = System.currentTimeMillis();
+        Optional<Collection<String>> missingTargets = Optional.empty();
         while (success == null && belowAttemptThreshold(retryCount, errorCount)) {
             if (isExitNeeded()) {
                 LOGGER.info(exitCriteria.exitMessage());
@@ -88,7 +91,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             long startTime = System.currentTimeMillis();
             try {
                 LOGGER.info("Calling orchestrator bootstrap: {}, additional info: {}", type, orchestratorBootstrap);
-                orchestratorBootstrap.call();
+                missingTargets = orchestratorBootstrap.call();
                 success = Boolean.TRUE;
                 String elapsedTimeLog = createElapseTimeLog(initialStartTime, startTime);
                 LOGGER.info("Orchestrator component {} successfully started! {}, "

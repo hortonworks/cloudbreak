@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -51,7 +52,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     }
 
     @Override
-    public Boolean call() throws Exception {
+    public Optional<Collection<String>> call() throws Exception {
         LOGGER.info("Bootstrapping of nodes [{}/{}]", originalTargets.size() - targets.size(), originalTargets.size());
         if (!targets.isEmpty()) {
             LOGGER.debug("Missing targets for SaltBootstrap: {}", targets);
@@ -73,7 +74,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
             if (!targets.isEmpty()) {
                 LOGGER.info("Missing nodes to run saltbootstrap: {}", targets);
-                throw new CloudbreakOrchestratorFailedException("There are missing nodes from saltbootstrap: " + targets);
+                return Optional.of(targets.stream().map(Node::getHostname).collect(Collectors.toSet()));
             }
         }
 
@@ -86,13 +87,15 @@ public class SaltBootstrap implements OrchestratorBootstrap {
                 }
             });
         } else {
-            throw new CloudbreakOrchestratorFailedException("Minions ip address collection returned null value");
+            LOGGER.warn("Minions ip address collection returned null value");
+            return Optional.of(originalTargets.stream().map(Node::getHostname).collect(Collectors.toSet()));
         }
         if (!targets.isEmpty()) {
-            throw new CloudbreakOrchestratorFailedException("There are missing nodes from salt network response: " + targets);
+            LOGGER.warn("There are missing nodes from salt network response: " + targets);
+            return Optional.of(targets.stream().map(Node::getHostname).collect(Collectors.toSet()));
         }
         LOGGER.debug("Bootstrapping of nodes completed: {}", originalTargets.size());
-        return true;
+        return Optional.empty();
     }
 
     private SaltAction createBootstrap() {

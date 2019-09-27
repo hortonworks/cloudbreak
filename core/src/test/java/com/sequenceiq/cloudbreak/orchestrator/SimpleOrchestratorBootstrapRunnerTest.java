@@ -4,13 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
+import java.util.Optional;
+
 import org.junit.Test;
 import org.slf4j.MDC;
 
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public class SimpleOrchestratorBootstrapRunnerTest {
 
@@ -54,12 +57,12 @@ public class SimpleOrchestratorBootstrapRunnerTest {
         }
 
         @Override
-        public Boolean call() throws Exception {
+        public Optional<Collection<String>> call() throws Exception {
             count++;
             if (count != retryOk) {
                 throw new CloudbreakException(EXCEPTION_MESSAGE);
             } else {
-                return true;
+                return Optional.empty();
             }
         }
 

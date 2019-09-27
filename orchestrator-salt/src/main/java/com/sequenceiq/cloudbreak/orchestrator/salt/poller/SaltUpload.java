@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
@@ -40,7 +41,7 @@ public class SaltUpload implements OrchestratorBootstrap {
     }
 
     @Override
-    public Boolean call() throws Exception {
+    public Optional<Collection<String>> call() throws Exception {
         LOGGER.info("Uploading files to: {}", targets);
         if (!targets.isEmpty()) {
             LOGGER.info("Current targets for upload: {}", targets);
@@ -61,12 +62,12 @@ public class SaltUpload implements OrchestratorBootstrap {
 
             if (!targets.isEmpty()) {
                 LOGGER.info("Missing nodes for file upload: {}", targets);
-                throw new CloudbreakOrchestratorFailedException("There are missing nodes for file upload: " + targets);
+                return Optional.of(targets);
             }
         }
 
         LOGGER.info("File upload has been completed on nodes: {}", originalTargets);
-        return true;
+        return Optional.empty();
     }
 
     @Override

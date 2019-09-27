@@ -1,10 +1,17 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import java.util.Collection;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 
 public class SaltCommandTracker implements OrchestratorBootstrap {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaltCommandTracker.class);
 
     private final SaltConnector saltConnector;
 
@@ -16,12 +23,13 @@ public class SaltCommandTracker implements OrchestratorBootstrap {
     }
 
     @Override
-    public Boolean call() throws Exception {
+    public Optional<Collection<String>> call() throws Exception {
         saltJobRunner.submit(saltConnector);
         if (!saltJobRunner.getTargetHostnames().isEmpty()) {
-            throw new CloudbreakOrchestratorFailedException("There are missing nodes from job result: " + saltJobRunner.getTargetHostnames());
+            LOGGER.warn("There are missing nodes from job result: " + saltJobRunner.getTargetHostnames());
+            return Optional.of(saltJobRunner.getTargetHostnames());
         }
-        return true;
+        return Optional.empty();
     }
 
     @Override

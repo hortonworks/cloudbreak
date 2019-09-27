@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.poller;
 
+import java.util.Collection;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +32,7 @@ public class YarnAppBootstrap implements OrchestratorBootstrap {
     }
 
     @Override
-    public Boolean call() throws Exception {
+    public Optional<Collection<String>> call() throws Exception {
         YarnClient dashHttpClient = new YarnHttpClient(apiEndpoint);
 
         // Make the request
@@ -67,12 +70,12 @@ public class YarnAppBootstrap implements OrchestratorBootstrap {
                             String msg = String.format("Application %s has now successfully started, in %s state",
                                     appName, applicationDetailResponse.getState());
                             LOGGER.debug(msg);
-                            return true;
+                            return Optional.empty();
                         }
                     }
                 }
             }
         }
-        return true;
+        return Optional.empty();
     }
 }

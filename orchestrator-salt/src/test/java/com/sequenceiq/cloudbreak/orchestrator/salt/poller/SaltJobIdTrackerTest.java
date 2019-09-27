@@ -5,7 +5,6 @@ import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
@@ -17,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -180,7 +180,7 @@ public class SaltJobIdTrackerTest {
         PowerMockito.when(SaltStates.jidInfo(any(), any(), any(), any())).thenReturn(missingNodesWithReason);
 
         SaltJobIdTracker underTest = new SaltJobIdTracker(saltConnector, saltJobRunner);
-        assertTrue(underTest.call());
+        assertEquals(Optional.empty(), underTest.call());
 
         assertEquals(JobState.FINISHED, saltJobRunner.getJobState());
 

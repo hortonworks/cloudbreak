@@ -8,18 +8,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.api.model.RecipeType;
+import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -96,7 +97,7 @@ public class PillarSave implements OrchestratorBootstrap {
     }
 
     @Override
-    public Boolean call() throws Exception {
+    public Optional<Collection<String>> call() throws Exception {
         LOGGER.info("Distribute pillar configs to: {}", targets);
         if (!targets.isEmpty()) {
 
@@ -113,13 +114,13 @@ public class PillarSave implements OrchestratorBootstrap {
             }
             targets = failedTargets;
 
-            if (!targets.isEmpty()) {
-                LOGGER.info("Missing nodes for pillar save: {}", targets);
-                throw new CloudbreakOrchestratorFailedException("There are missing nodes for pillar save: " + targets);
+            if (!CollectionUtils.isEmpty(targets)) {
+                LOGGER.warn("Missing nodes for pillar save: {}", targets);
+                return Optional.of(targets);
             }
         }
 
         LOGGER.info("Pillar save has been completed on nodes: {}", originalTargets);
-        return true;
+        return Optional.empty();
     }
 }
