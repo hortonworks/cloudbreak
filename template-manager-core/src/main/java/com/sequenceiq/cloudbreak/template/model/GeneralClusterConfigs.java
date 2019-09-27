@@ -45,6 +45,8 @@ public class GeneralClusterConfigs {
 
     private boolean knoxUserFacingCertConfigured;
 
+    private String externalFQDN;
+
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
     }
@@ -195,5 +197,13 @@ public class GeneralClusterConfigs {
 
     public void setKnoxUserFacingCertConfigured(boolean knoxUserFacingCertConfigured) {
         this.knoxUserFacingCertConfigured = knoxUserFacingCertConfigured;
+    }
+
+    public String getExternalFQDN() {
+        return externalFQDN;
+    }
+
+    public void setExternalFQDN(String externalFQDN) {
+        this.externalFQDN = externalFQDN;
     }
 }
