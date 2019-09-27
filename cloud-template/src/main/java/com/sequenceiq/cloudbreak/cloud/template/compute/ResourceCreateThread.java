@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Component(ResourceCreateThread.NAME)
 @Scope("prototype")
@@ -52,7 +54,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     @Inject
     private PersistenceNotifier resourceNotifier;
 
-    private final Long privateId;
+    private final List<CloudInstance> instances;
 
     private final Group group;
 
@@ -62,8 +64,8 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
 
     private final CloudStack cloudStack;
 
-    public ResourceCreateThread(long privateId, Group group, ResourceBuilderContext context, AuthenticatedContext auth, CloudStack cloudStack) {
-        this.privateId = privateId;
+    public ResourceCreateThread(List<CloudInstance> instances, Group group, ResourceBuilderContext context, AuthenticatedContext auth, CloudStack cloudStack) {
+        this.instances = instances;
         this.group = group;
         this.context = context;
         this.auth = auth;
@@ -73,45 +75,56 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     @Override
     public ResourceRequestResult<List<CloudResourceStatus>> call() {
         List<CloudResourceStatus> results = new ArrayList<>();
-        Collection<CloudResource> buildableResources = new ArrayList<>();
-        try {
-            for (ComputeResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
-                LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
-                List<CloudResource> cloudResources = builder.create(context, privateId, auth, group, cloudStack.getImage());
-                if (!cloudResources.isEmpty()) {
-                    buildableResources.addAll(cloudResources);
-                    createResource(auth, cloudResources);
 
-                    PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
-                    if (CANCELLED.equals(pollGroup)) {
-                        throw new CancellationException(format("Building of %s has been cancelled", cloudResources));
-                    }
+        for (CloudInstance instance : instances) {
+            LOGGER.debug("Create all compute resources for instance: {}", instance);
+            Collection<CloudResource> buildableResources = new ArrayList<>();
+            Long privateId = instance.getTemplate().getPrivateId();
+            try {
+                for (ComputeResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
+                    LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
+                    List<CloudResource> cloudResources = builder.create(context, privateId, auth, group, cloudStack.getImage());
+                    if (!cloudResources.isEmpty()) {
+                        buildableResources.addAll(cloudResources);
+                        persistResources(auth, cloudResources);
 
-                    List<CloudResource> resources = builder.build(context, privateId, auth, group, cloudResources, cloudStack);
-                    updateResource(auth, resources);
-                    context.addComputeResources(privateId, resources);
-                    PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);
-                    List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
-                    for (CloudResourceStatus resourceStatus : pollerResult) {
-                        resourceStatus.setPrivateId(privateId);
+                        PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
+                        if (CANCELLED.equals(pollGroup)) {
+                            throw new CancellationException(format("Building of %s has been cancelled", cloudResources));
+                        }
+
+                        List<CloudResource> resources = builder.build(context, privateId, auth, group, cloudResources, cloudStack);
+                        updateResource(auth, resources);
+                        context.addComputeResources(privateId, resources);
+
+                        if (ResourceType.GCP_INSTANCE.equals(builder.resourceType())) {
+                            LOGGER.debug("Skip instance polling in case of GCP");
+                            resources.stream().map(resource -> new CloudResourceStatus(resource, ResourceStatus.IN_PROGRESS, privateId)).forEach(results::add);
+                        } else {
+                            PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);
+                            List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
+                            for (CloudResourceStatus resourceStatus : pollerResult) {
+                                resourceStatus.setPrivateId(privateId);
+                            }
+                            results.addAll(pollerResult);
+                        }
                     }
-                    results.addAll(pollerResult);
+                }
+            } catch (CancellationException e) {
+                throw e;
+            } catch (Exception e) {
+                LOGGER.error("Failed to create resources for instance: {}", instance, e);
+                results.removeIf(crs -> crs.getPrivateId().equals(privateId));
+                for (CloudResource buildableResource : buildableResources) {
+                    results.add(new CloudResourceStatus(buildableResource, ResourceStatus.FAILED, e.getMessage(), privateId));
                 }
             }
-        } catch (CancellationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("", e);
-            results.clear();
-            for (CloudResource buildableResource : buildableResources) {
-                results.add(new CloudResourceStatus(buildableResource, ResourceStatus.FAILED, e.getMessage(), privateId));
-            }
-            return new ResourceRequestResult<>(FutureResult.FAILED, results);
         }
+
         return new ResourceRequestResult<>(FutureResult.SUCCESS, results);
     }
 
-    private void createResource(AuthenticatedContext auth, Iterable<CloudResource> cloudResources) {
+    private void persistResources(AuthenticatedContext auth, Iterable<CloudResource> cloudResources) {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.isPersistent()) {
                 resourceNotifier.notifyAllocation(cloudResource, auth.getCloudContext());

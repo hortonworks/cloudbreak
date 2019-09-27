@@ -46,6 +46,7 @@ public class CloudFailureHandler {
         if (failuresList.isEmpty()) {
             return;
         }
+        LOGGER.debug("Roll back the following resources: {}", failuresList);
         doRollback(auth, failuresList, group, fullNodeCount, ctx, resourceBuilders, stx);
     }
 

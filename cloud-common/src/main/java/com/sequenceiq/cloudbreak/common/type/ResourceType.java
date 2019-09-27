@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.common.type;
 
+import java.util.List;
+
 public enum ResourceType {
     // AWS
     CLOUDFORMATION_STACK(CommonResourceType.TEMPLATE),
@@ -63,5 +65,9 @@ public enum ResourceType {
 
     public CommonResourceType getCommonResourceType() {
         return commonResourceType;
+    }
+
+    public static boolean isInstanceResource(ResourceType resourceType) {
+        return List.of(GCP_INSTANCE, OPENSTACK_INSTANCE, MOCK_INSTANCE).contains(resourceType);
     }
 }
