@@ -639,7 +639,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 || Pattern.compile(runningParameter.getExpectedMessage()).matcher(ResponseUtil.getErrorMessage(exception)).find();
     }
 
-    public void handleExecptionsDuringTest(boolean silently) {
+    public void handleExceptionsDuringTest(boolean silently) {
         validated = true;
         checkShutdown();
         Map<String, Exception> exceptionsDuringTest = getErrors();
@@ -715,10 +715,10 @@ public abstract class TestContext implements ApplicationContextAware {
         }
         if (!validated && initialized) {
             throw new IllegalStateException(
-                    "Test context should be validated! Maybe do you forgot to call .validate() end of the test? See other tests as an example.");
+                    "Test context should be validated! Maybe you forgot to call .validate() at the end of the test? See other tests as an example.");
         }
         checkShutdown();
-        handleExecptionsDuringTest(true);
+        handleExceptionsDuringTest(true);
         if (!cleanUpOnFailure && !getExceptionMap().isEmpty()) {
             LOGGER.info("Cleanup skipped beacuse cleanupOnFail is false");
             return;

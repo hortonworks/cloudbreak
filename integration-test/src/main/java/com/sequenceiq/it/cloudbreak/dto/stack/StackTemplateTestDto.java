@@ -13,7 +13,7 @@ public class StackTemplateTestDto extends StackTestDtoBase<StackTemplateTestDto>
     }
 
     public StackTemplateTestDto valid() {
-        return withName(getResourceProperyProvider().getName())
+        return withName(getResourcePropertyProvider().getName())
                 .withCluster(getTestContext().init(ClusterTestDto.class))
                 .withAuthentication(getTestContext().init(StackTestDto.class).getRequest().getAuthentication());
     }
