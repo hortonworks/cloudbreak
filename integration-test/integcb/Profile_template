@@ -4,6 +4,7 @@ export DOCKER_TAG_FREEIPA=dev
 export DOCKER_TAG_REDBEAMS=dev
 export DOCKER_TAG_ENVIRONMENT=dev
 export DOCKER_TAG_DATALAKE=dev
+export DOCKER_TAG_REDBEAMS=dev
 export DOCKER_TAG_PERISCOPE=dev
 export CB_JAVA_OPTS="-Dcaas.url=caas-mock:8080 -Xmx4G -Drest.debug=true -Dmock.spi.endpoint=https://test:9443"
 export UAA_DEFAULT_SECRET=cbsecret2015

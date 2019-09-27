@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
 @Service
@@ -19,7 +18,7 @@ class CliProfileReaderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CliProfileReaderService.class);
 
-    @Value("${integrationtest.dp.profile:}")
+    @Value("${integrationtest.dp.profile:localhost}")
     private String profile;
 
     Map<String, String> read() throws IOException {
@@ -36,12 +35,6 @@ class CliProfileReaderService {
         Yaml yaml = new Yaml();
         Map<String, Object> profiles = yaml.load(profileString);
 
-        String usedProfile = "localhost";
-
-        if (!StringUtils.isEmpty(profile)) {
-            usedProfile = profile;
-        }
-
-        return (Map<String, String>) profiles.get(usedProfile);
+        return (Map<String, String>) profiles.get(profile);
     }
 }

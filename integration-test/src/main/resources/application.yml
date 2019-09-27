@@ -281,6 +281,10 @@ integrationtest:
   sdx:
       server: http://localhost
 
+  # redbeams properties
+  redbeams:
+      server: http://localhost
+
   # gcp credential details
   gcpcredential:
      name:
