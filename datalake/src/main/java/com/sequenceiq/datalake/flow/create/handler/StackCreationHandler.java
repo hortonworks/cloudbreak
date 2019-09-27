@@ -13,17 +13,23 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 
 @Component
 public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCreationWaitRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationHandler.class);
+
+    @Inject
+    private SdxStatusService sdxStatusService;
 
     @Value("${sdx.stack.provision.sleeptime_sec:10}")
     private int sleepTimeInSec;
@@ -56,6 +62,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
             LOGGER.debug("start polling stack creation process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig, requestId);
+            setStackCreatedStatus(sdxId);
             response = new StackCreationSuccessEvent(sdxId, userId, requestId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Polling exited before timeout for SDX: {}. Cause: ", sdxId, userBreakException);
@@ -72,5 +79,10 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
             response = new SdxCreateFailedEvent(sdxId, userId, requestId, anotherException);
         }
         sendEvent(response, handlerEvent);
+    }
+
+    private void setStackCreatedStatus(Long datalakeId) {
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED,
+                ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED, "Datalake stack created", datalakeId);
     }
 }

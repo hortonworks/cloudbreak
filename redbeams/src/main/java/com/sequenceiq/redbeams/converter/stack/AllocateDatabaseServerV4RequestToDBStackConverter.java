@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -46,14 +45,15 @@ import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
+import com.sequenceiq.redbeams.exception.BadRequestException;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
+import com.sequenceiq.redbeams.service.UuidGeneratorService;
 import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 import com.sequenceiq.redbeams.service.network.SubnetListerService;
-import com.sequenceiq.redbeams.service.UuidGeneratorService;
 
 @Component
 public class AllocateDatabaseServerV4RequestToDBStackConverter {
@@ -124,7 +124,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
         if (source.getDatabaseServer() != null) {
             dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), cloudPlatform, source.getName(), ownerCrn,
-                environment.getSecurityAccess()));
+                    environment.getSecurityAccess()));
         }
 
         Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
@@ -217,7 +217,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     }
 
     private DatabaseServer buildDatabaseServer(DatabaseServerV4StackRequest source, CloudPlatform cloudPlatform, String name, Crn ownerCrn,
-        SecurityAccessResponse securityAccessResponse) {
+            SecurityAccessResponse securityAccessResponse) {
         DatabaseServer server = new DatabaseServer();
         server.setAccountId(ownerCrn.getAccountId());
         server.setName(generateDatabaseServerName());
@@ -228,7 +228,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         server.setStorageSize(source.getStorageSize());
         server.setRootUserName(source.getRootUserName() != null ? source.getRootUserName() : userGeneratorService.generateUserName());
         server.setRootPassword(source.getRootUserPassword() != null ?
-            source.getRootUserPassword() : passwordGeneratorService.generatePassword(Optional.of(cloudPlatform)));
+                source.getRootUserPassword() : passwordGeneratorService.generatePassword(Optional.of(cloudPlatform)));
         server.setPort(source.getPort());
         server.setSecurityGroup(buildExistingSecurityGroup(source.getSecurityGroup(), securityAccessResponse));
 

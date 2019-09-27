@@ -59,9 +59,6 @@ public class SdxRepairService {
     private SdxService sdxService;
 
     @Inject
-    private SdxNotificationService notificationService;
-
-    @Inject
     private SdxStatusService sdxStatusService;
 
     @Inject
@@ -96,8 +93,7 @@ public class SdxRepairService {
             stackV4Endpoint.repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest));
             sdxCluster.setRepairFlowChainId(flowEndpoint.getLastFlowByResourceName(sdxCluster.getClusterName()).getFlowChainId());
             sdxClusterRepository.save(sdxCluster);
-            notificationService.send(ResourceEvent.SDX_REPAIR_STARTED, sdxCluster);
-            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.REPAIR_IN_PROGRESS,
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, ResourceEvent.SDX_REPAIR_STARTED,
                     "Datalake repair in progress", sdxCluster);
         } catch (NotFoundException e) {
             LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
@@ -123,9 +119,7 @@ public class SdxRepairService {
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> checkClusterStatusDuringRepair(sdxCluster));
-            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.RUNNING, "Datalake is running", sdxCluster);
-            sdxClusterRepository.save(sdxCluster);
-            notificationService.send(ResourceEvent.SDX_REPAIR_FINISHED, sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_REPAIR_FINISHED, "Datalake is running", sdxCluster);
         }, () -> {
             throw notFound("SDX cluster", id).get();
         });
@@ -184,7 +178,6 @@ public class SdxRepairService {
 
     private AttemptResult<StackV4Response> sdxRepairFailed(SdxCluster sdxCluster, String statusReason) {
         LOGGER.info("SDX repair failed, statusReason: " + statusReason);
-        notificationService.send(ResourceEvent.SDX_REPAIR_FAILED, sdxCluster);
         return AttemptResults.breakFor("SDX repair failed '" + sdxCluster.getClusterName() + "', " + statusReason);
     }
 
