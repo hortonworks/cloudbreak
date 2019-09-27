@@ -220,10 +220,6 @@ public class StackService {
         }
     }
 
-    public Stack findStackByNameAndWorkspaceId(String name, Long workspaceId) {
-        return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
-    }
-
     public StackResponse getJsonById(Long id, Collection<String> entry) {
         try {
             return transactionService.required(() -> {

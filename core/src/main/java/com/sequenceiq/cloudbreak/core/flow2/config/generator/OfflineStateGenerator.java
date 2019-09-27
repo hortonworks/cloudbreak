@@ -318,11 +318,6 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Stack findByNameInWorkspaceWithLists(String name, Workspace workspace) {
-            return null;
-        }
-
-        @Override
         public List<Stack> findAllAlive() {
             return null;
         }
@@ -364,11 +359,6 @@ public class OfflineStateGenerator {
 
         @Override
         public Set<Stack> findByCredential(Credential credential) {
-            return null;
-        }
-
-        @Override
-        public Long countByNetwork(Network network) {
             return null;
         }
 

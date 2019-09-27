@@ -14,7 +14,6 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspace;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
@@ -25,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
@@ -36,12 +34,12 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 public interface StackRepository extends WorkspaceResourceRepository<Stack, Long> {
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s from Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+    @Query("SELECT s from Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "WHERE s.cluster.ambariIp= :ambariIp AND s.terminated = null")
     Stack findByAmbari(@Param("ambariIp") String ambariIp);
 
     @CheckPermissionsByWorkspaceId(action = READ)
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "WHERE s.workspace.id= :workspaceId AND s.terminated = null")
     Set<Stack> findForWorkspaceIdWithLists(@Param("workspaceId") Long workspaceId);
 
@@ -50,13 +48,13 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Stack findByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData imd "
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData imd "
             + "WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.terminated = null "
             + "AND (imd.instanceStatus <> 'TERMINATED' AND imd.terminationDate = null)")
     Stack findByNameAndWorkspaceIdWithLists(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.id= :id")
+    @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.id= :id")
     Stack findOneWithLists(@Param("id") Long id);
 
     @CheckPermissionsByReturnValue
@@ -76,11 +74,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Stack c WHERE c.cluster.id= :clusterId")
     Stack findStackForCluster(@Param("clusterId") Long clusterId);
-
-    @CheckPermissionsByWorkspace(action = READ, workspaceIndex = 1)
-    @Query("SELECT t FROM Stack t LEFT JOIN FETCH t.resources LEFT JOIN FETCH t.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE t.workspace= :workspace and t.name= :name")
-    Stack findByNameInWorkspaceWithLists(@Param("name") String name, @Param("workspace") Workspace workspace);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s WHERE s.terminated = null")
@@ -125,9 +118,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @DisableCheckPermissions
     Set<Stack> findByCredential(Credential credential);
-
-    @DisableCheckPermissions
-    Long countByNetwork(Network network);
 
     @CheckPermissionsByReturnValue
     Set<Stack> findByNetwork(Network network);

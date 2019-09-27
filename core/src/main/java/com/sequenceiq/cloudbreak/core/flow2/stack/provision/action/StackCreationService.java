@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
@@ -115,6 +116,9 @@ public class StackCreationService {
     @Inject
     private GatewayConfigService gatewayConfigService;
 
+    @Inject
+    private ResourceService resourceService;
+
     public void setupProvision(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_SETUP, "Provisioning setup");
     }
@@ -137,7 +141,9 @@ public class StackCreationService {
         validateResourceResults(context.getCloudContext(), result);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.METADATA_COLLECTION, "Metadata collection");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
-        return stackService.getByIdWithListsInTransaction(stack.getId());
+        Stack provisionedStack = stackService.getByIdWithListsInTransaction(stack.getId());
+        provisionedStack.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
+        return provisionedStack;
     }
 
     private Date getStartDateIfExist(Map<Object, Object> variables) {
@@ -175,7 +181,9 @@ public class StackCreationService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.TLS_SETUP, "TLS setup");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, UPDATE_IN_PROGRESS.name());
         LOGGER.debug("Metadata setup DONE.");
-        return stackService.getByIdWithListsInTransaction(stack.getId());
+        Stack stackWithMetadata = stackService.getByIdWithListsInTransaction(stack.getId());
+        stackWithMetadata.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
+        return stackWithMetadata;
     }
 
     public Stack saveTlsInfo(StackContext context, TlsInfo tlsInfo) {
@@ -186,6 +194,7 @@ public class StackCreationService {
             securityConfig.setUsePrivateIpToTls(true);
             stackUpdater.updateStackSecurityConfig(stack, securityConfig);
             stack = stackService.getByIdWithListsInTransaction(stack.getId());
+            stack.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
             LOGGER.info("Update Stack and it's SecurityConfig to use private ip when TLS is built.");
         }
         return stack;

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
 import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
@@ -266,9 +267,12 @@ public class StackCreatorService {
     }
 
     private void ensureStackDoesNotExists(String stackName, Workspace workspace) {
-        Stack stack = stackService.findStackByNameAndWorkspaceId(stackName, workspace.getId());
-        if (stack != null) {
-            throw new BadRequestException("Cluster already exists: " + stackName);
+        try {
+            stackService.getIdByNameInWorkspace(stackName, workspace.getId());
+        } catch (NotFoundException e) {
+            return;
         }
+
+        throw new BadRequestException("Cluster already exists: " + stackName);
     }
 }

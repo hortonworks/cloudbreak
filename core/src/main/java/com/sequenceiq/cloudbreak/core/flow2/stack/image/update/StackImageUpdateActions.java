@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.STACK_IMAGE_UPDATE_FINISHED_EVENT;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -126,7 +127,7 @@ public class StackImageUpdateActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 CloudStack cloudStack = getCloudStackConverter().convert(context.getStack());
-                List<Resource> resources = getResourceRepository().findAllByStackId(context.getStack().getId());
+                List<Resource> resources = new ArrayList<>(getResourceService().getAllByStackId(context.getStack().getId()));
                 List<CloudResource> cloudResources =
                         resources.stream().map(resource -> getResourceToCloudResourceConverter().convert(resource)).collect(Collectors.toList());
                 UpdateImageRequest<Selectable> request =
