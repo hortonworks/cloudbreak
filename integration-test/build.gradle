@@ -75,6 +75,9 @@ dependencies {
   compile (project(':datalake-api')) {
     transitive = false;
   }
+  compile (project(':redbeams-api')) {
+    transitive = false;
+  }
   compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
     exclude group: 'org.slf4j'
     exclude group: 'xerces.xercesImpl'

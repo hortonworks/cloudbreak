@@ -30,6 +30,7 @@ services:
       - INTEGRATIONTEST_FREEIPA_SERVER=http://dev-gateway
       - INTEGRATIONTEST_ENVIRONMENT_SERVER=http://dev-gateway
       - INTEGRATIONTEST_SDX_SERVER=http://dev-gateway
+      - INTEGRATIONTEST_REDBEAMS_SERVER=http://dev-gateway
       - CLOUDBREAK_URL=cloudbreak:8080
       - SPRING_CONFIG_LOCATION=classpath:/application.yml,/it/it-application.yml
       - INTEGRATIONTEST_SUITEFILES

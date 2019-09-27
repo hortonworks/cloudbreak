@@ -31,10 +31,10 @@ class ServerUtil {
                 : enforceHttpsForServerAddress(serverRaw);
     }
 
-    private String enforceHttpsForServerAddress(String serverRaw) {
+    String enforceHttpsForServerAddress(String serverRaw) {
         //Hack to avoid SSLException in local mock/e2e tests due to CBD modification that allows traffic to services without https
         if ("localhost".equals(serverRaw) || "http://localhost".equals(serverRaw)) {
-            return "http://" + serverRaw;
+            return "http://localhost";
         }
         return "https://" + getDomainFromUrl(serverRaw);
     }

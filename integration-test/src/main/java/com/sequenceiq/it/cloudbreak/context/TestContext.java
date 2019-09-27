@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -29,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
+import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
@@ -222,10 +224,18 @@ public abstract class TestContext implements ApplicationContextAware {
             FreeIPAClient freeIPAClient = FreeIPAClient.createProxyFreeIPAClient(testParameter, acting);
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, acting);
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, acting);
+            RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, acting);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
-                    FreeIPAClient.class, freeIPAClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient);
+                    FreeIPAClient.class, freeIPAClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient,
+                    RedbeamsClient.class, redbeamsClient);
             clients.put(acting.getAccessKey(), clientMap);
             cloudbreakClient.setWorkspaceId(0L);
+            redbeamsClient.setEnvironmentCrn(Crn.builder()
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setAccountId("it")
+                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                .setResource("test-environment")
+                .build().toString());
         }
         return this;
     }
@@ -415,6 +425,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public CloudbreakClient getCloudbreakClient() {
         return getCloudbreakClient(getDefaultUser());
+    }
+
+    public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends MicroserviceClient> msClientClass) {
+        return getMicroserviceClient(msClientClass, getDefaultUser());
     }
 
     public <T extends CloudbreakTestDto> T await(Class<T> entityClass, Map<String, Status> desiredStatuses) {
