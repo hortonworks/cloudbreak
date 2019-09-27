@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -14,12 +15,16 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
@@ -31,6 +36,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
@@ -43,7 +49,9 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
+import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.util.KrbKeySetEncoder;
 
 @Service
 public class UserService {
@@ -72,7 +80,7 @@ public class UserService {
     private SyncOperationToSyncOperationStatus syncOperationToSyncOperationStatus;
 
     public SyncOperationStatus synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
-            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+                                                Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
 
         validateParameters(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
         LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
@@ -176,10 +184,47 @@ public class UserService {
             removeUsers(freeIpaClient, stateDifference.getUsersToRemove());
             removeGroups(freeIpaClient, stateDifference.getGroupsToRemove());
 
+            // Check for the password related attribute (cdpUserAttr) existence and go for password sync.
+            processUsersWorkloadCredentials(stack.getEnvironmentCrn(), umsUsersState, freeIpaClient);
+
             return SyncStatusDetail.succeed(environmentCrn, "TODO- collect detail info");
         } catch (Exception e) {
             LOGGER.warn("Failed to synchronize environment {}", stack.getEnvironmentCrn(), e);
             return SyncStatusDetail.fail(environmentCrn, e.getLocalizedMessage());
+        }
+    }
+
+    private void processUsersWorkloadCredentials(
+        String environmentCrn, UsersState umsUsersState, FreeIpaClient freeIpaClient) throws IOException, FreeIpaClientException {
+        Config config = freeIpaClient.getConfig();
+        if (config.getIpauserobjectclasses() == null || !config.getIpauserobjectclasses().contains(Config.CDP_USER_ATTRIBUTE)) {
+            LOGGER.debug("Does't seems like having config attribute, no credentials sync required for env:{}", environmentCrn);
+            return;
+        }
+
+        // found the attribute, password sync can be performed
+        LOGGER.debug("Having config attribute, going for credentials sync");
+
+        // Should sync for all users and not just diff. At present there is no way to identify that there is a change in password for a user
+        for (FmsUser u : umsUsersState.getUsers()) {
+            WorkloadCredential workloadCredential = umsUsersState.getUsersWorkloadCredentialMap().get(u.getName());
+            if (workloadCredential == null
+                || StringUtils.isEmpty(workloadCredential.getHashedPassword())
+                || CollectionUtils.isEmpty(workloadCredential.getKeys())) {
+                continue;
+            }
+
+            // Call ASN_1 Encoder for encoding hashed password and then call user mod for password
+            LOGGER.debug("Found Credentials for user {}", u.getName());
+            String ansEncodedKrbPrincipalKey = KrbKeySetEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
+
+            Map<String, Object> params =
+                ImmutableMap.of("setattr", ImmutableList.of(
+                    "cdpHashedPassword=" + workloadCredential.getHashedPassword(),
+                    "cdpUnencryptedKrbPrincipalKey=" + ansEncodedKrbPrincipalKey));
+
+            freeIpaClient.userMod(u.getName(), params);
+            LOGGER.debug("Password synced for the user:{}, for the environment: {}", u.getName(), environmentCrn);
         }
     }
 
@@ -262,7 +307,7 @@ public class UserService {
     private void removeUsersFromGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping) throws FreeIpaClientException {
         for (String group : groupMapping.keySet()) {
             Set<String> users = Set.copyOf(groupMapping.get(group));
-            LOGGER.debug("removing users {} to group {}", users, group);
+            LOGGER.debug("removing users {} from group {}", users, group);
 
             try {
                 // TODO specialize response object

@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSyste
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 
@@ -24,6 +25,9 @@ public class FileSystemV4Controller implements FileSystemV4Endpoint {
 
     @Inject
     private ConverterUtil converterUtil;
+
+    @Inject
+    private WorkspaceService workspaceService;
 
     @Override
     public FileSystemParameterV4Responses getFileSystemParameters(

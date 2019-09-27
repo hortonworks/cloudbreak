@@ -141,7 +141,7 @@ public class ClouderaManagerMgmtSetupService {
     private Consumer<BigDecimal> pollCredentialGeneration(Stack stack, ApiClient client) {
         return id -> {
             LOGGER.debug("Generate Credentials command is still active.");
-            clouderaManagerPollingServiceProvider.generateCredentialsPollingService(stack, client, id);
+            clouderaManagerPollingServiceProvider.startPollingCmGenerateCredentials(stack, client, id);
         };
     }
 
@@ -169,7 +169,7 @@ public class ClouderaManagerMgmtSetupService {
         } else if (mgmtService.getServiceState() != ApiServiceState.STARTED) {
             startCommand = Optional.of(mgmtServiceResourceApi.startCommand());
         }
-        startCommand.ifPresent(sc -> clouderaManagerPollingServiceProvider.startManagementServicePollingService(stack, client, sc.getId()));
+        startCommand.ifPresent(sc -> clouderaManagerPollingServiceProvider.startPollingCmManagementServiceStartup(stack, client, sc.getId()));
     }
 
     private void setupCMS(MgmtServiceResourceApi mgmtServiceResourceApi, ApiService mgmtService) throws ApiException {

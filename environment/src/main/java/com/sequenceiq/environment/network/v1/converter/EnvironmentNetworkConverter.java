@@ -3,6 +3,7 @@ package com.sequenceiq.environment.network.v1.converter;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -20,4 +21,6 @@ public interface EnvironmentNetworkConverter {
     NetworkDto convertToDto(BaseNetwork source);
 
     boolean hasExistingNetwork(BaseNetwork baseNetwork);
+
+    Network convertToNetwork(BaseNetwork baseNetwork);
 }

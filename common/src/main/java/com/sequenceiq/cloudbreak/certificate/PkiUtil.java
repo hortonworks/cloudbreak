@@ -28,13 +28,19 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
 import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.ExtensionsGenerator;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.crypto.CryptoException;
@@ -60,6 +66,7 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.io.BaseEncoding;
 
@@ -149,11 +156,15 @@ public class PkiUtil {
         }
     }
 
-    public static PKCS10CertificationRequest csr(KeyPair identity, String publicAddress) {
+    public static PKCS10CertificationRequest csr(KeyPair identity, String externalAddress) {
+        if (identity == null) {
+            throw new PkiException("Failed to generate CSR because KeyPair hasn't been specified for the method!");
+        }
         try {
-            String name = String.format("C=US, CN=%s, O=Cloudera", publicAddress);
-            LOGGER.info("Generate CSR with X.500 distinguished name: '{}'", name);
-            return generateCsrWithName(identity, name);
+            String name = String.format("C=US, CN=%s, O=Cloudera", externalAddress);
+            List<String> sanList = List.of();
+            LOGGER.info("Generate CSR with X.500 distinguished name: '{}' and list of SAN: '{}'", name, String.join(",", sanList));
+            return generateCsrWithName(identity, name, sanList);
         } catch (Exception e) {
             throw new PkiException("Failed to generate csr for the cluster!", e);
         }
@@ -249,15 +260,33 @@ public class PkiUtil {
 
     private static PKCS10CertificationRequest generateCsr(KeyPair identity, String publicAddress) throws Exception {
         String name = String.format("cn=%s", publicAddress);
-        return generateCsrWithName(identity, name);
+        return generateCsrWithName(identity, name, null);
     }
 
-    private static PKCS10CertificationRequest generateCsrWithName(KeyPair identity, String name) throws Exception {
+    private static PKCS10CertificationRequest generateCsrWithName(KeyPair identity, String name, List<String> sanList) throws Exception {
         X500Principal principal = new X500Principal(name);
         PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(principal, identity.getPublic());
+
+        if (!CollectionUtils.isEmpty(sanList)) {
+            p10Builder = addSubjectAlternativeNames(p10Builder, sanList);
+        }
+
         JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder("SHA256withRSA");
         ContentSigner signer = csBuilder.build(identity.getPrivate());
         return p10Builder.build(signer);
+    }
+
+    private static PKCS10CertificationRequestBuilder addSubjectAlternativeNames(PKCS10CertificationRequestBuilder p10Builder, List<String> sanList)
+            throws IOException {
+        GeneralName[] generalNames = sanList
+                .stream()
+                .map(address -> new GeneralName(GeneralName.dNSName, address))
+                .toArray(GeneralName[]::new);
+
+        GeneralNames subjectAltNames = new GeneralNames(generalNames);
+        ExtensionsGenerator extGen = new ExtensionsGenerator();
+        extGen.addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
+        return p10Builder.addAttribute(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest, extGen.generate());
     }
 
     private static String convertToString(Object o) throws IOException {

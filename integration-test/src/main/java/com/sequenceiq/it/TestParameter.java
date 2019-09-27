@@ -29,8 +29,8 @@ public class TestParameter {
             valueAsProperty = Optional.ofNullable(parameters.get(key.toUpperCase().replaceAll("\\.", "_")));
         }
         LOGGER.info(valueAsProperty.isPresent()
-                ? String.format("Aquiring key %s resulting: %s", key, valueAsProperty.get())
-                : String.format("Aquiring key %s, but no result has found.", key));
+                ? String.format("Acquiring key %s resulting: %s", key, valueAsProperty.get())
+                : String.format("Acquiring key %s, but no result has found.", key));
 
         if (key.startsWith(REQUIRED_KEY_PREFIX) && !valueAsProperty.isPresent()) {
             throw new MissingExpectedParameterException(key);

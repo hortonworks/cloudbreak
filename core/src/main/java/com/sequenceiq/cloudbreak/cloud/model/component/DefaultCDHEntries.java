@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@ConfigurationProperties("cb.cdh")
 @Component
+@ConfigurationProperties("cb.cdh")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DefaultCDHEntries {
 
     public static final Comparator<Map.Entry<String, DefaultCDHInfo>> CDH_ENTRY_COMPARATOR =
@@ -20,7 +20,7 @@ public class DefaultCDHEntries {
     private Map<String, DefaultCDHInfo> entries = new HashMap<>();
 
     public Map<String, DefaultCDHInfo> getEntries() {
-        return entries;
+        return new HashMap<>(entries);
     }
 
     public void setEntries(Map<String, DefaultCDHInfo> entries) {

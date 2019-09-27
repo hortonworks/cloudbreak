@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.io.CharStreams;
 import com.sequenceiq.ambari.client.services.ClusterService;
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -37,7 +38,8 @@ public class AmbariClusterTemplateSubmitter {
         if (ambariClient.getClusterName() == null) {
             try {
                 String clusterTemplate = ambariClusterTemplateGenerator.generateClusterTemplate(cluster, hostGroupMappings, ambariClient, kerberosConfig);
-                LOGGER.debug("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate, Collections.singleton("credentials")));
+                String minifiedClusterTemplate = JsonUtil.minify(clusterTemplate, Collections.singleton("credentials"));
+                LOGGER.debug("Submitted cluster creation template: {}", AnonymizerUtil.anonymize(minifiedClusterTemplate));
                 ambariClient.createClusterFromTemplate(clusterName, clusterTemplate);
             } catch (HttpResponseException exception) {
                 String reason = collectErrorReason(exception);

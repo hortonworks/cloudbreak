@@ -2880,6 +2880,43 @@ public final class UserManagementGrpc {
      }
      return getDeleteWorkloadAdministrationGroupNameMethod;
   }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGetActorWorkloadCredentialsMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> METHOD_GET_ACTOR_WORKLOAD_CREDENTIALS = getGetActorWorkloadCredentialsMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> getGetActorWorkloadCredentialsMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> getGetActorWorkloadCredentialsMethod() {
+    return getGetActorWorkloadCredentialsMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> getGetActorWorkloadCredentialsMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> getGetActorWorkloadCredentialsMethod;
+    if ((getGetActorWorkloadCredentialsMethod = UserManagementGrpc.getGetActorWorkloadCredentialsMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getGetActorWorkloadCredentialsMethod = UserManagementGrpc.getGetActorWorkloadCredentialsMethod) == null) {
+          UserManagementGrpc.getGetActorWorkloadCredentialsMethod = getGetActorWorkloadCredentialsMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "GetActorWorkloadCredentials"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetActorWorkloadCredentials"))
+                  .build();
+          }
+        }
+     }
+     return getGetActorWorkloadCredentialsMethod;
+  }
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -3710,6 +3747,16 @@ public final class UserManagementGrpc {
       asyncUnimplementedUnaryCall(getDeleteWorkloadAdministrationGroupNameMethodHelper(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * Retrieves the actor workload credentials.
+     * </pre>
+     */
+    public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetActorWorkloadCredentialsMethodHelper(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -4251,6 +4298,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse>(
                   this, METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
+          .addMethod(
+            getGetActorWorkloadCredentialsMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>(
+                  this, METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS)))
           .build();
     }
   }
@@ -5151,6 +5205,17 @@ public final class UserManagementGrpc {
       asyncUnaryCall(
           getChannel().newCall(getDeleteWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Retrieves the actor workload credentials.
+     * </pre>
+     */
+    public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetActorWorkloadCredentialsMethodHelper(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -5971,6 +6036,16 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse deleteWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request) {
       return blockingUnaryCall(
           getChannel(), getDeleteWorkloadAdministrationGroupNameMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Retrieves the actor workload credentials.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetActorWorkloadCredentialsMethodHelper(), getCallOptions(), request);
     }
   }
 
@@ -6870,6 +6945,17 @@ public final class UserManagementGrpc {
       return futureUnaryCall(
           getChannel().newCall(getDeleteWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Retrieves the actor workload credentials.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> getActorWorkloadCredentials(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetActorWorkloadCredentialsMethodHelper(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_INTERACTIVE_LOGIN = 0;
@@ -6949,6 +7035,7 @@ public final class UserManagementGrpc {
   private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 74;
   private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 75;
   private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 76;
+  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 77;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -7275,6 +7362,10 @@ public final class UserManagementGrpc {
           serviceImpl.deleteWorkloadAdministrationGroupName((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse>) responseObserver);
           break;
+        case METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS:
+          serviceImpl.getActorWorkloadCredentials((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -7413,6 +7504,7 @@ public final class UserManagementGrpc {
               .addMethod(getGetWorkloadAdministrationGroupNameMethodHelper())
               .addMethod(getSetWorkloadAdministrationGroupNameMethodHelper())
               .addMethod(getDeleteWorkloadAdministrationGroupNameMethodHelper())
+              .addMethod(getGetActorWorkloadCredentialsMethodHelper())
               .build();
         }
       }

@@ -46,6 +46,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public static final String EUROPE = "Europe";
 
+    private static final String DEFAULT_BLUEPRINT_CDH_VERSION = "7.0.1";
+
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
 
@@ -258,6 +260,11 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public String getBlueprintName() {
         return mockProperties.getDefaultBlueprintName();
+    }
+
+    @Override
+    public String getBlueprintCdhVersion() {
+        return DEFAULT_BLUEPRINT_CDH_VERSION;
     }
 
     @Override

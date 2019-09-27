@@ -34,6 +34,7 @@ public final class ModelDescriptions {
         public static final String CREATE_RESULT = "Result of database creation";
         public static final String ENVIRONMENT_CRN = "CRN of the environment of the database";
         public static final String CREATION_DATE = "Creation date / time of the database, in epoch milliseconds";
+        public static final String RESOURCE_STATUS = "Ownership status of the database";
     }
 
     public static class DatabaseTest {

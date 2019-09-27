@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
@@ -122,7 +123,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.clouderaManagerStartupPollerObjectPollingService(stack, client);
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, client);
         if (isSuccess(pollingResult)) {
             LOGGER.debug("Cloudera Manager server has successfully started! Polling result: {}", pollingResult);
         } else if (isExited(pollingResult)) {
@@ -164,7 +165,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                     clouderaManagerProductDetails, sdxContextName);
 
             cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
-            LOGGER.info("Generated Cloudera cluster template: {}", cluster.getExtendedBlueprintText());
+            LOGGER.info("Generated Cloudera cluster template: {}", AnonymizerUtil.anonymize(cluster.getExtendedBlueprintText()));
             ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
 
             removeRemoteParcelRepos(clouderaManagerResourceApi);
@@ -231,7 +232,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 throw new ClouderaManagerOperationFailedException(msg, e);
             }
         }
-        clusterInstallCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, cmd.getId()));
+        clusterInstallCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, client, cmd.getId()));
     }
 
     private void removeRemoteParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi) {
@@ -248,7 +249,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     private void refreshParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi) {
         try {
             ApiCommand apiCommand = clouderaManagerResourceApi.refreshParcelRepos();
-            clouderaManagerPollingServiceProvider.parcelRepoRefreshCheckerService(stack, client, apiCommand.getId());
+            clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, client, apiCommand.getId());
         } catch (ApiException e) {
             LOGGER.info("Unable to refresh parcel repo", e);
             throw new CloudbreakServiceException(e);
@@ -279,7 +280,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
-        clouderaManagerPollingServiceProvider.hostsPollingService(stack, client);
+        clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, client);
     }
 
     @Override

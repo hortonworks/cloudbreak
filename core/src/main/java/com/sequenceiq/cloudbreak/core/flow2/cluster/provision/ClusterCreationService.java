@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
+import com.sequenceiq.cloudbreak.service.gateway.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -49,6 +50,9 @@ public class ClusterCreationService {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
+
     public void bootstrappingMachines(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_MACHINES);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_BOOTSTRAP, UPDATE_IN_PROGRESS.name());
@@ -67,6 +71,13 @@ public class ClusterCreationService {
     public void collectingHostMetadata(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.COLLECTING_HOST_METADATA);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
+    }
+
+    public void generateCertAndDnsEntryForGateway(Stack stack) {
+        boolean success = gatewayPublicEndpointManagementService.generateCertAndSaveForStackAndUpdateDnsEntry(stack);
+        if (!success) {
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_GATEWAY_CERTIFICATE_CREATE_FAILED, UPDATE_IN_PROGRESS.name());
+        }
     }
 
     public void startingClusterServices(StackView stack) throws CloudbreakException {

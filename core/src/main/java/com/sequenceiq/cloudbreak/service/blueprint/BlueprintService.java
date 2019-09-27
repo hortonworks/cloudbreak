@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaulatorUtil.evaluateIfTrueDoOtherwise;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -9,6 +10,8 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -33,7 +36,9 @@ import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService
 import com.sequenceiq.cloudbreak.blueprint.filesystem.AmbariCloudStorageConfigDetails;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -48,8 +53,10 @@ import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
+import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -65,6 +72,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private static final String INVALID_DTO_MESSAGE = "One and only one value of the crn and name should be filled!";
 
+    private static final String MULTI_HOSTNAME_EXCEPTION_MESSAGE_FORMAT = "Host %s names must be unique! The following host %s names are invalid due to " +
+            "their multiple occurrence: %s";
+
     @Inject
     private BlueprintRepository blueprintRepository;
 
@@ -79,6 +89,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
+
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
@@ -100,6 +113,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public Blueprint createForLoggedInUser(Blueprint blueprint, Long workspaceId, String accountId, String creator) {
+        evaluateIfTrueDoOtherwise(blueprint.getBlueprintText(), bpText -> getVersionForCmWithBlueprintProcessingExceptionHandling(bpText).isPresent(),
+                bpText -> validateHostNames(cmTemplateProcessorFactory.get(bpText)), bpText -> validateHostNames(ambariBlueprintProcessorFactory.get(bpText)));
         decorateWithCrn(blueprint, accountId, creator);
         return super.createForLoggedInUser(blueprint, workspaceId);
     }
@@ -144,7 +159,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             String blueprintText = blueprint.getBlueprintText();
             String extendedAmbariBlueprint = ambariBlueprintProcessorFactory.get(blueprintText)
                     .extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(configs), false).asText();
-            LOGGER.debug("Extended blueprint result: {}", extendedAmbariBlueprint);
+            LOGGER.debug("Extended blueprint result: {}", AnonymizerUtil.anonymize(extendedAmbariBlueprint));
             blueprint.setBlueprintText(extendedAmbariBlueprint);
         }
         try {
@@ -260,14 +275,19 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     @Override
+    public Blueprint getByNameForWorkspace(String name, Workspace workspace) {
+        return getByNameForWorkspaceAndLoadDefaultsIfNecessary(name, workspace);
+    }
+
+    @Override
     public Blueprint delete(Blueprint blueprint) {
         LOGGER.debug("Deleting blueprint with name: {}", blueprint.getName());
         prepareDeletion(blueprint);
         if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
             blueprintRepository.delete(blueprint);
         } else {
-            blueprint.setStatus(ResourceStatus.DEFAULT_DELETED);
-            blueprint = blueprintRepository.save(blueprint);
+            LOGGER.error("Tried to delete DEFAULT blueprint");
+            throw new BadRequestException("deletion of DEFAULT blueprint is not allowed");
         }
         return blueprint;
     }
@@ -335,7 +355,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             boolean secure, Long workspaceId) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        Blueprint blueprint = getByNameForWorkspace(blueprintName, workspace);
+        Blueprint blueprint = getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace);
         String blueprintText = blueprint.getBlueprintText();
         // Not necessarily the best way to figure out whether a DL or not. At the moment, DLs cannot be launched as
         // workloads, so works fine. Would be better to get this information from the invoking context itself.
@@ -360,6 +380,33 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         }
 
         return result;
+    }
+
+    private void validateHostNames(BlueprintTextProcessor blueprintTextProcessor) {
+        List<String> hostTemplateNames = blueprintTextProcessor.getHostTemplateNames();
+        if (hostNamesAreNotUnique(hostTemplateNames)) {
+            String nonUniqueHostTemplateNames = String.join(", ", findHostTemplateNameDuplicates(hostTemplateNames));
+            String hostSectionIdentifier = blueprintTextProcessor.getHostGroupPropertyIdentifier();
+            String message = String.format(MULTI_HOSTNAME_EXCEPTION_MESSAGE_FORMAT, hostSectionIdentifier, hostSectionIdentifier, nonUniqueHostTemplateNames);
+            throw new BadRequestException(message);
+        }
+    }
+
+    private Optional<String> getVersionForCmWithBlueprintProcessingExceptionHandling(String bpText) {
+        try {
+            return cmTemplateProcessorFactory.get(bpText).getVersion();
+        } catch (BlueprintProcessingException ignore) {
+            return Optional.empty();
+        }
+    }
+
+    private Set<String> findHostTemplateNameDuplicates(List<String> hostTemplateNames) {
+        Set<String> temp = new LinkedHashSet<>();
+        return hostTemplateNames.stream().filter(hostTemplateName -> !temp.add(hostTemplateName)).collect(Collectors.toSet());
+    }
+
+    private boolean hostNamesAreNotUnique(List<String> hostGroupNames) {
+        return new HashSet<>(hostGroupNames).size() != hostGroupNames.size();
     }
 
     private void validateDto(BlueprintAccessDto dto) {

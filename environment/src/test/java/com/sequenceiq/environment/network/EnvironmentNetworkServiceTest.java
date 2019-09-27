@@ -2,6 +2,7 @@ package com.sequenceiq.environment.network;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
@@ -156,6 +158,43 @@ class EnvironmentNetworkServiceTest {
         assertEquals(cloudCredential, argumentCaptor.getValue().getCloudCredential());
         assertEquals(environmentDto.getLocation().getName(), argumentCaptor.getValue().getRegion());
         assertEquals(environmentDto.getNetwork().getAzure().getResourceGroupName(), argumentCaptor.getValue().getResourceGroup());
+    }
+
+    @Test
+    void testGetNetworkCidr() {
+        Credential credential = mock(Credential.class);
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        Network network = mock(Network.class);
+
+        String networkCidr = "10.0.0.0/16";
+
+        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
+        when(cloudConnector.networkConnector()).thenReturn(networkConnector);
+        when(networkConnector.getNetworkCidr(network, cloudCredential)).thenReturn(networkCidr);
+
+        String result = underTest.getNetworkCidr(network, "AWS", credential);
+
+        assertEquals(networkCidr, result);
+    }
+
+    @Test
+    void testGetNetworkCidrWhenNetworkNull() {
+        Credential credential = mock(Credential.class);
+
+        String result = underTest.getNetworkCidr(null, "AWS", credential);
+
+        assertNull(result);
+    }
+
+    @Test
+    void testGetNetworkCidrWhenNetworkConnectorNull() {
+        Credential credential = mock(Credential.class);
+        Network network = mock(Network.class);
+
+        when(cloudConnector.networkConnector()).thenReturn(null);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.getNetworkCidr(network, "AWS", credential));
+        assertEquals("No network connector for cloud platform: AWS", exception.getMessage());
     }
 
     private EnvironmentDto createEnvironmentDto(String resourceGroup) {

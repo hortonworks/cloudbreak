@@ -159,7 +159,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                     dbStackService.delete(dbStack.get());
                     resource.setDbStack(null);
                 } else {
-                    LOGGER.info("Database stack missing for {}, continuing anyway");
+                    LOGGER.info("Database stack missing for crn: '{}', continuing anyway", resourceCrn);
                 }
 
                 resource.setResourceStatus(ResourceStatus.USER_MANAGED);
@@ -170,13 +170,18 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         }
     }
 
-    public void archive(DatabaseServerConfig resource) {
-        for (DatabaseConfig dbConfig : resource.getDatabases()) {
-            databaseConfigService.archive(dbConfig);
+    @Override
+    public DatabaseServerConfig delete(DatabaseServerConfig resource) {
+        if (resource.getDatabases() != null) {
+            for (DatabaseConfig db : resource.getDatabases()) {
+                databaseConfigService.delete(db, true, true);
+            }
         }
-        resource.setArchived(true);
-        resource.setDbStack(null);
-        repository.save(resource);
+
+        // Reload the entity so that we start without any referenced databases in it
+        // Otherwise, JPA/Hibernate pitches a fit
+        DatabaseServerConfig resourceToDelete = getByCrn(resource.getResourceCrn()).get();
+        return super.delete(resourceToDelete);
     }
 
     public DatabaseServerConfig getByName(Long workspaceId, String environmentCrn, String name) {

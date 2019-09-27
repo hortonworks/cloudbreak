@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.ambari.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
@@ -202,7 +203,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
     private void addBlueprint(Long stackId, AmbariClient ambariClient, String blueprintText, Boolean topologyValidation) {
         try {
-            LOGGER.debug("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
+            LOGGER.debug("Adding generated blueprint to Ambari: {}", AnonymizerUtil.anonymize(JsonUtil.minify(blueprintText)));
             ambariClient.addBlueprint(blueprintText, topologyValidation);
         } catch (HttpResponseException hre) {
             if (hre.getStatusCode() == HttpStatus.SC_CONFLICT) {

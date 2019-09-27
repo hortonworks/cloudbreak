@@ -539,7 +539,7 @@ public class AzureClient {
         });
     }
 
-    private Network getNetworkByResourceGroup(String resourceGroup, String virtualNetwork) {
+    public Network getNetworkByResourceGroup(String resourceGroup, String virtualNetwork) {
         return azure.networks().getByResourceGroup(resourceGroup, virtualNetwork);
     }
 

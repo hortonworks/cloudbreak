@@ -1,11 +1,15 @@
 package com.sequenceiq.environment.network.v1.converter;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.environment.CloudPlatform;
@@ -80,5 +84,14 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     @Override
     public boolean hasExistingNetwork(BaseNetwork baseNetwork) {
         return Optional.ofNullable((AwsNetwork) baseNetwork).map(AwsNetwork::getVpcId).isPresent();
+    }
+
+    @Override
+    public Network convertToNetwork(BaseNetwork baseNetwork) {
+        AwsNetwork awsNetwork = (AwsNetwork) baseNetwork;
+        Map<String, Object> param = new HashMap<>();
+        param.put(AwsNetworkView.VPC_ID, awsNetwork.getVpcId());
+        param.put(AwsNetworkView.REGION, awsNetwork.getEnvironments().stream().findFirst().get().getLocation());
+        return new Network(null, param);
     }
 }

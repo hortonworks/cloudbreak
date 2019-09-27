@@ -5,11 +5,11 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAI
 import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,8 +21,12 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import javax.ws.rs.BadRequestException;
+
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -32,12 +36,17 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
+import com.amazonaws.services.ec2.model.DescribeVpcsResult;
+import com.amazonaws.services.ec2.model.Vpc;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -80,6 +89,9 @@ public class AwsNetworkConnectorTest {
     private static final String NETWORK_ID = String.join("-", ENV_NAME, String.valueOf(ID));
 
     private static final Region REGION = Region.region("US_WEST_2");
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private AwsNetworkConnector underTest;
@@ -196,6 +208,71 @@ public class AwsNetworkConnectorTest {
         verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsTerminateNetworkStatusCheckerTask(cfClient, DELETE_COMPLETE, DELETE_FAILED, ERROR_STATUSES, NETWORK_ID);
+    }
+
+    @Test
+    public void testGetNetworkCidr() {
+        String existingVpc = "vpc-1";
+        String cidrBlock = "10.0.0.0/16";
+
+        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc, "region", "us-west-2"));
+        CloudCredential credential = new CloudCredential();
+        AmazonEC2Client amazonEC2Client = mock(AmazonEC2Client.class);
+        DescribeVpcsResult describeVpcsResult = describeVpcsResult(cidrBlock);
+
+        when(awsClient.createAccess(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
+        when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
+
+        String result = underTest.getNetworkCidr(network, credential);
+        assertEquals(cidrBlock, result);
+    }
+
+    @Test
+    public void testGetNetworkCidrWithoutResult() {
+        String existingVpc = "vpc-1";
+
+        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc, "region", "us-west-2"));
+        CloudCredential credential = new CloudCredential();
+        AmazonEC2Client amazonEC2Client = mock(AmazonEC2Client.class);
+        DescribeVpcsResult describeVpcsResult = describeVpcsResult();
+
+        when(awsClient.createAccess(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
+        when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
+
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("VPC cidr could not fetch from AWS: " + existingVpc);
+
+        underTest.getNetworkCidr(network, credential);
+    }
+
+    @Test
+    public void testGetNetworkCidrMoreThanOne() {
+        String existingVpc = "vpc-1";
+        String cidrBlock1 = "10.0.0.0/16";
+        String cidrBlock2 = "10.23.0.0/16";
+
+        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc, "region", "us-west-2"));
+        CloudCredential credential = new CloudCredential();
+        AmazonEC2Client amazonEC2Client = mock(AmazonEC2Client.class);
+        DescribeVpcsResult describeVpcsResult = describeVpcsResult(cidrBlock1, cidrBlock2);
+
+        when(awsClient.createAccess(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
+        when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
+
+        String result = underTest.getNetworkCidr(network, credential);
+        assertEquals(cidrBlock1, result);
+    }
+
+    private DescribeVpcsResult describeVpcsResult(String... cidrBlocks) {
+        DescribeVpcsResult describeVpcsResult = new DescribeVpcsResult();
+        List<Vpc> vpcs = new ArrayList<>();
+        for (String block : cidrBlocks) {
+            Vpc vpc = new Vpc();
+            vpc.setCidrBlock(block);
+            vpcs.add(vpc);
+        }
+        describeVpcsResult.withVpcs(vpcs);
+        return describeVpcsResult;
     }
 
     private NetworkDeletionRequest createNetworkDeletionRequest() {

@@ -190,7 +190,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
     public void testWhenClusterGetUpScaledThenPostClusterInstallRecipeShouldBeExecuted(MockedTestContext testContext) {
         ApiParcel parcel = parcelGeneratorUtil.getActivatedCDHParcel();
         String clusterName = resourcePropertyProvider.getName();
-        parcelMockActivatorUtil.mockActivateParcels(testContext, clusterName, parcel);
+        parcelMockActivatorUtil.mockActivateWithDefaultParcels(testContext, clusterName, parcel);
         String recipeName = resourcePropertyProvider().getName();
         SetupCmScalingMock mock = new SetupCmScalingMock();
         mock.configure(testContext, 3, 4, 4);
@@ -234,7 +234,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
         ApiParcel parcel = parcelGeneratorUtil.getActivatedCDHParcel();
         String recipeName = resourcePropertyProvider().getName();
         String clusterName = resourcePropertyProvider.getName();
-        parcelMockActivatorUtil.mockActivateParcel(testContext, clusterName, parcel);
+        parcelMockActivatorUtil.mockActivateWithDefaultParcels(testContext, clusterName, parcel);
         SetupCmScalingMock mock = new SetupCmScalingMock();
         mock.configure(testContext, 3, 4, 4);
         testContext

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +39,11 @@ public class ShowTerminatedClustersConfigServiceTest {
 
     private static final long DEFAULT_TIMEOUT_MINUTES = 7;
 
+    private static final Duration DEFAULT_DURATION = Duration
+            .ofDays(DEFAULT_TIMEOUT_DAYS)
+            .plusHours(DEFAULT_TIMEOUT_HOURS)
+            .plusMinutes(DEFAULT_TIMEOUT_MINUTES);
+
     @Mock
     private Clock clock;
 
@@ -63,16 +69,13 @@ public class ShowTerminatedClustersConfigServiceTest {
     @Test
     public void testGetWhenUserHasPreference() {
         init(false);
-        Duration timeout = Duration.ofDays(1);
-        when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withShowClusterPrefs(true, timeout).build());
-        when(clock.nowMinus(timeout)).thenReturn(Instant.ofEpochSecond(0));
+        when(clock.nowMinus(DEFAULT_DURATION)).thenReturn(Instant.ofEpochSecond(0));
 
-        ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = underTest.get();
+        ShowTerminatedClustersAfterConfig showTerminatedClustersConfig = underTest.get();
 
-        assertTrue(showTerminatedClustersAfterConfig.isActive());
-        assertEquals(0L, showTerminatedClustersAfterConfig.showAfterMillisecs().longValue());
-        verify(clock).nowMinus(any());
-        verify(userProfileService).getOrCreateForLoggedInUser();
+        assertFalse(showTerminatedClustersConfig.isActive());
+        assertEquals(Long.valueOf(0), showTerminatedClustersConfig.showAfterMillisecs());
+        verify(userProfileService, times(0)).getOrCreateForLoggedInUser();
     }
 
     @Test
@@ -86,22 +89,22 @@ public class ShowTerminatedClustersConfigServiceTest {
         assertFalse(showTerminatedClustersAfterConfig.isActive());
         assertEquals(0L, showTerminatedClustersAfterConfig.showAfterMillisecs().longValue());
         verify(clock).nowMinus(any());
-        verify(userProfileService).getOrCreateForLoggedInUser();
+        verify(userProfileService, times(0)).getOrCreateForLoggedInUser();
     }
 
     @Test
     public void testGetConfigWhenUserHasPreference() {
         init(false);
-        when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withShowClusterPrefs(true, DURATION_D4_H5_M6).build());
+        when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withShowClusterPrefs(true, DEFAULT_DURATION).build());
 
         ShowTerminatedClustersConfig showTerminatedClustersConfig = underTest.getConfig();
 
-        assertTrue(showTerminatedClustersConfig.isActive());
-        assertEquals("USER", showTerminatedClustersConfig.getSource().name());
-        assertEquals(4, showTerminatedClustersConfig.getTimeout().toDaysPart());
-        assertEquals(5, showTerminatedClustersConfig.getTimeout().toHoursPart());
-        assertEquals(6, showTerminatedClustersConfig.getTimeout().toMinutesPart());
-        verify(userProfileService).getOrCreateForLoggedInUser();
+        assertFalse(showTerminatedClustersConfig.isActive());
+        assertEquals("GLOBAL", showTerminatedClustersConfig.getSource().name());
+        assertEquals(DEFAULT_TIMEOUT_DAYS, showTerminatedClustersConfig.getTimeout().toDaysPart());
+        assertEquals(DEFAULT_TIMEOUT_HOURS, showTerminatedClustersConfig.getTimeout().toHoursPart());
+        assertEquals(DEFAULT_TIMEOUT_MINUTES, showTerminatedClustersConfig.getTimeout().toMinutesPart());
+        verify(userProfileService, times(0)).getOrCreateForLoggedInUser();
     }
 
     @Test
@@ -111,12 +114,12 @@ public class ShowTerminatedClustersConfigServiceTest {
 
         ShowTerminatedClustersConfig showTerminatedClustersConfig = underTest.getConfig();
 
-        assertTrue(!showTerminatedClustersConfig.isActive());
+        assertFalse(showTerminatedClustersConfig.isActive());
         assertEquals("GLOBAL", showTerminatedClustersConfig.getSource().name());
         assertEquals(DEFAULT_TIMEOUT_DAYS, showTerminatedClustersConfig.getTimeout().toDaysPart());
         assertEquals(DEFAULT_TIMEOUT_HOURS, showTerminatedClustersConfig.getTimeout().toHoursPart());
         assertEquals(DEFAULT_TIMEOUT_MINUTES, showTerminatedClustersConfig.getTimeout().toMinutesPart());
-        verify(userProfileService).getOrCreateForLoggedInUser();
+        verify(userProfileService, times(0)).getOrCreateForLoggedInUser();
     }
 
     @Test
@@ -138,7 +141,7 @@ public class ShowTerminatedClustersConfigServiceTest {
     @Test
     public void testSetWhenUserHasPreference() {
         init(false);
-        when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withShowClusterPrefs(false, DURATION_D4_H5_M6).build());
+        when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withShowClusterPrefs(false, DEFAULT_DURATION).build());
 
         underTest.set(new ShowTerminatedClustersConfig(true, DURATION_D1_H2_M3, true));
 
@@ -198,7 +201,7 @@ public class ShowTerminatedClustersConfigServiceTest {
     @Test
     public void testDeleteWhenUserHasPreference() {
         init(false);
-        when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withShowClusterPrefs(false, DURATION_D4_H5_M6).build());
+        when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withShowClusterPrefs(false, DEFAULT_DURATION).build());
 
         underTest.delete();
 

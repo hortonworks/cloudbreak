@@ -3,6 +3,8 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 import static org.junit.Assert.assertEquals;
 
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
+import com.sequenceiq.redbeams.api.model.common.Status;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +44,14 @@ public class DatabaseServerV4ResponseTest {
         response.setCreationDate(now);
         assertEquals(now, response.getCreationDate().longValue());
 
+        response.setResourceStatus(ResourceStatus.USER_MANAGED);
+        assertEquals(ResourceStatus.USER_MANAGED, response.getResourceStatus());
+
+        response.setStatus(Status.AVAILABLE);
+        assertEquals(Status.AVAILABLE, response.getStatus());
+
+        response.setStatusReason("because");
+        assertEquals("because", response.getStatusReason());
     }
 
     private static void verifyEqualSecretResponses(SecretResponse expected, SecretResponse actual) {

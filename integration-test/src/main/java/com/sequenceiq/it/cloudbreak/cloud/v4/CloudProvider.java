@@ -109,5 +109,7 @@ public interface CloudProvider {
 
     String getBlueprintName();
 
+    String getBlueprintCdhVersion();
+
     StackV4ParameterBase stackParameters();
 }

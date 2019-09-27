@@ -34,7 +34,7 @@ public enum ExposedService {
     HBASE_UI("HBase UI", "MASTER", "HBASEUI", "/hbase/webui/master/", true, 16010, 16010, false, false),
     HBASE_REST("HBase Rest", "HBASERESTSERVER", "WEBHBASE", "/hbase/", true, 20550, 20550, true, true),
     NIFI("Nifi", "NIFI_NODE", "NIFI", "/nifi-app/nifi/", true, 8080, 8443, false, false),
-    NIFI_REGISTRY("Nifi Registry", "NIFI_REGISTRY_SERVER", "NIFI-REGISTRY", "/nifi-registry/", true, 18080, 18433, false, false),
+    NIFI_REGISTRY("Nifi Registry", "NIFI_REGISTRY_SERVER", "NIFI-REGISTRY", "/nifi-registry-app/nifi-registry/", true, 18080, 18433, false, false),
     NIFI_REST("NiFi Rest", "NIFI_NODE", "NIFI_REST", "/nifi-app/nifi-api/", true, 8080, 8443, true, true),
     SMM_UI("Streams Messaging Manager", "STREAMS_MESSAGING_MANAGER_UI", "SMM-UI", "/smm-ui/", true, 9991, 9991, false, false),
     SMM_API("Streams Messaging Manager Rest", "STREAMS_MESSAGING_MANAGER_SERVER", "SMM-API", "/smm-api/", true, 8585, 8587, true, true),

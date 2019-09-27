@@ -230,7 +230,6 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(GetSSHFingerprintsResult.class) {
             @Override
             protected void doExecute(StackContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
-                stackCreationService.generateCertAndSaveForStackAndUpdateDnsEntry(context.getStack());
                 stackCreationService.setupTls(context);
                 StackWithFingerprintsEvent fingerprintsEvent = new StackWithFingerprintsEvent(payload.getResourceId(), payload.getSshFingerprints());
                 sendEvent(context, StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), fingerprintsEvent);

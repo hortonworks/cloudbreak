@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.v1.EnvironmentViewConverter;
@@ -46,6 +47,11 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
 
     private Set<EnvironmentView> convertEnvToView(Environment environment) {
         return Collections.singleton(environmentViewConverter.convert(environment));
+    }
+
+    @Override
+    public Network convertToNetwork(BaseNetwork baseNetwork) {
+        return null;
     }
 
     abstract BaseNetwork createProviderSpecificNetwork(NetworkDto network);

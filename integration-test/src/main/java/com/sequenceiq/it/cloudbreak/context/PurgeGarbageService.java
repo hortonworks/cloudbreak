@@ -38,7 +38,7 @@ public class PurgeGarbageService {
             purge(testContext);
             MDC.put("testlabel", null);
         } catch (Exception e) {
-            LOGGER.error("Error happended during purging the test data. Some entities might have been left over", e);
+            LOGGER.error("Error happened while purging the test data. Some entities might have been left over", e);
         } finally {
             testContext.shutdown();
         }

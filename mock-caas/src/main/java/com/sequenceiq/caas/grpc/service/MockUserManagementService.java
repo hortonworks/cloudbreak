@@ -37,6 +37,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
@@ -503,6 +504,41 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Override
     public void listRoles(UserManagementProto.ListRolesRequest request, StreamObserver<UserManagementProto.ListRolesResponse> responseObserver) {
         responseObserver.onNext(UserManagementProto.ListRolesResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * NOTE: This is a mock implementation and meant only for testing.
+     * This implementation returns hard coded pre-defined set of response for workload credentials.
+     * For any integration test of debugging purpose, this should not be used and intent is purely mock.
+     * Hashed value used internally is sha256 hash of <i>Password123!</i>.
+     */
+    @Override
+    public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
+                                            io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement
+                                                .UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
+
+        final int keyType17 = 17;
+        final int keyType18 = 18;
+        final int saltType = 4;
+        GetActorWorkloadCredentialsResponse.Builder respBuilder = GetActorWorkloadCredentialsResponse.getDefaultInstance().toBuilder();
+        respBuilder.addKerberosKeysBuilder(0)
+            .setSaltType(saltType)
+            .setKeyType(keyType17)
+            .setKeyValue("testKeyValue17")
+            .setSaltValue("NonIodizedGrainOfSalt")
+            .build();
+
+        respBuilder.addKerberosKeysBuilder(1)
+            .setSaltType(saltType)
+            .setKeyType(keyType18)
+            .setKeyValue("testKeyValue18")
+            .setSaltValue("IodizedGrainOfSalt")
+            .build();
+
+        // sha256 hashed value of "Password123!"
+        respBuilder.setPasswordHash("e512ca494a454a47ad102dd3f05d48e0e647c8619e734621a760da360c198f32");
+        responseObserver.onNext(respBuilder.build());
         responseObserver.onCompleted();
     }
 

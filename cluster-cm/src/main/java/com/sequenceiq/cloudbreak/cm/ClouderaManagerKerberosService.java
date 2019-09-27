@@ -56,11 +56,11 @@ public class ClouderaManagerKerberosService {
             modificationService.stopCluster();
             ClustersResourceApi clustersResourceApi = clouderaManagerClientFactory.getClustersResourceApi(client);
             ApiCommand configureForKerberos = clustersResourceApi.configureForKerberos(cluster.getName(), new ApiConfigureForKerberosArguments());
-            clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, configureForKerberos.getId());
+            clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, configureForKerberos.getId());
             ApiCommand generateCredentials = clouderaManagerResourceApi.generateCredentialsCommand();
-            clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, generateCredentials.getId());
+            clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, generateCredentials.getId());
             ApiCommand deployClusterConfig = clustersResourceApi.deployClientConfig(cluster.getName());
-            clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, deployClusterConfig.getId());
+            clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, deployClusterConfig.getId());
             modificationService.startCluster(Collections.emptySet());
         }
     }
@@ -76,7 +76,7 @@ public class ClouderaManagerKerberosService {
             decomissionService.removeManagementServices();
 
             ApiCommand command = apiInstance.deleteCredentialsCommand("all");
-            clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, command.getId());
+            clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, command.getId());
         } catch (ApiException | CloudbreakException e) {
             LOGGER.info("Failed to remove Kerberos credentials", e);
             throw new ClouderaManagerOperationFailedException("Failed to remove Kerberos credentials", e);

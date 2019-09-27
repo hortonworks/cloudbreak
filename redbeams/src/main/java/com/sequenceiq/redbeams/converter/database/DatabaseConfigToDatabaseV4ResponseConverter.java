@@ -25,6 +25,7 @@ public class DatabaseConfigToDatabaseV4ResponseConverter extends AbstractConvers
         json.setCreationDate(source.getCreationDate());
         json.setEnvironmentCrn(source.getEnvironmentId());
         json.setType(source.getType());
+        json.setResourceStatus(source.getStatus());
         return json;
     }
 }

@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
@@ -62,6 +63,7 @@ public class DatabaseConfigToDatabaseV4ResponseConverterTest {
         databaseConfig.setDatabaseVendor(DatabaseVendor.MYSQL);
         databaseConfig.setType(TYPE);
         databaseConfig.setEnvironmentId(ENVIRONMENT_CRN);
+        databaseConfig.setStatus(ResourceStatus.SERVICE_MANAGED);
 
         DatabaseV4Response response = underTest.convert(databaseConfig);
 
@@ -76,5 +78,6 @@ public class DatabaseConfigToDatabaseV4ResponseConverterTest {
         assertEquals(DatabaseVendor.MYSQL.name(), response.getDatabaseEngine());
         assertEquals(TYPE, response.getType());
         assertEquals(ENVIRONMENT_CRN, response.getEnvironmentCrn());
+        assertEquals(ResourceStatus.SERVICE_MANAGED, response.getResourceStatus());
     }
 }

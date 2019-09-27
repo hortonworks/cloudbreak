@@ -170,6 +170,11 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getBlueprintCdhVersion() {
+        return gcpProperties.getBlueprintCdhVersion();
+    }
+
+    @Override
     public SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage) {
         return cloudStorage;
     }

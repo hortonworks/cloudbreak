@@ -159,6 +159,11 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getBlueprintCdhVersion() {
+        return openStackProperties.getBlueprintCdhVersion();
+    }
+
+    @Override
     public SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage) {
         return cloudStorage;
     }

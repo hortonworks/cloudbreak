@@ -50,7 +50,7 @@ class ClouderaManagerRoleRefreshService {
     }
 
     private void pollingRefresh(ApiCommand command, ApiClient client, Stack stack) throws CloudbreakException {
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.refreshClusterPollingService(stack, client, command.getId());
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, client, command.getId());
         if (isExited(pollingResult)) {
             throw new CancellationException("Cluster was terminated while waiting for cluster refresh");
         } else if (isTimeout(pollingResult)) {
@@ -74,7 +74,7 @@ class ClouderaManagerRoleRefreshService {
     private Consumer<BigDecimal> pollCredentialGeneration(Stack stack, ApiClient client) {
         return id -> {
             LOGGER.debug("Generate Credentials command is still active.");
-            clouderaManagerPollingServiceProvider.generateCredentialsPollingService(stack, client, id);
+            clouderaManagerPollingServiceProvider.startPollingCmGenerateCredentials(stack, client, id);
         };
     }
 }

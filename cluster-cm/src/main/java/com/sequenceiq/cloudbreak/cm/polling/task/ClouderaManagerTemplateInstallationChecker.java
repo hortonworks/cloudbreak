@@ -7,12 +7,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -23,13 +20,15 @@ import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 
-@Service
-public class ClouderaManagerTemplateInstallChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+public class ClouderaManagerTemplateInstallationChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerTemplateInstallChecker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerTemplateInstallationChecker.class);
 
-    @Inject
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+    private final ClouderaManagerClientFactory clouderaManagerClientFactory;
+
+    public ClouderaManagerTemplateInstallationChecker(ClouderaManagerClientFactory clouderaManagerClientFactory) {
+        this.clouderaManagerClientFactory = clouderaManagerClientFactory;
+    }
 
     @Override
     public boolean checkStatus(ClouderaManagerCommandPollerObject pollerObject) {

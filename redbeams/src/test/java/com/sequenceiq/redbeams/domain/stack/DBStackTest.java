@@ -84,6 +84,9 @@ public class DBStackTest {
         dbStack.setOwnerCrn(ownerCrn);
         assertEquals(ownerCrn, dbStack.getOwnerCrn());
 
+        dbStack.setUserName("username");
+        assertEquals("username", dbStack.getUserName());
+
         dbStack.setDBStackStatus(STATUS);
         assertEquals(STATUS, dbStack.getDbStackStatus());
         assertEquals(STATUS.getStatus(), dbStack.getStatus());

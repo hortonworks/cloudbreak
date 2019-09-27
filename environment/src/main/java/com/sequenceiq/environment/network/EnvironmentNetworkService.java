@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -57,6 +59,17 @@ public class EnvironmentNetworkService {
         EnvironmentNetworkConverter converter = environmentNetworkConverterMap.get(getCloudPlatform(environment));
         CreatedCloudNetwork createdCloudNetwork = networkConnector.createNetworkWithSubnets(networkCreationRequest);
         return converter.setProviderSpecificNetwork(baseNetwork, createdCloudNetwork);
+    }
+
+    public String getNetworkCidr(Network network, String cloudPlatform, Credential credential) {
+        if (network == null) {
+            LOGGER.info("Could not fetch network cidr from {}, because the network is null", cloudPlatform);
+            return null;
+        }
+        NetworkConnector networkConnector = getNetworkConnector(cloudPlatform)
+                .orElseThrow(() -> new BadRequestException("No network connector for cloud platform: " + cloudPlatform));
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+        return networkConnector.getNetworkCidr(network, cloudCredential);
     }
 
     public void deleteNetwork(EnvironmentDto environment) {

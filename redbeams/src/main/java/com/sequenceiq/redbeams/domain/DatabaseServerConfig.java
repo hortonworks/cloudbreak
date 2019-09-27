@@ -20,6 +20,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Where;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
@@ -243,6 +244,10 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
 
     @Override
     public void unsetRelationsToEntitiesToBeDeleted() {
+        dbStack = null;
+        if (databases != null) {
+            databases.clear();
+        }
     }
 
     public String getEnvironmentId() {
@@ -255,6 +260,11 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
 
     public Set<DatabaseConfig> getDatabases() {
         return databases;
+    }
+
+    @VisibleForTesting
+    public void setDatabases(Set<DatabaseConfig> databases) {
+        this.databases = databases;
     }
 
     public Optional<DBStack> getDbStack() {

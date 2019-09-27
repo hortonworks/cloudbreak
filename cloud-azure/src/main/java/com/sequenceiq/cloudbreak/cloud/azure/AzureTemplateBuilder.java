@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
@@ -136,7 +137,7 @@ public class AzureTemplateBuilder {
             model.put("subnets", azureNetworkView.getSubnets());
             model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(databaseStack), model);
-            LOGGER.debug("Generated ARM database template: {}", generatedTemplate);
+            LOGGER.debug("Generated ARM database template: {}", AnonymizerUtil.anonymize(generatedTemplate));
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process the ARM TemplateBuilder", e);

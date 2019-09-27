@@ -33,6 +33,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.security.CrnUser;
+import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -86,6 +88,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private static final String UNKNOWN_CLOUD_PLATFORM = "UnknownCloudPlatform";
 
+    private static final String USER_EMAIL = "userEmail";
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -115,6 +119,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     @Mock
     private UuidGeneratorService uuidGeneratorService;
+
+    @Mock
+    private CrnUserDetailsService crnUserDetailsService;
 
     @InjectMocks
     private AllocateDatabaseServerV4RequestToDBStackConverter underTest;
@@ -159,6 +166,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName("myRegion").build())
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
+        when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
 
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
@@ -170,12 +178,13 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(1, dbStack.getParameters().size());
         assertEquals("value", dbStack.getParameters().get("key"));
         assertEquals(Crn.safeFromString(OWNER_CRN), dbStack.getOwnerCrn());
+        assertEquals(USER_EMAIL, dbStack.getUserName());
 
         Json tags = dbStack.getTags();
         StackTags stackTags = tags.get(StackTags.class);
         Map<String, String> defaultTags = stackTags.getDefaultTags();
-        assertEquals("bob@cloudera.com", defaultTags.get(CB_USER_NAME.key()));
-        assertEquals("bob@cloudera.com", defaultTags.get(OWNER.key()));
+        assertEquals(USER_EMAIL, defaultTags.get(CB_USER_NAME.key()));
+        assertEquals(USER_EMAIL, defaultTags.get(OWNER.key()));
         assertEquals(String.valueOf(NOW.getEpochSecond()), defaultTags.get(CB_CREATION_TIMESTAMP.key()));
         assertEquals(VERSION, defaultTags.get(CB_VERSION.key()));
 
@@ -207,6 +216,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         verify(passwordGeneratorService, never()).generatePassword(any());
     }
 
+    private CrnUser getCrnUser() {
+        return new CrnUser("", "", "", USER_EMAIL, "", "");
+    }
+
     @Test
     public void testConversionWhenOptionalElementsGenerated() throws IOException {
         setupAllocateRequest(false);
@@ -228,6 +241,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                         )
                         .build())
                 .build();
+        when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(subnetListerService.listSubnets(any(), any())).thenReturn(cloudSubnets);
         when(subnetChooserService.chooseSubnets(any(), any())).thenReturn(cloudSubnets);
@@ -256,6 +270,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     @Test
     public void testConversionWhenRequestAndEnvironmentCloudplatformsDiffer() throws IOException {
+        when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
         allocateRequest.setCloudPlatform(CloudPlatform.AWS);
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
@@ -270,6 +285,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     @Test
     public void testConversionWhenUnsupportedCloudplatform() throws IOException {
+        when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
         allocateRequest.setCloudPlatform(CloudPlatform.YARN);
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
@@ -285,8 +301,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private void setupAllocateRequest(boolean provideOptionalFields) {
 
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
-//        allocateRequest.setRegion("us-east-1");
-        // allocateRequest.setCloudPlatform(CloudPlatform.AWS);
         if (provideOptionalFields) {
             allocateRequest.setName("myallocation");
             AwsNetworkV4Parameters awsNetworkV4Parameters = new AwsNetworkV4Parameters();
