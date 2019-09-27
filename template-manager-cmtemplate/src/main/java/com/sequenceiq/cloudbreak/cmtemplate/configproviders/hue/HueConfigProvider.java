@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -11,6 +12,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
@@ -28,6 +31,10 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private static final String HUE_DATABASE_PASSWORD = "hue-hue_database_password";
 
+    private static final String HUE_SAFETY_VALVE = "hue-hue_service_safety_valve";
+
+    private static final String SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN = "[desktop]\n[[knox]]\nknox_proxyhosts=";
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> result = new ArrayList<>();
@@ -37,6 +44,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         result.add(new ApiClusterTemplateConfig().name("database_type").variable(HUE_HUE_DATABASE_TYPE));
         result.add(new ApiClusterTemplateConfig().name("database_user").variable(HUE_HUE_DATABASE_USER));
         result.add(new ApiClusterTemplateConfig().name("database_password").variable(HUE_DATABASE_PASSWORD));
+        configureKnoxProxyHostsServiceConfig(source, result);
         return result;
     }
 
@@ -50,6 +58,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         result.add(new ApiClusterTemplateVariable().name(HUE_HUE_DATABASE_TYPE).value(hueRdsView.getSubprotocol()));
         result.add(new ApiClusterTemplateVariable().name(HUE_HUE_DATABASE_USER).value(hueRdsView.getConnectionUserName()));
         result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_PASSWORD).value(hueRdsView.getConnectionPassword()));
+        configureKnoxProxyHostsConfigVariables(source, result);
         return result;
     }
 
@@ -71,5 +80,31 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         return List.of();
+    }
+
+    private void configureKnoxProxyHostsServiceConfig(TemplatePreparationObject source, List<ApiClusterTemplateConfig> result) {
+        GatewayView gateway = source.getGatewayView();
+        GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
+        if (externalFQDNShouldConfigured(gateway, generalClusterConfigs)) {
+            result.add(new ApiClusterTemplateConfig().name("hue_service_safety_valve").variable(HUE_SAFETY_VALVE));
+        }
+    }
+
+    private void configureKnoxProxyHostsConfigVariables(TemplatePreparationObject source, List<ApiClusterTemplateVariable> result) {
+        GatewayView gateway = source.getGatewayView();
+        GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
+        if (externalFQDNShouldConfigured(gateway, generalClusterConfigs)) {
+            String proxyHosts = String.join(",", generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().get(),
+                    generalClusterConfigs.getExternalFQDN());
+            String valveValue = SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN.concat(proxyHosts);
+            result.add(new ApiClusterTemplateVariable().name(HUE_SAFETY_VALVE).value(valveValue));
+        }
+    }
+
+    private boolean externalFQDNShouldConfigured(GatewayView gateway, GeneralClusterConfigs generalClusterConfigs) {
+        return gateway != null
+                && generalClusterConfigs.getKnoxUserFacingCertConfigured()
+                && StringUtils.isNotEmpty(generalClusterConfigs.getExternalFQDN())
+                && generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().isPresent();
     }
 }
