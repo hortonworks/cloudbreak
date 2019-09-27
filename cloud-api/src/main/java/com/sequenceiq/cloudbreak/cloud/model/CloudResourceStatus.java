@@ -11,7 +11,11 @@ public class CloudResourceStatus {
     private Long privateId;
 
     public CloudResourceStatus(CloudResource cloudResource, ResourceStatus status) {
-        this(cloudResource, status, null);
+        this(cloudResource, status, null, null);
+    }
+
+    public CloudResourceStatus(CloudResource cloudResource, ResourceStatus status, Long privateId) {
+        this(cloudResource, status, null, privateId);
     }
 
     public CloudResourceStatus(CloudResource cloudResource, ResourceStatus status, String statusReason) {
