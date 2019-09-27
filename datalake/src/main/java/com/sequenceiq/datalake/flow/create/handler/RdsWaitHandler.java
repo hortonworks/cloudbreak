@@ -17,13 +17,17 @@ import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.create.event.RdsWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.RdsWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.DatabaseService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 
@@ -37,6 +41,9 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
+
+    @Inject
+    private SdxStatusService sdxStatusService;
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
@@ -62,6 +69,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
                     validForDatabaseCreation(sdxId, env);
                     LOGGER.debug("start polling database for sdx: {}", sdxId);
                     DatabaseServerStatusV4Response db = databaseService.create(sdxCluster, env, requestId);
+                    setRdsCreatedStatus(sdxCluster);
                     sendEvent(new RdsWaitSuccessEvent(sdxId, userId, requestId, env, db), event);
                 } else {
                     LOGGER.debug("skipping creation of database for sdx: {}", sdxId);
@@ -84,6 +92,11 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
             LOGGER.error("Something wrong happened in sdx database creation wait phase", anotherException);
             sendEvent(new SdxCreateFailedEvent(sdxId, userId, requestId, anotherException), event);
         }
+    }
+
+    private void setRdsCreatedStatus(SdxCluster cluster) {
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATED,
+                ResourceEvent.SDX_RDS_CREATION_FINISHED, "Sdx external database created", cluster);
     }
 
     private void validForDatabaseCreation(Long sdxId, DetailedEnvironmentResponse env) {

@@ -87,3 +87,6 @@ vault:
 cb:
   authentication:
     disabled: false
+
+notification:
+  urls: http://localhost:3000/notifications

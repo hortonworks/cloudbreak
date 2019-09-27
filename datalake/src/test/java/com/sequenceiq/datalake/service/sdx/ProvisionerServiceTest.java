@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -90,9 +89,6 @@ class ProvisionerServiceTest {
     @Mock
     private GatewayManifester gatewayManifester;
 
-    @Mock
-    private SdxNotificationService notificationService;
-
     @InjectMocks
     private ProvisionerService provisionerService;
 
@@ -110,7 +106,6 @@ class ProvisionerServiceTest {
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
         provisionerService.startStackProvisioning(id, getEnvironmentResponse(), getDatabaseServerResponse());
         verify(sdxClusterRepository, times(1)).save(any(SdxCluster.class));
-        verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED), any());
     }
 
     @Test
@@ -141,7 +136,8 @@ class ProvisionerServiceTest {
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 100, TimeUnit.MILLISECONDS);
         Assertions.assertThrows(PollerStoppedException.class, () -> provisionerService.waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID));
         verify(sdxStatusService, times(1))
-                .setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
+                        ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);
     }
 
     @Test
@@ -157,9 +153,9 @@ class ProvisionerServiceTest {
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
         Assertions.assertThrows(UserBreakException.class, () -> provisionerService
                 .waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID), "Stack creation failed");
-        verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_CREATION_FAILED), any());
         verify(sdxStatusService, times(1))
-                .setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
+                        ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);
     }
 
     @Test
@@ -182,16 +178,12 @@ class ProvisionerServiceTest {
         when(sdxClusterRepository.findById(2L)).thenReturn(Optional.of(sdxCluster));
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 1000, TimeUnit.MILLISECONDS);
         provisionerService.waitCloudbreakClusterCreation(id, pollingConfig, REQUEST_ID);
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
-        verify(sdxClusterRepository, times(1)).save(captor.capture());
-        SdxCluster savedSdxCluster = captor.getValue();
         verify(sdxStatusService, times(1))
-                .setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
+                        ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);
         verify(sdxStatusService, times(1))
-                .setStatusForDatalake(DatalakeStatusEnum.RUNNING, "Datalake is running", savedSdxCluster);
-        verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED), any());
-        verify(sdxStatusService, times(1))
-                .setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED,
+                        ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED, "Stack created for Datalake", sdxCluster);
     }
 
     @Test
@@ -266,7 +258,6 @@ class ProvisionerServiceTest {
 
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
         Assertions.assertThrows(UserBreakException.class, () -> provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig, REQUEST_ID));
-        verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_DELETION_FAILED), any());
     }
 
     @Test
@@ -279,13 +270,9 @@ class ProvisionerServiceTest {
 
         provisionerService.waitCloudbreakClusterDeletion(id, pollingConfig, REQUEST_ID);
 
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
-        verify(sdxClusterRepository, times(1)).save(captor.capture());
-        SdxCluster postedSdxCluster = captor.getValue();
-
         verify(sdxStatusService, times(1))
-                .setStatusForDatalake(DatalakeStatusEnum.STACK_DELETED, "Datalake deleted", postedSdxCluster);
-        verify(notificationService).send(eq(ResourceEvent.SDX_CLUSTER_DELETION_FINISHED), any());
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED,
+                        ResourceEvent.SDX_CLUSTER_DELETION_FINISHED, "Datalake stack deleted", sdxCluster);
     }
 
     private DatabaseServerStatusV4Response getDatabaseServerResponse() {

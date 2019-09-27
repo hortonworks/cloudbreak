@@ -45,9 +45,6 @@ public class DatabaseService {
     private SdxClusterRepository sdxClusterRepository;
 
     @Inject
-    private SdxNotificationService notificationService;
-
-    @Inject
     private SdxStatusService sdxStatusService;
 
     @Inject
@@ -67,14 +64,14 @@ public class DatabaseService {
                         .getResourceCrn();
                 sdxCluster.setDatabaseCrn(dbResourceCrn);
                 sdxClusterRepository.save(sdxCluster);
-                sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
+                        ResourceEvent.SDX_RDS_CREATION_STARTED,
                         "External database creation in progress", sdxCluster);
             } catch (BadRequestException badRequestException) {
                 LOGGER.error("Redbeams create request failed, bad request", badRequestException);
                 throw badRequestException;
             }
         }
-        notificationService.send(ResourceEvent.SDX_RDS_CREATION_STARTED, sdxCluster);
         return waitAndGetDatabase(sdxCluster, dbResourceCrn, SdxDatabaseOperation.CREATION, requestId, true);
     }
 
@@ -86,9 +83,9 @@ public class DatabaseService {
         LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
         try {
             DatabaseServerV4Response resp = databaseServerV4Endpoint.deleteByCrn(sdxCluster.getDatabaseCrn(), forced);
-            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
+                    ResourceEvent.SDX_RDS_DELETION_STARTED,
                     "External database deletion in progress", sdxCluster);
-            notificationService.send(ResourceEvent.SDX_RDS_DELETION_STARTED, sdxCluster);
             waitAndGetDatabase(sdxCluster, resp.getCrn(), SdxDatabaseOperation.DELETION, requestId, false);
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server is deleted on redbeams side {}", sdxCluster.getDatabaseCrn());
@@ -149,7 +146,6 @@ public class DatabaseService {
                             return AttemptResults.finishWith(rdsStatus);
                         } else {
                             if (sdxDatabaseOperation.getFailureCriteria().apply(rdsStatus.getStatus())) {
-                                notificationService.send(sdxDatabaseOperation.getFailedEvent(), sdxCluster);
                                 if (rdsStatus.getStatusReason() != null && rdsStatus.getStatusReason().contains("does not exist")) {
                                     return AttemptResults.finishWith(null);
                                 }
@@ -163,7 +159,6 @@ public class DatabaseService {
                         return AttemptResults.finishWith(null);
                     }
                 });
-        notificationService.send(sdxDatabaseOperation.getFinishedEvent(), sdxCluster);
         return response;
     }
 
