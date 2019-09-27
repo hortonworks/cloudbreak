@@ -41,7 +41,7 @@ public class MetadataSetupService {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     public void cleanupRequestedInstances(Stack stack, String instanceGroupName) {
-        InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
+        InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStackWithInstanceMetadata(stack.getId(), instanceGroupName);
         List<InstanceMetaData> requestedInstances = instanceMetaDataRepository.findAllByInstanceGroupAndInstanceStatus(ig, InstanceStatus.REQUESTED);
         for (InstanceMetaData inst : requestedInstances) {
             inst.setInstanceStatus(InstanceStatus.TERMINATED);
@@ -55,6 +55,9 @@ public class MetadataSetupService {
             Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
             boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
             Json imageJson = new Json(imageService.getImage(stack.getId()));
+
+            Set<InstanceGroup> instanceGroupsForStack = instanceGroupRepository.findByStackId(stack.getId());
+
             for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
                 CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
                 CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
@@ -68,12 +71,17 @@ public class MetadataSetupService {
                 // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
                 InstanceGroup ig = instanceMetaDataEntry.getInstanceGroup();
                 String group = ig == null ? cloudInstance.getTemplate().getGroupName() : ig.getGroupName();
-                InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), group);
+                instanceGroupsForStack.stream()
+                        .filter(instanceGroup -> group.equals(instanceGroup.getGroupName()))
+                        .findFirst()
+                        .ifPresentOrElse(instanceMetaDataEntry::setInstanceGroup, () -> {
+                            throw new CloudbreakServiceException("Can not find instance group " + group + " in " + stack.getName() + "'s hostgroups");
+                        });
+
                 instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
                 instanceMetaDataEntry.setPublicIp(md.getPublicIp());
                 instanceMetaDataEntry.setSshPort(md.getSshPort());
                 instanceMetaDataEntry.setLocalityIndicator(md.getLocalityIndicator());
-                instanceMetaDataEntry.setInstanceGroup(instanceGroup);
                 instanceMetaDataEntry.setInstanceId(instanceId);
                 instanceMetaDataEntry.setPrivateId(privateId);
                 instanceMetaDataEntry.setStartDate(timeInMillis);
