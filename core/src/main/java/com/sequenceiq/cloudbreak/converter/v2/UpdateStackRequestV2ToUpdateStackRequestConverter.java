@@ -22,7 +22,7 @@ public class UpdateStackRequestV2ToUpdateStackRequestConverter extends AbstractC
     public UpdateStackJson convert(StackScaleRequestV2 source) {
         UpdateStackJson updateStackJson = new UpdateStackJson();
         updateStackJson.setWithClusterEvent(true);
-        InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(source.getStackId(), source.getGroup());
+        InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStackWithInstanceMetadata(source.getStackId(), source.getGroup());
         if (instanceGroup != null) {
             InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
             instanceGroupAdjustmentJson.setInstanceGroup(source.getGroup());

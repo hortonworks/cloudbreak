@@ -80,13 +80,11 @@ public class ClusterDownscaleService {
     public void updateMetadata(Long stackId, Collection<String> hostNames, String hostGroupName) {
         StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
         ClusterView clusterView = stackView.getClusterView();
-        hostNames.forEach(hn -> {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithHostMetadata(clusterView.getId(), hostGroupName);
-            List<HostMetadata> hostMetaToRemove = hostGroup.getHostMetadata().stream()
-                    .filter(md -> hostNames.contains(md.getHostName())).collect(Collectors.toList());
-            hostGroup.getHostMetadata().removeAll(hostMetaToRemove);
-            hostGroupService.save(hostGroup);
-        });
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithHostMetadata(clusterView.getId(), hostGroupName);
+        List<HostMetadata> hostMetaToRemove = hostGroup.getHostMetadata().stream()
+                .filter(md -> hostNames.contains(md.getHostName())).collect(Collectors.toList());
+        hostGroup.getHostMetadata().removeAll(hostMetaToRemove);
+        hostGroupService.save(hostGroup);
         LOGGER.info("Start updating metadata");
         for (String hostName : hostNames) {
             stackService.updateMetaDataStatusIfFound(stackView.getId(), hostName, InstanceStatus.DECOMMISSIONED);

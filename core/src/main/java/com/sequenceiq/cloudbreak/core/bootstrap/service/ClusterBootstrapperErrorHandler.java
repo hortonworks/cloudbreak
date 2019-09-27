@@ -88,7 +88,8 @@ public class ClusterBootstrapperErrorHandler {
             for (Node missingNode : missingNodes) {
                 InstanceMetaData instanceMetaData =
                         instanceMetaDataRepository.findNotTerminatedByPrivateAddress(stack.getId(), missingNode.getPrivateIp());
-                InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceMetaData.getInstanceGroup().getGroupName());
+                InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStackWithInstanceMetadata(stack.getId(),
+                        instanceMetaData.getInstanceGroup().getGroupName());
                 if (ig.getNodeCount() < 1) {
                     throw new CloudbreakOrchestratorFailedException(cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_INVALID_NODECOUNT.code(),
                             Collections.singletonList(ig.getGroupName())));

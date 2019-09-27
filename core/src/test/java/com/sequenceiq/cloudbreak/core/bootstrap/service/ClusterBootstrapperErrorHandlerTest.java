@@ -91,7 +91,7 @@ public class ClusterBootstrapperErrorHandlerTest {
             }
             return null;
         });
-        when(instanceGroupRepository.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<InstanceGroup>) invocation -> {
+        when(instanceGroupRepository.findOneByGroupNameInStackWithInstanceMetadata(anyLong(), anyString())).thenAnswer((Answer<InstanceGroup>) invocation -> {
             Object[] args = invocation.getArguments();
             String name = (String) args[1];
             for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
@@ -132,7 +132,7 @@ public class ClusterBootstrapperErrorHandlerTest {
             }
             return null;
         });
-        when(instanceGroupRepository.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<InstanceGroup>) invocation -> {
+        when(instanceGroupRepository.findOneByGroupNameInStackWithInstanceMetadata(anyLong(), anyString())).thenAnswer((Answer<InstanceGroup>) invocation -> {
             Object[] args = invocation.getArguments();
             String name = (String) args[1];
             for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
@@ -151,7 +151,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         verify(connector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());
         verify(resourceRepository, times(3)).findByStackIdAndNameAndType(anyLong(), anyString(), nullable(ResourceType.class));
         verify(resourceRepository, times(3)).delete(nullable(Resource.class));
-        verify(instanceGroupRepository, times(3)).findOneByGroupNameInStack(anyLong(), anyString());
+        verify(instanceGroupRepository, times(3)).findOneByGroupNameInStackWithInstanceMetadata(anyLong(), anyString());
 
     }
 

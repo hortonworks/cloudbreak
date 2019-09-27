@@ -94,7 +94,7 @@ public class HostGroupDecorator {
 
     private HostGroup decorateHostGroupWithInstanceGroup(Stack stack, HostGroup hostGroup, String instanceGroupName) {
         if (StringUtils.isNotBlank(instanceGroupName)) {
-            InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
+            InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStackWithInstanceMetadata(stack.getId(), instanceGroupName);
             if (instanceGroup == null) {
                 LOGGER.error("Instance group not found: {}", instanceGroupName);
                 throw new BadRequestException(String.format("Instance group '%s' not found on stack.", instanceGroupName));
