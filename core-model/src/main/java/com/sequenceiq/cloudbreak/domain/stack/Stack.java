@@ -126,7 +126,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @OneToOne(cascade = CascadeType.ALL)
     private StackStatus stackStatus;
 
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Resource> resources = new HashSet<>();
 
     @Column(nullable = false)
