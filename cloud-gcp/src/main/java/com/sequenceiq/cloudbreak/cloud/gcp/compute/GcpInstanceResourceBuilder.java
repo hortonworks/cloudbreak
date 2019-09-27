@@ -351,7 +351,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 Operation operation = stopRequest ? compute.instances().stop(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute()
                         : executeStartOperation(projectId, availabilityZone, compute, instanceId, instance.getTemplate(), instanceResponse.getDisks());
                 CloudInstance operationAwareCloudInstance = createOperationAwareCloudInstance(instance, operation);
-                return checkInstances(context, auth, singletonList(operationAwareCloudInstance)).get(0);
+                return new CloudVmInstanceStatus(operationAwareCloudInstance, InstanceStatus.IN_PROGRESS);
             } else {
                 LOGGER.info("Instance {} is not in {} state - won't start it.", state, instanceId);
                 return null;
