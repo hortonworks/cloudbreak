@@ -63,9 +63,14 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
+import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
+import com.sequenceiq.cloudbreak.domain.projection.StackWorkspaceView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -273,12 +278,7 @@ public class OfflineStateGenerator {
     static class CustomStackRepository implements StackRepository {
 
         @Override
-        public Stack findByAmbari(String ambariIp) {
-            return null;
-        }
-
-        @Override
-        public Set<Stack> findForWorkspaceIdWithLists(Long workspaceId) {
+        public StackTtlView findByAmbari(String ambariIp) {
             return null;
         }
 
@@ -298,17 +298,17 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findEphemeralClusters(Long id) {
+        public Set<StackIdView> findEphemeralClusters(Long id) {
             return null;
         }
 
         @Override
-        public List<Stack> findAllStackForTemplate(Long id) {
-            return null;
+        public Boolean findTemplateInUse(Long templateId) {
+            return Boolean.TRUE;
         }
 
         @Override
-        public List<Object[]> findStackStatusesWithoutAuth(Set<Long> ids) {
+        public List<StackStatusView> findStackStatusesWithoutAuth(Set<Long> ids) {
             return null;
         }
 
@@ -318,32 +318,27 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Stack findByNameInWorkspaceWithLists(String name, Workspace workspace) {
+        public List<StackTtlView> findAllAlive() {
             return null;
         }
 
         @Override
-        public List<Stack> findAllAlive() {
+        public String findTimeToLiveValueForSTack(Long stackId, String ttl) {
             return null;
         }
 
         @Override
-        public Set<Stack> findAllAliveWithNoWorkspaceOrUser() {
+        public Set<StackWorkspaceView> findAllAliveWithNoWorkspaceOrUser() {
             return null;
         }
 
         @Override
-        public List<Stack> findAllAliveAndProvisioned() {
-            return null;
+        public Boolean anyStackInWorkspace(Long workspaceId) {
+            return Boolean.TRUE;
         }
 
         @Override
-        public Set<Stack> findAllForWorkspace(Long workspaceId) {
-            return null;
-        }
-
-        @Override
-        public List<Stack> findByStatuses(List<Status> statuses) {
+        public List<StackStatusView> findByStatuses(List<Status> statuses) {
             return null;
         }
 
@@ -363,32 +358,17 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findByCredential(Credential credential) {
+        public Set<StackIdView> findByCredential(Credential credential) {
             return null;
         }
 
         @Override
-        public Long countByNetwork(Network network) {
-            return null;
-        }
-
-        @Override
-        public Set<Stack> findByNetwork(Network network) {
+        public Set<StackIdView> findByNetwork(Network network) {
             return null;
         }
 
         @Override
         public Long countStacksWithNoWorkspaceOrCreator() {
-            return null;
-        }
-
-        @Override
-        public Long countActiveByAccount(String account) {
-            return null;
-        }
-
-        @Override
-        public Long countActiveByOwner(String owner) {
             return null;
         }
 
@@ -409,6 +389,16 @@ public class OfflineStateGenerator {
 
         @Override
         public String findNameByIdAndWorkspaceId(Long sharedClusterId, Long workspaceId) {
+            return null;
+        }
+
+        @Override
+        public int updateCreatorAndWorkspaceById(Long stackId, User creator, Workspace workspace) {
+            return 0;
+        }
+
+        @Override
+        public StackWorkspaceView findWorkspaceViewById(Long stackId) {
             return null;
         }
 

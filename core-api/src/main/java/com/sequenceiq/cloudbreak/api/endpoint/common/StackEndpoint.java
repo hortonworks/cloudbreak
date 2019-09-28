@@ -16,8 +16,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackValidationRequest;
 
 public interface StackEndpoint {
 
-    Set<StackResponse> getStacksInDefaultWorkspace();
-
     StackResponse getStackFromDefaultWorkspace(@PathParam("name") String name, @QueryParam("entry") Set<String> entries);
 
     StackResponse get(@PathParam("id") Long id, @QueryParam("entry") Set<String> entries);

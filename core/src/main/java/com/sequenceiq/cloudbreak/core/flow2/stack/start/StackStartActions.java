@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,6 +46,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.ConverterUtil;
 
@@ -159,6 +161,9 @@ public class StackStartActions {
         @Inject
         private CloudbreakEventService cloudbreakEventService;
 
+        @Inject
+        private ResourceService resourceService;
+
         protected AbstractStackStartAction(Class<P> payloadClass) {
             super(payloadClass);
         }
@@ -167,6 +172,7 @@ public class StackStartActions {
         protected StackStartStopContext createFlowContext(String flowId, StateContext<StackStartState, StackStartEvent> stateContext, P payload) {
             Long stackId = payload.getStackId();
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+            stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getStackId())));
             MDCBuilder.buildMdcContext(stack);
             List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataRepository.findNotTerminatedForStack(stackId));
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));

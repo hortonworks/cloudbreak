@@ -7,7 +7,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Before;
@@ -20,7 +19,6 @@ import org.mockito.Mock;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -193,7 +191,7 @@ public class WorkspaceModificationVerifierServiceTest {
         Workspace defaultWorkspaceOfUserWhoRequestTheDeletion = TestUtil.workspace(1L, "testuser1@mycompany.com");
         Workspace workspaceForDelete = TestUtil.workspace(2L, "bigorg");
         User userWhoRequestTheDeletion = TestUtil.user(1L, "testuser@mycompany.com");
-        when(stackService.findAllForWorkspace(anyLong())).thenReturn(ImmutableSet.of(TestUtil.stack()));
+        when(stackService.anyStackInWorkspace(anyLong())).thenReturn(Boolean.TRUE);
 
         thrown.expectMessage("The requested 'bigorg' workspace has already existing clusters. "
                 + "Please delete them before you delete the workspace.");
@@ -207,7 +205,7 @@ public class WorkspaceModificationVerifierServiceTest {
         Workspace defaultWorkspaceOfUserWhoRequestTheDeletion = TestUtil.workspace(1L, "testuser1@mycompany.com");
         Workspace workspaceForDelete = TestUtil.workspace(2L, "bigorg");
         User userWhoRequestTheDeletion = TestUtil.user(1L, "testuser@mycompany.com");
-        when(stackService.findAllForWorkspace(anyLong())).thenReturn(new HashSet<>());
+        when(stackService.anyStackInWorkspace(anyLong())).thenReturn(Boolean.FALSE);
 
         underTest.checkThatWorkspaceIsDeletable(userWhoRequestTheDeletion, workspaceForDelete, defaultWorkspaceOfUserWhoRequestTheDeletion);
     }

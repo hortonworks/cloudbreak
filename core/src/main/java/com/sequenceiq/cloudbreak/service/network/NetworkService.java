@@ -19,8 +19,8 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -66,19 +66,19 @@ public class NetworkService extends AbstractWorkspaceAwareResourceService<Networ
 
     private void deleteImpl(Network network) {
         LOGGER.info("Deleting network with name: {}", network.getName());
-        List<Stack> stacksWithThisNetwork = new ArrayList<>(stackService.getByNetwork(network));
+        List<StackIdView> stacksWithThisNetwork = new ArrayList<>(stackService.getByNetwork(network));
         if (!stacksWithThisNetwork.isEmpty()) {
             if (stacksWithThisNetwork.size() > 1) {
                 String clusters = stacksWithThisNetwork
                         .stream()
-                        .map(stack -> stack.getCluster().getName())
+                        .map(stack -> stack.getName())
                         .collect(Collectors.joining(", "));
                 throw new BadRequestException(String.format(
                         "There are clusters associated with network '%s'(ID:'%s'). Please remove these before deleting the network. "
                                 + "The following clusters are using this network: [%s]", network.getName(), network.getId(), clusters));
             } else {
                 throw new BadRequestException(String.format("There is a cluster ['%s'] which uses network '%s'(ID:'%s'). Please remove this "
-                        + "cluster before deleting the network", stacksWithThisNetwork.get(0).getCluster().getName(), network.getName(), network.getId()));
+                        + "cluster before deleting the network", stacksWithThisNetwork.get(0).getName(), network.getName(), network.getId()));
             }
 
         }

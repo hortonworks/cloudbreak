@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -49,6 +51,7 @@ import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
+import com.sequenceiq.cloudbreak.converter.stack.StackTtlViewToStackResponseConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
@@ -62,6 +65,9 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
+import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -203,26 +209,8 @@ public class StackService {
     @Inject
     private PermissionCheckingUtils permissionCheckingUtils;
 
-    public Long countByAccount(String account) {
-        return stackRepository.countActiveByAccount(account);
-    }
-
-    public Long countByOwner(String owner) {
-        return stackRepository.countActiveByOwner(owner);
-    }
-
-    public Set<StackResponse> retrieveStacksByWorkspaceId(Long workspaceId) {
-        try {
-            return transactionService.required(() ->
-                    convertStacks(stackRepository.findForWorkspaceIdWithLists(workspaceId)));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-    }
-
-    public Stack findStackByNameAndWorkspaceId(String name, Long workspaceId) {
-        return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId);
-    }
+    @Inject
+    private StackTtlViewToStackResponseConverter stackTtlViewToStackResponseConverter;
 
     public StackResponse getJsonById(Long id, Collection<String> entry) {
         try {
@@ -274,7 +262,7 @@ public class StackService {
         }
     }
 
-    public Set<Stack> findClustersConnectedToDatalake(Long stackId) {
+    public Set<StackIdView> findClustersConnectedToDatalake(Long stackId) {
         return stackRepository.findEphemeralClusters(stackId);
     }
 
@@ -338,7 +326,7 @@ public class StackService {
 
     public StackResponse getByAmbariAddress(String ambariAddress) {
         try {
-            return transactionService.required(() -> conversionService.convert(stackRepository.findByAmbari(ambariAddress), StackResponse.class));
+            return transactionService.required(() -> stackTtlViewToStackResponseConverter.convert(stackRepository.findByAmbari(ambariAddress)));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -803,11 +791,11 @@ public class StackService {
         return stackRepository.save(stack);
     }
 
-    public List<Stack> getAllAlive() {
+    public List<StackTtlView> getAllAlive() {
         return stackRepository.findAllAlive();
     }
 
-    public List<Stack> getByStatuses(List<Status> statuses) {
+    public List<StackStatusView> getByStatuses(List<Status> statuses) {
         return stackRepository.findByStatuses(statuses);
     }
 
@@ -898,9 +886,9 @@ public class StackService {
         }
     }
 
-    public Set<Stack> findAllForWorkspace(Long workspaceId) {
+    public Boolean anyStackInWorkspace(Long workspaceId) {
         try {
-            return transactionService.required(() -> stackRepository.findAllForWorkspace(workspaceId));
+            return transactionService.required(() -> stackRepository.anyStackInWorkspace(workspaceId));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -919,11 +907,11 @@ public class StackService {
     }
 
     private void checkStackHasNoAttachedClusters(Stack stack) {
-        Set<Stack> attachedOnes = findClustersConnectedToDatalake(stack.getId());
+        Set<StackIdView> attachedOnes = findClustersConnectedToDatalake(stack.getId());
         if (!attachedOnes.isEmpty()) {
             throw new BadRequestException(String.format("Stack has attached clusters! Please remove them before try to delete this one. %nThe following clusters"
                             + " has to be deleted before terminating the datalake cluster: %s",
-                    String.join(", ", attachedOnes.stream().map(Stack::getName).collect(Collectors.toSet()))));
+                    String.join(", ", attachedOnes.stream().map(StackIdView::getName).collect(Collectors.toSet()))));
         }
     }
 
@@ -957,20 +945,16 @@ public class StackService {
         }
     }
 
-    public List<Object[]> getStatuses(Set<Long> stackIds) {
+    public List<StackStatusView> getStatuses(Set<Long> stackIds) {
         return stackRepository.findStackStatusesWithoutAuth(stackIds);
     }
 
-    public Set<Stack> getByNetwork(Network network) {
+    public Set<StackIdView> getByNetwork(Network network) {
         return stackRepository.findByNetwork(network);
     }
 
-    public List<Stack> getAllForTemplate(Long id) {
-        return stackRepository.findAllStackForTemplate(id);
-    }
-
-    public List<Stack> getAllAliveAndProvisioned() {
-        return stackRepository.findAllAliveAndProvisioned();
+    public Boolean templateInUse(Long id) {
+        return stackRepository.findTemplateInUse(id);
     }
 
     public Stack getForCluster(Long id) {
@@ -980,6 +964,12 @@ public class StackService {
     public void updateImage(Long stackId, Long workspaceId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
         flowManager.triggerStackImageUpdate(stackId, imageId, imageCatalogName, imageCatalogUrl);
+    }
+
+    public Optional<Duration> getTtlValueForStack(Long stackId) {
+        return Optional.ofNullable(stackRepository.findTimeToLiveValueForSTack(stackId, PlatformParametersConsts.TTL))
+                .map(Long::valueOf)
+                .map(Duration::ofMillis);
     }
 
     private enum Msg {

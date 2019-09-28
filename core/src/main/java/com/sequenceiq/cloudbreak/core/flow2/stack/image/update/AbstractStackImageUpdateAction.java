@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
+import java.util.HashSet;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -25,9 +26,9 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.StackCreation
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 abstract class AbstractStackImageUpdateAction<P extends Payload> extends AbstractAction<StackImageUpdateState, StackImageUpdateEvent, StackContext, P> {
@@ -59,7 +60,7 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
     private StackUpdater stackUpdater;
 
     @Inject
-    private ResourceRepository resourceRepository;
+    private ResourceService resourceService;
 
     @Inject
     private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
@@ -71,6 +72,7 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
     @Override
     protected StackContext createFlowContext(String flowId, StateContext<StackImageUpdateState, StackImageUpdateEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getStackId());
+        stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getStackId())));
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
@@ -113,8 +115,8 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
         return stackUpdater;
     }
 
-    protected ResourceRepository getResourceRepository() {
-        return resourceRepository;
+    protected ResourceService getResourceService() {
+        return resourceService;
     }
 
     protected ResourceToCloudResourceConverter getResourceToCloudResourceConverter() {

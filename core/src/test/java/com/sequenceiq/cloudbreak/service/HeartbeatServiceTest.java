@@ -10,6 +10,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +44,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
@@ -53,6 +55,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFl
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
@@ -267,9 +271,15 @@ public class HeartbeatServiceTest {
         when(runningFlows.get(any())).thenReturn(null);
 
         List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toList());
-        List<Object[]> statusResponse = new ArrayList<>();
-        statusResponse.add(new Object[]{stackIds.get(0), Status.DELETE_IN_PROGRESS});
-        statusResponse.add(new Object[]{stackIds.get(2), Status.DELETE_IN_PROGRESS});
+        List<StackStatusView> statusResponse = new ArrayList<>();
+        StackStatusView ss1 = mock(StackStatusView.class);
+        when(ss1.getId()).thenReturn(stackIds.get(0));
+        when(ss1.getStatus()).thenReturn(new StackStatus(null, Status.DELETE_IN_PROGRESS, "", DetailedStackStatus.DELETE_IN_PROGRESS));
+        StackStatusView ss2 = mock(StackStatusView.class);
+        when(ss2.getId()).thenReturn(stackIds.get(2));
+        when(ss2.getStatus()).thenReturn(new StackStatus(null, Status.DELETE_IN_PROGRESS, "", DetailedStackStatus.DELETE_IN_PROGRESS));
+        statusResponse.add(ss1);
+        statusResponse.add(ss2);
         when(stackService.getStatuses(any())).thenReturn(statusResponse);
 
         List<FlowLog> invalidFlowLogs = myNewFlowLogs.stream()
@@ -334,10 +344,15 @@ public class HeartbeatServiceTest {
 
         when(runningFlows.get(any())).thenReturn(null);
 
-        List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toList());
-        List<Object[]> statusResponse = new ArrayList<>();
-        statusResponse.add(new Object[]{stackIds.get(0), Status.DELETE_IN_PROGRESS});
-        statusResponse.add(new Object[]{stackIds.get(2), Status.DELETE_IN_PROGRESS});
+        List<StackStatusView> statusResponse = new ArrayList<>();
+        StackStatusView ss1 = mock(StackStatusView.class);
+        when(ss1.getId()).thenReturn(0L);
+        when(ss1.getStatus()).thenReturn(new StackStatus(null, Status.DELETE_IN_PROGRESS, "", DetailedStackStatus.DELETE_IN_PROGRESS));
+        StackStatusView ss2 = mock(StackStatusView.class);
+        when(ss2.getId()).thenReturn(2L);
+        when(ss2.getStatus()).thenReturn(new StackStatus(null, Status.DELETE_IN_PROGRESS, "", DetailedStackStatus.DELETE_IN_PROGRESS));
+        statusResponse.add(ss1);
+        statusResponse.add(ss2);
         when(stackService.getStatuses(any())).thenReturn(statusResponse);
 
         heartbeatService.scheduledFlowDistribution();
@@ -549,9 +564,9 @@ public class HeartbeatServiceTest {
         Map<CloudbreakNode, List<String>> flowDistribution = createFlowDistribution(failedFLowLogs1, failedFlowLogs2);
         when(flowDistributor.distribute(anyList(), eq(clusterNodes.subList(2, clusterNodes.size())))).thenReturn(flowDistribution);
 
-        List<Object[]> stackStatuses = failedFLowLogs1.stream()
+        List<StackStatusView> stackStatuses = failedFLowLogs1.stream()
                 .map(FlowLog::getStackId)
-                .map(stackId -> new Object[]{stackId, Status.DELETE_IN_PROGRESS})
+                .map(stackId -> new StackStatusViewImpl(stackId, new StackStatus(null, Status.DELETE_IN_PROGRESS, "", DetailedStackStatus.DELETE_IN_PROGRESS)))
                 .collect(Collectors.toList());
         when(stackService.getStatuses(anySet())).thenReturn(stackStatuses);
 
@@ -572,5 +587,32 @@ public class HeartbeatServiceTest {
 
         distribution.put(new CloudbreakNode(UUID.randomUUID().toString()), failedFLowLogs1.stream().map(FlowLog::getFlowId).collect(Collectors.toList()));
         return distribution;
+    }
+
+    private static class StackStatusViewImpl implements StackStatusView {
+
+        private Long id;
+
+        private StackStatus status;
+
+        StackStatusViewImpl(Long id, StackStatus status) {
+            this.id = id;
+            this.status = status;
+        }
+
+        @Override
+        public Long getId() {
+            return id;
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public StackStatus getStatus() {
+            return status;
+        }
     }
 }
