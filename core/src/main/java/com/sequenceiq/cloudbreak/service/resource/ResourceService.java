@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.resource;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -34,5 +35,9 @@ public class ResourceService {
         });
 
         return list;
+    }
+
+    public Collection<Resource> getAllByStackId(Long stackId) {
+        return resourceRepository.findAllByStackId(stackId);
     }
 }

@@ -1,9 +1,6 @@
 package com.sequenceiq.cloudbreak.service.lifetime;
 
-import java.time.Duration;
 import java.util.Calendar;
-import java.util.Map;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -13,9 +10,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.startup.WorkspaceMigrationRunner;
@@ -36,11 +32,11 @@ public class ScheduledLifetimeChecker {
     @Scheduled(fixedRate = 60 * 1000, initialDelay = 60 * 1000)
     public void validate() {
         if (workspaceMigrationRunner.isFinished()) {
-            for (Stack stack : stackService.getAllAlive()) {
-                getStackTimeToLive(stack).ifPresent(ttl -> {
+            for (StackTtlView stack : stackService.getAllAlive()) {
+                stackService.getTtlValueForStack(stack.getId()).ifPresent(ttl -> {
                     try {
-                        if (Status.DELETE_IN_PROGRESS != stack.getStatus() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null) {
-                            validateClusterTimeToLive(stack.getCluster().getCreationFinished(), ttl.toMillis());
+                        if (Status.DELETE_IN_PROGRESS != stack.getStatus().getStatus() && stack.getCreationFinished() != null) {
+                            validateClusterTimeToLive(stack.getCreationFinished(), ttl.toMillis());
                         }
                     } catch (AccountPreferencesValidationException ignored) {
                         terminateStack(stack);
@@ -50,13 +46,8 @@ public class ScheduledLifetimeChecker {
         }
     }
 
-    private Optional<Duration> getStackTimeToLive(Stack stack) {
-        Map<String, String> params = stack.getParameters();
-        return Optional.ofNullable(params.get(PlatformParametersConsts.TTL)).map(s -> Duration.ofMillis(Long.parseLong(s)));
-    }
-
-    private void terminateStack(Stack stack) {
-        if (!stack.isDeleteCompleted()) {
+    private void terminateStack(StackTtlView stack) {
+        if (!Status.DELETE_COMPLETED.equals(stack.getStatus().getStatus())) {
             LOGGER.info("Trigger termination of stack: '{}', owner: '{}', account: '{}'.", stack.getName(), stack.getOwner(), stack.getAccount());
             flowManager.triggerTermination(stack.getId(), false, false);
         }

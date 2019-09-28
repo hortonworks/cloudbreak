@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -25,7 +24,7 @@ import org.mockito.stubbing.Answer;
 
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.projection.StackWorkspaceView;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -82,9 +81,6 @@ public class StackWorkspaceMigratorTest {
     @Mock
     private WorkspaceService workspaceService;
 
-    @Captor
-    private ArgumentCaptor<Stack> stackSaveCaptor;
-
     @InjectMocks
     private StackWorkspaceMigrator underTest;
 
@@ -121,69 +117,78 @@ public class StackWorkspaceMigratorTest {
 
     @Test
     public void testStackMigration() throws TransactionExecutionException {
-        Stack stack1 = new Stack();
-        stack1.setId(1L);
-        stack1.setName("stack1");
-        stack1.setOwner("1");
-        stack1.setAccount("1");
+        StackWorkspaceView stack1 = new StackWorkspaceViewImpl(1L, "1", null);
         Cluster cluster1 = new Cluster();
         cluster1.setId(1L);
-        cluster1.setStack(stack1);
-        stack1.setCluster(cluster1);
 
-        Stack stack2 = new Stack();
-        stack2.setId(2L);
-        stack2.setName("stack2");
-        stack2.setOwner("1");
-        stack2.setAccount("1");
+        StackWorkspaceView stack2 = new StackWorkspaceViewImpl(2L, "1", null);
         Cluster cluster2 = new Cluster();
         cluster2.setId(2L);
-        cluster2.setStack(stack2);
-        stack2.setCluster(cluster2);
 
-        Stack stack3 = new Stack();
-        stack3.setId(3L);
-        stack3.setName("stack3");
-        stack3.setOwner("2");
-        stack3.setAccount("2");
+        StackWorkspaceView stack3 = new StackWorkspaceViewImpl(3L, "2", null);
         Cluster cluster3 = new Cluster();
         cluster3.setId(3L);
-        cluster3.setStack(stack3);
-        stack3.setCluster(cluster3);
 
         // stack not set for cluster
-        Stack stack5 = new Stack();
-        stack5.setId(5L);
-        stack5.setName("stack5");
-        stack5.setOwner("2");
-        stack5.setAccount("2");
+        StackWorkspaceView stack5 = new StackWorkspaceViewImpl(5L, "2", null);
         Cluster cluster5 = new Cluster();
         cluster5.setId(5L);
-        stack5.setCluster(cluster5);
 
-        Set<Stack> stacks = Set.of(stack1, stack2, stack3, stack5);
+        Set<StackWorkspaceView> stacks = Set.of(stack1, stack2, stack3, stack5);
         Set<Cluster> clusters = Set.of(cluster1, cluster2, cluster3, cluster5);
         when(stackRepository.findAllAliveWithNoWorkspaceOrUser()).thenReturn(stacks);
         when(clusterRepository.findAllWithNoWorkspace()).thenReturn(clusters);
 
         underTest.migrateStackWorkspaceAndCreator(userMigrationResults);
 
-        verify(stackRepository, times(4)).save(stackSaveCaptor.capture());
+        ArgumentCaptor<Long> stackSaveCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<User> userSaveCaptor = ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<Workspace> workspaceSaveCaptor = ArgumentCaptor.forClass(Workspace.class);
+        verify(stackRepository, times(4)).updateCreatorAndWorkspaceById(stackSaveCaptor.capture(), userSaveCaptor.capture(), workspaceSaveCaptor.capture());
 
-        List<Stack> savedStacks = stackSaveCaptor.getAllValues();
-        assertEquals("1@hw.com", savedStacks.get(0).getCreator().getUserId());
-        assertEquals("1@hw.com", savedStacks.get(0).getCluster().getWorkspace().getName());
-        assertEquals("1@hw.com", savedStacks.get(0).getWorkspace().getName());
-        assertEquals("stack1", savedStacks.get(0).getName());
+        List<Long> savedStacks = stackSaveCaptor.getAllValues();
+        List<User> savedUsers = userSaveCaptor.getAllValues();
+        List<Workspace> savedWorkspaces = workspaceSaveCaptor.getAllValues();
+        assertEquals("1@hw.com", savedUsers.get(0).getUserId());
+        assertEquals("1@hw.com", savedWorkspaces.get(0).getName());
+        assertEquals(Long.valueOf(1L), savedStacks.get(0));
 
-        assertEquals("1@hw.com", savedStacks.get(1).getCreator().getUserId());
-        assertEquals("1@hw.com", savedStacks.get(1).getWorkspace().getName());
-        assertEquals("1@hw.com", savedStacks.get(1).getCluster().getWorkspace().getName());
-        assertEquals("stack2", savedStacks.get(1).getName());
+        assertEquals("1@hw.com", savedUsers.get(1).getUserId());
+        assertEquals("1@hw.com", savedWorkspaces.get(1).getName());
+        assertEquals(Long.valueOf(2L), savedStacks.get(1));
 
-        assertEquals("2@hw.com", savedStacks.get(2).getCreator().getUserId());
-        assertEquals("2@hw.com", savedStacks.get(2).getWorkspace().getName());
-        assertEquals("2@hw.com", savedStacks.get(2).getCluster().getWorkspace().getName());
-        assertEquals("stack3", savedStacks.get(2).getName());
+        assertEquals("2@hw.com", savedUsers.get(2).getUserId());
+        assertEquals("2@hw.com", savedWorkspaces.get(2).getName());
+        assertEquals(Long.valueOf(3), savedStacks.get(2));
+    }
+
+    private static class StackWorkspaceViewImpl implements StackWorkspaceView {
+
+        private Long id;
+
+        private String owner;
+
+        private Workspace workspace;
+
+        StackWorkspaceViewImpl(Long id, String owner, Workspace workspace) {
+            this.id = id;
+            this.owner = owner;
+            this.workspace = workspace;
+        }
+
+        @Override
+        public Long getId() {
+            return id;
+        }
+
+        @Override
+        public String getOwner() {
+            return owner;
+        }
+
+        @Override
+        public Workspace getWorkspace() {
+            return workspace;
+        }
     }
 }

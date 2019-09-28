@@ -49,10 +49,10 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.StackCreationService;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageUpdateEvent;
@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -138,6 +139,9 @@ public class StackImageUpdateActionsTest {
 
     @Mock
     private StackFailureContext failureContext;
+
+    @Mock
+    private ResourceService resourceService;
 
     @InjectMocks
     private final AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());

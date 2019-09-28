@@ -61,12 +61,12 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
@@ -126,7 +126,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @OneToOne(cascade = CascadeType.ALL)
     private StackStatus stackStatus;
 
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Resource> resources = new HashSet<>();
 
     @Column(nullable = false)

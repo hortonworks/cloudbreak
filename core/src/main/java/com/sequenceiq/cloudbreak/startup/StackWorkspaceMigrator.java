@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.domain.projection.StackWorkspaceView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -40,8 +41,8 @@ public class StackWorkspaceMigrator {
 
     public void migrateStackWorkspaceAndCreator(UserMigrationResults userMigrationResults) throws TransactionExecutionException {
         transactionService.required(() -> {
-            Map<Long, Stack> stacks = stackRepository.findAllAliveWithNoWorkspaceOrUser().stream()
-                    .collect(Collectors.toMap(Stack::getId, s -> s));
+            Map<Long, StackWorkspaceView> stacks = stackRepository.findAllAliveWithNoWorkspaceOrUser().stream()
+                    .collect(Collectors.toMap(StackWorkspaceView::getId, s -> s));
             stacks.values().forEach(stack -> setWorkspaceAndCreatorForStack(userMigrationResults, stack));
             Set<Cluster> clusters = clusterRepository.findAllWithNoWorkspace();
             clusters.forEach(cluster -> setWorkspaceForCluster(stacks, cluster));
@@ -49,26 +50,20 @@ public class StackWorkspaceMigrator {
         });
     }
 
-    private void setWorkspaceAndCreatorForStack(UserMigrationResults userMigrationResults, Stack stack) {
+    private void setWorkspaceAndCreatorForStack(UserMigrationResults userMigrationResults, StackWorkspaceView stack) {
         String owner = stack.getOwner();
         User creator = userMigrationResults.getOwnerIdToUser().get(owner);
         if (creator != null) {
-            putIntoDefaultWorkspace(stack, creator);
-            stackRepository.save(stack);
+            Workspace workspace = workspaceService.getDefaultWorkspaceForUser(creator);
+            stackRepository.updateCreatorAndWorkspaceById(stack.getId(), creator, workspace);
         }
     }
 
-    private void putIntoDefaultWorkspace(Stack stack, User creator) {
-        Workspace workspace = workspaceService.getDefaultWorkspaceForUser(creator);
-        stack.setCreator(creator);
-        stack.setWorkspace(workspace);
-    }
-
-    private void setWorkspaceForCluster(Map<Long, Stack> stacks, Cluster cluster) {
+    private void setWorkspaceForCluster(Map<Long, StackWorkspaceView> stacks, Cluster cluster) {
         Stack clusterStack = cluster.getStack();
         if (clusterStack != null) {
             Long stackId = clusterStack.getId();
-            Optional<Stack> stack = Optional.ofNullable(stacks.getOrDefault(stackId, stackRepository.findById(stackId).orElse(null)));
+            Optional<StackWorkspaceView> stack = Optional.ofNullable(stacks.getOrDefault(stackId, stackRepository.findWorkspaceViewById(stackId)));
             stack.ifPresent(s -> {
                 cluster.setWorkspace(s.getWorkspace());
                 clusterRepository.save(cluster);

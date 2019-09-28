@@ -19,12 +19,13 @@ import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
+import com.sequenceiq.cloudbreak.converter.stack.StackTtlViewToStackResponseConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -47,12 +48,12 @@ import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
 import com.sequenceiq.cloudbreak.service.stack.StackDownscaleValidatorService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @SpringBootTest(classes = TestConfig.class)
 public class StackServiceSecurityComponentTest extends SecurityComponentTestBase {
@@ -202,6 +203,9 @@ public class StackServiceSecurityComponentTest extends SecurityComponentTestBase
 
         @MockBean
         private WorkspaceService workspaceService;
+
+        @MockBean
+        private StackTtlViewToStackResponseConverter stackTtlViewToStackResponseConverter;
 
         @Bean
         public StackRepository stackRepository() {

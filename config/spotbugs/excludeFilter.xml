@@ -29,4 +29,7 @@
     <Match>
         <Class name="~.*EncryptionConverter$"/>
     </Match>
+    <Match>
+        <Package name="org.apache.cb.yarn.service.api"/>
+    </Match>
 </FindBugsFilter>

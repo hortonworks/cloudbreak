@@ -33,9 +33,9 @@ import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
@@ -44,9 +44,9 @@ import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Service
 public class CredentialService extends AbstractWorkspaceAwareResourceService<Credential> {
@@ -188,13 +188,13 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         if (credential == null) {
             throw new NotFoundException("Credential not found.");
         }
-        Set<Stack> stacksForCredential = stackRepository.findByCredential(credential);
+        Set<StackIdView> stacksForCredential = stackRepository.findByCredential(credential);
         if (!stacksForCredential.isEmpty()) {
             String clusters;
             String message;
             if (stacksForCredential.size() > 1) {
                 clusters = stacksForCredential.stream()
-                        .map(Stack::getName)
+                        .map(StackIdView::getName)
                         .collect(Collectors.joining(", "));
                 message = "There are clusters associated with credential config '%s'. Please remove these before deleting the credential. "
                         + "The following clusters are using this credential: [%s]";

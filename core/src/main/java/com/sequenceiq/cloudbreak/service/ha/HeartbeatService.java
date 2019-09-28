@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFl
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
@@ -219,11 +220,11 @@ public class HeartbeatService {
         Set<Long> stackIds = InMemoryStateStore.getAllStackId();
         if (!stackIds.isEmpty()) {
             LOGGER.info("Check if there are termination flows for the following stack ids: {}", stackIds);
-            List<Object[]> stackStatuses = stackService.getStatuses(stackIds);
+            List<StackStatusView> stackStatuses = stackService.getStatuses(stackIds);
             Set<Long> terminatingStacksByCurrentNode = findTerminatingStacksForCurrentNode();
-            for (Object[] ss : stackStatuses) {
-                if (DELETE_STATUSES.contains(ss[1])) {
-                    Long stackId = (Long) ss[0];
+            for (StackStatusView ss : stackStatuses) {
+                if (DELETE_STATUSES.contains(ss.getStatus().getStatus())) {
+                    Long stackId = ss.getId();
                     if (isStackTerminationExecutedByAnotherNode(stackId, terminatingStacksByCurrentNode)) {
                         Set<String> runningFlowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
                         if (hasRunningNonTerminationFlowOnThisNode(runningFlowIds)) {
@@ -254,7 +255,7 @@ public class HeartbeatService {
         Set<Long> stackIds = flowLogs.stream().map(FlowLog::getStackId).collect(Collectors.toSet());
         if (!stackIds.isEmpty()) {
             Set<Long> deletingStackIds = stackService.getStatuses(stackIds).stream()
-                    .filter(ss -> DELETE_STATUSES.contains(ss[1])).map(ss -> (Long) ss[0]).collect(Collectors.toSet());
+                    .filter(ss -> DELETE_STATUSES.contains(ss.getStatus().getStatus())).map(StackStatusView::getId).collect(Collectors.toSet());
             if (!deletingStackIds.isEmpty()) {
                 return flowLogs.stream()
                         .filter(fl -> deletingStackIds.contains(fl.getStackId()))

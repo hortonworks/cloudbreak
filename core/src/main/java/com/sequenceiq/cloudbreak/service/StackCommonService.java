@@ -145,11 +145,6 @@ public class StackCommonService implements StackEndpoint {
     }
 
     @Override
-    public Set<StackResponse> getStacksInDefaultWorkspace() {
-        return stackService.retrieveStacksByWorkspaceId(restRequestThreadLocalService.getRequestedWorkspaceId());
-    }
-
-    @Override
     public StackResponse get(Long id, Set<String> entries) {
         return stackService.getJsonById(id, entries);
     }

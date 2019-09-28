@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.converter.mapper.ProxyConfigMapper;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
@@ -201,7 +201,7 @@ public class ClusterToClusterResponseConverter extends AbstractConversionService
             sharedServiceResponse.setSharedClusterId(cluster.getStack().getDatalakeId());
             sharedServiceResponse.setSharedClusterName(stackService.getByIdWithTransaction(cluster.getStack().getDatalakeId()).getName());
         } else {
-            for (Stack stack : stackService.findClustersConnectedToDatalake(cluster.getStack().getId())) {
+            for (StackIdView stack : stackService.findClustersConnectedToDatalake(cluster.getStack().getId())) {
                 AttachedClusterInfoResponse attachedClusterInfoResponse = new AttachedClusterInfoResponse();
                 attachedClusterInfoResponse.setId(stack.getId());
                 attachedClusterInfoResponse.setName(stack.getName());

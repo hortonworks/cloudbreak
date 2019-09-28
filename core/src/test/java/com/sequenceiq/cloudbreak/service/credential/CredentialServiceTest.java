@@ -15,12 +15,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,19 +24,25 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CredentialServiceTest {
@@ -312,7 +312,7 @@ public class CredentialServiceTest {
     @Test
     public void testDeleteByNameWhenOneStackUsesTheGivenCredentialThenBadRequestExceptionShouldComeWithExpectedMessage() {
         String stackName = "testStackName";
-        Stack stack = mock(Stack.class);
+        StackIdView stack = mock(StackIdView.class);
         when(stack.getName()).thenReturn(stackName);
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, ORG_ID, CLOUD_PLATFORMS)).thenReturn(testCredential);
         when(stackRepository.findByCredential(testCredential)).thenReturn(Set.of(stack));
@@ -332,8 +332,8 @@ public class CredentialServiceTest {
     public void testDeleteByNameWhenMoreThaneOneStackUsesTheGivenCredentialThenBadRequestExceptionShouldComeWithExpectedMessage() {
         String stack1Name = "testStack1Name";
         String stack2Name = "testStack1Name";
-        Stack stack1 = mock(Stack.class);
-        Stack stack2 = mock(Stack.class);
+        StackIdView stack1 = mock(StackIdView.class);
+        StackIdView stack2 = mock(StackIdView.class);
         when(stack1.getName()).thenReturn(stack1Name);
         when(stack2.getName()).thenReturn(stack2Name);
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, ORG_ID, CLOUD_PLATFORMS)).thenReturn(testCredential);
