@@ -7,18 +7,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.AccessConfig;
-import com.google.api.services.compute.model.Instance;
+import com.google.api.services.compute.model.NetworkInterface;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -32,61 +31,26 @@ public class GcpMetadataCollector implements MetadataCollector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpMetadataCollector.class);
 
+    @Inject
+    private GcpNetworkInterfaceProvider gcpNetworkInterfaceProvider;
+
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
             List<CloudInstance> knownInstances) {
 
         List<CloudVmMetaDataStatus> instanceMetaData = new ArrayList<>();
-
         Map<String, CloudResource> instanceNameMap = groupByInstanceName(resources);
         Map<Long, CloudResource> privateIdMap = groupByPrivateId(resources);
+        Map<String, Optional<NetworkInterface>> networkInterfacesByInstance = getNetworkInterfaceByInstance(authenticatedContext, instanceNameMap);
 
         for (CloudInstance cloudInstance : vms) {
             String instanceId = cloudInstance.getInstanceId();
             CloudResource cloudResource;
             cloudResource = instanceId != null ? instanceNameMap.get(instanceId) : privateIdMap.get(cloudInstance.getTemplate().getPrivateId());
-            CloudVmMetaDataStatus cloudVmMetaDataStatus = getCloudVmMetaDataStatus(authenticatedContext, cloudResource, cloudInstance);
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = getCloudVmMetaDataStatus(cloudResource, cloudInstance, networkInterfacesByInstance);
             instanceMetaData.add(cloudVmMetaDataStatus);
         }
-
         return instanceMetaData;
-    }
-
-    private CloudVmMetaDataStatus getCloudVmMetaDataStatus(AuthenticatedContext authenticatedContext, CloudResource cloudResource,
-            CloudInstance matchedInstance) {
-        CloudVmMetaDataStatus cloudVmMetaDataStatus;
-        if (cloudResource != null) {
-            CloudInstance cloudInstance = new CloudInstance(cloudResource.getName(), matchedInstance.getTemplate(), matchedInstance.getAuthentication());
-            try {
-                CloudCredential credential = authenticatedContext.getCloudCredential();
-                CloudContext cloudContext = authenticatedContext.getCloudContext();
-                Compute compute = GcpStackUtil.buildCompute(credential);
-                Instance executeInstance = getInstance(cloudContext, credential, compute, cloudResource.getName());
-
-                String privateIp = Optional.ofNullable(executeInstance.getNetworkInterfaces().get(0).getNetworkIP())
-                        .orElseThrow(() -> new IOException("Private IP must not be null."));
-                String publicIp = null;
-                List<AccessConfig> acl = executeInstance.getNetworkInterfaces().get(0).getAccessConfigs();
-                if (acl != null && acl.get(0) != null) {
-                    publicIp = executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP();
-                }
-
-                CloudInstanceMetaData metaData = new CloudInstanceMetaData(privateIp, publicIp);
-
-                CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
-                cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, metaData);
-
-            } catch (IOException e) {
-                LOGGER.info(String.format("Instance %s is not reachable", cloudResource.getName()), e);
-                CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.UNKNOWN);
-                cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, CloudInstanceMetaData.EMPTY_METADATA);
-            }
-        } else {
-            CloudVmInstanceStatus status = new CloudVmInstanceStatus(matchedInstance, InstanceStatus.TERMINATED);
-            cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, CloudInstanceMetaData.EMPTY_METADATA);
-        }
-        return cloudVmMetaDataStatus;
-
     }
 
     private Map<String, CloudResource> groupByInstanceName(Iterable<CloudResource> resources) {
@@ -109,17 +73,44 @@ public class GcpMetadataCollector implements MetadataCollector {
                 if (privateId != null) {
                     privateIdMap.put(privateId, resource);
                 }
-
             }
         }
         return privateIdMap;
     }
 
-    private Instance getInstance(CloudContext context, CloudCredential credential, Compute compute, String instanceName) throws IOException {
-        Instance instance = compute.instances()
-                .get(GcpStackUtil.getProjectId(credential), context.getLocation().getAvailabilityZone().value(), instanceName)
-                .execute();
-        LOGGER.debug(String.format("Instance %s created with status %s", instance.getName(), instance.getStatus()));
-        return instance;
+    private Map<String, Optional<NetworkInterface>> getNetworkInterfaceByInstance(AuthenticatedContext authenticatedContext,
+            Map<String, CloudResource> instanceNameMap) {
+        return gcpNetworkInterfaceProvider.provide(authenticatedContext, new ArrayList<>(instanceNameMap.values()));
+    }
+
+    private CloudVmMetaDataStatus getCloudVmMetaDataStatus(CloudResource cloudResource, CloudInstance matchedInstance,
+            Map<String, Optional<NetworkInterface>> networkInterfacesByInstance) {
+        CloudVmMetaDataStatus cloudVmMetaDataStatus;
+        if (cloudResource != null) {
+            CloudInstance cloudInstance = new CloudInstance(cloudResource.getName(), matchedInstance.getTemplate(), matchedInstance.getAuthentication());
+            Optional<NetworkInterface> networkInterface = networkInterfacesByInstance.get(cloudResource.getName());
+            try {
+                String privateIp = networkInterface
+                        .map(NetworkInterface::getNetworkIP)
+                        .orElseThrow(() -> new IOException("Private IP must not be null."));
+                String publicIp = null;
+                List<AccessConfig> acl = networkInterface.get().getAccessConfigs();
+                if (acl != null && acl.get(0) != null) {
+                    publicIp = networkInterface.get().getAccessConfigs().get(0).getNatIP();
+                }
+                CloudInstanceMetaData metaData = new CloudInstanceMetaData(privateIp, publicIp);
+                CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
+                cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, metaData);
+
+            } catch (IOException e) {
+                LOGGER.warn(String.format("Instance %s is not reachable", cloudResource.getName()), e);
+                CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.UNKNOWN);
+                cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, CloudInstanceMetaData.EMPTY_METADATA);
+            }
+        } else {
+            CloudVmInstanceStatus status = new CloudVmInstanceStatus(matchedInstance, InstanceStatus.TERMINATED);
+            cloudVmMetaDataStatus = new CloudVmMetaDataStatus(status, CloudInstanceMetaData.EMPTY_METADATA);
+        }
+        return cloudVmMetaDataStatus;
     }
 }
