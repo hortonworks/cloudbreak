@@ -39,6 +39,8 @@ public class AwsDownscaleService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsDownscaleService.class);
 
+    private static final int MAX_DETACH_INSTANCE_SIZE = 20;
+
     @Inject
     private AwsComputeResourceService awsComputeResourceService;
 
@@ -72,11 +74,9 @@ public class AwsDownscaleService {
 
             String asGroupName = cfStackUtil.getAutoscalingGroupName(auth, vms.get(0).getTemplate().getGroupName(),
                     auth.getCloudContext().getLocation().getRegion().value());
-            DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceIds)
-                    .withShouldDecrementDesiredCapacity(true);
             AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(auth.getCloudCredential()),
                     auth.getCloudContext().getLocation().getRegion().value());
-            detachInstances(instanceIds, detachInstancesRequest, amazonASClient);
+            detachInstances(asGroupName, instanceIds, amazonASClient);
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(auth.getCloudCredential()),
                     auth.getCloudContext().getLocation().getRegion().value());
             terminateInstances(instanceIds, amazonEC2Client);
@@ -103,16 +103,21 @@ public class AwsDownscaleService {
         return awsResourceConnector.check(auth, resources);
     }
 
-    private void detachInstances(List<String> instanceIds, DetachInstancesRequest detachInstancesRequest, AmazonAutoScalingRetryClient amazonASClient) {
+    private void detachInstances(String asGroupName, List<String> instanceIds, AmazonAutoScalingRetryClient amazonASClient) {
         try {
-            amazonASClient.detachInstances(detachInstancesRequest);
+            for (int i = 0; i < instanceIds.size(); i += MAX_DETACH_INSTANCE_SIZE) {
+                List<String> idPartition = instanceIds.subList(i, i + Math.min(instanceIds.size() - i, MAX_DETACH_INSTANCE_SIZE));
+                DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(idPartition)
+                        .withShouldDecrementDesiredCapacity(true);
+                amazonASClient.detachInstances(detachInstancesRequest);
+            }
         } catch (AmazonServiceException e) {
             if (!"ValidationError".equals(e.getErrorCode())
                     || !e.getErrorMessage().contains("not part of Auto Scaling")
                     || instanceIds.stream().anyMatch(id -> !e.getErrorMessage().contains(id))) {
                 throw e;
             }
-            LOGGER.debug(e.getErrorMessage());
+            LOGGER.info(e.getErrorMessage());
         }
     }
 

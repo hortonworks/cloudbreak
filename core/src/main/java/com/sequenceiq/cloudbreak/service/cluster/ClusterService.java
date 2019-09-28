@@ -539,7 +539,6 @@ public class ClusterService {
         try {
             transactionService.required(() -> {
                 Stack stack = stackService.findByCrn(crn);
-                long stackId = stack.getId();
                 Cluster cluster = stack.getCluster();
                 Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
                 Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();
