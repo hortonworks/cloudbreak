@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4Sing
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ResourceEventResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExternalDatabaseServiceEntryV4Response;
@@ -109,10 +110,12 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
-    public ResourceEvent postNotificationTest() {
+    public ResourceEventResponse postNotificationTest() {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         notificationSender.sendTestNotification(cloudbreakUser.getUserId());
-        return ResourceEvent.CREDENTIAL_CREATED;
+        ResourceEventResponse response = new ResourceEventResponse();
+        response.setEvent(ResourceEvent.CREDENTIAL_CREATED);
+        return response;
     }
 
     @Override
