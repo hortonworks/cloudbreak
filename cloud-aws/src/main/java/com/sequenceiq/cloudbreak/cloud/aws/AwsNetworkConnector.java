@@ -8,6 +8,7 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAI
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,7 @@ import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.OnFailure;
+import com.amazonaws.services.cloudformation.model.Tag;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
@@ -49,6 +51,8 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 
 @Service
 public class AwsNetworkConnector implements NetworkConnector {
@@ -80,8 +84,14 @@ public class AwsNetworkConnector implements NetworkConnector {
     @Inject
     private AwsCreatedSubnetProvider awsCreatedSubnetProvider;
 
+    @Inject
+    private AwsTagPreparationService awsTagPreparationService;
+
+    @Inject
+    private DefaultCostTaggingService defaultCostTaggingService;
+
     @Override
-    public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
+    public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest, String creatorUser) {
         AwsCredentialView credentialView = new AwsCredentialView(networkRequest.getCloudCredential());
         AmazonCloudFormationRetryClient cloudFormationRetryClient = getCloudFormationRetryClient(credentialView, networkRequest.getRegion().value());
         List<SubnetRequest> subnetRequests = getCloudSubNets(networkRequest);
@@ -95,7 +105,7 @@ public class AwsNetworkConnector implements NetworkConnector {
             if (networkDoesNotExist(e)) {
                 LOGGER.warn("{} occurred during describe AWS CloudFormation stack for Network with stack name: '{}'. "
                         + "Assuming the CF Stack does not exist, so creating a new one. Exception message: {}", e.getClass(), cfStackName, e.getMessage());
-                return createNewCfNetworkStack(networkRequest, credentialView, cloudFormationRetryClient, cloudFormationTemplate);
+                return createNewCfNetworkStack(networkRequest, credentialView, cloudFormationRetryClient, cloudFormationTemplate, creatorUser);
             } else {
                 throw new CloudConnectorException("Failed to create network.", e);
             }
@@ -142,8 +152,9 @@ public class AwsNetworkConnector implements NetworkConnector {
     }
 
     private CreatedCloudNetwork createNewCfNetworkStack(NetworkCreationRequest networkRequest, AwsCredentialView credentialView,
-            AmazonCloudFormationRetryClient cloudFormationRetryClient, String cloudFormationTemplate) {
-        cloudFormationRetryClient.createStack(createStackRequest(networkRequest.getStackName(), cloudFormationTemplate));
+            AmazonCloudFormationRetryClient cloudFormationRetryClient, String cloudFormationTemplate, String creatorUser) {
+        Map<String, String> defaultTags = defaultCostTaggingService.prepareDefaultTags(creatorUser, null, CloudConstants.AWS);
+        cloudFormationRetryClient.createStack(createStackRequest(networkRequest.getStackName(), cloudFormationTemplate, defaultTags));
         LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' ", networkRequest.getStackName());
         return getCreatedNetworkWithPolling(networkRequest, credentialView, cloudFormationRetryClient);
     }
@@ -167,11 +178,13 @@ public class AwsNetworkConnector implements NetworkConnector {
         return new CreatedCloudNetwork(networkRequest.getStackName(), vpcId, subnets);
     }
 
-    private CreateStackRequest createStackRequest(String stackName, String cloudFormationTemplate) {
+    private CreateStackRequest createStackRequest(String stackName, String cloudFormationTemplate, Map<String, String> tags) {
+        Collection<Tag> awsTags = awsTagPreparationService.prepareCloudformationTags(null, tags);
         return new CreateStackRequest()
                 .withStackName(stackName)
                 .withOnFailure(OnFailure.DO_NOTHING)
                 .withTemplateBody(cloudFormationTemplate)
+                .withTags(awsTags)
                 .withCapabilities(CAPABILITY_IAM);
     }
 

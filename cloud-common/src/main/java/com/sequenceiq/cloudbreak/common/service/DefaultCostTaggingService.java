@@ -24,7 +24,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 @Service
 public class DefaultCostTaggingService {
@@ -71,12 +70,12 @@ public class DefaultCostTaggingService {
         return result;
     }
 
-    public Map<String, String> prepareDefaultTags(CloudbreakUser cbUser, Map<String, String> sourceMap, String platform) {
+    public Map<String, String> prepareDefaultTags(String cbUser, Map<String, String> sourceMap, String platform) {
         Map<String, String> result = new HashMap<>();
-        result.put(transform(CB_USER_NAME.key(), platform), transform(cbUser.getUsername(), platform));
+        result.put(transform(CB_USER_NAME.key(), platform), transform(cbUser, platform));
         result.put(transform(CB_VERSION.key(), platform), transform(cbVersion, platform));
         if (sourceMap == null || Strings.isNullOrEmpty(sourceMap.get(transform(OWNER.key(), platform)))) {
-            result.put(transform(OWNER.key(), platform), transform(cbUser.getUsername(), platform));
+            result.put(transform(OWNER.key(), platform), transform(cbUser, platform));
         }
         result.put(transform(CB_CREATION_TIMESTAMP.key(), platform), transform(String.valueOf(clock.getCurrentInstant().getEpochSecond()), platform));
         return result;

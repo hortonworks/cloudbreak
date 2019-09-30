@@ -19,12 +19,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultCostTaggingServiceTest {
 
-    private static final CloudbreakUser CB_USER = new CloudbreakUser("123", "testCrn", "apache1@apache.com", "apache1@apache.com", "tenant");
+    private static final String CB_USER = "apache1@apache.com";
 
     @Mock
     private Clock clock;

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 
 @Service
 public class AwsTagPreparationService {
@@ -44,7 +46,10 @@ public class AwsTagPreparationService {
 
     public Collection<com.amazonaws.services.cloudformation.model.Tag> prepareCloudformationTags(AuthenticatedContext ac, Map<String, String> userDefinedTags) {
         Collection<com.amazonaws.services.cloudformation.model.Tag> tags = new ArrayList<>();
-        tags.add(prepareCloudformationTag(CLOUDBREAK_CLUSTER_TAG, ac.getCloudContext().getName()));
+        Optional.ofNullable(ac)
+                .map(AuthenticatedContext::getCloudContext)
+                .map(CloudContext::getName)
+                .ifPresent(clusterName -> tags.add(prepareCloudformationTag(CLOUDBREAK_CLUSTER_TAG, clusterName)));
         if (!Strings.isNullOrEmpty(defaultCloudformationTag)) {
             tags.add(prepareCloudformationTag(CLOUDBREAK_ID, defaultCloudformationTag));
         }
