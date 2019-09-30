@@ -115,13 +115,11 @@ public class UserService {
             Map<String, UsersState> envToUmsStateMap = umsUsersStateProvider
                 .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter);
 
-            Set<String> userIdFilter = Set.of();
-
             Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
                     .collect(Collectors.toMap(Stack::getEnvironmentCrn,
                             stack -> asyncTaskExecutor.submit(() -> {
                                 MDCBuilder.buildMdcContext(stack);
-                                return synchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), userIdFilter);
+                                return synchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()));
                             })));
 
             List<SuccessDetails> success = new ArrayList<>();
@@ -154,7 +152,7 @@ public class UserService {
         }
     }
 
-    private SyncStatusDetail synchronizeStack(Stack stack, UsersState umsUsersState, Set<String> userIdFilter) {
+    private SyncStatusDetail synchronizeStack(Stack stack, UsersState umsUsersState) {
 
         // TODO improve exception handling
         // TODO: AP- Check if ums user has any user to be sync'ed, if not, skip. DH- revisit this check when implementing user removal
@@ -169,8 +167,7 @@ public class UserService {
             }
 
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-            UsersState ipaUsersState = userIdFilter.isEmpty() ? freeIpaUsersStateProvider.getUsersState(freeIpaClient)
-                    : freeIpaUsersStateProvider.getFilteredUsersState(freeIpaClient, userIdFilter);
+            UsersState ipaUsersState = freeIpaUsersStateProvider.getFilteredFreeIPAState(freeIpaClient, umsUsersState.getUsers());
             LOGGER.debug("IPA UsersState, found {} users and {} groups", ipaUsersState.getUsers().size(), ipaUsersState.getGroups().size());
 
             UsersStateDifference stateDifference = UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState);
@@ -277,7 +274,6 @@ public class UserService {
             LOGGER.debug("Removing group {}", groupname);
 
             try {
-                // TODO: Add method to delete group
                 freeIpaClient.deleteGroup(groupname);
                 LOGGER.debug("Success: {}", groupname);
             } catch (FreeIpaClientException e) {
