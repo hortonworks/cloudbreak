@@ -9,8 +9,10 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
@@ -34,7 +36,7 @@ public class MockInstanceConnector implements InstanceConnector {
     public List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
         for (CloudInstance instance : vms) {
-            CloudVmInstanceStatus instanceStatus = new CloudVmInstanceStatus(instance, InstanceStatus.CREATED);
+            CloudVmInstanceStatus instanceStatus = getVmInstanceStatus(authenticatedContext, instance, "start");
             cloudVmInstanceStatuses.add(instanceStatus);
         }
         return cloudVmInstanceStatuses;
@@ -44,7 +46,7 @@ public class MockInstanceConnector implements InstanceConnector {
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
         for (CloudInstance instance : vms) {
-            CloudVmInstanceStatus instanceStatus = new CloudVmInstanceStatus(instance, InstanceStatus.STOPPED);
+            CloudVmInstanceStatus instanceStatus = getVmInstanceStatus(authenticatedContext, instance, "stop");
             cloudVmInstanceStatuses.add(instanceStatus);
         }
         return cloudVmInstanceStatuses;
@@ -80,5 +82,20 @@ public class MockInstanceConnector implements InstanceConnector {
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
         return CB_FINGERPRINT;
+    }
+
+    private CloudVmInstanceStatus getVmInstanceStatus(AuthenticatedContext authenticatedContext, CloudInstance instance, String operation) {
+        try {
+            MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
+            HttpResponse<CloudVmInstanceStatus> response = Unirest
+                    .get(mockCredentialView.getMockEndpoint() + "/spi/" + instance.getInstanceId() + "/" + operation)
+                    .asObject(CloudVmInstanceStatus.class);
+            if (response.getStatus() != HttpStatus.OK.value()) {
+                throw new RuntimeException("Http status should be OK but got " + response.getStatus());
+            }
+            return response.getBody();
+        } catch (UnirestException e) {
+            throw new RuntimeException("can't fetch vm status from mock provider by " + operation, e);
+        }
     }
 }

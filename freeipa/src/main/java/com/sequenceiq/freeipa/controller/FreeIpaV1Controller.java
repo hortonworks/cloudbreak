@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,8 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaRootCertificateService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -56,6 +59,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private Validator<CreateFreeIpaRequest> createFreeIpaRequestValidator;
+
+    @Inject
+    private FreeIpaStartService freeIpaStartService;
+
+    @Inject
+    private FreeIpaStopService freeIpaStopService;
 
     @Override
     public DescribeFreeIpaResponse create(@Valid CreateFreeIpaRequest request) {
@@ -100,5 +109,17 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public CleanupResponse cleanup(@Valid CleanupRequest request) throws FreeIpaClientException {
         String accountId = crnService.getCurrentAccountId();
         return cleanupService.cleanup(accountId, request);
+    }
+
+    @Override
+    public void start(@NotEmpty String environmentCrn) throws Exception {
+        String accountId = crnService.getCurrentAccountId();
+        freeIpaStartService.start(environmentCrn, accountId);
+    }
+
+    @Override
+    public void stop(@NotEmpty String environmentCrn) throws Exception {
+        String accountId = crnService.getCurrentAccountId();
+        freeIpaStopService.stop(environmentCrn, accountId);
     }
 }
