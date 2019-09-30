@@ -6,7 +6,7 @@ public class CloudResourceStatus {
 
     private ResourceStatus status;
 
-    private final String statusReason;
+    private String statusReason;
 
     private Long privateId;
 
@@ -39,6 +39,10 @@ public class CloudResourceStatus {
 
     public String getStatusReason() {
         return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 
     public Long getPrivateId() {
