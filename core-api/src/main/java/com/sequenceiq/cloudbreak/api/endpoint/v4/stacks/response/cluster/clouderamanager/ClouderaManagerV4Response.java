@@ -6,24 +6,28 @@ import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class ClouderaManagerV4Response implements JsonEntity {
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.CM_REPO_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.CM_REPO_DETAILS)
     private ClouderaManagerRepositoryV4Response repository;
 
     @Valid
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.CM_PRODUCT_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.CM_PRODUCT_DETAILS)
     private List<ClouderaManagerProductV4Response> products;
+
+    @ApiModelProperty(ClusterModelDescription.CM_ENABLE_AUTOTLS)
+    private Boolean enableAutoTls = Boolean.FALSE;
 
     public ClouderaManagerRepositoryV4Response getRepository() {
         return repository;
@@ -41,6 +45,14 @@ public class ClouderaManagerV4Response implements JsonEntity {
         this.products = products;
     }
 
+    public Boolean getEnableAutoTls() {
+        return enableAutoTls;
+    }
+
+    public void setEnableAutoTls(Boolean enableAutoTls) {
+        this.enableAutoTls = enableAutoTls == null ? Boolean.FALSE : enableAutoTls;
+    }
+
     public ClouderaManagerV4Response withRepository(ClouderaManagerRepositoryV4Response repository) {
         setRepository(repository);
         return this;
@@ -48,6 +60,11 @@ public class ClouderaManagerV4Response implements JsonEntity {
 
     public ClouderaManagerV4Response withProducts(List<ClouderaManagerProductV4Response> products) {
         setProducts(products);
+        return this;
+    }
+
+    public ClouderaManagerV4Response withTlsEnabled(Boolean enabled) {
+        setEnableAutoTls(enabled);
         return this;
     }
 }
