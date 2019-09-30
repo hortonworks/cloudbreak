@@ -537,7 +537,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             .build();
 
         // sha256 hashed value of "Password123!"
-        respBuilder.setPasswordHash("e512ca494a454a47ad102dd3f05d48e0e647c8619e734621a760da360c198f32");
+        respBuilder.setPasswordHash("008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601");
         responseObserver.onNext(respBuilder.build());
         responseObserver.onCompleted();
     }
