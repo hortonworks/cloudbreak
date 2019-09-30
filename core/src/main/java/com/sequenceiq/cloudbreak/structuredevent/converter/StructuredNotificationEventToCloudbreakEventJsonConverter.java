@@ -18,7 +18,6 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
     public CloudbreakEventsJson convert(StructuredNotificationEvent source) {
         NotificationDetails notificationDetails = source.getNotificationDetails();
         OperationDetails operationDetails = source.getOperation();
-        //        cloudbreakEvent.setStackView(stackApiViewService.retrieveById(notificationDetails.getStackId()));
         return getCloudbreakEventsJson(notificationDetails, operationDetails);
     }
 
