@@ -21,6 +21,7 @@ public class DistroXClouderaManagerTestDto extends AbstractCloudbreakTestDto<Clo
     }
 
     public DistroXClouderaManagerTestDto valid() {
+        withAutoTls(false);
         return this;
     }
 
@@ -31,6 +32,11 @@ public class DistroXClouderaManagerTestDto extends AbstractCloudbreakTestDto<Clo
 
     public DistroXClouderaManagerTestDto withClouderaManagerRepository(DistroXClouderaManagerRepositoryTestDto clouderaManagerRepositoryEntity) {
         getRequest().setRepository(clouderaManagerRepositoryEntity.getRequest());
+        return this;
+    }
+
+    public DistroXClouderaManagerTestDto withAutoTls(boolean enabled) {
+        getRequest().setEnableAutoTls(enabled);
         return this;
     }
 

@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ResourceEventResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
@@ -26,7 +27,6 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.AccountPreferencesDes
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RepositoryConfigsValidationOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.SecurityRuleOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -82,7 +82,7 @@ public interface UtilV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.NOTIFICATION_TEST, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "postNotificationTest")
-    ResourceEvent postNotificationTest();
+    ResourceEventResponse postNotificationTest();
 
     @POST
     @Path("check_right")
