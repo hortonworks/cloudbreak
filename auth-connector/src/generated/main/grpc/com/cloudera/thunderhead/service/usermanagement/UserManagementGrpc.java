@@ -2881,6 +2881,80 @@ public final class UserManagementGrpc {
      return getDeleteWorkloadAdministrationGroupNameMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getListWorkloadAdministrationGroupsMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> METHOD_LIST_WORKLOAD_ADMINISTRATION_GROUPS = getListWorkloadAdministrationGroupsMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> getListWorkloadAdministrationGroupsMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> getListWorkloadAdministrationGroupsMethod() {
+    return getListWorkloadAdministrationGroupsMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> getListWorkloadAdministrationGroupsMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> getListWorkloadAdministrationGroupsMethod;
+    if ((getListWorkloadAdministrationGroupsMethod = UserManagementGrpc.getListWorkloadAdministrationGroupsMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getListWorkloadAdministrationGroupsMethod = UserManagementGrpc.getListWorkloadAdministrationGroupsMethod) == null) {
+          UserManagementGrpc.getListWorkloadAdministrationGroupsMethod = getListWorkloadAdministrationGroupsMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "ListWorkloadAdministrationGroups"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListWorkloadAdministrationGroups"))
+                  .build();
+          }
+        }
+     }
+     return getListWorkloadAdministrationGroupsMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getSetActorWorkloadCredentialsMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> METHOD_SET_ACTOR_WORKLOAD_CREDENTIALS = getSetActorWorkloadCredentialsMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> getSetActorWorkloadCredentialsMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> getSetActorWorkloadCredentialsMethod() {
+    return getSetActorWorkloadCredentialsMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> getSetActorWorkloadCredentialsMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> getSetActorWorkloadCredentialsMethod;
+    if ((getSetActorWorkloadCredentialsMethod = UserManagementGrpc.getSetActorWorkloadCredentialsMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getSetActorWorkloadCredentialsMethod = UserManagementGrpc.getSetActorWorkloadCredentialsMethod) == null) {
+          UserManagementGrpc.getSetActorWorkloadCredentialsMethod = getSetActorWorkloadCredentialsMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "SetActorWorkloadCredentials"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetActorWorkloadCredentials"))
+                  .build();
+          }
+        }
+     }
+     return getSetActorWorkloadCredentialsMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getGetActorWorkloadCredentialsMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> METHOD_GET_ACTOR_WORKLOAD_CREDENTIALS = getGetActorWorkloadCredentialsMethodHelper();
@@ -2916,6 +2990,43 @@ public final class UserManagementGrpc {
         }
      }
      return getGetActorWorkloadCredentialsMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGetEventGenerationIdsMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> METHOD_GET_EVENT_GENERATION_IDS = getGetEventGenerationIdsMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> getGetEventGenerationIdsMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> getGetEventGenerationIdsMethod() {
+    return getGetEventGenerationIdsMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> getGetEventGenerationIdsMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> getGetEventGenerationIdsMethod;
+    if ((getGetEventGenerationIdsMethod = UserManagementGrpc.getGetEventGenerationIdsMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getGetEventGenerationIdsMethod = UserManagementGrpc.getGetEventGenerationIdsMethod) == null) {
+          UserManagementGrpc.getGetEventGenerationIdsMethod = getGetEventGenerationIdsMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "GetEventGenerationIds"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetEventGenerationIds"))
+                  .build();
+          }
+        }
+     }
+     return getGetEventGenerationIdsMethod;
   }
 
   /**
@@ -3749,12 +3860,51 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Lists the workload administration groups in an account.
+     * </pre>
+     */
+    public void listWorkloadAdministrationGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getListWorkloadAdministrationGroupsMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Sets the actor workloads credentials. This will replace and overwrite any
+     * existing actor credentials.
+     * </pre>
+     */
+    public void setActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetActorWorkloadCredentialsMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Retrieves the actor workload credentials.
      * </pre>
      */
     public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getGetActorWorkloadCredentialsMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Returns a unique ID for the following events:
+     * * Role assignment events.
+     * * Resource role assignment events.
+     * * Group membership changes events.
+     * * Actor deletion events.
+     * * Actore workload credentials change events.
+     * The IDs are guaranteed to be unique and can be used to track the above
+     * changes in a specific account. If no such event has happened in the account
+     * since tracking started an empty string will be returned instead of an ID.
+     * </pre>
+     */
+    public void getEventGenerationIds(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetEventGenerationIdsMethodHelper(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -4299,12 +4449,33 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse>(
                   this, METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
           .addMethod(
+            getListWorkloadAdministrationGroupsMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse>(
+                  this, METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS)))
+          .addMethod(
+            getSetActorWorkloadCredentialsMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse>(
+                  this, METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS)))
+          .addMethod(
             getGetActorWorkloadCredentialsMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>(
                   this, METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS)))
+          .addMethod(
+            getGetEventGenerationIdsMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse>(
+                  this, METHODID_GET_EVENT_GENERATION_IDS)))
           .build();
     }
   }
@@ -5208,6 +5379,29 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Lists the workload administration groups in an account.
+     * </pre>
+     */
+    public void listWorkloadAdministrationGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getListWorkloadAdministrationGroupsMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Sets the actor workloads credentials. This will replace and overwrite any
+     * existing actor credentials.
+     * </pre>
+     */
+    public void setActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetActorWorkloadCredentialsMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Retrieves the actor workload credentials.
      * </pre>
      */
@@ -5215,6 +5409,25 @@ public final class UserManagementGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getGetActorWorkloadCredentialsMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Returns a unique ID for the following events:
+     * * Role assignment events.
+     * * Resource role assignment events.
+     * * Group membership changes events.
+     * * Actor deletion events.
+     * * Actore workload credentials change events.
+     * The IDs are guaranteed to be unique and can be used to track the above
+     * changes in a specific account. If no such event has happened in the account
+     * since tracking started an empty string will be returned instead of an ID.
+     * </pre>
+     */
+    public void getEventGenerationIds(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetEventGenerationIdsMethodHelper(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -6040,12 +6253,51 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Lists the workload administration groups in an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse listWorkloadAdministrationGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getListWorkloadAdministrationGroupsMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the actor workloads credentials. This will replace and overwrite any
+     * existing actor credentials.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse setActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetActorWorkloadCredentialsMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Retrieves the actor workload credentials.
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request) {
       return blockingUnaryCall(
           getChannel(), getGetActorWorkloadCredentialsMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Returns a unique ID for the following events:
+     * * Role assignment events.
+     * * Resource role assignment events.
+     * * Group membership changes events.
+     * * Actor deletion events.
+     * * Actore workload credentials change events.
+     * The IDs are guaranteed to be unique and can be used to track the above
+     * changes in a specific account. If no such event has happened in the account
+     * since tracking started an empty string will be returned instead of an ID.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse getEventGenerationIds(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetEventGenerationIdsMethodHelper(), getCallOptions(), request);
     }
   }
 
@@ -6948,6 +7200,29 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Lists the workload administration groups in an account.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> listWorkloadAdministrationGroups(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getListWorkloadAdministrationGroupsMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Sets the actor workloads credentials. This will replace and overwrite any
+     * existing actor credentials.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> setActorWorkloadCredentials(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetActorWorkloadCredentialsMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Retrieves the actor workload credentials.
      * </pre>
      */
@@ -6955,6 +7230,25 @@ public final class UserManagementGrpc {
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getGetActorWorkloadCredentialsMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Returns a unique ID for the following events:
+     * * Role assignment events.
+     * * Resource role assignment events.
+     * * Group membership changes events.
+     * * Actor deletion events.
+     * * Actore workload credentials change events.
+     * The IDs are guaranteed to be unique and can be used to track the above
+     * changes in a specific account. If no such event has happened in the account
+     * since tracking started an empty string will be returned instead of an ID.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> getEventGenerationIds(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetEventGenerationIdsMethodHelper(), getCallOptions()), request);
     }
   }
 
@@ -7035,7 +7329,10 @@ public final class UserManagementGrpc {
   private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 74;
   private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 75;
   private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 76;
-  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 77;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 77;
+  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 78;
+  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 79;
+  private static final int METHODID_GET_EVENT_GENERATION_IDS = 80;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -7362,9 +7659,21 @@ public final class UserManagementGrpc {
           serviceImpl.deleteWorkloadAdministrationGroupName((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse>) responseObserver);
           break;
+        case METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS:
+          serviceImpl.listWorkloadAdministrationGroups((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse>) responseObserver);
+          break;
+        case METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS:
+          serviceImpl.setActorWorkloadCredentials((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse>) responseObserver);
+          break;
         case METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS:
           serviceImpl.getActorWorkloadCredentials((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>) responseObserver);
+          break;
+        case METHODID_GET_EVENT_GENERATION_IDS:
+          serviceImpl.getEventGenerationIds((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -7504,7 +7813,10 @@ public final class UserManagementGrpc {
               .addMethod(getGetWorkloadAdministrationGroupNameMethodHelper())
               .addMethod(getSetWorkloadAdministrationGroupNameMethodHelper())
               .addMethod(getDeleteWorkloadAdministrationGroupNameMethodHelper())
+              .addMethod(getListWorkloadAdministrationGroupsMethodHelper())
+              .addMethod(getSetActorWorkloadCredentialsMethodHelper())
               .addMethod(getGetActorWorkloadCredentialsMethodHelper())
+              .addMethod(getGetEventGenerationIdsMethodHelper())
               .build();
         }
       }
