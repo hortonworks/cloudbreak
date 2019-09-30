@@ -48,25 +48,27 @@ public class FreeIpaUsersStateProvider {
         return builder.build();
     }
 
-    public UsersState getFilteredUsersState(FreeIpaClient freeIpaClient, Set<String> users) throws FreeIpaClientException {
+    public UsersState getFilteredFreeIPAState(FreeIpaClient freeIpaClient, Set<FmsUser> users) throws FreeIpaClientException {
         LOGGER.debug("Retrieving users with user ids [{}] from FreeIPA", users);
         UsersState.Builder builder = new UsersState.Builder();
 
-        for (String username : users) {
-            if (IPA_ONLY_USERS.contains(username)) {
+        // get all groups from IPA
+        freeIpaClient.groupFindAll().stream()
+            .filter(group -> !IPA_ONLY_GROUPS.contains(group.getCn()))
+            .forEach(group -> builder.addGroup(fromIpaGroup(group)));
+
+        for (FmsUser user : users) {
+            if (IPA_ONLY_USERS.contains(user.getName())) {
                 continue;
             }
-            Optional<com.sequenceiq.freeipa.client.model.User> ipaUserOptional = freeIpaClient.userFind(username);
+            Optional<com.sequenceiq.freeipa.client.model.User> ipaUserOptional = freeIpaClient.userFind(user.getName());
             if (ipaUserOptional.isPresent()) {
                 com.sequenceiq.freeipa.client.model.User ipaUser = ipaUserOptional.get();
                 builder.addUser(fromIpaUser(ipaUser));
                 ipaUser.getMemberOfGroup().stream()
                         .filter(group -> !IPA_ONLY_GROUPS.contains(group))
                         .forEach(groupname -> {
-                            FmsGroup fmsGroup = new FmsGroup();
-                            fmsGroup.setName(groupname);
-                            builder.addGroup(fmsGroup);
-                            builder.addMemberToGroup(groupname, username);
+                            builder.addMemberToGroup(groupname, user.getName());
                         });
             }
         }
