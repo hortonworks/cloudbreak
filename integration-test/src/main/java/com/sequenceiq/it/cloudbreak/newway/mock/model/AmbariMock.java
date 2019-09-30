@@ -12,6 +12,7 @@ import com.sequenceiq.it.spark.DynamicRouteStack;
 import com.sequenceiq.it.spark.ITResponse;
 import com.sequenceiq.it.spark.StatefulRoute;
 import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
+import com.sequenceiq.it.spark.ambari.AmbariClusterHostDeleteRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClustersHostsResponseW;
@@ -113,8 +114,7 @@ public class AmbariMock extends AbstractModelMock {
         getAmbariClusterHostStatus();
         getAmbariClusterServicesComponentsNamenode();
         putAmbariClusterHostComponents();
-        deleteClusterHostComponents();
-        deleteAmbariClusterHost();
+        deleteAmbariClusterHosts();
         getAmbariViews();
     }
 
@@ -225,12 +225,8 @@ public class AmbariMock extends AbstractModelMock {
         dynamicRouteStack.put(CLUSTERS_CLUSTER_HOST_COMPONENTS, new AmbariClusterRequestsResponse());
     }
 
-    private void deleteClusterHostComponents() {
-        dynamicRouteStack.delete(CLUSTERS_CLUSTER_HOSTS_HOSTNAME_HOST_COMPONENTS, new EmptyAmbariResponse());
-    }
-
-    private void deleteAmbariClusterHost() {
-        dynamicRouteStack.delete(CLUSTERS_CLUSTER_HOSTS_HOSTNAME, new AmbariClusterRequestsResponse());
+    private void deleteAmbariClusterHosts() {
+        dynamicRouteStack.delete(CLUSTERS_CLUSTER_HOSTS, (StatefulRoute) new AmbariClusterHostDeleteRequestsResponse());
     }
 
     private void postAmbariUsers() {

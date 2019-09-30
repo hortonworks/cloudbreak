@@ -132,7 +132,7 @@ public class MockSparkServer {
                     : new EmptyAmbariClusterResponse();
             return itResp.handle(req, resp);
         });
-        get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap, "SUCCESSFUL"));
+        get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap, new HashSet<>(), "SUCCESSFUL"));
         post(AMBARI_API_ROOT + "/clusters/:cluster/requests", new AmbariClusterRequestsResponse());
         get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
         post(AMBARI_API_ROOT + "/clusters/:cluster", (req, resp) -> {

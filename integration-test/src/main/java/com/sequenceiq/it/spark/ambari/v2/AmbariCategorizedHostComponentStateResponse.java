@@ -38,30 +38,35 @@ public class AmbariCategorizedHostComponentStateResponse extends ITResponse impl
         rootNode.put("href", request.url() + "?fields=host_components/HostRoles/state,host_components/component/ServiceComponentInfo/category");
         ArrayNode items = rootNode.putArray("items");
 
-        instanceMap.forEach((key, value) -> {
-            String hostName = HostNameUtil.generateHostNameByIp(value.getMetaData().getPrivateIp());
+        String hostsParam = request.queryParams().stream().filter(qp -> qp.contains("host_name.in")).findFirst().orElse("");
 
-            ObjectNode item = items.addObject();
-            ObjectNode hosts = item.putObject("Hosts");
-            String clusterName = request.params(":cluster");
-            hosts.put("cluster_name", clusterName);
-            hosts.put("host_name", hostName);
-            ArrayNode hostComponents = item.putArray("host_components");
+        instanceMap.entrySet().stream()
+                .filter(e -> hostsParam.isEmpty() || hostsParam.contains(e.getValue().getMetaData().getPrivateIp().replaceAll("\\.", "-") + "."))
+                .forEach(e -> {
+                    String hostName = HostNameUtil.generateHostNameByIp(e.getValue().getMetaData().getPrivateIp());
 
-            ObjectNode hostComponent = hostComponents.addObject();
+                    ObjectNode item = items.addObject();
+                    ObjectNode hosts = item.putObject("Hosts");
+                    String clusterName = request.params(":cluster");
+                    hosts.put("cluster_name", clusterName);
+                    hosts.put("host_name", hostName);
+                    ArrayNode hostComponents = item.putArray("host_components");
 
-            ObjectNode hostRoles1 = hostComponent.putObject("HostRoles");
-            hostRoles1.put("component_name", "DATANODE");
-            hostRoles1.put("cluster_name", clusterName);
-            hostRoles1.put("host_name", hostName);
-            hostRoles1.put("state", "STARTED");
+                    ObjectNode hostComponent = hostComponents.addObject();
 
-            ArrayNode componentArray = hostComponent.putArray("component");
-            ObjectNode component = componentArray.addObject();
-            ObjectNode serviceComponentInfo = component.putObject("ServiceComponentInfo");
-            serviceComponentInfo.put("component_name", "DATANODE");
-            serviceComponentInfo.put("category", "MASTER");
-        });
+                    ObjectNode hostRoles1 = hostComponent.putObject("HostRoles");
+                    hostRoles1.put("component_name", "DATANODE");
+                    hostRoles1.put("cluster_name", clusterName);
+                    hostRoles1.put("host_name", hostName);
+                    hostRoles1.put("state", "STARTED");
+                    hostRoles1.put("desired_admin_state", "INSERVICE");
+
+                    ArrayNode componentArray = hostComponent.putArray("component");
+                    ObjectNode component = componentArray.addObject();
+                    ObjectNode serviceComponentInfo = component.putObject("ServiceComponentInfo");
+                    serviceComponentInfo.put("component_name", "DATANODE");
+                    serviceComponentInfo.put("category", "MASTER");
+                });
 
         return rootNode;
     }

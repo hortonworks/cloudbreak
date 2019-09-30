@@ -7,8 +7,10 @@ import static com.sequenceiq.it.spark.ITResponse.SALT_BOOT_ROOT;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
+import com.sequenceiq.it.spark.ambari.AmbariClusterHostDeleteRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClustersHostsResponse;
@@ -47,6 +50,8 @@ import spark.Service;
 @Scope("prototype")
 public class ScalingMock extends MockServer {
     public static final String NAME = "ScalingMock";
+
+    private Set<String> removedHostsFromAmbari = new HashSet<>();
 
     private int grainsBaseAppendCount = 8;
 
@@ -135,7 +140,7 @@ public class ScalingMock extends MockServer {
         sparkService.post(AMBARI_API_ROOT + "/clusters/:cluster", new EmptyAmbariResponse());
         sparkService.get(AMBARI_API_ROOT + "/clusters/:cluster", new AmbariClusterResponse(instanceMap, clusterName));
         sparkService.get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(instanceMap), gson()::toJson);
-        sparkService.get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap, "INSTALLED"));
+        sparkService.get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap, removedHostsFromAmbari, "INSTALLED"));
         sparkService.put(AMBARI_API_ROOT + "/clusters/:cluster/services/*", new AmbariClusterRequestsResponse());
         sparkService.post(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClusterRequestsResponse());
         sparkService.get(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname/host_components/*", new AmbariComponentStatusOnHostResponse());
@@ -169,9 +174,7 @@ public class ScalingMock extends MockServer {
             return rootNode;
         });
         sparkService.put(AMBARI_API_ROOT + "/clusters/:cluster/host_components", new AmbariClusterRequestsResponse());
-        sparkService.delete(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname/host_components/*", new EmptyAmbariResponse());
-//        sparkService.delete(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname", new AmbariClusterRequestsResponse());
-        sparkService.delete(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClusterRequestsResponse());
+        sparkService.delete(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClusterHostDeleteRequestsResponse(instanceMap, removedHostsFromAmbari));
         sparkService.post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
     }
 
@@ -210,23 +213,18 @@ public class ScalingMock extends MockServer {
                     .exactTimes(1).verify();
             verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST").bodyContains("/nodes/hosts.sls").exactTimes(1).verify();
             verify(AMBARI_API_ROOT + "/hosts", "GET").atLeast(1).verify();
-//            verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").atLeast(1).verify();
         }
     }
 
     private void verifyDownScale(String clusterName, int scalingAdjustment) {
         if (isDownScale(scalingAdjustment)) {
-            int adjustment = Math.abs(scalingAdjustment);
             verifyRegexpPath(AMBARI_API_ROOT + "/blueprints/.*", "GET").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/configurations/service_config_versions", "GET").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").atLeast(1).verify();
             verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/.*", "GET").atLeast(2).verify();
-            verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "GET").exactTimes(6).verify();
-//            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/.*/host_components/.*", "DELETE").exactTimes(adjustment * 2).verify();
-//            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/((?!/).)*$", "DELETE").exactTimes(adjustment).verify();
-            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "DELETE").exactTimes(6).verify();
-            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/.*/host_components/.*", "GET").atLeast(adjustment * 2).verify();
+            verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "GET").exactTimes(2).verify();
+            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "DELETE").exactTimes(1).verify();
             verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/services/.*", "PUT").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/requests", "POST").bodyContains("DECOMMISSION").exactTimes(2).verify();
             verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/host_components", "PUT").bodyContains("INSTALLED")
