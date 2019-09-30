@@ -55,10 +55,6 @@
                         "base": true,
                         "configs": [
                             {
-                                "name": "atlas_kafka_bootstrap_servers",
-                                "value": "{{{format-join host_groups.master format='%s:9092' }}}"
-                            },
-                            {
                               "name": "atlas_authentication_method_file",
                               "value": "false"
                             }
