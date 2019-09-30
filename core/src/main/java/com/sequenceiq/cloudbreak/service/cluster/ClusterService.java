@@ -539,32 +539,40 @@ public class ClusterService {
         try {
             transactionService.required(() -> {
                 Stack stack = stackService.findByCrn(crn);
-                Cluster cluster = stack.getCluster();
-                Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
-                Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();
-                Map<String, HostMetadata> failedHostMetadata = new HashMap<>();
-                for (String failedNode : failedNodes) {
-                    Optional<HostMetadata> hostMetadata = hostMetadataService.findHostInClusterByName(cluster.getId(), failedNode);
-                    if (hostMetadata.isEmpty()) {
-                        throw new BadRequestException("No metadata information for the node: " + failedNode);
-                    }
-                    HostGroup hostGroup = hostMetadata.get().getHostGroup();
-                    if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                        validateRepair(stack, hostMetadata.get(), false);
-                    }
-                    String hostGroupName = hostGroup.getName();
-                    if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                        prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryHostMetadata, failedNode, hostMetadata.get(), hostGroupName);
-                    } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
-                        failedHostMetadata.put(failedNode, hostMetadata.get());
-                    }
+                if (stack != null && !stack.getStatus().isInProgress()) {
+                    handleHealthChange(failedNodes, newHealthyNodes, stack);
+                } else {
+                    LOGGER.debug("Stack [{}] status is {}, thus we do not handle failure report.", stack.getName(), stack.getStatus());
                 }
-                handleChangedHosts(cluster, newHealthyNodes, autoRecoveryNodesMap, autoRecoveryHostMetadata, failedHostMetadata);
                 return null;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    private void handleHealthChange(Set<String> failedNodes, Set<String> newHealthyNodes, Stack stack) {
+        Cluster cluster = stack.getCluster();
+        Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
+        Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();
+        Map<String, HostMetadata> failedHostMetadata = new HashMap<>();
+        for (String failedNode : failedNodes) {
+            Optional<HostMetadata> hostMetadata = hostMetadataService.findHostInClusterByName(cluster.getId(), failedNode);
+            if (hostMetadata.isEmpty()) {
+                throw new BadRequestException("No metadata information for the node: " + failedNode);
+            }
+            HostGroup hostGroup = hostMetadata.get().getHostGroup();
+            if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                validateRepair(stack, hostMetadata.get(), false);
+            }
+            String hostGroupName = hostGroup.getName();
+            if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryHostMetadata, failedNode, hostMetadata.get(), hostGroupName);
+            } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
+                failedHostMetadata.put(failedNode, hostMetadata.get());
+            }
+        }
+        handleChangedHosts(cluster, newHealthyNodes, autoRecoveryNodesMap, autoRecoveryHostMetadata, failedHostMetadata);
     }
 
     private void handleChangedHosts(Cluster cluster, Set<String> newHealthyNodes,
