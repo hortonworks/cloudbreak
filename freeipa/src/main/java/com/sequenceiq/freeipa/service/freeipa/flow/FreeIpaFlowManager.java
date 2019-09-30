@@ -71,7 +71,7 @@ public class FreeIpaFlowManager {
                 accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
             }
             if (accepted == null || !accepted) {
-                throw new RuntimeException(String.format("Flows under operation, request not allowed."));
+                throw new RuntimeException("Flows under operation, request not allowed.");
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e.getMessage());

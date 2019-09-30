@@ -1,9 +1,15 @@
 package com.sequenceiq.freeipa.entity;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOPPED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOP_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOP_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOP_REQUESTED;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -235,6 +241,12 @@ public class Stack {
                 .collect(Collectors.toSet());
     }
 
+    public List<InstanceMetaData> getNotDeletedInstanceMetaDataList() {
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream())
+                .collect(Collectors.toList());
+    }
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -257,5 +269,25 @@ public class Stack {
 
     public void setAppVersion(String appVersion) {
         this.appVersion = appVersion;
+    }
+
+    public boolean isStopRequested() {
+        return STOP_REQUESTED.equals(stackStatus.getStatus());
+    }
+
+    public boolean isStopInProgress() {
+        return STOP_IN_PROGRESS.equals(stackStatus.getStatus()) || STOP_REQUESTED.equals(stackStatus.getStatus());
+    }
+
+    public boolean isAvailable() {
+        return AVAILABLE.equals(stackStatus.getStatus());
+    }
+
+    public boolean isStopped() {
+        return STOPPED.equals(stackStatus.getStatus());
+    }
+
+    public boolean isStopFailed() {
+        return STOP_FAILED.equals(stackStatus.getStatus());
     }
 }

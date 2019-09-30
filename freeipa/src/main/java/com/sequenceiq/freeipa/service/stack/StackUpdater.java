@@ -26,6 +26,10 @@ public class StackUpdater {
         return doUpdateStackStatus(stackId, detailedStatus, statusReason);
     }
 
+    public Stack updateStackStatus(Stack stack, DetailedStackStatus detailedStatus, String statusReason) {
+        return doUpdateStackStatus(stack, detailedStatus, statusReason);
+    }
+
     public void updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {
         securityConfig = securityConfigService.save(securityConfig);
         stack.setSecurityConfig(securityConfig);
@@ -34,15 +38,19 @@ public class StackUpdater {
 
     private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
         Stack stack = stackService.getStackById(stackId);
+        return doUpdateStackStatus(stack, detailedStatus, statusReason);
+    }
+
+    private Stack doUpdateStackStatus(Stack stack, DetailedStackStatus detailedStatus, String statusReason) {
         Status status = detailedStatus.getStatus();
         if (!Status.DELETE_COMPLETED.equals(stack.getStackStatus().getStatus())) {
             stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
             stack = stackService.save(stack);
             if (status.isRemovableStatus()) {
-                InMemoryStateStore.deleteStack(stackId);
+                InMemoryStateStore.deleteStack(stack.getId());
             } else {
                 PollGroup pollGroup = Status.DELETE_COMPLETED.equals(status) ? PollGroup.CANCELLED : PollGroup.POLLABLE;
-                InMemoryStateStore.putStack(stackId, pollGroup);
+                InMemoryStateStore.putStack(stack.getId(), pollGroup);
             }
         }
         return stack;

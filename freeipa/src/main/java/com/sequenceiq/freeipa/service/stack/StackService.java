@@ -54,6 +54,10 @@ public class StackService {
         return stackRepository.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
     }
 
+    public List<Long> findAllIdByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
+        return stackRepository.findAllIdByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+    }
+
     public Stack getByEnvironmentCrnAndAccountIdWithLists(String environmentCrn, String accountId) {
         return stackRepository.findByEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));

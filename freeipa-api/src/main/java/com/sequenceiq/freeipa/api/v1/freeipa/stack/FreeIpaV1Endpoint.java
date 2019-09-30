@@ -8,6 +8,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -68,4 +69,16 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.CLEANUP, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "cleanupV1")
     CleanupResponse cleanup(@Valid CleanupRequest request) throws Exception;
+
+    @PUT
+    @Path("start")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.START, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "startV1")
+    void start(@QueryParam("environment") @NotEmpty String environmentCrn) throws Exception;
+
+    @PUT
+    @Path("stop")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.STOP, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "stopV1")
+    void stop(@QueryParam("environment") @NotEmpty String environmentCrn) throws Exception;
 }
