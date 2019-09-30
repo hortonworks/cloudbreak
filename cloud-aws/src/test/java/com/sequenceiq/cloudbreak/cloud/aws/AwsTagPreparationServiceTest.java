@@ -38,6 +38,15 @@ public class AwsTagPreparationServiceTest {
     }
 
     @Test
+    public void testWhenCustomTagsDefinedNoAuthenticatedContext() {
+        ReflectionTestUtils.setField(awsTagPreparationService, "defaultCloudformationTag", "test1");
+        ReflectionTestUtils.setField(awsTagPreparationService, "customCloudformationTags", Lists.asList("test2:abc", new String[]{"test3:def"}));
+        awsTagPreparationService.init();
+        Collection<Tag> tags = awsTagPreparationService.prepareCloudformationTags(null, Maps.newHashMap());
+        Assert.assertEquals(3L, tags.size());
+    }
+
+    @Test
     public void testWhenCustomAndUserTagsDefined() {
         ReflectionTestUtils.setField(awsTagPreparationService, "defaultCloudformationTag", "test1");
         ReflectionTestUtils.setField(awsTagPreparationService, "customCloudformationTags", Lists.asList("test2:abc", new String[]{"test3:def"}));

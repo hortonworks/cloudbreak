@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 @Service
 public class MockNetworkConnector implements NetworkConnector {
     @Override
-    public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest request) {
+    public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest request, String creatorUser) {
         CreatedSubnet subnet1 = new CreatedSubnet();
         CreatedSubnet subnet2 = new CreatedSubnet();
         subnet1.setAvailabilityZone("europe-a");
