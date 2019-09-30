@@ -1,20 +1,23 @@
 package com.sequenceiq.environment.environment.v1;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
-import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
+import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.telemetry.response.WorkloadAnalyticsResponse;
+import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
-import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentWorkloadAnalytics;
+import com.sequenceiq.environment.environment.dto.telemetry.Features;
 import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
 import com.sequenceiq.environment.environment.dto.telemetry.WasbCloudStorageParameters;
 
@@ -35,7 +38,6 @@ public class TelemetryApiConverter {
         EnvironmentTelemetry telemetry = null;
         if (request != null) {
             EnvironmentLogging logging = null;
-            EnvironmentWorkloadAnalytics workloadAnalytics = null;
             if (request.getLogging() != null) {
                 LoggingRequest loggingRequest = request.getLogging();
                 logging = new EnvironmentLogging();
@@ -43,16 +45,24 @@ public class TelemetryApiConverter {
                 logging.setS3(convertS3(loggingRequest.getS3()));
                 logging.setWasb(convertWasb(loggingRequest.getWasb()));
             }
-            if (request.getWorkloadAnalytics() != null) {
-                WorkloadAnalyticsRequest waRequest = request.getWorkloadAnalytics();
-                workloadAnalytics = new EnvironmentWorkloadAnalytics();
-                workloadAnalytics.setAttributes(waRequest.getAttributes());
-                workloadAnalytics.setDatabusEndpoint(
-                        StringUtils.isNotEmpty(waRequest.getDatabusEndpoint()) ? waRequest.getDatabusEndpoint() : databusEndpoint
-                );
+            Map<String, Object> fluentAttributes = request.getFluentAttributes();
+            Features features = null;
+
+            if (request.getFeatures() != null) {
+                features = new Features();
+                FeaturesRequest featuresRequest = request.getFeatures();
+                if (reportDeploymentLogs) {
+                    final FeatureSetting reportDeploymentLogs;
+                    if (featuresRequest.getReportDeploymentLogs() != null) {
+                        reportDeploymentLogs = featuresRequest.getReportDeploymentLogs();
+                    } else {
+                        reportDeploymentLogs = new FeatureSetting();
+                        reportDeploymentLogs.setEnabled(false);
+                    }
+                    features.setReportDeploymentLogs(reportDeploymentLogs);
+                }
             }
-            boolean reportDeploymentLogsEnabled = reportDeploymentLogs ? request.getReportDeploymentLogs() : false;
-            telemetry = new EnvironmentTelemetry(logging, workloadAnalytics, reportDeploymentLogsEnabled);
+            telemetry = new EnvironmentTelemetry(logging, features, fluentAttributes, databusEndpoint);
         }
         return telemetry;
     }
@@ -90,16 +100,17 @@ public class TelemetryApiConverter {
                 loggingResponse.setS3(convertS3(logging.getS3()));
                 loggingResponse.setWasb(convertWasb(logging.getWasb()));
             }
-            if (telemetry.getWorkloadAnalytics() != null) {
-                EnvironmentWorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
-                waResponse = new WorkloadAnalyticsResponse();
-                waResponse.setAttributes(workloadAnalytics.getAttributes());
-                waResponse.setDatabusEndpoint(workloadAnalytics.getDatabusEndpoint());
-            }
             response = new TelemetryResponse();
             response.setLogging(loggingResponse);
             response.setWorkloadAnalytics(waResponse);
-            response.setReportDeploymentLogs(telemetry.isReportDeploymentLogs());
+            response.setFluentAttributes(telemetry.getFluentAttributes());
+            if (telemetry.getFeatures() != null) {
+                FeaturesResponse featuresResponse = new FeaturesResponse();
+                featuresResponse.setReportDeploymentLogs(telemetry.getFeatures().getReportDeploymentLogs());
+                response.setFeatures(featuresResponse);
+            }
+            response.setFluentAttributes(telemetry.getFluentAttributes());
+            response.setDatabusEndpoint(databusEndpoint);
         }
         return response;
     }
