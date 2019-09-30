@@ -2,6 +2,7 @@ package com.sequenceiq.it.spark.ambari;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -15,13 +16,15 @@ import spark.Request;
 import spark.Response;
 
 public class AmbariClustersHostsResponse extends ITResponse {
-
     private final Map<String, CloudVmMetaDataStatus> instanceMap;
+
+    private Set<String> removedHostsFromAmbari;
 
     private final String state;
 
-    public AmbariClustersHostsResponse(Map<String, CloudVmMetaDataStatus> instanceMap, String state) {
+    public AmbariClustersHostsResponse(Map<String, CloudVmMetaDataStatus> instanceMap, Set<String> removedHostsFromAmbari, String state) {
         this.instanceMap = instanceMap;
+        this.removedHostsFromAmbari = removedHostsFromAmbari;
         this.state = state;
     }
 
@@ -30,10 +33,13 @@ public class AmbariClustersHostsResponse extends ITResponse {
         response.type("text/plain");
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         ArrayNode items = rootNode.putArray("items");
-
+        String hostsParam = request.queryParams().stream().filter(qp -> qp.contains("host_name.in")).findFirst().orElse("");
         for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
             CloudVmMetaDataStatus status = stringCloudVmMetaDataStatusEntry.getValue();
-            if (InstanceStatus.STARTED == status.getCloudVmInstanceStatus().getStatus()) {
+            if (hostsParam.isEmpty()
+                    || hostsParam.contains(stringCloudVmMetaDataStatusEntry.getValue().getMetaData().getPrivateIp().replaceAll("\\.", "-") + ".")
+                    && !removedHostsFromAmbari.contains(stringCloudVmMetaDataStatusEntry.getKey())
+                    && InstanceStatus.STARTED == status.getCloudVmInstanceStatus().getStatus()) {
                 ObjectNode item = items.addObject();
                 String hostName = HostNameUtil.generateHostNameByIp(status.getMetaData().getPrivateIp());
                 item.putObject("Hosts").put("host_name", hostName);
@@ -41,13 +47,15 @@ public class AmbariClustersHostsResponse extends ITResponse {
                 ObjectNode dataNode = components.addObject();
                 dataNode.putObject("HostRoles")
                         .put("component_name", "DATANODE")
-                        .put("state", state);
+                        .put("state", state)
+                        .put("desired_admin_state", "INSERVICE");
                 addComponentNode(dataNode, "SLAVE", "DATANODE", "HDF", hostName);
 
                 ObjectNode nodeManagerNode = components.addObject();
                 nodeManagerNode.putObject("HostRoles")
                         .put("component_name", "NODEMANAGER")
-                        .put("state", state);
+                        .put("state", state)
+                        .put("desired_admin_state", "INSERVICE");
                 addComponentNode(nodeManagerNode, "SLAVE", "NODEMANAGER", "YARN", hostName);
             }
         }

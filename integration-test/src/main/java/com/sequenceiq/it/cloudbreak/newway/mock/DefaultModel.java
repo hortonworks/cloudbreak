@@ -2,7 +2,9 @@ package com.sequenceiq.it.cloudbreak.newway.mock;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
@@ -26,6 +28,8 @@ public class DefaultModel extends MockModel {
     private String clusterName;
 
     private Map<String, CloudVmMetaDataStatus> instanceMap = new HashMap<>();
+
+    private Set<String> removedHostsFromAmbari = new HashSet<>();
 
     private AmbariMock ambariMock;
 
@@ -79,6 +83,14 @@ public class DefaultModel extends MockModel {
         if (instanceMap.isEmpty()) {
             addInstance(numberOfServers);
         }
+    }
+
+    public Set<String> getRemovedHostsFromAmbari() {
+        return removedHostsFromAmbari;
+    }
+
+    public void removeHostsFromAmbari(Set<String> hosts) {
+        removedHostsFromAmbari.addAll(hosts);
     }
 
     public void addInstance(int numberOfAddedInstances) {
