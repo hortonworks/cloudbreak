@@ -72,6 +72,10 @@ public class PollingService<T> {
         return pollWithAbsoluteTimeout(statusCheckerTask, t, interval, maxAttempts, 1).getLeft();
     }
 
+    public PollingResult pollWithAttemptSingleFailure(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
+        return pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, 1).getLeft();
+    }
+
     private void sleep(long duration) {
         try {
             Thread.sleep(duration);
