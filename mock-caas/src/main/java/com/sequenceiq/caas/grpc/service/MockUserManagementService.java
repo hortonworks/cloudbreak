@@ -92,6 +92,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private static final int MOCK_USER_COUNT = 10;
 
+    private static final String ACCOUNT_SUBDOMAIN = "xcu2-8y8x";
+
     private static final String ACCOUNT_ID_ALTUS = "altus";
 
     private static final long CREATION_DATE_MS = 1483228800000L;
@@ -328,6 +330,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                 GetAccountResponse.newBuilder()
                         .setAccount(UserManagementProto.Account.newBuilder()
                                 .setClouderaManagerLicenseKey(cbLicense)
+                                .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
                                 .build())
                         .build());
         responseObserver.onCompleted();
