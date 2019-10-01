@@ -4,7 +4,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,35 +15,27 @@ public class EnvironmentTelemetry implements Serializable {
 
     private final EnvironmentLogging logging;
 
-    private final Features features;
+    private final EnvironmentWorkloadAnalytics workloadAnalytics;
 
-    private final Map<String, Object> fluentAttributes;
-
-    private final String databusEndpoint;
+    private final boolean reportDeploymentLogs;
 
     public EnvironmentTelemetry(@JsonProperty("logging") EnvironmentLogging logging,
-            @JsonProperty("features") Features features,
-            @JsonProperty("fluentAttributes") Map<String, Object> fluentAttributes,
-            @JsonProperty("databusEndpoint") String databusEndpoint) {
+            @JsonProperty("workloadAnalytics") EnvironmentWorkloadAnalytics workloadAnalytics,
+            @JsonProperty("reportDeploymentLogs") boolean reportDeploymentLogs) {
         this.logging = logging;
-        this.features = features;
-        this.fluentAttributes = fluentAttributes;
-        this.databusEndpoint = databusEndpoint;
+        this.workloadAnalytics = workloadAnalytics;
+        this.reportDeploymentLogs = reportDeploymentLogs;
     }
 
     public EnvironmentLogging getLogging() {
         return logging;
     }
 
-    public Features getFeatures() {
-        return features;
+    public EnvironmentWorkloadAnalytics getWorkloadAnalytics() {
+        return workloadAnalytics;
     }
 
-    public Map<String, Object> getFluentAttributes() {
-        return fluentAttributes;
-    }
-
-    public String getDatabusEndpoint() {
-        return databusEndpoint;
+    public boolean isReportDeploymentLogs() {
+        return reportDeploymentLogs;
     }
 }

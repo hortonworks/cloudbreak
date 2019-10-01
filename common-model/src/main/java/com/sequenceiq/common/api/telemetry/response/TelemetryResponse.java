@@ -17,12 +17,6 @@ public class TelemetryResponse extends TelemetryBase {
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
     private WorkloadAnalyticsResponse workloadAnalytics;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_FEATURES)
-    private FeaturesResponse features;
-
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_DATABUS_ENDPOINT)
-    private String databusEndpoint;
-
     public LoggingResponse getLogging() {
         return logging;
     }
@@ -37,21 +31,5 @@ public class TelemetryResponse extends TelemetryBase {
 
     public void setWorkloadAnalytics(WorkloadAnalyticsResponse workloadAnalytics) {
         this.workloadAnalytics = workloadAnalytics;
-    }
-
-    public FeaturesResponse getFeatures() {
-        return features;
-    }
-
-    public void setFeatures(FeaturesResponse features) {
-        this.features = features;
-    }
-
-    public String getDatabusEndpoint() {
-        return databusEndpoint;
-    }
-
-    public void setDatabusEndpoint(String databusEndpoint) {
-        this.databusEndpoint = databusEndpoint;
     }
 }

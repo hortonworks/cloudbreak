@@ -191,9 +191,7 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("azureInstanceMsi", ObjectUtils.defaultIfNull(this.azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
         if (this.overrideAttributes != null) {
             for (Map.Entry<String, Object> entry : this.overrideAttributes.entrySet()) {
-                if (!"enabled".equalsIgnoreCase(entry.getKey())
-                        && !"dbusMeteringEnabled".equalsIgnoreCase(entry.getKey())
-                        && map.containsKey(entry.getKey())) {
+                if (!"enabled".equalsIgnoreCase(entry.getKey()) && map.containsKey(entry.getKey())) {
                     map.put(entry.getKey(), entry.getValue());
                 }
             }

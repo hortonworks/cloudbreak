@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
-import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -328,13 +327,8 @@ public class SdxService implements ResourceIdProvider {
             loggingRequest.setWasb(environment.getTelemetry().getLogging().getWasb());
             loggingRequest.setStorageLocation(environment.getTelemetry().getLogging().getStorageLocation());
             telemetryRequest.setLogging(loggingRequest);
-            if (environment.getTelemetry().getFeatures() != null
-                    && environment.getTelemetry().getFeatures().getReportDeploymentLogs() != null) {
-                FeaturesRequest featuresRequest = new FeaturesRequest();
-                featuresRequest.setReportDeploymentLogs(
-                        environment.getTelemetry().getFeatures().getReportDeploymentLogs());
-                telemetryRequest.setFeatures(featuresRequest);
-            }
+            telemetryRequest.setReportDeploymentLogs(
+                    environment.getTelemetry().getReportDeploymentLogs());
             stackV4Request.setTelemetry(telemetryRequest);
         }
     }

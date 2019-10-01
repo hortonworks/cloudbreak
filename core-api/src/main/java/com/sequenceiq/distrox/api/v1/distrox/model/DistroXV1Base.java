@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
-import com.sequenceiq.common.api.type.FeatureSetting;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -29,7 +28,7 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
     private YarnDistroXV1Parameters yarn;
 
     @ApiModelProperty(StackModelDescription.WORKLOAD_ANALYTICS)
-    private FeatureSetting workloadAnalytics;
+    private Boolean workloadAnalytics = Boolean.TRUE;
 
     @ApiModelProperty
     private Long timeToLive;
@@ -77,11 +76,11 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
         this.yarn = yarn;
     }
 
-    public FeatureSetting getWorkloadAnalytics() {
+    public Boolean getWorkloadAnalytics() {
         return workloadAnalytics;
     }
 
-    public void setWorkloadAnalytics(FeatureSetting workloadAnalytics) {
+    public void setWorkloadAnalytics(Boolean workloadAnalytics) {
         this.workloadAnalytics = workloadAnalytics;
     }
 }

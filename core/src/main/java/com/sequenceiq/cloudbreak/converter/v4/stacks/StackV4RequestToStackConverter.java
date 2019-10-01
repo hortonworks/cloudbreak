@@ -192,7 +192,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(Stack stack, StackV4Request source) {
-        Telemetry telemetry = telemetryConverter.convert(source.getTelemetry(), source.getType());
+        Telemetry telemetry = telemetryConverter.convert(source.getTelemetry());
         try {
             return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.TELEMETRY, ComponentType.TELEMETRY.name(), Json.silent(telemetry), stack);
         } catch (Exception e) {
