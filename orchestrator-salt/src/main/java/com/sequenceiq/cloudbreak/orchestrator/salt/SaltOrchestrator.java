@@ -39,6 +39,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -532,21 +533,28 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void tearDown(List<GatewayConfig> allGatewayConfigs, Map<String, String> privateIPsByFQDN) throws CloudbreakOrchestratorException {
-        LOGGER.debug("Tear down hosts: {},", privateIPsByFQDN);
+    public void tearDown(List<GatewayConfig> allGatewayConfigs, Map<String, String> removeNodePrivateIPsByFQDN,
+            Set<Node> remainingNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
+        LOGGER.debug("Tear down hosts: {},", removeNodePrivateIPsByFQDN);
         LOGGER.debug("Gateway config for tear down: {}", allGatewayConfigs);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
+        Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector saltConnector = createSaltConnector(primaryGateway)) {
-            SaltStates.stopMinions(saltConnector, privateIPsByFQDN);
+            SaltStates.stopMinions(saltConnector, removeNodePrivateIPsByFQDN);
+            if (!CollectionUtils.isEmpty(remainingNodes)) {
+                OrchestratorBootstrap hostSave = new PillarSave(saltConnector, gatewayTargetIpAddresses, remainingNodes);
+                Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitModel);
+                saltPillarRunner.call();
+            }
         } catch (Exception e) {
             LOGGER.info("Error occurred during salt minion tear down", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
         List<GatewayConfig> liveGateways = allGatewayConfigs.stream()
-                .filter(gw -> !privateIPsByFQDN.values().contains(gw.getPrivateAddress())).collect(Collectors.toList());
+                .filter(gw -> !removeNodePrivateIPsByFQDN.containsValue(gw.getPrivateAddress())).collect(Collectors.toList());
         for (GatewayConfig gatewayConfig : liveGateways) {
             try (SaltConnector sc = createSaltConnector(gatewayConfig)) {
-                sc.wheel("key.delete", privateIPsByFQDN.keySet(), Object.class);
+                sc.wheel("key.delete", removeNodePrivateIPsByFQDN.keySet(), Object.class);
                 removeDeadSaltMinions(gatewayConfig);
             } catch (Exception e) {
                 LOGGER.info("Error occurred during salt minion tear down", e);
