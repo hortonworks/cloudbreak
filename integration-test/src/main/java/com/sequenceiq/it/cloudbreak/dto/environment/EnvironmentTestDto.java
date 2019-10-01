@@ -166,6 +166,14 @@ public class EnvironmentTestDto
         return withNetwork(environmentNetwork.getRequest());
     }
 
+    public EnvironmentTestDto withNetwork(String key) {
+        EnvironmentNetworkTestDto environmentNetwork = getTestContext().get(key);
+        if (environmentNetwork == null) {
+            throw new IllegalArgumentException("Environment Network does not exist!");
+        }
+        return withNetwork(environmentNetwork.getRequest());
+    }
+
     public EnvironmentTestDto withS3Guard(String tableName) {
         AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
         S3GuardRequestParameters s3GuardRequestParameters = new S3GuardRequestParameters();

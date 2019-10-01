@@ -11,6 +11,7 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
@@ -140,13 +141,15 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         String sdxInternal = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
+        String networkKey = "someNetwork";
 
         testContext
-                .given(EnvironmentNetworkTestDto.class)
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
                 .given(storageEnvKey, EnvironmentTestDto.class)
                 .withDescription("Env with telemetry")
                 .withLocation(ENVIRONMENT_LOCATION)
-                .withNetwork()
+                .withNetwork(networkKey)
                 .withTelemetry(telemetry())
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withMockIDBMS()
@@ -197,11 +200,13 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         String sdxInternal = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
+        String networkKey = "someNetwork";
 
         testContext
-                .given(EnvironmentNetworkTestDto.class)
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
                 .given(envKey, EnvironmentTestDto.class)
-                .withNetwork()
+                .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(envName)
                 .when(getEnvironmentTestClient().create())

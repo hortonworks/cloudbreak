@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaulatorUtil.evaluateIfTrueDoOtherwise;
+import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.evaluateIfTrueDoOtherwise;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Optional;

@@ -4,6 +4,8 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -22,11 +24,11 @@ public class Telemetry implements Serializable {
     @JsonProperty("databusEndpoint")
     private String databusEndpoint;
 
-    @JsonProperty("meteringEnabled")
-    private boolean meteringEnabled;
+    @JsonProperty("features")
+    private Features features;
 
-    @JsonProperty("reportDeploymentLogs")
-    private boolean reportDeploymentLogs;
+    @JsonProperty("fluentAttributes")
+    private Map<String, Object> fluentAttributes = new HashMap<>();
 
     public Logging getLogging() {
         return logging;
@@ -52,19 +54,19 @@ public class Telemetry implements Serializable {
         this.databusEndpoint = databusEndpoint;
     }
 
-    public boolean isMeteringEnabled() {
-        return meteringEnabled;
+    public Features getFeatures() {
+        return features;
     }
 
-    public void setMeteringEnabled(boolean meteringEnabled) {
-        this.meteringEnabled = meteringEnabled;
+    public void setFeatures(Features features) {
+        this.features = features;
     }
 
-    public boolean isReportDeploymentLogs() {
-        return reportDeploymentLogs;
+    public Map<String, Object> getFluentAttributes() {
+        return fluentAttributes;
     }
 
-    public void setReportDeploymentLogs(boolean reportDeploymentLogs) {
-        this.reportDeploymentLogs = reportDeploymentLogs;
+    public void setFluentAttributes(Map<String, Object> fluentAttributes) {
+        this.fluentAttributes = fluentAttributes;
     }
 }
