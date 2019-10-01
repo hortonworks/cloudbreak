@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreCloudStorageServiceConfigProvider.HMS_METASTORE_DIR;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +44,9 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
 
     private static final String S3GUARD_AUTHORITATIVE_PATH_PARAM = "fs.s3a.authoritative.path";
 
-    private static final String S3GUARD_TABLE_TAG_PARAM = "fs.s3a.s3guard.ddb.table.tag.cdp_table_role";
+    private static final String S3GUARD_TABLE_TAG_PARAM = "fs.s3a.s3guard.ddb.table.tag.";
+
+    private static final String CDP_TABLE_ROLE = "cdp_table_role";
 
     private static final String S3GUARD_TABLE_TAG_VALUE = "s3guard";
 
@@ -98,8 +101,7 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
         if (isS3GuardTableConfigured(s3FileSystemConfigurationsView)) {
             hdfsCoreSiteSafetyValveValue.append(ConfigUtils
                     .getSafetyValveProperty(S3GUARD_METADATASTORE_IMPL_PARAM, S3GUARD_METADATASTORE_IMPL_VALUE));
-            hdfsCoreSiteSafetyValveValue.append(ConfigUtils
-                    .getSafetyValveProperty(S3GUARD_TABLE_TAG_PARAM, S3GUARD_TABLE_TAG_VALUE));
+            addTags(source, hdfsCoreSiteSafetyValveValue);
             hdfsCoreSiteSafetyValveValue.append(ConfigUtils
                     .getSafetyValveProperty(S3GUARD_TABLE_CREATE_PARAM, S3GUARD_TABLE_CREATE_VALUE));
             hdfsCoreSiteSafetyValveValue.append(ConfigUtils
@@ -112,6 +114,15 @@ public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
                     .ifPresent(location -> hdfsCoreSiteSafetyValveValue.append(
                             ConfigUtils.getSafetyValveProperty(S3GUARD_AUTHORITATIVE_PATH_PARAM, location.getValue())));
         }
+    }
+
+    private void addTags(TemplatePreparationObject source, StringBuilder hdfsCoreSiteSafetyValveValue) {
+        for (Map.Entry<String, String> entry : source.getDefaultTags().entrySet()) {
+            hdfsCoreSiteSafetyValveValue.append(ConfigUtils
+                    .getSafetyValveProperty(S3GUARD_TABLE_TAG_PARAM + entry.getKey(), entry.getValue()));
+        }
+        hdfsCoreSiteSafetyValveValue.append(ConfigUtils
+                .getSafetyValveProperty(S3GUARD_TABLE_TAG_PARAM + CDP_TABLE_ROLE, S3GUARD_TABLE_TAG_VALUE));
     }
 
     private boolean isS3GuardTableConfigured(S3FileSystemConfigurationsView s3FileSystemConfigurationsView) {
