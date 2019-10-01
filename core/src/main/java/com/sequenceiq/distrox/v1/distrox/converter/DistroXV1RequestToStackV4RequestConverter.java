@@ -25,9 +25,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.network.DefaultNetworkRequiredService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
-import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
-import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
@@ -147,8 +145,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private TelemetryRequest getTelemetryRequest(DistroXV1Request source, DetailedEnvironmentResponse environment,
             SdxClusterResponse sdxClusterResponse) {
         TelemetryResponse envTelemetryResp = environment != null ? environment.getTelemetry() : null;
-        FeatureSetting workloadAnalyticsFeature = source.getWorkloadAnalytics();
-        return telemetryConverter.convert(envTelemetryResp, sdxClusterResponse, workloadAnalyticsFeature);
+        boolean workloadAnalytics = true;
+        return telemetryConverter.convert(envTelemetryResp, sdxClusterResponse, workloadAnalytics);
     }
 
     private NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment) {
@@ -209,7 +207,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSdx(getIfNotNull(source.getSharedService(), sdxConverter::getSdx));
-        request.setWorkloadAnalytics(getWorkloadAnalyticsFeature(source, source.getTelemetry(), sdxClusterResponse));
+        request.setWorkloadAnalytics(isWorkloadAnalyticsEnabled(source, source.getTelemetry(), sdxClusterResponse));
         request.setGatewayPort(source.getGatewayPort());
         return request;
     }
@@ -218,21 +216,22 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return CloudPlatform.valueOf(environment.getCloudPlatform());
     }
 
-    private FeatureSetting getWorkloadAnalyticsFeature(StackV4Request source, TelemetryRequest telemetryRequest,
+    private boolean isWorkloadAnalyticsEnabled(StackV4Request source, TelemetryRequest telemetryRequest,
             SdxClusterResponse sdxClusterResponse) {
+        boolean waEnabled = false;
         if (telemetryRequest != null && telemetryRequest.getWorkloadAnalytics() != null) {
-            FeatureSetting featureSetting = new FeatureSetting();
-            featureSetting.setEnabled(true);
-            return featureSetting;
+            waEnabled = true;
         }
-        TelemetryResponse telemetryResponse =
+        if (!waEnabled) {
+            TelemetryResponse telemetryResponse =
                     getIfNotNull(source.getEnvironmentCrn(),
                             crn -> environmentClientService.getByCrn(crn).getTelemetry());
-        WorkloadAnalyticsRequest waRequest = telemetryConverter.createWorkloadAnalyticsRequest(telemetryResponse, sdxClusterResponse, null);
-        Optional<FeatureSetting> featureSetting = telemetryConverter.createWorkloadAnalyticsFeature(waRequest);
-        FeatureSetting disabledWaFeature = new FeatureSetting();
-        disabledWaFeature.setEnabled(false);
-        return featureSetting.orElse(disabledWaFeature);
+            if (telemetryConverter.convert(telemetryResponse, sdxClusterResponse, true)
+                    .getWorkloadAnalytics() != null) {
+                waEnabled = true;
+            }
+        }
+        return waEnabled;
     }
 
     private TagsV4Request getTags(TagsV1Request source) {

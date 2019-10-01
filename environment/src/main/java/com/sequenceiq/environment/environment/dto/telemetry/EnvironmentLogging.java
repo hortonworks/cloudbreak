@@ -1,8 +1,6 @@
 package com.sequenceiq.environment.environment.dto.telemetry;
 
-import java.io.Serializable;
-
-public class EnvironmentLogging implements Serializable {
+public class EnvironmentLogging extends CommonTelemetryParams {
 
     private String storageLocation;
 

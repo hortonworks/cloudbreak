@@ -41,14 +41,12 @@ public class FluentConfigService {
         boolean enabled = false;
         boolean cloudStorageLoggingEnabled = false;
         if (telemetry != null) {
-            if (telemetry.getFluentAttributes() != null) {
-                builder.withOverrideAttributes(
-                        telemetry.getFluentAttributes() != null ? new HashMap<>(telemetry.getFluentAttributes()) : new HashMap<>()
-                );
-            }
             if (telemetry.getLogging() != null) {
                 Logging logging = telemetry.getLogging();
                 builder.withPlatform(platform)
+                        .withOverrideAttributes(
+                                logging.getAttributes() != null ? new HashMap<>(logging.getAttributes()) : new HashMap<>()
+                        )
                         .withProviderPrefix(DEFAULT_PROVIDER_PREFIX);
 
                 if (logging.getS3() != null) {
@@ -78,24 +76,19 @@ public class FluentConfigService {
     private boolean fillMeteringAndDeploymentReportConfigs(Telemetry telemetry, boolean databusEnabled,
             boolean meteringEnabled, FluentConfigView.Builder builder) {
         boolean validDatabusLogging = false;
-        if (meteringEnabled || isReportDeploymentLogsEnabled(telemetry)) {
+        if (meteringEnabled || telemetry.isReportDeploymentLogs()) {
             if (databusEnabled && meteringEnabled) {
                 builder.withMeteringEnabled(true);
                 LOGGER.debug("Fluent will be configured to send metering events.");
                 validDatabusLogging = true;
             }
-            if (databusEnabled && isReportDeploymentLogsEnabled(telemetry)) {
+            if (databusEnabled && telemetry.isReportDeploymentLogs()) {
                 builder.withReportClusterDeploymentLogs(true);
                 LOGGER.debug("Fluent based metering is enabled.");
                 validDatabusLogging = true;
             }
         }
         return validDatabusLogging;
-    }
-
-    private boolean isReportDeploymentLogsEnabled(Telemetry telemetry) {
-        return telemetry.getFeatures() != null && telemetry.getFeatures().getReportDeploymentLogs() != null
-                && telemetry.getFeatures().getReportDeploymentLogs().isEnabled();
     }
 
     private void fillS3Configs(FluentConfigView.Builder builder, String storageLocation) {
