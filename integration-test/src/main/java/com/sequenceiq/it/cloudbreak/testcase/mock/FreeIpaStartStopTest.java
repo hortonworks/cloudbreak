@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.mock.ITResponse.MOCK_ROOT;
-import static com.sequenceiq.it.cloudbreak.mock.model.SPIMock.START_INSTANCES;
-import static com.sequenceiq.it.cloudbreak.mock.model.SPIMock.STOP_INSTANCES;
+import static com.sequenceiq.it.cloudbreak.mock.model.SPIMock.START_INSTANCE;
+import static com.sequenceiq.it.cloudbreak.mock.model.SPIMock.STOP_INSTANCE;
 
 import javax.inject.Inject;
 
@@ -61,7 +61,7 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
             response.cookie("ipa_session", "dummysession");
             return "";
         });
-        testContext.getModel().getSpiMock().getDynamicRouteStack().get(MOCK_ROOT + STOP_INSTANCES, (request, response) -> {
+        testContext.getModel().getSpiMock().getDynamicRouteStack().get(MOCK_ROOT + STOP_INSTANCE, (request, response) -> {
             throw new BadRequestException("Stop failed on mock instance");
         });
         dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
@@ -85,7 +85,7 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
             response.cookie("ipa_session", "dummysession");
             return "";
         });
-        testContext.getModel().getSpiMock().getDynamicRouteStack().get(MOCK_ROOT + START_INSTANCES, (request, response) -> {
+        testContext.getModel().getSpiMock().getDynamicRouteStack().get(MOCK_ROOT + START_INSTANCE, (request, response) -> {
             throw new BadRequestException("Start failed on mock instance");
         });
         dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);

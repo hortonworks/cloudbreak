@@ -87,6 +87,9 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("${integrationtest.testsuite.cleanUpOnFailure:true}")
     private boolean cleanUpOnFailure;
 
+    @Value("${integrationtest.testsuite.cleanUp:true}")
+    private boolean cleanUp;
+
     @Inject
     private CloudProviderProxy cloudProvider;
 
@@ -706,6 +709,10 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public void cleanupTestContext() {
+        if (!cleanUp) {
+            LOGGER.info("Clean up is skipped due to cleanUp paramater");
+            return;
+        }
         if (!validated && initialized) {
             throw new IllegalStateException(
                     "Test context should be validated! Maybe do you forgot to call .validate() end of the test? See other tests as an example.");

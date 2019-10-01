@@ -2,8 +2,10 @@ package com.sequenceiq.it.cloudbreak.mock;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -36,10 +38,12 @@ public class DefaultModel extends MockModel {
 
     private ClouderaManagerMock clouderaManagerMock;
 
+    private List<ApiProductVersion> products;
+
     @Override
     public void startModel(Service sparkService, String mockServerAddress) {
         setMockServerAddress(mockServerAddress);
-        initInstanceMap(20);
+        initInstanceMap(150);
 
         ambariMock = new AmbariMock(sparkService, this);
         spiMock = new SPIMock(sparkService, this);
@@ -66,6 +70,16 @@ public class DefaultModel extends MockModel {
 
     public String getClusterName() {
         return clusterName;
+    }
+
+    @Override
+    public void setClouderaManagerProducts(List<ApiProductVersion> products) {
+        this.products = products;
+    }
+
+    @Override
+    public List<ApiProductVersion> getClouderaManagerProducts() {
+        return products;
     }
 
     public void setClusterName(String clusterName) {
@@ -121,5 +135,24 @@ public class DefaultModel extends MockModel {
         CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstanceWithId, InstanceStatus.TERMINATED);
         CloudVmMetaDataStatus cloudVmMetaDataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, vmMetaDataStatus.getMetaData());
         instanceMap.put(instanceId, cloudVmMetaDataStatus);
+    }
+
+    public void stopAllInstances() {
+        modifyInstances(InstanceStatus.STOPPED);
+    }
+
+    public void startAllInstances() {
+        modifyInstances(InstanceStatus.STARTED);
+    }
+
+    private void modifyInstances(InstanceStatus started) {
+        for (Map.Entry<String, CloudVmMetaDataStatus> entry : instanceMap.entrySet()) {
+            CloudVmMetaDataStatus currentVmMeta = entry.getValue();
+            CloudVmInstanceStatus currentInstance = currentVmMeta.getCloudVmInstanceStatus();
+            CloudVmInstanceStatus newInstanceStatus = new CloudVmInstanceStatus(currentInstance.getCloudInstance(), started);
+            CloudInstanceMetaData currentInstanceMeta = currentVmMeta.getMetaData();
+            CloudVmMetaDataStatus newVmMetaData = new CloudVmMetaDataStatus(newInstanceStatus, currentVmMeta.getMetaData());
+            entry.setValue(newVmMetaData);
+        }
     }
 }
