@@ -1,0 +1,6 @@
+name: "distrox mock stop start testcase"
+tests:
+  - name: "distrox mock stop start testcases"
+    parameters: {hostgroup: worker, min: 100, max: 150, times: 2}
+    classes:
+      - com.sequenceiq.it.cloudbreak.testcase.mock.DistroXClusterStopStartTest

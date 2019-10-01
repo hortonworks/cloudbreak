@@ -1,0 +1,8 @@
+#Obsolete, all-in-mock-package.yaml should be used for newway mock tests
+name: "mock-big-cluster-tests"
+tests:
+  - name: "mockbigclusters start and scale"
+    parameters: {workerInstanceCount: 100, computeInstanceCount: 100}
+    classes:
+      - com.sequenceiq.it.cloudbreak.newway.testcase.StackStopTest
+

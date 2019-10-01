@@ -1,0 +1,6 @@
+name: "a freeipai papnak fapipaja van"
+tests:
+  - name: "freeipa"
+    parameters: {hostgroup: worker, min: 100, max: 150, times: 2}
+    classes:
+      - com.sequenceiq.it.cloudbreak.testcase.mock.FreeIpaStartStopTest
