@@ -163,8 +163,8 @@ cb:
                 CDP 1.1 - Data Mart: Apache Impala, Hue=cdp-data-mart-701;
                 CDP 1.1 - Operations Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-op-data-mart-701;
                 CDP 1.1 - Operational Database: Apache HBase=cdp-opdb-701;
-                CDP 1.1 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-701;
-                CDP 1.1 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-701;
+                CDP 1.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-702;
+                CDP 1.2 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-702;
 
     ambari:
       defaults:
