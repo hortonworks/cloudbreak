@@ -15,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.workspace.authorization.UmsWorkspaceAuthorizationService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceRepository;
@@ -101,6 +102,10 @@ public class WorkspaceService {
 
     public Optional<Workspace> getByNameForUser(String name, User user) {
         return Optional.ofNullable(workspaceRepository.getByName(getAccountWorkspaceName(user), user.getTenant()));
+    }
+
+    public Optional<Workspace> getByNameForTenant(String workspaceName, Tenant tenant) {
+        return Optional.ofNullable(workspaceRepository.getByName(workspaceName, tenant));
     }
 
     /**

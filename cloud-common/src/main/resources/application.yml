@@ -604,6 +604,7 @@ cb:
             amazonlinux2:
               - mpackUrl: http://public-repo-1.hortonworks.com/HDF/amazonlinux2/3.x/updates/3.3.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
                 stackDefault: true
+  workspace.service.cache.ttl: 15
 
   structuredevent:
     rest:
