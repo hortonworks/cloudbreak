@@ -246,7 +246,7 @@ public class SaltOrchestratorTest {
 
         when(SaltStates.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
 
-        saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN);
+        saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null);
 
         verify(saltConnector, times(1)).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
         verifyStatic(SaltStates.class);
@@ -269,7 +269,7 @@ public class SaltOrchestratorTest {
         SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
 
         try {
-            saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN);
+            saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null);
             fail();
         } catch (CloudbreakOrchestratorFailedException e) {
             assertTrue(e.getCause() instanceof NullPointerException);
