@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.converter.BlueprintRequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil;
 
 @Service
 public class DefaultBlueprintCache {
@@ -51,7 +52,7 @@ public class DefaultBlueprintCache {
             try {
                 String[] split = blueprintText.trim().split("=");
                 if (blueprintUtils.isBlueprintNamePreConfigured(blueprintText, split)) {
-                    LOGGER.info("Load default validation '{}'.", blueprintText);
+                    LOGGER.info("Load default validation '{}'.", AnonymizerUtil.anonymize(blueprintText));
                     BlueprintRequest blueprintJson = new BlueprintRequest();
                     blueprintJson.setName(split[0].trim());
                     JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(blueprintUtils.readDefaultBlueprintFromFile(split));

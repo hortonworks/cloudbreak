@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.BlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
@@ -103,7 +104,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             }
             String extendedBlueprint = blueprintProcessorFactory.get(blueprint.getBlueprintText())
                     .extendBlueprintGlobalConfiguration(SiteConfigurations.fromMap(configs), false).asText();
-            LOGGER.info("Extended blueprint result: {}", extendedBlueprint);
+            LOGGER.info("Extended blueprint result: {}", AnonymizerUtil.anonymize(extendedBlueprint));
             blueprint.setBlueprintText(extendedBlueprint);
         }
         try {

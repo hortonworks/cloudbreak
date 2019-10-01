@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -222,7 +223,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
     private void addBlueprint(Long stackId, AmbariClient ambariClient, String blueprintText, Boolean topologyValidation) {
         try {
-            LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
+            LOGGER.info("Adding generated blueprint to Ambari: {}", AnonymizerUtil.anonymize(JsonUtil.minify(blueprintText)));
             ambariClient.addBlueprint(blueprintText, topologyValidation);
         } catch (HttpResponseException hre) {
             if (hre.getStatusCode() == HttpStatus.SC_CONFLICT) {
