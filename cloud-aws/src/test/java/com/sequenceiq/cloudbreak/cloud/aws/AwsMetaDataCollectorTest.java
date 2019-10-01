@@ -130,7 +130,7 @@ public class AwsMetaDataCollectorTest {
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, vms, vms);
+        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), vms, vms);
 
         Assert.assertEquals(1L, statuses.size());
         Assert.assertEquals("i-1", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
@@ -182,7 +182,7 @@ public class AwsMetaDataCollectorTest {
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, vms, Collections.emptyList());
+        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), vms, Collections.emptyList());
 
         Assert.assertEquals(3L, statuses.size());
         Assert.assertEquals("i-0", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
@@ -239,7 +239,7 @@ public class AwsMetaDataCollectorTest {
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, vms, vms);
+        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), vms, vms);
 
         Assert.assertEquals(2L, statuses.size());
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "i-1".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
@@ -296,7 +296,7 @@ public class AwsMetaDataCollectorTest {
         when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
         AuthenticatedContext ac = authenticatedContext();
-        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, null, newVms, everyVms);
+        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, Collections.emptyList(), newVms, everyVms);
 
         Assert.assertEquals(1L, statuses.size());
         Assert.assertTrue(statuses.stream().anyMatch(predicate -> "i-2".equals(predicate.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())));
