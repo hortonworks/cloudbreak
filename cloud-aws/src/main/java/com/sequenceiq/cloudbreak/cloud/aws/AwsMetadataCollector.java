@@ -45,7 +45,8 @@ public class AwsMetadataCollector implements MetadataCollector {
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
             List<CloudInstance> allInstances) {
-        LOGGER.debug("Collect AWS metadata, resources: {}, vms: {}, allInstances: {}", resources, vms, allInstances);
+        LOGGER.debug("Collect AWS instance metadata, for cluster {} resources: {}, vms: {}, allInstances: {}",
+                ac.getCloudContext().getName(), resources.size(), vms.size(), allInstances.size());
         try {
             List<String> knownInstanceIdList = allInstances.stream()
                     .filter(cloudInstance -> cloudInstance.getInstanceId() != null)
@@ -60,7 +61,7 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     private List<CloudVmMetaDataStatus> collectCloudVmMetaDataStatuses(AuthenticatedContext ac, List<CloudInstance> vms,
             List<String> knownInstanceIdList) {
-        LOGGER.debug("Collect Cloud VM metadata statuses, vms: {}, knownInstanceIdList: {}", vms, knownInstanceIdList);
+        LOGGER.debug("Collect Cloud VM metadata statuses");
 
         List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses = new ArrayList<>();
 
@@ -89,8 +90,8 @@ public class AwsMetadataCollector implements MetadataCollector {
     }
 
     private Multimap<String, Instance> getUnkownInstancesForGroup(List<String> knownInstanceIdList, Multimap<String, Instance> instancesOnAWSForGroup) {
-        LOGGER.debug("Collect unknown cloud metadata statuses, knownInstanceIdList: {}, instancesOnAWSForGroup: {}",
-                knownInstanceIdList, instancesOnAWSForGroup);
+        LOGGER.debug("Collect unknown cloud metadata statuses, knownInstanceIdList: {}, instancesOnAWSForGroup: {}", knownInstanceIdList,
+                instancesOnAWSForGroup.keySet());
         Multimap<String, Instance> unkownInstancesForGroup = ArrayListMultimap.create();
         for (String group : instancesOnAWSForGroup.keySet()) {
             Collection<Instance> instances = instancesOnAWSForGroup.get(group);
@@ -104,8 +105,7 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     private void addFromUnknownMap(CloudInstance cloudInstance, Multimap<String, Instance> unknownMap,
             List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses) {
-        LOGGER.debug("Collect from unknown map, cloudInstance: {}, unknownMap: {}, collectedCloudVmMetaDataStatuses: {}",
-                cloudInstance, unknownMap, collectedCloudVmMetaDataStatuses);
+        LOGGER.debug("Collect from unknown map, cloudInstance: {}, unknownMap: {}", cloudInstance.getInstanceId(), unknownMap.keySet());
         String groupName = cloudInstance.getTemplate().getGroupName();
         Collection<Instance> unknownInstancesForGroup = unknownMap.get(groupName);
         if (!unknownInstancesForGroup.isEmpty()) {
@@ -124,8 +124,7 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     private void addKnownInstance(CloudInstance cloudInstance, Multimap<String, Instance> instancesOnAWSForGroup,
             List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses) {
-        LOGGER.debug("Add known intance, cloudInstance: {}, instancesOnAWSForGroup: {}, collectedCloudVmMetaDataStatuses: {}",
-                cloudInstance, instancesOnAWSForGroup, collectedCloudVmMetaDataStatuses);
+        LOGGER.debug("Add known intance, cloudInstance: {}, instancesOnAWSForGroup: {}", cloudInstance.getInstanceId(), instancesOnAWSForGroup.keySet());
         List<Instance> instanceList = instancesOnAWSForGroup.entries().stream().map(Entry::getValue).collect(Collectors.toList());
         instanceList.stream()
                 .filter(instance ->
