@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserS
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.service.workspace.CachedWorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -45,7 +45,7 @@ public class WorkspaceConfigurationFilterTest {
     private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
 
     @Mock
-    private WorkspaceService workspaceService;
+    private CachedWorkspaceService workspaceService;
 
     @Mock
     private UserService userService;
@@ -93,7 +93,6 @@ public class WorkspaceConfigurationFilterTest {
 
         underTest.doFilterInternal(request, response, filterChain);
 
-        verify(workspaceService, times(0)).create(any());
         verify(workspaceService, times(1)).getByName(eq(Crn.fromString(cbUser.getUserCrn()).getAccountId()), any());
         verify(workspaceService, times(0)).getByName(eq(cbUser.getTenant()), any());
     }
@@ -110,7 +109,6 @@ public class WorkspaceConfigurationFilterTest {
 
         underTest.doFilterInternal(request, response, filterChain);
 
-        verify(workspaceService, times(1)).create(any());
         verify(workspaceService, times(1)).getByName(eq(Crn.fromString(cbUser.getUserCrn()).getAccountId()), any());
         verify(workspaceService, times(0)).getByName(eq(cbUser.getTenant()), any());
     }
