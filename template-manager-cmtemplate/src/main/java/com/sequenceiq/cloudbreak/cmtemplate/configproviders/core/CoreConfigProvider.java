@@ -47,7 +47,8 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public Map<String, ApiClusterTemplateService> getAdditionalServices(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        if (source.getGatewayView() != null && cmTemplateProcessor.getServiceByType(CORE_SETTINGS).isEmpty()) {
+        if (isConfigurationNeeded(cmTemplateProcessor, source)
+                && cmTemplateProcessor.getServiceByType(CORE_SETTINGS).isEmpty()) {
             ApiClusterTemplateService coreSettings = createBaseCoreSettingsService();
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
             return hostgroupViews.stream()
