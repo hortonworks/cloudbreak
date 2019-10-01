@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
+import java.util.Arrays;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +22,7 @@ public class ClouderaManagerStartupListenerTask extends ClusterBasedStatusChecke
 
     private static final int[] ERROR_CODES = {502, 503, 504};
 
-    private static final String CONNECTION_REFUSED_MESSAGE = "Connection refused";
-
-    private static final String CONNECT_TIMED_OUT = "connect timed out";
+    private static final String[] CONNECTION_MESSAGES = {"Connection refused", "connect timed out", "Failed to connect"};
 
     @Override
     public boolean checkStatus(ClouderaManagerPollerObject clouderaManagerPollerObject) {
@@ -39,8 +39,7 @@ public class ClouderaManagerStartupListenerTask extends ClusterBasedStatusChecke
             }
         } catch (ApiException e) {
             String errorMessage = e.getMessage();
-            if (ArrayUtils.contains(ERROR_CODES, e.getCode())
-                    || containsIgnoreCase(errorMessage, CONNECTION_REFUSED_MESSAGE) || containsIgnoreCase(errorMessage, CONNECT_TIMED_OUT)) {
+            if (ArrayUtils.contains(ERROR_CODES, e.getCode()) || Arrays.stream(CONNECTION_MESSAGES).anyMatch(msg -> containsIgnoreCase(errorMessage, msg))) {
                 LOGGER.debug("Cloudera Manager is not running");
                 return false;
             } else {
