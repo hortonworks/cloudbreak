@@ -1,0 +1,438 @@
+spring:
+  freemarker:
+    checkTemplateLocation: false
+
+# The logfiles will be created in this directory, LOG_PATH system property will be set and can be used in logback.xml
+# http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-logging.html#boot-features-logging-file-output
+logging:
+  path: ${integrationtest.outputdir}
+
+integrationtest:
+  user:
+    accessKey: Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlcg==
+    secretKey: nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g=
+  database:
+    connectionUrl: jdbc:postgresql://localhost:5432/
+    username: postgres
+    password: postgres
+  cloudProvider: MOCK
+  sshPublicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+  defaultPrivateKeyFile:
+  subnetCidr: 10.0.0.0/16
+  accessCidr: 0.0.0.0/0
+  imageCatalogName: cloudbreak-default
+  gatewayPort: null
+  defaultCredentialDescription: "autotesting credential default description."
+  tags:
+    auto: tesztelek
+  clusterShape: LIGHT_DUTY
+  internalClusterShape: CUSTOM
+
+  testsuite:
+    pollingInterval: 1000
+    threadPoolSize: 3
+    skipRemainingTestsAfterOneFailed: true
+    cleanUpOnFailure: false
+
+  ambari:
+    defaultUser: admin
+    defaultPassword: Admin123
+    defaultPort: 8080
+
+  clouderamanager:
+    defaultUser: admin
+    defaultPassword: Admin123
+    defaultPort: 7180
+
+  # aws parameters
+  aws:
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    region: eu-west-1
+    location: eu-west-1
+    availabilityZone: eu-west-1a
+    vpcId: vpc-071202b5656f08a83
+    subnetIds:
+      - subnet-02d25e06bb8bcce9e
+      - subnet-0727c0067a06c31f7
+      - subnet-08435fb0a78dd9080
+    publicKeyId: api-e2e-test
+    credential:
+      type: key
+      roleArn:
+      accessKeyId:
+      secretKey:
+    instance:
+      type: m5.2xlarge
+      volumeSize: 100
+      volumeCount: 1
+      volumeType: gp2
+    baseimage:
+      redhat7:
+        imageId: ee68297d-59b3-4cb0-419a-f9e00763bdb4
+        blueprints:
+          - "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    cloudstorage:
+      s3:
+        instanceProfile:
+      baseLocation:
+      fileSystemType: S3
+
+  # azure parameters
+  azure:
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    availabilityZone:
+    region: West Europe
+    location: West Europe
+    network:
+      networkId:
+      firewallRules:
+      noPublicIp:
+      resourceGroupName:
+      subnetIds:
+    credential:
+      appId:
+      appPassword:
+      subscriptionId:
+      tenantId:
+    instance:
+      type: Standard_D12_v2
+      volumeSize: 100
+      volumeCount: 1
+      volumeType: Standard_LRS
+    cloudstorage:
+      accountKey:
+      accountName:
+      locationName:
+      baseLocation:
+      fileSystemType:
+
+  # gcp parameters
+  gcp:
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    availabilityZone: europe-west2-a
+    region: europe-west2
+    location: europe-west2
+    vpcId:
+    subnetId:
+    credential:
+      type: json
+      json:
+      p12:
+      serviceAccountId:
+      projectId:
+    instance:
+      type: n1-standard-8
+      volumeSize: 100
+      volumeCount: 1
+      volumeType: pd-standard
+
+  # openstack parameters
+  openstack:
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    availabilityZone: nova
+    region: RegionOne
+    location: Texas
+    publicNetId: 999e09bc-cf75-4a19-98fb-c0b4ddee6d93
+    networkingOption: self-service
+    instance:
+      type: m1.xlarge
+      volumeSize: 100
+      volumeCount: 0
+      volumeType: HDD
+    credential:
+      endpoint:
+      tenant:
+      userName:
+      password:
+
+  # yarn parameters
+  yarn:
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    availabilityZone:
+    region: default
+    location: Frankfurt
+    credential:
+      endpoint: http://yprod001.l42scl.hortonworks.com:9191
+    instance:
+      cpuCount: 4
+      memory: 8192
+      volumeSize: 0
+      volumeCount: 0
+    queue: HDP_2_6_0_0-integration-tests
+    imageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json
+    imageId: 16ad7759-83b1-42aa-aadf-0e3a6e7b5444
+
+  # mock parameters
+  mock:
+    defaultBlueprintName: "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    region: Europe
+    location: London
+    availabilityZone: London
+    vpcId: vpc1
+    subnetIds:
+      - net1
+      - net2
+    publicKeyId: publicKeyId
+    internetGateway: "1.1.1.1"
+    credential:
+      type: key
+      roleArn:
+      accessKeyId:
+      secretKey:
+    instance:
+      type: m5.2xlarge
+      volumeSize: 100
+      volumeCount: 1
+      volumeType: gp2
+    baseimage:
+      redhat7:
+        imageId: ee68297d-59b3-4cb0-419a-f9e00763bdb4
+        blueprints:
+          - "CDP 1.1 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    cloudstorage:
+      s3:
+        instanceProfile:
+      baseLocation:
+      fileSystemType: S3
+  # ---------- old test parameters: ---------- #
+
+  outputdir: .
+
+  publicKeyFile:
+
+  # uaa properties
+  uaa:
+    server:
+    user:
+    password:
+    autoscale:
+      clientId:
+      clientSecret:
+
+  # cloudbreak properites
+  cloudbreak:
+    server: http://localhost
+
+  # periscope properites
+  periscope:
+    server: http://localhost
+
+  # freeipa properties
+  freeipa:
+    server: http://localhost
+
+  # environment properties
+  environment:
+    server: http://localhost
+
+  # sdx properties
+  sdx:
+    server: http://localhost
+
+  # gcp credential details
+  gcpcredential:
+    name:
+    projectId:
+    serviceAccountId:
+    p12File:
+    jsonFile:
+    newServiceAccountId:
+    newP12File:
+
+  # aws credential details
+  awscredential:
+    name:
+    roleArn:
+    accessKey:
+    secretKey:
+
+  # openstack Keystone V2 credential details
+  openstackcredential:
+    name:
+    tenantName:
+    userName:
+    password:
+    endpoint:
+
+  # openstack Engineering V2 credential details
+  openstackEngcredential:
+    tenantName:
+    userName:
+    password:
+    endpoint:
+
+  # openstack Kilo V2 Admin credential details
+  openstackAdmincredential:
+    tenantName:
+    userName:
+    password:
+    endpoint:
+
+  # openstack Keystone V3 credential details
+  openstackFieldcredential:
+    name:
+    tenantName:
+    userDomain:
+    userName:
+    password:
+    endpoint:
+    projectDomainName:
+    projectName:
+    keystoneAuthScope:
+    keystoneVersion:
+    apiFacing:
+    selector:
+
+  # azure rm credential details
+  azurermcredential:
+    name:
+    secretKey:
+    accessKey:
+    subscriptionId:
+    tenantId:
+    newAccessKey:
+    newSecretKey:
+
+  rdsconfig:
+    rdsUser:
+    rdsPassword:
+    rdsConnectionUrl:
+
+  ldapconfig:
+    ldapServerHost:
+    bindPassword:
+
+  proxyconfig:
+    proxyHost:
+    proxyUser:
+    proxyPassword:
+
+  filesystemconfig:
+    accountKeyWasb:
+    accountKeyAbfs:
+    accountNameAbfs:
+
+  mockcredential:
+    name:
+
+  customAmbari:
+    aws:
+      hdf:
+        version:
+        repoUrl:
+        gpgKeyUrl:
+
+  cleanup:
+    retryCount: 3
+    cleanupBeforeStart: false
+
+  defaultBlueprintName:
+
+  ambariContainer: hortonworks/ambari-agent
+
+  logsearch:
+    url:
+    components:
+    timeRangeInterval: 8
+    queryTypes:
+      - id: cbid
+        name: sdi_cb_id
+        label: 'Cb Id'
+      - id: cbname
+        name: sdi_cb_name
+        label: 'Cb Name'
+      - id: cbowner
+        name: sdt_cb_owner
+        label: 'Sdt Cb Owner'
+
+  credentialNames:
+    GCP: it-gcp-credential
+    AWS: it-aws-credential
+    AZURE_RM: itazurermcredential
+    OPENSTACK: it-openstack-credential
+  defaultNetworks:
+    GCP: default-gcp-network
+    AWS: default-aws-network
+    AZURE_RM: default-azure-rm-network
+    AZURE: default-azure-network
+  defaultSecurityGroups:
+    GCP: UNSECURE-gcp-all-services-open
+    AWS: UNSECURE-aws-all-services-open
+    AZURE_RM: UNSECURE-azure_rm-all-services-open
+    OPENSTACK: UNSECURE-openstack-all-services-open
+    AZURE: default-azure-only-ssh-and-ssl
+  testSuites:
+    # Full smoke tests with cluster creation, stop-start, upscale-downscale
+    FULL_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop-updown.yaml
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop-updown.yaml
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop-updown.yaml
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop-updown.yaml
+    GCP_FULL_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop-updown.yaml
+    AWS_FULL_SMOKE_TEST:
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop-updown.yaml
+    AZURE_FULL_SMOKE_TEST:
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop-updown.yaml
+    AZURE_RM_FULL_SMOKE_TEST:
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop-updown.yaml
+
+    # Simple smoke tests with cluster creation
+    SIMPLE_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate.yaml
+      - classpath:/testsuites/aws/smoke/aws-clustercreate.yaml
+      - classpath:/testsuites/azure/smoke/azure-clustercreate.yaml
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate.yaml
+    GCP_SIMPLE_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate.yaml
+    AWS_SIMPLE_SMOKE_TEST:
+      - classpath:/testsuites/aws/smoke/aws-clustercreate.yaml
+    AZURE_SIMPLE_SMOKE_TEST:
+      - classpath:/testsuites/azure/smoke/azure-clustercreate.yaml
+    AZURE_RM_SIMPLE_SMOKE_TEST:
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate.yaml
+
+    # Smoke tests with cluster creation and stop-start
+    STARTSTOP_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop.yaml
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop.yaml
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop.yaml
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop.yaml
+    GCP_STARTSTOP_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop.yaml
+    AWS_STARTSTOP_SMOKE_TEST:
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop.yaml
+    AZURE_STARTSTOP_SMOKE_TEST:
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop.yaml
+    AZURE_RM_STARTSTOP_SMOKE_TEST:
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop.yaml
+
+    # Smoke tests with cluster creation and upscale-downscale
+    UPDOWN_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-updown.yaml
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-updown.yaml
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-updown.yaml
+    GCP_UPDOWN_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-updown.yaml
+    AWS_UPDOWN_SMOKE_TEST:
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-updown.yaml
+    AZURE_UPDOWN_SMOKE_TEST:
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
+    AZURE_RM_UPDOWN_SMOKE_TEST:
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-updown.yaml
+
+    # Kerberos test with cluster creation, stop-start and upscale-downscale
+    GCP_UPDOWN_KERBEROS_TEST:
+      - classpath:/testsuites/gcp/kerberos/gcp-clustercreate-startstop-updown.yaml
+
+    # Recipe test with cluster creation and upscale
+    GCP_UP_RECIPE_TEST:
+      - classpath:/testsuites/gcp/recipe/gcp-clustercreate-up.yaml
+
+mock:
+  server:
+    address: localhost
+  image:
+    catalog:
+      url: https://localhost:9443/imagecatalog
