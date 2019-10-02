@@ -26,12 +26,19 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
     }
 
     public TelemetryTestDto withLogging() {
-        LoggingRequest loggingRequest = new LoggingRequest();
-        S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
-        s3CloudStorageV1Parameters.setInstanceProfile(getCloudProvider().getInstanceProfile());
-        loggingRequest.setS3(s3CloudStorageV1Parameters);
-        loggingRequest.setStorageLocation(getCloudProvider().getBaseLocation());
-        getRequest().setLogging(loggingRequest);
+        switch (getTestContext().getCloudProvider().getCloudPlatform()) {
+            case AWS:
+                LoggingRequest loggingRequest = new LoggingRequest();
+                S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
+                s3CloudStorageV1Parameters.setInstanceProfile(getCloudProvider().getInstanceProfile());
+                loggingRequest.setS3(s3CloudStorageV1Parameters);
+                loggingRequest.setStorageLocation(getCloudProvider().getBaseLocation());
+                getRequest().setLogging(loggingRequest);
+                break;
+            // AZURE comes next.
+            default:
+                break;
+        }
         return this;
     }
 }

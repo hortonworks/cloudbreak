@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserS
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.service.workspace.CachedWorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -27,13 +27,13 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
 
     private final CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
-    private final WorkspaceService workspaceService;
+    private final CachedWorkspaceService workspaceService;
 
     private final UserService userService;
 
     private final AuthenticatedUserService authenticatedUserService;
 
-    public WorkspaceConfiguratorFilter(CloudbreakRestRequestThreadLocalService restRequestThreadLocalService, WorkspaceService workspaceService,
+    public WorkspaceConfiguratorFilter(CloudbreakRestRequestThreadLocalService restRequestThreadLocalService, CachedWorkspaceService workspaceService,
             UserService userService, AuthenticatedUserService authenticatedUserService) {
         this.restRequestThreadLocalService = restRequestThreadLocalService;
         this.workspaceService = workspaceService;
@@ -53,7 +53,8 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
             }
             Long workspaceId = tenantDefaultWorkspace.get().getId();
             restRequestThreadLocalService.setRequestedWorkspaceId(workspaceId);
-            filterChain.doFilter(new WorkspaceIdModifiedRequest(request, workspaceId), response);
+            WorkspaceIdModifiedRequest modifiedRequest = new WorkspaceIdModifiedRequest(request, workspaceId);
+            filterChain.doFilter(modifiedRequest, response);
         } else {
             filterChain.doFilter(request, response);
         }

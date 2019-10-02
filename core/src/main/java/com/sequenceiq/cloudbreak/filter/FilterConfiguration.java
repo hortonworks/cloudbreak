@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.service.workspace.CachedWorkspaceService;
 
 @Configuration
 public class FilterConfiguration {
@@ -25,7 +25,7 @@ public class FilterConfiguration {
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
-    private WorkspaceService workspaceService;
+    private CachedWorkspaceService workspaceService;
 
     @Inject
     private UserService userService;
