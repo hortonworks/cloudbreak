@@ -18,7 +18,7 @@ public abstract class MockModel {
         this.mockServerAddress = mockServerAddress;
     }
 
-    public abstract void startModel(Service sparkService, String mockServerAddress);
+    public abstract void startModel(Service sparkService, String mockServerAddress, List<String> activeProfiles);
 
     public abstract String getClusterName();
 

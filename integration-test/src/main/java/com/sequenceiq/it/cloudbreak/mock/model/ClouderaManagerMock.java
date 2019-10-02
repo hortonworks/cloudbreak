@@ -38,12 +38,15 @@ import com.cloudera.api.swagger.model.ApiUser2List;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.cloudbreak.mock.AbstractModelMock;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
+import com.sequenceiq.it.cloudbreak.mock.ProfileAwareRoute;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.util.HostNameUtil;
 
 import spark.Service;
 
 public class ClouderaManagerMock extends AbstractModelMock {
+
+    public static final String PROFILE_RETURN_HTTP_500 = "cmHttp500";
 
     public static final String API_ROOT = "/api/v31";
 
@@ -119,9 +122,12 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     private DynamicRouteStack dynamicRouteStack;
 
-    public ClouderaManagerMock(Service sparkService, DefaultModel defaultModel) {
+    private final List<String> activeProfiles;
+
+    public ClouderaManagerMock(Service sparkService, DefaultModel defaultModel, List<String> activeProfiles) {
         super(sparkService, defaultModel);
         dynamicRouteStack = new DynamicRouteStack(sparkService, defaultModel);
+        this.activeProfiles = activeProfiles;
     }
 
     public DynamicRouteStack getDynamicRouteStack() {
@@ -173,27 +179,29 @@ public class ClouderaManagerMock extends AbstractModelMock {
     }
 
     private void readAuthRoles() {
-        dynamicRouteStack.get(READ_AUTH_ROLES, (request, response) -> new ApiAuthRoleMetadataList());
+        dynamicRouteStack.get(READ_AUTH_ROLES,
+                new ProfileAwareRoute((request, response) -> new ApiAuthRoleMetadataList(), activeProfiles));
     }
 
     private void getEcho() {
-        dynamicRouteStack.get(ECHO, (request, response) -> {
+        dynamicRouteStack.get(ECHO, new ProfileAwareRoute((request, response) -> {
             String message = request.queryMap("message").value();
             message = message == null ? "Hello World!" : message;
             return new ApiEcho().message(message);
-        });
+        }, activeProfiles));
     }
 
     private void getUsers() {
-        dynamicRouteStack.get(USERS, (request, response) -> getUserList());
+        dynamicRouteStack.get(USERS, new ProfileAwareRoute((request, response) -> getUserList(), activeProfiles));
     }
 
     private void putUser() {
-        dynamicRouteStack.put(USERS_USER, (request, response) -> new ApiUser2().name(request.params("user")));
+        dynamicRouteStack.put(USERS_USER, new ProfileAwareRoute((request, response)
+                -> new ApiUser2().name(request.params("user")), activeProfiles));
     }
 
     private void postUser() {
-        dynamicRouteStack.post(USERS, (request, response) -> getUserList());
+        dynamicRouteStack.post(USERS, new ProfileAwareRoute((request, response) -> getUserList(), activeProfiles));
     }
 
     private ApiUser2List getUserList() {
@@ -206,7 +214,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     private void postImportClusterTemplate() {
         dynamicRouteStack.post(IMPORT_CLUSTERTEMPLATE,
-                (request, response, model) -> {
+                new ProfileAwareRoute((request, response, model) -> {
                     ApiClient client = new ApiClient();
 
                     Type type = ApiClusterTemplate.class;
@@ -214,90 +222,84 @@ public class ClouderaManagerMock extends AbstractModelMock {
                     model.setClouderaManagerProducts(template.getProducts());
 
                     return new ApiCommand().id(BigDecimal.ONE).name("Import ClusterTemplate").active(Boolean.TRUE);
-                });
+                }, activeProfiles));
     }
 
     private void postClouderaManagerHostDecommission() {
-        dynamicRouteStack.post(CM_HOST_DECOMMISSION,
-                (request, response) -> getSuccessfulApiCommand());
+        dynamicRouteStack.post(CM_HOST_DECOMMISSION, new ProfileAwareRoute((request, response)
+                -> getSuccessfulApiCommand(), activeProfiles));
     }
 
     private void postClouderaManagerDeleteCredentials() {
-        dynamicRouteStack.post(CM_DELETE_CREDENTIALS,
-                (request, response) -> getSuccessfulApiCommand());
+        dynamicRouteStack.post(CM_DELETE_CREDENTIALS, new ProfileAwareRoute((request, response)
+                -> getSuccessfulApiCommand(), activeProfiles));
     }
 
     private void postClouderaManagerRestart() {
-        dynamicRouteStack.post(CM_RESTART,
-                (request, response) -> getSuccessfulApiCommand());
+        dynamicRouteStack.post(CM_RESTART, new ProfileAwareRoute((request, response)
+                -> getSuccessfulApiCommand(), activeProfiles));
     }
 
     private void getCommand() {
-        dynamicRouteStack.get(COMMANDS_COMMAND,
-                (request, response) -> new ApiCommand().id(new BigDecimal(request.params("commandId"))).active(Boolean.FALSE).success(Boolean.TRUE));
+        dynamicRouteStack.get(COMMANDS_COMMAND, new ProfileAwareRoute((request, response)
+                -> new ApiCommand().id(new BigDecimal(request.params("commandId"))).active(Boolean.FALSE).success(Boolean.TRUE), activeProfiles));
     }
 
     private void getCommands() {
-        dynamicRouteStack.get(COMMANDS,
-                (request, response) -> new ApiCommandList().items(List.of(new ApiCommand().name("something"))));
+        dynamicRouteStack.get(COMMANDS, new ProfileAwareRoute((request, response)
+                -> new ApiCommandList().items(List.of(new ApiCommand().name("something"))), activeProfiles));
     }
 
     private void postStopCommand() {
-        dynamicRouteStack.post(COMMANDS_STOP,
-                (request, response) -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Stop"));
+        dynamicRouteStack.post(COMMANDS_STOP, new ProfileAwareRoute((request, response)
+                -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Stop"), activeProfiles));
     }
 
     private void postStartCommand() {
-        dynamicRouteStack.post(COMMANDS_START,
-                (request, response) -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Start"));
+        dynamicRouteStack.post(COMMANDS_START, new ProfileAwareRoute((request, response)
+                -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Start"), activeProfiles));
     }
 
     private void getClusterServices() {
-        dynamicRouteStack.get(CLUSTER_SERVICES,
-                (request, response) -> new ApiServiceList().items(List.of(new ApiService().name("service1"))));
+        dynamicRouteStack.get(CLUSTER_SERVICES, new ProfileAwareRoute((request, response)
+                -> new ApiServiceList().items(List.of(new ApiService().name("service1"))), activeProfiles));
     }
 
     private void getClusterHosts() {
-        dynamicRouteStack.get(CLUSTER_HOSTS,
-                (request, response, model) ->
-                        getHosts(model));
+        dynamicRouteStack.get(CLUSTER_HOSTS, new ProfileAwareRoute((request, response, model) -> getHosts(model), activeProfiles));
     }
 
     private void deleteClusterHosts() {
         dynamicRouteStack.delete(CLUSTER_HOSTS_BY_HOSTID,
-                (request, response, model) ->
-                        getHosts(model));
+                new ProfileAwareRoute((request, response, model) -> getHosts(model), activeProfiles));
     }
 
     private void getClusterHostTemplates() {
-        dynamicRouteStack.get(CLUSTER_HOSTTEMPLATES,
-                (request, response, model) -> {
-                    getHosts(model);
-
-                    ApiHostTemplate hostTemplateWorker = new ApiHostTemplate()
-                            .name("worker")
-                            .roleConfigGroupRefs(
-                                    List.of(new ApiRoleConfigGroupRef().roleConfigGroupName("WORKER")
+        dynamicRouteStack.get(CLUSTER_HOSTTEMPLATES, new ProfileAwareRoute((request, response, model) -> {
+            getHosts(model);
+            ApiHostTemplate hostTemplateWorker = new ApiHostTemplate()
+                    .name("worker")
+                    .roleConfigGroupRefs(
+                            List.of(new ApiRoleConfigGroupRef().roleConfigGroupName("WORKER")
                             ));
-                    ApiHostTemplate hostTemplateCompute = new ApiHostTemplate()
-                            .name("compute")
-                            .roleConfigGroupRefs(
-                                    List.of(new ApiRoleConfigGroupRef().roleConfigGroupName("DATANODE")
-                                    ));
-                    return new ApiHostTemplateList().items(List.of(hostTemplateWorker, hostTemplateCompute));
-                });
+            ApiHostTemplate hostTemplateCompute = new ApiHostTemplate()
+                    .name("compute")
+                    .roleConfigGroupRefs(
+                            List.of(new ApiRoleConfigGroupRef().roleConfigGroupName("DATANODE")
+                            ));
+            return new ApiHostTemplateList().items(List.of(hostTemplateWorker, hostTemplateCompute));
+        }, activeProfiles));
     }
 
     private void getClusterServiceRoles() {
-        dynamicRouteStack.get(CLUSTER_SERVICE_ROLES,
-                (request, response) -> new ApiRoleList().items(List.of(
-                        new ApiRole().name("role1").serviceRef(new ApiServiceRef().serviceName("service1"))
-                )));
+        dynamicRouteStack.get(CLUSTER_SERVICE_ROLES, new ProfileAwareRoute((request, response)
+                -> new ApiRoleList().items(List.of(new ApiRole().name("role1").serviceRef(new ApiServiceRef().serviceName("service1"))
+        )), activeProfiles));
     }
 
     private void deleteClusterServiceRole() {
-        dynamicRouteStack.delete(CLUSTER_SERVICE_ROLES_BY_ROLE,
-                (request, response) -> new ApiRole().name("role1"));
+        dynamicRouteStack.delete(CLUSTER_SERVICE_ROLES_BY_ROLE, new ProfileAwareRoute((request, response)
+                -> new ApiRole().name("role1"), activeProfiles));
     }
 
     private ApiCommand getSuccessfulApiCommand() {
@@ -309,14 +311,12 @@ public class ClouderaManagerMock extends AbstractModelMock {
     }
 
     private void postCMRefreshParcelRepos() {
-        dynamicRouteStack.post(CM_REFRESH_PARCELREPOS,
-                (request, response) ->
-                        getSuccessfulApiCommand());
+        dynamicRouteStack.post(CM_REFRESH_PARCELREPOS, new ProfileAwareRoute((request, response) -> getSuccessfulApiCommand(), activeProfiles));
     }
 
     private void getClusterParcels() {
         dynamicRouteStack.get(CLUSTER_PARCELS,
-                (request, response, model) -> {
+                new ProfileAwareRoute((request, response, model) -> {
                     List<ApiProductVersion> products = model.getClouderaManagerProducts();
 
                     return new ApiParcelList().items(
@@ -326,99 +326,110 @@ public class ClouderaManagerMock extends AbstractModelMock {
                                     .stage("ACTIVATED"))
                                     .collect(Collectors.toList())
                     );
-                });
+                }, activeProfiles));
     }
 
     private void postClusterDeployClientConfig() {
-        dynamicRouteStack.post(CLUSTER_DEPLOY_CLIENT_CONFIG,
-                (request, response) ->
-                        getSuccessfulApiCommand());
+        dynamicRouteStack.post(CLUSTER_DEPLOY_CLIENT_CONFIG, new ProfileAwareRoute((request, response)
+                -> getSuccessfulApiCommand(), activeProfiles));
     }
 
     private void postClusterCommandsRefresh() {
-        dynamicRouteStack.post(CLUSTER_COMMANDS_REFRESH,
-                (request, response) ->
-                        getSuccessfulApiCommand());
+        dynamicRouteStack.post(CLUSTER_COMMANDS_REFRESH, new ProfileAwareRoute((request, response)
+                -> getSuccessfulApiCommand(), activeProfiles));
     }
 
     private void postClusterCommandsRestart() {
-        dynamicRouteStack.post(CLUSTER_COMMANDS_RESTART,
-                (request, response) ->
-                        getSuccessfulApiCommand());
+        dynamicRouteStack.post(CLUSTER_COMMANDS_RESTART, new ProfileAwareRoute((request, response)
+                -> getSuccessfulApiCommand(), activeProfiles));
     }
 
     private void postBeginTrial() {
-        dynamicRouteStack.post(BEGIN_FREE_TRIAL, (request, response) -> null);
+        dynamicRouteStack.post(BEGIN_FREE_TRIAL, new ProfileAwareRoute((request, response) -> null, activeProfiles));
     }
 
     private void addManagementService() {
-        dynamicRouteStack.put(MANAGEMENT_SERVICE, (request, response) -> new ApiService());
+        dynamicRouteStack.put(MANAGEMENT_SERVICE, new ProfileAwareRoute((request, response) -> new ApiService(), activeProfiles));
     }
 
     private void getManagementService() {
-        dynamicRouteStack.get(MANAGEMENT_SERVICE, (request, response) -> new ApiService().serviceState(ApiServiceState.STARTED));
+        dynamicRouteStack.get(MANAGEMENT_SERVICE, new ProfileAwareRoute((request, response)
+                -> new ApiService().serviceState(ApiServiceState.STARTED), activeProfiles));
     }
 
     private void startManagementService() {
-        dynamicRouteStack.post(START_MANAGEMENT_SERVICE, (request, response) -> new ApiService());
+        dynamicRouteStack.post(START_MANAGEMENT_SERVICE, new ProfileAwareRoute((request, response) -> new ApiService(), activeProfiles));
     }
 
     private void listRoleTypes() {
-        dynamicRouteStack.get(ROLE_TYPES, (request, response) -> new ApiRoleTypeList().items(new ArrayList<>()));
+        dynamicRouteStack.get(ROLE_TYPES, new ProfileAwareRoute((request, response)
+                -> new ApiRoleTypeList().items(new ArrayList<>()), activeProfiles));
     }
 
     private void listRoles() {
-        dynamicRouteStack.get(ROLES, (request, response) -> new ApiRoleTypeList().items(new ArrayList<>()));
+        dynamicRouteStack.get(ROLES, new ProfileAwareRoute((request, response)
+                -> new ApiRoleTypeList().items(new ArrayList<>()), activeProfiles));
     }
 
     private void createRoles() {
-        dynamicRouteStack.post(ROLES, (request, response) -> new ApiRoleTypeList().items(new ArrayList<>()));
+        dynamicRouteStack.post(ROLES, new ProfileAwareRoute((request, response)
+                -> new ApiRoleTypeList().items(new ArrayList<>()), activeProfiles));
     }
 
     private void listActiveCommands() {
-        dynamicRouteStack.get(ACTIVE_COMMANDS,
-                (request, response) -> new ApiCommandList().items(
-                        List.of(new ApiCommand().id(new BigDecimal(1)).active(Boolean.FALSE).success(Boolean.TRUE))));
+        dynamicRouteStack.get(ACTIVE_COMMANDS, new ProfileAwareRoute((request, response) -> new ApiCommandList().items(
+                List.of(new ApiCommand().id(new BigDecimal(1)).active(Boolean.FALSE).success(Boolean.TRUE))), activeProfiles));
     }
 
     private void listCommands() {
-        dynamicRouteStack.get(LIST_COMMANDS,
-                (request, response) -> new ApiCommandList().items(
-                        List.of(new ApiCommand().id(new BigDecimal(1)).active(Boolean.FALSE).success(Boolean.TRUE))));
+        dynamicRouteStack.get(LIST_COMMANDS, new ProfileAwareRoute((request, response) -> new ApiCommandList().items(
+                List.of(new ApiCommand().id(new BigDecimal(1)).active(Boolean.FALSE).success(Boolean.TRUE))), activeProfiles));
     }
 
     private void cmConfig() {
-        dynamicRouteStack.get(CONFIG, (request, response) -> new ApiConfigList().items(new ArrayList<>()));
+        dynamicRouteStack.get(CONFIG, new ProfileAwareRoute((request, response)
+                -> new ApiConfigList().items(new ArrayList<>()), activeProfiles));
     }
 
     private void updateCmConfig() {
-        dynamicRouteStack.put(CONFIG, (request, response) -> new ApiConfigList().items(new ArrayList<>()));
+        dynamicRouteStack.put(CONFIG, new ProfileAwareRoute((request, response)
+                -> new ApiConfigList().items(new ArrayList<>()), activeProfiles));
     }
 
     private void getCdpRemoteContext() {
         dynamicRouteStack.get(CDP_REMOTE_CONTEXT_BY_CLUSTER_CLUSTER_NAME,
-                (req, res) -> new ApiRemoteDataContext());
+                new ProfileAwareRoute((req, res) -> new ApiRemoteDataContext(), activeProfiles));
     }
 
     private void postCdpRemoteContext() {
         dynamicRouteStack.post(CDP_REMOTE_CONTEXT,
-                (req, res) -> new ApiRemoteDataContext());
+                new ProfileAwareRoute((req, res) -> new ApiRemoteDataContext(), activeProfiles));
     }
 
     private void getHosts() {
+        dynamicRouteStack.get(HOSTS, new ProfileAwareRoute((request, response, model) -> {
+            Map<String, CloudVmMetaDataStatus> instanceMap = model.getInstanceMap();
+            ApiHostList apiHostList = new ApiHostList();
+            for (Map.Entry<String, CloudVmMetaDataStatus> entry : instanceMap.entrySet()) {
+                ApiHost apiHost = new ApiHost()
+                        .hostId(entry.getValue().getCloudVmInstanceStatus().getCloudInstance().getInstanceId())
+                        .hostname(HostNameUtil.generateHostNameByIp(entry.getValue().getMetaData().getPrivateIp()))
+                        .ipAddress(entry.getValue().getMetaData().getPrivateIp());
+                apiHostList.addItemsItem(apiHost);
+            }
+            return apiHostList;
+        }, activeProfiles));
         dynamicRouteStack.get(HOSTS, (request, response, model) -> getHosts(model));
     }
 
     private void getHostById() {
-        dynamicRouteStack.get(HOST_BY_ID, (request, response, model) ->
-            getApiHost(model.getInstanceMap().get(request.params("hostId")))
-        );
+        dynamicRouteStack.get(HOST_BY_ID, new ProfileAwareRoute((request, response, model)
+                -> getApiHost(model.getInstanceMap().get(request.params("hostId"))), activeProfiles));
     }
 
     private void deleteHostById() {
-        dynamicRouteStack.delete(HOST_BY_ID, (request, response, model) ->
-                getApiHost(model.getInstanceMap().get(request.params("hostId")))
-        );
+        dynamicRouteStack.delete(HOST_BY_ID, new ProfileAwareRoute((request, response, model)
+                -> getApiHost(model.getInstanceMap().get(request.params("hostId"))), activeProfiles));
     }
 
     private ApiHostList getHosts(DefaultModel model) {
@@ -438,5 +449,4 @@ public class ClouderaManagerMock extends AbstractModelMock {
                 .ipAddress(cloudVmMetaDataStatus.getMetaData().getPrivateIp())
                 .healthSummary(ApiHealthSummary.GOOD);
     }
-
 }

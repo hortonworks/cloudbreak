@@ -17,6 +17,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXC
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractClouderaManagerTest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
