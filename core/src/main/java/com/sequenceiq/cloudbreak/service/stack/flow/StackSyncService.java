@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.WAIT_FOR_SYNC;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.INSTANCE_NAME;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -27,8 +26,6 @@ import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -42,8 +39,6 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariClusterConnector;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -73,12 +68,6 @@ public class StackSyncService {
 
     @Inject
     private ResourceRepository resourceRepository;
-
-    @Inject
-    private AmbariClusterConnector ambariClusterConnector;
-
-    @Inject
-    private AmbariDecommissioner ambariDecommissioner;
 
     @Inject
     private ServiceProviderMetadataAdapter metadata;
@@ -257,43 +246,6 @@ public class StackSyncService {
         instanceStates.put(InstanceSyncState.IN_PROGRESS, 0);
         instanceStates.put(InstanceSyncState.UNKNOWN, 0);
         return instanceStates;
-    }
-
-    private void deleteHostFromCluster(Stack stack, InstanceMetaData instanceMetaData) {
-        try {
-            if (stack.getCluster() != null) {
-                HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
-                if (hostMetadata == null) {
-                    if (instanceMetaData.getInstanceStatus() != InstanceStatus.TERMINATED) {
-                        throw new NotFoundException(String.format("Host not found with id '%s'", instanceMetaData.getDiscoveryFQDN()));
-                    }
-                } else {
-                    if (ambariClusterConnector.available(stack)) {
-                        if (ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata)) {
-                            hostMetadataRepository.delete(hostMetadata);
-                            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_HOST_DELETED.code(),
-                                            Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));
-                        } else {
-                            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_REMOVAL_FAILED.code(),
-                                            Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));
-                        }
-                    } else {
-                        hostMetadata.setHostMetadataState(HostMetadataState.UNHEALTHY);
-                        hostMetadataRepository.save(hostMetadata);
-                        eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                                cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_HOST_UPDATED.code(),
-                                        Arrays.asList(instanceMetaData.getDiscoveryFQDN(), HostMetadataState.UNHEALTHY.name())));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("Host cannot be deleted from cluster: ", e);
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_TERMINATED.code(),
-                            Collections.singletonList(instanceMetaData.getDiscoveryFQDN())));
-        }
     }
 
     private void updateMetaDataToDeletedOnProviderSide(Stack stack, InstanceMetaData instanceMetaData) {

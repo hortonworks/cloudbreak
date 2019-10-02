@@ -88,7 +88,7 @@ public class StackScalingService {
     public void removeHostmetadataIfExists(Stack stack, InstanceMetaData instanceMetaData, HostMetadata hostMetadata) {
         if (hostMetadata != null) {
             try {
-                ambariDecommissioner.deleteHostFromAmbari(stack, hostMetadata);
+                ambariDecommissioner.deleteHostFromAmbariIfInUnknownState(stack, hostMetadata);
                 // Deleting by entity will not work because HostMetadata has a reference pointed
                 // from HostGroup and per JPA, we would need to clear that up.
                 // Reference: http://stackoverflow.com/a/22315188
