@@ -53,6 +53,8 @@ public enum ResourceType {
     // MOCK
     MOCK_INSTANCE;
 
+    private static final List<ResourceType> INSTANCE_TYPES = List.of(GCP_INSTANCE, OPENSTACK_INSTANCE, MOCK_INSTANCE);
+
     private final CommonResourceType commonResourceType;
 
     ResourceType() {
@@ -68,6 +70,6 @@ public enum ResourceType {
     }
 
     public static boolean isInstanceResource(ResourceType resourceType) {
-        return List.of(GCP_INSTANCE, OPENSTACK_INSTANCE, MOCK_INSTANCE).contains(resourceType);
+        return INSTANCE_TYPES.contains(resourceType);
     }
 }

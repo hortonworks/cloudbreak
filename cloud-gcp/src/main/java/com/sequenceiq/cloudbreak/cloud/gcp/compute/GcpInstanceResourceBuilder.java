@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,7 @@ import com.google.api.services.compute.model.Tags;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpNetworkInterfaceProvider;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
@@ -84,6 +86,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Inject
     private GcpDiskEncryptionService gcpDiskEncryptionService;
+
+    @Inject
+    private GcpNetworkInterfaceProvider gcpNetworkInterfaceProvider;
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -214,17 +219,29 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public List<CloudVmInstanceStatus> checkInstances(GcpContext context, AuthenticatedContext auth, List<CloudInstance> instances) {
         List<CloudVmInstanceStatus> result = new ArrayList<>();
-        for (CloudInstance instance : instances) {
-            try {
-                LOGGER.info("Checking instance: {}", instance);
-                Operation operation = check(context, instance);
-                boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
-                InstanceStatus status = finished ? context.isBuild() ? InstanceStatus.STARTED : InstanceStatus.STOPPED : InstanceStatus.IN_PROGRESS;
-                LOGGER.info("Instance: {} status: {}", instances, status);
-                result.add(new CloudVmInstanceStatus(instance, status));
-            } catch (Exception ignored) {
-                LOGGER.info("Failed to check instance state of {}", instance);
-                result.add(new CloudVmInstanceStatus(instance, InstanceStatus.IN_PROGRESS));
+        String instanceName = instances.isEmpty() ? "" : instances.get(0).getInstanceId();
+        if (!StringUtils.isEmpty(instanceName)) {
+            List<Instance> gcpInstances = gcpNetworkInterfaceProvider.getInstances(auth, instanceName.split("-")[0]);
+            for (CloudInstance instance : instances) {
+                Optional<Instance> gcpInstanceOpt = gcpInstances.stream().filter(inst -> inst.getName().equalsIgnoreCase(instance.getInstanceId())).findFirst();
+                if (gcpInstanceOpt.isPresent()) {
+                    Instance gcpInstance = gcpInstanceOpt.get();
+                    InstanceStatus status;
+                    switch (gcpInstance.getStatus()) {
+                        case "RUNNING":
+                            status = InstanceStatus.STARTED;
+                            break;
+                        case "TERMINATED":
+                            status = InstanceStatus.STOPPED;
+                            break;
+                        default:
+                            status = InstanceStatus.IN_PROGRESS;
+                    }
+                    result.add(new CloudVmInstanceStatus(instance, status));
+                } else {
+                    LOGGER.debug("Instance {} cannot be found", instance.getInstanceId());
+                    result.add(new CloudVmInstanceStatus(instance, InstanceStatus.TERMINATED));
+                }
             }
         }
         return result;
