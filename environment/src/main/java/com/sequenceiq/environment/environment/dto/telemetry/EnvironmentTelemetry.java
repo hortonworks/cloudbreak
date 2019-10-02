@@ -1,41 +1,61 @@
 package com.sequenceiq.environment.environment.dto.telemetry;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentTelemetry implements Serializable {
 
-    private final EnvironmentLogging logging;
+    private EnvironmentLogging logging;
 
-    private final EnvironmentWorkloadAnalytics workloadAnalytics;
+    private EnvironmentWorkloadAnalytics workloadAnalytics;
 
-    private final boolean reportDeploymentLogs;
+    private boolean reportDeploymentLogs;
 
-    public EnvironmentTelemetry(@JsonProperty("logging") EnvironmentLogging logging,
-            @JsonProperty("workloadAnalytics") EnvironmentWorkloadAnalytics workloadAnalytics,
-            @JsonProperty("reportDeploymentLogs") boolean reportDeploymentLogs) {
-        this.logging = logging;
-        this.workloadAnalytics = workloadAnalytics;
-        this.reportDeploymentLogs = reportDeploymentLogs;
-    }
+    private EnvironmentFeatures features;
+
+    private Map<String, Object> fluentAttributes = new HashMap<>();
 
     public EnvironmentLogging getLogging() {
         return logging;
+    }
+
+    public void setLogging(EnvironmentLogging logging) {
+        this.logging = logging;
     }
 
     public EnvironmentWorkloadAnalytics getWorkloadAnalytics() {
         return workloadAnalytics;
     }
 
+    public void setWorkloadAnalytics(EnvironmentWorkloadAnalytics workloadAnalytics) {
+        this.workloadAnalytics = workloadAnalytics;
+    }
+
     public boolean isReportDeploymentLogs() {
         return reportDeploymentLogs;
+    }
+
+    public void setReportDeploymentLogs(boolean reportDeploymentLogs) {
+        this.reportDeploymentLogs = reportDeploymentLogs;
+    }
+
+    public EnvironmentFeatures getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(EnvironmentFeatures features) {
+        this.features = features;
+    }
+
+    public Map<String, Object> getFluentAttributes() {
+        return fluentAttributes;
+    }
+
+    public void setFluentAttributes(Map<String, Object> fluentAttributes) {
+        this.fluentAttributes = fluentAttributes;
     }
 }

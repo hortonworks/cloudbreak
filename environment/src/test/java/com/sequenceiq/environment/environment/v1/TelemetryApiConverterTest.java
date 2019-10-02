@@ -54,7 +54,8 @@ public class TelemetryApiConverterTest {
         S3CloudStorageParameters s3Params = new S3CloudStorageParameters();
         s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
         logging.setS3(s3Params);
-        EnvironmentTelemetry telemetry = new EnvironmentTelemetry(logging, null, false);
+        EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
+        telemetry.setLogging(logging);
         // WHEN
         TelemetryResponse result = underTest.convert(telemetry);
         // THEN
