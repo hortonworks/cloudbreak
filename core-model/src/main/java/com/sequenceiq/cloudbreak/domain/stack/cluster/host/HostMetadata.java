@@ -36,6 +36,9 @@ public class HostMetadata implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private HostMetadataState hostMetadataState = HostMetadataState.HEALTHY;
 
+    @Column(columnDefinition = "TEXT")
+    private String statusReason;
+
     public Long getId() {
         return id;
     }
@@ -82,6 +85,14 @@ public class HostMetadata implements ProvisionEntity {
         }
 
         return EqualsBuilder.reflectionEquals(this, o, "hostGroup");
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 
     @Override

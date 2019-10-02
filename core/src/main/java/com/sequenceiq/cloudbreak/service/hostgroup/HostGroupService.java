@@ -76,10 +76,11 @@ public class HostGroupService {
         return hostMetadataRepository.save(hostMetadata);
     }
 
-    public void updateHostMetaDataStatus(Cluster cluster, String hostName, HostMetadataState status) {
+    public void updateHostMetaDataStatus(Cluster cluster, String hostName, HostMetadataState status, String statusReason) {
         HostMetadata hostMetadata = getHostMetadataByClusterAndHostName(cluster, hostName);
         if (hostMetadata != null) {
             hostMetadata.setHostMetadataState(status);
+            hostMetadata.setStatusReason(statusReason);
             hostMetadataRepository.save(hostMetadata);
         }
     }
