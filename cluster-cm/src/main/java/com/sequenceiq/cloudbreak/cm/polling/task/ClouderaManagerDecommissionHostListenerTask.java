@@ -1,17 +1,22 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 
-public class ClouderaManagerDecommissionHostListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+public class ClouderaManagerDecommissionHostListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
+
+    public ClouderaManagerDecommissionHostListenerTask(ClouderaManagerClientFactory clouderaManagerClientFactory) {
+        super(clouderaManagerClientFactory);
+    }
 
     @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
+    public void handleTimeout(ClouderaManagerPollerObject toolsResourceApi) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to decommission host.");
     }
 
     @Override
-    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
+    public String successMessage(ClouderaManagerPollerObject toolsResourceApi) {
         return "Cloudera Manager host decommission finished with success result.";
     }
 

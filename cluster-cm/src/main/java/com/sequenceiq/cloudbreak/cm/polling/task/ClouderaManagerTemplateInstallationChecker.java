@@ -12,47 +12,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.api.swagger.CommandsResourceApi;
-import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 
-public class ClouderaManagerTemplateInstallationChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+public class ClouderaManagerTemplateInstallationChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerTemplateInstallationChecker.class);
 
-    private final ClouderaManagerClientFactory clouderaManagerClientFactory;
-
     public ClouderaManagerTemplateInstallationChecker(ClouderaManagerClientFactory clouderaManagerClientFactory) {
-        this.clouderaManagerClientFactory = clouderaManagerClientFactory;
+        super(clouderaManagerClientFactory);
     }
 
     @Override
-    public boolean checkStatus(ClouderaManagerCommandPollerObject pollerObject) {
-        ApiClient apiClient = pollerObject.getApiClient();
-        CommandsResourceApi commandsResourceApi = clouderaManagerClientFactory.getCommandsResourceApi(apiClient);
-        try {
-            ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
-
-            if (apiCommand.getActive()) {
-                LOGGER.debug("Command [" + getCommandName() + "] with id [" + pollerObject.getId() + "] is active, so it hasn't finished yet");
-                return false;
-            } else if (apiCommand.getSuccess()) {
-                return true;
-            } else {
-                List<String> errorReasons = new ArrayList<>();
-                digForFailureCause(apiCommand, errorReasons, commandsResourceApi);
-
-                String msg = "Cluster template install failed: " + errorReasons;
-                LOGGER.info(msg);
-                throw new ClouderaManagerOperationFailedException(msg);
-            }
-        } catch (ApiException e) {
-            LOGGER.debug("Cloudera Manager is not running", e);
+    protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+        commandsResourceApi = clouderaManagerClientFactory.getCommandsResourceApi(pollerObject.getApiClient());
+        ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
+        if (apiCommand.getActive()) {
+            LOGGER.debug("Command [" + getCommandName() + "] with id [" + pollerObject.getId() + "] is active, so it hasn't finished yet");
             return false;
+        } else if (apiCommand.getSuccess()) {
+            return true;
+        } else {
+            List<String> errorReasons = new ArrayList<>();
+            digForFailureCause(apiCommand, errorReasons, commandsResourceApi);
+            String msg = "Cluster template install failed: " + errorReasons;
+            LOGGER.info(msg);
+            throw new ClouderaManagerOperationFailedException(msg);
         }
     }
 
@@ -87,13 +76,13 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject clouderaManagerPollerObject) {
+    public void handleTimeout(ClouderaManagerPollerObject clouderaManagerPollerObject) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Template install timed out with this command id: "
                 + clouderaManagerPollerObject.getId());
     }
 
     @Override
-    public String successMessage(ClouderaManagerCommandPollerObject clouderaManagerPollerObject) {
+    public String successMessage(ClouderaManagerPollerObject clouderaManagerPollerObject) {
         return String.format("Template installation success for stack '%s'", clouderaManagerPollerObject.getStack().getId());
     }
 
