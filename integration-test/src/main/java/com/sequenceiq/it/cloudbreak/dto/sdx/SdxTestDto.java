@@ -67,12 +67,13 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Override
     public List<SdxClusterResponse> getAll(SdxClient client) {
         SdxEndpoint sdxEndpoint = client.getSdxClient().sdxEndpoint();
-        if (getTestContext().get(EnvironmentTestDto.class) == null) {
-            return List.of();
-        }
-        return sdxEndpoint.list(getTestContext().get(EnvironmentTestDto.class).getName()).stream()
-                .filter(response -> response.getName() != null)
-                .collect(Collectors.toList());
+        return sdxEndpoint.list(null).stream()
+                .filter(s -> s.getName() != null)
+                .map(s -> {
+                    SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
+                    sdxClusterResponse.setName(s.getName());
+                    return sdxClusterResponse;
+                }).collect(Collectors.toList());
     }
 
     @Override
