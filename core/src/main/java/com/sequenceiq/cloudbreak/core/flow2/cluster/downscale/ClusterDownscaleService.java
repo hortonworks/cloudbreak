@@ -94,7 +94,7 @@ public class ClusterDownscaleService {
             InstanceStatus status = getStatus(payload.getErrorPhase());
             for (String hostName : payload.getHostNames()) {
                 stackService.updateMetaDataStatusIfFound(payload.getStackId(), hostName, status);
-                hostGroupService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY);
+                hostGroupService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY, payload.getStatusReason());
             }
             String errorDetailes = String.format("The following hosts are in '%s': %s", status, String.join(", ", payload.getHostNames()));
             flowMessageService.fireEventAndLog(payload.getStackId(),
@@ -106,7 +106,7 @@ public class ClusterDownscaleService {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getStackId());
         for (String hostName : payload.getFailedHostNames()) {
             stackService.updateMetaDataStatusIfFound(payload.getStackId(), hostName, InstanceStatus.ORCHESTRATION_FAILED);
-            hostGroupService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY);
+            hostGroupService.updateHostMetaDataStatus(stack.getCluster(), hostName, HostMetadataState.UNHEALTHY, payload.getException().getMessage());
         }
         String errorDetailes = String.format("The following hosts are in '%s': %s",
                 InstanceStatus.ORCHESTRATION_FAILED, String.join(", ", payload.getFailedHostNames()));

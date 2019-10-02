@@ -564,9 +564,11 @@ public class ClusterService {
             for (HostMetadata host : hosts) {
                 if (host.getHostMetadataState() == unhealthyState && !failedHostMetadata.containsKey(host.getHostName())) {
                     host.setHostMetadataState(healthyState);
+                    host.setStatusReason("");
                     changedHosts.add(host);
                 } else if (host.getHostMetadataState() == healthyState && failedHostMetadata.containsKey(host.getHostName())) {
                     host.setHostMetadataState(unhealthyState);
+                    host.setStatusReason(recoveryMessage);
                     changedHosts.add(host);
                 }
             }
@@ -683,7 +685,7 @@ public class ClusterService {
                     if (hostStatuses.containsKey(host.getHostName())) {
                         HostMetadataState newState = HostMetadataState.HEALTHY.name().equals(hostStatuses.get(host.getHostName()))
                                 ? HostMetadataState.HEALTHY : HostMetadataState.UNHEALTHY;
-                        boolean stateChanged = updateHostMetadataByHostState(stack, host.getHostName(), newState);
+                        boolean stateChanged = updateHostMetadataByHostState(stack, host.getHostName(), newState, getStatusReason(newState));
                         if (stateChanged && HostMetadataState.HEALTHY == newState) {
                             updateInstanceMetadataStateToRegistered(stackId, host);
                         }
@@ -694,6 +696,13 @@ public class ClusterService {
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    private String getStatusReason(HostMetadataState newState) {
+        if (HostMetadataState.UNHEALTHY == newState) {
+            return "Host is reported as UNHEALTHY by Ambari.";
+        }
+        return null;
     }
 
     private void updateInstanceMetadataStateToRegistered(Long stackId, HostMetadata host) {
@@ -957,13 +966,14 @@ public class ClusterService {
         return hostGroup;
     }
 
-    private boolean updateHostMetadataByHostState(Stack stack, String hostName, HostMetadataState newState) {
+    private boolean updateHostMetadataByHostState(Stack stack, String hostName, HostMetadataState newState, String statusReason) {
         boolean stateChanged = false;
         HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
         HostMetadataState oldState = hostMetadata.getHostMetadataState();
         if (!oldState.equals(newState)) {
             stateChanged = true;
             hostMetadata.setHostMetadataState(newState);
+            hostMetadata.setStatusReason(statusReason);
             hostMetadataRepository.save(hostMetadata);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
