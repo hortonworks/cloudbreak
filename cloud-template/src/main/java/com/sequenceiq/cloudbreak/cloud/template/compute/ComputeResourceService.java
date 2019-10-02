@@ -23,14 +23,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -164,7 +161,7 @@ public class ComputeResourceService {
                         PollTask<List<CloudVmInstanceStatus>> pollTask = resourcePollTaskFactory
                                 .newPollComputeStatusTask(builder, auth, context, checkInstances);
                         try {
-                            List<CloudVmInstanceStatus> statuses = pollInstancesRetriable(pollTask);
+                            List<CloudVmInstanceStatus> statuses = syncVMPollingScheduler.schedule(pollTask);
                             results.addAll(statuses);
                         } catch (Exception e) {
                             LOGGER.debug("Failed to poll the instances status of {}, set the status to failed", checkInstances, e);
@@ -246,26 +243,6 @@ public class ComputeResourceService {
         return result;
     }
 
-    @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public List<CloudResourceStatus> pollSingleResourceRetriable(PollTask<List<CloudResourceStatus>> pollTask, CloudResourceStatus status)
-            throws ExecutionException, InterruptedException, java.util.concurrent.TimeoutException {
-        try {
-            return syncPollingScheduler.schedule(pollTask);
-        } catch (CloudConnectorException exception) {
-            if (exception.getMessage().contains("QUOTA_EXCEEDED")) {
-                return List.of(new CloudResourceStatus(status.getCloudResource(), ResourceStatus.FAILED, exception.getMessage(), status.getPrivateId()));
-            } else {
-                throw exception;
-            }
-        }
-    }
-
-    @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public List<CloudVmInstanceStatus> pollInstancesRetriable(PollTask<List<CloudVmInstanceStatus>> pollTask)
-            throws ExecutionException, InterruptedException, java.util.concurrent.TimeoutException {
-        return syncVMPollingScheduler.schedule(pollTask);
-    }
-
     private class ResourceBuilder {
 
         private final ResourceBuilderContext ctx;
@@ -334,7 +311,7 @@ public class ComputeResourceService {
                         PollTask<List<CloudResourceStatus>> pollTask = resourcePollTaskFactory
                                 .newPollResourceTask(builder, auth, List.of(instance), ctx, true);
                         try {
-                            List<CloudResourceStatus> statuses = pollSingleResourceRetriable(pollTask, instanceResourceStatus);
+                            List<CloudResourceStatus> statuses = syncPollingScheduler.schedule(pollTask);
                             instanceResourceStatus.setStatus(statuses.get(0).getStatus());
                         } catch (Exception e) {
                             LOGGER.debug("Failure during polling the instance status of {}", instanceResourceStatus, e);
