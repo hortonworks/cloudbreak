@@ -16,7 +16,9 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 @Component
 public class SyncPollingScheduler<T> {
 
-    private static final int POLLING_INTERVAL = 5;
+    private static final long NO_WAIT_INTERVAL = 0L;
+
+    private static final int POLLING_INTERVAL = 1;
 
     private static final int MAX_POLLING_ATTEMPT = 1000;
 
@@ -37,7 +39,7 @@ public class SyncPollingScheduler<T> {
                 throw new CancellationException("Task was cancelled.");
             }
             try {
-                ListenableScheduledFuture<T> ft = schedule(task, interval);
+                ListenableScheduledFuture<T> ft = schedule(task, NO_WAIT_INTERVAL);
                 result = ft.get();
                 if (task.completed(result)) {
                     return result;
@@ -48,11 +50,12 @@ public class SyncPollingScheduler<T> {
                     throw ex;
                 }
             }
+            Thread.sleep(interval);
         }
         throw new TimeoutException(String.format("Task (%s) did not finished within %d seconds", task.getClass().getSimpleName(), interval * maxAttempt));
     }
 
-    public ListenableScheduledFuture<T> schedule(Callable<T> task, int interval) {
+    public ListenableScheduledFuture<T> schedule(Callable<T> task, long interval) {
         return scheduler.schedule(task, interval, TimeUnit.SECONDS);
     }
 
