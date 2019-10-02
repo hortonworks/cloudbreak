@@ -27,6 +27,8 @@ public class ListFreeIpaResponse {
     @NotNull
     private String crn;
 
+    private String domain;
+
     private Status status;
 
     public String getEnvironmentCrn() {
@@ -53,6 +55,14 @@ public class ListFreeIpaResponse {
         this.crn = crn;
     }
 
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
     public Status getStatus() {
         return status;
     }
@@ -60,4 +70,5 @@ public class ListFreeIpaResponse {
     public void setStatus(Status status) {
         this.status = status;
     }
+
 }
