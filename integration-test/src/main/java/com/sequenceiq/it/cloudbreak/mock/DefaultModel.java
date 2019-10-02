@@ -14,9 +14,9 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.it.cloudbreak.mock.model.AmbariMock;
+import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SPIMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
-import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.util.ServerAddressGenerator;
 
 import spark.Service;
@@ -41,14 +41,14 @@ public class DefaultModel extends MockModel {
     private List<ApiProductVersion> products;
 
     @Override
-    public void startModel(Service sparkService, String mockServerAddress) {
+    public void startModel(Service sparkService, String mockServerAddress, List<String> activeProfiles) {
         setMockServerAddress(mockServerAddress);
         initInstanceMap(150);
 
         ambariMock = new AmbariMock(sparkService, this);
         spiMock = new SPIMock(sparkService, this);
         saltMock = new SaltMock(sparkService, this);
-        clouderaManagerMock = new ClouderaManagerMock(sparkService, this);
+        clouderaManagerMock = new ClouderaManagerMock(sparkService, this, activeProfiles);
 
         ambariMock.addAmbariMappings();
         spiMock.addSPIEndpoints();

@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.mock;
+package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
 
 import static org.springframework.http.HttpMethod.GET;

@@ -4,6 +4,8 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.ITestContext;
@@ -131,7 +134,20 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     public void createSharedObjects() {
         String testClassName = getClass().getSimpleName();
         MDC.put("testlabel", "Purge: " + testClassName);
+        setActiveProfiles();
         applicationContext.getBean(PurgeGarbageService.class).purge();
+    }
+
+    private void setActiveProfiles() {
+        StandardEnvironment environment = (StandardEnvironment) applicationContext.getEnvironment();
+        List<String> profilesToSet = profilesBeforeTestContext();
+        List<String> activeProfiles = new ArrayList<>(List.of(environment.getActiveProfiles()));
+        activeProfiles.addAll(profilesToSet);
+        String[] result = new String[activeProfiles.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = activeProfiles.get(i);
+        }
+        environment.setActiveProfiles(result);
     }
 
     @BeforeMethod
@@ -399,5 +415,9 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         networkReq.setMock(mockReq);
         networkReq.setSubnetIds(Set.of("net1", "net2"));
         return networkReq;
+    }
+
+    protected List<String> profilesBeforeTestContext() {
+        return Collections.emptyList();
     }
 }
