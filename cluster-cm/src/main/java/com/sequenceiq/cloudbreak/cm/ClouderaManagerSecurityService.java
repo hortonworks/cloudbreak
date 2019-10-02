@@ -8,10 +8,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.UsersResourceApi;
-import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiAuthRoleRef;
 import com.cloudera.api.swagger.model.ApiUser2;
@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
-import com.sequenceiq.cloudbreak.cm.util.UsersResourceApiProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
@@ -36,9 +35,6 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     private static final String ADMIN_USER = "admin";
 
     @Inject
-    private ClouderaManagerClientFactory clouderaManagerClientFactory;
-
-    @Inject
     private ClouderaManagerSecurityConfigProvider securityConfigProvider;
 
     @Inject
@@ -48,7 +44,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     private ClouderaManagerLdapService ldapService;
 
     @Inject
-    private UsersResourceApiProvider usersResourceApiProvider;
+    private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
     private final Stack stack;
 
@@ -65,7 +61,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
-            UsersResourceApi usersResourceApi = usersResourceApiProvider.getResourceApi(stack.getGatewayPort(), user, password, clientConfig);
+            UsersResourceApi usersResourceApi = clouderaManagerClientFactory.getUserResourceApi(stack.getGatewayPort(), user, password, clientConfig);
             ApiUser2List oldUserList = usersResourceApi.readUsers2("SUMMARY");
             Optional<ApiUser2> oldAdminUser = oldUserList.getItems().stream()
                     .filter(apiUser2 -> apiUser2.getName().equals(stack.getCluster().getUserName()))
@@ -88,7 +84,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         String cmUser = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
-            UsersResourceApi usersResourceApi = usersResourceApiProvider.getResourceApi(stack.getGatewayPort(), cmUser, password, clientConfig);
+            UsersResourceApi usersResourceApi = clouderaManagerClientFactory.getUserResourceApi(stack.getGatewayPort(), cmUser, password, clientConfig);
             ApiUser2List oldUserList = usersResourceApi.readUsers2("SUMMARY");
             Optional<ApiUser2> oldAdminUser = oldUserList.getItems().stream()
                     .filter(apiUser2 -> apiUser2.getName().equals(stack.getCluster().getUserName()))
@@ -113,12 +109,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
 
     @Override
     public void disableSecurity() {
-        Cluster cluster = stack.getCluster();
-        String user = cluster.getCloudbreakAmbariUser();
-        String password = cluster.getCloudbreakAmbariPassword();
         try {
-            ApiClient client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
-            kerberosService.deleteCredentials(client, clientConfig, stack);
+            kerberosService.deleteCredentials(clientConfig, stack);
         } catch (Exception e) {
             LOGGER.warn("Couldn't cleanup kerberos. It's possible CM isn't started.", e);
         }
@@ -128,7 +120,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     public void changeOriginalCredentialsAndCreateCloudbreakUser(boolean ldapConfigured) throws CloudbreakException {
         LOGGER.debug("change original admin user and create cloudbreak user");
         try {
-            UsersResourceApi usersResourceApi = usersResourceApiProvider.getDefaultUsersResourceApi(stack.getGatewayPort(), clientConfig);
+            UsersResourceApi usersResourceApi = clouderaManagerClientFactory.getDefaultUsersResourceApi(stack.getGatewayPort(), clientConfig);
             Optional<ApiUser2> oldAdminUser = getOldAdminUser(usersResourceApi);
             if (oldAdminUser.isPresent()) {
                 Cluster cluster = stack.getCluster();
@@ -142,7 +134,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
                     if (cluster.getUserName() != null) {
                         String user = cluster.getCloudbreakAmbariUser();
                         String password = cluster.getCloudbreakAmbariPassword();
-                        UsersResourceApi newUsersResourceApi = usersResourceApiProvider.getResourceApi(stack.getGatewayPort(), user, password, clientConfig);
+                        UsersResourceApi newUsersResourceApi = clouderaManagerClientFactory
+                                .getUserResourceApi(stack.getGatewayPort(), user, password, clientConfig);
                         createNewUser(newUsersResourceApi, oldAdminUser.get().getAuthRoles(), cluster.getUserName(), cluster.getPassword());
                     }
                 }
@@ -161,7 +154,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             try {
                 String user = stack.getCluster().getCloudbreakAmbariUser();
                 String password = stack.getCluster().getCloudbreakAmbariPassword();
-                UsersResourceApi usersResourceApi = usersResourceApiProvider.getResourceApi(stack.getGatewayPort(), user, password, clientConfig);
+                UsersResourceApi usersResourceApi = clouderaManagerClientFactory
+                        .getUserResourceApi(stack.getGatewayPort(), user, password, clientConfig);
                 usersResourceApi.deleteUser2(ADMIN_USER);
             } catch (ApiException | ClouderaManagerClientInitException e) {
                 LOGGER.info("Can't remove default admin user due to: ", e);
@@ -173,6 +167,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         return userName.isEmpty() || !ADMIN_USER.equals(userName.get());
     }
 
+    @Retryable
     private Optional<ApiUser2> getOldAdminUser(UsersResourceApi usersResourceApi) throws ApiException {
         ApiUser2List oldUserList = usersResourceApi.readUsers2("SUMMARY");
         return oldUserList.getItems().stream()

@@ -8,15 +8,15 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
-import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiEcho;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 
-public class ClouderaManagerStartupListenerTask extends ClusterBasedStatusCheckerTask<ClouderaManagerPollerObject> {
+public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerStartupListenerTask.class);
 
@@ -24,11 +24,14 @@ public class ClouderaManagerStartupListenerTask extends ClusterBasedStatusChecke
 
     private static final String[] CONNECTION_MESSAGES = {"Connection refused", "connect timed out", "Failed to connect"};
 
+    public ClouderaManagerStartupListenerTask(ClouderaManagerClientFactory clouderaManagerClientFactory) {
+        super(clouderaManagerClientFactory);
+    }
+
     @Override
-    public boolean checkStatus(ClouderaManagerPollerObject clouderaManagerPollerObject) {
-        ApiClient apiClient = clouderaManagerPollerObject.getApiClient();
-        ToolsResourceApi toolsResourceApi = new ToolsResourceApi(apiClient);
+    protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
         try {
+            ToolsResourceApi toolsResourceApi = new ToolsResourceApi(pollerObject.getApiClient());
             String testMessage = "test";
             ApiEcho testIfRunning = toolsResourceApi.echo(testMessage);
             if (testMessage.equals(testIfRunning.getMessage())) {
@@ -43,18 +46,23 @@ public class ClouderaManagerStartupListenerTask extends ClusterBasedStatusChecke
                 LOGGER.debug("Cloudera Manager is not running");
                 return false;
             } else {
-                throw new ClouderaManagerOperationFailedException("Cloudera Manager startup failed", e);
+                throw e;
             }
         }
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerPollerObject toolsResourceApi) {
+    protected String getCommandName() {
+        return "API Echo";
+    }
+
+    @Override
+    public void handleTimeout(ClouderaManagerPollerObject pollerObject) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to check Cloudera Manager startup.");
     }
 
     @Override
-    public String successMessage(ClouderaManagerPollerObject toolsResourceApi) {
+    public String successMessage(ClouderaManagerPollerObject pollerObject) {
         return "Cloudera Manager startup finished with success result.";
     }
 }
