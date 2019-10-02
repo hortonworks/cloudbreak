@@ -376,4 +376,35 @@ public class KerberosMgmtV1ServiceTest {
         Mockito.verify(vaultComponent).cleanupSecrets(ENVIRONMENT_ID, null, ACCOUNT_ID);
     }
 
+    @Test
+    public void testGetExistingServiceKeytabRequiesNoRoleInformation() throws Exception {
+        Set<String> privileges = new HashSet<>();
+        privileges.add(PRIVILEGE);
+        RoleRequest roleRequest = new RoleRequest();
+        roleRequest.setRoleName(ROLE);
+        roleRequest.setPrivileges(privileges);
+        ServiceKeytabRequest request = new ServiceKeytabRequest();
+        request.setServiceName(SERVICE);
+        request.setEnvironmentCrn(ENVIRONMENT_ID);
+        request.setServerHostName(HOST);
+        request.setRoleRequest(roleRequest);
+        Assertions.assertThrows(KeytabCreationException.class,
+            () -> underTest.getExistingServiceKeytab(request, ACCOUNT_ID));
+    }
+
+    @Test
+    public void testGetExistingHostKeytabRequiesNoRoleInformation() throws Exception {
+        Set<String> privileges = new HashSet<>();
+        privileges.add(PRIVILEGE);
+        RoleRequest roleRequest = new RoleRequest();
+        roleRequest.setRoleName(ROLE);
+        roleRequest.setPrivileges(privileges);
+        HostKeytabRequest request = new HostKeytabRequest();
+        request.setEnvironmentCrn(ENVIRONMENT_ID);
+        request.setServerHostName(HOST);
+        request.setRoleRequest(roleRequest);
+        Assertions.assertThrows(KeytabCreationException.class,
+            () -> underTest.getExistingHostKeytab(request, ACCOUNT_ID));
+    }
+
 }
