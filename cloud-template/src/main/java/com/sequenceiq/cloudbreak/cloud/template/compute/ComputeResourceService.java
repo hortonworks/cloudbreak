@@ -155,20 +155,18 @@ public class ComputeResourceService {
                 if (!futures.isEmpty()) {
                     LOGGER.debug("Wait for all {} stop/start threads to finish", futures.size());
                     List<List<CloudVmInstanceStatus>> instancesStatuses = waitForRequests(futures).get(FutureResult.SUCCESS);
-                    for (List<CloudVmInstanceStatus> vmStatuses : instancesStatuses) {
-                        LOGGER.debug("Poll {} instance's state whether they have reached the stopped/started state", vmStatuses.size());
-                        List<CloudInstance> checkInstances = vmStatuses.stream().map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
-                        PollTask<List<CloudVmInstanceStatus>> pollTask = resourcePollTaskFactory
-                                .newPollComputeStatusTask(builder, auth, context, checkInstances);
-                        try {
-                            List<CloudVmInstanceStatus> statuses = syncVMPollingScheduler.schedule(pollTask);
-                            results.addAll(statuses);
-                        } catch (Exception e) {
-                            LOGGER.debug("Failed to poll the instances status of {}, set the status to failed", checkInstances, e);
-                            results.addAll(vmStatuses.stream()
-                                    .map(vs -> new CloudVmInstanceStatus(vs.getCloudInstance(), InstanceStatus.FAILED, e.getMessage()))
-                                    .collect(Collectors.toList()));
-                        }
+                    List<CloudVmInstanceStatus> allVmStatuses = instancesStatuses.stream().flatMap(Collection::stream).collect(Collectors.toList());
+                    List<CloudInstance> checkInstances = allVmStatuses.stream().map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
+                    PollTask<List<CloudVmInstanceStatus>> pollTask = resourcePollTaskFactory
+                            .newPollComputeStatusTask(builder, auth, context, checkInstances);
+                    try {
+                        List<CloudVmInstanceStatus> statuses = syncVMPollingScheduler.schedule(pollTask);
+                        results.addAll(statuses);
+                    } catch (Exception e) {
+                        LOGGER.debug("Failed to poll the instances status of {}, set the status to failed", checkInstances, e);
+                        results.addAll(allVmStatuses.stream()
+                                .map(vs -> new CloudVmInstanceStatus(vs.getCloudInstance(), InstanceStatus.FAILED, e.getMessage()))
+                                .collect(Collectors.toList()));
                     }
                 }
             } else {
