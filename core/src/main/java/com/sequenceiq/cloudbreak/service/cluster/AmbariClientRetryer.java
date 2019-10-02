@@ -72,6 +72,7 @@ public class AmbariClientRetryer {
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Map<String, List<String>> getBlueprintMap(AmbariClient ambariClient, String blueprintName) {
+        LOGGER.info("get blueprint map: {}, ambari URI: {}", blueprintName, ambariClient.getAmbari().getUri());
         return ambariClient.getBlueprintMap(blueprintName);
     }
 
@@ -111,21 +112,25 @@ public class AmbariClientRetryer {
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public int decommissionNodeManagers(AmbariClient ambariClient, List<String> hosts) throws IOException, URISyntaxException {
+        LOGGER.info("Decommission node managers: {}, ambari URI: {}", hosts, ambariClient.getAmbari().getUri());
         return ambariClient.decommissionNodeManagers(hosts);
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public int decommissionDataNodes(AmbariClient ambariClient, List<String> hosts) throws IOException, URISyntaxException {
+        LOGGER.info("Decommission data nodes: {}, ambari URI: {}", hosts, ambariClient.getAmbari().getUri());
         return ambariClient.decommissionDataNodes(hosts);
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public void setHBaseRegionServersToMaintenance(AmbariClient ambariClient, List<String> hostNames, boolean mode) throws IOException, URISyntaxException {
+        LOGGER.info("Set HBASE region servers to maintenance: {}, mode: {}, ambari URI: {}", hostNames, mode, ambariClient.getAmbari().getUri());
         ambariClient.setHBaseRegionServersToMaintenance(hostNames, mode);
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public int decommissionHBaseRegionServers(AmbariClient ambariClient, List<String> hosts) throws IOException, URISyntaxException {
+        LOGGER.info("Decommission HBASE region servers: {}, ambari URI: {}", hosts, ambariClient.getAmbari().getUri());
         return ambariClient.decommissionHBaseRegionServers(hosts);
     }
 
@@ -146,6 +151,7 @@ public class AmbariClientRetryer {
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public int startService(AmbariClient ambariClient, String service) throws IOException, URISyntaxException {
+        LOGGER.info("Start service {}, ambari URI: {}", service, ambariClient.getAmbari().getUri());
         return ambariClient.startService(service);
     }
 
