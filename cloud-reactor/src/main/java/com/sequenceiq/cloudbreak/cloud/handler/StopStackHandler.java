@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -18,10 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
-import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -33,12 +28,6 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Inject
-    private PollTaskFactory statusCheckFactory;
-
-    @Inject
-    private SyncPollingScheduler<InstancesStatusResult> syncPollingScheduler;
 
     @Inject
     private EventBus eventBus;
@@ -58,12 +47,7 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             List<CloudInstance> instances = request.getCloudInstances();
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudVmInstanceStatus> cloudVmInstanceStatuses = connector.instances().stop(authenticatedContext, request.getResources(), instances);
-            PollTask<InstancesStatusResult> task = statusCheckFactory.newPollInstanceStateTask(authenticatedContext, instances,
-                    Sets.newHashSet(InstanceStatus.STOPPED, InstanceStatus.FAILED));
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, cloudVmInstanceStatuses);
-            if (!task.completed(statusResult)) {
-                statusResult = syncPollingScheduler.schedule(task);
-            }
             StopInstancesResult result = new StopInstancesResult(request, cloudContext, statusResult);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
