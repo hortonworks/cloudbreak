@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 @Component
-class GcpNetworkInterfaceProvider {
+public class GcpNetworkInterfaceProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpNetworkInterfaceProvider.class);
 
@@ -57,11 +57,11 @@ class GcpNetworkInterfaceProvider {
         return instances.get(0).getName().split(DELIMITER)[0];
     }
 
-    private List<Instance> getInstances(AuthenticatedContext authenticatedContext, String instanceNamePrefix) {
+    public List<Instance> getInstances(AuthenticatedContext authenticatedContext, String instanceNamePrefix) {
         List<Instance> instances = new ArrayList<>();
         CloudContext cloudContext = authenticatedContext.getCloudContext();
         String stackName = cloudContext.getName();
-        LOGGER.debug(String.format("Collecting instance metadata for stack: %s", stackName));
+        LOGGER.debug(String.format("Collecting instances for stack: %s", stackName));
         long startTime = new Date().getTime();
 
         try {
@@ -76,7 +76,7 @@ class GcpNetworkInterfaceProvider {
                 request.setPageToken(response.getNextPageToken());
             } while (response.getNextPageToken() != null);
         } catch (IOException e) {
-            LOGGER.debug("Error dunging metadata collection", e);
+            LOGGER.debug("Error during instance collection", e);
         }
         logResponse(instances, startTime, stackName);
         return instances;
