@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
+import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
 import static com.sequenceiq.cloudbreak.cloud.template.compute.CloudFailureHandler.ScaleContext;
+import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +31,7 @@ import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -38,7 +41,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
@@ -241,9 +247,17 @@ public class ComputeResourceService {
     }
 
     @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public List<CloudResourceStatus> pollResourcesRetriable(PollTask<List<CloudResourceStatus>> pollTask)
+    public List<CloudResourceStatus> pollSingleResourceRetriable(PollTask<List<CloudResourceStatus>> pollTask, CloudResourceStatus status)
             throws ExecutionException, InterruptedException, java.util.concurrent.TimeoutException {
-        return syncPollingScheduler.schedule(pollTask);
+        try {
+            return syncPollingScheduler.schedule(pollTask);
+        } catch (CloudConnectorException exception) {
+            if (exception.getMessage().contains("QUOTA_EXCEEDED")) {
+                return List.of(new CloudResourceStatus(status.getCloudResource(), ResourceStatus.FAILED, exception.getMessage(), status.getPrivateId()));
+            } else {
+                throw exception;
+            }
+        }
     }
 
     @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
@@ -312,11 +326,15 @@ public class ComputeResourceService {
                     ComputeResourceBuilder<ResourceBuilderContext> builder = builderOpt.get();
                     LOGGER.debug("Determined resource builder for instances: {}", builder.resourceType());
                     for (CloudResourceStatus instanceResourceStatus : instanceResourceStatuses) {
+                        PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
+                        if (CANCELLED.equals(pollGroup)) {
+                            throw new CancellationException(format("Building of %s has been cancelled", instanceResourceStatus));
+                        }
                         CloudResource instance = instanceResourceStatus.getCloudResource();
                         PollTask<List<CloudResourceStatus>> pollTask = resourcePollTaskFactory
                                 .newPollResourceTask(builder, auth, List.of(instance), ctx, true);
                         try {
-                            List<CloudResourceStatus> statuses = pollResourcesRetriable(pollTask);
+                            List<CloudResourceStatus> statuses = pollSingleResourceRetriable(pollTask, instanceResourceStatus);
                             instanceResourceStatus.setStatus(statuses.get(0).getStatus());
                         } catch (Exception e) {
                             LOGGER.debug("Failure during polling the instance status of {}", instanceResourceStatus, e);
