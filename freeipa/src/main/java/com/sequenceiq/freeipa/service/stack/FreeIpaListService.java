@@ -7,20 +7,21 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
-import com.sequenceiq.freeipa.converter.stack.StackToListFreeIpaResponseConverter;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.converter.stack.FreeIpaToListFreeIpaResponseConverter;
+import com.sequenceiq.freeipa.entity.FreeIpa;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 
 @Service
 public class FreeIpaListService {
 
     @Inject
-    private StackService stackService;
+    private FreeIpaService freeIpaService;
 
     @Inject
-    private StackToListFreeIpaResponseConverter stackToListFreeIpaResponseConverter;
+    private FreeIpaToListFreeIpaResponseConverter freeIpaToListFreeIpaResponseConverter;
 
     public List<ListFreeIpaResponse> list(String accountId) {
-        List<Stack> stackList = stackService.getAllByAccountId(accountId);
-        return stackToListFreeIpaResponseConverter.convertList(stackList);
+        List<FreeIpa> stackList = freeIpaService.getAllByAccountId(accountId);
+        return freeIpaToListFreeIpaResponseConverter.convertList(stackList);
     }
 }

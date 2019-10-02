@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -25,4 +26,8 @@ public interface FreeIpaRepository extends BaseCrudRepository<FreeIpa, Long> {
     @Query("SELECT f FROM FreeIpa f WHERE f.stack.id = :stackId")
     @CheckPermission(action = ResourceAction.READ)
     Optional<FreeIpa> getByStackId(@Param("stackId") Long stackId);
+
+    @CheckPermission(action = ResourceAction.READ)
+    @Query("SELECT f FROM FreeIpa f WHERE f.stack.accountId = :accountId AND f.stack.terminated = -1")
+    List<FreeIpa> findByAccountId(@Param("accountId") String accountId);
 }

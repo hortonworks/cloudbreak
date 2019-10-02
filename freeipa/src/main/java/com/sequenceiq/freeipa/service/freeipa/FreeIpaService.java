@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -37,5 +39,9 @@ public class FreeIpaService implements ResourceIdProvider {
         FreeIpa freeIpa = freeIpaConverter.convert(request);
         freeIpa.setStack(stack);
         return save(freeIpa);
+    }
+
+    public List<FreeIpa> getAllByAccountId(String accountId) {
+        return repository.findByAccountId(accountId);
     }
 }
