@@ -10,7 +10,7 @@ public class WorkspaceIdModifiedRequest extends HttpServletRequestWrapper {
 
     private static final String API_VERSION = "v4";
 
-    private final Pattern apiResourcePattern = Pattern.compile("\\/" + API_VERSION + "\\/(\\d*)\\/");
+    private static final Pattern API_RESOURCE_PATTERN = Pattern.compile("\\/" + API_VERSION + "\\/(\\d*)\\/");
 
     private String replaceString;
 
@@ -22,7 +22,7 @@ public class WorkspaceIdModifiedRequest extends HttpServletRequestWrapper {
     @Override
     public String getRequestURI() {
         String requestURI = super.getRequestURI();
-        Matcher apiResourceMatcher = apiResourcePattern.matcher(requestURI);
+        Matcher apiResourceMatcher = API_RESOURCE_PATTERN.matcher(requestURI);
         if (apiResourceMatcher.find()) {
             return apiResourceMatcher.replaceFirst(replaceString);
         }
@@ -32,7 +32,7 @@ public class WorkspaceIdModifiedRequest extends HttpServletRequestWrapper {
     @Override
     public StringBuffer getRequestURL() {
         StringBuffer requestURL = super.getRequestURL();
-        Matcher apiResourceMatcher = apiResourcePattern.matcher(requestURL);
+        Matcher apiResourceMatcher = API_RESOURCE_PATTERN.matcher(requestURL);
         if (apiResourceMatcher.find()) {
             return requestURL.replace(apiResourceMatcher.start(), apiResourceMatcher.end(), replaceString);
         }

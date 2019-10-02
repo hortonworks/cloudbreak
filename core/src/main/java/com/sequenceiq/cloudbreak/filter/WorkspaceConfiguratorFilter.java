@@ -53,7 +53,8 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
             }
             Long workspaceId = tenantDefaultWorkspace.get().getId();
             restRequestThreadLocalService.setRequestedWorkspaceId(workspaceId);
-            filterChain.doFilter(new WorkspaceIdModifiedRequest(request, workspaceId), response);
+            WorkspaceIdModifiedRequest modifiedRequest = new WorkspaceIdModifiedRequest(request, workspaceId);
+            filterChain.doFilter(modifiedRequest, response);
         } else {
             filterChain.doFilter(request, response);
         }
