@@ -55,6 +55,14 @@ public class WaitUtil {
     @Value("${integrationtest.testsuite.maxRetry:1800}")
     private int maxRetry;
 
+    public long getPollingInterval() {
+        return pollingInterval;
+    }
+
+    public int getMaxRetry() {
+        return maxRetry;
+    }
+
     public Pair<Status, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Status desiredStatus) {
         Pair<Status, String> ret = null;
         WaitResult waitResult = WaitResult.SUCCESSFUL;
