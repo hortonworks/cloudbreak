@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.DefaultAutoTlsFlagProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -77,6 +78,9 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
 
     @Inject
     private CloudStorageConverter cloudStorageConverter;
+
+    @Inject
+    private DefaultAutoTlsFlagProvider defaultAutoTlsFlagProvider;
 
     @Override
     public Cluster convert(ClusterV4Request source) {
@@ -111,7 +115,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setProxyConfigCrn(source.getProxyConfigCrn());
         cluster.setAutoTlsEnabled(Optional.ofNullable(source.getCm())
                 .map(ClouderaManagerV4Request::getEnableAutoTls)
-                .orElse(Boolean.TRUE));
+                .orElse(defaultAutoTlsFlagProvider.defaultAutoTls(source.getCloudPlatform())));
         return cluster;
     }
 

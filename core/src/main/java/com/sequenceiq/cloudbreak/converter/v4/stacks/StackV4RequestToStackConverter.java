@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -316,9 +317,10 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private void updateCluster(StackV4Request source, Stack stack, Workspace workspace) {
-        if (source.getCluster() != null) {
-            source.getCluster().setName(stack.getName());
-            Cluster cluster = getConversionService().convert(source.getCluster(), Cluster.class);
+        doIfNotNull(source.getCluster(), clusterRequest -> {
+            clusterRequest.setName(stack.getName());
+            clusterRequest.setCloudPlatform(stack.getCloudPlatform());
+            Cluster cluster = getConversionService().convert(clusterRequest, Cluster.class);
             Set<HostGroup> hostGroups = source.getInstanceGroups().stream()
                     .map(ig -> {
                         HostGroup hostGroup = getConversionService().convert(ig, HostGroup.class);
@@ -328,7 +330,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                     .collect(Collectors.toSet());
             cluster.setHostGroups(hostGroups);
             stack.setCluster(cluster);
-        }
+        });
     }
 
     private com.sequenceiq.cloudbreak.domain.stack.Component getImageComponent(StackV4Request source, Stack stack) {

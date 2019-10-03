@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.DefaultAutoTlsFlagProvider;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -54,6 +55,9 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
 
     @Mock
     private CloudStorageConverter cloudStorageConverter;
+
+    @Mock
+    private DefaultAutoTlsFlagProvider defaultAutoTlsFlagProvider;
 
     @Before
     public void setUp() {

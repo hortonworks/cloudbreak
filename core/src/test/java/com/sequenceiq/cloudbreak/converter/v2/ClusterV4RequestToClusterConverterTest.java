@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -58,6 +60,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.DefaultAutoTlsFlagProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -92,6 +95,9 @@ public class ClusterV4RequestToClusterConverterTest {
 
     @Mock
     private CloudStorageConverter cloudStorageConverter;
+
+    @Mock
+    private DefaultAutoTlsFlagProvider defaultAutoTlsFlagProvider;
 
     private Workspace workspace;
 
@@ -338,6 +344,19 @@ public class ClusterV4RequestToClusterConverterTest {
 
         Json expectedRepoJson = new Json(repository);
         assertEquals(expectedRepoJson.getMap().size() + 1, component.getAttributes().getMap().size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"TRUE", "FALSE"})
+    public void testConvertAutoTls(String boolString) {
+        boolean boolValue = Boolean.parseBoolean(boolString);
+        ClusterV4Request source = new ClusterV4Request();
+        source.setCloudPlatform("YARN");
+
+        when(defaultAutoTlsFlagProvider.defaultAutoTls(any())).thenReturn(boolValue);
+        Cluster result = underTest.convert(source);
+
+        assertEquals(boolValue, result.getAutoTlsEnabled());
     }
 
     @Test

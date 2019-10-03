@@ -83,6 +83,8 @@ public class ClusterV4Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
 
+    private String cloudPlatform;
+
     public String getUserName() {
         return userName;
     }
@@ -201,5 +203,13 @@ public class ClusterV4Request implements JsonEntity {
 
     public void setValidateBlueprint(Boolean validateBlueprint) {
         this.validateBlueprint = validateBlueprint;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 }

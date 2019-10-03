@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.service.cluster.DefaultAutoTlsFlagProvider;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
@@ -36,6 +37,9 @@ public class ClusterCreationEnvironmentValidator {
 
     @Inject
     private KerberosConfigService kerberosConfigService;
+
+    @Inject
+    private DefaultAutoTlsFlagProvider defaultAutoTlsFlagProvider;
 
     public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
@@ -79,7 +83,7 @@ public class ClusterCreationEnvironmentValidator {
     private void validateAutoTls(ClusterV4Request clusterRequest, Stack stack, ValidationResultBuilder resultBuilder) {
         Boolean autoTls = Optional.ofNullable(clusterRequest.getCm())
                 .map(ClouderaManagerV4Request::getEnableAutoTls)
-                .orElse(Boolean.TRUE);
+                .orElse(defaultAutoTlsFlagProvider.defaultAutoTls(stack.getCloudPlatform()));
         if (autoTls) {
             Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
             boolean freeipa = kerberosConfig.map(kc -> KerberosType.FREEIPA == kc.getType()).orElse(Boolean.FALSE);
