@@ -80,11 +80,15 @@ public class UmsUsersStateProvider {
 
                 users.stream().forEach(u -> {
                     FmsUser fmsUser = umsUserToUser(u);
+                    // add workload username for each user. This will be helpful in getting users from IPA.
+                    userStateBuilder.addWorkloadUsername(fmsUser);
                     handleUser(userStateBuilder, crnToFmsGroup, actorCrn, u.getCrn(), fmsUser, environmentCrn, requestIdOptional);
+
                 });
 
                 machineUsers.stream().forEach(mu -> {
                     FmsUser fmsUser = umsMachineUserToUser(mu);
+                    userStateBuilder.addWorkloadUsername(fmsUser);
                     handleUser(userStateBuilder, crnToFmsGroup, actorCrn, mu.getCrn(), fmsUser, environmentCrn, requestIdOptional);
                 });
 

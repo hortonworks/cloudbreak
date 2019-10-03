@@ -19,12 +19,17 @@ public class UsersState {
 
     private Map<String, WorkloadCredential> usersWorkloadCredentialMap;
 
+    // This field denotes all users those are passwd as an input. If there is no user passwd then this will represent all users.
+    private Set<FmsUser> requestedWorkloadUsers = new HashSet<>();
+
     public UsersState(
-        Set<FmsGroup> groups, Set<FmsUser> users, Multimap<String, String> groupMembership, Map<String, WorkloadCredential> usersWorkloadCredentialMap) {
+        Set<FmsGroup> groups, Set<FmsUser> users, Multimap<String, String> groupMembership,
+        Map<String, WorkloadCredential> usersWorkloadCredentialMap, Set<FmsUser> requestedWorkloadUsers) {
         this.groups = requireNonNull(groups);
         this.users = requireNonNull(users);
         this.groupMembership = requireNonNull(groupMembership);
         this.usersWorkloadCredentialMap = usersWorkloadCredentialMap;
+        this.requestedWorkloadUsers = requestedWorkloadUsers;
     }
 
     public Set<FmsGroup> getGroups() {
@@ -41,6 +46,10 @@ public class UsersState {
 
     public Map<String, WorkloadCredential> getUsersWorkloadCredentialMap() {
         return usersWorkloadCredentialMap;
+    }
+
+    public Set<FmsUser> getRequestedWorkloadUsers() {
+        return requestedWorkloadUsers;
     }
 
     @Override
@@ -61,6 +70,9 @@ public class UsersState {
 
         private Map<String, WorkloadCredential> workloadCredentialMap = new HashMap<>();
 
+        // This field denotes all users those are passwd as an input. If there is no user passwd then this will represent all users.
+        private Set<FmsUser> requestedWorkloadUsers = new HashSet<>();
+
         public void addGroup(FmsGroup fmsGroup) {
             fmsGroups.add(fmsGroup);
         }
@@ -78,7 +90,12 @@ public class UsersState {
         }
 
         public UsersState build() {
-            return new UsersState(fmsGroups, fmsUsers, groupMembership, workloadCredentialMap);
+            return new UsersState(fmsGroups, fmsUsers, groupMembership, workloadCredentialMap, requestedWorkloadUsers);
+        }
+
+        public void addWorkloadUsername(FmsUser user) {
+            requestedWorkloadUsers.add(user);
+
         }
     }
 }
