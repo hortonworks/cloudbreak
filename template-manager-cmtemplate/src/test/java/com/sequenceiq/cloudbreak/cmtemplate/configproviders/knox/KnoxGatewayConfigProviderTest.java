@@ -137,64 +137,6 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void roleConfigsWithGatewayAndUserFacingCertificationGeneratedAndAutoTlsIsDisabled() {
-        final String gatewaySiteCustomUserFacingCertConfigValue = "<property><name>gateway.tls.keystore.path</name>"
-                + "<value>/var/lib/knox/cloudbreak_resources/security/keystores/userfacing.jks</value>"
-                + "</property><property><name>gateway.tls.key.alias</name><value>userfacing-identity</value></property>";
-        Gateway gateway = new Gateway();
-        gateway.setKnoxMasterSecret("admin");
-        gateway.setPath("/a/b/c");
-        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setKnoxUserFacingCertConfigured(Boolean.TRUE);
-        generalClusterConfigs.setAutoTlsEnabled(Boolean.FALSE);
-        TemplatePreparationObject source = Builder.builder()
-                .withGateway(gateway, "key")
-                .withGeneralClusterConfigs(generalClusterConfigs)
-                .build();
-
-        assertEquals(
-                List.of(
-                        config("gateway_master_secret", gateway.getKnoxMasterSecret()),
-                        config("gateway_path", gateway.getPath()),
-                        config("gateway_signing_keystore_name", "signing.jks"),
-                        config("gateway_signing_keystore_type", "JKS"),
-                        config("gateway_signing_key_alias", "signing-identity"),
-                        config("gateway_dispatch_whitelist", "^*.*$"),
-                        config("conf/gateway-site.xml_role_safety_valve", gatewaySiteCustomUserFacingCertConfigValue)
-                ),
-                underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
-        );
-    }
-
-    @Test
-    public void roleConfigsWithGatewayAndUserFacingCertificationGeneratedAndAutoTlsIsEnsabled() {
-        Gateway gateway = new Gateway();
-        gateway.setKnoxMasterSecret("admin");
-        gateway.setPath("/a/b/c");
-        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setKnoxUserFacingCertConfigured(Boolean.TRUE);
-        generalClusterConfigs.setAutoTlsEnabled(Boolean.TRUE);
-        TemplatePreparationObject source = Builder.builder()
-                .withGateway(gateway, "key")
-                .withGeneralClusterConfigs(generalClusterConfigs)
-                .build();
-
-        assertEquals(
-                List.of(
-                        config("gateway_master_secret", gateway.getKnoxMasterSecret()),
-                        config("gateway_path", gateway.getPath()),
-                        config("gateway_signing_keystore_name", "signing.jks"),
-                        config("gateway_signing_keystore_type", "JKS"),
-                        config("gateway_signing_key_alias", "signing-identity"),
-                        config("gateway_dispatch_whitelist", "^*.*$"),
-                        config("gateway_tls_certificate_path", "/var/lib/knox/cloudbreak_resources/security/keystores/userfacing.p12"),
-                        config("gateway_tls_certificate_alias", "userfacing-identity")
-                ),
-                underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
-        );
-    }
-
-    @Test
     public void roleConfigsWithoutGateway() {
         GeneralClusterConfigs gcc = new GeneralClusterConfigs();
         gcc.setPassword("secret");

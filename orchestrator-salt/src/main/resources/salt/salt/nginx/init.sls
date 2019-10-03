@@ -60,18 +60,26 @@ update_nginx_conf_manager_port:
       protocol: {{ cloudera_manager.communication.protocol }}
 {% endif %}
 
-# when gateway is defined, we do NOT config user facing cert and ssl for port 443, because services are available through knox on 8443
-# we still config ssl for port 9443 (for internal communication with ambari)
-{% if gateway.path is defined and gateway.path is not none and "manager_server" not in grains.get('roles', []) %}
+/etc/certs-user-facing:
+  file.directory:
+    - makedirs: True
 
-restart_nginx_after_ssl_reconfig:
-  service.running:
-    - name: nginx
-    - enable: True
-    - watch:
-      - file: /etc/nginx/sites-enabled/ssl.conf
+{% if gateway.userfacingcert_configured is defined and gateway.userfacingcert_configured == True %}
 
-# when gateway is NOT defined, we config user facing cert and ssl, because services are available through nginx on 443
+/etc/certs-user-facing/server-key.pem:
+  file.managed:
+    - contents_pillar: gateway:userfacingkey
+    - makedirs: True
+    - mode: 777
+    - unless: test -f /etc/certs-user-facing/server-key.pem
+
+/etc/certs-user-facing/server.pem:
+  file.managed:
+    - contents_pillar: gateway:userfacingcert
+    - makedirs: True
+    - mode: 777
+    - unless: test -f /etc/certs-user-facing/server.pem
+
 {% else %}
 
 add_user_facing_cert_script:
@@ -82,14 +90,12 @@ add_user_facing_cert_script:
     - template: jinja
     - mode: 755
 
-/etc/certs-user-facing:
-  file.directory:
-    - makedirs: True
-
 generate_user_facing_cert:
   cmd.run:
     - name: /opt/salt/scripts/create-user-facing-cert.sh 2>&1 | tee -a /var/log/generate-user-facing-cert.log && exit ${PIPESTATUS[0]}
     - unless: test -f /etc/certs-user-facing/server.pem
+
+{% endif %}
 
 /etc/nginx/sites-enabled/ssl-user-facing.conf:
   file.managed:
@@ -111,5 +117,3 @@ restart_nginx_after_ssl_reconfig_with_user_facing:
     - watch:
       - file: /etc/nginx/sites-enabled/ssl.conf
       - file: /etc/nginx/sites-enabled/ssl-user-facing.conf
-
-{% endif %}

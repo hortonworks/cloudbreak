@@ -70,8 +70,7 @@ public class GatewayPublicEndpointManagementService {
         boolean certGeneratedAndSaved = false;
         if (isCertGenerationEnabled()
                 && stack != null
-                && stack.getCluster() != null
-                && stack.getCluster().getGateway() != null) {
+                && stack.getCluster() != null) {
             if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
                 certGeneratedAndSaved = generateCertAndSaveForStack(stack);
                 if (certGeneratedAndSaved) {
