@@ -441,6 +441,14 @@
   tag {{providerPrefix}}.HUE-HTTPD-error_log
   read_from_head true
 </source>
+<source>
+  @type tail
+  format none
+  path /var/log/autossh-*.log
+  pos_file /var/log/td-agent/pos/{{providerPrefix}}-autossh.log.pos
+  tag {{providerPrefix}}.AUTOSSH
+  read_from_head true
+</source>
 {% else %}
 # DATABUS inputs are disabled
 {% endif %}
