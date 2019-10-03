@@ -16,7 +16,6 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
@@ -49,16 +48,6 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String GATEWAY_WHITELIST = "gateway_dispatch_whitelist";
 
-    private static final String GATEWAY_SITE_SAFETY_VALVE = "conf/gateway-site.xml_role_safety_valve";
-
-    private static final String GATEWAY_TLS_KEYSTORE_PATH_PROPERTY_NAME = "gateway.tls.keystore.path";
-
-    private static final String GATEWAY_TLS_KEY_ALIAS_PROPERTY_NAME = "gateway.tls.key.alias";
-
-    private static final String GATEWAY_TLS_CERTIFICATE_PATH = "gateway_tls_certificate_path";
-
-    private static final String GATEWAY_TLS_CERT_ALIAS = "gateway_tls_certificate_alias";
-
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         GatewayView gateway = source.getGatewayView();
@@ -81,7 +70,6 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
                     } else {
                         config.add(config(GATEWAY_WHITELIST, "^*.*$"));
                     }
-                    configKnoxUserFacingCert(generalClusterConfigs, config);
                 }
                 return config;
             case KnoxRoles.IDBROKER:
@@ -119,17 +107,5 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public List<String> getRoleTypes() {
         return List.of(KnoxRoles.KNOX_GATEWAY, KnoxRoles.IDBROKER);
-    }
-
-    private void configKnoxUserFacingCert(GeneralClusterConfigs generalClusterConfigs, List<ApiClusterTemplateConfig> config) {
-        if (!generalClusterConfigs.getAutoTlsEnabled() && generalClusterConfigs.getKnoxUserFacingCertConfigured()) {
-            String userFacingJksPath = "/var/lib/knox/cloudbreak_resources/security/keystores/userfacing.jks";
-            String configValue = ConfigUtils.getSafetyValveProperty(GATEWAY_TLS_KEYSTORE_PATH_PROPERTY_NAME, userFacingJksPath)
-                    .concat(ConfigUtils.getSafetyValveProperty(GATEWAY_TLS_KEY_ALIAS_PROPERTY_NAME, "userfacing-identity"));
-            config.add(config(GATEWAY_SITE_SAFETY_VALVE, configValue));
-        } else if (generalClusterConfigs.getAutoTlsEnabled() && generalClusterConfigs.getKnoxUserFacingCertConfigured()) {
-            config.add(config(GATEWAY_TLS_CERTIFICATE_PATH, "/var/lib/knox/cloudbreak_resources/security/keystores/userfacing.p12"));
-            config.add(config(GATEWAY_TLS_CERT_ALIAS, "userfacing-identity"));
-        }
     }
 }
