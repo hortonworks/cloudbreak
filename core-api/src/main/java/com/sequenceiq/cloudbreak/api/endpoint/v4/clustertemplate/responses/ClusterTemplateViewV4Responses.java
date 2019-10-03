@@ -22,4 +22,5 @@ public class ClusterTemplateViewV4Responses extends GeneralCollectionV4Response<
     public ClusterTemplateViewV4Responses() {
         super(Sets.newHashSet());
     }
+
 }

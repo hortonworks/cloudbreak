@@ -38,4 +38,9 @@ public interface ClusterTemplateRepository extends WorkspaceResourceRepository<C
     @Query("SELECT c FROM ClusterTemplate c WHERE c.resourceCrn= :crn AND c.workspace.id= :workspaceId AND c.status <> 'DEFAULT_DELETED'")
     @CheckPermissionsByReturnValue
     Optional<ClusterTemplate> getByCrnForWorkspaceId(@Param("crn") String crn, @Param("workspaceId") Long workspaceId);
+
+    @Query("SELECT c FROM ClusterTemplate c WHERE c.stackTemplate.environmentCrn= :environmentCrn AND c.status <> 'DEFAULT_DELETED'")
+    @CheckPermissionsByReturnValue
+    Set<ClusterTemplate> getAllByEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
+
 }

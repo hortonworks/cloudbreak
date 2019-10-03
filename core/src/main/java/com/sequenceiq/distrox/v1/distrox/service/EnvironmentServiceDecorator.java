@@ -1,5 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.service;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -51,14 +54,15 @@ public class EnvironmentServiceDecorator {
     }
 
     public void prepareEnvironments(Set<ClusterTemplateViewV4Response> clusterTemplateViewV4Responses) {
+        LOGGER.debug("Decorating with environment name the following cluster definition(s): {}",
+                clusterTemplateViewV4Responses.stream().map(CompactViewV4Response::getName).collect(toSet()));
         Collection<SimpleEnvironmentResponse> responses = environmentClientService.list().getResponses();
         for (ClusterTemplateViewV4Response clusterTemplateViewV4Response : clusterTemplateViewV4Responses) {
             Optional<SimpleEnvironmentResponse> first = responses.stream()
                     .filter(x -> x.getCrn().equals(clusterTemplateViewV4Response.getEnvironmentCrn()))
                     .findFirst();
-            if (first.isPresent()) {
-                clusterTemplateViewV4Response.setEnvironmentName(first.get().getName());
-            }
+            first.ifPresentOrElse(simpleEnvironmentResponse -> clusterTemplateViewV4Response.setEnvironmentName(simpleEnvironmentResponse.getName()), () ->
+                    LOGGER.info("Unable to find environment name for cluster definition \"{}\"", clusterTemplateViewV4Response.getName()));
         }
     }
 
