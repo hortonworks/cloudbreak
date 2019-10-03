@@ -47,6 +47,11 @@ public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldSt
     }
 
     @Override
+    public String getDisplayName() {
+        return "Hello world";
+    }
+
+    @Override
     public HelloWorldEvent getFailHandledEvent() {
         return HELLOWORLD_FAILHANDLED_EVENT;
     }

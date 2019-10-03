@@ -63,4 +63,9 @@ public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<Ch
     public ChangePrimaryGatewayEvent[] getInitEvents() {
         return new ChangePrimaryGatewayEvent[]{CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT};
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Change primary gateway";
+    }
 }

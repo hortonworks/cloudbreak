@@ -61,4 +61,24 @@ public class HostGroupService {
     public Set<HostGroup> findAllHostGroupsByRecipe(Long recipeId) {
         return hostGroupRepository.findAllHostGroupsByRecipe(recipeId);
     }
+
+    public Set<HostGroup> getByClusterWithRecipes(Long clusterId) {
+        return hostGroupRepository.findHostGroupsInClusterWithRecipes(clusterId);
+    }
+
+    public HostGroup getByClusterIdAndNameWithRecipes(Long clusterId, String hostGroupName) {
+        return hostGroupRepository.findHostGroupInClusterByNameWithRecipes(clusterId, hostGroupName);
+    }
+
+    public Long countByClusterIdAndName(Long id, String hostGroupName) {
+        return hostMetadataService.countByClusterIdAndHostGroupName(id, hostGroupName);
+    }
+
+    public HostGroup getByClusterIdAndNameWithHostMetadata(Long clusterId, String hostGroupName) {
+        return hostGroupRepository.findHostGroupInClusterByNameWithHostMetadata(clusterId, hostGroupName);
+    }
+
+    public Set<HostGroup> getByClusterWithRecipesAndHostmetadata(Long clusterId) {
+        return hostGroupRepository.findHostGroupsInClusterWithRecipesAndHostmetadata(clusterId);
+    }
 }

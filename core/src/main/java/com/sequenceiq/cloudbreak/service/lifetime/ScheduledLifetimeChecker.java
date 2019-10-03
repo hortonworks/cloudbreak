@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.service.lifetime;
 
-import java.time.Duration;
-import java.util.Map;
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -11,10 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -33,41 +29,21 @@ public class ScheduledLifetimeChecker {
     @Scheduled(fixedRate = 60 * 1000, initialDelay = 60 * 1000)
     public void validate() {
         stackService.getAllAlive().forEach(stack ->
-                getStackTimeToLive(stack).ifPresent(ttl -> {
-                    if (isInDeletableStatus(stack) && isExceeded(stack.getCluster().getCreationFinished(), ttl.toMillis())) {
+                stackService.getTtlValueForStack(stack.getId()).ifPresent(ttl -> {
+                    if (isInDeletableStatus(stack) && isExceeded(stack.getCreationFinished(), ttl.toMillis())) {
                         LOGGER.info("Stack is exceeded at {}ms because is in deletable status and ttl is expired, ttl: {}",
-                                stack.getCluster().getCreationFinished() + ttl.toMillis(), ttl.toMillis());
+                                stack.getCreationFinished() + ttl.toMillis(), ttl.toMillis());
                         terminateStack(stack);
                     }
                 }));
     }
 
-    private boolean isInDeletableStatus(Stack stack) {
-        return !stack.isDeleteInProgress() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null;
+    private boolean isInDeletableStatus(StackTtlView stack) {
+        return Status.DELETE_IN_PROGRESS != stack.getStatus().getStatus() && stack.getCreationFinished() != null;
     }
 
-    private Optional<Duration> getStackTimeToLive(Stack stack) {
-        Map<String, String> params = stack.getParameters();
-        if (stack.getParameters() == null) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(params.get(PlatformParametersConsts.TTL_MILLIS))
-                .filter(this::isLong)
-                .map(s -> Duration.ofMillis(Long.parseLong(s)));
-    }
-
-    private boolean isLong(String s) {
-        try {
-            Long.parseLong(s);
-            return true;
-        } catch (NumberFormatException e) {
-            LOGGER.debug("Cannot parse TTL_MILLIS to long: {}", s);
-        }
-        return false;
-    }
-
-    private void terminateStack(Stack stack) {
-        if (!stack.isDeleteCompleted()) {
+    private void terminateStack(StackTtlView stack) {
+        if (!Status.DELETE_COMPLETED.equals(stack.getStatus().getStatus())) {
             LOGGER.debug("Trigger termination of stack: '{}', workspace: '{}', tenant: '{}'.",
                     stack.getName(), stack.getWorkspace().getName(), stack.getWorkspace().getTenant().getName());
             flowManager.triggerTermination(stack.getId(), false);

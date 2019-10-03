@@ -26,9 +26,6 @@ public class StackApiViewService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackApiViewService.class);
 
     @Inject
-    private StackApiViewRepository stackApiViewRepository;
-
-    @Inject
     private FlowLogService flowLogService;
 
     @Inject
@@ -36,6 +33,12 @@ public class StackApiViewService {
 
     @Inject
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
+
+    @Inject
+    private StackApiViewRepository stackApiViewRepository;
+
+    public StackApiViewService() {
+    }
 
     public boolean canChangeCredential(StackApiView stackApiView) {
         if (stackApiView.getStatus() != null) {

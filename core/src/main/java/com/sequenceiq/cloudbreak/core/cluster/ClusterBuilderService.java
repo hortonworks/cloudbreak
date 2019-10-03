@@ -120,7 +120,7 @@ public class ClusterBuilderService {
     public void buildCluster(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
+        Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipesAndHostmetadata(stack.getCluster().getId());
         Cluster cluster = stack.getCluster();
         clusterService.updateCreationDateOnCluster(cluster);
         TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);

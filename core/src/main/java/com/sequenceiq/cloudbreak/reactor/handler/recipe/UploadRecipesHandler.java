@@ -52,7 +52,7 @@ public class UploadRecipesHandler implements EventHandler<UploadRecipesRequest> 
         Long stackId = request.getResourceId();
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
+            Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
             recipeEngine.uploadRecipes(stack, hostGroups);
             result = new UploadRecipesSuccess(stackId);
         } catch (Exception e) {

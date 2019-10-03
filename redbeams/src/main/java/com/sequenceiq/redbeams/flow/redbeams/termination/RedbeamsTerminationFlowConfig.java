@@ -15,13 +15,13 @@ import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminat
 import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState.REDBEAMS_TERMINATION_FINISHED_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationState.TERMINATE_DATABASE_SERVER_STATE;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
-
 import java.util.List;
 
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class RedbeamsTerminationFlowConfig extends AbstractFlowConfiguration<RedbeamsTerminationState, RedbeamsTerminationEvent>
@@ -64,6 +64,11 @@ public class RedbeamsTerminationFlowConfig extends AbstractFlowConfiguration<Red
     @Override
     public RedbeamsTerminationEvent[] getInitEvents() {
         return REDBEAMS_INIT_EVENTS;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Terminate RDS";
     }
 
     @Override

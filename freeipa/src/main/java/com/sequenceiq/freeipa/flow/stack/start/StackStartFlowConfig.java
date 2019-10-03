@@ -52,6 +52,11 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     }
 
     @Override
+    public String getDisplayName() {
+        return "Start stack";
+    }
+
+    @Override
     protected List<Transition<StackStartState, StackStartEvent>> getTransitions() {
         return TRANSITIONS;
     }

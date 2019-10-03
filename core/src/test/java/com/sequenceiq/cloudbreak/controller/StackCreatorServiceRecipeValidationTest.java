@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -171,7 +172,7 @@ class StackCreatorServiceRecipeValidationTest {
         when(recipeService.get(any(RecipeAccessDto.class), eq(WORKSPACE_ID))).thenReturn(getRecipeWithName(existingRecipeName));
         when(converterUtil.convert(request, Stack.class)).thenReturn(TestUtil.stack());
         when(transactionService.required(any())).thenReturn(TestUtil.stack());
-
+        when(stackService.getIdByNameInWorkspace(anyString(), any(Long.class))).thenThrow(new NotFoundException("stack not found by name"));
         underTest.createStack(user, workspace, request);
 
         verify(recipeService, times(1)).get(any(RecipeAccessDto.class), anyLong());
@@ -185,6 +186,7 @@ class StackCreatorServiceRecipeValidationTest {
 
         when(converterUtil.convert(request, Stack.class)).thenReturn(TestUtil.stack());
         when(transactionService.required(any())).thenReturn(TestUtil.stack());
+        when(stackService.getIdByNameInWorkspace(anyString(), any(Long.class))).thenThrow(new NotFoundException("stack not found by name"));
 
         underTest.createStack(user, workspace, request);
 

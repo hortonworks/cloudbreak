@@ -53,6 +53,11 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     }
 
     @Override
+    public String getDisplayName() {
+        return "Stop stack";
+    }
+
+    @Override
     protected List<Transition<StackStopState, StackStopEvent>> getTransitions() {
         return TRANSITIONS;
     }

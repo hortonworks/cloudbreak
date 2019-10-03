@@ -52,6 +52,11 @@ public class SdxRepairFlowConfig extends AbstractFlowConfiguration<SdxRepairStat
     }
 
     @Override
+    public String getDisplayName() {
+        return "Repair SDX";
+    }
+
+    @Override
     protected List<Transition<SdxRepairState, SdxRepairEvent>> getTransitions() {
         return TRANSITIONS;
     }

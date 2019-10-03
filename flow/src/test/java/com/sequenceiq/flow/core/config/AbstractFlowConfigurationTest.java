@@ -191,6 +191,11 @@ public class AbstractFlowConfigurationTest {
             return new Event[]{ Event.START };
         }
 
+        @Override
+        public String getDisplayName() {
+            return "Test flow configuration";
+        }
+
         class NotAcceptedException extends RuntimeException {
 
         }

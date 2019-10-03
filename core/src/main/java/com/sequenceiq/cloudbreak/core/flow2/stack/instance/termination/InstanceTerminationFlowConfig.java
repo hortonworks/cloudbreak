@@ -63,4 +63,9 @@ public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<Ins
             TERMINATION_EVENT
         };
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Terminate instance";
+    }
 }

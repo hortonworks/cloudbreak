@@ -64,4 +64,9 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     public StackTerminationEvent[] getInitEvents() {
         return new StackTerminationEvent[]{TERMINATION_EVENT};
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Stack termination";
+    }
 }

@@ -57,4 +57,9 @@ public class ClusterCredentialChangeFlowConfig extends AbstractFlowConfiguration
                 CLUSTER_CREDENTIALCHANGE_EVENT
         };
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Change cluster credential";
+    }
 }

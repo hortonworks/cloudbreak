@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.service.lifetime;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,15 +16,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ScheduledLifetimeCheckerTest {
@@ -42,7 +44,7 @@ public class ScheduledLifetimeCheckerTest {
 
     @Test
     public void testValidateWhenOnlyOneStackIsAliveAndNotExceeded() {
-        Stack stack = new Stack();
+        StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
@@ -54,9 +56,8 @@ public class ScheduledLifetimeCheckerTest {
 
     @Test
     public void testValidateWhenOnlyOneStackIsAliveAndTTLNotSet() {
-        Stack stack = new Stack();
+        StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
-        stack.setParameters(Collections.emptyMap());
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
 
@@ -67,9 +68,8 @@ public class ScheduledLifetimeCheckerTest {
 
     @Test
     public void testValidateWhenOnlyOneStackIsAliveAndTTLIsLetter() {
-        Stack stack = new Stack();
+        StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "ttl"));
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
 
@@ -80,13 +80,11 @@ public class ScheduledLifetimeCheckerTest {
 
     @Test
     public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndDeleteInProgressAndClusterNull() {
-        Stack stack = new Stack();
+        StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
-        stack.setCluster(null);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "1"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.DELETE_IN_PROGRESS);
-        stack.setStackStatus(stackStatus);
+        stack.setStatus(stackStatus);
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
 
@@ -97,15 +95,13 @@ public class ScheduledLifetimeCheckerTest {
 
     @Test
     public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndDeleteInProgressAndCreationFinished() {
-        Stack stack = new Stack();
+        StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
         Cluster cluster = new Cluster();
         cluster.setCreationFinished(1L);
-        stack.setCluster(cluster);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "1"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.DELETE_IN_PROGRESS);
-        stack.setStackStatus(stackStatus);
+        stack.setStatus(stackStatus);
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
 
@@ -116,15 +112,13 @@ public class ScheduledLifetimeCheckerTest {
 
     @Test
     public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndDeleteInProgressAndCreationNotFinished() {
-        Stack stack = new Stack();
+        StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
         Cluster cluster = new Cluster();
         cluster.setCreationFinished(null);
-        stack.setCluster(cluster);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "1"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.DELETE_IN_PROGRESS);
-        stack.setStackStatus(stackStatus);
+        stack.setStatus(stackStatus);
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
 
@@ -135,13 +129,11 @@ public class ScheduledLifetimeCheckerTest {
 
     @Test
     public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndAvailableAndClusterNull() {
-        Stack stack = new Stack();
+        StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
-        stack.setCluster(null);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "1"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
-        stack.setStackStatus(stackStatus);
+        stack.setStatus(stackStatus);
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
 
@@ -152,15 +144,13 @@ public class ScheduledLifetimeCheckerTest {
 
     @Test
     public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndStoppedAndCreationNotFinished() {
-        Stack stack = new Stack();
+        StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
         Cluster cluster = new Cluster();
         cluster.setCreationFinished(null);
-        stack.setCluster(cluster);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "1"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.STOPPED);
-        stack.setStackStatus(stackStatus);
+        stack.setStatus(stackStatus);
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
 
@@ -171,7 +161,7 @@ public class ScheduledLifetimeCheckerTest {
 
     @Test
     public void testValidateWhenClusterExceededByRunningTimeMoreThanTTL() {
-        Stack stack = new Stack();
+        StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
         Workspace workspace = new Workspace();
         Tenant tenant = new Tenant();
@@ -183,13 +173,12 @@ public class ScheduledLifetimeCheckerTest {
         long startTimeMillis = 0;
         int ttlMillis = 1;
         cluster.setCreationFinished(startTimeMillis);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, String.valueOf(ttlMillis)));
-        stack.setCluster(cluster);
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
-        stack.setStackStatus(stackStatus);
+        stack.setStatus(stackStatus);
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
+        when(stackService.getTtlValueForStack(anyLong())).thenReturn(Optional.of(Duration.ofMillis(ttlMillis)));
         when(clock.getCurrentTimeMillis()).thenReturn(startTimeMillis + ttlMillis + 1);
 
         underTest.validate();
@@ -199,7 +188,7 @@ public class ScheduledLifetimeCheckerTest {
 
     @Test
     public void testValidateWhenClusterNotExceededByTTLMoreThanRunningTime() {
-        Stack stack = new Stack();
+        StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
         Workspace workspace = new Workspace();
         Tenant tenant = new Tenant();
@@ -209,16 +198,83 @@ public class ScheduledLifetimeCheckerTest {
         stack.setWorkspace(workspace);
         Cluster cluster = new Cluster();
         cluster.setCreationFinished(System.currentTimeMillis() - 1L);
-        stack.setCluster(cluster);
-        stack.setParameters(Collections.singletonMap(PlatformParametersConsts.TTL_MILLIS, "10000"));
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
-        stack.setStackStatus(stackStatus);
+        stack.setStatus(stackStatus);
 
         when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
 
         underTest.validate();
 
         verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
+    }
+
+    private class StackTtlViewImpl implements StackTtlView {
+
+        private Long id;
+
+        private String name;
+
+        private String crn;
+
+        private Workspace workspace;
+
+        private StackStatus status;
+
+        private Long creationFinished;
+
+        @Override
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getCrn() {
+            return crn;
+        }
+
+        public void setCrn(String crn) {
+            this.crn = crn;
+        }
+
+        @Override
+        public Workspace getWorkspace() {
+            return workspace;
+        }
+
+        public void setWorkspace(Workspace workspace) {
+            this.workspace = workspace;
+        }
+
+        @Override
+        public StackStatus getStatus() {
+            return status;
+        }
+
+        public void setStatus(StackStatus status) {
+            this.status = status;
+        }
+
+        @Override
+        public Long getCreationFinished() {
+            return creationFinished;
+        }
+
+        public void setCreationFinished(Long creationFinished) {
+            this.creationFinished = creationFinished;
+        }
     }
 }

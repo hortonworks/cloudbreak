@@ -70,4 +70,9 @@ public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<Cluste
     public ClusterDownscaleEvent[] getInitEvents() {
         return new ClusterDownscaleEvent[] { DECOMMISSION_EVENT };
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Downscale cluster";
+    }
 }

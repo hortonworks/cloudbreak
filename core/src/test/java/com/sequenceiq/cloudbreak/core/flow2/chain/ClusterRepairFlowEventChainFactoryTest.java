@@ -24,6 +24,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.Constraint;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -52,7 +53,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     private static final long CLUSTER_ID = 2L;
 
-    private static final Stack ATTACHED_WORKLOAD = mock(Stack.class);
+    private static final StackIdView ATTACHED_WORKLOAD = mock(StackIdView.class);
 
     @Mock
     private StackService stackService;

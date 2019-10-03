@@ -96,6 +96,11 @@ public class StackProvisionFlowConfig extends AbstractFlowConfiguration<StackPro
     }
 
     @Override
+    public String getDisplayName() {
+        return "Provision stack";
+    }
+
+    @Override
     public StackProvisionEvent getFailHandledEvent() {
         return STACKCREATION_FAILURE_HANDLED_EVENT;
     }

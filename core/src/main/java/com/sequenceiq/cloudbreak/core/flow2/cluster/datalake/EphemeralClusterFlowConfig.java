@@ -56,4 +56,9 @@ public class EphemeralClusterFlowConfig extends AbstractFlowConfiguration<Epheme
     public EphemeralClusterEvent[] getInitEvents() {
         return new EphemeralClusterEvent[]{EPHEMERAL_CLUSTER_UPDATE_TRIGGER_EVENT};
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Ephemeral cluster";
+    }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +19,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Pageable;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -29,6 +31,7 @@ import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
+import com.sequenceiq.flow.repository.FlowLogRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OperationRetryServiceTest {
@@ -60,17 +63,19 @@ public class OperationRetryServiceTest {
     @Mock
     private StackUpdater stackUpdater;
 
+    @Mock
+    private FlowLogRepository flowLogRepository;
+
     @Test(expected = BadRequestException.class)
     public void retryPending() {
-        when(stackMock.getId()).thenReturn(STACK_ID);
-
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
                 createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, Instant.now().toEpochMilli()),
                 createFlowLog("START_STATE", StateStatus.PENDING, Instant.now().toEpochMilli())
                 );
         when(flowLogService.findAllByResourceIdOrderByCreatedDesc(STACK_ID)).thenReturn(pendingFlowLogs);
+        when(flowLogRepository.findAnyByStackIdAndStateStatus(STACK_ID, StateStatus.PENDING)).thenReturn(Boolean.TRUE);
         try {
-            underTest.retry(stackMock);
+            underTest.retry(STACK_ID);
         } finally {
             verify(flow2Handler, times(0)).restartFlow(any(FlowLog.class));
         }
@@ -95,8 +100,9 @@ public class OperationRetryServiceTest {
                 createFlowLog("START_STATE", StateStatus.SUCCESSFUL, Instant.now().toEpochMilli())
         );
         when(flowLogService.findAllByResourceIdOrderByCreatedDesc(STACK_ID)).thenReturn(pendingFlowLogs);
+        when(flowLogRepository.findAnyByStackIdAndStateStatus(STACK_ID, StateStatus.PENDING)).thenReturn(Boolean.TRUE);
         try {
-            underTest.retry(stackMock);
+            underTest.retry(STACK_ID);
         } finally {
             verify(flow2Handler, times(0)).restartFlow(any(FlowLog.class));
         }
@@ -115,9 +121,10 @@ public class OperationRetryServiceTest {
                 createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, getOffsettedCreated(2)),
                 createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, getOffsettedCreated(1))
                 );
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(STACK_ID)).thenReturn(pendingFlowLogs);
+        when(flowLogRepository.findAllByStackIdOrderByCreatedDesc(anyLong(), any(Pageable.class))).thenReturn(pendingFlowLogs);
+        when(flowLogRepository.findAnyByStackIdAndStateStatus(STACK_ID, StateStatus.PENDING)).thenReturn(Boolean.TRUE);
         when(stackMock.getStatus()).thenReturn(Status.CREATE_FAILED);
-        underTest.retry(stackMock);
+        underTest.retry(STACK_ID);
 
         verify(flow2Handler, times(1)).restartFlow(ArgumentMatchers.eq(lastSuccessfulState));
         verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.RETRY);
@@ -126,6 +133,7 @@ public class OperationRetryServiceTest {
     @Test
     public void retryCluster() {
         when(stackMock.getId()).thenReturn(STACK_ID);
+        when(flowLogRepository.findAnyByStackIdAndStateStatus(STACK_ID, StateStatus.PENDING)).thenReturn(Boolean.FALSE);
 
         FlowLog lastSuccessfulState = createFlowLog("FINISHED", StateStatus.SUCCESSFUL, getOffsettedCreated(4));
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
@@ -136,11 +144,11 @@ public class OperationRetryServiceTest {
                 createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, getOffsettedCreated(2)),
                 createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, getOffsettedCreated(1))
                 );
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(STACK_ID)).thenReturn(pendingFlowLogs);
+        when(flowLogRepository.findAllByStackIdOrderByCreatedDesc(anyLong(), any(Pageable.class))).thenReturn(pendingFlowLogs);
         when(stackMock.getStatus()).thenReturn(Status.AVAILABLE);
         when(stackMock.getCluster()).thenReturn(clusterMock);
         when(clusterMock.getStatus()).thenReturn(Status.CREATE_FAILED);
-        underTest.retry(stackMock);
+        underTest.retry(STACK_ID);
 
         verify(flow2Handler, times(1)).restartFlow(ArgumentMatchers.eq(lastSuccessfulState));
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.UPDATE_IN_PROGRESS);

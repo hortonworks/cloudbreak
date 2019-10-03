@@ -54,5 +54,10 @@ public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStop
                 CLUSTER_STOP_EVENT
         };
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Stop cluster";
+    }
 }
 

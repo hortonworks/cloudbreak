@@ -97,6 +97,11 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
     }
 
     @Override
+    public String getDisplayName() {
+        return "Create stack";
+    }
+
+    @Override
     public StackCreationEvent getFailHandledEvent() {
         return STACKCREATION_FAILURE_HANDLED_EVENT;
     }

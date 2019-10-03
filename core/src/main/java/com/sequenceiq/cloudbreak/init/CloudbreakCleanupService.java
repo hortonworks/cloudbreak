@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -77,7 +78,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         heartbeatService.heartbeat();
         try {
             List<Long> stackIdsUnderOperation = restartFlowService.collectUnderOperationResources();
-            List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
+            List<StackStatusView> stacksToSync = resetStackStatus(stackIdsUnderOperation);
             List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
             triggerSyncs(stacksToSync, clustersToSync);
             restartFlowService.purgeTerminatedResourceFlowLogs();
@@ -89,15 +90,15 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         }
     }
 
-    private List<Stack> resetStackStatus(Collection<Long> excludeStackIds) {
+    private List<StackStatusView> resetStackStatus(Collection<Long> excludeStackIds) {
         return stackService.getByStatuses(syncRequiredStates).stream()
                 .filter(s -> !excludeStackIds.contains(s.getId()) || Status.WAIT_FOR_SYNC.equals(s.getStatus()))
                 .peek(s -> {
                     if (!Status.WAIT_FOR_SYNC.equals(s.getStatus())) {
-                        loggingStatusChange("Stack", s.getId(), s.getStatus(), Status.WAIT_FOR_SYNC);
-                        stackUpdater.updateStackStatus(s.getId(), DetailedStackStatus.WAIT_FOR_SYNC, s.getStatusReason());
+                        loggingStatusChange("Stack", s.getId(), s.getStatus().getStatus(), Status.WAIT_FOR_SYNC);
+                        stackUpdater.updateStackStatus(s.getId(), DetailedStackStatus.WAIT_FOR_SYNC, s.getStatus().getStatusReason());
                     }
-                    cleanInstanceMetaData(instanceMetaDataService.findAllInStack(s.getId()));
+                    cleanInstanceMetaData(instanceMetaDataService.findAllRequestedInStack(s.getId()));
                 }).collect(Collectors.toList());
     }
 
@@ -110,7 +111,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         }
     }
 
-    private List<Cluster> resetClusterStatus(Collection<Stack> stacksToSync, Collection<Long> excludeStackIds) {
+    private List<Cluster> resetClusterStatus(Collection<StackStatusView> stacksToSync, Collection<Long> excludeStackIds) {
         return clusterService.findByStatuses(syncRequiredStates).stream()
                 .filter(c -> !excludeStackIds.contains(c.getStack().getId()))
                 .peek(c -> {
@@ -122,8 +123,8 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
                 }).filter(c -> !isStackToSyncContainsCluster(stacksToSync, c)).collect(Collectors.toList());
     }
 
-    private boolean isStackToSyncContainsCluster(Collection<Stack> stacksToSync, Cluster cluster) {
-        Set<Long> stackIds = stacksToSync.stream().map(Stack::getId).collect(Collectors.toSet());
+    private boolean isStackToSyncContainsCluster(Collection<StackStatusView> stacksToSync, Cluster cluster) {
+        Set<Long> stackIds = stacksToSync.stream().map(StackStatusView::getId).collect(Collectors.toSet());
         return stackIds.contains(cluster.getStack().getId());
     }
 
@@ -131,18 +132,18 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         LOGGER.debug("{} {} status is updated from {} to {} at CB start.", type, id, status, deleteFailed);
     }
 
-    private void triggerSyncs(Iterable<Stack> stacksToSync, Iterable<Cluster> clustersToSync) {
+    private void triggerSyncs(Iterable<StackStatusView> stacksToSync, Iterable<Cluster> clustersToSync) {
         try {
-            for (Stack stack : stacksToSync) {
+            for (StackStatusView stack : stacksToSync) {
                 LOGGER.debug("Triggering full sync on stack [name: {}, id: {}].", stack.getName(), stack.getId());
-                fireEvent(stack);
+                fireEvent(stack.getId());
                 flowManager.triggerFullSyncWithoutCheck(stack.getId());
             }
 
             for (Cluster cluster : clustersToSync) {
                 Stack stack = cluster.getStack();
                 LOGGER.debug("Triggering sync on cluster [name: {}, id: {}].", cluster.getName(), cluster.getId());
-                fireEvent(stack);
+                fireEvent(stack.getId());
                 flowManager.triggerClusterSyncWithoutCheck(stack.getId());
             }
         } catch (OptimisticLockingFailureException | FlowsAlreadyRunningException e) {
@@ -150,8 +151,8 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         }
     }
 
-    private void fireEvent(Stack stack) {
-        eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
+    private void fireEvent(Long stackId) {
+        eventService.fireCloudbreakEvent(stackId, UPDATE_IN_PROGRESS.name(),
                 "Couldn't retrieve the cluster's status, starting to sync.");
     }
 }

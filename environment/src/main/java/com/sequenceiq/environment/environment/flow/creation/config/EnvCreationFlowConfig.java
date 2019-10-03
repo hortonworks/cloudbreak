@@ -62,6 +62,11 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
     }
 
     @Override
+    public String getDisplayName() {
+        return "Create enironment";
+    }
+
+    @Override
     public EnvCreationStateSelectors getFailHandledEvent() {
         return HANDLED_FAILED_ENV_CREATION_EVENT;
     }

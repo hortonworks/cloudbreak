@@ -13,15 +13,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Service
 public class InstanceMetaDataService {
@@ -195,5 +196,13 @@ public class InstanceMetaDataService {
                     instanceMetaData.setInstanceStatus(instanceStatus);
                     repository.save(instanceMetaData);
                 });
+    }
+
+    public Set<StackInstanceCount> countByWorkspaceId(Long workspaceId) {
+        return repository.countByWorkspaceId(workspaceId);
+    }
+
+    public Set<InstanceMetaData> findAllRequestedInStack(Long stackId) {
+        return repository.findAllRequestedByStackId(stackId);
     }
 }

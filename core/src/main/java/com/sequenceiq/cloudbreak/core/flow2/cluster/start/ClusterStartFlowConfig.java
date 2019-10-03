@@ -65,4 +65,9 @@ public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterSta
                 CLUSTER_START_EVENT
         };
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Start cluster";
+    }
 }

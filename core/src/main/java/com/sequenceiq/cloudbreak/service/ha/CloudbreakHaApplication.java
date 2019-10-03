@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -35,14 +36,14 @@ public class CloudbreakHaApplication implements HaApplication {
     @Override
     public Set<Long> getDeletingResources(Set<Long> resourceIds) {
         return stackService.getStatuses(resourceIds).stream()
-                .filter(ss -> DELETE_STATUSES.contains(ss[1])).map(ss -> (Long) ss[0]).collect(Collectors.toSet());
+                .filter(ss -> DELETE_STATUSES.contains(ss.getStatus().getStatus())).map(StackStatusView::getId).collect(Collectors.toSet());
     }
 
     @Override
     public Set<Long> getAllDeletingResources() {
         Set<Long> stackIds = InMemoryStateStore.getAllStackId();
         return stackIds.isEmpty() ? Set.of() : stackService.getStatuses(stackIds).stream()
-            .filter(ss -> DELETE_STATUSES.contains(ss[1])).map(ss -> (Long) ss[0]).collect(Collectors.toSet());
+            .filter(ss -> DELETE_STATUSES.contains(ss.getStatus().getStatus())).map(StackStatusView::getId).collect(Collectors.toSet());
     }
 
     @Override

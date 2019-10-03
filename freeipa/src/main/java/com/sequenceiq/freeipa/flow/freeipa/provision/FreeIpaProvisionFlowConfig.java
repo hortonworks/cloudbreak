@@ -72,4 +72,9 @@ public class FreeIpaProvisionFlowConfig extends AbstractFlowConfiguration<FreeIp
     public FreeIpaProvisionEvent[] getInitEvents() {
         return FREEIPA_INIT_EVENTS;
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Provision FreeIPA";
+    }
 }

@@ -35,7 +35,12 @@ public class TestFlowConfig extends AbstractFlowConfiguration<TestFlowConfig.Tes
             };
         }
 
-        @Override
+    @Override
+    public String getDisplayName() {
+        return "Test flow config";
+    }
+
+    @Override
         protected List<AbstractFlowConfiguration.Transition<TestFlowState, TestFlowEvent>> getTransitions() {
             return TRANSITIONS;
         }

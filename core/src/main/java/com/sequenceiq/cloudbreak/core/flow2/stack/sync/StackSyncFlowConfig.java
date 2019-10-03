@@ -46,6 +46,11 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
     }
 
     @Override
+    public String getDisplayName() {
+        return "Sync stack";
+    }
+
+    @Override
     protected List<Transition<StackSyncState, StackSyncEvent>> getTransitions() {
         return TRANSITIONS;
     }

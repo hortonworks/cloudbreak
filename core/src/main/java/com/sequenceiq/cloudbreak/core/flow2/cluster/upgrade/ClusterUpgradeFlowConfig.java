@@ -62,4 +62,9 @@ public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterU
                 CLUSTER_UPGRADE_EVENT
         };
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Upgrade cluster";
+    }
 }

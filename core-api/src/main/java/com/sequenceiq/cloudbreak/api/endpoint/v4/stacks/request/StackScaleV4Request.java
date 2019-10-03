@@ -25,6 +25,9 @@ public class StackScaleV4Request implements JsonEntity {
 
     private Long stackId;
 
+    @ApiModelProperty(InstanceGroupAdjustmentModelDescription.FORCE)
+    private Boolean forced;
+
     public String getGroup() {
         return group;
     }
@@ -49,5 +52,13 @@ public class StackScaleV4Request implements JsonEntity {
     @JsonIgnore
     public void setStackId(Long stackId) {
         this.stackId = stackId;
+    }
+
+    public Boolean getForced() {
+        return forced;
+    }
+
+    public void setForced(Boolean forced) {
+        this.forced = forced;
     }
 }

@@ -10,12 +10,13 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @EntityType(entityClass = InstanceMetaData.class)
 @Transactional(TxType.REQUIRED)
@@ -65,4 +66,14 @@ public interface InstanceMetaDataRepository extends DisabledBaseRepository<Insta
             + " i.instanceStatus <> 'TERMINATED' AND i.instanceGroup.stack.id= :stackId")
     List<InstanceMetaData> getPrimaryGatewayByInstanceGroup(@Param("stackId") Long stackId, @Param("instanceGroupId") Long instanceGroupId);
 
+    @Query("SELECT max(imd.privateId) FROM InstanceMetaData imd WHERE imd.instanceGroup IN :instanceGroups")
+    Long getMaxPrivateId(@Param("instanceGroups") List<InstanceGroup> instanceGroups);
+
+    @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
+            + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id AND i.instanceStatus <> 'TERMINATED' "
+            + "GROUP BY s.id")
+    Set<StackInstanceCount> countByWorkspaceId(@Param("id") Long id);
+
+    @Query("SELECT i FROM InstanceMetaData i ")
+    Set<InstanceMetaData> findAllRequestedByStackId(@Param("id") Long stackId);
 }

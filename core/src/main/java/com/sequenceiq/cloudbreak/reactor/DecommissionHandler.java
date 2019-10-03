@@ -176,7 +176,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
 
     private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {
         try {
-            Optional<HostGroup> hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName);
+            Optional<HostGroup> hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName));
             recipeEngine.executePreTerminationRecipes(stack, hostGroup.map(Collections::singleton).orElse(Collections.emptySet()), hostNames);
         } catch (Exception ex) {
             LOGGER.warn(ex.getLocalizedMessage(), ex);

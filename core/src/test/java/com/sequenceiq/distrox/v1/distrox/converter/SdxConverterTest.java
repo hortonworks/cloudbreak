@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -15,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -43,7 +44,8 @@ public class SdxConverterTest {
     @Test
     public void testGetSharedServiceWhenSdxNullAndEnvironmentHasMoreThanOneSdx() {
         String environmenName = "environmenName";
-        when(stackService.getByEnvironmentCrnAndStackType(environmenName, StackType.DATALAKE)).thenReturn(List.of(new Stack(), new Stack()));
+        when(stackService.getByEnvironmentCrnAndStackType(environmenName, StackType.DATALAKE))
+                .thenReturn(List.of(mock(StackStatusView.class), mock(StackStatusView.class)));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.getSharedService(null, environmenName));
         Assertions.assertEquals(exception.getMessage(), "More than one Datalake attached to the environment. Please specify one.");
@@ -52,9 +54,9 @@ public class SdxConverterTest {
     @Test
     public void testGetSharedServiceWhenSdxNullAndSdxInvIsRunning() {
         String environmenName = "environmenName";
-        Stack stack = new Stack();
-        stack.setName("some-sdx");
-        stack.setStackStatus(getStatus(Status.AVAILABLE));
+        StackStatusView stack = mock(StackStatusView.class);
+        when(stack.getName()).thenReturn("some-sdx");
+        when(stack.getStatus()).thenReturn(getStatus(Status.AVAILABLE));
         when(stackService.getByEnvironmentCrnAndStackType(environmenName, StackType.DATALAKE)).thenReturn(List.of(stack));
 
         SharedServiceV4Request sdxRequest = underTest.getSharedService(null, environmenName);
@@ -65,9 +67,8 @@ public class SdxConverterTest {
     @Test
     public void testGetSharedServiceWhenSdxNotAttachedToEnvironment() {
         String environmenName = "environmenName";
-        Stack stack = new Stack();
-        stack.setName("some-sdx");
-        stack.setStackStatus(getStatus(Status.AVAILABLE));
+        StackStatusView stack = mock(StackStatusView.class);
+        when(stack.getName()).thenReturn("some-sdx");
         when(stackService.getByEnvironmentCrnAndStackType(environmenName, StackType.DATALAKE)).thenReturn(List.of(stack));
 
         SdxV1Request sdxRequest = new SdxV1Request();
@@ -80,9 +81,9 @@ public class SdxConverterTest {
     @Test
     public void testGetSharedServiceWhenSdxInvIsNotRunning() {
         String environmenName = "environmenName";
-        Stack stack = new Stack();
-        stack.setName("some-sdx");
-        stack.setStackStatus(getStatus(Status.DELETE_FAILED));
+        StackStatusView stack = mock(StackStatusView.class);
+        when(stack.getName()).thenReturn("some-sdx");
+        when(stack.getStatus()).thenReturn(getStatus(Status.DELETE_FAILED));
         when(stackService.getByEnvironmentCrnAndStackType(environmenName, StackType.DATALAKE)).thenReturn(List.of(stack));
 
         SdxV1Request sdxRequest = new SdxV1Request();

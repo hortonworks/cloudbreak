@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.template;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -60,32 +59,20 @@ public class TemplateService {
 
     public void delete(Template template) {
         LOGGER.debug("Deleting template. {} - {}", new Object[]{template.getId(), template.getName()});
-        List<Stack> allStackForTemplate = stackService.getAllForTemplate(template.getId());
-        if (allStackForTemplate.isEmpty()) {
+        if (!stackService.templateInUse(template.getId())) {
             template.setTopology(null);
             if (ResourceStatus.USER_MANAGED.equals(template.getStatus())) {
                 templateRepository.delete(template);
             } else {
                 template.setName(NameUtil.postfixWithTimestamp(template.getName()));
                 template.setStatus(ResourceStatus.DEFAULT_DELETED);
+                template.setDeleted(true);
                 templateRepository.save(template);
             }
-        } else if (isRunningStackReferToTemplate(allStackForTemplate)) {
+        } else {
             throw new BadRequestException(String.format(
                     "There are stacks associated with template '%s'. Please remove these before deleting the template.", template.getName()));
-        } else {
-            template.setName(NameUtil.postfixWithTimestamp(template.getName()));
-            template.setTopology(null);
-            template.setDeleted(true);
-            if (ResourceStatus.DEFAULT.equals(template.getStatus())) {
-                template.setStatus(ResourceStatus.DEFAULT_DELETED);
-            }
-            templateRepository.save(template);
         }
-    }
-
-    private boolean isRunningStackReferToTemplate(Collection<Stack> allStackForTemplate) {
-        return allStackForTemplate.stream().anyMatch(s -> !s.isDeleteCompleted());
     }
 
     public Set<Template> findByTopology(Topology topology) {
