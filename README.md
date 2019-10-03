@@ -177,7 +177,7 @@ After importing the `cloudbreak` repo root, launch the Periscope application by 
 ````
 -Dperiscope.db.port.5432.tcp.addr=localhost
 -Dperiscope.db.port.5432.tcp.port=5432
--Dperiscope.cloudbreak.url=http://localhost:8080
+-Dperiscope.cloudbreak.url=http://localhost:9091
 -Dserver.port=8085
 -Daltus.ums.host=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>

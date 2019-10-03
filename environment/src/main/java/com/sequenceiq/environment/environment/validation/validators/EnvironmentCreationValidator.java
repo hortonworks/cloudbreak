@@ -6,6 +6,8 @@ import static com.sequenceiq.environment.CloudPlatform.AZURE;
 import static com.sequenceiq.environment.CloudPlatform.MOCK;
 import static com.sequenceiq.environment.CloudPlatform.YARN;
 import static com.sequenceiq.environment.CloudPlatform.valueOf;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.Map;
 import java.util.Optional;
@@ -63,7 +65,7 @@ public class EnvironmentCreationValidator {
     private void validateNetworkHasTheSamePropertyFilledAsTheDesiredCloudPlatform(NetworkDto networkDto, String cloudPlatform,
             ValidationResultBuilder resultBuilder) {
 
-        if (networkDto != null) {
+        if (nonNull(networkDto) && isEmpty(networkDto.getNetworkCidr())) {
             Map<CloudPlatform, Optional<Object>> providerNetworkParamPair = Map.of(
                     AWS,   optional(networkDto.getAws()),
                     AZURE, optional(networkDto.getAzure()),
