@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
@@ -48,6 +49,12 @@ public class CloudbreakApiClientConfig {
     @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
     DistroXV1Endpoint distroXV1Endpoint(WebTarget cloudbreakApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, DistroXV1Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    ClusterTemplateV4Endpoint clusterTemplateV4Endpoint(WebTarget cloudbreakApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, ClusterTemplateV4Endpoint.class);
     }
 
     @Bean

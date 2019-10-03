@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.flow.deletion.handler;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FAILED_ENV_DELETE_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_CLUSTER_DEFINITION_CLEANUP_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.handler.IdBrokerMappingsDeleteHandler.IAM_INTERNAL_ACTOR_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -155,7 +155,7 @@ class IdBrokerMappingsDeleteHandlerTest {
         assertThat(envDeleteEvent.getResourceName()).isEqualTo(ENVIRONMENT_NAME);
         assertThat(envDeleteEvent.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
         assertThat(envDeleteEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
-        assertThat(envDeleteEvent.selector()).isEqualTo(FINISH_ENV_DELETE_EVENT.selector());
+        assertThat(envDeleteEvent.selector()).isEqualTo(START_CLUSTER_DEFINITION_CLEANUP_EVENT.selector());
 
         assertThat(headersArgumentCaptor.getValue()).isSameAs(headers);
     }

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.dto.ClusterDefinitionAccessDto.ClusterDefinitionAccessDtoBuilder.aClusterDefinitionAccessDtoBuilder;
+import static java.util.stream.Collectors.toSet;
+
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -7,28 +11,34 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.dto.ClusterDefinitionAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
+import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
+import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(ClusterTemplate.class)
 public class ClusterTemplateV4Controller extends NotificationController implements ClusterTemplateV4Endpoint {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateV4Controller.class);
 
     @Inject
     private ConverterUtil converterUtil;
@@ -45,6 +55,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Inject
     private EnvironmentServiceDecorator environmentServiceDecorator;
 
+    @Inject
+    private ClusterTemplateViewService clusterTemplateViewService;
+
     @Override
     public ClusterTemplateV4Response post(Long workspaceId, @Valid ClusterTemplateV4Request request) {
         ClusterTemplate clusterTemplate = clusterTemplateService.createForLoggedInUser(converterUtil.convert(request, ClusterTemplate.class), workspaceId);
@@ -53,27 +66,22 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
 
     @Override
     public ClusterTemplateViewV4Responses list(Long workspaceId) {
-        try {
-            blueprintService.updateDefaultBlueprintCollection(workspaceId);
-            clusterTemplateService.updateDefaultClusterTemplates(workspaceId);
-            Set<ClusterTemplateViewV4Response> responses = transactionService.required(() ->
-                    converterUtil.convertAllAsSet(clusterTemplateService.getAllAvailableViewInWorkspace(workspaceId), ClusterTemplateViewV4Response.class));
-            environmentServiceDecorator.prepareEnvironments(responses);
-            return new ClusterTemplateViewV4Responses(responses);
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+        blueprintService.updateDefaultBlueprintCollection(workspaceId);
+        clusterTemplateService.updateDefaultClusterTemplates(workspaceId);
+        Set<ClusterTemplateViewV4Response> result = clusterTemplateService.listInWorkspace(workspaceId);
+        return new ClusterTemplateViewV4Responses(result);
     }
 
     @Override
     public ClusterTemplateV4Response getByName(Long workspaceId, String name) {
         try {
-            ClusterTemplateV4Response clusterTemplateV4Response = transactionService.required(() ->
-                    converterUtil.convert(clusterTemplateService.getByNameForWorkspaceId(name, workspaceId), ClusterTemplateV4Response.class));
-            environmentServiceDecorator.prepareEnvironment(clusterTemplateV4Response);
-            return clusterTemplateV4Response;
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
+            ClusterTemplate clusterTemplate = transactionService.required(() -> clusterTemplateService.getByNameForWorkspaceId(name, workspaceId));
+            ClusterTemplateV4Response response = transactionService.required(() -> converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class));
+            environmentServiceDecorator.prepareEnvironment(response);
+            return response;
+        } catch (TransactionExecutionException cse) {
+            LOGGER.warn("Unable to find cluster definition due to {}", cse.getMessage());
+            throw new CloudbreakServiceException("Unable to obtain cluster definition!");
         }
     }
 
@@ -86,12 +94,13 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     public ClusterTemplateV4Response getByCrn(Long workspaceId, String crn) {
         try {
-            ClusterTemplateV4Response clusterTemplateV4Response = transactionService.required(() ->
-                    converterUtil.convert(clusterTemplateService.getByCrn(crn, workspaceId), ClusterTemplateV4Response.class));
-            environmentServiceDecorator.prepareEnvironment(clusterTemplateV4Response);
-            return clusterTemplateV4Response;
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
+            ClusterTemplate clusterTemplate = transactionService.required(() -> clusterTemplateService.getByCrn(crn, workspaceId));
+            ClusterTemplateV4Response response = transactionService.required(() -> converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class));
+            environmentServiceDecorator.prepareEnvironment(response);
+            return response;
+        } catch (TransactionExecutionException cse) {
+            LOGGER.warn("Unable to find cluster definition due to {}", cse.getMessage());
+            throw new CloudbreakServiceException("Unable to obtain cluster definition!");
         }
     }
 
@@ -102,8 +111,20 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     }
 
     @Override
-    public ClusterTemplateV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
-        Set<ClusterTemplate> clusterTemplates = clusterTemplateService.deleteMultiple(names, workspaceId);
+    public ClusterTemplateV4Responses deleteMultiple(Long workspaceId, Set<String> names, String environmentName, String environmentCrn) {
+        Set<ClusterTemplate> clusterTemplates;
+        if (Objects.nonNull(names) && !names.isEmpty()) {
+            clusterTemplates = clusterTemplateService.deleteMultiple(names, workspaceId);
+        } else {
+            ClusterDefinitionAccessDto dto = aClusterDefinitionAccessDtoBuilder().withCrn(environmentCrn).withName(environmentName).build();
+            Set<String> namesByEnv = clusterTemplateService
+                    .findAllByEnvironment(dto)
+                    .stream()
+                    .map(ClusterTemplate::getName)
+                    .collect(toSet());
+            clusterTemplates = clusterTemplateService.deleteMultiple(namesByEnv, workspaceId);
+        }
         return new ClusterTemplateV4Responses(converterUtil.convertAllAsSet(clusterTemplates, ClusterTemplateV4Response.class));
     }
+
 }

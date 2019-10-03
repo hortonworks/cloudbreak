@@ -24,7 +24,7 @@ public interface ClusterTemplateViewRepository extends WorkspaceResourceReposito
 
     @Query("SELECT b FROM ClusterTemplateView b WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
     @CheckPermissionsByReturnValue
-    Set<ClusterTemplateView> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
+    Set<ClusterTemplateView> findAllActive(@Param("workspaceId") Long workspaceId);
 
     @Override
     default <S extends ClusterTemplateView> S save(S entity) {
@@ -55,4 +55,5 @@ public interface ClusterTemplateViewRepository extends WorkspaceResourceReposito
     default void deleteAll() {
         throw new UnsupportedOperationException("Deletion is not supported from ClusterTemplateViewRepository");
     }
+
 }

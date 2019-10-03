@@ -67,6 +67,7 @@ public enum ResourceEvent {
     ENVIRONMENT_CREATION_FAILED("environment.creation.failed"),
 
     ENVIRONMENT_NETWORK_DELETION_STARTED("environment.network.deletion.started"),
+    ENVIRONMENT_CLUSTER_DEFINITION_DELETE_STARTED("environment.clusterdefinition.deletion.started"),
     ENVIRONMENT_DATABASE_DELETION_STARTED("environment.database.deletion.started"),
     ENVIRONMENT_FREEIPA_DELETION_STARTED("environment.freeipa.deletion.started"),
     ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED("environment.idbroker.mappings.deletion.started"),

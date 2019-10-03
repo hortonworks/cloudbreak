@@ -206,4 +206,5 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     protected abstract void prepareDeletion(T resource);
 
     protected abstract void prepareCreation(T resource);
+
 }
