@@ -1,11 +1,12 @@
 package com.sequenceiq.sdx.api.model;
 
-import javax.validation.constraints.NotNull;
+import java.util.List;
 
 public class SdxRepairRequest {
 
-    @NotNull
     private String hostGroupName;
+
+    private List<String> hostGroupNames;
 
     public String getHostGroupName() {
         return hostGroupName;
@@ -13,5 +14,13 @@ public class SdxRepairRequest {
 
     public void setHostGroupName(String hostGroupName) {
         this.hostGroupName = hostGroupName;
+    }
+
+    public List<String> getHostGroupNames() {
+        return hostGroupNames;
+    }
+
+    public void setHostGroupNames(List<String> hostGroupNames) {
+        this.hostGroupNames = hostGroupNames;
     }
 }

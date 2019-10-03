@@ -171,8 +171,8 @@ public class InstanceMetaDataService {
         return repository.saveAll(instanceMetaData);
     }
 
-    public List<InstanceMetaData> getPrimaryGatewayByInstanceGroup(Long stackId, Long instanceGroupId) {
-        return repository.getPrimaryGatewayByInstanceGroup(stackId, instanceGroupId);
+    public Optional<String> getPrimaryGatewayDiscoveryFQDNByInstanceGroup(Long stackId, Long instanceGroupId) {
+        return repository.getPrimaryGatewayDiscoveryFQDNByInstanceGroup(stackId, instanceGroupId);
     }
 
     public Optional<String> getServerCertByStackId(Long stackId) {

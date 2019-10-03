@@ -4,10 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,14 +23,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -112,13 +112,18 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Stack stack = getStack();
         when(clusterService.isMultipleGateway(stack)).thenReturn(false);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
-        setupHostGroup(true);
+
+        HostGroup masterHostGroup = setupHostGroup(setupInstanceGroup(InstanceGroupType.GATEWAY));
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-master"))).thenReturn(Optional.of(masterHostGroup));
+        HostGroup coreHostGroup = setupHostGroup(setupInstanceGroup(InstanceGroupType.CORE));
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-core"))).thenReturn(Optional.of(coreHostGroup));
+        setupPrimaryGateway();
 
         Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(
                 new TriggerEventBuilder(stack).withFailedPrimaryGateway().withFailedCore().build());
 
         List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT", "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT"),
+        assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT", "STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT"),
                 triggeredOperations);
     }
 
@@ -160,7 +165,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Stack stack = getStack();
         when(clusterService.isMultipleGateway(stack)).thenReturn(false);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
-        setupHostGroup(true);
+        setupHostGroup(false);
 
         Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
@@ -188,8 +193,8 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     private void setupPrimaryGateway() {
-        List<InstanceMetaData> primaryGatewayIm = getPrimaryGatewayByInstanceGroup();
-        when(instanceMetaDataService.getPrimaryGatewayByInstanceGroup(anyLong(), anyLong())).thenReturn(primaryGatewayIm);
+        when(instanceMetaDataService.getPrimaryGatewayDiscoveryFQDNByInstanceGroup(anyLong(), anyLong()))
+                .thenReturn(Optional.of(FAILED_NODE_FQDN_PRIMARY_GATEWAY));
     }
 
     private Stack getStack() {
@@ -199,13 +204,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(stack.getId()).thenReturn(STACK_ID);
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         return stack;
-    }
-
-    private List<InstanceMetaData> getPrimaryGatewayByInstanceGroup() {
-        InstanceMetaData primaryGatewayIm = mock(InstanceMetaData.class);
-        when(primaryGatewayIm.getDiscoveryFQDN()).thenReturn(FAILED_NODE_FQDN_PRIMARY_GATEWAY);
-        when(primaryGatewayIm.getInstanceMetadataType()).thenReturn(InstanceMetadataType.GATEWAY_PRIMARY);
-        return List.of(primaryGatewayIm);
     }
 
     private HostGroup setupHostGroup(InstanceGroup instanceGroup) {
@@ -228,29 +226,37 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
         private final Stack stack;
 
-        private final List<String> failedHostnames = new ArrayList<>();
+        private final List<String> failedGatewayNodes = new ArrayList<>();
+
+        private final List<String> failedCoreNodes = new ArrayList<>();
 
         private TriggerEventBuilder(Stack stack) {
             this.stack = stack;
         }
 
         private TriggerEventBuilder withFailedPrimaryGateway() {
-            failedHostnames.add(FAILED_NODE_FQDN_PRIMARY_GATEWAY);
+            failedGatewayNodes.add(FAILED_NODE_FQDN_PRIMARY_GATEWAY);
             return this;
         }
 
         private TriggerEventBuilder withFailedSecondaryGateway() {
-            failedHostnames.add(FAILED_NODE_FQDN_PRIMARY_GATEWAY);
+            failedGatewayNodes.add(FAILED_NODE_FQDN_SECONDARY_GATEWAY);
             return this;
         }
 
         private TriggerEventBuilder withFailedCore() {
-            failedHostnames.add(FAILED_NODE_FQDN_CORE);
+            failedCoreNodes.add(FAILED_NODE_FQDN_CORE);
             return this;
         }
 
         private ClusterRepairTriggerEvent build() {
-            Map<String, List<String>> failedNodes = Map.of("hostGroup-master", failedHostnames);
+            Map<String, List<String>> failedNodes = new HashMap<>();
+            if (!failedGatewayNodes.isEmpty()) {
+                failedNodes.put("hostGroup-master", failedGatewayNodes);
+            }
+            if (!failedCoreNodes.isEmpty()) {
+                failedNodes.put("hostGroup-core", failedCoreNodes);
+            }
             return new ClusterRepairTriggerEvent(stack, failedNodes, false);
         }
     }
