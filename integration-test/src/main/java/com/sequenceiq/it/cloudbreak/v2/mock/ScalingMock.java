@@ -153,7 +153,7 @@ public class ScalingMock extends MockServer {
             response.type("text/plain");
             return responseFromJsonFile("blueprint/" + request.params("blueprintname") + ".bp");
         });
-        sparkService.get(AMBARI_API_ROOT + "/clusters/:clusterName/hosts/:internalhostname", (request, response) -> {
+        sparkService.get(AMBARI_API_ROOT + "/clusters/:clusterName/hosts/:inthostsernalhostname", (request, response) -> {
             response.type("text/plain");
             ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
             rootNode.putObject("Hosts").put("public_host_name", request.params("internalhostname")).put("host_status", "HEALTHY");
@@ -226,7 +226,7 @@ public class ScalingMock extends MockServer {
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/configurations/service_config_versions", "GET").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").atLeast(1).verify();
             verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/.*", "GET").atLeast(2).verify();
-            verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "GET").exactTimes(3).verify();
+            verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "GET").exactTimes(2).verify();
             verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "DELETE").exactTimes(1).verify();
             verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/services/.*", "PUT").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/requests", "POST").bodyContains("DECOMMISSION").exactTimes(2).verify();
