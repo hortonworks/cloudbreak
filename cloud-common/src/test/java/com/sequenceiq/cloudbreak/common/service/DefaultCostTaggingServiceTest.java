@@ -42,7 +42,7 @@ public class DefaultCostTaggingServiceTest {
     @Test
     public void testPrepareAllTagsForTemplateShouldReturnAllResourceMap() {
         Map<String, String> result = underTest.prepareAllTagsForTemplate();
-        Assert.assertEquals(8L, result.size());
+        Assert.assertEquals(9L, result.size());
     }
 
     @Test

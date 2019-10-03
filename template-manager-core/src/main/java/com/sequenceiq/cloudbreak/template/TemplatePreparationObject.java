@@ -61,6 +61,8 @@ public class TemplatePreparationObject {
 
     private final Map<String, Object> fixInputs;
 
+    private final Map<String, String> defaultTags;
+
     private final AccountMappingView accountMappingView;
 
     private final Optional<PlacementView> placementView;
@@ -85,6 +87,7 @@ public class TemplatePreparationObject {
         fixInputs = builder.fixInputs;
         accountMappingView = builder.accountMappingView;
         placementView = builder.placementView;
+        defaultTags = builder.defaultTags;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -162,6 +165,10 @@ public class TemplatePreparationObject {
         return placementView;
     }
 
+    public Map<String, String> getDefaultTags() {
+        return defaultTags;
+    }
+
     public static class Builder {
 
         private CloudPlatform cloudPlatform;
@@ -191,6 +198,8 @@ public class TemplatePreparationObject {
         private Map<String, Object> customInputs = new HashMap<>();
 
         private Map<String, Object> fixInputs = new HashMap<>();
+
+        private Map<String, String> defaultTags = new HashMap<>();
 
         private AccountMappingView accountMappingView;
 
@@ -300,6 +309,11 @@ public class TemplatePreparationObject {
 
         public Builder withPlacementView(PlacementView placementView) {
             this.placementView = Optional.of(placementView);
+            return this;
+        }
+
+        public Builder withDefaultTags(Map<String, String> defaultTags) {
+            this.defaultTags = defaultTags == null ? new HashMap<>() : defaultTags;
             return this;
         }
 

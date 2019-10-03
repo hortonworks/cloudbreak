@@ -17,6 +17,7 @@ public enum HandleBarModelKey {
     HDF("hdf"),
     GENERAL("general"),
     HOST_GROUPS("host_groups"),
+    DEFAULT_TAGS("default_tags"),
     STACK_VERSION("stack_version");
 
     private final String modelKey;
