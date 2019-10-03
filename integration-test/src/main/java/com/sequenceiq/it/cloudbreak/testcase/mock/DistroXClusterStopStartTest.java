@@ -58,7 +58,8 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
             then = "the cluster should be available")
     public void testCreateNewRegularDistroXCluster(MockedTestContext testContext, ITestContext testNgContext) {
         DistroXStartStopTestParameters params = new DistroXStartStopTestParameters(testNgContext.getCurrentXmlTest().getAllParameters());
-        int current = params.getMin();
+        int step = params.getStep();
+        int current = step;
         DistroXTestDto currentContext = testContext
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
@@ -75,7 +76,7 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create())
                 .await(STACK_AVAILABLE);
-        for (int i = 0; i < params.getTimes(); i++, current = params.getMin() + params.getMax() - current) {
+        for (int i = 0; i < params.getTimes(); i++, current += step) {
             currentContext = currentContext
                     .when(distroXClient.stop())
                     .await(STACK_STOPPED)
