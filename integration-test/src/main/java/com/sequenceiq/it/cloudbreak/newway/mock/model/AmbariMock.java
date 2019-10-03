@@ -21,6 +21,7 @@ import com.sequenceiq.it.spark.ambari.AmbariHostsResponseV2;
 import com.sequenceiq.it.spark.ambari.AmbariServiceConfigResponseV2;
 import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
+import com.sequenceiq.it.spark.ambari.AmbariUserResponse;
 import com.sequenceiq.it.spark.ambari.AmbariVersionDefinitionResponse;
 import com.sequenceiq.it.spark.ambari.AmbariViewResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
@@ -91,6 +92,7 @@ public class AmbariMock extends AbstractModelMock {
         getAmbariClusters();
         postAmbariClusterRequest();
         getAmbariCheck();
+        getAmbariUsers();
         postAmbariUsers();
         getAmbariBlueprint();
         getAmbariClusterHosts("STARTED");
@@ -231,6 +233,10 @@ public class AmbariMock extends AbstractModelMock {
 
     private void postAmbariUsers() {
         dynamicRouteStack.post(USERS, new EmptyAmbariResponse());
+    }
+
+    private void getAmbariUsers() {
+        dynamicRouteStack.get(USERS + "/:user", new AmbariUserResponse());
     }
 
     private void putAmbariUsersAdmin() {

@@ -54,6 +54,7 @@ import com.sequenceiq.it.spark.ambari.AmbariClustersHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
+import com.sequenceiq.it.spark.ambari.AmbariUserResponse;
 import com.sequenceiq.it.spark.ambari.AmbariVersionDefinitionResponse;
 import com.sequenceiq.it.spark.ambari.AmbariViewResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
@@ -149,6 +150,7 @@ public class MockSparkServer {
         post(AMBARI_API_ROOT + "/blueprints/*", new EmptyAmbariResponse());
         put(AMBARI_API_ROOT + "/users/admin", new EmptyAmbariResponse());
         post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
+        get(AMBARI_API_ROOT + "/users/:username", new AmbariUserResponse());
         get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
         put(AMBARI_API_ROOT + "/stacks/HDP/versions/:version/operating_systems/:os/repositories/:hdpversion", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/version_definitions", new AmbariVersionDefinitionResponse());

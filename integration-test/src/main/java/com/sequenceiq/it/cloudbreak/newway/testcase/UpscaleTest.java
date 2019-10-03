@@ -66,7 +66,6 @@ public class UpscaleTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(desiredWorkedCount))
                 .await(StackEntity.class, STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/"))
                 .then(MockVerification.verify(HttpMethod.POST, MOCK_ROOT + "/cloud_instance_statuses").exactTimes(1))
                 .then(MockVerification.verify(HttpMethod.POST, MOCK_ROOT + "/cloud_metadata_statuses")
                         .bodyContains("CREATE_REQUESTED", addedNodes).exactTimes(1))
