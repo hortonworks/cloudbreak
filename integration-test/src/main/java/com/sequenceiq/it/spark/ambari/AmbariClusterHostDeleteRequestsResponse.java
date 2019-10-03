@@ -1,5 +1,6 @@
 package com.sequenceiq.it.spark.ambari;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -40,13 +41,17 @@ public class AmbariClusterHostDeleteRequestsResponse extends ITResponse implemen
 
     @Override
     public Object handle(Request request, Response response) {
-        String hostsParam = request.queryParams().stream().findFirst().get();
-        removedHostsFromAmbari.addAll(instanceMap.entrySet().stream().filter(e -> hostsParam.contains(
-                e.getValue().getMetaData().getPrivateIp().replaceAll("\\.", "-") + ".")).map(Map.Entry::getKey).collect(Collectors.toSet()));
-        response.type("text/plain");
-        ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
-        Requests requests = new Requests(66, "SUCCESSFUL", 100);
-        rootNode.set("Requests", new ObjectMapper().valueToTree(requests));
-        return rootNode.toString();
+        try {
+            String hostsParam = new ObjectMapper().readTree(request.body()).get("RequestInfo").get("query").asText();
+            removedHostsFromAmbari.addAll(instanceMap.entrySet().stream().filter(e -> hostsParam.contains(
+                    e.getValue().getMetaData().getPrivateIp().replaceAll("\\.", "-") + ".")).map(Map.Entry::getKey).collect(Collectors.toSet()));
+            response.type("text/plain");
+            ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
+            Requests requests = new Requests(66, "SUCCESSFUL", 100);
+            rootNode.set("Requests", new ObjectMapper().valueToTree(requests));
+            return rootNode.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
