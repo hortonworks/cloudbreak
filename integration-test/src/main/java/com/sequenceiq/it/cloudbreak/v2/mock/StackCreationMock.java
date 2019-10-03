@@ -34,6 +34,7 @@ import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.AmbariHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
+import com.sequenceiq.it.spark.ambari.AmbariUserResponse;
 import com.sequenceiq.it.spark.ambari.AmbariVersionDefinitionResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
@@ -80,6 +81,7 @@ public class StackCreationMock extends MockServer {
     public void addAmbariMappings(String clusterName) {
         Map<String, CloudVmMetaDataStatus> instanceMap = getInstanceMap();
         Service sparkService = getSparkService();
+        sparkService.get(AMBARI_API_ROOT + "/users/:username", new AmbariUserResponse());
         sparkService.get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
         sparkService.post(AMBARI_API_ROOT + "/views/:view/versions/1.0.0/instances/*", new EmptyAmbariResponse());
         sparkService.get(AMBARI_API_ROOT + "/clusters", (req, resp) -> {

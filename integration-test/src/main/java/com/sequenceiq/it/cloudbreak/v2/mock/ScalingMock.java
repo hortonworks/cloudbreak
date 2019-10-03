@@ -38,6 +38,7 @@ import com.sequenceiq.it.spark.ambari.AmbariComponentStatusOnHostResponse;
 import com.sequenceiq.it.spark.ambari.AmbariHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariServiceConfigResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
+import com.sequenceiq.it.spark.ambari.AmbariUserResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
 import com.sequenceiq.it.spark.spi.CloudMetaDataStatuses;
@@ -133,6 +134,8 @@ public class ScalingMock extends MockServer {
     public void addAmbariMappings(String clusterName) {
         Service sparkService = getSparkService();
         Map<String, CloudVmMetaDataStatus> instanceMap = getInstanceMap();
+        sparkService.get(AMBARI_API_ROOT + "/users/:username", new AmbariUserResponse());
+        sparkService.get(AMBARI_API_ROOT + "/user", new EmptyAmbariResponse());
         sparkService.get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
         sparkService.get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
         sparkService.get(AMBARI_API_ROOT + "/clusters", new AmbariClusterResponse(instanceMap, clusterName));
@@ -223,7 +226,7 @@ public class ScalingMock extends MockServer {
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/configurations/service_config_versions", "GET").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").atLeast(1).verify();
             verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/.*", "GET").atLeast(2).verify();
-            verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "GET").exactTimes(2).verify();
+            verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "GET").exactTimes(3).verify();
             verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "DELETE").exactTimes(1).verify();
             verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/services/.*", "PUT").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/requests", "POST").bodyContains("DECOMMISSION").exactTimes(2).verify();
