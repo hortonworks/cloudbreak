@@ -5,12 +5,11 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
@@ -31,7 +29,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayTriggerEvent;
@@ -47,6 +44,7 @@ import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 
 @Component
 public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory<ClusterRepairTriggerEvent> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterRepairFlowEventChainFactory.class);
 
     @Inject
@@ -74,106 +72,164 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(ClusterRepairTriggerEvent event) {
+        RepairConfig repairConfig = createRepairConfig(event);
+        return createFlowTriggers(event, repairConfig);
+    }
+
+    private RepairConfig createRepairConfig(ClusterRepairTriggerEvent event) {
+        RepairConfig repairConfig = new RepairConfig();
         Stack stack = event.getStack();
-        Queue<Selectable> flowChainTriggers = new ConcurrentLinkedDeque<>();
-        Map<String, List<String>> failedNodesMap = event.getFailedNodesMap();
-        boolean multipleGatewayStack = clusterService.isMultipleGateway(stack);
-        for (Entry<String, List<String>> failedNodes : failedNodesMap.entrySet()) {
+        for (Entry<String, List<String>> failedNodes : event.getFailedNodesMap().entrySet()) {
             String hostGroupName = failedNodes.getKey();
             List<String> hostNames = failedNodes.getValue();
             HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName)
                     .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
             InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
-            boolean gatewayInstanceGroup = InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType());
-            List<String> primaryGatewayHostNames = instanceMetaDataService.getPrimaryGatewayByInstanceGroup(stack.getId(), instanceGroup.getId()).stream()
-                    .filter(imd -> hostNames.contains(imd.getDiscoveryFQDN()) && imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY)
-                    .map(InstanceMetaData::getDiscoveryFQDN)
-                    .collect(Collectors.toList());
-            boolean primaryGatewayInstance = !primaryGatewayHostNames.isEmpty();
-            boolean singlePrimaryGateway = primaryGatewayInstance && !multipleGatewayStack;
-
-            List<String> failedHostnames = new ArrayList<>(hostNames);
-            if (singlePrimaryGateway) {
-                handleSinglePrimaryGateway(event, hostGroup, primaryGatewayHostNames, stack, flowChainTriggers);
-                failedHostnames.removeAll(primaryGatewayHostNames);
-                handleNotSinglePrimaryGateways(false, gatewayInstanceGroup, event, hostGroup, failedHostnames, stack, flowChainTriggers);
+            if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
+                Optional<String> primaryGatewayHostName = instanceMetaDataService.getPrimaryGatewayDiscoveryFQDNByInstanceGroup(stack.getId(),
+                        instanceGroup.getId());
+                boolean primaryGatewayReparaiable = primaryGatewayHostName.isPresent() && hostNames.contains(primaryGatewayHostName.get());
+                boolean singlePrimaryGatewayRepairable = primaryGatewayReparaiable && !clusterService.isMultipleGateway(stack);
+                if (singlePrimaryGatewayRepairable) {
+                    repairConfig.setSinglePrimaryGateway(new Repair(instanceGroup.getGroupName(), hostGroup.getName(), hostNames));
+                } else if (primaryGatewayReparaiable) {
+                    repairConfig.setChangePGW(true);
+                    repairConfig.addRepairs(new Repair(instanceGroup.getGroupName(), hostGroup.getName(), hostNames));
+                }
             } else {
-                handleNotSinglePrimaryGateways(
-                        primaryGatewayInstance, gatewayInstanceGroup, event, hostGroup, failedHostnames, stack, flowChainTriggers);
+                repairConfig.addRepairs(new Repair(instanceGroup.getGroupName(), hostGroup.getName(), hostNames));
             }
         }
-        return flowChainTriggers;
+        return repairConfig;
     }
 
-    private void handleSinglePrimaryGateway(ClusterRepairTriggerEvent event, HostGroup hostGroup, List<String> hostNames, Stack stack,
-            Queue<Selectable> flowChainTriggers) {
-        InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
-        addStackDownscale(event, flowChainTriggers, instanceGroup, stack, new HashSet<>(hostNames));
-        if (!event.isRemoveOnly()) {
-            addFullUpscale(event, flowChainTriggers, hostGroup.getName(), hostNames, true, isKerberosSecured(stack), stack);
-            // we need to update all ephemeral clusters that are connected to a datalake
-            if (!stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getResourceId()).isEmpty()) {
-                upgradeEphemeralClusters(event, flowChainTriggers);
+    private Queue<Selectable> createFlowTriggers(ClusterRepairTriggerEvent event, RepairConfig repairConfig) {
+        Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        if (repairConfig.getSinglePrimaryGateway().isPresent()) {
+            Repair repair = repairConfig.getSinglePrimaryGateway().get();
+            flowTriggers.add(stackDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
+            flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), true,
+                    isKerberosSecured(event.getStack())));
+        } else if (repairConfig.isChangePGW()) {
+            flowTriggers.add(changePrimaryGatewayEvent(event));
+        }
+        for (Repair repair : repairConfig.getRepairs()) {
+            if (repairConfig.getSinglePrimaryGateway().isPresent()) {
+                flowTriggers.add(stackDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
+            } else {
+                flowTriggers.add(fullDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
+            }
+            if (!event.isRemoveOnly()) {
+                flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), false, false));
             }
         }
+        if (!event.isRemoveOnly() && (repairConfig.getSinglePrimaryGateway().isPresent() || repairConfig.isChangePGW())
+                && !stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getResourceId()).isEmpty()) {
+            flowTriggers.add(upgradeEphemeralClustersEvent(event));
+        }
+        return flowTriggers;
     }
 
-    private void handleNotSinglePrimaryGateways(boolean primaryGatewayInstance, boolean gatewayInstanceGroup, ClusterRepairTriggerEvent event,
-            HostGroup hostGroup, List<String> failedHostNames, Stack stack, Queue<Selectable> flowChainTriggers) {
-        if (failedHostNames.isEmpty()) {
-            return;
-        }
-        // TODO: handle the case when the gateway and the gateway candidates are all selected for repair
-        if (gatewayInstanceGroup && primaryGatewayInstance) {
-            addChangePrimaryGateway(event, flowChainTriggers);
-        }
-        addFullDownscale(event, stack, flowChainTriggers, hostGroup.getName(), failedHostNames);
-        if (!event.isRemoveOnly()) {
-            addFullUpscale(event, flowChainTriggers, hostGroup.getName(), failedHostNames, false, false, stack);
-            // we need to update all ephemeral clusters that are connected to a datalake
-            if (gatewayInstanceGroup
-                    && !stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getResourceId()).isEmpty() && primaryGatewayInstance) {
-                upgradeEphemeralClusters(event, flowChainTriggers);
-            }
-        }
+    private StackDownscaleTriggerEvent stackDownscaleEvent(ClusterRepairTriggerEvent event, String groupName, List<String> hostNames) {
+        Stack stack = event.getStack();
+        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), new HashSet<>(hostNames));
+        return new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), groupName, privateIdsForHostNames, event.accepted());
     }
 
-    private void addStackDownscale(ClusterRepairTriggerEvent event, Queue<Selectable> flowChainTriggers, InstanceGroup instanceGroup, Stack stack,
-            Set<String> hostNames) {
-        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
-        flowChainTriggers.add(new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroup.getGroupName(),
-                privateIdsForHostNames, event.accepted()));
-    }
-
-    private void addFullDownscale(ClusterRepairTriggerEvent event, Stack stack, Queue<Selectable> flowChainTriggers, String hostGroupName,
-            List<String> hostNames) {
-        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
-        flowChainTriggers.add(new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(),
+    private ClusterAndStackDownscaleTriggerEvent fullDownscaleEvent(ClusterRepairTriggerEvent event, String hostGroupName, List<String> hostNames) {
+        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(event.getStack().getInstanceMetaDataAsList(), hostNames);
+        return new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(),
                 hostGroupName, Sets.newHashSet(privateIdsForHostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted(),
-                new ClusterDownscaleDetails(true, true)));
+                new ClusterDownscaleDetails(true, true));
     }
 
-    private void addChangePrimaryGateway(ClusterRepairTriggerEvent event, Queue<Selectable> flowChainTriggers) {
-        flowChainTriggers.add(new ChangePrimaryGatewayTriggerEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT.event(),
-                event.getResourceId(), event.accepted()));
+    private ChangePrimaryGatewayTriggerEvent changePrimaryGatewayEvent(ClusterRepairTriggerEvent event) {
+        return new ChangePrimaryGatewayTriggerEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT.event(),
+                event.getResourceId(), event.accepted());
     }
 
-    private void upgradeEphemeralClusters(ClusterRepairTriggerEvent event, Queue<Selectable> flowChainTriggers) {
-        flowChainTriggers.add(new EphemeralClustersUpgradeTriggerEvent(FlowChainTriggers.EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT,
-                event.getResourceId(), event.accepted()));
+    private EphemeralClustersUpgradeTriggerEvent upgradeEphemeralClustersEvent(ClusterRepairTriggerEvent event) {
+        return new EphemeralClustersUpgradeTriggerEvent(FlowChainTriggers.EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT,
+                event.getResourceId(), event.accepted());
     }
 
-    private void addFullUpscale(ClusterRepairTriggerEvent event, Queue<Selectable> flowChainTriggers, String hostGroupName, List<String> hostNames,
-            boolean singlePrimaryGateway, boolean kerberosSecured, Stack stack) {
+    private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, String hostGroupName, List<String> hostNames,
+            boolean singlePrimaryGateway, boolean kerberosSecured) {
+        Stack stack = event.getStack();
         boolean singleNodeCluster = clusterService.isSingleNode(stack);
         boolean ambariBlueprint = blueprintService.isAmbariBlueprint(stack.getCluster().getBlueprint());
         ClusterManagerType cmType = ambariBlueprint ? ClusterManagerType.AMBARI : ClusterManagerType.CLOUDERA_MANAGER;
-        flowChainTriggers.add(new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(), hostGroupName,
+        return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(), hostGroupName,
                 hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames), singlePrimaryGateway,
-                kerberosSecured, event.accepted(), singleNodeCluster, cmType));
+                kerberosSecured, event.accepted(), singleNodeCluster, cmType);
     }
 
     private boolean isKerberosSecured(Stack stack) {
         return kerberosConfigService.isKerberosConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName());
+    }
+
+    private static class RepairConfig {
+
+        private boolean changePGW;
+
+        private Optional<Repair> singlePrimaryGateway;
+
+        private List<Repair> repairs;
+
+        RepairConfig() {
+            singlePrimaryGateway = Optional.empty();
+            repairs = new ArrayList<>();
+        }
+
+        public boolean isChangePGW() {
+            return changePGW;
+        }
+
+        public void setChangePGW(boolean changePGW) {
+            this.changePGW = changePGW;
+        }
+
+        public Optional<Repair> getSinglePrimaryGateway() {
+            return singlePrimaryGateway;
+        }
+
+        public void setSinglePrimaryGateway(Repair singlePrimaryGateway) {
+            this.singlePrimaryGateway = Optional.of(singlePrimaryGateway);
+        }
+
+        public List<Repair> getRepairs() {
+            return repairs;
+        }
+
+        public void addRepairs(Repair repair) {
+            repairs.add(repair);
+        }
+    }
+
+    private static class Repair {
+
+        private final String instanceGroupName;
+
+        private final String hostGroupName;
+
+        private final List<String> hostNames;
+
+        Repair(String instanceGroupName, String hostGroupName, List<String> hostNames) {
+            this.instanceGroupName = instanceGroupName;
+            this.hostGroupName = hostGroupName;
+            this.hostNames = hostNames;
+        }
+
+        public String getInstanceGroupName() {
+            return instanceGroupName;
+        }
+
+        public String getHostGroupName() {
+            return hostGroupName;
+        }
+
+        public List<String> getHostNames() {
+            return hostNames;
+        }
     }
 }

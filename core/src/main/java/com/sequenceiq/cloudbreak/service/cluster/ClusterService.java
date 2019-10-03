@@ -450,11 +450,20 @@ public class ClusterService {
                         hostGroupEntry.getValue().stream()
                                 .filter(hostName -> !existingHosts.contains(hostName))
                                 .forEach(hostName -> {
-                                    HostMetadata hostMetadataEntry = new HostMetadata();
-                                    hostMetadataEntry.setHostName(hostName);
-                                    hostMetadataEntry.setHostGroup(hostGroup.get());
-                                    hostMetadataEntry.setHostMetadataState(hostMetadataState);
-                                    hostGroup.get().getHostMetadata().add(hostMetadataEntry);
+                                    hostGroup.get().getHostMetadata()
+                                            .stream()
+                                            .filter(hm -> hostName.equals(hm.getHostName()))
+                                            .findFirst()
+                                            .ifPresentOrElse(hostMetadata -> {
+                                                hostMetadata.setHostMetadataState(hostMetadataState);
+                                                hostMetadata.setStatusReason(null);
+                                            }, () -> {
+                                                HostMetadata hostMetadata = new HostMetadata();
+                                                hostMetadata.setHostName(hostName);
+                                                hostMetadata.setHostGroup(hostGroup.get());
+                                                hostMetadata.setHostMetadataState(hostMetadataState);
+                                                hostGroup.get().getHostMetadata().add(hostMetadata);
+                                            });
                                 });
                         hostGroupService.save(hostGroup.get());
                     }

@@ -109,7 +109,13 @@ public class SdxRepairService {
 
     private ClusterRepairV4Request createRepairRequest(SdxRepairRequest sdxRepairRequest) {
         ClusterRepairV4Request repairRequest = new ClusterRepairV4Request();
-        repairRequest.setHostGroups(List.of(sdxRepairRequest.getHostGroupName()));
+        List<String> hostGroupNames;
+        if (StringUtils.isNotBlank(sdxRepairRequest.getHostGroupName())) {
+            hostGroupNames = List.of(sdxRepairRequest.getHostGroupName());
+        } else {
+            hostGroupNames = sdxRepairRequest.getHostGroupNames();
+        }
+        repairRequest.setHostGroups(hostGroupNames);
         return repairRequest;
     }
 
