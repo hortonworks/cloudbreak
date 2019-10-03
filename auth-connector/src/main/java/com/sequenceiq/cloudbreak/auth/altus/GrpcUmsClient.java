@@ -20,6 +20,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
@@ -514,6 +515,22 @@ public class GrpcUmsClient {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             return client.listRoles(requestId.orElse(UUID.randomUUID().toString()), accountId).getRoleList();
+        }
+    }
+
+    /**
+     * Retrieves event generation ids for an account from UMS.
+     *
+     * @param actorCrn  the CRN of the actor
+     * @param accountId the account id
+     * @param requestId an optional request Id
+     * @return the user associated with this user CRN
+     */
+    public GetEventGenerationIdsResponse getEventGenerationIds(String actorCrn, String accountId, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Getting event generation ids for account {} using request ID {}", accountId, requestId);
+            return client.getEventGenerationIds(requestId.orElse(UUID.randomUUID().toString()), accountId);
         }
     }
 

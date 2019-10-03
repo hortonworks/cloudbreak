@@ -21,6 +21,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -38,6 +39,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
@@ -59,6 +62,9 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.io.Resources;
 import com.sequenceiq.caas.grpc.GrpcActorContext;
 import com.sequenceiq.caas.model.AltusToken;
@@ -131,11 +137,30 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private final Map<String, Map<String, Group>> accountGroups = new ConcurrentHashMap<>();
 
+    @Value("${auth.mock.event-generation.expiration-minutes:10}")
+    private long eventGenerationExirationMinutes;
+
+    private LoadingCache<String, GetEventGenerationIdsResponse> eventGenerationIdsCache;
+
     @PostConstruct
     public void init() {
         this.cbLicense = getLicense();
         this.telemetyPublisherCredential = getAltusCredential(databusTpCredentialFile, databusTpCredentialProfile);
         this.fluentCredential = getAltusCredential(databusFluentCredentialFile, databusFluentCredentialProfile);
+        this.eventGenerationIdsCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(eventGenerationExirationMinutes, TimeUnit.MINUTES)
+                .build(new CacheLoader<String, GetEventGenerationIdsResponse>() {
+                    @Override
+                    public GetEventGenerationIdsResponse load(String key) throws Exception {
+                        GetEventGenerationIdsResponse.Builder respBuilder = GetEventGenerationIdsResponse.newBuilder();
+                        respBuilder.setLastRoleAssignmentEventId(UUID.randomUUID().toString());
+                        respBuilder.setLastResourceRoleAssignmentEventId(UUID.randomUUID().toString());
+                        respBuilder.setLastGroupMembershipChangedEventId(UUID.randomUUID().toString());
+                        respBuilder.setLastActorDeletedEventId(UUID.randomUUID().toString());
+                        respBuilder.setLastActorWorkloadCredentialsChangedEventId(UUID.randomUUID().toString());
+                        return respBuilder.build();
+                    }
+                });
     }
 
     @Override
@@ -540,6 +565,19 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         respBuilder.setPasswordHash("008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601");
         responseObserver.onNext(respBuilder.build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getEventGenerationIds(GetEventGenerationIdsRequest request, StreamObserver<GetEventGenerationIdsResponse> responseObserver) {
+        try {
+            responseObserver.onNext(eventGenerationIdsCache.get(request.getAccountId()));
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            throw Status.INTERNAL
+                    .withDescription("Error retrieving/creating event generation ids.")
+                    .withCause(e)
+                    .asRuntimeException();
+        }
     }
 
     private String getLicense() {

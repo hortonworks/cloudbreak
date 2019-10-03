@@ -9,3 +9,6 @@ auth:
         file: altus_credentials
       fluent:
         file: databus_credentials
+  mock:
+    event-generation:
+      expiration-minutes: 10
