@@ -25,10 +25,16 @@ public class EnvironmentBasedDomainNameProvider {
     @Value("${gateway.cert.base.domain.name:cloudera.site}")
     private String rootDomain;
 
-    public String getDomain(String environmentName, String accountName) {
-        if (StringUtils.isEmpty(environmentName) || StringUtils.isEmpty(accountName)) {
-            LOGGER.warn("The required parameters hasn't been specified, environment name: {}, account name: {}", environmentName, accountName);
-            throw new IllegalStateException(NAMES_SHOULD_BE_SPECIFIED_MSG);
+    public String getDomainName(String environmentName, String accountName) {
+        if (StringUtils.isEmpty(environmentName)) {
+            LOGGER.error("The required parameters hasn't been specified, environment name: {}, account name: {}", environmentName, accountName);
+            throw new IllegalStateException("Domain name cannot be generated, since environment name must be specified!");
+        }
+
+        if (StringUtils.isEmpty(accountName)) {
+            LOGGER.error("The required parameters hasn't been specified, environment name: {}, account name: {}", environmentName, accountName);
+            throw new IllegalStateException(String.format("Domain name cannot be generated for environment: %s, " +
+                    " WorkloadSubdomain in your UMS Account details is null, or empty!", environmentName));
         }
 
         LOGGER.info("Generating domain with environment name: '{}', account name: '{}' and root domain: '{}'", environmentName, accountName, rootDomain);
@@ -46,13 +52,12 @@ public class EnvironmentBasedDomainNameProvider {
         return result;
     }
 
-    public String getDomainName(String clusterName, String environmentName, String accountName) {
-        if (StringUtils.isEmpty(clusterName)) {
-            throw new IllegalStateException("Cluster name should be specified!");
+    public String getFullyQualifiedEndpointName(String endpointName, String environmentName, String accountName) {
+        if (StringUtils.isEmpty(endpointName)) {
+            throw new IllegalStateException("Endpoint name must be specified!");
         }
-
-        String domain = getDomain(environmentName, accountName);
-        return clusterName + DOMAIN_PART_DELIMITER + domain;
+        String domain = getDomainName(environmentName, accountName);
+        return endpointName + DOMAIN_PART_DELIMITER + domain;
     }
 
     private void validateDomainPattern(String result) {

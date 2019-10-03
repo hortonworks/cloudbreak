@@ -105,7 +105,7 @@ public class GatewayPublicEndpointManagementService {
         if (success) {
             try {
                 String fullQualifiedDomainName = environmentBasedDomainNameProvider
-                        .getDomainName(stack.getName(), environment.getName(), getWorkloadSubdomain(userCrn));
+                        .getFullyQualifiedEndpointName(stack.getName(), environment.getName(), getWorkloadSubdomain(userCrn));
                 if (fullQualifiedDomainName != null) {
                     LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", gatewayIp, fullQualifiedDomainName);
                     return fullQualifiedDomainName;

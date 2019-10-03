@@ -19,25 +19,25 @@ class EnvironmentBasedDomainNameProviderTest {
 
     @Test
     void testGetDomainWhenEnvironmentNameIsNull() {
-        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomain(null, "anAccountName"));
+        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomainName(null, "anAccountName"));
         assertEquals(EnvironmentBasedDomainNameProvider.NAMES_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
     }
 
     @Test
     void testGetDomainWhenAccountNameIsNull() {
-        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomain("anEnvName", null));
+        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomainName("anEnvName", null));
         assertEquals(EnvironmentBasedDomainNameProvider.NAMES_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
     }
 
     @Test
     void testGetDomainWhenEnvironmentNameIsEmpty() {
-        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomain("", "anAccountName"));
+        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomainName("", "anAccountName"));
         assertEquals(EnvironmentBasedDomainNameProvider.NAMES_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
     }
 
     @Test
     void testGetDomainWhenAccountNameIsEmpty() {
-        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomain("anEnvName", ""));
+        IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomainName("anEnvName", ""));
         assertEquals(EnvironmentBasedDomainNameProvider.NAMES_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
     }
 
@@ -47,7 +47,7 @@ class EnvironmentBasedDomainNameProviderTest {
         String accountName = "an-account-name";
         ReflectionTestUtils.setField(underTest, "rootDomain", "cloudera.site");
 
-        String result = underTest.getDomain(envName, accountName);
+        String result = underTest.getDomainName(envName, accountName);
 
         String expected = String.format("%s.%s.cloudera.site", "an-env-n", accountName);
         assertEquals(expected, result);
@@ -59,7 +59,7 @@ class EnvironmentBasedDomainNameProviderTest {
         String accountName = "an-account-name";
         ReflectionTestUtils.setField(underTest, "rootDomain", "cloudera.site");
 
-        String result = underTest.getDomain(envName, accountName);
+        String result = underTest.getDomainName(envName, accountName);
 
         String expected = String.format("%s.%s.cloudera.site", "an-envi", accountName);
         assertEquals(expected, result);
@@ -71,7 +71,7 @@ class EnvironmentBasedDomainNameProviderTest {
         String accountName = "an-account-name";
         ReflectionTestUtils.setField(underTest, "rootDomain", ".mytest.local");
 
-        String result = underTest.getDomain(envName, accountName);
+        String result = underTest.getDomainName(envName, accountName);
 
         String expected = String.format("%s.%s.mytest.local", "an-env-n", accountName);
         assertEquals(expected, result);
@@ -83,7 +83,7 @@ class EnvironmentBasedDomainNameProviderTest {
         String accountName = "anaccountname";
         ReflectionTestUtils.setField(underTest, "rootDomain", ".mytest.local");
 
-        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.getDomain(envName, accountName));
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.getDomainName(envName, accountName));
 
         String actualMessage = illegalStateException.getMessage();
         assertTrue(actualMessage.startsWith("The generated domain(")
@@ -96,7 +96,7 @@ class EnvironmentBasedDomainNameProviderTest {
         String accountName = "anAccount$%$$$Name";
         ReflectionTestUtils.setField(underTest, "rootDomain", ".mytest.local");
 
-        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.getDomain(envName, accountName));
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.getDomainName(envName, accountName));
 
         String actualMessage = illegalStateException.getMessage();
         assertTrue(actualMessage.startsWith("The generated domain(")
@@ -109,7 +109,7 @@ class EnvironmentBasedDomainNameProviderTest {
         String accountName = "an-loooooooooooooong-account-name";
         ReflectionTestUtils.setField(underTest, "rootDomain", "some-subdomain.mytest.local");
 
-        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.getDomain(envName, accountName));
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.getDomainName(envName, accountName));
 
         String actualMessage = illegalStateException.getMessage();
         assertTrue(actualMessage.startsWith("The length of the generated domain(")

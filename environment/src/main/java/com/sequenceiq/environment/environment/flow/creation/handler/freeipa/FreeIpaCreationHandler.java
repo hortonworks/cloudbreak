@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 
@@ -27,7 +28,6 @@ import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -40,9 +40,9 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
-import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
@@ -60,10 +60,6 @@ import reactor.bus.Event;
 public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationHandler.class);
-
-    private static final String FREEIPA_DOMAIN = "cloudera.site";
-
-    private static final String FREEIPA_HOSTNAME = "ipaserver";
 
     private static final String MASTER_GROUP_NAME = "master";
 
@@ -84,6 +80,9 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private final Map<CloudPlatform, FreeIpaNetworkProvider> freeIpaNetworkProviderMapByCloudPlatform;
 
     private final PollingService<FreeIpaPollerObject> freeIpaPollingService;
+
+    @Inject
+    private FreeIpaServerRequestProvider freeIpaServerRequestProvider;
 
     public FreeIpaCreationHandler(
             EventSender eventSender,
@@ -165,7 +164,9 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         CreateFreeIpaRequest createFreeIpaRequest = initFreeIpaRequest(environment);
         createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
 
-        setFreeIpaServer(environment, createFreeIpaRequest);
+        FreeIpaServerRequest freeIpaServerRequest = freeIpaServerRequestProvider.create(environment);
+        createFreeIpaRequest.setFreeIpa(freeIpaServerRequest);
+
         setPlacementAndNetwork(environment, createFreeIpaRequest);
         setAuthentication(environment.getAuthentication(), createFreeIpaRequest);
         doIfNotNull(environment.getSecurityAccess(), securityAccess -> setSecurityAccess(securityAccess, createFreeIpaRequest));
@@ -177,16 +178,6 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
         createFreeIpaRequest.setName(environment.getName() + "-freeipa");
         return createFreeIpaRequest;
-    }
-
-    private void setFreeIpaServer(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
-        String adminGroupName = environment.getAdminGroupName();
-        FreeIpaServerRequest freeIpaServerRequest = new FreeIpaServerRequest();
-        freeIpaServerRequest.setAdminPassword(PasswordUtil.generatePassword());
-        freeIpaServerRequest.setDomain(FREEIPA_DOMAIN);
-        freeIpaServerRequest.setHostname(FREEIPA_HOSTNAME);
-        freeIpaServerRequest.setAdminGroupName(adminGroupName);
-        createFreeIpaRequest.setFreeIpa(freeIpaServerRequest);
     }
 
     private void setPlacementAndNetwork(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
