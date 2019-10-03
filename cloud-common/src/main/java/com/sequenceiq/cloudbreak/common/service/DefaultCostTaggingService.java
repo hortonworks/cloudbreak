@@ -25,7 +25,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 @Service
 public class DefaultCostTaggingService {
@@ -74,10 +73,6 @@ public class DefaultCostTaggingService {
             result.put(cloudbreakResourceType.templateVariable(), cloudbreakResourceType.key());
         }
         return result;
-    }
-
-    public Map<String, String> prepareDefaultTags(CloudbreakUser cbUser, Map<String, String> sourceMap, String platform) {
-        return prepareDefaultTags(cbUser.getUsername(), sourceMap, platform);
     }
 
     public Map<String, String> prepareDefaultTags(String cbUser, Map<String, String> sourceMap, String platform) {

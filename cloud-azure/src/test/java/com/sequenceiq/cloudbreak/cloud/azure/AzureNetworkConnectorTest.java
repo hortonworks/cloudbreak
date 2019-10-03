@@ -119,7 +119,7 @@ public class AzureNetworkConnectorTest {
         when(resourceGroup.name()).thenReturn(ENV_NAME);
         when(templateDeployment.outputs()).thenReturn(outputs);
 
-        CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
+        CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest, "creatorUser");
 
         assertEquals(ENV_NAME, actual.getNetworkId());
         assertTrue(actual.getSubnets().stream().anyMatch(cloudSubnet -> cloudSubnet.getSubnetId().equals(SUBNET_ID_0)));

@@ -16,6 +16,13 @@ buildscript {
   }
 }
 
+configurations.all {
+    resolutionStrategy {
+        force 'org.ow2.asm:asm:7.1'
+        force 'net.bytebuddy:byte-buddy:1.9.13'
+    }
+}
+
 jar {
     baseName = 'cloud-common'
     archiveName = 'cloud-common.jar'

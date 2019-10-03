@@ -52,6 +52,10 @@ class EnvironmentNetworkServiceTest {
 
     private static final String STACK_NAME = "stackName";
 
+    private static final String USER_NAME = "name";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:accountId:user:" + USER_NAME;
+
     @Mock
     private CloudConnector<Object> cloudConnector;
 
@@ -81,7 +85,7 @@ class EnvironmentNetworkServiceTest {
 
     @Test
     void testCreateNetworkShouldReturnWithANewNetwork() {
-        EnvironmentDto environmentDto = EnvironmentDto.builder().withCloudPlatform(CLOUD_PLATFORM).build();
+        EnvironmentDto environmentDto = EnvironmentDto.builder().withCloudPlatform(CLOUD_PLATFORM).withCreator(USER_CRN).build();
         BaseNetwork baseNetwork = new AwsNetwork();
         NetworkCreationRequest networkCreationRequest = new NetworkCreationRequest.Builder().build();
         CreatedCloudNetwork createdCloudNetwork = new CreatedCloudNetwork();
@@ -89,7 +93,7 @@ class EnvironmentNetworkServiceTest {
 
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(networkCreationRequestFactory.create(environmentDto)).thenReturn(networkCreationRequest);
-        when(networkConnector.createNetworkWithSubnets(networkCreationRequest)).thenReturn(createdCloudNetwork);
+        when(networkConnector.createNetworkWithSubnets(networkCreationRequest, USER_NAME)).thenReturn(createdCloudNetwork);
         when(environmentNetworkConverterMap.get(CloudPlatform.valueOf(CLOUD_PLATFORM))).thenReturn(networkConverter);
         when(networkConverter.setProviderSpecificNetwork(baseNetwork, createdCloudNetwork)).thenReturn(baseNetwork);
 
@@ -98,7 +102,7 @@ class EnvironmentNetworkServiceTest {
         verify(cloudConnector).networkConnector();
         verify(cloudPlatformConnectors).get(any(CloudPlatformVariant.class));
         verify(networkCreationRequestFactory).create(environmentDto);
-        verify(networkConnector).createNetworkWithSubnets(networkCreationRequest);
+        verify(networkConnector).createNetworkWithSubnets(networkCreationRequest, USER_NAME);
         verify(environmentNetworkConverterMap).get(CloudPlatform.valueOf(CLOUD_PLATFORM));
         verify(networkConverter).setProviderSpecificNetwork(baseNetwork, createdCloudNetwork);
         assertEquals(baseNetwork, actual);

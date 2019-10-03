@@ -271,7 +271,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private Map<String, String> getDefaultTags(String cloudPlatform) {
         Map<String, String> result = new HashMap<>();
         try {
-            result.putAll(defaultCostTaggingService.prepareDefaultTags(restRequestThreadLocalService.getCloudbreakUser(), result, cloudPlatform));
+            result.putAll(defaultCostTaggingService.prepareDefaultTags(restRequestThreadLocalService.getCloudbreakUser().getUsername(), result, cloudPlatform));
         } catch (Exception e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }

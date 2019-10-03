@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,8 +34,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
+import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
+import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
@@ -56,6 +60,8 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsNetworkConnectorTest {
@@ -117,6 +123,12 @@ public class AwsNetworkConnectorTest {
     @Mock
     private AwsCreatedSubnetProvider awsCreatedSubnetProvider;
 
+    @Mock
+    private AwsTagPreparationService awsTagPreparationService;
+
+    @Mock
+    private DefaultCostTaggingService defaultCostTaggingService;
+
     @Test
     public void testPlatformShouldReturnAwsPlatform() {
         Platform actual = underTest.platform();
@@ -132,7 +144,7 @@ public class AwsNetworkConnectorTest {
     }
 
     @Test
-    public void testCreateNetworkWithSubnetsShouldCreateTheNetworkAndSubnets() {
+    public void testCreateNetworkWithSubnetsShouldReturnTheNetworkAndSubnets() {
         String networkCidr = "0.0.0.0/16";
         Set<String> subnetCidrs = Set.of("1.1.1.1/8", "1.1.1.2/8");
         AmazonCloudFormationRetryClient cloudFormationRetryClient = Mockito.mock(AmazonCloudFormationRetryClient.class);
@@ -155,12 +167,55 @@ public class AwsNetworkConnectorTest {
         when(awsCreatedSubnetProvider.provide(output, networkCreationRequest.getSubnetCidrs().size(), networkCreationRequest.isPrivateSubnetEnabled()))
                 .thenReturn(createdSubnets);
 
-        CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
+        CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest, "creatorUser");
 
         verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsNetworkCfTemplateProvider).provide(networkCidr, subnetRequestList, true);
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
+        verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
+        verify(defaultCostTaggingService, never()).prepareDefaultTags(any(), any(), any());
+        verify(awsTagPreparationService, never()).prepareCloudformationTags(any(), any());
+        verify(cloudFormationRetryClient, never()).createStack(any(CreateStackRequest.class));
+        assertEquals(VPC_ID, actual.getNetworkId());
+        assertEquals(NUMBER_OF_SUBNETS, actual.getSubnets().size());
+    }
+
+    @Test
+    public void testCreateNewNetworkWithSubnetsShouldCreateTheNetworkAndSubnets() {
+        String networkCidr = "0.0.0.0/16";
+        Set<String> subnetCidrs = Set.of("1.1.1.1/8", "1.1.1.2/8");
+        AmazonCloudFormationRetryClient cloudFormationRetryClient = Mockito.mock(AmazonCloudFormationRetryClient.class);
+        AmazonServiceException amazonServiceException = new AmazonServiceException("does not exist");
+        amazonServiceException.setStatusCode(400);
+        when(cloudFormationRetryClient.describeStacks(any(DescribeStacksRequest.class))).thenThrow(amazonServiceException);
+        AmazonCloudFormationClient cfClient = Mockito.mock(AmazonCloudFormationClient.class);
+        AmazonEC2Client ec2Client = Mockito.mock(AmazonEC2Client.class);
+        PollTask pollTask = Mockito.mock(PollTask.class);
+        Map<String, String> output = createOutput();
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnetCidrs);
+        List<SubnetRequest> subnetRequestList = createSubnetRequestList();
+        Set<CreatedSubnet> createdSubnets = Set.of(new CreatedSubnet(), new CreatedSubnet(), new CreatedSubnet());
+
+        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsSubnetRequestProvider.provide(ec2Client, new ArrayList<>(subnetCidrs))).thenReturn(subnetRequestList);
+        when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cloudFormationRetryClient);
+        when(awsNetworkCfTemplateProvider.provide(networkCidr, subnetRequestList, true)).thenReturn(CF_TEMPLATE);
+        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
+        when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest))
+                .thenReturn(pollTask);
+        when(cfStackUtil.getOutputs(NETWORK_ID, cloudFormationRetryClient)).thenReturn(output);
+        when(awsCreatedSubnetProvider.provide(output, networkCreationRequest.getSubnetCidrs().size(), networkCreationRequest.isPrivateSubnetEnabled()))
+                .thenReturn(createdSubnets);
+        CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest, "creatorUser");
+
+        verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
+        verify(awsNetworkCfTemplateProvider).provide(networkCidr, subnetRequestList, true);
+        verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
+        verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
+        verify(defaultCostTaggingService).prepareDefaultTags("creatorUser", null, CloudConstants.AWS);
+        verify(awsTagPreparationService).prepareCloudformationTags(any(), any());
+        verify(cloudFormationRetryClient).createStack(any(CreateStackRequest.class));
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
         assertEquals(VPC_ID, actual.getNetworkId());
         assertEquals(NUMBER_OF_SUBNETS, actual.getSubnets().size());
