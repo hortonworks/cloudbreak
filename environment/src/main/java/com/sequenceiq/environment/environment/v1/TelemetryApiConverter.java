@@ -52,7 +52,11 @@ public class TelemetryApiConverter {
                 );
             }
             boolean reportDeploymentLogsEnabled = reportDeploymentLogs ? request.getReportDeploymentLogs() : false;
-            telemetry = new EnvironmentTelemetry(logging, workloadAnalytics, reportDeploymentLogsEnabled);
+            telemetry = new EnvironmentTelemetry();
+            telemetry.setLogging(logging);
+            telemetry.setWorkloadAnalytics(workloadAnalytics);
+            telemetry.setReportDeploymentLogs(reportDeploymentLogsEnabled);
+            telemetry.setFluentAttributes(request.getFluentAttributes());
         }
         return telemetry;
     }
@@ -100,6 +104,7 @@ public class TelemetryApiConverter {
             response.setLogging(loggingResponse);
             response.setWorkloadAnalytics(waResponse);
             response.setReportDeploymentLogs(telemetry.isReportDeploymentLogs());
+            response.setFluentAttributes(telemetry.getFluentAttributes());
         }
         return response;
     }

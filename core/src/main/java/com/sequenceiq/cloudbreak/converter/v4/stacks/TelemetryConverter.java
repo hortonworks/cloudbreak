@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
@@ -17,6 +18,7 @@ import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.telemetry.response.WorkloadAnalyticsResponse;
+import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
@@ -98,6 +100,11 @@ public class TelemetryConverter {
         }
         if (meteringEnabled) {
             telemetry.setMeteringEnabled(true);
+            FeatureSetting meteringFeature = new FeatureSetting();
+            meteringFeature.setEnabled(true);
+            Features features = new Features();
+            features.setMetering(meteringFeature);
+            telemetry.setFeatures(features);
         }
         if (StringUtils.isNotEmpty(databusEndpoint)) {
             telemetry.setDatabusEndpoint(databusEndpoint);

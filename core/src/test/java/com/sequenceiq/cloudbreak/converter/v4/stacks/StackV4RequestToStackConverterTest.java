@@ -143,6 +143,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(cloudbreakUser.getUsername()).thenReturn("username");
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(1L);
@@ -163,7 +164,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
         StackV4Request request = getRequest("stack.json");
 
-        given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(new HashMap<>());
+        given(defaultCostTaggingService.prepareDefaultTags(anyString(), anyMap(), anyString())).willReturn(new HashMap<>());
         given(credentialClientService.getByCrn(anyString())).willReturn(credential);
         given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
@@ -189,7 +190,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         StackV4Request request = getRequest("stack-without-tags.json");
 
         Map<String, String> defaultTags = Map.of(CB_USER_NAME.key(), "test", CB_VERSION.key(), "test", OWNER.key(), "test", CB_CREATION_TIMESTAMP.key(), "test");
-        given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(defaultTags);
+        given(defaultCostTaggingService.prepareDefaultTags(anyString(), anyMap(), anyString())).willReturn(defaultTags);
         given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(credentialClientService.getByCrn(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
@@ -227,7 +228,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     public void testConvertWithLoginUserName() {
         initMocks();
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
-        given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(new HashMap<>());
+        given(defaultCostTaggingService.prepareDefaultTags(anyString(), anyMap(), anyString())).willReturn(new HashMap<>());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("You can not modify the default user!");
         // WHEN
