@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -13,17 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.network.LoadBalancerBackend;
-import com.microsoft.azure.management.network.LoadBalancerInboundNatRule;
 import com.microsoft.azure.management.network.NetworkInterface;
-import com.microsoft.azure.management.network.PublicIPAddress;
-import com.microsoft.azure.management.resources.fluentcore.arm.models.HasName;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
@@ -43,62 +39,37 @@ public class AzureMetadataCollector implements MetadataCollector {
     @Inject
     private AzureUtils azureUtils;
 
+    @Inject
+    private AzureVirtualMachineService azureVirtualMachineService;
+
+    @Inject
+    private AzureVmPublicIpProvider azureVmPublicIpProvider;
+
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
             List<CloudInstance> knownInstances) {
-        CloudResource resource = azureUtils.getTemplateResource(resources);
+        LOGGER.debug("Starting to collect vm metadata.");
         List<CloudVmMetaDataStatus> results = new ArrayList<>();
-
-        List<InstanceTemplate> templates = Lists.transform(vms, CloudInstance::getTemplate);
-
-        String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
-        String resourceGroupName = resource.getName();
-        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates,
-                from -> azureUtils.getPrivateInstanceId(stackName, from.getGroupName(), Long.toString(from.getPrivateId())));
+        String resourceGroup = azureUtils.getTemplateResource(resources).getName();
         AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
-        Map<String, VirtualMachine> virtualMachinesById = azureClient.getVirtualMachines(resourceGroupName).stream()
-                .filter(virtualMachine -> templateMap.containsKey(virtualMachine.name()))
-                .collect(Collectors.toMap(HasName::name, vm -> vm));
+
+        Map<String, InstanceTemplate> templateMap = getTemplateMap(vms, authenticatedContext);
+        Map<String, VirtualMachine> virtualMachinesByName = getVirtualMachinesByName(azureClient, resourceGroup, vms, templateMap);
         try {
             for (Entry<String, InstanceTemplate> instance : templateMap.entrySet()) {
-                VirtualMachine vm = virtualMachinesById.get(instance.getKey());
-                String subnetId = vm.getPrimaryNetworkInterface().primaryIPConfiguration().subnetName();
-
-                Integer faultDomainCount = azureClient.getFaultDomainNumber(resourceGroupName, vm.name());
-                String platform = authenticatedContext.getCloudContext().getPlatform().value();
-                String location = authenticatedContext.getCloudContext().getLocation().getRegion().value();
-                String hostgroupNm = instance.getValue().getGroupName();
-                StringBuilder localityIndicatorBuilder = new StringBuilder();
-                localityIndicatorBuilder.append(LOCALITY_SEPARATOR)
-                        .append(platform)
-                        .append(LOCALITY_SEPARATOR)
-                        .append(location)
-                        .append(LOCALITY_SEPARATOR)
-                        .append(resourceGroupName)
-                        .append(LOCALITY_SEPARATOR)
-                        .append(hostgroupNm)
-                        .append(LOCALITY_SEPARATOR)
-                        .append(faultDomainCount);
-                AzureUtils.removeBlankSpace(localityIndicatorBuilder);
-
+                VirtualMachine vm = virtualMachinesByName.get(instance.getKey());
                 NetworkInterface networkInterface = vm.getPrimaryNetworkInterface();
-                PublicIPAddress publicIpAddress = networkInterface.primaryIPConfiguration().getPublicIPAddress();
+                String subnetId = networkInterface.primaryIPConfiguration().subnetName();
 
-                List<LoadBalancerBackend> backends = networkInterface.primaryIPConfiguration().listAssociatedLoadBalancerBackends();
-                List<LoadBalancerInboundNatRule> inboundNatRules = networkInterface.primaryIPConfiguration().listAssociatedLoadBalancerInboundNatRules();
+                Integer faultDomainCount = azureClient.getFaultDomainNumber(resourceGroup, vm.name());
 
-                String publicIp = null;
-                if (!backends.isEmpty() || !inboundNatRules.isEmpty()) {
-                    publicIp = azureClient.getLoadBalancerIps(resource.getName(), azureUtils.getLoadBalancerId(resource.getName())).get(0);
-                }
-
-                if (publicIpAddress != null && publicIpAddress.ipAddress() != null) {
-                    publicIp = publicIpAddress.ipAddress();
-                }
+                String publicIp = azureVmPublicIpProvider.getPublicIp(azureClient, azureUtils, networkInterface, resourceGroup);
 
                 String instanceId = instance.getKey();
-                CloudInstanceMetaData md = new CloudInstanceMetaData(networkInterface.primaryPrivateIP(), publicIp,
-                        faultDomainCount == null ? null : localityIndicatorBuilder.toString());
+                String localityIndicator = Optional.ofNullable(faultDomainCount)
+                        .map(domainCount -> getLocalityIndicator(domainCount, authenticatedContext.getCloudContext(), instance.getValue(), resourceGroup))
+                        .orElse(null);
+                CloudInstanceMetaData md = new CloudInstanceMetaData(networkInterface.primaryPrivateIP(), publicIp, localityIndicator);
 
                 InstanceTemplate template = templateMap.get(instanceId);
                 if (template != null) {
@@ -111,10 +82,44 @@ public class AzureMetadataCollector implements MetadataCollector {
                 }
             }
         } catch (RuntimeException e) {
+            LOGGER.debug("Failed to collect vm metadata due to an exception: ", e);
             throw new CloudConnectorException(e.getMessage(), e);
         }
         LOGGER.debug("Metadata collection finished");
         return results;
+    }
+
+    private String getLocalityIndicator(Integer faultDomainCount, CloudContext cloudContext, InstanceTemplate instanceTemplate, String resourceGroup) {
+        String platform = cloudContext.getPlatform().value();
+        String location = cloudContext.getLocation().getRegion().value();
+        String hostgroupNm = instanceTemplate.getGroupName();
+        StringBuilder localityIndicatorBuilder = new StringBuilder()
+                .append(LOCALITY_SEPARATOR)
+                .append(platform)
+                .append(LOCALITY_SEPARATOR)
+                .append(location)
+                .append(LOCALITY_SEPARATOR)
+                .append(resourceGroup)
+                .append(LOCALITY_SEPARATOR)
+                .append(hostgroupNm)
+                .append(LOCALITY_SEPARATOR)
+                .append(faultDomainCount);
+        AzureUtils.removeBlankSpace(localityIndicatorBuilder);
+        return localityIndicatorBuilder.toString();
+    }
+
+    private Map<String, VirtualMachine> getVirtualMachinesByName(AzureClient azureClient, String resourceGroup, List<CloudInstance> vms,
+            Map<String, InstanceTemplate> templateMap) {
+        return azureVirtualMachineService.getVirtualMachinesByName(azureClient, resourceGroup, templateMap.keySet());
+    }
+
+    private Map<String, InstanceTemplate> getTemplateMap(List<CloudInstance> vms, AuthenticatedContext authenticatedContext) {
+        List<InstanceTemplate> templates = vms.stream().map(CloudInstance::getTemplate).collect(Collectors.toList());
+        String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
+        return templates.stream()
+                .collect(Collectors.toMap(
+                        template -> azureUtils.getPrivateInstanceId(stackName, template.getGroupName(), Long.toString(template.getPrivateId())),
+                        template -> template));
     }
 
 }
