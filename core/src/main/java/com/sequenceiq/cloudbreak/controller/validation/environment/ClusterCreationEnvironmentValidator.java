@@ -14,6 +14,11 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -36,6 +41,9 @@ public class ClusterCreationEnvironmentValidator {
 
     @Inject
     private KerberosConfigService kerberosConfigService;
+
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
     public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
@@ -60,9 +68,8 @@ public class ClusterCreationEnvironmentValidator {
             rdsConfigNames
                     .stream()
                     .filter(dbName -> !foundDatabaseNames.contains(dbName))
-                    .forEach(dbName -> {
-                        resultBuilder.error(String.format("Stack cannot use '%s' Database resource which doesn't exist in the same workspace.", dbName));
-                    });
+                    .forEach(dbName -> resultBuilder.error(
+                            String.format("Stack cannot use '%s' Database resource which doesn't exist in the same workspace.", dbName)));
         }
     }
 
@@ -77,15 +84,36 @@ public class ClusterCreationEnvironmentValidator {
     }
 
     private void validateAutoTls(ClusterV4Request clusterRequest, Stack stack, ValidationResultBuilder resultBuilder) {
-        Boolean autoTls = Optional.ofNullable(clusterRequest.getCm())
-                .map(ClouderaManagerV4Request::getEnableAutoTls)
-                .orElse(Boolean.TRUE);
-        if (autoTls) {
-            Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
-            boolean freeipa = kerberosConfig.map(kc -> KerberosType.FREEIPA == kc.getType()).orElse(Boolean.FALSE);
-            if (!freeipa) {
-                resultBuilder.error("AutoTls is only enabled for clusters with FreeIpa!");
+        boolean platformAutoTls = isAutoTlsSupportedByCloudPlatform(stack);
+        Optional<Boolean> requestedAutoTlsOptional = ofNullable(clusterRequest.getCm())
+                .map(ClouderaManagerV4Request::getEnableAutoTls);
+        boolean effectiveAutoTls = platformAutoTls;
+        if (requestedAutoTlsOptional.isPresent()) {
+            boolean requestedAutoTls = requestedAutoTlsOptional.get();
+            if (!platformAutoTls || !requestedAutoTls) {
+                if (platformAutoTls) {
+                    effectiveAutoTls = false;
+                } else if (requestedAutoTls) {
+                    resultBuilder.error(String.format("AutoTLS is not supported by '%s' platform!", stack.getCloudPlatform()));
+                }
             }
+        }
+        if (effectiveAutoTls) {
+            validateKerberosConfig(stack, resultBuilder);
+        }
+    }
+
+    private boolean isAutoTlsSupportedByCloudPlatform(Stack stack) {
+        CloudConnector<Object> connector = cloudPlatformConnectors.get(Platform.platform(stack.cloudPlatform()), Variant.variant(stack.getPlatformVariant()));
+        PlatformParameters platformParameters = connector.parameters();
+        return platformParameters.isAutoTlsSupported();
+    }
+
+    private void validateKerberosConfig(Stack stack, ValidationResultBuilder resultBuilder) {
+        Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
+        boolean freeipa = kerberosConfig.map(kc -> KerberosType.FREEIPA == kc.getType()).orElse(Boolean.FALSE);
+        if (!freeipa) {
+            resultBuilder.error("AutoTls is only enabled for clusters with FreeIpa!");
         }
     }
 }

@@ -1,21 +1,27 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -28,7 +34,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
-public class ClusterDecoratorTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterDecoratorTest {
 
     @InjectMocks
     private ClusterDecorator underTest;
@@ -60,24 +67,54 @@ public class ClusterDecoratorTest {
     @Mock
     private User user;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
+    @Mock
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Mock
+    private CloudConnector<Object> connector;
+
+    @Mock
+    private PlatformParameters platformParameters;
+
+    @BeforeEach
+    void setUp() {
         when(blueprintValidatorFactory.createBlueprintValidator(any())).thenReturn(ambariBlueprintValidator);
+        when(cloudPlatformConnectors.get(any(), any())).thenReturn(connector);
+        when(connector.parameters()).thenReturn(platformParameters);
     }
 
     @Test
-    public void testDecorateIfMethodCalledThenSharedServiceConfigProviderShouldBeCalledOnceToConfigureTheCluster() {
+    void testDecorateIfMethodCalledThenSharedServiceConfigProviderShouldBeCalledOnceToConfigureTheCluster() {
         Cluster expectedClusterInstance = new Cluster();
-        Blueprint blueprint = new Blueprint();
-        String blueprintText = FileReaderUtil.readResourceFile(this, "ha-components.bp");
-        blueprint.setBlueprintText(blueprintText);
+        Blueprint blueprint = getBlueprint();
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
                 .thenReturn(expectedClusterInstance);
         Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack);
 
-        Assert.assertEquals(expectedClusterInstance, result);
+        assertEquals(expectedClusterInstance, result);
         verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class), any(User.class), any(Workspace.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"true", "false"})
+    void testAutoTlsSetting(String valueString) {
+        boolean useAutoTls = Boolean.parseBoolean(valueString);
+        Cluster expectedClusterInstance = new Cluster();
+        Blueprint blueprint = getBlueprint();
+        when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
+                .thenReturn(expectedClusterInstance);
+        when(platformParameters.isAutoTlsSupported()).thenReturn(useAutoTls);
+
+        Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack);
+
+        assertEquals(useAutoTls, result.getAutoTlsEnabled());
+    }
+
+    private Blueprint getBlueprint() {
+        Blueprint blueprint = new Blueprint();
+        String blueprintText = FileReaderUtil.readResourceFile(this, "ha-components.bp");
+        blueprint.setBlueprintText(blueprintText);
+        return blueprint;
     }
 
     private ClusterV4Request createClusterV4Request() {
