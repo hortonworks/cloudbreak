@@ -68,7 +68,7 @@ cloudera_manager_set_parcel_validation:
 /opt/salt/scripts/cm-setup-autotls.sh:
   file.managed:
     - makedirs: True
-    - source: salt://cloudera/manager/scripts/setup-autotls.sh
+    - source: salt://cloudera/manager/scripts/setup-autotls.sh.j2
     - template: jinja
     - mode: 700
     - context:
@@ -77,7 +77,7 @@ cloudera_manager_set_parcel_validation:
 
 run_autotls_setup:
   cmd.run:
-    - name: /opt/salt/scripts/cm-setup-autotls.sh
+    - name: /opt/salt/scripts/cm-setup-autotls.sh 2>&1 | tee -a /var/log/cm-setup-autotls.log && exit ${PIPESTATUS[0]}
     - require:
       - file: /opt/salt/scripts/cm-setup-autotls.sh
     - env:
@@ -97,13 +97,13 @@ copy_autotls_setup_to_cm_settings:
 /opt/salt/scripts/cm_generate_agent_tokens.sh:
   file.managed:
     - makedirs: True
-    - source: salt://cloudera/manager/scripts/generate_agent_tokens.sh
+    - source: salt://cloudera/manager/scripts/generate_agent_tokens.sh.j2
     - template: jinja
     - mode: 700
 
 run_generate_agent_tokens:
   cmd.run:
-    - name: /opt/salt/scripts/cm_generate_agent_tokens.sh
+    - name: /opt/salt/scripts/cm_generate_agent_tokens.sh 2>&1 | tee -a /var/log/cm_generate_agent_tokens.log && exit ${PIPESTATUS[0]}
     - require:
         - file: /opt/salt/scripts/cm_generate_agent_tokens.sh
         - cmd: run_autotls_setup

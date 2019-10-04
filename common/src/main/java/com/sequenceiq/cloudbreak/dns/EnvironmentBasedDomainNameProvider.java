@@ -22,7 +22,7 @@ public class EnvironmentBasedDomainNameProvider {
 
     private static final Integer MAX_LENGTH_OF_ENVIRONMENT = 8;
 
-    @Value("${gateway.cert.base.domain.name:cloudera.site}")
+    @Value("${gateway.cert.base.domain.name:workload-local.cloudera.site}")
     private String rootDomain;
 
     public String getDomainName(String environmentName, String accountName) {

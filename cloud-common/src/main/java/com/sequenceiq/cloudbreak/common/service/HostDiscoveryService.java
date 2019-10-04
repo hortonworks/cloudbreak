@@ -20,30 +20,11 @@ public class HostDiscoveryService {
      */
     public String determineDomain(String domain, String subDomain, boolean useSubDomain) {
         String result = null;
-        String domainName = getCustomDomainName(domain);
-        if (StringUtils.isNoneBlank(domainName)) {
-            String sub = getSubDomain(subDomain, useSubDomain);
-            result = domainName.startsWith(".") ? sub + domainName : sub + '.' + domainName;
-            LOGGER.debug("Custom domain defined: {}", result);
-
-        }
-        return result;
-    }
-
-    private String getCustomDomainName(String domain) {
         if (StringUtils.isNoneBlank(domain)) {
-            return domain;
+            result = domain;
         }
         if (StringUtils.isNoneBlank(customDomain)) {
-            return customDomain;
-        }
-        return null;
-    }
-
-    private String getSubDomain(String subDomain, boolean useSubDomain) {
-        String result = subDomain == null ? "" : subDomain;
-        if (!useSubDomain) {
-            result = "";
+            result = customDomain;
         }
         return result;
     }
@@ -51,18 +32,25 @@ public class HostDiscoveryService {
     /*
      * It generates a hostname based on the instance group name and the node's private id.
      */
-    public String generateHostname(String customHostname, String instanceGroupName, long privateId, boolean useInstanceGroupName) {
-        if (StringUtils.isBlank(customHostname) && !useInstanceGroupName) {
+    public String generateHostname(String customHostnamePrefix, String instanceGroupName, long privateId, boolean useInstanceGroupName) {
+        if (StringUtils.isBlank(customHostnamePrefix) && !useInstanceGroupName) {
             return "";
         }
-        return getHostname(customHostname, instanceGroupName).replaceAll("_", "") + privateId;
+        return getHostname(customHostnamePrefix, instanceGroupName).replaceAll("_", "") + privateId;
     }
 
-    private String getHostname(String customHostname, String instanceGroupName) {
-        if (StringUtils.isNoneBlank(customHostname)) {
-            return customHostname;
+    private String getHostname(String customHostnamePrefix, String instanceGroupName) {
+        String hostname;
+        if (StringUtils.isNoneBlank(customHostnamePrefix)) {
+            if (StringUtils.isNoneBlank(instanceGroupName)) {
+                hostname = customHostnamePrefix + "-" + instanceGroupName;
+            } else {
+                hostname = customHostnamePrefix;
+            }
+        } else {
+            hostname = instanceGroupName;
         }
-        return instanceGroupName;
+        return hostname;
     }
 
 }
