@@ -147,6 +147,11 @@ public class AwsPlatformParameters implements PlatformParameters {
         return AwsConstants.AWS_PLATFORM.value();
     }
 
+    @Override
+    public boolean isAutoTlsSupported() {
+        return true;
+    }
+
     public String getCredentialPoliciesJson() {
         return credentailPoliciesJson;
     }
