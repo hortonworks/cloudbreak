@@ -31,6 +31,8 @@ public class GeneralClusterConfigs {
 
     private String clusterManagerIp;
 
+    private String externalFQDN;
+
     private OrchestratorType orchestratorType = OrchestratorType.HOST;
 
     private int nodeCount;
@@ -195,5 +197,13 @@ public class GeneralClusterConfigs {
 
     public void setKnoxUserFacingCertConfigured(boolean knoxUserFacingCertConfigured) {
         this.knoxUserFacingCertConfigured = knoxUserFacingCertConfigured;
+    }
+
+    public String getExternalFQDN() {
+        return externalFQDN;
+    }
+
+    public void setExternalFQDN(String externalFQDN) {
+        this.externalFQDN = externalFQDN;
     }
 }
