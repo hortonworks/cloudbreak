@@ -91,7 +91,7 @@
             "type": "bool",
             "defaultValue": ${(sslEnforcement!true)?c},
             "metadata": {
-                "description": "Enable ssl enforcement or not when connect to server."
+                "description": "Enable ssl enforcement or not when connecting to the server."
             }
         },
         "backupRetentionDays": {

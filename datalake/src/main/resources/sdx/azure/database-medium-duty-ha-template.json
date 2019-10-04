@@ -1,0 +1,5 @@
+{
+  "instanceType": "GP_Gen5_2",
+  "vendor": "postgres",
+  "volumeSize": 100
+}

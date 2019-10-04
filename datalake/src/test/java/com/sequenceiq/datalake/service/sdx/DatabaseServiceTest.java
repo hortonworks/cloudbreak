@@ -3,7 +3,6 @@ package com.sequenceiq.datalake.service.sdx;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -20,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -52,7 +52,7 @@ public class DatabaseServiceTest {
     private SdxStatusService sdxStatusService;
 
     @Mock
-    private Map<SdxClusterShape, DatabaseConfig> dbConfigs;
+    private Map<DatabaseConfigKey, DatabaseConfig> dbConfigs;
 
     @InjectMocks
     private DatabaseService underTest;
@@ -67,10 +67,12 @@ public class DatabaseServiceTest {
         cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setName("ENV");
+        env.setCloudPlatform("aws");
         DatabaseConfig databaseConfig = getDatabaseConfig();
 
         when(databaseServerV4Endpoint.create(any())).thenThrow(BadRequestException.class);
-        when(dbConfigs.get(eq(SdxClusterShape.LIGHT_DUTY))).thenReturn(databaseConfig);
+        DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
+        when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
 
         Assertions.assertThrows(BadRequestException.class, () -> {
             underTest.create(cluster, env, "ID");
