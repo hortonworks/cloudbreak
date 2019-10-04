@@ -26,8 +26,8 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
     private final StreamsMessagingManagerServiceConfigProvider underTest = new StreamsMessagingManagerServiceConfigProvider();
 
     @Test
-    public void testGetStreamsMessagingManagerServiceConfigs() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject();
+    public void testGetStreamsMessagingManagerServiceConfigsWhenExternalFqdn() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject("cm.fqdn.host");
         String inputJson = getBlueprintText("input/cdp-streaming.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -35,7 +35,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
 
         assertEquals(3, streamsMessagingManagerServiceConfigs.size());
         assertEquals("cm.metrics.host", streamsMessagingManagerServiceConfigs.get(0).getName());
-        assertEquals("128.128.4.1", streamsMessagingManagerServiceConfigs.get(0).getValue());
+        assertEquals("cm.fqdn.host", streamsMessagingManagerServiceConfigs.get(0).getValue());
 
         assertEquals("cm.metrics.username", streamsMessagingManagerServiceConfigs.get(1).getName());
         assertEquals("cbambariuser", streamsMessagingManagerServiceConfigs.get(1).getValue());
@@ -45,8 +45,21 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
     }
 
     @Test
+    public void testGetStreamsMessagingManagerServiceConfigsWhenNoExternalFqdn() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null);
+        String inputJson = getBlueprintText("input/cdp-streaming.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        List<ApiClusterTemplateConfig> streamsMessagingManagerServiceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+
+        assertEquals(3, streamsMessagingManagerServiceConfigs.size());
+        assertEquals("cm.metrics.host", streamsMessagingManagerServiceConfigs.get(0).getName());
+        assertEquals("122.0.0.1", streamsMessagingManagerServiceConfigs.get(0).getValue());
+    }
+
+    @Test
     public void testGetStreamsMessagingManagerServerRoleConfigs() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject();
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null);
         String inputJson = getBlueprintText("input/cdp-streaming.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -64,7 +77,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
         assertEquals("smm_server_db_password", streamsMessagingManager.get(2).getValue());
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject() {
+    private TemplatePreparationObject getTemplatePreparationObject(String externalFqdn) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
 
@@ -75,7 +88,8 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
         rdsConfig.setConnectionURL("jdbc:postgresql://testhost:5432/smm");
 
         GeneralClusterConfigs gcc = new GeneralClusterConfigs();
-        gcc.setClusterManagerIp("128.128.4.1");
+        gcc.setExternalFQDN(externalFqdn);
+        gcc.setClusterManagerIp("122.0.0.1");
         gcc.setCloudbreakAmbariUser("cbambariuser");
         gcc.setCloudbreakAmbariPassword("cbambaripassword");
 
