@@ -28,7 +28,7 @@ public class ClouderaManagerV4Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.CM_PRODUCT_DETAILS)
     private List<ClouderaManagerProductV4Request> products;
 
-    @ApiModelProperty(ClusterModelDescription.CM_ENABLE_AUTOTLS)
+    @ApiModelProperty(value = ClusterModelDescription.CM_ENABLE_AUTOTLS, required = true)
     private Boolean enableAutoTls = Boolean.TRUE;
 
     public ClouderaManagerRepositoryV4Request getRepository() {
