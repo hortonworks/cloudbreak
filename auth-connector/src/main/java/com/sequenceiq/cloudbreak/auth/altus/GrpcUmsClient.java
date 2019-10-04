@@ -510,14 +510,6 @@ public class GrpcUmsClient {
         }
     }
 
-    @Cacheable(cacheNames = "umsRolesCache", key = "{ #accountId }")
-    public List<UserManagementProto.Role> listRoles(String actorCrn, String accountId, Optional<String> requestId) {
-        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
-            return client.listRoles(requestId.orElse(UUID.randomUUID().toString()), accountId).getRoleList();
-        }
-    }
-
     /**
      * Retrieves event generation ids for an account from UMS.
      *
