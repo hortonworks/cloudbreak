@@ -509,14 +509,6 @@ public class GrpcUmsClient {
         }
     }
 
-    @Cacheable(cacheNames = "umsRolesCache", key = "{ #accountId }")
-    public List<UserManagementProto.Role> listRoles(String actorCrn, String accountId, Optional<String> requestId) {
-        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
-            return client.listRoles(requestId.orElse(UUID.randomUUID().toString()), accountId).getRoleList();
-        }
-    }
-
     /**
      * Get built-in Dbus uploader role
      * Partition and region is hard coded right now, if it will change use the same as the user crn
