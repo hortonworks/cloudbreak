@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -16,6 +17,7 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -48,7 +50,7 @@ public class DatabaseService {
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private Map<SdxClusterShape, DatabaseConfig> dbConfigs;
+    private Map<DatabaseConfigKey, DatabaseConfig> dbConfigs;
 
     @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
@@ -95,14 +97,14 @@ public class DatabaseService {
     private AllocateDatabaseServerV4Request getDatabaseRequest(SdxClusterShape clusterShape, DetailedEnvironmentResponse env) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(env.getCrn());
-        req.setDatabaseServer(getDatabaseServerRequest(clusterShape));
+        req.setDatabaseServer(getDatabaseServerRequest(CloudPlatform.valueOf(env.getCloudPlatform().toUpperCase(Locale.US)), clusterShape));
         return req;
     }
 
-    private DatabaseServerV4StackRequest getDatabaseServerRequest(SdxClusterShape clusterShape) {
-        DatabaseConfig databaseConfig = dbConfigs.get(clusterShape);
+    private DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxClusterShape clusterShape) {
+        DatabaseConfig databaseConfig = dbConfigs.get(new DatabaseConfigKey(cloudPlatform, clusterShape));
         if (databaseConfig == null) {
-            throw new BadRequestException("Not found database config for " + clusterShape);
+            throw new BadRequestException("Database config for cloud platform " + cloudPlatform + ", cluster shape " + clusterShape + " not found");
         }
         DatabaseServerV4StackRequest req = new DatabaseServerV4StackRequest();
         req.setInstanceType(databaseConfig.getInstanceType());

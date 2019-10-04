@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,15 +19,25 @@ import org.powermock.reflect.Whitebox;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractRdsConfigProviderTest {
+
+    private static final String DB_HOST = "dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com";
+
+    private static final int DB_PORT = 1234;
+
+    private static final String REMOTE_ADMIN = "admin";
+
+    private static final String REMOTE_ADMIN_PASSWORD = "adminPassword";
 
     @Mock
     private RdsConfigService rdsConfigService;
@@ -37,12 +46,10 @@ public class AbstractRdsConfigProviderTest {
     private ClusterService clusterService;
 
     @Mock
-    private DatabaseCommon dbCommon;
+    private SecretService secretService;
 
     @Mock
     private RedbeamsDbServerConfigurer dbServerConfigurer;
-
-    private String dbHost = "dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com";
 
     @InjectMocks
     private ClouderaManagerRdsConfigProvider underTest;
@@ -53,39 +60,53 @@ public class AbstractRdsConfigProviderTest {
     }
 
     @Test
-    public void createservicePillarForLocalRdsConfig() {
+    public void createServicePillarForLocalRdsConfig() {
         when(rdsConfigService.createIfNotExists(any(), any(), any())).thenAnswer(i -> i.getArguments()[1]);
         Stack testStack = TestUtil.stack();
         InstanceMetaData metaData = testStack.getGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         testStack.getGatewayInstanceMetadata().add(metaData);
         Cluster testCluster = TestUtil.cluster();
+
         Map<String, Object> result = underTest.createServicePillarConfigMapIfNeeded(testStack, testCluster);
+
         Map<String, Object> postgresData = (Map<String, Object>) result.get("clouderamanager");
         assertEquals("clouderamanager", postgresData.get("database"));
-        assertNull(postgresData.get("remote_db_url"));
+        assertNull(postgresData.get("remote_db_host"));
         assertNotNull(postgresData.get("password"));
     }
 
     @Test
-    public void createservicePillarForRemoteRdsConfig() {
+    public void createServicePillarForRemoteRdsConfig() {
         when(rdsConfigService.createIfNotExists(any(), any(), any())).thenAnswer(i -> i.getArguments()[1]);
         RDSConfig config = TestUtil.rdsConfig(DatabaseType.CLOUDERA_MANAGER);
-        when(dbServerConfigurer.getRdsConfig(any(), any(), any(), any())).thenReturn(config);
+        when(dbServerConfigurer.createNewRdsConfig(any(), any(), any(), any(), any())).thenReturn(config);
         when(dbServerConfigurer.isRemoteDatabaseNeeded(any())).thenReturn(true);
-        DatabaseCommon.JdbcConnectionUrlFields fields = new DatabaseCommon.JdbcConnectionUrlFields("postgres", dbHost, 1234, Optional.empty());
-        when(dbCommon.parseJdbcConnectionUrl(any())).thenReturn(fields);
+        DatabaseServerV4Response resp = new DatabaseServerV4Response();
+        resp.setHost(DB_HOST);
+        resp.setPort(DB_PORT);
+        SecretResponse username = new SecretResponse("user", "name");
+        SecretResponse password = new SecretResponse("pass", "word");
+        resp.setConnectionUserName(username);
+        resp.setConnectionPassword(password);
+        when(dbServerConfigurer.getDatabaseServer(any())).thenReturn(resp);
+        when(secretService.getByResponse(username)).thenReturn(REMOTE_ADMIN);
+        when(secretService.getByResponse(password)).thenReturn(REMOTE_ADMIN_PASSWORD);
         Stack testStack = TestUtil.stack();
         InstanceMetaData metaData = testStack.getGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         testStack.getGatewayInstanceMetadata().add(metaData);
         Cluster testCluster = TestUtil.cluster();
         testStack.setCluster(testCluster);
+
         Map<String, Object> result = underTest.createServicePillarConfigMapIfNeeded(testStack, testCluster);
+
         Map<String, Object> postgresData = (Map<String, Object>) result.get("clouderamanager");
         assertEquals("clouderamanager", postgresData.get("database"));
-        assertEquals(dbHost, postgresData.get("remote_db_url"));
-        assertEquals(1234, postgresData.get("remote_db_port"));
-        assertNotNull(postgresData.get("database"));
+        assertEquals(REMOTE_ADMIN, postgresData.get("remote_admin"));
+        assertEquals(REMOTE_ADMIN_PASSWORD, postgresData.get("remote_admin_pw"));
+        assertEquals(DB_HOST, postgresData.get("remote_db_host"));
+        assertEquals(DB_PORT, postgresData.get("remote_db_port"));
+        assertNotNull(postgresData.get("password"));
     }
 }

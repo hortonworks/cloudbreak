@@ -101,18 +101,20 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
 
     private void validForDatabaseCreation(Long sdxId, DetailedEnvironmentResponse env) {
         String message;
-        if (env.getNetwork().getSubnetMetas().size() < 2) {
-            message = String.format("Cannot create external database for sdx: %s, not enough subnets in the vpc", sdxId);
-            LOGGER.debug(message);
-            throw new BadRequestException(message);
-        }
-        Map<String, Long> zones = env.getNetwork().getSubnetMetas().values().stream()
-                .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
-        if (zones.size() < 2) {
-            message = String.format("Cannot create external database for sdx: %s, the subnets in the vpc should be at least in two different availabilityzones",
-                    sdxId);
-            LOGGER.debug(message);
-            throw new BadRequestException(message);
+        if ("aws".equalsIgnoreCase(env.getCloudPlatform())) {
+            if (env.getNetwork().getSubnetMetas().size() < 2) {
+                message = String.format("Cannot create external database for sdx: %s, not enough subnets in the vpc", sdxId);
+                LOGGER.debug(message);
+                throw new BadRequestException(message);
+            }
+            Map<String, Long> zones = env.getNetwork().getSubnetMetas().values().stream()
+                    .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
+            if (zones.size() < 2) {
+                message = String.format("Cannot create external database for sdx: %s, vpc subnets must cover at least two different availability zones",
+                        sdxId);
+                LOGGER.debug(message);
+                throw new BadRequestException(message);
+            }
         }
     }
 
