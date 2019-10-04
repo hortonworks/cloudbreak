@@ -15,14 +15,6 @@ install-cloudera-manager-server:
     - group: cloudera-scm
     - mode: 600
 
-add_public_cloud_settings_to_cm:
-  file.append:
-    - name: /etc/cloudera-scm-server/cm.settings
-    - text: |
-        # CDP ENV settings
-        setsettings CDP_ENV PUBLIC_CLOUD
-    - unless: grep "CDP_ENV" /etc/cloudera-scm-server/cm.settings
-
 {% if salt['pillar.get']('ldap', None) != None and salt['pillar.get']('ldap:local', None) == None %}
 
 add_ldap_settings_to_cm:
