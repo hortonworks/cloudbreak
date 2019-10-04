@@ -84,6 +84,11 @@ public class YarnPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public boolean isAutoTlsSupported() {
+        return false;
+    }
+
+    @Override
     public SpecialParameters specialParameters() {
         Map<String, Boolean> specialParameters = Maps.newHashMap();
         specialParameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE, Boolean.TRUE);

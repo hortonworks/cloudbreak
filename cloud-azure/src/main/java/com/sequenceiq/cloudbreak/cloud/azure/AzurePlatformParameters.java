@@ -153,6 +153,11 @@ public class AzurePlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public boolean isAutoTlsSupported() {
+        return true;
+    }
+
+    @Override
     public Map<String, InstanceGroupParameterResponse> collectInstanceGroupParameters(Set<InstanceGroupParameterRequest> instanceGroupParameterRequests) {
         Map<String, InstanceGroupParameterResponse> result = new HashMap<>();
         for (InstanceGroupParameterRequest groupParameterRequest : instanceGroupParameterRequests) {

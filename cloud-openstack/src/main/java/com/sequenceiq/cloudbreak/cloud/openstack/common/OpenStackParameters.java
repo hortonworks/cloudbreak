@@ -119,6 +119,11 @@ public class OpenStackParameters implements PlatformParameters {
     }
 
     @Override
+    public boolean isAutoTlsSupported() {
+        return true;
+    }
+
+    @Override
     public VmRecommendations recommendedVms() {
         return vmRecommendations;
     }

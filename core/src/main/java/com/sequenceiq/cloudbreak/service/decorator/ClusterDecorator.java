@@ -12,7 +12,13 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -42,6 +48,9 @@ public class ClusterDecorator {
     @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
     @Measure(ClusterDecorator.class)
     public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterV4Request request, Blueprint blueprint, User user, Workspace workspace,
             @Nonnull Stack stack) {
@@ -49,6 +58,7 @@ public class ClusterDecorator {
         prepareClusterManagerVariant(cluster);
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
+        prepareAutoTlsFlag(cluster, request, stack);
         cluster = sharedServiceConfigProvider.configureCluster(cluster, user, workspace);
         return cluster;
     }
@@ -80,5 +90,16 @@ public class ClusterDecorator {
         Optional.ofNullable(request.getDatabases())
                 .ifPresent(confs -> confs.forEach(confName -> subject.getRdsConfigs().add(
                         rdsConfigService.getByNameForWorkspace(confName, stack.getWorkspace()))));
+    }
+
+    private void prepareAutoTlsFlag(Cluster cluster, ClusterV4Request request, Stack stack) {
+        cluster.setAutoTlsEnabled(Optional.ofNullable(request.getCm())
+                .map(ClouderaManagerV4Request::getEnableAutoTls)
+                .orElseGet(() -> {
+                    CloudConnector<Object> connector = cloudPlatformConnectors.get(
+                            Platform.platform(stack.cloudPlatform()), Variant.variant(stack.getPlatformVariant()));
+                    PlatformParameters platformParameters = connector.parameters();
+                    return platformParameters.isAutoTlsSupported();
+                }));
     }
 }
