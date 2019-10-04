@@ -29,7 +29,7 @@ public enum ExposedService {
     ZEPPELIN("Zeppelin", "ZEPPELIN_SERVER", "ZEPPELIN", "/zeppelin/", true, 8885, 8886, false, false),
     RANGER("Ranger", "RANGER_ADMIN", "RANGER", "/ranger/", true, 6080, 6182, false, true),
     LIVY_SERVER("Livy Server", "LIVY_SERVER", "LIVYSERVER1", "/livy/ui/", true, 8998, 8998, false, true),
-    OOZIE_UI("Oozie Server", "OOZIE_SERVER", "OOZIE", "/oozie/", true, 11000, 11443, false, true),
+    OOZIE_UI("Oozie Server", "OOZIE_SERVER", "OOZIE", "/oozie/", true, 11000, 11443, false, true, false),
     SOLR("Solr Server", "SOLR_SERVER", "SOLR", "/solr/", true, 8983, 8985, false, true),
     HBASE_UI("HBase UI", "MASTER", "HBASEUI", "/hbase/webui/master/", true, 16010, 16010, false, false),
     HBASE_REST("HBase Rest", "HBASERESTSERVER", "WEBHBASE", "/hbase/", true, 20550, 20550, true, true),
@@ -55,9 +55,15 @@ public enum ExposedService {
     private final Integer tlsPort;
     private final boolean apiOnly;
     private final boolean apiIncluded;
+    private final boolean visible;
 
     ExposedService(String displayName, String serviceName, String knoxService, String knoxUrl,
             boolean ssoSupported, Integer port, Integer tlsPort, boolean apiOnly, boolean apiIncluded) {
+        this(displayName, serviceName, knoxService, knoxUrl, ssoSupported, port, tlsPort, apiOnly, apiIncluded, true);
+    }
+
+    ExposedService(String displayName, String serviceName, String knoxService, String knoxUrl,
+            boolean ssoSupported, Integer port, Integer tlsPort, boolean apiOnly, boolean apiIncluded, boolean visible) {
         this.displayName = displayName;
         this.serviceName = serviceName;
         this.knoxService = knoxService;
@@ -67,6 +73,7 @@ public enum ExposedService {
         this.tlsPort = tlsPort;
         this.apiOnly = apiOnly;
         this.apiIncluded = apiIncluded;
+        this.visible = visible;
     }
 
     public static boolean isKnoxExposed(String knoxService) {
@@ -139,5 +146,9 @@ public enum ExposedService {
 
     public boolean isAPISupported() {
         return apiIncluded;
+    }
+
+    public boolean isVisible() {
+        return visible;
     }
 }
