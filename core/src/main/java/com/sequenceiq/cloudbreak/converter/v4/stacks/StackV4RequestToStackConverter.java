@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -188,6 +189,10 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                     stack.setCustomDomain(kb.getRealm().toLowerCase());
                 }
             });
+        }
+        // Host names shall be prefixed with stack name if not configured otherwise
+        if (StringUtils.isEmpty(stack.getCustomHostname())) {
+            stack.setCustomHostname(stack.getName());
         }
     }
 

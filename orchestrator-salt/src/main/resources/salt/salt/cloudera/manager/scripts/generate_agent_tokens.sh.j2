@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -ex
+
+CERTMANAGER_DIR="/etc/cloudera-scm-server/certs"
+AGENT_FQDNS={%- for ip, args in pillar.get('hosts', {}).items() %}{{ args['fqdn'] }}{{ "," if not loop.last else "" }}{%- endfor %}
+TOKEN_DIR="/srv/salt/agent-tls-tokens"
+
+source /bin/activate_salt_env
+
+for fqdn in ${AGENT_FQDNS//,/ }
+do
+  #host=$(echo ${fqdn} | cut -d"." -f1)
+  mkdir -p $TOKEN_DIR/${fqdn}
+  /opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR gen_cert_request_token --output $TOKEN_DIR/${fqdn}/cmagent.token --hostname ${fqdn} --lifetime 3600
+done
+
+for fqdn in ${AGENT_FQDNS//,/ }
+do
+  # This can be fairly slow, for large clusters
+  salt ${fqdn} cp.get_file salt://agent-tls-tokens/${fqdn}/cmagent.token /etc/cloudera-scm-agent/cmagent.token
+done
