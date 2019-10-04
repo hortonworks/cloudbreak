@@ -1,12 +1,13 @@
 package com.sequenceiq.common.api.telemetry.model;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
-import com.sequenceiq.common.api.telemetry.common.CommonTelemetryParams;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Logging extends CommonTelemetryParams {
+public class Logging implements Serializable {
 
     private String storageLocation;
 

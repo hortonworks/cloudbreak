@@ -31,7 +31,7 @@ public class AltusIAMService {
      * Generate machine user for fluentd - databus communication
      */
     public Optional<AltusCredential> generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry) {
-        if (telemetry != null && isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
+        if (isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
             return Optional.of(umsClient.createMachineUserAndGenerateKeys(
                     getFluentDatabusMachineUserName(stack),
                     stack.getCreator().getUserCrn(),
@@ -45,7 +45,7 @@ public class AltusIAMService {
      * Delete machine user with its access keys (and unassign databus role if required)
      */
     public void clearFluentMachineUser(Stack stack, Telemetry telemetry) {
-        if (telemetry != null && isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
+        if (isMeteringOrDeploymentReportingSupported(stack, telemetry)) {
             try {
                 String machineUserName = getFluentDatabusMachineUserName(stack);
                 String userCrn = stack.getCreator().getUserCrn();
@@ -59,7 +59,8 @@ public class AltusIAMService {
 
     // for datalake metering is not supported/required right now
     private boolean isMeteringOrDeploymentReportingSupported(Stack stack, Telemetry telemetry) {
-        return telemetry != null && (telemetry.isReportDeploymentLogs() || (telemetry.isMeteringEnabled() && !StackType.DATALAKE.equals(stack.getType())));
+        return telemetry != null && (telemetry.isReportDeploymentLogsFeatureEnabled() || (telemetry.isMeteringFeatureEnabled()
+                && !StackType.DATALAKE.equals(stack.getType())));
     }
 
     private String getFluentDatabusMachineUserName(Stack stack) {

@@ -88,8 +88,9 @@ public class TelemetryDecorator {
                     new SaltPillarProperties("/databus/init.sls", singletonMap("databus", databusConfig)));
         }
 
+        boolean meteringFeatureEnabled = telemetry.isMeteringFeatureEnabled();
         // for datalake - metering is not enabled yet
-        boolean meteringEnabled = telemetry.isMeteringEnabled() && !StackType.DATALAKE.equals(stack.getType());
+        boolean meteringEnabled = meteringFeatureEnabled && !StackType.DATALAKE.equals(stack.getType());
 
         FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterType,
                 stack.getCloudPlatform(), databusConfigView.isEnabled(), meteringEnabled, telemetry);
