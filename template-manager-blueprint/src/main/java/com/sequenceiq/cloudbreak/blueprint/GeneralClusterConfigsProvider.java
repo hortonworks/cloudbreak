@@ -62,6 +62,7 @@ public class GeneralClusterConfigsProvider {
         boolean userFacingCertHasBeenGenerated = StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingKey())
                 && StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingCert());
         generalClusterConfigs.setKnoxUserFacingCertConfigured(userFacingCertHasBeenGenerated);
+        generalClusterConfigs.setExternalFQDN(cluster.getFqdn());
         return generalClusterConfigs;
     }
 
