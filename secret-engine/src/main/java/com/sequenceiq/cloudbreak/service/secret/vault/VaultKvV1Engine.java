@@ -7,6 +7,8 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.cache.annotation.CacheEvict;
@@ -21,6 +23,8 @@ import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 @Component("VaultKvV1Engine")
 @ConditionalOnBean(VaultConfig.class)
 public class VaultKvV1Engine extends AbstractVaultEngine<VaultKvV1Engine> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VaultKvV1Engine.class);
 
     @Value("${vault.kv.engine.path:}")
     private String enginePath;
@@ -37,6 +41,7 @@ public class VaultKvV1Engine extends AbstractVaultEngine<VaultKvV1Engine> {
 
     @Override
     public String put(String path, String value) {
+        LOGGER.info("Storing secret to {}", path);
         VaultSecret secret = convertToVaultSecret(enginePath, appPath + path);
         template.write(secret.getPath(), Collections.singletonMap("secret", value));
         return gson().toJson(secret);
