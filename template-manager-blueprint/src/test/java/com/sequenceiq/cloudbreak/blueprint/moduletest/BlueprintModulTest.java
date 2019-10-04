@@ -26,7 +26,6 @@ import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestM
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenSharedServiceConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhenWebhcatConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhereExecutioTypeHasConfiguredAsContainer;
-import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWhereSmartSenseHasConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWithZepelinAndHdp25PresentedThenZeppelinShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.blueprintObjectWithZepelinAndHdp26PresentedThenZeppelinShouldConfigured;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.BlueprintModulTestModelProvider.getFileName;
@@ -121,10 +120,6 @@ public class BlueprintModulTest extends CentralBlueprintContext {
                 blueprintObjectForHbaseConfigurationForTwoHosts()});
         params.add(new Object[]{"execution-type-container", "execution-type-container",
                 blueprintObjectWhereExecutioTypeHasConfiguredAsContainer()});
-        params.add(new Object[]{"smartsense", "smartsense",
-                blueprintObjectWhereSmartSenseHasConfigured()});
-        params.add(new Object[]{"smartsense-when-no-hst-server", "smartsense-when-no-hst-server",
-                blueprintObjectWhereSmartSenseHasConfigured()});
         params.add(new Object[]{"oozie", "oozie",
                 blueprintObjectWhenRdsConfiguredWithRdsOozie()});
         params.add(new Object[]{"webhcat", "webhcat-2-6",
