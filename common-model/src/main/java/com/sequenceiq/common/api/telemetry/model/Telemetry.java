@@ -1,18 +1,16 @@
 package com.sequenceiq.common.api.telemetry.model;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Telemetry implements Serializable {
 
     @JsonProperty("logging")
@@ -23,12 +21,6 @@ public class Telemetry implements Serializable {
 
     @JsonProperty("databusEndpoint")
     private String databusEndpoint;
-
-    @JsonProperty("meteringEnabled")
-    private boolean meteringEnabled;
-
-    @JsonProperty("reportDeploymentLogs")
-    private boolean reportDeploymentLogs;
 
     @JsonProperty("features")
     private Features features;
@@ -60,22 +52,6 @@ public class Telemetry implements Serializable {
         this.databusEndpoint = databusEndpoint;
     }
 
-    public boolean isMeteringEnabled() {
-        return meteringEnabled;
-    }
-
-    public void setMeteringEnabled(boolean meteringEnabled) {
-        this.meteringEnabled = meteringEnabled;
-    }
-
-    public boolean isReportDeploymentLogs() {
-        return reportDeploymentLogs;
-    }
-
-    public void setReportDeploymentLogs(boolean reportDeploymentLogs) {
-        this.reportDeploymentLogs = reportDeploymentLogs;
-    }
-
     public Features getFeatures() {
         return features;
     }
@@ -91,4 +67,17 @@ public class Telemetry implements Serializable {
     public void setFluentAttributes(Map<String, Object> fluentAttributes) {
         this.fluentAttributes = fluentAttributes;
     }
+
+    @JsonIgnore
+    public boolean isMeteringFeatureEnabled() {
+        return features != null && features.getMetering() != null
+                && features.getMetering().isEnabled();
+    }
+
+    @JsonIgnore
+    public boolean isReportDeploymentLogsFeatureEnabled() {
+        return features != null && features.getReportDeploymentLogs() != null
+                && features.getReportDeploymentLogs().isEnabled();
+    }
+
 }

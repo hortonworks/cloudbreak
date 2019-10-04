@@ -5,15 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EnvironmentTelemetry implements Serializable {
 
     private EnvironmentLogging logging;
 
     private EnvironmentWorkloadAnalytics workloadAnalytics;
-
-    private boolean reportDeploymentLogs;
 
     private EnvironmentFeatures features;
 
@@ -33,14 +33,6 @@ public class EnvironmentTelemetry implements Serializable {
 
     public void setWorkloadAnalytics(EnvironmentWorkloadAnalytics workloadAnalytics) {
         this.workloadAnalytics = workloadAnalytics;
-    }
-
-    public boolean isReportDeploymentLogs() {
-        return reportDeploymentLogs;
-    }
-
-    public void setReportDeploymentLogs(boolean reportDeploymentLogs) {
-        this.reportDeploymentLogs = reportDeploymentLogs;
     }
 
     public EnvironmentFeatures getFeatures() {

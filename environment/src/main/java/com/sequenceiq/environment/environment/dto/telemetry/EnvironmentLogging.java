@@ -1,10 +1,14 @@
 package com.sequenceiq.environment.environment.dto.telemetry;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EnvironmentLogging extends CommonTelemetryParams {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class EnvironmentLogging implements Serializable {
 
     private String storageLocation;
 

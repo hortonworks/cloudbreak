@@ -145,8 +145,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private TelemetryRequest getTelemetryRequest(DistroXV1Request source, DetailedEnvironmentResponse environment,
             SdxClusterResponse sdxClusterResponse) {
         TelemetryResponse envTelemetryResp = environment != null ? environment.getTelemetry() : null;
-        boolean workloadAnalytics = true;
-        return telemetryConverter.convert(envTelemetryResp, sdxClusterResponse, workloadAnalytics);
+        return telemetryConverter.convert(envTelemetryResp, sdxClusterResponse);
     }
 
     private NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment) {
@@ -195,7 +194,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
                 throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
             }
         }
-        SdxClusterResponse sdxClusterResponse = getSdxClusterResponse(environment);
         request.setEnvironmentName(getIfNotNull(environment, EnvironmentBaseResponse::getName));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
@@ -207,31 +205,12 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSdx(getIfNotNull(source.getSharedService(), sdxConverter::getSdx));
-        request.setWorkloadAnalytics(isWorkloadAnalyticsEnabled(source, source.getTelemetry(), sdxClusterResponse));
         request.setGatewayPort(source.getGatewayPort());
         return request;
     }
 
     private CloudPlatform getCloudPlatform(DetailedEnvironmentResponse environment) {
         return CloudPlatform.valueOf(environment.getCloudPlatform());
-    }
-
-    private boolean isWorkloadAnalyticsEnabled(StackV4Request source, TelemetryRequest telemetryRequest,
-            SdxClusterResponse sdxClusterResponse) {
-        boolean waEnabled = false;
-        if (telemetryRequest != null && telemetryRequest.getWorkloadAnalytics() != null) {
-            waEnabled = true;
-        }
-        if (!waEnabled) {
-            TelemetryResponse telemetryResponse =
-                    getIfNotNull(source.getEnvironmentCrn(),
-                            crn -> environmentClientService.getByCrn(crn).getTelemetry());
-            if (telemetryConverter.convert(telemetryResponse, sdxClusterResponse, true)
-                    .getWorkloadAnalytics() != null) {
-                waEnabled = true;
-            }
-        }
-        return waEnabled;
     }
 
     private TagsV4Request getTags(TagsV1Request source) {
