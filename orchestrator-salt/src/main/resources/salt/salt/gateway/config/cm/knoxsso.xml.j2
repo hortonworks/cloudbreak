@@ -43,11 +43,11 @@
             {% if salt['pillar.get']('gateway:userfacingfqdn') is defined and salt['pillar.get']('gateway:userfacingfqdn')|length > 1 %}
             <param>
                 <name>pac4j.callbackUrl</name>
-                <value>https://{{ salt['pillar.get']('gateway:userfacingfqdn') }}:8443/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso</value>
+                <value>https://{{ salt['pillar.get']('gateway:userfacingfqdn') }}/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso</value>
             </param>
             <param>
                 <name>saml.serviceProviderEntityId</name>
-                <value>https://{{ salt['pillar.get']('gateway:userfacingfqdn') }}:8443/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso?pac4jCallback=true&amp;client_name=SAML2Client</value>
+                <value>https://{{ salt['pillar.get']('gateway:userfacingfqdn') }}/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso?pac4jCallback=true&amp;client_name=SAML2Client</value>
             </param>
             {% else %}
             <param>
