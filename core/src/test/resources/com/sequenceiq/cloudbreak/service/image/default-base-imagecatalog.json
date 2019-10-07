@@ -46,6 +46,7 @@
       },
       {
         "uuid": "2",
+        "created": 9999999999,
         "date": "2000-12-01",
         "os": "centos7",
         "images": {
@@ -132,6 +133,7 @@
       },
       {
         "uuid": "1",
+        "created": 9999999999,
         "date": "1915-09-20",
         "os": "centos7",
         "images": {

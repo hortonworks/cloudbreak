@@ -1,0 +1,134 @@
+{
+  "images": {
+    "base-images": [
+      {
+        "created": 1474329600,
+        "date": "irrelevant",
+        "description": "Cloudbreak official base image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fc3016e",
+            "ap-northeast-2": "ami-4d6aa023",
+            "ap-southeast-1": "ami-ced60fad",
+            "ap-southeast-2": "ami-9f9eaafc",
+            "eu-central-1": "ami-cd4cbaa2",
+            "eu-west-1": "ami-0b067378",
+            "sa-east-1": "ami-70a5331c",
+            "us-east-1": "ami-70a73c67",
+            "us-west-1": "ami-3fe8ab5f",
+            "us-west-2": "ami-6bf9330b"
+          },
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
+          },
+          "openstack": {
+            "default": "hdc-hdp--1710161226"
+          }
+        },
+        "os": "centos7",
+        "os_type": "",
+        "uuid": "3"
+      },
+      {
+        "created": 975628800,
+        "date": "irrelevant",
+        "description": "Cloudbreak official base image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fc3016e",
+            "ap-northeast-2": "ami-4d6aa023",
+            "ap-southeast-1": "ami-ced60fad",
+            "ap-southeast-2": "ami-9f9eaafc",
+            "eu-central-1": "ami-cd4cbaa2",
+            "eu-west-1": "ami-0b067378",
+            "sa-east-1": "ami-70a5331c",
+            "us-east-1": "ami-70a73c67",
+            "us-west-1": "ami-3fe8ab5f",
+            "us-west-2": "ami-6bf9330b"
+          },
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
+          },
+          "openstack": {
+            "default": "hdc-hdp--1710161226"
+          }
+        },
+        "os": "centos7",
+        "os_type": "",
+        "uuid": "2"
+      },
+      {
+        "created": 1474416000,
+        "date": "irrelevant",
+        "description": "Cloudbreak official base image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fc3016e",
+            "ap-northeast-2": "ami-4d6aa023",
+            "ap-southeast-1": "ami-ced60fad",
+            "ap-southeast-2": "ami-9f9eaafc",
+            "eu-central-1": "ami-cd4cbaa2",
+            "eu-west-1": "ami-0b067378",
+            "sa-east-1": "ami-70a5331c",
+            "us-east-1": "ami-70a73c67",
+            "us-west-1": "ami-3fe8ab5f",
+            "us-west-2": "ami-6bf9330b"
+          },
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
+          },
+          "openstack": {
+            "default": "hdc-hdp--1710161226"
+          }
+        },
+        "os": "centos7",
+        "os_type": "",
+        "uuid": "latest-base"
+      },
+      {
+        "created": -1713052800,
+        "date": "irrelevant",
+        "description": "Cloudbreak official base image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fc3016e",
+            "ap-northeast-2": "ami-4d6aa023",
+            "ap-southeast-1": "ami-ced60fad",
+            "ap-southeast-2": "ami-9f9eaafc",
+            "eu-central-1": "ami-cd4cbaa2",
+            "eu-west-1": "ami-0b067378",
+            "sa-east-1": "ami-70a5331c",
+            "us-east-1": "ami-70a73c67",
+            "us-west-1": "ami-3fe8ab5f",
+            "us-west-2": "ami-6bf9330b"
+          },
+          "gcp": {
+            "default": "sequenceiqimage/hdc-hdp--1710161226.tar.gz"
+          },
+          "openstack": {
+            "default": "hdc-hdp--1710161226"
+          }
+        },
+        "os": "centos7",
+        "os_type": "",
+        "uuid": "1"
+      }
+    ]
+  },
+  "versions": {
+    "cloudbreak": [
+      {
+        "images": [
+          "3",
+          "1",
+          "2",
+          "latest-base"
+        ],
+        "defaults": null,
+        "versions": [
+          "5.0.0"
+        ]
+      }
+    ]
+  }
+}

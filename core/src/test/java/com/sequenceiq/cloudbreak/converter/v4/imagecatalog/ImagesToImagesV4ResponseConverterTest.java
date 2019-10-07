@@ -104,7 +104,7 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
         StackRepoDetails repoDetails = new StackRepoDetails(Collections.emptyMap(), Collections.emptyMap());
         StackDetails stackDetails = new StackDetails("3.1", repoDetails, Collections.emptyList());
 
-        return new Image("", "", osType, UUID.randomUUID().toString(), "",
+        return new Image("", System.currentTimeMillis(), "", osType, UUID.randomUUID().toString(), "",
                 Collections.emptyMap(), imageSetsByProvider, stackDetails, osType, Collections.emptyMap(),
                 Collections.emptyList(), Collections.emptyList());
     }
