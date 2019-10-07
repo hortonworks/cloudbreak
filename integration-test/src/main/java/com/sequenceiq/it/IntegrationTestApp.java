@@ -229,7 +229,7 @@ public class IntegrationTestApp implements CommandLineRunner {
             XmlSuite xmlSuite = parser.parse(suitePath, inputStream, true);
             xmlSuite.setParallel(XmlSuite.ParallelMode.valueOf(parallel.toUpperCase()));
             xmlSuite.setThreadCount(threadCount);
-            LOG.info("Test are running in: {} type of parallel mode, thread count: {}", parallel.toUpperCase(), threadCount);
+            LOG.info("Test are running in: {} type of parallel mode", parallel.toUpperCase());
             return xmlSuite;
         }
     }
