@@ -5,7 +5,6 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
@@ -18,9 +17,6 @@ import com.sequenceiq.periscope.api.model.AlertState;
         @NamedQuery(name = "MetricAlert.findAllByCluster", query = "SELECT c FROM MetricAlert c WHERE c.cluster.id= :clusterId")
 })
 public class MetricAlert extends BaseAlert {
-
-    @ManyToOne
-    private Cluster cluster;
 
     @Column(name = "definition_name")
     private String definitionName;
@@ -45,15 +41,6 @@ public class MetricAlert extends BaseAlert {
 
     public void setPeriod(int period) {
         this.period = period;
-    }
-
-    @Override
-    public Cluster getCluster() {
-        return cluster;
-    }
-
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
     }
 
     public AlertState getAlertState() {
