@@ -14,12 +14,13 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.flow.ha.NodeConfig;
-import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.RdsNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
+import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
 @Transactional
@@ -44,6 +46,9 @@ public class StructuredFlowEventFactory {
 
     @Inject
     private ConversionService conversionService;
+
+    @Inject
+    private ClusterToClusterDetailsConverter clusterToClusterDetailsConverter;
 
     @Inject
     private NodeConfig nodeConfig;
@@ -66,18 +71,26 @@ public class StructuredFlowEventFactory {
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
-        if (detailed) {
-            stackDetails = conversionService.convert(stack, StackDetails.class);
-            Cluster cluster = stack.getCluster();
-            if (cluster != null) {
-                clusterDetails = conversionService.convert(cluster, ClusterDetails.class);
-                blueprintDetails = conversionService.convert(cluster.getBlueprint(), BlueprintDetails.class);
+        try {
+            if (detailed) {
+                stackDetails = conversionService.convert(stack, StackDetails.class);
+                Cluster cluster = stack.getCluster();
+                if (cluster != null) {
+                    clusterDetails = clusterToClusterDetailsConverter.convert(cluster);
+                    blueprintDetails = conversionService.convert(cluster.getBlueprint(), BlueprintDetails.class);
+                }
+            }
+        } catch (BadRequestException ex) {
+            LOGGER.error("Error happened during conversion, not all details will be available in Structured Event", ex);
+            if (exception == null) {
+                exception = ex;
             }
         }
-        return exception != null
-            ? new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails,
-                ExceptionUtils.getStackTrace(exception))
-            : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails);
+        StructuredFlowEvent event = new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails);
+        if (exception != null) {
+            event.setException(ExceptionUtils.getStackTrace(exception));
+        }
+        return event;
     }
 
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
@@ -177,5 +190,4 @@ public class StructuredFlowEventFactory {
         }
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
-
 }
