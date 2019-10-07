@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 
@@ -92,6 +93,9 @@ public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEva
     private Long getStackIdFromTarget(Object targetDomainObject) {
         if (targetDomainObject instanceof Cluster) {
             return ((Cluster) targetDomainObject).getStackId();
+        }
+        if (targetDomainObject instanceof BaseAlert) {
+            return ((BaseAlert) targetDomainObject).getCluster().getStackId();
         }
         return null;
     }

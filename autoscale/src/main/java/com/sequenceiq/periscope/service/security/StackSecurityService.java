@@ -17,6 +17,6 @@ public class StackSecurityService {
 
     @Cacheable(cacheNames = "stackAccessByOwnerCache")
     public boolean hasAccess(Long stackId, String owner, String permission) {
-        return cloudbreakClient.autoscaleEndpoint().authorizeForAutoscale(stackId, owner, permission);
+        return cloudbreakClient.autoscaleUserAuthorizationEndpoint().authorizeForAutoscale(stackId, owner, permission);
     }
 }

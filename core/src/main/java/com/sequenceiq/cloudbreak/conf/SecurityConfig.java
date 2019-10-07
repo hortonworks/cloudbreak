@@ -88,6 +88,8 @@ public class SecurityConfig {
 
         private static final String AUTOSCALE_API = API_ROOT_CONTEXT + "/autoscale/**";
 
+        private static final String AUTOSCALE_USER_AUTHORIZATION_API = API_ROOT_CONTEXT + "/autoscale/authorize/**";
+
         @Inject
         private ResourceServerTokenServices resourceServerTokenServices;
 
@@ -128,6 +130,8 @@ public class SecurityConfig {
                     .permitAll()
                     .antMatchers(AUTOSCALE_API)
                     .access("#oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers(AUTOSCALE_USER_AUTHORIZATION_API)
+                    .access("#oauth2.hasScope('cloudbreak.periscope.user')")
 
                     .antMatchers(API_ROOT_CONTEXT + "/v1/users/**").access("#oauth2.hasScope('openid')")
                     .antMatchers(BLUEPRINT_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.blueprints')")
