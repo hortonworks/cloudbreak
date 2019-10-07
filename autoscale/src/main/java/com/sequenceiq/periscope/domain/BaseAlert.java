@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
@@ -20,6 +21,9 @@ public abstract class BaseAlert implements Clustered {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "alert_generator")
     @SequenceGenerator(name = "alert_generator", sequenceName = "alert_id_seq", allocationSize = 1)
     private Long id;
+
+    @ManyToOne
+    private Cluster cluster;
 
     private String name;
 
@@ -64,7 +68,12 @@ public abstract class BaseAlert implements Clustered {
         return scalingPolicy == null ? null : scalingPolicy.getId();
     }
 
-    @Override
-    public abstract Cluster getCluster();
+    public Cluster getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(Cluster cluster) {
+        this.cluster = cluster;
+    }
 
 }
