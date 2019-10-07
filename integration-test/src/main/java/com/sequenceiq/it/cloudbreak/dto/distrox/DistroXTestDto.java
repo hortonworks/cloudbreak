@@ -6,6 +6,7 @@ import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STAC
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -25,7 +26,9 @@ import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
@@ -108,6 +111,12 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     public GeneratedBlueprintV4Response getGeneratedBlueprint() {
         return generatedBlueprint;
+    }
+
+    public DistroXTestDto fromClusterDefinition(String key) {
+        Optional<ClusterTemplateTestDto> template = Optional.ofNullable(getTestContext().get(key));
+        setRequest(template.orElseThrow(() -> new TestFailException("Unable to find DistroXV1Request")).getRequest().getDistroXTemplate());
+        return this;
     }
 
 }
