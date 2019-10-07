@@ -5,7 +5,6 @@ status_code=0
 if [[ "$CIRCLECI" ]]; then
 
     # Check integration test results
-    date
     if [[ ! -d test-output ]]; then
         echo -e "\033[0;91m--- !!! NO test-output DIRECTORY !!! ---\n"; status_code=1;
     else

@@ -3,7 +3,6 @@
 : ${ADDITIONAL_DOCKER_BUILD_COMMAND:=""}
 
 docker pull openjdk:11-jdk
-date
 echo -e "\n\033[1;96m--- build cloudbreak in docker container\033[0m\n"
 docker run -i --rm \
     $ADDITIONAL_DOCKER_BUILD_COMMAND \
