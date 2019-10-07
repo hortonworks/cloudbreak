@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
+import com.cloudera.cdp.datahub.model.CreateRecipeRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
@@ -92,5 +93,10 @@ public class RecipesV4Controller extends NotificationController implements Recip
     public RecipeV4Request getRequest(Long workspaceId, String name) {
         Recipe recipe = recipeService.getByNameForWorkspaceId(name, workspaceId);
         return converterUtil.convert(recipe, RecipeV4Request.class);
+    }
+
+    @Override
+    public CreateRecipeRequest getCreateRecipeRequestForCli(Long workspaceId, RecipeV4Request recipeV4Request) {
+        return converterUtil.convert(recipeV4Request, CreateRecipeRequest.class);
     }
 }

@@ -18,6 +18,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.cloudera.cdp.datahub.model.CreateClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Responses;
@@ -98,4 +99,11 @@ public interface BlueprintV4Endpoint {
             nickname = "getBlueprintCustomParameters")
     ParametersQueryV4Response getParameters(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
 
+    @POST
+    @Path("cli_create")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = BlueprintOpDescription.CLI_COMMAND, produces = JSON, notes = BLUEPRINT_NOTES,
+            nickname = "getCreateClusterTemplateRequestForCli")
+    CreateClusterTemplateRequest getCreateClusterTemplateRequestForCli(@PathParam("workspaceId") Long workspaceId,
+            @NotNull @Valid BlueprintV4Request blueprintV4Request);
 }

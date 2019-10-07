@@ -23,6 +23,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
@@ -31,11 +32,13 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
+import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
+import com.sequenceiq.environment.credential.v1.converter.CredentialRequestToCreateAWSCredentialRequestConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.notification.NotificationSender;
@@ -64,6 +67,9 @@ public class CredentialService extends AbstractCredentialService {
 
     @Inject
     private SecretService secretService;
+
+    @Inject
+    private CredentialRequestToCreateAWSCredentialRequestConverter credentialRequestToCreateAWSCredentialRequestConverter;
 
     protected CredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
@@ -193,6 +199,14 @@ public class CredentialService extends AbstractCredentialService {
         Credential updated = repository.save(credentialAdapter.verify(original, accountId).getCredential());
         secretService.delete(attributesSecret);
         return updated;
+    }
+
+    public CreateAWSCredentialRequest getCreateAWSCredentialForCli(CredentialRequest credentialRequest) {
+        ValidationResult validationResult = credentialValidator.validateAwsCredentialRequest(credentialRequest);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        return credentialRequestToCreateAWSCredentialRequestConverter.convert(credentialRequest);
     }
 
     Optional<Credential> findByNameAndAccountId(String name, String accountId, Collection<String> cloudPlatforms) {

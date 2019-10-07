@@ -39,6 +39,7 @@ allprojects {
 
   repositories {
     mavenLocal()
+    maven {url = "$cdpRepoUrl"}
     maven { url = "$repoUrl" }
   }
   apply plugin: 'idea'

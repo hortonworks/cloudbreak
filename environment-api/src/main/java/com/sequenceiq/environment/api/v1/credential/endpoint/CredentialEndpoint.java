@@ -6,6 +6,7 @@ import static com.sequenceiq.environment.api.doc.credential.CredentialDescriptor
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -153,4 +154,11 @@ public interface CredentialEndpoint {
     @ApiOperation(value = CredentialOpDescription.VERIFY_BR_CRN, notes = CredentialDescriptor.CREDENTIAL_NOTES,
             nickname = "verifyCredentialByCrn", httpMethod = "GET")
     CredentialResponse verifyByCrn(@PathParam("crn") String crn);
+
+    @POST
+    @Path("cli_create")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.CLI_COMMAND, produces = MediaType.APPLICATION_JSON, notes = CredentialDescriptor.CREDENTIAL_NOTES,
+            nickname = "getCreateCredentialForCli")
+    Object getCreateCredentialForCli(@NotNull @Valid CredentialRequest recipeV4Request);
 }

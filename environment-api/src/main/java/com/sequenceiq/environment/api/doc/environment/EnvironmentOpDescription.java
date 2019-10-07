@@ -18,6 +18,7 @@ public class EnvironmentOpDescription {
     public static final String EDIT_BY_NAME = "Edit an environment by name. Location, regions and description can be changed.";
     public static final String EDIT_BY_CRN = "Edit an environment by CRN. Location, regions and description can be changed.";
     public static final String DATALAKE_PREREQUISITES = "Returns datalake prerequisites.";
+    public static final String CLI_COMMAND = "produce cli command input for environment creation";
 
     private EnvironmentOpDescription() {
     }

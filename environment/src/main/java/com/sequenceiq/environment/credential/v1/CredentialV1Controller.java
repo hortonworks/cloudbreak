@@ -15,10 +15,12 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
+import com.sequenceiq.environment.api.v1.credential.model.response.EmptyResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCredentialResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialDeleteService;
@@ -181,4 +183,11 @@ public class CredentialV1Controller extends NotificationController implements Cr
         return credentialConverter.convert(verifiedCredential);
     }
 
+    @Override
+    public Object getCreateCredentialForCli(CredentialRequest credentialRequest) {
+        if (!CloudPlatform.AWS.name().equals(credentialRequest.getCloudPlatform())) {
+            return new EmptyResponse();
+        }
+        return credentialService.getCreateAWSCredentialForCli(credentialRequest);
+    }
 }

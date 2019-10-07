@@ -81,6 +81,13 @@ public interface EnvironmentEndpoint {
             nickname = "changeCredentialInEnvironmentV1")
     DetailedEnvironmentResponse changeCredentialByEnvironmentName(@PathParam("name") String environmentName, @Valid EnvironmentChangeCredentialRequest request);
 
+    @POST
+    @Path("/name/{name}/cli_create")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.CLI_COMMAND, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "getCreateEnvironmentForCliByName")
+    Object getCreateEnvironmentForCliByName(@PathParam("name") String environmentName);
+
     @GET
     @Path("/crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -115,4 +122,18 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "changeCredentialInEnvironmentV1ByCrn")
     DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(@PathParam("crn") String crn, @Valid EnvironmentChangeCredentialRequest request);
+
+    @POST
+    @Path("/crn/{crn}/cli_create")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.CLI_COMMAND, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "getCreateEnvironmentForCliByCrn")
+    Object getCreateEnvironmentForCliByCrn(@PathParam("crn") String crn);
+
+    @POST
+    @Path("cli_create")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.CLI_COMMAND, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "getCreateEnvironmentForCli")
+    Object getCreateEnvironmentForCli(@NotNull @Valid EnvironmentRequest environmentRequest);
 }

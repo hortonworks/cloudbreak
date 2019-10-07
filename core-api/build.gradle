@@ -47,6 +47,7 @@ dependencies {
   compile group: 'org.springframework',           name: 'spring-aspects',                 version: springFrameworkVersion
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   compile group: 'commons-validator',             name: 'commons-validator',              version: apacheCommonsValidatorVersion
+  implementation group: 'com.cloudera.cdp',       name: 'cdp-sdk-java',                   version: cdpSdkVersion
 
   testImplementation group: 'org.junit.jupiter',  name: 'junit-jupiter-api',              version: junitJupiterVersion
   testRuntime        group: 'org.junit.jupiter',  name: 'junit-jupiter-engine',           version: junitJupiterVersion

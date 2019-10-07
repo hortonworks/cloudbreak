@@ -78,6 +78,7 @@ dependencies {
     implementation     group: "io.opentracing.contrib",    name: "opentracing-spring-jaeger-starter",        version: opentracingSpringJaegerStarterVersion
     implementation     group: "io.opentracing.contrib",    name: "opentracing-jaxrs2",                       version: opentracingJaxrs2Version
     implementation     group: "io.opentracing.contrib",    name: "opentracing-jdbc",                         version: opentracingJdbcVersion
+    implementation     group: 'com.cloudera.cdp',          name: 'cdp-sdk-java',                             version: cdpSdkVersion
     implementation     group: "org.jetbrains",             name: "annotations",                              version: "17.0.0"
 
     testImplementation group: "org.junit.jupiter",         name: "junit-jupiter-api",                        version: junitJupiterVersion
@@ -92,6 +93,7 @@ dependencies {
     testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
     testImplementation group: "org.mockito",               name: "mockito-junit-jupiter",                    version: mockitoVersion
     testImplementation group: "com.google.guava",          name: "guava",                                    version: guavaVersion
+    testImplementation group: 'org.assertj',               name: 'assertj-core',                             version: assertjVersion
 
     testRuntimeOnly    group: "org.junit.jupiter",         name: "junit-jupiter-engine",                     version: junitJupiterVersion
     testRuntimeOnly    group: "org.junit.vintage",         name: "junit-vintage-engine",                     version: junitJupiterVersion

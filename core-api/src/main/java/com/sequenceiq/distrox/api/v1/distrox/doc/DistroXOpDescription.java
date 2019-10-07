@@ -39,6 +39,7 @@ public class DistroXOpDescription {
     public static final String DELETE_INSTANCE_BY_ID_BY_CRN = "deletes instance from the stack's cluster by crn";
     public static final String CHECK_IMAGE = "checks image in stack by name";
     public static final String GENERATE_HOSTS_INVENTORY = "Generate hosts inventory";
+    public static final String CLI_COMMAND = "produce cli command input";
 
     private DistroXOpDescription() {
     }

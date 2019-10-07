@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
+import com.cloudera.cdp.datahub.model.CreateClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
@@ -102,4 +103,8 @@ public class BlueprintV4Controller extends NotificationController implements Blu
         return parametersQueryV4Response;
     }
 
+    @Override
+    public CreateClusterTemplateRequest getCreateClusterTemplateRequestForCli(Long workspaceId, BlueprintV4Request blueprintV4Request) {
+        return converterUtil.convert(blueprintV4Request, CreateClusterTemplateRequest.class);
+    }
 }

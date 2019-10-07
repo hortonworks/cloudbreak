@@ -13,6 +13,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.cloudera.cdp.datahub.model.CreateRecipeRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Responses;
@@ -85,4 +86,11 @@ public interface RecipeV4Endpoint {
     @ApiOperation(value = RecipeOpDescription.GET_REQUEST_BY_NAME, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "getRecipeRequestFromNameInWorkspace")
     RecipeV4Request getRequest(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @POST
+    @Path("cli_create")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RecipeOpDescription.CLI_COMMAND, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+            nickname = "getCreateRecipeRequestForCli")
+    CreateRecipeRequest getCreateRecipeRequestForCli(@PathParam("workspaceId") Long workspaceId, @NotNull @Valid RecipeV4Request recipeV4Request);
 }
