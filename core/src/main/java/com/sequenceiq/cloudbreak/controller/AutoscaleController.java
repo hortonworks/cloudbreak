@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.STACK;
-
 import java.util.Collections;
 import java.util.Set;
 
@@ -23,8 +21,6 @@ import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
-import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -48,9 +44,6 @@ public class AutoscaleController implements AutoscaleEndpoint {
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
-    private PermissionCheckingUtils permissionCheckingUtils;
 
     @Inject
     private StackCommonService stackCommonService;
@@ -116,21 +109,6 @@ public class AutoscaleController implements AutoscaleEndpoint {
         AutoscaleClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, AutoscaleClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
         return clusterService.getClusterResponse(cluster, clusterJson);
-    }
-
-    @Override
-    public Boolean authorizeForAutoscale(Long id, String owner, String permission) {
-        try {
-            restRequestThreadLocalService.setCloudbreakUserByOwner(owner);
-            Stack stack = stackService.get(id);
-            if (Action.WRITE.name().equalsIgnoreCase(permission)) {
-                User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-                permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), STACK, Action.WRITE, user);
-            }
-            return true;
-        } catch (RuntimeException ignore) {
-            return false;
-        }
     }
 
     @Override

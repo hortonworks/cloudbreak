@@ -89,11 +89,6 @@ public interface AutoscaleEndpoint {
     AutoscaleClusterResponse getForAutoscale(@PathParam("id") Long id);
 
     @GET
-    @Path("/stack/{id}/authorize/{owner}/{permission}")
-    @Produces(MediaType.APPLICATION_JSON)
-    Boolean authorizeForAutoscale(@PathParam("id") Long id, @PathParam("owner") String owner, @PathParam("permission") String permission);
-
-    @GET
     @Path("/stack/{id}/certificate")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
