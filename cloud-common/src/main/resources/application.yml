@@ -82,7 +82,7 @@ cb:
     AWS: 50
     AZURE: 50
     GCP: 50
-  enabled.linux.types: redhat6,redhat7,centos6,centos7,amazonlinux,amazonlinux2
+  enabled.linux.types: redhat6,redhat7,centos6,centos7
   publicip:
   etc.config.dir: /etc/cloudbreak
   threadpool:
@@ -644,7 +644,7 @@ cb:
       contentlogging: true
 
   image.catalog:
-    url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json
+    url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
     cache.ttl: 15
 
   instance:

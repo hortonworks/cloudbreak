@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DE
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -143,7 +144,11 @@ public class ImageService {
         }
         Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(clusterType, clusterVersion);
         if (image != null && StringUtils.isNotEmpty(image.getOs())) {
-            operatingSystems = operatingSystems.stream().filter(os -> os.equalsIgnoreCase(image.getOs())).collect(Collectors.toSet());
+            if (operatingSystems.isEmpty()) {
+                operatingSystems = Collections.singleton(image.getOs());
+            } else {
+                operatingSystems = operatingSystems.stream().filter(os -> os.equalsIgnoreCase(image.getOs())).collect(Collectors.toSet());
+            }
         }
         if (image != null && image.getId() != null) {
             return imageCatalogService.getImageByCatalogName(workspaceId, image.getId(), image.getCatalog());

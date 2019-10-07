@@ -21,6 +21,9 @@ public class ImageV4Response implements JsonEntity {
     @JsonProperty("date")
     private String date;
 
+    @JsonProperty("created")
+    private Long created;
+
     @JsonProperty("description")
     private String description;
 
@@ -138,5 +141,13 @@ public class ImageV4Response implements JsonEntity {
 
     public void setPackageVersions(Map<String, String> packageVersions) {
         this.packageVersions = packageVersions;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }
