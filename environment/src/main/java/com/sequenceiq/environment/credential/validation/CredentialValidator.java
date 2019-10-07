@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
+import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.validation.definition.CredentialDefinitionService;
 
@@ -68,4 +73,14 @@ public class CredentialValidator {
                 .orElse(resultBuilder.build());
     }
 
+    public ValidationResult validateAwsCredentialRequest(CredentialRequest credentialRequest) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        resultBuilder.ifError(() -> !CloudPlatform.AWS.name().equalsIgnoreCase(credentialRequest.getCloudPlatform()),
+                "Credential request is not for AWS.");
+        resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(credentialRequest.getAws())
+                .map(AwsCredentialParameters::getRoleBased)
+                .map(RoleBasedParameters::getRoleArn)
+                .orElse(null)), "Role ARN is not found in credential request.");
+        return resultBuilder.build();
+    }
 }

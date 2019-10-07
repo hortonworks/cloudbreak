@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cli;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
@@ -64,6 +67,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
     @Override
     public StackV4Request convert(Stack source) {
         StackV4Request stackV4Request = new StackV4Request();
+        stackV4Request.setCloudPlatform(getIfNotNull(source.getCloudPlatform(), cp -> Enum.valueOf(CloudPlatform.class, cp)));
         stackV4Request.setEnvironmentCrn(source.getEnvironmentCrn());
         stackV4Request.setCustomDomain(getCustomDomainSettings(source));
         providerParameterCalculator.parse(new HashMap<>(source.getParameters()), stackV4Request);

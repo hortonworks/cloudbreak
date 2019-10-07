@@ -26,21 +26,27 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.EmptyResponse;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXImageChangeV1RequestToStackImageChangeV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXMaintenanceModeV1ToMainenanceModeV4Converter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClusterRepairV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackScaleV4RequestConverter;
+import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToCreateAWSClusterRequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
+import com.sequenceiq.distrox.v1.distrox.converter.StackRequestToCreateAWSClusterRequestConverter;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Controller
 @InternalReady
@@ -67,6 +73,15 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private DistroXMaintenanceModeV1ToMainenanceModeV4Converter maintenanceModeConverter;
+
+    @Inject
+    private DistroXV1RequestToCreateAWSClusterRequestConverter distroXV1RequestToCreateAWSClusterRequestConverter;
+
+    @Inject
+    private StackRequestToCreateAWSClusterRequestConverter stackRequestToCreateAWSClusterRequestConverter;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     @Override
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
@@ -283,19 +298,15 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    public DistroXV1Request getRequestfromName(String name) {
-        StackV4Request stackV4Request = stackOperations.getRequest(
-                StackAccessDto.builder().withName(name).build(),
-                workspaceService.getForCurrentUser().getId());
-        return stackRequestConverter.convert(stackV4Request);
+    public Object getRequestfromName(String name) {
+        StackV4Request stackV4Request = getStackV4Request(StackAccessDto.builder().withName(name).build());
+        return getCreateAWSClusterRequest(stackV4Request);
     }
 
     @Override
-    public DistroXV1Request getRequestfromCrn(String crn) {
-        StackV4Request stackV4Request = stackOperations.getRequest(
-                StackAccessDto.builder().withCrn(crn).build(),
-                workspaceService.getForCurrentUser().getId());
-        return stackRequestConverter.convert(stackV4Request);
+    public Object getRequestfromCrn(String crn) {
+        StackV4Request stackV4Request = getStackV4Request(StackAccessDto.builder().withCrn(crn).build());
+        return getCreateAWSClusterRequest(stackV4Request);
     }
 
     @Override
@@ -381,5 +392,26 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 workspaceService.getForCurrentUser().getId(),
                 forced);
 
+    }
+
+    @Override
+    public Object getCreateAwsClusterForCli(DistroXV1Request request) {
+        DetailedEnvironmentResponse env = environmentClientService.getByName(request.getEnvironmentName());
+        if (!CloudPlatform.AWS.name().equals(env.getCloudPlatform())) {
+            return new EmptyResponse();
+        }
+        return distroXV1RequestToCreateAWSClusterRequestConverter.convert(request);
+    }
+
+    private StackV4Request getStackV4Request(StackAccessDto stackAccessDto) {
+        return stackOperations.getRequest(stackAccessDto, workspaceService.getForCurrentUser().getId());
+    }
+
+    private Object getCreateAWSClusterRequest(StackV4Request stackV4Request) {
+        DetailedEnvironmentResponse env = environmentClientService.getByCrn(stackV4Request.getEnvironmentCrn());
+        if (!CloudPlatform.AWS.name().equals(env.getCloudPlatform())) {
+            return new EmptyResponse();
+        }
+        return stackRequestToCreateAWSClusterRequestConverter.convert(stackV4Request);
     }
 }

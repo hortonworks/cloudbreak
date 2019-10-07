@@ -10,6 +10,7 @@ public class OperationDescriptions {
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete blueprint by name in workspace";
         public static final String DELETE_BY_CRN_IN_WORKSPACE = "delete blueprint by crn";
         public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple blueprints by name in workspace";
+        public static final String CLI_COMMAND = "produce cli command input";
     }
 
     public static class CredentialOpDescription {
@@ -97,6 +98,7 @@ public class OperationDescriptions {
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete recipe by name in workspace";
         public static final String DELETE_BY_CRN_IN_WORKSPACE = "delete recipe by crn in workspace";
         public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple recipes by name in workspace";
+        public static final String CLI_COMMAND = "produce cli command input";
     }
 
     public static class WorkspaceOpDescription {

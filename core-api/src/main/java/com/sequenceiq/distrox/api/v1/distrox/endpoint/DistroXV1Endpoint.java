@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.doc.ContentType.JSON;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_CRN;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CLI_COMMAND;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CREATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_BY_NAME;
@@ -212,16 +213,16 @@ public interface DistroXV1Endpoint {
     GeneratedBlueprintV4Response postStackForBlueprintByCrn(@PathParam("crn") String crn, @Valid DistroXV1Request stackRequest);
 
     @GET
-    @Path("name/{name}/request")
+    @Path("name/{name}/cli_create")
     @ApiOperation(value = GET_STACK_REQUEST_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "getDistroXRequestV1ByName")
-    DistroXV1Request getRequestfromName(@PathParam("name") String name);
+    Object getRequestfromName(@PathParam("name") String name);
 
     @GET
-    @Path("crn/{crn}/request")
+    @Path("crn/{crn}/cli_create")
     @ApiOperation(value = GET_STACK_REQUEST_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "getDistroXRequestV1ByCrn")
-    DistroXV1Request getRequestfromCrn(@PathParam("crn") String crn);
+    Object getRequestfromCrn(@PathParam("crn") String crn);
 
     @GET
     @Path("name/{name}/status")
@@ -292,4 +293,11 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = DELETE_WITH_KERBEROS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "deleteWithKerberosDistroXV1ByCrn")
     void deleteWithKerberosByCrn(@PathParam("crn") String crn, @QueryParam("forced") @DefaultValue("false") boolean forced);
+
+    @POST
+    @Path("cli_create")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CLI_COMMAND, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES,
+            nickname = "getCreateClusterForCli")
+    Object getCreateAwsClusterForCli(@NotNull @Valid DistroXV1Request request);
 }

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -30,8 +31,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.cloudera.cdp.environments.model.CreateAWSEnvironmentRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -39,6 +43,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
+import com.sequenceiq.environment.environment.v1.EnvironmentDtoToCreateAWSEnvironmentRequestConverter;
+import com.sequenceiq.environment.environment.v1.EnvironmentRequestToCreateAWSEnvironmentRequestConverter;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 
@@ -62,6 +68,12 @@ class EnvironmentServiceTest {
 
     @Mock
     private EnvironmentReactorFlowManager reactorFlowManager;
+
+    @Mock
+    private EnvironmentRequestToCreateAWSEnvironmentRequestConverter environmentRequestToCreateAWSEnvironmentRequestConverter;
+
+    @Mock
+    private EnvironmentDtoToCreateAWSEnvironmentRequestConverter environmentDtoToCreateAWSEnvironmentRequestConverter;
 
     @Mock
     private EnvironmentValidatorService environmentValidatorService;
@@ -384,6 +396,41 @@ class EnvironmentServiceTest {
         assertEquals(List.of(environmentDto), environmentServiceUnderTest
                 .findAllByStatusIn(Set.of(EnvironmentStatus.AVAILABLE, EnvironmentStatus.CREATION_INITIATED)));
 
+    }
+
+    @Test
+    void testGetCreateAWSEnvironmentFromEnvironmentRequestForCli() {
+        EnvironmentRequest environmentRequest = new EnvironmentRequest();
+        CreateAWSEnvironmentRequest createAWSEnvironmentRequest = new CreateAWSEnvironmentRequest();
+        when(environmentValidatorService.validateAwsEnvironmentRequest(eq(environmentRequest), anyString())).thenReturn(new ValidationResultBuilder().build());
+        when(environmentRequestToCreateAWSEnvironmentRequestConverter.convert(environmentRequest)).thenReturn(createAWSEnvironmentRequest);
+        CreateAWSEnvironmentRequest result = environmentServiceUnderTest.getCreateAWSEnvironmentForCli(environmentRequest, "platform");
+        assertEquals(createAWSEnvironmentRequest, result);
+    }
+
+    @Test
+    void testGetCreateAWSEnvironmentFromEnvironmentRequestForCliHasErrors() {
+        EnvironmentRequest environmentRequest = new EnvironmentRequest();
+        when(environmentValidatorService.validateAwsEnvironmentRequest(eq(environmentRequest), anyString())).thenReturn(
+                new ValidationResultBuilder().error("error").build());
+        assertThrows(BadRequestException.class, () -> environmentServiceUnderTest.getCreateAWSEnvironmentForCli(environmentRequest, "platform"));
+    }
+
+    @Test
+    void testGetCreateAWSEnvironmentFromEnvironmentDtoForCli() {
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        CreateAWSEnvironmentRequest createAWSEnvironmentRequest = new CreateAWSEnvironmentRequest();
+        when(environmentValidatorService.validateAwsEnvironmentRequest(environmentDto)).thenReturn(new ValidationResultBuilder().build());
+        when(environmentDtoToCreateAWSEnvironmentRequestConverter.convert(environmentDto)).thenReturn(createAWSEnvironmentRequest);
+        CreateAWSEnvironmentRequest result = environmentServiceUnderTest.getCreateAWSEnvironmentForCli(environmentDto);
+        assertEquals(createAWSEnvironmentRequest, result);
+    }
+
+    @Test
+    void testGetCreateAWSEnvironmentFromEnvironmentDtoForCliHasErrors() {
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        when(environmentValidatorService.validateAwsEnvironmentRequest(environmentDto)).thenReturn(new ValidationResultBuilder().error("error").build());
+        assertThrows(BadRequestException.class, () -> environmentServiceUnderTest.getCreateAWSEnvironmentForCli(environmentDto));
     }
 
     @Configuration

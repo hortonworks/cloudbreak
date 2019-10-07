@@ -20,10 +20,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.cdp.environments.model.CreateAWSEnvironmentRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.util.ValidationResult;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -33,6 +36,8 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
+import com.sequenceiq.environment.environment.v1.EnvironmentDtoToCreateAWSEnvironmentRequestConverter;
+import com.sequenceiq.environment.environment.v1.EnvironmentRequestToCreateAWSEnvironmentRequestConverter;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -58,19 +63,27 @@ public class EnvironmentService implements ResourceIdProvider {
 
     private final EnvironmentReactorFlowManager reactorFlowManager;
 
+    private final EnvironmentRequestToCreateAWSEnvironmentRequestConverter environmentRequestToCreateAWSEnvironmentRequestConverter;
+
+    private final EnvironmentDtoToCreateAWSEnvironmentRequestConverter environmentDtoToCreateAWSEnvironmentRequestConverter;
+
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
             EnvironmentRepository environmentRepository,
             PlatformParameterService platformParameterService,
             EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentResourceDeletionService environmentResourceDeletionService,
-            EnvironmentReactorFlowManager reactorFlowManager) {
+            EnvironmentReactorFlowManager reactorFlowManager,
+            EnvironmentRequestToCreateAWSEnvironmentRequestConverter environmentRequestToCreateAWSEnvironmentRequestConverter,
+            EnvironmentDtoToCreateAWSEnvironmentRequestConverter environmentDtoToCreateAWSEnvironmentRequestConverter) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentResourceDeletionService = environmentResourceDeletionService;
         this.reactorFlowManager = reactorFlowManager;
+        this.environmentRequestToCreateAWSEnvironmentRequestConverter = environmentRequestToCreateAWSEnvironmentRequestConverter;
+        this.environmentDtoToCreateAWSEnvironmentRequestConverter = environmentDtoToCreateAWSEnvironmentRequestConverter;
     }
 
     public Environment save(Environment environment) {
@@ -251,6 +264,22 @@ public class EnvironmentService implements ResourceIdProvider {
         List<Environment> environments = environmentRepository
                 .findAllByStatusInAndArchivedIsFalse(environmentStatuses);
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
+    }
+
+    public CreateAWSEnvironmentRequest getCreateAWSEnvironmentForCli(EnvironmentRequest environmentRequest, String cloudPlatform) {
+        ValidationResult validationResult = validatorService.validateAwsEnvironmentRequest(environmentRequest, cloudPlatform);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        return environmentRequestToCreateAWSEnvironmentRequestConverter.convert(environmentRequest);
+    }
+
+    public CreateAWSEnvironmentRequest getCreateAWSEnvironmentForCli(EnvironmentDto environmentDto) {
+        ValidationResult validationResult = validatorService.validateAwsEnvironmentRequest(environmentDto);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        return environmentDtoToCreateAWSEnvironmentRequestConverter.convert(environmentDto);
     }
 
     Optional<Environment> findByNameAndAccountIdAndArchivedIsFalse(String name, String accountId) {

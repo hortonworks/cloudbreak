@@ -14,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.environment.api.v1.credential.model.response.EmptyResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -21,6 +23,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRe
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
+import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -44,17 +48,21 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentModificationService environmentModificationService;
 
+    private final CredentialService credentialService;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentService environmentService,
             EnvironmentCreationService environmentCreationService,
             ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
-            EnvironmentModificationService environmentModificationService) {
+            EnvironmentModificationService environmentModificationService,
+            CredentialService credentialService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentService = environmentService;
         this.environmentCreationService = environmentCreationService;
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.environmentModificationService = environmentModificationService;
+        this.credentialService = credentialService;
     }
 
     @Override
@@ -151,5 +159,35 @@ public class EnvironmentController implements EnvironmentEndpoint {
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentCrn(accountId, crn,
                 environmentApiConverter.convertEnvironmentChangeCredentialDto(request));
         return environmentApiConverter.dtoToDetailedResponse(result);
+    }
+
+    @Override
+    public Object getCreateEnvironmentForCliByName(String environmentName) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(environmentName, accountId);
+        if (!CloudPlatform.AWS.name().equals(environmentDto.getCloudPlatform())) {
+            return new EmptyResponse();
+        }
+        return environmentService.getCreateAWSEnvironmentForCli(environmentDto);
+    }
+
+    @Override
+    public Object getCreateEnvironmentForCliByCrn(String crn) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
+        if (!CloudPlatform.AWS.name().equals(environmentDto.getCloudPlatform())) {
+            return new EmptyResponse();
+        }
+        return environmentService.getCreateAWSEnvironmentForCli(environmentDto);
+    }
+
+    @Override
+    public Object getCreateEnvironmentForCli(EnvironmentRequest environmentRequest) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        Credential credential = credentialService.getByNameForAccountId(environmentRequest.getCredentialName(), accountId);
+        if (!CloudPlatform.AWS.name().equals(credential.getCloudPlatform())) {
+            return new EmptyResponse();
+        }
+        return environmentService.getCreateAWSEnvironmentForCli(environmentRequest, credential.getCloudPlatform());
     }
 }
