@@ -17,6 +17,9 @@ public class TelemetryRequest extends TelemetryBase {
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
     private WorkloadAnalyticsRequest workloadAnalytics;
 
+    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_FEATURES)
+    private FeaturesRequest features;
+
     public LoggingRequest getLogging() {
         return logging;
     }
@@ -31,5 +34,13 @@ public class TelemetryRequest extends TelemetryBase {
 
     public void setWorkloadAnalytics(WorkloadAnalyticsRequest workloadAnalytics) {
         this.workloadAnalytics = workloadAnalytics;
+    }
+
+    public FeaturesRequest getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(FeaturesRequest features) {
+        this.features = features;
     }
 }

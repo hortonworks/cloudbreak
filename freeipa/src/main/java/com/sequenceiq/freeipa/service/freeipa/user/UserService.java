@@ -167,7 +167,11 @@ public class UserService {
             }
 
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-            UsersState ipaUsersState = freeIpaUsersStateProvider.getFilteredFreeIPAState(freeIpaClient, umsUsersState.getUsers());
+
+            // Get all users from FreeIPA those are requested.
+            // If we use only UMS provided users for this environment and if user's access is being changed (removed user from env),
+            // then handleUser method will not filter that user and the user will not be updated in IPA.
+            UsersState ipaUsersState = freeIpaUsersStateProvider.getFilteredFreeIPAState(freeIpaClient, umsUsersState.getRequestedWorkloadUsers());
             LOGGER.debug("IPA UsersState, found {} users and {} groups", ipaUsersState.getUsers().size(), ipaUsersState.getGroups().size());
 
             UsersStateDifference stateDifference = UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState);

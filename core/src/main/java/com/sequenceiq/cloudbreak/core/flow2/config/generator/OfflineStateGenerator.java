@@ -413,12 +413,12 @@ public class OfflineStateGenerator {
 
         @Override
         public Boolean anyStackInWorkspace(Long workspaceId) {
-            return null;
+            return Boolean.TRUE;
         }
 
         @Override
         public Boolean findTemplateInUse(Long templateId) {
-            return null;
+            return Boolean.TRUE;
         }
 
         @Override
@@ -428,12 +428,12 @@ public class OfflineStateGenerator {
 
         @Override
         public <S extends Stack> S save(S entity) {
-            return null;
+            return entity;
         }
 
         @Override
         public <S extends Stack> Iterable<S> saveAll(Iterable<S> entities) {
-            return null;
+            return entities;
         }
 
         @Override
@@ -448,12 +448,12 @@ public class OfflineStateGenerator {
 
         @Override
         public Iterable<Stack> findAll() {
-            return null;
+            return () -> null;
         }
 
         @Override
         public Iterable<Stack> findAllById(Iterable<Long> longs) {
-            return null;
+            return () -> null;
         }
 
         @Override

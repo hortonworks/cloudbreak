@@ -53,7 +53,7 @@ public class AzureNetworkConnector implements NetworkConnector {
     private AzureUtils azureUtils;
 
     @Override
-    public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
+    public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest, String creatorUser) {
         AzureClient azureClient = azureClientService.getClient(networkRequest.getCloudCredential());
         String template = azureNetworkTemplateBuilder.build(networkRequest);
         String envName = networkRequest.getEnvName();

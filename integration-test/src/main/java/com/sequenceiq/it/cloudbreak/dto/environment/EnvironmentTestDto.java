@@ -83,8 +83,8 @@ public class EnvironmentTestDto
     @Override
     public EnvironmentTestDto valid() {
         return getCloudProvider()
-                .environment(withName(getResourceProperyProvider().getEnvironmentName())
-                        .withDescription(getResourceProperyProvider().getDescription("environment")))
+                .environment(withName(getResourcePropertyProvider().getEnvironmentName())
+                        .withDescription(getResourcePropertyProvider().getDescription("environment")))
                         .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
                         .withAuthentication(DUMMY_SSH_KEY)
                         .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK);
@@ -160,6 +160,14 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withNetwork() {
         EnvironmentNetworkTestDto environmentNetwork = getCloudProvider().network(given(EnvironmentNetworkTestDto.class));
+        if (environmentNetwork == null) {
+            throw new IllegalArgumentException("Environment Network does not exist!");
+        }
+        return withNetwork(environmentNetwork.getRequest());
+    }
+
+    public EnvironmentTestDto withNetwork(String key) {
+        EnvironmentNetworkTestDto environmentNetwork = getTestContext().get(key);
         if (environmentNetwork == null) {
             throw new IllegalArgumentException("Environment Network does not exist!");
         }

@@ -117,5 +117,10 @@ public class UserDataBuilderTest {
             return "TEST";
         }
 
+        @Override
+        public boolean isAutoTlsSupported() {
+            return false;
+        }
+
     }
 }

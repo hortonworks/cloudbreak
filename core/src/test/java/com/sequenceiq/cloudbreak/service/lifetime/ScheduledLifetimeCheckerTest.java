@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -97,8 +96,6 @@ public class ScheduledLifetimeCheckerTest {
     public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndDeleteInProgressAndCreationFinished() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
-        Cluster cluster = new Cluster();
-        cluster.setCreationFinished(1L);
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.DELETE_IN_PROGRESS);
         stack.setStatus(stackStatus);
@@ -114,8 +111,6 @@ public class ScheduledLifetimeCheckerTest {
     public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndDeleteInProgressAndCreationNotFinished() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
-        Cluster cluster = new Cluster();
-        cluster.setCreationFinished(null);
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.DELETE_IN_PROGRESS);
         stack.setStatus(stackStatus);
@@ -146,8 +141,6 @@ public class ScheduledLifetimeCheckerTest {
     public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndStoppedAndCreationNotFinished() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
-        Cluster cluster = new Cluster();
-        cluster.setCreationFinished(null);
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.STOPPED);
         stack.setStatus(stackStatus);
@@ -163,16 +156,15 @@ public class ScheduledLifetimeCheckerTest {
     public void testValidateWhenClusterExceededByRunningTimeMoreThanTTL() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
+        long startTimeMillis = 0;
+        stack.setCreationFinished(startTimeMillis);
         Workspace workspace = new Workspace();
         Tenant tenant = new Tenant();
         tenant.setName("tenant");
         workspace.setTenant(tenant);
         workspace.setName("workspace");
         stack.setWorkspace(workspace);
-        Cluster cluster = new Cluster();
-        long startTimeMillis = 0;
         int ttlMillis = 1;
-        cluster.setCreationFinished(startTimeMillis);
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStatus(stackStatus);
@@ -196,8 +188,6 @@ public class ScheduledLifetimeCheckerTest {
         workspace.setTenant(tenant);
         workspace.setName("workspace");
         stack.setWorkspace(workspace);
-        Cluster cluster = new Cluster();
-        cluster.setCreationFinished(System.currentTimeMillis() - 1L);
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStatus(stackStatus);
@@ -209,7 +199,7 @@ public class ScheduledLifetimeCheckerTest {
         verify(flowManager, times(0)).triggerTermination(stack.getId(), false);
     }
 
-    private class StackTtlViewImpl implements StackTtlView {
+    private static class StackTtlViewImpl implements StackTtlView {
 
         private Long id;
 

@@ -90,6 +90,11 @@ public class MockPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public boolean isAutoTlsSupported() {
+        return false;
+    }
+
+    @Override
     public VmRecommendations recommendedVms() {
         return null;
     }

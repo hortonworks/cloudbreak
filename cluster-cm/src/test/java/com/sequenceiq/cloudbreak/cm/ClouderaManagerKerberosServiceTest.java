@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,9 +12,10 @@ import java.math.BigDecimal;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -23,6 +26,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -31,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ClouderaManagerKerberosServiceTest {
 
     @Mock
@@ -57,26 +62,29 @@ public class ClouderaManagerKerberosServiceTest {
     @Mock
     private KerberosDetailService kerberosDetailService;
 
+    @Mock
+    private ApiClient client;
+
     @InjectMocks
-    private ClouderaManagerKerberosService underTest = new ClouderaManagerKerberosService();
+    private ClouderaManagerKerberosService underTest;
 
     private Stack stack;
 
     private Cluster cluster;
 
-    private ApiClient client;
-
     private HttpClientConfig clientConfig;
 
     @Before
-    public void init() {
+    public void init() throws ClouderaManagerClientInitException {
         stack = new Stack();
+        stack.setGatewayPort(1);
         cluster = new Cluster();
         cluster.setName("clusterName");
+        cluster.setCloudbreakAmbariUser("user");
+        cluster.setCloudbreakAmbariPassword("password");
         stack.setCluster(cluster);
-        client = new ApiClient();
         clientConfig = new HttpClientConfig("1.2.3.4", null, null, null);
-        MockitoAnnotations.initMocks(this);
+        when(clouderaManagerClientFactory.getClient(anyInt(), anyString(), anyString(), any())).thenReturn(client);
         when(clouderaManagerClientFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerClientFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
         when(applicationContext.getBean(eq(ClouderaManagerModificationService.class), eq(stack), eq(clientConfig))).thenReturn(modificationService);
@@ -111,10 +119,11 @@ public class ClouderaManagerKerberosServiceTest {
     }
 
     @Test
-    public void deleteCredentials() throws ApiException, CloudbreakException {
+    public void deleteCredentials() throws ApiException, CloudbreakException, ClouderaManagerClientInitException {
+        when(clouderaManagerClientFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.deleteCredentialsCommand("all")).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
 
-        underTest.deleteCredentials(client, clientConfig, stack);
+        underTest.deleteCredentials(clientConfig, stack);
 
         verify(modificationService).stopCluster();
         clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, BigDecimal.ZERO);

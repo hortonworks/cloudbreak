@@ -2,6 +2,7 @@ package com.sequenceiq.environment.credential.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,15 +23,20 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowResponse;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -82,16 +88,46 @@ class ServiceProviderCredentialAdapterTest {
     @Mock
     private InitCodeGrantFlowResponse initCodeGrantFlowResponse;
 
+    @Mock
+    private CredentialVerificationRequest credentialVerificationRequest;
+
+    @Mock
+    private CredentialVerificationResult credentialVerificationResult;
+
+    @Mock
+    private CloudCredentialStatus cloudCredentialStatus;
+
     @BeforeEach
     void setUp() throws InterruptedException {
         MockitoAnnotations.initMocks(this);
         when(credential.getId()).thenReturn(CREDENTIAL_ID);
         when(credential.getName()).thenReturn(CREDENTIAL_NAME);
-//        when(credential.cloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(initCodeGrantFlowResponse.getStatus()).thenReturn(EventStatus.OK);
         when(initCodeGrantFlowRequest.await()).thenReturn(initCodeGrantFlowResponse);
+        when(credentialVerificationResult.getStatus()).thenReturn(EventStatus.OK);
+        when(credentialVerificationResult.getCloudCredentialStatus()).thenReturn(cloudCredentialStatus);
+        when(credentialVerificationRequest.await()).thenReturn(credentialVerificationResult);
+        when(credentialPrerequisiteService.decorateCredential(any())).thenAnswer(i -> i.getArgument(0));
         when(credentialConverter.convert(credential)).thenReturn(convertedCredential);
         when(requestProvider.getInitCodeGrantFlowRequest(any(CloudContext.class), eq(convertedCredential))).thenReturn(initCodeGrantFlowRequest);
+        when(requestProvider.getCredentialVerificationRequest(any(CloudContext.class), eq(convertedCredential))).thenReturn(credentialVerificationRequest);
+    }
+
+    @Test
+    void testCredentialVerificationCredentialNotChanged() {
+        when(cloudCredentialStatus.getCloudCredential()).thenReturn(convertedCredential);
+        when(cloudCredentialStatus.getStatus()).thenReturn(CredentialStatus.VERIFIED);
+        CredentialVerification verification = underTest.verify(credential, ACCOUNT_ID);
+        assertFalse(verification.isChanged());
+    }
+
+    @Test
+    void testCredentialVerificationPermissionMissing() {
+        when(cloudCredentialStatus.getCloudCredential()).thenReturn(convertedCredential);
+        when(cloudCredentialStatus.getStatus()).thenReturn(CredentialStatus.PERMISSIONS_MISSING);
+        when(cloudCredentialStatus.getStatusReason()).thenReturn(CredentialStatus.PERMISSIONS_MISSING.name());
+        CredentialVerification verification = underTest.verify(credential, ACCOUNT_ID);
+        assertTrue(verification.isChanged());
     }
 
     @Test

@@ -8,6 +8,7 @@ public enum CloudbreakResourceType {
     SECURITY("securitygroup_resource", "securitygroup"),
     IP("ipaddress_resource", "ipaddress"),
     DISK("disk_resource", "disk"),
+    NOSQL("nosql_resource", "nosql"),
     STORAGE("storage_resource", "storage"),
     DATABASE("database_resource", "database");
 

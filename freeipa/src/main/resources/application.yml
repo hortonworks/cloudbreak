@@ -60,7 +60,11 @@ freeipa:
     max-failures-before-lock: 10
     failure-reset-interval: 3
     lockout-duration: 10
-
+  syncoperation:
+    cleanup:
+      timeout-millis: 1800000
+      initial-delay-millis: 60000
+      fixed-delay-millis: 60000
 
 info:
   app:

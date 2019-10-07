@@ -29,7 +29,7 @@ public class SdxRepairTestDto extends AbstractSdxTestDto<SdxRepairRequest, SdxCl
     }
 
     public SdxRepairTestDto valid() {
-        withSdxName(getResourceProperyProvider().getName())
+        withSdxName(getResourcePropertyProvider().getName())
                 .withHostGroupName(HOSTGROUP_NAME);
         return getCloudProvider().sdxRepair(this);
     }

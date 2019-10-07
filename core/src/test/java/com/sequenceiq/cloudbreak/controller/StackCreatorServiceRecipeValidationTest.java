@@ -167,6 +167,7 @@ class StackCreatorServiceRecipeValidationTest {
         String existingRecipeName = "existingRecipe";
 
         StackV4Request request = new StackV4Request();
+        request.setName("stack_name");
         request.setInstanceGroups(List.of(getInstanceGroupWithRecipe(INSTANCE_GROUP_MASTER, Set.of(existingRecipeName))));
 
         when(recipeService.get(any(RecipeAccessDto.class), eq(WORKSPACE_ID))).thenReturn(getRecipeWithName(existingRecipeName));
@@ -181,6 +182,7 @@ class StackCreatorServiceRecipeValidationTest {
     @Test
     void voidTestIfRecipeDoesNotExistInInstanceGroupV4RequestThenEverythingShouldGoFine() throws TransactionExecutionException {
         StackV4Request request = new StackV4Request();
+        request.setName("stack_name");
         request.setInstanceGroups(List.of(getInstanceGroupWithRecipe(INSTANCE_GROUP_MASTER, null),
                 getInstanceGroupWithRecipe(INSTANCE_GROUP_COMPUTE, null)));
 

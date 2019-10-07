@@ -25,7 +25,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 class ClouderaManagerTemplateInstallationCheckerTest {
@@ -52,14 +52,17 @@ class ClouderaManagerTemplateInstallationCheckerTest {
 
     private CommandsResourceApi commandsResourceApi = Mockito.mock(CommandsResourceApi.class);
 
+    private ApiCommand apiCommand = Mockito.mock(ApiCommand.class);
+
     private ClouderaManagerTemplateInstallationChecker underTest = new ClouderaManagerTemplateInstallationChecker(clouderaManagerClientFactory);
 
-    private ClouderaManagerCommandPollerObject pollerObject;
+    private ClouderaManagerPollerObject pollerObject;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws ApiException {
+        when(commandsResourceApi.readCommand(any())).thenReturn(apiCommand);
         when(clouderaManagerClientFactory.getCommandsResourceApi(eq(apiClient))).thenReturn(commandsResourceApi);
-        pollerObject = new ClouderaManagerCommandPollerObject(new Stack(), apiClient, TEMPLATE_INSTALL_ID);
+        pollerObject = new ClouderaManagerPollerObject(new Stack(), apiClient, TEMPLATE_INSTALL_ID);
     }
 
     @Test

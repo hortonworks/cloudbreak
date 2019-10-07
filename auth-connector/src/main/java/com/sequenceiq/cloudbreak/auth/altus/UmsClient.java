@@ -604,6 +604,21 @@ public class UmsClient {
     }
 
     /**
+     * Retrieves event generation ids for an account
+     *
+     * @param requestId     id of the request
+     * @param accountId     id of the account
+     */
+    UserManagementProto.GetEventGenerationIdsResponse getEventGenerationIds(String requestId, String accountId) {
+        checkNotNull(requestId);
+        checkNotNull(accountId);
+
+        return newStub(requestId).getEventGenerationIds(UserManagementProto.GetEventGenerationIdsRequest.newBuilder()
+                .setAccountId(accountId)
+                .build());
+    }
+
+    /**
      * Creates a new stub with the appropriate metadata injecting interceptors.
      *
      * @param requestId the request ID

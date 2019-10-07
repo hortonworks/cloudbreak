@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
+import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.SUCCESS;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -20,6 +22,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsRequest;
@@ -27,6 +31,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsSucc
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -48,6 +53,9 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private StackUtil stackUtil;
 
     @Override
     public String selector() {
@@ -79,14 +87,17 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
             List<GatewayConfig> allGatewayConfigs) throws CloudbreakException {
         LOGGER.debug("Remove hosts from orchestrator: {}", hostNames);
         try {
-            Map<String, String> privateIpsByFQDN = new HashMap<>();
+            Map<String, String> removeNodePrivateIPsByFQDN = new HashMap<>();
             stack.getInstanceMetaDataAsList().stream()
                     .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                     .filter(instanceMetaData ->
                             hostNames.stream()
                                     .anyMatch(hn -> hn.equals(instanceMetaData.getDiscoveryFQDN())))
-                    .forEach(instanceMetaData -> privateIpsByFQDN.put(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getPrivateIp()));
-            hostOrchestrator.tearDown(allGatewayConfigs, privateIpsByFQDN);
+                    .forEach(instanceMetaData -> removeNodePrivateIPsByFQDN.put(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getPrivateIp()));
+            Set<Node> remainingNodes = stackUtil.collectNodes(stack)
+                    .stream().filter(node -> !removeNodePrivateIPsByFQDN.containsValue(node.getPrivateIp())).collect(Collectors.toSet());
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId());
+            hostOrchestrator.tearDown(allGatewayConfigs, removeNodePrivateIPsByFQDN, remainingNodes, exitCriteriaModel);
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.info("Failed to delete orchestrator components while decommissioning: ", e);
             throw new CloudbreakException("Failed to delete orchestrator components while decommissioning: ", e);

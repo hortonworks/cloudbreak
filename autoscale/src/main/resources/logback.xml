@@ -63,5 +63,9 @@
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
         <level value="${PERISCOPE_LOG_LEVEL:-INFO}"/>
     </logger>
+    <logger name="org.glassfish.jersey.logging.LoggingFeature" level="ERROR">
+        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
 
 </configuration>

@@ -133,6 +133,11 @@ public class GcpPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public boolean isAutoTlsSupported() {
+        return true;
+    }
+
+    @Override
     public VmRecommendations recommendedVms() {
         return vmRecommendations;
     }

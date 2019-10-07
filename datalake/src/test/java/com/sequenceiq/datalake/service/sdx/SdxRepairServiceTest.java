@@ -57,9 +57,6 @@ public class SdxRepairServiceTest {
     private SdxService sdxService;
 
     @Mock
-    private SdxNotificationService notificationService;
-
-    @Mock
     private SdxStatusService sdxStatusService;
 
     @Captor
@@ -81,8 +78,8 @@ public class SdxRepairServiceTest {
         assertEquals(FLOW_CHAIN_ID, cluster.getRepairFlowChainId());
         assertEquals("master", captor.getValue().getHostGroups().get(0));
         verify(sdxStatusService, times(1))
-                .setStatusForDatalake(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", cluster);
-        verify(notificationService).send(eq(ResourceEvent.SDX_REPAIR_STARTED), any());
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS,
+                        ResourceEvent.SDX_REPAIR_STARTED, "Datalake repair in progress", cluster);
     }
 
     @Test
@@ -98,7 +95,6 @@ public class SdxRepairServiceTest {
         when(stackV4Endpoint.get(eq(0L), eq("dummyCluster"), any())).thenReturn(resp);
         AttemptResult<StackV4Response> attempt = underTest.checkClusterStatusDuringRepair(cluster);
         assertEquals(AttemptState.BREAK, attempt.getState());
-        verify(notificationService).send(eq(ResourceEvent.SDX_REPAIR_FAILED), any());
         verify(flowEndpoint).getFlowLogsByResourceNameAndChainId(eq(CLUSTER_NAME), eq(FLOW_CHAIN_ID));
     }
 

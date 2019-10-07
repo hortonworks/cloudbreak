@@ -5,10 +5,12 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -32,7 +34,8 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @RunWith(MockitoJUnitRunner.class)
 public class HdfsConfigProviderTest {
 
-    private final HdfsConfigProvider underTest = new HdfsConfigProvider();
+    @InjectMocks
+    private HdfsConfigProvider underTest;
 
     @Test
     public void testGetHdfsServiceConfigsWithoutS3Guard() {
@@ -76,14 +79,18 @@ public class HdfsConfigProviderTest {
 
         assertEquals(1, serviceConfigs.size());
         assertEquals("core_site_safety_valve", serviceConfigs.get(0).getName());
-        assertEquals("<property><name>hadoop.http.filter.initializers</name>"
-                + "<value>org.apache.hadoop.security.HttpCrossOriginFilterInitializer,"
-                + "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer</value></property>"
-                + "<property><name>fs.s3a.metadatastore.impl</name><value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value></property>"
-                + "<property><name>fs.s3a.s3guard.ddb.table.tag.cdp_table_role</name><value>s3guard</value></property>"
-                + "<property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>"
-                + "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>"
-                + "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>", serviceConfigs.get(0).getValue());
+        assertEquals("<property>" +
+                "<name>hadoop.http.filter.initializers</name>" +
+                "<value>org.apache.hadoop.security.HttpCrossOriginFilterInitializer," +
+                "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer</value>" +
+                "</property>" +
+                "<property><name>fs.s3a.metadatastore.impl</name>" +
+                "<value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table.tag.apple</name><value>apple1</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table.tag.cdp_table_role</name><value>s3guard</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>", serviceConfigs.get(0).getValue());
     }
 
     @Test
@@ -96,15 +103,19 @@ public class HdfsConfigProviderTest {
 
         assertEquals(1, serviceConfigs.size());
         assertEquals("core_site_safety_valve", serviceConfigs.get(0).getName());
-        assertEquals("<property><name>hadoop.http.filter.initializers</name>"
-                + "<value>org.apache.hadoop.security.HttpCrossOriginFilterInitializer,"
-                + "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer</value></property>"
-                + "<property><name>fs.s3a.metadatastore.impl</name><value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value></property>"
-                + "<property><name>fs.s3a.s3guard.ddb.table.tag.cdp_table_role</name><value>s3guard</value></property>"
-                + "<property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>"
-                + "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>"
-                + "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>"
-                + "<property><name>fs.s3a.authoritative.path</name><value>s3a://bucket/warehouse/managed</value></property>", serviceConfigs.get(0).getValue());
+        assertEquals("<property><name>hadoop.http.filter.initializers</name>" +
+                "<value>org.apache.hadoop.security.HttpCrossOriginFilterInitializer," +
+                "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer</value>" +
+                "</property>" +
+                "<property><name>fs.s3a.metadatastore.impl</name>" +
+                "<value>org.apache.hadoop.fs.s3a.s3guard.DynamoDBMetadataStore</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table.tag.apple</name><value>apple1</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table.tag.cdp_table_role</name><value>s3guard</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table.create</name><value>true</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>" +
+                "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>" +
+                "<property><name>fs.s3a.authoritative.path</name>" +
+                "<value>s3a://bucket/warehouse/managed</value></property>", serviceConfigs.get(0).getValue());
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(boolean useS3FileSystem, boolean fillDynamoTableName, boolean includeLocations) {
@@ -139,6 +150,7 @@ public class HdfsConfigProviderTest {
                 .withHostgroupViews(Set.of(master, worker))
                 .withGateway(gateway, "/cb/secret/signkey")
                 .withPlacementView(placementView)
+                .withDefaultTags(Map.of("apple", "apple1"))
                 .build();
     }
 

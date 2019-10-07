@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigPro
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -59,6 +60,7 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
@@ -75,6 +77,7 @@ import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -184,11 +187,20 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
+    @Mock
+    private DefaultCostTaggingService defaultCostTaggingService;
+
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
         when(clusterService.getById(any(Long.class))).thenReturn(cluster);
         when(stackMock.getCluster()).thenReturn(sourceCluster);
+        User user = new User();
+        user.setUserName("applebob@apple.com");
+        when(stackMock.getCreator()).thenReturn(user);
         when(stackMock.getEnvironmentCrn()).thenReturn("env");
         when(stackMock.getCloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         when(stackMock.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);

@@ -337,25 +337,46 @@ service UserManagement {
   // Returns the the workload administration group name for the
   // (account, right, resource) tuple. Will throw NOT_FOUND exception if no name
   // for the workload administration group has been set yet.
-  rpc GetWorkloadAdministrationGroupName (GetWorkloadAdministrationGroupNameRequest)
-  returns (GetWorkloadAdministrationGroupNameResponse) {}
+  rpc GetWorkloadAdministrationGroupName(GetWorkloadAdministrationGroupNameRequest)
+    returns (GetWorkloadAdministrationGroupNameResponse) {}
 
   // Sets the workload administration group name for the (account, right, resource)
   // tuple. If the name was already set for the workload administration group
   // this is a no-op and the name generated for the workload administration group
   // will be returned.
-  rpc SetWorkloadAdministrationGroupName (SetWorkloadAdministrationGroupNameRequest) returns (SetWorkloadAdministrationGroupNameResponse) {
-  }
+  rpc SetWorkloadAdministrationGroupName(SetWorkloadAdministrationGroupNameRequest)
+    returns (SetWorkloadAdministrationGroupNameResponse) {}
 
   // Deletes the workload administration group name for the (account, right, resource)
   // tuple. Throws a NOT_FOUND exception if no such workload administration group
   // can be found.
-  rpc DeleteWorkloadAdministrationGroupName (DeleteWorkloadAdministrationGroupNameRequest) returns (DeleteWorkloadAdministrationGroupNameResponse) {
-  }
+  rpc DeleteWorkloadAdministrationGroupName(DeleteWorkloadAdministrationGroupNameRequest)
+    returns (DeleteWorkloadAdministrationGroupNameResponse) {}
+
+  // Lists the workload administration groups in an account.
+  rpc ListWorkloadAdministrationGroups(ListWorkloadAdministrationGroupsRequest)
+    returns (ListWorkloadAdministrationGroupsResponse) {}
+
+  // Sets the actor workloads credentials. This will replace and overwrite any
+  // existing actor credentials.
+  rpc SetActorWorkloadCredentials(SetActorWorkloadCredentialsRequest)
+    returns (SetActorWorkloadCredentialsResponse) {}
 
   // Retrieves the actor workload credentials.
-  rpc GetActorWorkloadCredentials (GetActorWorkloadCredentialsRequest) returns (GetActorWorkloadCredentialsResponse) {
-  }
+  rpc GetActorWorkloadCredentials(GetActorWorkloadCredentialsRequest)
+    returns (GetActorWorkloadCredentialsResponse) {}
+
+  // Returns a unique ID for the following events:
+  // * Role assignment events.
+  // * Resource role assignment events.
+  // * Group membership changes events.
+  // * Actor deletion events.
+  // * Actore workload credentials change events.
+  // The IDs are guaranteed to be unique and can be used to track the above
+  // changes in a specific account. If no such event has happened in the account
+  // since tracking started an empty string will be returned instead of an ID.
+  rpc GetEventGenerationIds(GetEventGenerationIdsRequest)
+    returns (GetEventGenerationIdsResponse) {}
 }
 
 // An User is the Altus identity corresponding to an external SFDC contact. Users
@@ -415,6 +436,13 @@ message MachineUser {
   // though that if the machine user is deleted the workload username it used
   // becomes available to new machine users in the account.
   string workloadUsername = 5;
+  // Whether this is an internal machine user. Internal machine users are made
+  // by platform services and not end-users. They are filtered out of account
+  // level listing operations and cannot be modified by end-user operations.
+  // Note that it is possible for end-users to list by name or CRN and otherwise
+  // determine the existence of an internal machine user. We simply prevent them
+  // from shooting themselves in the foot by modifying one.
+  bool internal = 6;
 }
 
 // A Group is a Altus resource that contains a collection of Actors. Groups
@@ -478,6 +506,13 @@ message AccessKey {
   // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
   uint64 creationDateMs = 8;
   AccessKeyUsage lastUsage = 6;
+  // Whether this is an internal machine user. Internal machine users are made
+  // by platform services and not end-users. They are filtered out of default
+  // listing operations and cannot be modified by end-user operations. Note that
+  // it is possible for end-users to list by ID or CRN and otherwise
+  // determine the existence of an internal access key. We simply prevent them
+  // from shooting themselves in the foot by modifying one.
+  bool internal = 11;
 }
 
 
@@ -859,6 +894,10 @@ message ListAccessKeysRequest {
   // This optionally filters the request to the given actor, a user or a
   // machine user.
   Actor keyAssignee = 6;
+  // Whether to include internal access keys. Note that this has no impact when
+  // listing by ID or CRN. For those calls, internal access keys are always
+  // returned.
+  bool includeInternal = 7;
   // See the PageToken comment in paging.proto on paging usage.
   int32 pageSize = 2;
   paging.PageToken pageToken = 3;
@@ -1467,6 +1506,10 @@ message ListMachineUsersRequest {
   // A list of MachineUsers name or CRN to retrieve. The list is optional if
   // not provided all MachineUsers in the account will be returned.
   repeated string machineUserNameOrCrn = 2;
+  // Whether to include internal machine users. Note that this has no impact
+  // when listing by name or CRN. For those calls, internal machine users are
+  // always returned.
+  bool includeInternal = 5;
   // See the PageToken comment in paging.proto on paging usage.
   int32 pageSize = 3;
   paging.PageToken pageToken = 4;
@@ -1563,7 +1606,7 @@ message DescribeTermsResponse {
   // The termsName for these terms
   string termsName = 1;
   // The text of the terms
-  string termsText = 2;
+  string termsText = 2 [(options.FieldExtension.skipLogging) = true];
   // The acceptance state of the terms
   AcceptanceState acceptanceState = 3;
   // The date the terms were accepted, if they have been accepted
@@ -2111,25 +2154,36 @@ message DeleteWorkloadAdministrationGroupNameRequest {
 message DeleteWorkloadAdministrationGroupNameResponse {
 }
 
-// A representation of a kerberos key. This does not exactly reflect the formal
+message ListWorkloadAdministrationGroupsRequest {
+  // The account ID to list the workload administration group names for.
+  string accountId = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 2;
+  paging.PageToken pageToken = 3;
+}
+
+message WorkloadAdministrationGroup {
+  // The workload administration group name.
+  string workloadAdministrationGroupName = 1;
+  // The name of the right associated with this workload administration group.
+  string rightName = 2;
+  // The resource on which the above right was granted, e.g., the environment CRN.
+  string resource = 3;
+}
+
+message ListWorkloadAdministrationGroupsResponse {
+  repeated WorkloadAdministrationGroup workloadAdministrationGroup = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
+}
+
+// A representation of a stored kerberos key. This does not exactly reflect the formal
 // ASN.1 structure; that seemed gratuitous.
 message StoredKerberosKey {
   // The key type
   int32 keyType = 1;
   // The encrypted value as was returned from the AWS kms client
   string encryptedKeyValue = 2 [(options.FieldExtension.sensitive) = true];
-  // The salt type
-  int32 saltType = 3;
-  // The salt value
-  string saltValue = 4;
-}
-
-// Definition of a Kerberos Key used in rpc calls (vs storage)
-message ActorKerberosKey {
-  // The key type
-  int32 keyType = 1;
-  // The key value, base64 encoded
-  string keyValue = 2 [(options.FieldExtension.sensitive) = true];
   // The salt type
   int32 saltType = 3;
   // The salt value
@@ -2145,6 +2199,29 @@ message ActorDetails {
   repeated StoredKerberosKey kerberosKeys = 2;
 }
 
+message SetActorWorkloadCredentialsRequest {
+  // The actor's CRN
+  string actorCrn = 1;
+  // The CDP workloads password. This password is going to be hashed and the
+  // hash is the only thing that is going to be saved, encrypted, in our database.
+  string password = 2 [(options.FieldExtension.sensitive) = true];
+}
+
+message SetActorWorkloadCredentialsResponse {
+}
+
+// Definition of a Kerberos Key used in rpc calls (vs storage)
+message ActorKerberosKey {
+  // The key type
+  int32 keyType = 1;
+  // The key value, base64 encoded
+  string keyValue = 2 [(options.FieldExtension.sensitive) = true];
+  // The salt type
+  int32 saltType = 3;
+  // The salt value
+  string saltValue = 4;
+}
+
 message GetActorWorkloadCredentialsRequest {
   // The actor CRN
   string actorCrn = 1;
@@ -2155,4 +2232,31 @@ message GetActorWorkloadCredentialsResponse {
   string passwordHash = 1 [(options.FieldExtension.sensitive) = true];
   // A list of kerberos keys for the actor.
   repeated ActorKerberosKey kerberosKeys = 2;
+}
+
+message GetEventGenerationIdsRequest {
+  // The account ID to retrieve the last event generation IDs for.
+  string accountId = 1;
+}
+
+message GetEventGenerationIdsResponse {
+  // Generated when a role was assigned or unassigned to a user, machine-user, or
+  // a group. Empty string if no such event has been occurred since tracking
+  // started.
+  string lastRoleAssignmentEventId = 1;
+  // Generated when a resource role was assigned or unassigned to a user,
+  // machine-user, or a group. Empty string if no such event has been occurred
+  // since tracking started.
+  string lastResourceRoleAssignmentEventId = 2;
+  // Generated when a member, i.e., a user or a machine-user, was added or
+  // removed from a group. Empty string if no such event has been occurred
+  // since tracking started.
+  string lastGroupMembershipChangedEventId = 3;
+  // Generated when an actor, i.e., a user or a machine-user, was deleted.
+  // Empty string if no such event has been occurred since tracking started.
+  string lastActorDeletedEventId = 4;
+  // Generated when an actor workload credentials change - the actor called
+  // set-workload-password. Empty string if no such event has been occurred since
+  // tracking started.
+  string lastActorWorkloadCredentialsChangedEventId = 5;
 }

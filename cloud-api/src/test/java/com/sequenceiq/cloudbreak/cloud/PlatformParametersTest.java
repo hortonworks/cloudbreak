@@ -90,5 +90,10 @@ public class PlatformParametersTest {
         public String platforName() {
             return "test";
         }
+
+        @Override
+        public boolean isAutoTlsSupported() {
+            return false;
+        }
     }
 }

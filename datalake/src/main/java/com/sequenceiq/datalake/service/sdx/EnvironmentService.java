@@ -41,9 +41,6 @@ public class EnvironmentService {
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private SdxNotificationService notificationService;
-
-    @Inject
     private EnvironmentEndpoint environmentEndpoint;
 
     public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId, String requestId) {
@@ -56,8 +53,7 @@ public class EnvironmentService {
         Optional<SdxCluster> sdxClusterOptional = sdxClusterRepository.findById(sdxId);
         if (sdxClusterOptional.isPresent()) {
             SdxCluster sdxCluster = sdxClusterOptional.get();
-            notificationService.send(ResourceEvent.SDX_WAITING_FOR_ENVIRONMENT, sdxCluster);
-            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.WAIT_FOR_ENVIRONMENT,
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.WAIT_FOR_ENVIRONMENT, ResourceEvent.SDX_WAITING_FOR_ENVIRONMENT,
                     "Waiting for environment creation", sdxCluster);
             DetailedEnvironmentResponse environmentResponse = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
@@ -82,9 +78,6 @@ public class EnvironmentService {
                             }
                         }
                     });
-            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.ENVIRONMENT_CREATED, "Environment created", sdxCluster);
-            sdxClusterRepository.save(sdxCluster);
-            notificationService.send(ResourceEvent.SDX_ENVIRONMENT_FINISHED, sdxCluster);
             return environmentResponse;
         } else {
             throw notFound("SDX cluster", sdxId).get();

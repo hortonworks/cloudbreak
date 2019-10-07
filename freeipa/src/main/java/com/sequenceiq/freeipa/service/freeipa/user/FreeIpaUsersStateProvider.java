@@ -54,8 +54,8 @@ public class FreeIpaUsersStateProvider {
 
         // get all groups from IPA
         freeIpaClient.groupFindAll().stream()
-            .filter(group -> !IPA_ONLY_GROUPS.contains(group.getCn()))
-            .forEach(group -> builder.addGroup(fromIpaGroup(group)));
+                .filter(group -> !IPA_ONLY_GROUPS.contains(group.getCn()))
+                .forEach(group -> builder.addGroup(fromIpaGroup(group)));
 
         for (FmsUser user : users) {
             if (IPA_ONLY_USERS.contains(user.getName())) {
@@ -65,11 +65,13 @@ public class FreeIpaUsersStateProvider {
             if (ipaUserOptional.isPresent()) {
                 com.sequenceiq.freeipa.client.model.User ipaUser = ipaUserOptional.get();
                 builder.addUser(fromIpaUser(ipaUser));
-                ipaUser.getMemberOfGroup().stream()
-                        .filter(group -> !IPA_ONLY_GROUPS.contains(group))
-                        .forEach(groupname -> {
-                            builder.addMemberToGroup(groupname, user.getName());
-                        });
+                if (ipaUser.getMemberOfGroup() != null) {
+                    ipaUser.getMemberOfGroup().stream()
+                            .filter(group -> !IPA_ONLY_GROUPS.contains(group))
+                            .forEach(groupname -> {
+                                builder.addMemberToGroup(groupname, user.getName());
+                            });
+                }
             }
         }
 

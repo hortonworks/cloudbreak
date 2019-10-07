@@ -84,6 +84,8 @@ public interface PlatformParameters {
 
     String platforName();
 
+    boolean isAutoTlsSupported();
+
     default SpecialParameters specialParameters() {
         Map<String, Boolean> specialParameters = Maps.newHashMap();
         specialParameters.put(PlatformParametersConsts.CUSTOM_INSTANCETYPE, Boolean.FALSE);

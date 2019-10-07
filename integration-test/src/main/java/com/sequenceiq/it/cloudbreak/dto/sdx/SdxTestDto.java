@@ -50,7 +50,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     @Override
     public SdxTestDto valid() {
-        withName(getResourceProperyProvider().getName())
+        withName(getResourcePropertyProvider().getName())
                 .withEnvironment(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withClusterShape(getCloudProvider().getClusterShape())
                 .withTags(getCloudProvider().getTags());
@@ -67,14 +67,18 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Override
     public List<SdxClusterResponse> getAll(SdxClient client) {
         SdxEndpoint sdxEndpoint = client.getSdxClient().sdxEndpoint();
-        return sdxEndpoint.list(getTestContext().get(EnvironmentTestDto.class).getName()).stream()
-                .filter(response -> response.getName() != null)
-                .collect(Collectors.toList());
+        return sdxEndpoint.list(null).stream()
+                .filter(s -> s.getName() != null)
+                .map(s -> {
+                    SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
+                    sdxClusterResponse.setName(s.getName());
+                    return sdxClusterResponse;
+                }).collect(Collectors.toList());
     }
 
     @Override
     public boolean deletable(SdxClusterResponse entity) {
-        return entity.getName().startsWith(getResourceProperyProvider().prefix());
+        return entity.getName().startsWith(getResourcePropertyProvider().prefix());
     }
 
     @Override

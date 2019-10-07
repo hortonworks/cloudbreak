@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -19,7 +20,7 @@ import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -27,35 +28,28 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 
-public class ClouderaManagerParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+public class ClouderaManagerParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelActivationListenerTask.class);
 
     private static final String PARCEL_ACTIVATED_STAGE = "ACTIVATED";
 
-    private final ClouderaManagerClientFactory clouderaManagerClientFactory;
-
     public ClouderaManagerParcelActivationListenerTask(ClouderaManagerClientFactory clouderaManagerClientFactory) {
-        this.clouderaManagerClientFactory = clouderaManagerClientFactory;
+        super(clouderaManagerClientFactory);
     }
 
     @Override
-    public boolean checkStatus(ClouderaManagerCommandPollerObject clouderaManagerPollerObject) {
-        try {
-            ApiClient apiClient = clouderaManagerPollerObject.getApiClient();
-            Stack stack = clouderaManagerPollerObject.getStack();
-            List<ClouderaManagerProduct> clouderaManagerProducts = getClouderaManagerProductsFromStack(stack);
-            ApiParcelList parcels = getClouderaManagerParcels(apiClient, stack.getName());
-            List<ApiParcel> notActivated = getNotActivatedOrMissingParcels(clouderaManagerProducts, parcels);
-            if (notActivated.isEmpty()) {
-                LOGGER.debug("Parcels are activated");
-                return true;
-            } else {
-                LOGGER.debug("Some parcels are not yet activated: [{}]", getJoinedParcelStages(notActivated));
-                return false;
-            }
-        } catch (ApiException e) {
-            LOGGER.debug("Cloudera Manager is not running", e);
+    protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+        ApiClient apiClient = pollerObject.getApiClient();
+        Stack stack = pollerObject.getStack();
+        List<ClouderaManagerProduct> clouderaManagerProducts = getClouderaManagerProductsFromStack(stack);
+        ApiParcelList parcels = getClouderaManagerParcels(apiClient, stack.getName());
+        List<ApiParcel> notActivated = getNotActivatedOrMissingParcels(clouderaManagerProducts, parcels);
+        if (notActivated.isEmpty()) {
+            LOGGER.debug("Parcels are activated.");
+            return true;
+        } else {
+            LOGGER.debug("Some parcels are not yet activated: [{}].", getJoinedParcelStages(notActivated));
             return false;
         }
     }
@@ -120,12 +114,12 @@ public class ClouderaManagerParcelActivationListenerTask extends AbstractClouder
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
+    public void handleTimeout(ClouderaManagerPollerObject toolsResourceApi) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to deploy client configurations.");
     }
 
     @Override
-    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
+    public String successMessage(ClouderaManagerPollerObject toolsResourceApi) {
         return "Cloudera Manager deployed client configurations finished with success result.";
     }
 

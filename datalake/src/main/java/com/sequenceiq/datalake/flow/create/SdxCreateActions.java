@@ -17,6 +17,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -160,6 +161,8 @@ public class SdxCreateActions {
             @Override
             protected void doExecute(SdxContext context, StackCreationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestId(context.getRequestId());
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_CLUSTER_CREATED,
+                        "Datalake is running", payload.getResourceId());
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -183,13 +186,13 @@ public class SdxCreateActions {
             protected void doExecute(SdxContext context, SdxCreateFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 MDCBuilder.addRequestId(context.getRequestId());
                 Exception exception = payload.getException();
-                DatalakeStatusEnum provisioningFailedStatus = DatalakeStatusEnum.PROVISIONING_FAILED;
-                LOGGER.info("Update SDX status to {} for resource: {}", provisioningFailedStatus.name(), payload.getResourceId(), exception);
-                String statusReason = "SDX creation failed";
+                LOGGER.error("Datalake create failed for datalakeId: {}", payload.getResourceId(), exception);
+                String statusReason = "Datalake creation failed";
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                sdxStatusService.setStatusForDatalake(provisioningFailedStatus, statusReason, payload.getResourceId());
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.PROVISIONING_FAILED, ResourceEvent.SDX_CLUSTER_CREATION_FAILED,
+                        statusReason, payload.getResourceId());
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }
 

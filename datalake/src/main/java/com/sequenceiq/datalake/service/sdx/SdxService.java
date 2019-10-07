@@ -100,9 +100,6 @@ public class SdxService implements ResourceIdProvider {
     private CloudStorageLocationValidator cloudStorageLocationValidator;
 
     @Inject
-    private SdxNotificationService notificationService;
-
-    @Inject
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @PostConstruct
@@ -216,9 +213,8 @@ public class SdxService implements ResourceIdProvider {
         MDCBuilder.buildMdcContext(sdxCluster);
 
         sdxCluster = sdxClusterRepository.save(sdxCluster);
-        sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.REQUESTED, "Datalake requested", sdxCluster);
-
-        notificationService.send(ResourceEvent.SDX_CLUSTER_CREATED, sdxCluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED,
+                ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake requested", sdxCluster);
 
         LOGGER.info("trigger SDX creation: {}", sdxCluster);
         sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
@@ -455,7 +451,8 @@ public class SdxService implements ResourceIdProvider {
         checkIfSdxIsDeletable(sdxCluster);
         MDCBuilder.buildMdcContext(sdxCluster);
         sdxClusterRepository.save(sdxCluster);
-        sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED,
+                ResourceEvent.SDX_CLUSTER_DELETION_STARTED, "Datalake deletion requested", sdxCluster);
         sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId(), forced);
         sdxReactorFlowManager.cancelRunningFlows(sdxCluster.getId());
         LOGGER.info("SDX delete triggered: {}", sdxCluster.getClusterName());

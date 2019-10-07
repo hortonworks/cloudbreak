@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
@@ -105,6 +107,12 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
+    @Inject
+    private DefaultCostTaggingService defaultCostTaggingService;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -142,6 +150,10 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withLdapConfig(ldapView.orElse(null))
                     .withHdfConfigs(hdfConfigs)
                     .withKerberosConfig(kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null))
+                    .withDefaultTags(defaultCostTaggingService.prepareDefaultTags(
+                            source.getCreator().getUserName(),
+                            new HashMap<>(),
+                            source.getCloudPlatform()))
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource));
 
             decorateBuilderWithPlacement(source, builder);

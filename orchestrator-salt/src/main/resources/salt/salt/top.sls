@@ -8,6 +8,7 @@ base:
     - recipes.runner
     - fluent
     - metering
+    - ntp
 
   'G@roles:ad_member and G@os_family:RedHat':
     - match: compound

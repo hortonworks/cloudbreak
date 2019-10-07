@@ -1,4 +1,6 @@
 name: "mock-tests"
+parameters:
+  cleanUp: false
 tests:
   - name: "newway mock testcases"
     classes:

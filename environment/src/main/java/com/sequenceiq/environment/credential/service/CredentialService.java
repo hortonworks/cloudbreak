@@ -36,6 +36,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
+import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.notification.NotificationSender;
 
 @Service
@@ -96,8 +97,11 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public Credential verify(Credential credential) {
-        credentialAdapter.verify(credential, credential.getAccountId());
-        return repository.save(credential);
+        CredentialVerification verification = credentialAdapter.verify(credential, credential.getAccountId());
+        if (verification.isChanged()) {
+            return repository.save(verification.getCredential());
+        }
+        return verification.getCredential();
     }
 
     public Credential updateByAccountId(Credential credential, String accountId) {
@@ -106,7 +110,7 @@ public class CredentialService extends AbstractCredentialService {
         credential.setAccountId(accountId);
         credential.setResourceCrn(original.getResourceCrn());
         credential.setCreator(original.getCreator());
-        Credential updated = repository.save(credentialAdapter.verify(credential, accountId));
+        Credential updated = repository.save(credentialAdapter.verify(credential, accountId).getCredential());
         secretService.delete(original.getAttributesSecret());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED);
         return updated;
@@ -138,7 +142,7 @@ public class CredentialService extends AbstractCredentialService {
         credential.setResourceCrn(createCRN(accountId));
         credential.setCreator(creator);
         credential.setAccountId(accountId);
-        Credential created = repository.save(credentialAdapter.verify(credential, accountId));
+        Credential created = repository.save(credentialAdapter.verify(credential, accountId).getCredential());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
         return created;
     }
@@ -185,7 +189,7 @@ public class CredentialService extends AbstractCredentialService {
         LOGGER.info("Authorizing credential('{}') with Authorization Code Grant flow.", original.getName());
         String attributesSecret = original.getAttributesSecret();
         updateAuthorizationCodeOfAzureCredential(original, code);
-        Credential updated = repository.save(credentialAdapter.verify(original, accountId));
+        Credential updated = repository.save(credentialAdapter.verify(original, accountId).getCredential());
         secretService.delete(attributesSecret);
         return updated;
     }

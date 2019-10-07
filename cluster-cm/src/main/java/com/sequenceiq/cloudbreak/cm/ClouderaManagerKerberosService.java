@@ -17,6 +17,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -65,9 +66,13 @@ public class ClouderaManagerKerberosService {
         }
     }
 
-    public void deleteCredentials(ApiClient client, HttpClientConfig clientConfig, Stack stack) {
-        ClouderaManagerResourceApi apiInstance = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
+    public void deleteCredentials(HttpClientConfig clientConfig, Stack stack) {
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
         try {
+            ApiClient client = clouderaManagerClientFactory.getClient(stack.getGatewayPort(), user, password, clientConfig);
+            ClouderaManagerResourceApi apiInstance = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
             modificationService.stopCluster();
 
@@ -77,7 +82,7 @@ public class ClouderaManagerKerberosService {
 
             ApiCommand command = apiInstance.deleteCredentialsCommand("all");
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, command.getId());
-        } catch (ApiException | CloudbreakException e) {
+        } catch (ApiException | CloudbreakException | ClouderaManagerClientInitException e) {
             LOGGER.info("Failed to remove Kerberos credentials", e);
             throw new ClouderaManagerOperationFailedException("Failed to remove Kerberos credentials", e);
         }

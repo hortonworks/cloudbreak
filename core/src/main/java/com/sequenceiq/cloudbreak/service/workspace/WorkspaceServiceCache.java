@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.auth.altus.cache;
+package com.sequenceiq.cloudbreak.service.workspace;
 
 import java.util.concurrent.TimeUnit;
 
@@ -8,16 +8,16 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cache.common.AbstractCacheDefinition;
 
 @Service
-public class UmsRolesCache extends AbstractCacheDefinition {
+public class WorkspaceServiceCache extends AbstractCacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
 
-    @Value("${altus.ums.roles.cache.ttl:1}")
-    private long ttlHours;
+    @Value("${cb.workspace.service.cache.ttl:15}")
+    private long ttlMinutes;
 
     @Override
     protected String getName() {
-        return "umsRolesCache";
+        return "workspaceServiceCache";
     }
 
     @Override
@@ -27,6 +27,6 @@ public class UmsRolesCache extends AbstractCacheDefinition {
 
     @Override
     protected long getTimeToLiveSeconds() {
-        return ttlHours == 0L ? 1 : TimeUnit.HOURS.toSeconds(ttlHours);
+        return ttlMinutes == 0L ? 1 : TimeUnit.MINUTES.toSeconds(ttlMinutes);
     }
 }

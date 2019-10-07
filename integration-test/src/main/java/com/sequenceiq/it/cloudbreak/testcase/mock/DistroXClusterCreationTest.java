@@ -11,6 +11,7 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
@@ -35,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
+import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractClouderaManagerTest;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -140,13 +142,15 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         String sdxInternal = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
+        String networkKey = "someNetwork";
 
         testContext
-                .given(EnvironmentNetworkTestDto.class)
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
                 .given(storageEnvKey, EnvironmentTestDto.class)
                 .withDescription("Env with telemetry")
                 .withLocation(ENVIRONMENT_LOCATION)
-                .withNetwork()
+                .withNetwork(networkKey)
                 .withTelemetry(telemetry())
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withMockIDBMS()
@@ -197,11 +201,13 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         String sdxInternal = resourcePropertyProvider().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
+        String networkKey = "someNetwork";
 
         testContext
-                .given(EnvironmentNetworkTestDto.class)
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
                 .given(envKey, EnvironmentTestDto.class)
-                .withNetwork()
+                .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(envName)
                 .when(getEnvironmentTestClient().create())

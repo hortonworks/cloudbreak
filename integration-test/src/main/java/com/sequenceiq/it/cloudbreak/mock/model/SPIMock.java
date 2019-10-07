@@ -23,13 +23,17 @@ public class SPIMock extends AbstractModelMock {
 
     public static final String TERMINATE_INSTANCES = "/terminate_instances";
 
-    public static final String STOP_INSTANCES = "/:instanceid/stop";
+    public static final String STOP_INSTANCE = "/:instanceid/stop";
 
-    public static final String START_INSTANCES = "/:instanceid/start";
+    public static final String START_INSTANCE = "/:instanceid/start";
 
     public static final String CLOUD_INSTANCE_STATUSES = "/cloud_instance_statuses";
 
     public static final String CLOUD_METADATA_STATUSES = "/cloud_metadata_statuses";
+
+    public static final String START_INSTANCES = "/start_instances";
+
+    public static final String STOP_INSTANCES = "/stop_instances";
 
     private DynamicRouteStack dynamicRouteStack;
 
@@ -45,6 +49,8 @@ public class SPIMock extends AbstractModelMock {
         postMockProviderTerminateInstance(instanceMap);
         getMockProviderStopStatus();
         getMockProviderStartStatus();
+        postMockProviderStartInstance(getDefaultModel());
+        postMockProviderStopInstance(getDefaultModel());
     }
 
     public DynamicRouteStack getDynamicRouteStack() {
@@ -52,7 +58,7 @@ public class SPIMock extends AbstractModelMock {
     }
 
     private void getMockProviderStopStatus() {
-        dynamicRouteStack.get(MOCK_ROOT + STOP_INSTANCES, (request, response) -> {
+        dynamicRouteStack.get(MOCK_ROOT + STOP_INSTANCE, (request, response) -> {
             String instanceid = request.params("instanceid");
             CloudInstance instance = new CloudInstance(instanceid, null, null);
             return new CloudVmInstanceStatus(instance, InstanceStatus.STOPPED);
@@ -60,7 +66,7 @@ public class SPIMock extends AbstractModelMock {
     }
 
     private void getMockProviderStartStatus() {
-        dynamicRouteStack.get(MOCK_ROOT + START_INSTANCES, (request, response) -> {
+        dynamicRouteStack.get(MOCK_ROOT + START_INSTANCE, (request, response) -> {
             String instanceid = request.params("instanceid");
             CloudInstance instance = new CloudInstance(instanceid, null, null);
             return new CloudVmInstanceStatus(instance, InstanceStatus.STARTED);
@@ -82,5 +88,19 @@ public class SPIMock extends AbstractModelMock {
 
     private void postMockProviderMetadataStatus(Map<String, CloudVmMetaDataStatus> instanceMap) {
         dynamicRouteStack.post(MOCK_ROOT + CLOUD_METADATA_STATUSES, new CloudMetaDataStatuses(instanceMap));
+    }
+
+    private void postMockProviderStartInstance(DefaultModel model) {
+        dynamicRouteStack.post(MOCK_ROOT + START_INSTANCES, (request, response) -> {
+            model.startAllInstances();
+            return null;
+        });
+    }
+
+    private void postMockProviderStopInstance(DefaultModel model) {
+        dynamicRouteStack.post(MOCK_ROOT + STOP_INSTANCES, (request, response) -> {
+            model.stopAllInstances();
+            return null;
+        });
     }
 }

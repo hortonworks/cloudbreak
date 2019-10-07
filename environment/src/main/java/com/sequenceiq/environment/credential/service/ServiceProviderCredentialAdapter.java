@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -32,6 +34,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialVerificationException;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -61,7 +64,8 @@ public class ServiceProviderCredentialAdapter {
     @Inject
     private RequestProvider requestProvider;
 
-    public Credential verify(Credential credential, String accountId) {
+    public CredentialVerification verify(Credential credential, String accountId) {
+        boolean changed = false;
         credential = credentialPrerequisiteService.decorateCredential(credential);
         CloudContext cloudContext =
                 new CloudContext(credential.getId(), credential.getName(), credential.getCloudPlatform(), TEMP_USER_ID, accountId);
@@ -82,18 +86,31 @@ public class ServiceProviderCredentialAdapter {
                 throw new CredentialVerificationException(message + res.getCloudCredentialStatus().getStatusReason(),
                         res.getCloudCredentialStatus().getException());
             }
-            if (CredentialStatus.PERMISSIONS_MISSING.equals(res.getCloudCredentialStatus().getStatus())) {
-                credential.setVerificationStatusText(res.getCloudCredentialStatus().getStatusReason());
-            } else {
-                credential.setVerificationStatusText(null);
-            }
+            changed = setNewStatusText(credential, res.getCloudCredentialStatus());
             CloudCredential cloudCredentialResponse = res.getCloudCredentialStatus().getCloudCredential();
-            mergeCloudProviderParameters(credential, cloudCredentialResponse, Collections.singleton(SMART_SENSE_ID));
+            changed = changed || mergeCloudProviderParameters(credential, cloudCredentialResponse, Collections.singleton(SMART_SENSE_ID));
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing credential verification", e);
             throw new OperationException(e);
         }
-        return credential;
+        return new CredentialVerification(credential, changed);
+    }
+
+    private boolean setNewStatusText(Credential credential, CloudCredentialStatus status) {
+        boolean changed = false;
+        String originalVerificationStatusText = credential.getVerificationStatusText();
+        if (CredentialStatus.PERMISSIONS_MISSING.equals(status.getStatus())) {
+            if (!StringUtils.equals(originalVerificationStatusText, status.getStatusReason())) {
+                credential.setVerificationStatusText(status.getStatusReason());
+                changed = true;
+            }
+        } else {
+            credential.setVerificationStatusText(null);
+            if (originalVerificationStatusText != null) {
+                changed = true;
+            }
+        }
+        return changed;
     }
 
     public Map<String, String> interactiveLogin(Credential credential, String accountId, String userId) {
@@ -146,11 +163,11 @@ public class ServiceProviderCredentialAdapter {
         }
     }
 
-    private void mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys) {
-        mergeCloudProviderParameters(credential, cloudCredentialResponse, skippedKeys, true);
+    private boolean mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys) {
+        return mergeCloudProviderParameters(credential, cloudCredentialResponse, skippedKeys, true);
     }
 
-    private void mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys,
+    private boolean mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys,
             boolean overrideParameters) {
         Json attributes = new Json(credential.getAttributes());
         Map<String, Object> newAttributes = attributes.getMap();
@@ -166,6 +183,7 @@ public class ServiceProviderCredentialAdapter {
         if (newAttributesAdded) {
             credential.setAttributes(new Json(newAttributes).getValue());
         }
+        return newAttributesAdded;
     }
 
     private void addCodeGrantFlowInitAttributesToCredential(Credential credential, Map<String, String> codeGrantFlowInitParams) {

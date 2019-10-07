@@ -92,9 +92,9 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
 
     private List<StackStatusView> resetStackStatus(Collection<Long> excludeStackIds) {
         return stackService.getByStatuses(syncRequiredStates).stream()
-                .filter(s -> !excludeStackIds.contains(s.getId()) || Status.WAIT_FOR_SYNC.equals(s.getStatus()))
+                .filter(s -> !excludeStackIds.contains(s.getId()) || Status.WAIT_FOR_SYNC.equals(s.getStatus().getStatus()))
                 .peek(s -> {
-                    if (!Status.WAIT_FOR_SYNC.equals(s.getStatus())) {
+                    if (!Status.WAIT_FOR_SYNC.equals(s.getStatus().getStatus())) {
                         loggingStatusChange("Stack", s.getId(), s.getStatus().getStatus(), Status.WAIT_FOR_SYNC);
                         stackUpdater.updateStackStatus(s.getId(), DetailedStackStatus.WAIT_FOR_SYNC, s.getStatus().getStatusReason());
                     }

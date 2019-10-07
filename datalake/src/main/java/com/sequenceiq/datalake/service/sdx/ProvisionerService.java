@@ -28,8 +28,8 @@ import com.sequenceiq.cloudbreak.common.exception.ClientErrorExceptionHandler;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -51,18 +51,14 @@ public class ProvisionerService {
     private StackRequestManifester stackRequestManifester;
 
     @Inject
-    private SdxNotificationService notificationService;
-
-    @Inject
     private StackV4Endpoint stackV4Endpoint;
 
     public void startStackDeletion(Long id, boolean forced) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             try {
                 stackV4Endpoint.delete(0L, sdxCluster.getClusterName(), forced);
-                sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS, "Datalake deletion in progress", sdxCluster);
-                sdxClusterRepository.save(sdxCluster);
-                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_STARTED, sdxCluster);
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS,
+                        ResourceEvent.SDX_CLUSTER_DELETION_STARTED, "Datalake stack deletion in progress", sdxCluster);
             } catch (NotFoundException e) {
                 LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
             } catch (ClientErrorException e) {
@@ -92,7 +88,6 @@ public class ProvisionerService {
                                     stackV4Response.getStatus().name());
                             LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
                             if (Status.DELETE_FAILED.equals(stackV4Response.getStatus())) {
-                                notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_FAILED, sdxCluster);
                                 return AttemptResults.breakFor(
                                         "Stack deletion failed '" + sdxCluster.getClusterName() + "', " + stackV4Response.getStatusReason()
                                 );
@@ -103,9 +98,8 @@ public class ProvisionerService {
                             return AttemptResults.finishWith(null);
                         }
                     });
-            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.STACK_DELETED, "Datalake deleted", sdxCluster);
-            sdxClusterRepository.save(sdxCluster);
-            notificationService.send(ResourceEvent.SDX_CLUSTER_DELETION_FINISHED, sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETED,
+                    ResourceEvent.SDX_CLUSTER_DELETION_FINISHED, "Datalake stack deleted", sdxCluster);
         }, () -> {
             throw notFound("SDX cluster", id).get();
         });
@@ -125,7 +119,6 @@ public class ProvisionerService {
                 sdxCluster.setStackId(stackV4Response.getId());
                 sdxCluster.setStackCrn(stackV4Response.getCrn());
                 sdxClusterRepository.save(sdxCluster);
-                notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, sdxCluster);
                 LOGGER.info("Sdx cluster updated");
             } catch (ClientErrorException e) {
                 String errorMessage = ClientErrorExceptionHandler.getErrorMessage(e);
@@ -142,7 +135,8 @@ public class ProvisionerService {
 
     public void waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig, String requestId) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
-            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS, "Datalake stack creation in progress", sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_IN_PROGRESS,
+                    ResourceEvent.SDX_CLUSTER_PROVISION_STARTED, "Datalake stack creation in progress", sdxCluster);
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                     .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
@@ -177,9 +171,8 @@ public class ProvisionerService {
                             return AttemptResults.breakFor("Stack not found on CB side " + sdxCluster.getClusterName());
                         }
                     });
-            sdxStatusService.setStatusForDatalake(DatalakeStatusEnum.RUNNING, "Datalake is running", sdxCluster);
-            sdxClusterRepository.save(sdxCluster);
-            notificationService.send(ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED, sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED,
+                    ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED, "Stack created for Datalake", sdxCluster);
         }, () -> {
             throw notFound("SDX cluster", id).get();
         });
@@ -187,7 +180,6 @@ public class ProvisionerService {
 
     private AttemptResult<StackV4Response> sdxCreationFailed(SdxCluster sdxCluster, String statusReason) {
         LOGGER.info("SDX creation failed, statusReason: " + statusReason);
-        notificationService.send(ResourceEvent.SDX_CLUSTER_CREATION_FAILED, sdxCluster);
         return AttemptResults.breakFor("SDX creation failed '" + sdxCluster.getClusterName() + "', " + statusReason);
     }
 

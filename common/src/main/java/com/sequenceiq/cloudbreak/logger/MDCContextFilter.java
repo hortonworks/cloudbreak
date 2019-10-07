@@ -51,7 +51,7 @@ public class MDCContextFilter extends OncePerRequestFilter {
         Builder builder = MdcContext.builder().requestId(wrapper.getHeader(REQUEST_ID_HEADER));
         doIfNotNull(threadBasedUserCrnProvider.getUserCrn(), crn -> builder.userCrn(crn).tenant(threadBasedUserCrnProvider.getAccountId()));
         builder.buildMdc();
-        LOGGER.debug("Request id has been added to MDC context for request, method: {}, path: {}",
+        LOGGER.trace("Request id has been added to MDC context for request, method: {}, path: {}",
                 request.getMethod().toUpperCase(),
                 request.getRequestURI());
         if (mdcAppender != null) {
@@ -68,7 +68,7 @@ public class MDCContextFilter extends OncePerRequestFilter {
             super(request);
             if (StringUtils.isEmpty(request.getHeader(REQUEST_ID_HEADER))) {
                 String requestId = UUID.randomUUID().toString();
-                LOGGER.debug("No requestId in request. Adding requestId: '{}'", requestId);
+                LOGGER.trace("No requestId in request. Adding requestId: '{}'", requestId);
                 addHeader(REQUEST_ID_HEADER, requestId);
             }
         }

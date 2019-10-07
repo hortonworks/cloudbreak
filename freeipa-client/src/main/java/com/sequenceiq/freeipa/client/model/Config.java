@@ -39,7 +39,7 @@ public class Config {
     public String toString() {
         return new StringJoiner(", ", Config.class.getSimpleName() + "[", "]")
                 .add("ipamaxusernamelength=" + ipamaxusernamelength)
-                .add(String.format("ipauserobjectclasses={}", ipauserobjectclasses.toString()))
+                .add(String.format("ipauserobjectclasses={}", ipauserobjectclasses != null ? ipauserobjectclasses.toString() : ""))
                 .toString();
     }
 }

@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
+import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 
 @Prototype
 public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implements Purgable<StackV4Response, CloudbreakClient> {
@@ -37,6 +38,9 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Inject
     private DistroXTestClient distroXTestClient;
+
+    @Inject
+    private WaitUtil waitUtil;
 
     public DistroXTestDto(TestContext testContext) {
         super(new DistroXV1Request(), testContext);
@@ -73,7 +77,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public boolean deletable(StackV4Response entity) {
-        return entity.getName().startsWith(getResourceProperyProvider().prefix());
+        return entity.getName().startsWith(getResourcePropertyProvider().prefix());
     }
 
     @Override
@@ -99,6 +103,53 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public CloudbreakTestDto wait(Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
         return await(desiredStatuses, runningParameter);
+    }
+
+    @Override
+    public DistroXTestDto await(Map<String, Status> statuses) {
+        super.await(statuses);
+        waitTillFlowInOperation();
+        return this;
+    }
+
+    @Override
+    public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses) {
+        super.await(entityClass, statuses);
+        waitTillFlowInOperation();
+        return this;
+    }
+
+    @Override
+    public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, long pollingInteval) {
+        super.await(entityClass, statuses, pollingInteval);
+        waitTillFlowInOperation();
+        return this;
+    }
+
+    @Override
+    public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, RunningParameter runningParameter) {
+        super.await(entityClass, statuses, runningParameter);
+        waitTillFlowInOperation();
+        return this;
+    }
+
+    @Override
+    public DistroXTestDto await(Map<String, Status> statuses, RunningParameter runningParameter) {
+        super.await(statuses, runningParameter);
+        waitTillFlowInOperation();
+        return this;
+    }
+
+    private void waitTillFlowInOperation() {
+        while  (getTestContext().getCloudbreakClient().getCloudbreakClient()
+                .flowEndpoint()
+                .getFlowLogsByResourceName(getName()).stream().anyMatch(flowentry -> !flowentry.getFinalized())) {
+            try {
+                Thread.sleep(waitUtil.getPollingInterval());
+            } catch (InterruptedException e) {
+                LOGGER.warn("Exception has been occurred during wait for flow end: ", e);
+            }
+        }
     }
 
     public DistroXTestDto withGeneratedBlueprint(GeneratedBlueprintV4Response generatedBlueprint) {

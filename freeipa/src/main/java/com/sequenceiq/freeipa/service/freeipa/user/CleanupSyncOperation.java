@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +18,17 @@ import com.sequenceiq.freeipa.repository.SyncOperationRepository;
 public class CleanupSyncOperation {
     private static final Logger LOGGER = LoggerFactory.getLogger(CleanupSyncOperation.class);
 
-    private static final Long SYNC_OPERATION_TIMEOUT = 30L * 60L * 1000L;
+    @Value("${freeipa.syncoperation.cleanup.timeout-millis:1800000}")
+    private  Long syncOperationTimeout;
 
     @Inject
     private SyncOperationRepository syncOperationRepository;
 
-    @Scheduled(fixedDelay = 60 * 1000, initialDelay = 60 * 1000)
+    @Scheduled(fixedDelayString = "${freeipa.syncoperation.cleanup.fixed-delay-millis:60000}",
+            initialDelayString = "${freeipa.syncoperation.cleanup.initial-delay-millis:60000}")
     public void triggerCleanup() {
         try {
-            cleanupStaleSyncOperation(System.currentTimeMillis() - SYNC_OPERATION_TIMEOUT);
+            cleanupStaleSyncOperation(System.currentTimeMillis() - syncOperationTimeout);
         } catch (Exception e) {
             LOGGER.error("Failed to clean up SyncOperation table", e);
         }

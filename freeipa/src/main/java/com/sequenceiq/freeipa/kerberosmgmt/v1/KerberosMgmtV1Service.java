@@ -56,6 +56,8 @@ public class KerberosMgmtV1Service {
 
     private static final String EMPTY_REALM = "Failed to create service as realm was empty.";
 
+    private static final String ROLE_NOT_ALLOWED = "The role request is not allowed when retrieving a keytab";
+
     private static final String IPA_STACK_NOT_FOUND = "Stack for IPA server not found.";
 
     private static final int NOT_FOUND_ERROR_CODE = 4001;
@@ -98,6 +100,9 @@ public class KerberosMgmtV1Service {
 
     public ServiceKeytabResponse getExistingServiceKeytab(ServiceKeytabRequest request, String accountId) throws FreeIpaClientException {
         LOGGER.debug("Request to get service keytab for account {}: {}", accountId, request);
+        if (request.getRoleRequest() != null) {
+            throw new KeytabCreationException(ROLE_NOT_ALLOWED);
+        }
         ServiceKeytabResponse response = new ServiceKeytabResponse();
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
@@ -129,6 +134,9 @@ public class KerberosMgmtV1Service {
 
     public HostKeytabResponse getExistingHostKeytab(HostKeytabRequest request, String accountId) throws FreeIpaClientException {
         LOGGER.debug("Request to get host keytab for account {}: {}", accountId, request);
+        if (request.getRoleRequest() != null) {
+            throw new KeytabCreationException(ROLE_NOT_ALLOWED);
+        }
         HostKeytabResponse response = new HostKeytabResponse();
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);

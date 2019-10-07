@@ -1,5 +1,8 @@
 package com.sequenceiq.environment.environment.dto.telemetry;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentLogging extends CommonTelemetryParams {
 
     private String storageLocation;

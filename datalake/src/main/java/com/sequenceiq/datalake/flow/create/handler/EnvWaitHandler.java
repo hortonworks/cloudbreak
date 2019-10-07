@@ -12,11 +12,14 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.service.sdx.EnvironmentService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -26,6 +29,9 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
 
     @Inject
     private EnvironmentService environmentService;
+
+    @Inject
+    private SdxStatusService sdxStatusService;
 
     @Override
     public String selector() {
@@ -40,29 +46,35 @@ public class EnvWaitHandler extends ExceptionCatcherEventHandler<EnvWaitRequest>
     @Override
     protected void doAccept(HandlerEvent event) {
         EnvWaitRequest envWaitRequest = event.getData();
-        Long sdxId = envWaitRequest.getResourceId();
+        Long datalakeId = envWaitRequest.getResourceId();
         String userId = envWaitRequest.getUserId();
         String requestId = envWaitRequest.getRequestId();
         MDCBuilder.addRequestId(requestId);
         Selectable response;
         try {
-            LOGGER.debug("start polling env for sdx: {}", sdxId);
-            DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.waitAndGetEnvironment(sdxId, requestId);
-            response = new EnvWaitSuccessEvent(sdxId, userId, requestId, detailedEnvironmentResponse);
+            LOGGER.debug("start polling env for sdx: {}", datalakeId);
+            DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.waitAndGetEnvironment(datalakeId, requestId);
+            response = new EnvWaitSuccessEvent(datalakeId, userId, requestId, detailedEnvironmentResponse);
+            setEnvCreatedStatus(datalakeId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Env polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, userBreakException);
+            response = new SdxCreateFailedEvent(datalakeId, userId, requestId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.info("Env poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId,
+            LOGGER.info("Env poller stopped for sdx: {}", datalakeId, pollerStoppedException);
+            response = new SdxCreateFailedEvent(datalakeId, userId, requestId,
                     new PollerStoppedException("Env wait timed out after " + DURATION_IN_MINUTES_FOR_ENV_POLLING + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.info("Env polling failed for sdx: {}", sdxId, exception);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, exception);
+            LOGGER.info("Env polling failed for sdx: {}", datalakeId, exception);
+            response = new SdxCreateFailedEvent(datalakeId, userId, requestId, exception);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in sdx creation wait phase", anotherException);
-            response = new SdxCreateFailedEvent(sdxId, userId, requestId, anotherException);
+            response = new SdxCreateFailedEvent(datalakeId, userId, requestId, anotherException);
         }
         sendEvent(response, event);
+    }
+
+    private void setEnvCreatedStatus(Long datalakeId) {
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.ENVIRONMENT_CREATED,
+                ResourceEvent.SDX_ENVIRONMENT_FINISHED, "Environment created", datalakeId);
     }
 }

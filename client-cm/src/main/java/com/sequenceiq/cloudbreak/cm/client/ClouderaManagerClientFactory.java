@@ -18,6 +18,7 @@ import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.RoleCommandsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
+import com.cloudera.api.swagger.UsersResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
@@ -99,5 +100,16 @@ public class ClouderaManagerClientFactory {
 
     public CommandsResourceApi getCommandsResourceApi(ApiClient apiClient) {
         return new CommandsResourceApi(apiClient);
+    }
+
+    public UsersResourceApi getDefaultUsersResourceApi(Integer gatewayPort, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
+        ApiClient defaultClient = getDefaultClient(gatewayPort, clientConfig);
+        return new UsersResourceApi(defaultClient);
+    }
+
+    public UsersResourceApi getUserResourceApi(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig)
+            throws ClouderaManagerClientInitException {
+        ApiClient newClient = getClient(gatewayPort, user, password, clientConfig);
+        return new UsersResourceApi(newClient);
     }
 }

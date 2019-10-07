@@ -158,12 +158,20 @@ public class ServiceEndpointCollector {
         return exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.NONE;
     }
 
+    /**
+     * Get all exposed services for blueprint, there are filtered by visibility
+     *
+     * @param blueprint given blueprint
+     * @return all visible exposed services for the given blueprint
+     */
     private Collection<ExposedService> getExposedServices(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
-        return ExposedService.knoxServicesForComponents(
-                processor.getAllComponents().stream().map(
-                        ServiceComponent::getComponent).collect(Collectors.toList()));
+        List<String> components = processor.getAllComponents().stream().map(ServiceComponent::getComponent).collect(Collectors.toList());
+        return ExposedService.knoxServicesForComponents(components)
+                .stream()
+                .filter(ExposedService::isVisible)
+                .collect(Collectors.toList());
     }
 
     private Collection<ExposedServiceV4Response> getKnoxServices(Blueprint blueprint) {

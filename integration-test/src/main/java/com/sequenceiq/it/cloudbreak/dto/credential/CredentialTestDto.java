@@ -40,8 +40,8 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
     }
 
     public CredentialTestDto valid() {
-        withName(getResourceProperyProvider().getName());
-        withDescription(getResourceProperyProvider().getDescription("credential"));
+        withName(getResourcePropertyProvider().getName());
+        withDescription(getResourcePropertyProvider().getDescription("credential"));
         return getCloudProvider().credential(this);
     }
 
