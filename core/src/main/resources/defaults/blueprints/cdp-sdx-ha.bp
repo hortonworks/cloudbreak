@@ -147,7 +147,13 @@
                     {
                         "base": true,
                         "refName": "hdfs-NAMENODE-BASE",
-                        "roleType": "NAMENODE"
+                        "roleType": "NAMENODE",
+                        "configs": [
+                            {
+                                "name":"role_config_suppression_namenode_java_heapsize_minimum_validator",
+                                "value":"true"
+                            }
+                        ]
                     },
                     {
                         "base": true,
