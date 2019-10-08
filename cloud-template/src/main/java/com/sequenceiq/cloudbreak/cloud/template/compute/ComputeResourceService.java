@@ -302,7 +302,7 @@ public class ComputeResourceService {
                     LOGGER.debug("Determined resource builder for instances: {}", builder.resourceType());
                     for (CloudResourceStatus instanceResourceStatus : instanceResourceStatuses) {
                         PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
-                        if (CANCELLED.equals(pollGroup)) {
+                        if (pollGroup == null || CANCELLED.equals(pollGroup)) {
                             throw new CancellationException(format("Building of %s has been cancelled", instanceResourceStatus));
                         }
                         CloudResource instance = instanceResourceStatus.getCloudResource();
