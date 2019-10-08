@@ -91,7 +91,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
                         persistResources(auth, cloudResources);
 
                         PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
-                        if (CANCELLED.equals(pollGroup)) {
+                        if (isCancelled(pollGroup)) {
                             throw new CancellationException(format("Building of %s has been cancelled", cloudResources));
                         }
 
@@ -132,6 +132,10 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
                 resourceNotifier.notifyAllocation(cloudResource, auth.getCloudContext());
             }
         }
+    }
+
+    private boolean isCancelled(PollGroup pollGroup) {
+        return pollGroup == null || CANCELLED.equals(pollGroup);
     }
 
     private void updateResource(AuthenticatedContext auth, Iterable<CloudResource> cloudResources) {
