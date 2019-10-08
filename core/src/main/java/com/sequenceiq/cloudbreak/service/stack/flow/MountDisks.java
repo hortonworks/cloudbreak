@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +64,7 @@ public class MountDisks {
 
     public void mountAllDisks(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
         if (!StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant())) {
             return;
         }
@@ -118,6 +120,7 @@ public class MountDisks {
 
     public void mountDisksOnNewNodes(Long stackId, Set<String> upscaleCandidateAddresses) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
         if (!StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant())) {
             return;
         }

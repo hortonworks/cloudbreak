@@ -2,7 +2,6 @@
 
 : ${INTEGCB_LOCATION?"integcb location"}
 
-date
 echo -e "\n\033[1;96m--- Create cloudbreak context\033[0m\n"
 cp $INTEGCB_LOCATION/Profile_template $INTEGCB_LOCATION/Profile
 cp docker-compose_template.yml docker-compose.yml

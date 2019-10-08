@@ -112,7 +112,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             ClusterDecomissionService clusterDecomissionService = clusterApiConnectors.getConnector(stack).clusterDecomissionService();
             hostNames = getHostNamesForPrivateIds(request, stack);
             Cluster cluster = stack.getCluster();
-            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(cluster.getId(), hostGroupName)
+            HostGroup hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithHostMetadata(cluster.getId(), hostGroupName))
                     .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
             Map<String, HostMetadata> hostsToRemove = clusterDecomissionService.collectHostsToRemove(hostGroup, hostNames);
             Set<String> decomissionedHostNames;

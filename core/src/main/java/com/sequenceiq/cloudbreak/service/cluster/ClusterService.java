@@ -399,6 +399,7 @@ public class ClusterService {
 
     public void delete(Long stackId, Boolean withStackDelete) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
         LOGGER.debug("Cluster delete requested.");
         markVolumesForDeletion(stack);
         flowManager.triggerClusterTermination(stack, withStackDelete);
