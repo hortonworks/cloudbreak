@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -20,9 +19,8 @@ public class StreamsMessagingManagerServiceConfigProvider extends AbstractRdsRol
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        String cmHost = StringUtils.isNotEmpty(source.getGeneralClusterConfigs().getExternalFQDN()) ?
-                source.getGeneralClusterConfigs().getExternalFQDN() :
-                source.getGeneralClusterConfigs().getClusterManagerIp();
+        String cmHost = source.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN()
+                .orElse(source.getGeneralClusterConfigs().getClusterManagerIp());
 
         List<ApiClusterTemplateConfig> configs = Lists.newArrayList(
                 config("cm.metrics.host", cmHost),
