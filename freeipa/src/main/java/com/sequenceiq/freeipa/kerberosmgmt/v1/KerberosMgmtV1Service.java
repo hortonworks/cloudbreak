@@ -152,7 +152,7 @@ public class KerberosMgmtV1Service {
         LOGGER.debug("Request to delete service principal for account {}: {}", accountId, request);
         Stack freeIpaStack = getFreeIpaStack(request.getEnvironmentCrn(), accountId);
         String realm = getRealm(freeIpaStack);
-        String canonicalPrincipal = constructCanonicalPrincipal(request.getServiceName(), request.getServerHostName(), realm);
+        String canonicalPrincipal = constructPrincipal(request.getServiceName(), request.getServerHostName(), realm);
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientForStack(freeIpaStack);
         delService(canonicalPrincipal, ipaClient);
         VaultPathBuilder vaultPathBuilder = new VaultPathBuilder()
@@ -280,22 +280,48 @@ public class KerberosMgmtV1Service {
 
     private com.sequenceiq.freeipa.client.model.Service serviceAdd(ServiceKeytabRequest request, String realm, FreeIpaClient ipaClient)
             throws KeytabCreationException {
-        String canonicalPrincipal = constructCanonicalPrincipal(request.getServiceName(), request.getServerHostName(), realm);
+        String canonicalPrincipal = constructPrincipal(request.getServiceName(), request.getServerHostName(), realm);
         com.sequenceiq.freeipa.client.model.Service service;
         try {
-            try {
-                service = ipaClient.addService(canonicalPrincipal);
-            } catch (FreeIpaClientException e) {
-                if (!KerberosMgmtUtil.isDuplicateEntryException(e)) {
-                    throw e;
+            service = serviceAdd(canonicalPrincipal, ipaClient);
+            if (request.getServerHostNameAlias() != null) {
+                String aliasPrincipal = constructPrincipal(request.getServiceName(), request.getServerHostNameAlias(), realm);
+                if (!aliasPrincipal.equals(canonicalPrincipal)) {
+                    service = addServiceAlias(canonicalPrincipal, aliasPrincipal, ipaClient);
                 }
-                service = ipaClient.showService(canonicalPrincipal);
             }
             allowServiceKeytabRetrieval(service.getKrbprincipalname(), freeIpaClientFactory.getAdminUser(), ipaClient);
             roleComponent.addRoleAndPrivileges(Optional.of(service), Optional.empty(), request.getRoleRequest(), ipaClient);
         } catch (FreeIpaClientException e) {
             LOGGER.error(SERVICE_PRINCIPAL_CREATION_FAILED + " " + e.getLocalizedMessage(), e);
             throw new KeytabCreationException(SERVICE_PRINCIPAL_CREATION_FAILED);
+        }
+        return service;
+    }
+
+    private com.sequenceiq.freeipa.client.model.Service serviceAdd(String canonicalPrincipal, FreeIpaClient ipaClient) throws FreeIpaClientException {
+        com.sequenceiq.freeipa.client.model.Service service;
+        try {
+            service = ipaClient.addService(canonicalPrincipal);
+        } catch (FreeIpaClientException e) {
+            if (!KerberosMgmtUtil.isDuplicateEntryException(e)) {
+                throw e;
+            }
+            service = ipaClient.showService(canonicalPrincipal);
+        }
+        return service;
+    }
+
+    private com.sequenceiq.freeipa.client.model.Service addServiceAlias(String canonicalPrincipal, String aliasPrincipal, FreeIpaClient ipaClient)
+            throws FreeIpaClientException {
+        com.sequenceiq.freeipa.client.model.Service service;
+        try {
+            service = ipaClient.addServiceAlias(canonicalPrincipal, aliasPrincipal);
+        } catch (FreeIpaClientException e) {
+            if (!KerberosMgmtUtil.isDuplicateEntryException(e)) {
+                throw e;
+            }
+            service = ipaClient.showService(canonicalPrincipal);
         }
         return service;
     }
@@ -349,7 +375,7 @@ public class KerberosMgmtV1Service {
         }
     }
 
-    private static String constructCanonicalPrincipal(String serviceName, String hostName, String realm) {
+    private static String constructPrincipal(String serviceName, String hostName, String realm) {
         return serviceName + "/" + hostName + "@" + realm;
     }
 }
