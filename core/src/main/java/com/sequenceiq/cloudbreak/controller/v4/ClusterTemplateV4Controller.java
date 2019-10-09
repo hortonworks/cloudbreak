@@ -68,7 +68,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     public ClusterTemplateViewV4Responses list(Long workspaceId) {
         blueprintService.updateDefaultBlueprintCollection(workspaceId);
         clusterTemplateService.updateDefaultClusterTemplates(workspaceId);
-        Set<ClusterTemplateViewV4Response> result = clusterTemplateService.listInWorkspace(workspaceId);
+        Set<ClusterTemplateViewV4Response> result = clusterTemplateService.listInWorkspaceAndCleanUpInvalids(workspaceId);
         return new ClusterTemplateViewV4Responses(result);
     }
 
