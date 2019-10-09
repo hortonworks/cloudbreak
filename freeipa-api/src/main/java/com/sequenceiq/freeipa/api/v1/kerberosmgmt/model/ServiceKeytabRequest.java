@@ -25,6 +25,9 @@ public class ServiceKeytabRequest {
     @NotNull
     private String serverHostName;
 
+    @ApiModelProperty(value = KeytabModelDescription.SERVICE_HOST_ALIAS)
+    private String serverHostNameAlias;
+
     @ApiModelProperty(value = ModelDescriptions.CLUSTER_CRN)
     private String clusterCrn;
 
@@ -82,12 +85,21 @@ public class ServiceKeytabRequest {
         this.clusterCrn = clusterCrn;
     }
 
+    public String getServerHostNameAlias() {
+        return serverHostNameAlias;
+    }
+
+    public void setServerHostNameAlias(String serverHostNameAlias) {
+        this.serverHostNameAlias = serverHostNameAlias;
+    }
+
     @Override
     public String toString() {
         return "ServiceKeytabRequest{"
                 + "environmentCrn='" + environmentCrn + '\''
                 + ", serviceName='" + serviceName + '\''
                 + ", serverHostName='" + serverHostName + '\''
+                + ", serverHostNameAlias='" + serverHostNameAlias + '\''
                 + ", clusterCrn='" + clusterCrn + '\''
                 + ", doNotRecreateKeytab=" + doNotRecreateKeytab
                 + ", roleRequest=" + roleRequest

@@ -358,6 +358,12 @@ public class FreeIpaClient {
         return (Service) invoke("service_add", flags, params, Service.class).getResult();
     }
 
+    public Service addServiceAlias(String canonicalPrincipal, String principalname) throws FreeIpaClientException {
+        List<String> flags = List.of(canonicalPrincipal, principalname);
+        Map<String, Object> params = Map.of();
+        return (Service) invoke("service_add_principal", flags, params, Service.class).getResult();
+    }
+
     public Role addRole(String roleName) throws FreeIpaClientException {
         List<String> flags = List.of(roleName);
         Map<String, Object> params = Map.of();
