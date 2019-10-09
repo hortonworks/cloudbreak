@@ -16,7 +16,7 @@ public class SecurityRulesAction implements Action<SecurityRulesTestDto, Cloudbr
     public SecurityRulesTestDto action(TestContext testContext, SecurityRulesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         String logInitMessage = "Obtaining default security rules";
         LOGGER.info("{}", logInitMessage);
-        testDto.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().getDefaultSecurityRules(testDto.getKnoxEnabled()));
+        testDto.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().getDefaultSecurityRules());
         LOGGER.info("{} was successful", logInitMessage);
         return testDto;
     }

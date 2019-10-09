@@ -6,7 +6,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.util.Map;
 
@@ -18,7 +17,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
@@ -39,9 +37,6 @@ public class AmbariSSOServiceTest {
 
     @Before
     public void initTest() {
-        Field knoxPort = ReflectionUtils.findField(AmbariSSOService.class, "knoxPort", String.class);
-        knoxPort.setAccessible(true);
-        ReflectionUtils.setField(knoxPort, ambariSSOService, "8443");
     }
 
     @Test
@@ -58,7 +53,7 @@ public class AmbariSSOServiceTest {
         ambariSSOService.setupSSO(ambariClient, cluster, "hostname");
         verify(ambariClient, times(1)).configureSSO(captor.capture());
         Map<String, Object> parameters = captor.getValue();
-        assertThat(parameters, hasEntry("ambari.sso.provider.url", "https://hostname:8443/ssoprovider"));
+        assertThat(parameters, hasEntry("ambari.sso.provider.url", "https://hostname/ssoprovider"));
         assertThat(parameters, hasEntry("ambari.sso.provider.certificate", "cert"));
         assertThat(parameters, hasEntry("ambari.sso.authentication.enabled", true));
         assertThat(parameters, hasEntry("ambari.sso.manage_services", true));

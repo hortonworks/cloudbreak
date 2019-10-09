@@ -93,7 +93,7 @@ public class ClusterProxyService {
     private String knoxUrl(Stack stack) {
         String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
         Cluster cluster = stack.getCluster();
-        return String.format("https://%s:8443/%s", gatewayIp, cluster.getGateway().getPath());
+        return String.format("https://%s/%s", gatewayIp, cluster.getGateway().getPath());
     }
 
     private String clusterId(Cluster cluster) {

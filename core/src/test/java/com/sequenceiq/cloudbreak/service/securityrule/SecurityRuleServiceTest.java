@@ -25,20 +25,18 @@ public class SecurityRuleServiceTest {
     public void setUp() {
         ReflectionTestUtils.setField(underTest, "gatewayPort", "9443");
         ReflectionTestUtils.setField(underTest, "httpsPort", "443");
-        ReflectionTestUtils.setField(underTest, "knoxPort", "8443");
         ReflectionTestUtils.setField(underTest, "sshPort", "22");
         ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Sets.newHashSet("0.0.0.0/0"));
     }
 
     @Test
     public void getDefaultSecurityRulesWhenKnoxIsEnabled() {
-        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(true);
+        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules();
 
-        Assert.assertEquals(4, defaultSecurityRules.getGateway().size());
+        Assert.assertEquals(3, defaultSecurityRules.getGateway().size());
         Assert.assertEquals(1, defaultSecurityRules.getCore().size());
 
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
-        Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "8443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "22"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));
@@ -46,13 +44,12 @@ public class SecurityRuleServiceTest {
 
     @Test
     public void getDefaultSecurityRulesWhenKnoxIsEnabledAndKnoxPortIsSet() {
-        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(true);
+        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules();
 
-        Assert.assertEquals(4, defaultSecurityRules.getGateway().size());
+        Assert.assertEquals(3, defaultSecurityRules.getGateway().size());
         Assert.assertEquals(1, defaultSecurityRules.getCore().size());
 
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
-        Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "8443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "22"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));
@@ -60,13 +57,12 @@ public class SecurityRuleServiceTest {
 
     @Test
     public void getDefaultSecurityRulesWhenKnoxIsDisabledAndHttpsPortIsSet() {
-        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules(false);
+        SecurityRulesV4Response defaultSecurityRules = underTest.getDefaultSecurityRules();
 
         Assert.assertEquals(3, defaultSecurityRules.getGateway().size());
         Assert.assertEquals(1, defaultSecurityRules.getCore().size());
 
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "9443"));
-        Assert.assertFalse(containsServicePort(defaultSecurityRules.getGateway(), "8443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "443"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getGateway(), "22"));
         Assert.assertTrue(containsServicePort(defaultSecurityRules.getCore(), "22"));

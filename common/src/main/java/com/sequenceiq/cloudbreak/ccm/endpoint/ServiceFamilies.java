@@ -23,7 +23,7 @@ public class ServiceFamilies {
      * The service family for Apache Knox proxy servers.
      */
     public static final ServiceFamily<HttpsServiceEndpoint> KNOX =
-            new AbstractServiceFamily<>(8443, KnownServiceIdentifier.KNOX) {
+            new AbstractServiceFamily<>(443, KnownServiceIdentifier.KNOX) {
                 @Nonnull
                 @Override
                 public HttpsServiceEndpoint getServiceEndpoint(@Nonnull HostEndpoint hostEndpoint, int port) {

@@ -34,7 +34,7 @@ public class AmbariClusterRequestResponse extends ITResponse {
     }
 
     private String createUrl(String ipAddress, String clusterName, int id) {
-        return String.format("https://%s:8443/%s/dp-proxy/ambari/api/v1/clusters/%s/requests/%d", ipAddress, clusterName, clusterName, id);
+        return String.format("https://%s:443/%s/dp-proxy/ambari/api/v1/clusters/%s/requests/%d", ipAddress, clusterName, clusterName, id);
     }
 
     private int getNextId() {

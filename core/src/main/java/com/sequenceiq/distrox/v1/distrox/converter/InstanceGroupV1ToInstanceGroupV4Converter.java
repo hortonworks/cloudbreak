@@ -98,7 +98,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         List<String> ret = new ArrayList<>();
         ret.add("22");
         if (type == InstanceGroupType.GATEWAY) {
-            ret.addAll(List.of("9443", "8443", "443"));
+            ret.addAll(List.of("9443", "443"));
         }
         return ret;
     }
