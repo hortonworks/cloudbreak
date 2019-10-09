@@ -292,7 +292,7 @@ public class StackImageUpdateActionsTest {
         StackEvent payload = new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), 1L);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.SET_IMAGE_STATE);
-        when(resourceService.findAllByStackId(anyLong()))
+        when(resourceService.getAllByStackId(anyLong()))
                 .thenReturn(Collections.singletonList(new Resource(ResourceType.CLOUDFORMATION_STACK, "cf", stack)));
         when(resourceToCloudResourceConverter.convert(any(Resource.class)))
                 .thenReturn(CloudResource.builder().type(ResourceType.CLOUDFORMATION_STACK).name("cfresource").build());

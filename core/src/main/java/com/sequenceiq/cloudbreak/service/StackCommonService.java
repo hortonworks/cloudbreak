@@ -271,15 +271,15 @@ public class StackCommonService {
     public void retryInWorkspaceByName(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
-        operationRetryService.retry(stack);
+        Long stackId = stackService.getIdByNameInWorkspace(name, workspaceId);
+        operationRetryService.retry(stackId);
     }
 
     public void retryInWorkspaceByCrn(String crn, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResource.DATAHUB, ResourceAction.WRITE, user.getUserCrn());
-        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
-        operationRetryService.retry(stack);
+        Long stackId = stackService.getIdByNameInWorkspace(crn, workspaceId);
+        operationRetryService.retry(stackId);
     }
 
     public GeneratedBlueprintV4Response postStackForBlueprint(StackV4Request stackRequest) {

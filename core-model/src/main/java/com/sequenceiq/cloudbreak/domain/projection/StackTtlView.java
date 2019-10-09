@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.projection;
 
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 public interface StackTtlView {
 
@@ -8,9 +9,9 @@ public interface StackTtlView {
 
     String getName();
 
-    String getOwner();
+    String getCrn();
 
-    String getAccount();
+    Workspace getWorkspace();
 
     StackStatus getStatus();
 

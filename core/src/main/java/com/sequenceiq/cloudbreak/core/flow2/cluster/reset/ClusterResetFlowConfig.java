@@ -62,4 +62,9 @@ public class ClusterResetFlowConfig extends AbstractFlowConfiguration<ClusterRes
                 CLUSTER_RESET_EVENT
         };
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Cluster reset";
+    }
 }

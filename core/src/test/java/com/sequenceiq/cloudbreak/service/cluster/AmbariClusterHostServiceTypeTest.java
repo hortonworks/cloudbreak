@@ -161,6 +161,7 @@ public class AmbariClusterHostServiceTypeTest {
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
         when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
+        when(hostGroupService.countByClusterIdAndName(anyLong(), anyString())).thenReturn(3L);
 
         underTest.updateHosts(stack.getId(), json);
     }
@@ -178,7 +179,8 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
+        when(hostGroupService.countByClusterIdAndName(any(Long.class), anyString())).thenReturn(3L);
+        when(hostGroupService.findHostGroupInClusterByName(any(Long.class), anyString())).thenReturn(Optional.of(hostGroup));
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -201,6 +203,7 @@ public class AmbariClusterHostServiceTypeTest {
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
         when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
+        when(hostGroupService.countByClusterIdAndName(anyLong(), anyString())).thenReturn(3L);
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -223,6 +226,7 @@ public class AmbariClusterHostServiceTypeTest {
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
         when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
+        when(hostGroupService.countByClusterIdAndName(anyLong(), anyString())).thenReturn(3L);
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -246,6 +250,7 @@ public class AmbariClusterHostServiceTypeTest {
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
         when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
+        when(hostGroupService.countByClusterIdAndName(anyLong(), anyString())).thenReturn(3L);
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -268,6 +273,7 @@ public class AmbariClusterHostServiceTypeTest {
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
         when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
+        when(hostGroupService.countByClusterIdAndName(anyLong(), anyString())).thenReturn(3L);
 
         underTest.updateHosts(stack.getId(), json);
 

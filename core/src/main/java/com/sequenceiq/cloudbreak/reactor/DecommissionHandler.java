@@ -112,7 +112,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             ClusterDecomissionService clusterDecomissionService = clusterApiConnectors.getConnector(stack).clusterDecomissionService();
             hostNames = getHostNamesForPrivateIds(request, stack);
             Cluster cluster = stack.getCluster();
-            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(cluster.getId(), hostGroupName)
+            HostGroup hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithHostMetadata(cluster.getId(), hostGroupName))
                     .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
             Map<String, HostMetadata> hostsToRemove = clusterDecomissionService.collectHostsToRemove(hostGroup, hostNames);
             Set<String> decomissionedHostNames;
@@ -171,7 +171,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
 
     private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {
         try {
-            Optional<HostGroup> hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName);
+            Optional<HostGroup> hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName));
             recipeEngine.executePreTerminationRecipes(stack, hostGroup.map(Collections::singleton).orElse(Collections.emptySet()), hostNames);
         } catch (Exception ex) {
             LOGGER.warn(ex.getLocalizedMessage(), ex);

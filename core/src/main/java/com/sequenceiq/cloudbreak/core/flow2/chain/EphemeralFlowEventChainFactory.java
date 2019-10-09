@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClustersUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
@@ -35,8 +35,8 @@ public class EphemeralFlowEventChainFactory implements FlowEventChainFactory<Eph
 
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(EphemeralClustersUpgradeTriggerEvent event) {
-        Set<Stack> ephemeralStacks = stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getResourceId());
-        for (Stack stack : ephemeralStacks) {
+        Set<StackIdView> ephemeralStacks = stackService.findClustersConnectedToDatalake(event.getResourceId());
+        for (StackIdView stack : ephemeralStacks) {
             try {
                 flowManager.triggerEphemeralUpdate(stack.getId());
             } catch (Exception e) {

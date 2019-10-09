@@ -57,6 +57,11 @@ public class MaintenanceModeValidationFlowConfig extends AbstractFlowConfigurati
     }
 
     @Override
+    public String getDisplayName() {
+        return "Maintenance mode validation";
+    }
+
+    @Override
     protected List<Transition<MaintenanceModeValidationState, MaintenanceModeValidationEvent>> getTransitions() {
         return TRANSITIONS;
     }

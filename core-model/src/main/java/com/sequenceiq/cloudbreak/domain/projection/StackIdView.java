@@ -5,4 +5,6 @@ public interface StackIdView {
     Long getId();
 
     String getName();
+
+    String getCrn();
 }

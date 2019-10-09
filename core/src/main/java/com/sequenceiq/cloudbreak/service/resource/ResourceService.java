@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.resource;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,8 +39,8 @@ public class ResourceService {
         return list;
     }
 
-    public List<Resource> findAllByStackId(Long id) {
-        return repository.findAllByStackId(id);
+    public Collection<Resource> getAllByStackId(Long stackId) {
+        return repository.findAllByStackId(stackId);
     }
 
     public Optional<Resource> findByStackIdAndNameAndType(Long stackId, String name, ResourceType type) {
@@ -57,5 +58,4 @@ public class ResourceService {
     public Iterable<Resource> saveAll(Iterable<Resource> resources) {
         return repository.saveAll(resources);
     }
-
 }

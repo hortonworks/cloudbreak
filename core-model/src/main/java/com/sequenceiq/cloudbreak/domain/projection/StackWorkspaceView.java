@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.domain.projection;
 
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 public interface StackWorkspaceView {
 

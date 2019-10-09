@@ -308,7 +308,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private Collection<ApiService> readServices(Stack stack) throws ApiException {
         ServicesResourceApi api = clouderaManagerClientFactory.getServicesResourceApi(client);
-        return api.readServices(stack.getCluster().getName(), SUMMARY).getItems();
+        return api.readServices(stack.getName(), SUMMARY).getItems();
     }
 
     @Override

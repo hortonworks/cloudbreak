@@ -79,4 +79,9 @@ public class StackImageUpdateFlowConfig extends AbstractFlowConfiguration<StackI
     public StackImageUpdateEvent[] getInitEvents() {
         return new StackImageUpdateEvent[]{STACK_IMAGE_UPDATE_EVENT};
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Update stack image";
+    }
 }

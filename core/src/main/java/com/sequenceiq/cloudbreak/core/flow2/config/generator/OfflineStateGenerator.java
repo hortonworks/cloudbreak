@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,13 +57,15 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFl
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
+import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.Flow;
@@ -276,13 +277,23 @@ public class OfflineStateGenerator {
     static class CustomStackRepository implements StackRepository {
 
         @Override
-        public Optional<Stack> findByAmbari(String ambariIp) {
+        public Optional<StackIdView> findByAmbari(String clusterManagerIp) {
             return Optional.empty();
         }
 
         @Override
-        public Set<Stack> findForWorkspaceIdWithLists(Long workspaceId) {
+        public Set<Stack> findAllByWorkspace(Workspace workspace) {
             return null;
+        }
+
+        @Override
+        public Set<Stack> findAllByWorkspaceId(Long workspaceId) {
+            return null;
+        }
+
+        @Override
+        public Optional<Stack> findByNameAndWorkspace(String name, Workspace workspace) {
+            return Optional.empty();
         }
 
         @Override
@@ -306,7 +317,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public List<Stack> findByEnvironmentCrnAndStackType(String environmentCrn, StackType type) {
+        public List<StackStatusView> findByEnvironmentCrnAndStackType(String environmentCrn, StackType type) {
             return null;
         }
 
@@ -341,32 +352,17 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findEphemeralClusters(Long id) {
+        public Set<StackIdView> findEphemeralClusters(Long id) {
             return null;
         }
 
         @Override
-        public List<Stack> findAllStackForTemplate(Long id) {
+        public List<StackStatusView> findStackStatusesWithoutAuth(Set<Long> ids) {
             return null;
         }
 
         @Override
-        public List<Object[]> findStackStatusesWithoutAuth(Set<Long> ids) {
-            return null;
-        }
-
-        @Override
-        public Optional<Stack> findStackForCluster(Long id) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<Stack> findByNameInWorkspaceWithLists(String name, Workspace workspace) {
-            return Optional.empty();
-        }
-
-        @Override
-        public List<Stack> findAllAlive() {
+        public List<StackTtlView> findAllAlive() {
             return null;
         }
 
@@ -376,22 +372,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findAllAliveWithNoWorkspaceOrUser() {
-            return null;
-        }
-
-        @Override
-        public List<Stack> findAllAliveAndProvisioned() {
-            return null;
-        }
-
-        @Override
-        public Set<Stack> findAllForWorkspace(Long workspaceId) {
-            return null;
-        }
-
-        @Override
-        public List<Stack> findByStatuses(List<Status> statuses) {
+        public List<StackStatusView> findByStatuses(List<Status> statuses) {
             return null;
         }
 
@@ -401,48 +382,13 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findByNetwork(Network network) {
-            return null;
-        }
-
-        @Override
-        public List<String> findNamesOfAliveOnesByWorkspaceAndEnvironment(Long workspaceId, String environmentCrn) {
-            return null;
-        }
-
-        @Override
-        public Set<Stack> findTerminatedByWorkspaceIdAndEnvironmentId(Long workspaceId, Long environmentId) {
-            return null;
-        }
-
-        @Override
-        public Long countAliveOnesByWorkspaceAndEnvironment(Long workspaceId, String environmentCrn) {
-            return null;
-        }
-
-        @Override
-        public Long findWorkspaceIdById(Long id) {
+        public Set<StackIdView> findByNetwork(Network network) {
             return null;
         }
 
         @Override
         public Long findWorkspaceIdByCrn(String crn) {
             return null;
-        }
-
-        @Override
-        public Set<String> findDatalakeStackNamesByWorkspaceAndEnvironment(Long workspaceId, String environmentCrn) {
-            return null;
-        }
-
-        @Override
-        public Set<String> findWorkloadStackNamesByWorkspaceAndEnvironment(Long workspaceId, String environmentCrn) {
-            return null;
-        }
-
-        @Override
-        public Optional<Workspace> findWorkspaceById(Long id) {
-            return Optional.empty();
         }
 
         @Override
@@ -461,6 +407,26 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public String findTimeToLiveValueForSTack(Long stackId, String ttl) {
+            return null;
+        }
+
+        @Override
+        public Boolean anyStackInWorkspace(Long workspaceId) {
+            return Boolean.TRUE;
+        }
+
+        @Override
+        public Boolean findTemplateInUse(Long templateId) {
+            return Boolean.TRUE;
+        }
+
+        @Override
+        public Optional<Long> findIdByNameAndWorkspaceId(String name, Long workspaceId) {
+            return Optional.empty();
+        }
+
+        @Override
         public <S extends Stack> S save(S entity) {
             return entity;
         }
@@ -472,10 +438,7 @@ public class OfflineStateGenerator {
 
         @Override
         public Optional<Stack> findById(Long aLong) {
-            Stack stack = new Stack();
-            stack.setWorkspace(new Workspace());
-            stack.setCreator(new User());
-            return Optional.of(stack);
+            return Optional.empty();
         }
 
         @Override
@@ -485,12 +448,12 @@ public class OfflineStateGenerator {
 
         @Override
         public Iterable<Stack> findAll() {
-            return Collections.emptyList();
+            return () -> null;
         }
 
         @Override
         public Iterable<Stack> findAllById(Iterable<Long> longs) {
-            return Collections.emptyList();
+            return () -> null;
         }
 
         @Override
@@ -516,21 +479,6 @@ public class OfflineStateGenerator {
         @Override
         public void deleteAll() {
 
-        }
-
-        @Override
-        public Set<Stack> findAllByWorkspace(Workspace workspace) {
-            return null;
-        }
-
-        @Override
-        public Optional<Stack> findByNameAndWorkspace(String name, Workspace workspace) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Set<Stack> findAllByWorkspaceId(Long workspaceId) {
-            return null;
         }
     }
 

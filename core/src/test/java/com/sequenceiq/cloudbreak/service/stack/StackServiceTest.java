@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationSt
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -379,8 +380,8 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWithForceByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack1 = mock(Stack.class);
-        Stack stack2 = mock(Stack.class);
+        StackIdView stack1 = mock(StackIdView.class);
+        StackIdView stack2 = mock(StackIdView.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
@@ -401,8 +402,8 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWithoutForceByNameWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack1 = mock(Stack.class);
-        Stack stack2 = mock(Stack.class);
+        StackIdView stack1 = mock(StackIdView.class);
+        StackIdView stack2 = mock(StackIdView.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
@@ -423,7 +424,7 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWithForceByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack = mock(Stack.class);
+        StackIdView stack = mock(StackIdView.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
@@ -443,7 +444,7 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWithoutForceByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack = mock(Stack.class);
+        StackIdView stack = mock(StackIdView.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
@@ -463,8 +464,8 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWithForceByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack1 = mock(Stack.class);
-        Stack stack2 = mock(Stack.class);
+        StackIdView stack1 = mock(StackIdView.class);
+        StackIdView stack2 = mock(StackIdView.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
@@ -486,8 +487,8 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWithoutForceByIdWhenStachHasMultipleAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack1 = mock(Stack.class);
-        Stack stack2 = mock(Stack.class);
+        StackIdView stack1 = mock(StackIdView.class);
+        StackIdView stack2 = mock(StackIdView.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
@@ -509,7 +510,7 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWithForceByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack = mock(Stack.class);
+        StackIdView stack = mock(StackIdView.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
@@ -530,7 +531,7 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWithoutForceByIdWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
-        Stack stack = mock(Stack.class);
+        StackIdView stack = mock(StackIdView.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
@@ -569,9 +570,7 @@ public class StackServiceTest {
         Stack stack = mock(Stack.class);
         when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.empty());
         when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
-        when(stack.isDeleteInProgress()).thenReturn(Boolean.TRUE);
         when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getWorkspace()).thenReturn(workspace);
         FlowLog flowLog = new FlowLog();
         flowLog.setVariables("{\"FORCEDTERMINATION\":false}");
         flowLog.setCurrentState(StackTerminationState.PRE_TERMINATION_STATE.name());

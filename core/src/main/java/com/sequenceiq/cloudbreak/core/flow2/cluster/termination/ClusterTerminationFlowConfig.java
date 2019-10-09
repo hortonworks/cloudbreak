@@ -70,4 +70,9 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
         return new ClusterTerminationEvent[]{ TERMINATION_EVENT, PROPER_TERMINATION_EVENT };
     }
 
+    @Override
+    public String getDisplayName() {
+        return "Terminate cluster";
+    }
+
 }

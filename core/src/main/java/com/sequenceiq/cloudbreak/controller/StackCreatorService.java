@@ -367,9 +367,12 @@ public class StackCreatorService {
     }
 
     private void ensureStackDoesNotExists(String stackName, Workspace workspace) {
-        stackService.findStackByNameAndWorkspaceId(stackName, workspace.getId()).ifPresent(stack -> {
-            throw new BadRequestException("Cluster already exists: " + stackName);
-        });
+        try {
+            stackService.getIdByNameInWorkspace(stackName, workspace.getId());
+        } catch (NotFoundException e) {
+            return;
+        }
+        throw new BadRequestException("Cluster already exists: " + stackName);
     }
 
     private Blueprint determineBlueprint(StackV4Request stackRequest, Workspace workspace) {

@@ -15,13 +15,13 @@ import static com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionS
 import static com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionState.REDBEAMS_PROVISION_FINISHED_STATE;
 import static com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionState.UPDATE_DATABASE_SERVER_REGISTRATION_STATE;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
-
 import java.util.List;
 
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class RedbeamsProvisionFlowConfig extends AbstractFlowConfiguration<RedbeamsProvisionState, RedbeamsProvisionEvent>
@@ -65,6 +65,11 @@ public class RedbeamsProvisionFlowConfig extends AbstractFlowConfiguration<Redbe
     @Override
     public RedbeamsProvisionEvent[] getInitEvents() {
         return REDBEAMS_INIT_EVENTS;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Provision RDS";
     }
 
     @Override

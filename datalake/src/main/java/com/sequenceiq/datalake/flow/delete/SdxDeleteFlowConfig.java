@@ -58,6 +58,11 @@ public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteStat
     }
 
     @Override
+    public String getDisplayName() {
+        return "Delete SDX";
+    }
+
+    @Override
     protected List<Transition<SdxDeleteState, SdxDeleteEvent>> getTransitions() {
         return TRANSITIONS;
     }

@@ -399,6 +399,7 @@ public class ClusterService {
 
     public void delete(Long stackId, Boolean withStackDelete) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
         LOGGER.debug("Cluster delete requested.");
         markVolumesForDeletion(stack);
         flowManager.triggerClusterTermination(stack, withStackDelete);
@@ -1181,8 +1182,7 @@ public class ClusterService {
 
     private void validateRegisteredHosts(Stack stack, HostGroupAdjustmentV4Request hostGroupAdjustment) {
         String hostGroup = hostGroupAdjustment.getHostGroup();
-        int hostsCount = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroup)
-                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroup)).getHostMetadata().size();
+        Long hostsCount = hostGroupService.countByClusterIdAndName(stack.getCluster().getId(), hostGroup);
         int adjustment = Math.abs(hostGroupAdjustment.getScalingAdjustment());
         Boolean validateNodeCount = hostGroupAdjustment.getValidateNodeCount();
         if (validateNodeCount == null || validateNodeCount) {

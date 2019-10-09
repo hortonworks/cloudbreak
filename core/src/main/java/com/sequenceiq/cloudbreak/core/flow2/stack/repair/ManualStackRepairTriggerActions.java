@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.StackRepairService;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -91,6 +93,9 @@ public class ManualStackRepairTriggerActions {
         @Inject
         private StackService stackService;
 
+        @Inject
+        private ResourceService resourceService;
+
         protected AbstractStackRepairTriggerAction(Class<P> payloadClass) {
             super(payloadClass);
         }
@@ -100,6 +105,7 @@ public class ManualStackRepairTriggerActions {
                 FlowParameters flowParameters, StateContext<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> stateContext, P payload) {
             Long stackId = payload.getResourceId();
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+            stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
             return new StackRepairTriggerContext(flowParameters, stack);
         }
 

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.reactor;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -61,6 +64,9 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Inject
+    private TransactionService transactionService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(CollectDownscaleCandidatesRequest.class);
@@ -71,26 +77,33 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
         CollectDownscaleCandidatesRequest request = event.getData();
         CollectDownscaleCandidatesResult result;
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            int defaultRootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(stack.cloudPlatform());
-            Set<Long> privateIds = request.getPrivateIds();
-            if (noSelectedInstancesForDownscale(privateIds)) {
-                privateIds = collectCandidates(request, stack, defaultRootVolumeSize);
-            } else {
-                List<InstanceMetaData> instanceMetaDataList = stackService.getInstanceMetaDataForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
-                List<InstanceMetaData> notDeletedNodes = instanceMetaDataList.stream()
-                        .filter(instanceMetaData -> !instanceMetaData.isTerminated() && !instanceMetaData.isDeletedOnProvider())
-                        .collect(Collectors.toList());
-                if (!request.getDetails().isForced()) {
-                    Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
-                    Multimap<Long, HostMetadata> hostGroupWithInstances = getHostGroupWithInstances(stack, notDeletedNodes);
-                    clusterApiConnectors.getConnector(stack).clusterDecomissionService().verifyNodesAreRemovable(hostGroupWithInstances, hostGroups,
-                            defaultRootVolumeSize, notDeletedNodes);
+            result = transactionService.required(() -> {
+                try {
+                    Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+                    int defaultRootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(stack.cloudPlatform());
+                    Set<Long> privateIds = request.getPrivateIds();
+                    if (noSelectedInstancesForDownscale(privateIds)) {
+                        privateIds = collectCandidates(request, stack, defaultRootVolumeSize);
+                    } else {
+                        List<InstanceMetaData> instanceMetaDataList =
+                                stackService.getInstanceMetaDataForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
+                        List<InstanceMetaData> notDeletedNodes = instanceMetaDataList.stream()
+                                .filter(instanceMetaData -> !instanceMetaData.isTerminated() && !instanceMetaData.isDeletedOnProvider())
+                                .collect(Collectors.toList());
+                        if (!request.getDetails().isForced()) {
+                            Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
+                            Multimap<Long, HostMetadata> hostGroupWithInstances = getHostGroupWithInstances(stack, notDeletedNodes);
+                            clusterApiConnectors.getConnector(stack).clusterDecomissionService().verifyNodesAreRemovable(hostGroupWithInstances, hostGroups,
+                                    defaultRootVolumeSize, notDeletedNodes);
+                        }
+                    }
+                    return new CollectDownscaleCandidatesResult(request, privateIds);
+                } catch (Exception e) {
+                    return new CollectDownscaleCandidatesResult(e.getMessage(), e, request);
                 }
-            }
-            result = new CollectDownscaleCandidatesResult(request, privateIds);
-        } catch (Exception e) {
-            result = new CollectDownscaleCandidatesResult(e.getMessage(), e, request);
+            });
+        } catch (TransactionExecutionException e) {
+            throw e.getCause();
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
@@ -110,7 +123,7 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
 
     private Set<Long> collectCandidates(CollectDownscaleCandidatesRequest request, Stack stack, int defaultRootVolumeSize)
             throws CloudbreakException {
-        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), request.getHostGroupName())
+        HostGroup hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithHostMetadata(stack.getCluster().getId(), request.getHostGroupName()))
                 .orElseThrow(NotFoundException.notFound("hostgroup", request.getHostGroupName()));
         Set<InstanceMetaData> instanceMetaDatasInStack = instanceMetaDataService.findAllInStack(stack.getId());
         Set<String> hostNames = clusterApiConnectors.getConnector(stack).clusterDecomissionService()

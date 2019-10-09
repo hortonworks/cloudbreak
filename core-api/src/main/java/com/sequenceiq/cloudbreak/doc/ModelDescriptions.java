@@ -464,6 +464,7 @@ public class ModelDescriptions {
     public static class InstanceGroupAdjustmentModelDescription {
         public static final String SCALING_ADJUSTMENT = "scaling adjustment of the instance groups";
         public static final String WITH_CLUSTER_EVENT = "on stack update, update cluster too";
+        public static final String FORCE = "Force remove instance";
     }
 
     public static class MpackDetailsDescription {
@@ -510,6 +511,7 @@ public class ModelDescriptions {
         public static final String SCALING_ADJUSTMENT = "scaling adjustment of the host groups";
         public static final String WITH_STACK_UPDATE = "on cluster update, update stack too";
         public static final String VALIDATE_NODE_COUNT = "validate node count during downscale";
+        public static final String FORCED = "Force remove host";
     }
 
     public static class InstanceMetaDataModelDescription {

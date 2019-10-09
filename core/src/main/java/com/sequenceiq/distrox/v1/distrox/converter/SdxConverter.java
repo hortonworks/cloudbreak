@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
@@ -29,7 +29,7 @@ public class SdxConverter {
     }
 
     public SharedServiceV4Request getSharedService(SdxV1Request sdx, String environemntCrn) {
-        List<Stack> datalakes = stackService.getByEnvironmentCrnAndStackType(environemntCrn, StackType.DATALAKE);
+        List<StackStatusView> datalakes = stackService.getByEnvironmentCrnAndStackType(environemntCrn, StackType.DATALAKE);
         StringBuilder name = new StringBuilder();
         if (sdx == null) {
             if (datalakes.isEmpty()) {
@@ -42,12 +42,12 @@ public class SdxConverter {
         } else {
             name.append(sdx.getName());
         }
-        Stack datalake = datalakes.stream()
+        StackStatusView datalake = datalakes.stream()
                 .filter(sr -> sr.getName().equals(name.toString()))
                 .findFirst()
                 .orElseThrow(() -> new BadRequestException("The given Datalake not attached to the environment"));
-        if (datalake.getStatus() != Status.AVAILABLE) {
-            throw new BadRequestException(String.format("Datalake status is invalid. Current state is %s instead of %s", datalake.getStatus().name(),
+        if (datalake.getStatus().getStatus() != Status.AVAILABLE) {
+            throw new BadRequestException(String.format("Datalake status is invalid. Current state is %s instead of %s", datalake.getStatus().getStatus().name(),
                     Status.AVAILABLE));
         }
         return getSharedServiceV4Request(name.toString());

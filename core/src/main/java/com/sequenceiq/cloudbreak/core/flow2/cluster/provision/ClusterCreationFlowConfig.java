@@ -109,6 +109,11 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
     }
 
     @Override
+    public String getDisplayName() {
+        return "Create cluster";
+    }
+
+    @Override
     protected List<Transition<ClusterCreationState, ClusterCreationEvent>> getTransitions() {
         return TRANSITIONS;
     }

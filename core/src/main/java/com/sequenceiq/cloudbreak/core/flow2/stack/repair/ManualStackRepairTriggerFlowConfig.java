@@ -57,4 +57,9 @@ public class ManualStackRepairTriggerFlowConfig extends AbstractFlowConfiguratio
                 MANUAL_STACK_REPAIR_TRIGGER_EVENT
         };
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Manual stack repair";
+    }
 }

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
+import java.util.HashSet;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -30,6 +32,9 @@ import com.sequenceiq.flow.core.FlowParameters;
 public abstract class AbstractStackCreationAction<P extends Payload> extends AbstractStackAction<StackCreationState, StackCreationEvent, StackContext, P> {
     @Inject
     private StackService stackService;
+
+    @Inject
+    private ResourceService resourceService;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
@@ -44,6 +49,7 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
     @Override
     protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
+        stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -44,6 +45,9 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private ResourceService resourceService;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
@@ -63,6 +67,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
             P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
+        stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),

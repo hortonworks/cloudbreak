@@ -9,13 +9,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Supplier;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
@@ -42,8 +45,16 @@ public class CollectDownscaleCandidatesHandlerTest {
     @Mock
     private StackService stackService;
 
+    @Mock
+    private TransactionService transactionService;
+
     @InjectMocks
     private CollectDownscaleCandidatesHandler testedClass;
+
+    @Before
+    public void setUp() throws Exception {
+        when(transactionService.required(any(Supplier.class))).then(invocationOnMock -> ((Supplier) invocationOnMock.getArgument(0)).get());
+    }
 
     @Test
     public void testFlowWithPrivateIds() {

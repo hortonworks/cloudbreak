@@ -89,4 +89,9 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
                 ADD_INSTANCES_EVENT
         };
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Upscale stack";
+    }
 }

@@ -54,4 +54,9 @@ public class ClusterSyncFlowConfig extends AbstractFlowConfiguration<ClusterSync
                 CLUSTER_SYNC_EVENT
         };
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Sync cluster";
+    }
 }

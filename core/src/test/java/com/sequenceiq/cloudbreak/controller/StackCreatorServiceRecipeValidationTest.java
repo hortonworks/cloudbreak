@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -166,12 +167,13 @@ class StackCreatorServiceRecipeValidationTest {
         String existingRecipeName = "existingRecipe";
 
         StackV4Request request = new StackV4Request();
+        request.setName("stack_name");
         request.setInstanceGroups(List.of(getInstanceGroupWithRecipe(INSTANCE_GROUP_MASTER, Set.of(existingRecipeName))));
 
         when(recipeService.get(any(RecipeAccessDto.class), eq(WORKSPACE_ID))).thenReturn(getRecipeWithName(existingRecipeName));
         when(converterUtil.convert(request, Stack.class)).thenReturn(TestUtil.stack());
         when(transactionService.required(any())).thenReturn(TestUtil.stack());
-
+        when(stackService.getIdByNameInWorkspace(anyString(), any(Long.class))).thenThrow(new NotFoundException("stack not found by name"));
         underTest.createStack(user, workspace, request);
 
         verify(recipeService, times(1)).get(any(RecipeAccessDto.class), anyLong());
@@ -180,11 +182,13 @@ class StackCreatorServiceRecipeValidationTest {
     @Test
     void voidTestIfRecipeDoesNotExistInInstanceGroupV4RequestThenEverythingShouldGoFine() throws TransactionExecutionException {
         StackV4Request request = new StackV4Request();
+        request.setName("stack_name");
         request.setInstanceGroups(List.of(getInstanceGroupWithRecipe(INSTANCE_GROUP_MASTER, null),
                 getInstanceGroupWithRecipe(INSTANCE_GROUP_COMPUTE, null)));
 
         when(converterUtil.convert(request, Stack.class)).thenReturn(TestUtil.stack());
         when(transactionService.required(any())).thenReturn(TestUtil.stack());
+        when(stackService.getIdByNameInWorkspace(anyString(), any(Long.class))).thenThrow(new NotFoundException("stack not found by name"));
 
         underTest.createStack(user, workspace, request);
 

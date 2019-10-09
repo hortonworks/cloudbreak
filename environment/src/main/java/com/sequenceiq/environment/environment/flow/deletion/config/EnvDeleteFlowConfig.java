@@ -77,6 +77,11 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
     }
 
     @Override
+    public String getDisplayName() {
+        return "Delete environment";
+    }
+
+    @Override
     public EnvDeleteStateSelectors getFailHandledEvent() {
         return HANDLED_FAILED_ENV_DELETE_EVENT;
     }

@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
@@ -65,5 +66,13 @@ public class HostMetadataService {
             hmd.setStatusReason(explanation);
             repository.save(hmd);
         });
+    }
+
+    public Set<StackInstanceCount> countUnhealthyByWorkspaceId(Long workspaceId) {
+        return repository.countUnhealthyByWorkspaceId(workspaceId);
+    }
+
+    public Long countByClusterIdAndHostGroupName(Long id, String hostGroupName) {
+        return repository.countByClusterIdAndHostGroupName(id, hostGroupName);
     }
 }

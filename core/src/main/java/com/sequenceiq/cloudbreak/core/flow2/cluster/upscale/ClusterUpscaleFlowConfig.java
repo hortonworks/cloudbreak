@@ -147,4 +147,9 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
     public ClusterUpscaleEvent[] getInitEvents() {
         return new ClusterUpscaleEvent[]{CLUSTER_UPSCALE_TRIGGER_EVENT};
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Upscale cluster";
+    }
 }

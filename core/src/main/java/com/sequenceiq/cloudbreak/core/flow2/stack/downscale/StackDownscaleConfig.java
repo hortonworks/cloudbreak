@@ -53,6 +53,11 @@ public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownsca
     }
 
     @Override
+    public String getDisplayName() {
+        return "Stack downscale";
+    }
+
+    @Override
     protected List<Transition<StackDownscaleState, StackDownscaleEvent>> getTransitions() {
         return TRANSITIONS;
     }

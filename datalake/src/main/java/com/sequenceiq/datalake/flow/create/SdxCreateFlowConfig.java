@@ -64,6 +64,11 @@ public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateStat
     }
 
     @Override
+    public String getDisplayName() {
+        return "Create SDX";
+    }
+
+    @Override
     protected List<Transition<SdxCreateState, SdxCreateEvent>> getTransitions() {
         return TRANSITIONS;
     }

@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 import com.cedarsoftware.util.io.JsonReader;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResource;
+import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -42,11 +44,9 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
-import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
-import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
+import com.sequenceiq.cloudbreak.converter.stack.StackIdViewToStackResponseConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
@@ -70,6 +71,9 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
+import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -108,10 +112,12 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
+import com.sequenceiq.cloudbreak.workspace.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.authorization.resource.ResourceAction;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.ResourceIdProvider;
@@ -228,6 +234,9 @@ public class StackService implements ResourceIdProvider {
     @Inject
     private CloudStorageFolderResolverService cloudStorageFolderResolverService;
 
+    @Inject
+    private StackIdViewToStackResponseConverter stackIdViewToStackResponseConverter;
+
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
 
@@ -307,11 +316,11 @@ public class StackService implements ResourceIdProvider {
         }
     }
 
-    public Set<Stack> findClustersConnectedToDatalakeByDatalakeResourceId(Long datalakeResourceId) {
+    public Set<StackIdView> findClustersConnectedToDatalakeByDatalakeResourceId(Long datalakeResourceId) {
         return stackRepository.findEphemeralClusters(datalakeResourceId);
     }
 
-    public Set<Stack> findClustersConnectedToDatalakeByDatalakeStackId(Long datalakeStackId) {
+    public Set<StackIdView> findClustersConnectedToDatalakeByDatalakeStackId(Long datalakeStackId) {
         Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findByDatalakeStackId(datalakeStackId);
         return datalakeResources.isEmpty() ? Collections.emptySet() : stackRepository.findEphemeralClusters(datalakeResources.get().getId());
     }
@@ -376,14 +385,14 @@ public class StackService implements ResourceIdProvider {
 
     public StackV4Response getByAmbariAddress(String ambariAddress) {
         try {
-            return transactionService.required(() -> converterUtil.convert(stackRepository.findByAmbari(ambariAddress)
-                    .orElseThrow(notFound("stack", ambariAddress)), StackV4Response.class));
+            return transactionService.required(() -> stackIdViewToStackResponseConverter.convert(stackRepository.findByAmbari(ambariAddress)
+                    .orElseThrow(notFound("stack", ambariAddress))));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
-    public List<Stack> getByEnvironmentCrnAndStackType(String environmentCrn, StackType stackType) {
+    public List<StackStatusView> getByEnvironmentCrnAndStackType(String environmentCrn, StackType stackType) {
         return stackRepository.findByEnvironmentCrnAndStackType(environmentCrn, stackType);
     }
 
@@ -646,7 +655,7 @@ public class StackService implements ResourceIdProvider {
         return stackRepository.save(stack);
     }
 
-    public List<Stack> getAllAlive() {
+    public List<StackTtlView> getAllAlive() {
         return stackRepository.findAllAlive();
     }
 
@@ -654,24 +663,16 @@ public class StackService implements ResourceIdProvider {
         return stackRepository.findAllAliveWithInstanceGroups();
     }
 
-    public List<Stack> getByStatuses(List<Status> statuses) {
+    public List<StackStatusView> getByStatuses(List<Status> statuses) {
         return stackRepository.findByStatuses(statuses);
     }
 
-    public List<Object[]> getStatuses(Set<Long> stackIds) {
+    public List<StackStatusView> getStatuses(Set<Long> stackIds) {
         return stackRepository.findStackStatusesWithoutAuth(stackIds);
     }
 
-    public Set<Stack> getByNetwork(Network network) {
+    public Set<StackIdView> getByNetwork(Network network) {
         return stackRepository.findByNetwork(network);
-    }
-
-    public List<Stack> getAllForTemplate(Long id) {
-        return stackRepository.findAllStackForTemplate(id);
-    }
-
-    public Optional<Stack> getForCluster(Long id) {
-        return stackRepository.findStackForCluster(id);
     }
 
     public void updateImage(Long stackId, Long workspaceId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {
@@ -692,14 +693,6 @@ public class StackService implements ResourceIdProvider {
             return stackByNameAndWorkspaceId.get().getId();
         }
         throw new NotFoundException(String.format("Not found stack in the user's workspace with name %s", resourceName));
-    }
-
-    public Set<Stack> findAllForWorkspace(Long workspaceId) {
-        try {
-            return transactionService.required(() -> stackRepository.findAllForWorkspace(workspaceId));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
     }
 
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
@@ -990,11 +983,11 @@ public class StackService implements ResourceIdProvider {
     }
 
     private void checkStackHasNoAttachedClusters(Stack stack) {
-        Set<Stack> attachedOnes = findClustersConnectedToDatalakeByDatalakeStackId(stack.getId());
+        Set<StackIdView> attachedOnes = findClustersConnectedToDatalakeByDatalakeStackId(stack.getId());
         if (!attachedOnes.isEmpty()) {
             throw new BadRequestException(String.format("Data Lake has attached Data Hub clusters! "
                             + "Please delete Data Hub cluster %s before deleting this Data Lake",
-                    String.join(", ", attachedOnes.stream().map(Stack::getName).collect(Collectors.toSet()))));
+                    String.join(", ", attachedOnes.stream().map(StackIdView::getName).collect(Collectors.toSet()))));
         }
     }
 
@@ -1051,6 +1044,32 @@ public class StackService implements ResourceIdProvider {
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();
+    }
+
+    public Optional<Duration> getTtlValueForStack(Long stackId) {
+        return Optional.ofNullable(stackRepository.findTimeToLiveValueForSTack(stackId, PlatformParametersConsts.TTL_MILLIS))
+                .map(Long::valueOf)
+                .map(Duration::ofMillis);
+    }
+
+    public Boolean anyStackInWorkspace(Long workspaceId) {
+        try {
+            return transactionService.required(() -> stackRepository.anyStackInWorkspace(workspaceId));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public Boolean templateInUse(Long id) {
+        return stackRepository.findTemplateInUse(id);
+    }
+
+    public Long getIdByNameInWorkspace(String name, Long workspaceId) {
+        return stackRepository.findIdByNameAndWorkspaceId(name, workspaceId).orElseThrow(notFound("Stack", name));
+    }
+
+    public Set<StackIdView> findClustersConnectedToDatalake(Long stackId) {
+        return stackRepository.findEphemeralClusters(stackId);
     }
 
     private enum Msg {

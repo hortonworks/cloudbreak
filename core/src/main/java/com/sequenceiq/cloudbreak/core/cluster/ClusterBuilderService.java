@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -109,6 +111,9 @@ public class ClusterBuilderService {
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
 
+    @Inject
+    private ResourceService resourceService;
+
     public void startCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
@@ -119,8 +124,9 @@ public class ClusterBuilderService {
 
     public void buildCluster(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
+        Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipesAndHostmetadata(stack.getCluster().getId());
         Cluster cluster = stack.getCluster();
         clusterService.updateCreationDateOnCluster(cluster);
         TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);

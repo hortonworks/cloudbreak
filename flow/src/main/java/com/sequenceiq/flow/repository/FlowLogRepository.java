@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -45,4 +46,9 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long resourceId);
 
     List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId);
+
+    List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long resourceId, Pageable page);
+
+    @Query("SELECT COUNT(fl.id) > 0 FROM FlowLog fl WHERE fl.resourceId = :resourceId AND fl.stateStatus = :status")
+    Boolean findAnyByStackIdAndStateStatus(@Param("resourceId") Long resourceId, @Param("status") StateStatus status);
 }
