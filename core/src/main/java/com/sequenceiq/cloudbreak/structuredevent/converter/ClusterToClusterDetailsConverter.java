@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -23,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 
 @Component
-public class ClusterToClusterDetailsConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterDetails> {
+public class ClusterToClusterDetailsConverter {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
@@ -34,7 +33,6 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
     @Inject
     private KerberosConfigService kerberosConfigService;
 
-    @Override
     public ClusterDetails convert(Cluster source) {
         ClusterDetails clusterDetails = new ClusterDetails();
         clusterDetails.setId(source.getId());

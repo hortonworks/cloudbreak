@@ -47,7 +47,7 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'LIVYSERVER1' in exposed and 'LIVY_SERVER' in salt['pillar.get']('gateway:location') -%}
+            {% if 'LIVYSERVER_API' in exposed and 'LIVY_SERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>LIVYSERVER</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
@@ -152,11 +152,11 @@
     {%- endif %}
 
     {% if 'LIVY_SERVER' in salt['pillar.get']('gateway:location') -%}
-    {% if 'LIVYSERVER1' in exposed -%}
+    {% if 'LIVYSERVER_API' in exposed -%}
     <service>
         <role>LIVYSERVER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['LIVYSERVER1'] }}</url>
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['LIVYSERVER_API'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
