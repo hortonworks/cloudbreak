@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
@@ -26,7 +27,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
     private final StreamsMessagingManagerServiceConfigProvider underTest = new StreamsMessagingManagerServiceConfigProvider();
 
     @Test
-    public void testGetStreamsMessagingManagerServiceConfigsWhenExternalFqdn() {
+    public void testGetStreamsMessagingManagerServiceConfigsWhenInternalFqdn() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject("cm.fqdn.host");
         String inputJson = getBlueprintText("input/cdp-streaming.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -45,7 +46,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
     }
 
     @Test
-    public void testGetStreamsMessagingManagerServiceConfigsWhenNoExternalFqdn() {
+    public void testGetStreamsMessagingManagerServiceConfigsWhenNoInternalFqdn() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(null);
         String inputJson = getBlueprintText("input/cdp-streaming.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -77,7 +78,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
         assertEquals("smm_server_db_password", streamsMessagingManager.get(2).getValue());
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(String externalFqdn) {
+    private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
 
@@ -88,7 +89,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
         rdsConfig.setConnectionURL("jdbc:postgresql://testhost:5432/smm");
 
         GeneralClusterConfigs gcc = new GeneralClusterConfigs();
-        gcc.setExternalFQDN(externalFqdn);
+        gcc.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(internalFqdn));
         gcc.setClusterManagerIp("122.0.0.1");
         gcc.setCloudbreakAmbariUser("cbambariuser");
         gcc.setCloudbreakAmbariPassword("cbambaripassword");
