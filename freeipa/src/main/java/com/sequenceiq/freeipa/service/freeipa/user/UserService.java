@@ -118,9 +118,9 @@ public class UserService {
             Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
                     .collect(Collectors.toMap(Stack::getEnvironmentCrn,
                             stack -> asyncTaskExecutor.submit(() -> {
-                                MDCBuilder.buildMdcContext(stack);
-                                return synchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()));
-                            })));
+                                        MDCBuilder.buildMdcContext(stack);
+                                        return synchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), userCrnFilter, machineUserCrnFilter);
+                                    })));
 
             List<SuccessDetails> success = new ArrayList<>();
             List<FailureDetails> failure = new ArrayList<>();
@@ -152,54 +152,50 @@ public class UserService {
         }
     }
 
-    private SyncStatusDetail synchronizeStack(Stack stack, UsersState umsUsersState) {
-
-        // TODO improve exception handling
-        // TODO: AP- Check if ums user has any user to be sync'ed, if not, skip. DH- revisit this check when implementing user removal
+    private SyncStatusDetail synchronizeStack(Stack stack, UsersState umsUsersState, Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
         String environmentCrn = stack.getEnvironmentCrn();
         try {
-            LOGGER.info("Syncing Environment {}", environmentCrn);
-
-            if (umsUsersState.getUsers() == null || umsUsersState.getUsers().size() == 0) {
-                String message = "Failed to synchronize environment " + stack.getEnvironmentCrn() + " No User to sync for this environment";
-                LOGGER.warn(message);
-                return SyncStatusDetail.fail(environmentCrn, message);
-            }
-
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-
-            // Get all users from FreeIPA those are requested.
-            // If we use only UMS provided users for this environment and if user's access is being changed (removed user from env),
-            // then handleUser method will not filter that user and the user will not be updated in IPA.
-            UsersState ipaUsersState = freeIpaUsersStateProvider.getFilteredFreeIPAState(freeIpaClient, umsUsersState.getRequestedWorkloadUsers());
+            UsersState ipaUsersState = getIpaUserState(freeIpaClient, umsUsersState, userCrnFilter, machineUserCrnFilter);
             LOGGER.debug("IPA UsersState, found {} users and {} groups", ipaUsersState.getUsers().size(), ipaUsersState.getGroups().size());
 
-            UsersStateDifference stateDifference = UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState);
-            LOGGER.debug("State Difference = {}", stateDifference);
-
-            addGroups(freeIpaClient, stateDifference.getGroupsToAdd());
-            addUsers(freeIpaClient, stateDifference.getUsersToAdd());
-            addUsersToGroups(freeIpaClient, stateDifference.getGroupMembershipToAdd());
-
-            removeUsersFromGroups(freeIpaClient, stateDifference.getGroupMembershipToRemove());
-            removeUsers(freeIpaClient, stateDifference.getUsersToRemove());
-            removeGroups(freeIpaClient, stateDifference.getGroupsToRemove());
+            applyStateDifferenceToIpa(stack.getEnvironmentCrn(), freeIpaClient, UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState));
 
             // Check for the password related attribute (cdpUserAttr) existence and go for password sync.
-            processUsersWorkloadCredentials(stack.getEnvironmentCrn(), umsUsersState, freeIpaClient);
+            processUsersWorkloadCredentials(environmentCrn, umsUsersState, freeIpaClient);
 
             return SyncStatusDetail.succeed(environmentCrn, "TODO- collect detail info");
         } catch (Exception e) {
-            LOGGER.warn("Failed to synchronize environment {}", stack.getEnvironmentCrn(), e);
+            LOGGER.warn("Failed to synchronize environment {}", environmentCrn, e);
             return SyncStatusDetail.fail(environmentCrn, e.getLocalizedMessage());
         }
+    }
+
+    @VisibleForTesting
+    UsersState getIpaUserState(FreeIpaClient freeIpaClient, UsersState umsUsersState, Set<String> userCrnFilter, Set<String> machineUserCrnFilter)
+            throws FreeIpaClientException {
+        return userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty() ? freeIpaUsersStateProvider.getUsersState(freeIpaClient) :
+                freeIpaUsersStateProvider.getFilteredFreeIPAState(freeIpaClient, umsUsersState.getRequestedWorkloadUsers());
+    }
+
+    private void applyStateDifferenceToIpa(String environmentCrn, FreeIpaClient freeIpaClient, UsersStateDifference stateDifference)
+            throws FreeIpaClientException {
+        LOGGER.info("Applying state difference to environment {}.", environmentCrn);
+
+        addGroups(freeIpaClient, stateDifference.getGroupsToAdd());
+        addUsers(freeIpaClient, stateDifference.getUsersToAdd());
+        addUsersToGroups(freeIpaClient, stateDifference.getGroupMembershipToAdd());
+
+        removeUsersFromGroups(freeIpaClient, stateDifference.getGroupMembershipToRemove());
+        removeUsers(freeIpaClient, stateDifference.getUsersToRemove());
+        removeGroups(freeIpaClient, stateDifference.getGroupsToRemove());
     }
 
     private void processUsersWorkloadCredentials(
         String environmentCrn, UsersState umsUsersState, FreeIpaClient freeIpaClient) throws IOException, FreeIpaClientException {
         Config config = freeIpaClient.getConfig();
         if (config.getIpauserobjectclasses() == null || !config.getIpauserobjectclasses().contains(Config.CDP_USER_ATTRIBUTE)) {
-            LOGGER.debug("Does't seems like having config attribute, no credentials sync required for env:{}", environmentCrn);
+            LOGGER.debug("Doesn't seems like having config attribute, no credentials sync required for env:{}", environmentCrn);
             return;
         }
 
@@ -357,7 +353,7 @@ public class UserService {
         });
     }
 
-    protected Set<String> union(Collection<String> collection1, Collection<String> collection2) {
+    private Set<String> union(Collection<String> collection1, Collection<String> collection2) {
         return Stream.concat(collection1.stream(), collection2.stream()).collect(Collectors.toSet());
     }
 }
