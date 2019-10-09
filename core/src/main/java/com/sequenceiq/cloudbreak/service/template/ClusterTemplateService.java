@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.dto.ClusterDefinitionAccessDto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.GeneralAccessDto;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -202,6 +204,10 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspaceId);
     }
 
+    private boolean isNotUsableClusterTemplate(ClusterTemplateViewV4Response response) {
+        return !isUsableClusterTemplate(response);
+    }
+
     public boolean isUsableClusterTemplate(ClusterTemplateViewV4Response response) {
         return (isUserManaged(response) && hasEnvironment(response)) || isDefaultTemplate(response);
     }
@@ -223,15 +229,18 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         updateDefaultClusterTemplates(workspace);
     }
 
-    public Set<ClusterTemplateViewV4Response> listInWorkspace(Long workspaceId) {
+    public Set<ClusterTemplateViewV4Response> listInWorkspaceAndCleanUpInvalids(Long workspaceId) {
         try {
             Set<ClusterTemplateView> views = transactionService.required(() -> clusterTemplateViewService.findAllActive(workspaceId));
             Set<ClusterTemplateViewV4Response> responses = transactionService.required(() ->
                     converterUtil.convertAllAsSet(views, ClusterTemplateViewV4Response.class));
             environmentServiceDecorator.prepareEnvironments(responses);
+
+            cleanUpInvalidClusterDefinitions(workspaceId, responses);
+
             return responses.stream()
                     .filter(this::isUsableClusterTemplate)
-                    .collect(Collectors.toSet());
+                    .collect(toSet());
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.warn("Unable to find cluster definitions due to {}", e.getMessage());
             throw new CloudbreakServiceException("Unable to obtain cluster definitions!");
@@ -288,6 +297,23 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             env = environmentClientService.getByName(dto.getName());
         }
         return env;
+    }
+
+    private void cleanUpInvalidClusterDefinitions(final long workspaceId, Set<ClusterTemplateViewV4Response> envPreparedTemplates) {
+        try {
+            LOGGER.debug("Collecting cluster definition(s) which has no associated existing environment...");
+            Set<String> invalidTemplateNames = envPreparedTemplates.stream()
+                    .filter(this::isNotUsableClusterTemplate)
+                    .map(CompactViewV4Response::getName)
+                    .collect(toSet());
+
+            if (!invalidTemplateNames.isEmpty()) {
+                LOGGER.debug("About to delete invalid cluster definition(s): [{}]", String.join(", ", invalidTemplateNames));
+                transactionService.required(() -> deleteMultiple(invalidTemplateNames, workspaceId));
+            }
+        } catch (TransactionExecutionException e) {
+            LOGGER.warn("Unable to delete invalid cluster definition(s) due to: {}", e.getMessage());
+        }
     }
 
     public Set<ClusterTemplate> deleteMultiple(Set<String> names, Long workspaceId) {
