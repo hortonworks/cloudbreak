@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <topology>
-   <uri>https://{{ salt['pillar.get']('gateway:address') }}:8443/{{ salt['pillar.get']('gateway:path') }}/token</uri>
+   <uri>https://{{ salt['pillar.get']('gateway:address') }}:443/{{ salt['pillar.get']('gateway:path') }}/token</uri>
    <name>cdp-token</name>
    <gateway>
 
@@ -10,7 +10,7 @@
          <enabled>true</enabled>
          <param>
             <name>sso.authentication.provider.url</name>
-            <value>https://{{ salt['pillar.get']('gateway:address') }}:8443/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso</value>
+            <value>https://{{ salt['pillar.get']('gateway:address') }}:443/{{ salt['pillar.get']('gateway:path') }}/knoxsso/api/v1/websso</value>
          </param>
          <param>
             <name>sso.token.verification.pem</name>

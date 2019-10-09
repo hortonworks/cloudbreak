@@ -353,7 +353,7 @@ public class SdxService implements ResourceIdProvider {
                 if (InstanceGroupType.CORE.equals(instance.getType())) {
                     groupRequest.setSecurityRules(rulesWithPorts("22"));
                 } else if (InstanceGroupType.GATEWAY.equals(instance.getType())) {
-                    groupRequest.setSecurityRules(rulesWithPorts("9443", "8443", "443", "22"));
+                    groupRequest.setSecurityRules(rulesWithPorts("9443", "443", "22"));
                 } else {
                     throw new IllegalStateException("Unknown instance group type " + instance.getType());
                 }

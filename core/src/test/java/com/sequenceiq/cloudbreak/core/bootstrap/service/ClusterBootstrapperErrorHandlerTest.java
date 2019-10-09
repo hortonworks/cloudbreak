@@ -113,7 +113,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         thrown.expectMessage("invalide.nodecount");
 
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
-                new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 8443, "instanceId", false), prepareNodes(stack));
+                new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 443, "instanceId", false), prepareNodes(stack));
     }
 
     @Test
@@ -148,7 +148,7 @@ public class ClusterBootstrapperErrorHandlerTest {
             return Optional.empty();
         });
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
-                new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 8443, "instanceId", false), prepareNodes(stack));
+                new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 443, "instanceId", false), prepareNodes(stack));
 
         verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), nullable(String.class));
         verify(instanceGroupService, times(3)).save(any(InstanceGroup.class));

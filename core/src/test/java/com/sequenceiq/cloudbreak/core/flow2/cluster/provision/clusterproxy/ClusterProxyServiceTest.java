@@ -45,8 +45,6 @@ public class ClusterProxyServiceTest {
 
     private static final long CLUSTER_ID = 1000L;
 
-    private static final String KNOX_URI = "https://10.10.10.10:8443/test-cluster";
-
     @Mock
     private StackService stackService;
 
@@ -113,7 +111,7 @@ public class ClusterProxyServiceTest {
     }
 
     private ConfigUpdateRequest configUpdateRequest(String clusterIdentifier) {
-        return new ConfigUpdateRequest(clusterIdentifier, "https://10.10.10.10:8443/test-cluster");
+        return new ConfigUpdateRequest(clusterIdentifier, "https://10.10.10.10/test-cluster");
     }
 
     private Stack testStack() {

@@ -20,7 +20,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
@@ -46,9 +45,6 @@ public class ServiceEndpointCollector {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceEndpointCollector.class);
 
     private static final String API_TOPOLOGY_POSTFIX = "-api";
-
-    @Value("${cb.knox.port}")
-    private String knoxPort;
 
     @Inject
     private BlueprintService blueprintService;
@@ -79,7 +75,7 @@ public class ServiceEndpointCollector {
                     // when knox gateway is enabled, but cm is not exposed, use the default url
                     return managerUrl.orElse(String.format("https://%s/", managerIp));
                 }
-                return String.format("https://%s/", managerIp);
+                return String.format("https://%s/clouderamanager/", managerIp);
             }
         }
         return null;
@@ -308,7 +304,7 @@ public class ServiceEndpointCollector {
     private String buildKnoxUrl(String managerIp, Gateway gateway, String knoxUrl, String topology) {
         return GatewayType.CENTRAL == gateway.getGatewayType()
                 ? String.format("/%s/%s%s", gateway.getPath(), topology, knoxUrl)
-                : String.format("https://%s:%s/%s/%s%s", managerIp, knoxPort, gateway.getPath(), topology, knoxUrl);
+                : String.format("https://%s/%s/%s%s", managerIp, gateway.getPath(), topology, knoxUrl);
     }
 
     private Optional<String> getHdfsUIUrl(Gateway gateway, String managerIp, String nameNodePrivateIp, boolean autoTlsEnabled) {
@@ -333,29 +329,27 @@ public class ServiceEndpointCollector {
 
     private String getHiveJdbcUrlFromGatewayTopology(String managerIp, GatewayTopology gt) {
         Gateway gateway = gt.getGateway();
-        return String.format("jdbc:hive2://%s:%s/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword=${GATEWAY_JKS_PASSWORD};"
-                + "transportMode=http;httpPath=%s/%s%s/hive", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(), API_TOPOLOGY_POSTFIX);
+        return String.format("jdbc:hive2://%s/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword=${GATEWAY_JKS_PASSWORD};"
+                + "transportMode=http;httpPath=%s/%s%s/hive", managerIp, gateway.getPath(), gt.getTopologyName(), API_TOPOLOGY_POSTFIX);
     }
 
     private String getImpalaJdbcUrlFromGatewayTopology(String managerIp, GatewayTopology gt) {
         Gateway gateway = gt.getGateway();
-        return String.format("jdbc:impala://%s:%s/;ssl=1;transportMode=http;httpPath=%s/%s%s/impala;AuthMech=3;",
-                managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(), API_TOPOLOGY_POSTFIX);
+        return String.format("jdbc:impala://%s/;ssl=1;transportMode=http;httpPath=%s/%s%s/impala;AuthMech=3;",
+                managerIp, gateway.getPath(), gt.getTopologyName(), API_TOPOLOGY_POSTFIX);
     }
 
     private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp, boolean autoTlsEnabled) {
         Gateway gateway = gt.getGateway();
         String protocol = autoTlsEnabled ? "https" : "http";
         Integer port = autoTlsEnabled ? ExposedService.NAMENODE.getTlsPort() : ExposedService.NAMENODE.getPort();
-        String url = String.format("https://%s:%s/%s/%s%s?host=%s://%s:%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
+        return String.format("https://%s/%s/%s%s?host=%s://%s:%s", managerIp, gateway.getPath(), gt.getTopologyName(),
                 ExposedService.NAMENODE.getKnoxUrl(), protocol, nameNodePrivateIp, port);
-        return url;
     }
 
     private String getHBaseUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp) {
         Gateway gateway = gt.getGateway();
-        String url = String.format("https://%s:%s/%s/%s%s?host=%s&port=%s", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
+        return String.format("https://%s/%s/%s%s?host=%s&port=%s", managerIp, gateway.getPath(), gt.getTopologyName(),
                 ExposedService.HBASE_UI.getKnoxUrl(), nameNodePrivateIp, ExposedService.HBASE_UI.getPort());
-        return url;
     }
 }

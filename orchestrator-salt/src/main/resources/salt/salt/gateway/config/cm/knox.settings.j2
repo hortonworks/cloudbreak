@@ -6,5 +6,5 @@ setsettings PROXYUSER_KNOX_USERS *
 {% if salt['pillar.get']('gateway:userfacingfqdn') is defined and salt['pillar.get']('gateway:userfacingfqdn')|length > 1 %}
 setsettings FRONTEND_URL https://{{ salt['pillar.get']('gateway:userfacingfqdn') }}/
 {% else %}
-setsettings FRONTEND_URL https://{{ knox_address }}:8443/
+setsettings FRONTEND_URL https://{{ knox_address }}/
 {% endif %}

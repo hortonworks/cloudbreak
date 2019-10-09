@@ -93,8 +93,8 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
-    public SecurityRulesV4Response getDefaultSecurityRules(Boolean knoxEnabled) {
-        return securityRuleService.getDefaultSecurityRules(knoxEnabled);
+    public SecurityRulesV4Response getDefaultSecurityRules() {
+        return securityRuleService.getDefaultSecurityRules();
     }
 
     @Override
