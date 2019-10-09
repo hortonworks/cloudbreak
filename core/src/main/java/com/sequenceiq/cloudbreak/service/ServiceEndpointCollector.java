@@ -131,6 +131,7 @@ public class ServiceEndpointCollector {
         List<ClusterExposedServiceV4Response> services = new ArrayList<>();
         List<String> serviceUrlsForService = getServiceUrlsForService(exposedService, managerIp,
                 gateway, gatewayTopology.getTopologyName(), privateIps, api, autoTlsEnabled);
+        serviceUrlsForService.addAll(getJdbcUrlsForService(exposedService, managerIp, gateway));
         if (serviceUrlsForService.isEmpty()) {
             ClusterExposedServiceV4Response service = new ClusterExposedServiceV4Response();
             service.setMode(api ? SSOType.PAM : getSSOType(exposedService, gateway));
@@ -194,10 +195,6 @@ public class ServiceEndpointCollector {
         List<String> urls = new ArrayList<>();
         if (hasKnoxUrl(exposedService) && managerIp != null) {
             switch (exposedService) {
-                case HIVE_SERVER:
-                case HIVE_SERVER_INTERACTIVE:
-                    getHiveJdbcUrl(gateway, managerIp).ifPresent(urls::add);
-                    break;
                 case NAMENODE:
                     addNameNodeUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
                     break;
@@ -215,6 +212,24 @@ public class ServiceEndpointCollector {
                     break;
                 default:
                     urls.add(getExposedServiceUrl(managerIp, gateway, topologyName, exposedService, api));
+                    break;
+            }
+        }
+        return urls;
+    }
+
+    private List<String> getJdbcUrlsForService(ExposedService exposedService, String managerIp, Gateway gateway) {
+        List<String> urls = new ArrayList<>();
+        if (hasKnoxUrl(exposedService) && managerIp != null) {
+            switch (exposedService) {
+                case HIVE_SERVER:
+                case HIVE_SERVER_INTERACTIVE:
+                    getHiveJdbcUrl(gateway, managerIp).ifPresent(urls::add);
+                    break;
+                case IMPALA:
+                    getImpalaJdbcUrl(gateway, managerIp).ifPresent(urls::add);
+                    break;
+                default:
                     break;
             }
         }
@@ -311,10 +326,21 @@ public class ServiceEndpointCollector {
                 .map(gt -> getHiveJdbcUrlFromGatewayTopology(ambariIp, gt));
     }
 
+    private Optional<String> getImpalaJdbcUrl(Gateway gateway, String ambariIp) {
+        return getGatewayTopology(ExposedService.IMPALA, gateway)
+                .map(gt -> getImpalaJdbcUrlFromGatewayTopology(ambariIp, gt));
+    }
+
     private String getHiveJdbcUrlFromGatewayTopology(String managerIp, GatewayTopology gt) {
         Gateway gateway = gt.getGateway();
         return String.format("jdbc:hive2://%s:%s/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword=${GATEWAY_JKS_PASSWORD};"
                 + "transportMode=http;httpPath=%s/%s%s/hive", managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(), API_TOPOLOGY_POSTFIX);
+    }
+
+    private String getImpalaJdbcUrlFromGatewayTopology(String managerIp, GatewayTopology gt) {
+        Gateway gateway = gt.getGateway();
+        return String.format("jdbc:impala://%s:%s/;ssl=1;transportMode=http;httpPath=%s/%s%s/impala;AuthMech=3;",
+                managerIp, knoxPort, gateway.getPath(), gt.getTopologyName(), API_TOPOLOGY_POSTFIX);
     }
 
     private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp, boolean autoTlsEnabled) {
